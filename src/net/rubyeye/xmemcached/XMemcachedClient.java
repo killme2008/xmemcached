@@ -33,7 +33,6 @@ public class XMemcachedClient {
 		this.connector.setCodecFactory(new MemcachedCodecFactory());
 		this.connector.setHandler(new MemcachedHandler(this.transcoder));
 		this.connector.connect(new InetSocketAddress(server, port));
-		this.connector.setSendBufferSize(8 * 1024);
 		try {
 			this.connector.awaitForConnected();
 		} catch (InterruptedException e) {
@@ -49,7 +48,6 @@ public class XMemcachedClient {
 			public ByteBuffer[] getCmd() {
 				StringBuffer sb = new StringBuffer("get ");
 				sb.append(this.getKey()).append(SPLIT);
-				// System.out.println(sb.toString());
 				return new ByteBuffer[] { ByteBuffer.wrap(sb.toString()
 						.getBytes()) };
 			}
@@ -141,8 +139,8 @@ public class XMemcachedClient {
 		return sendIncrOrDecrCommand(key, num, Command.CommandType.DECR,
 				"decr ");
 	}
-	
-	public void shutdown()throws IOException{
+
+	public void shutdown() throws IOException {
 		this.connector.stop();
 	}
 
@@ -193,7 +191,6 @@ public class XMemcachedClient {
 						.append(SPLIT);
 				ByteBuffer dataBuffer = ByteBuffer
 						.allocate(data.getData().length + 2);
-				// System.out.println(sb.toString());
 				dataBuffer.put(data.getData());
 				dataBuffer.put(SPLIT.getBytes());
 				dataBuffer.flip();
@@ -216,22 +213,15 @@ public class XMemcachedClient {
 		try {
 			XMemcachedClient client = new XMemcachedClient("192.168.222.100",
 					11211);
-		//	client.set("test", 0, 2);
-			System.out.println(client.decr("test", 4));
-			// long start = System.currentTimeMillis();
-			// for (int i = 0; i < 100000; i++) {
-			// assert (client.set("hello" + i, 0, i));
-			// // assert ((Integer) client.get("hello" + i) == i);
-			// //assert (client.delete("hello" + i));
-			//
-			// }
-			// System.out.println(System.currentTimeMillis() - start);
-			// // System.out.println(client.get("hello"));
-			// System.out.println(client.replace("shit", 0, 2));
-			// long start = System.currentTimeMillis();
-			// for (int i = 0; i < 10000; i++)
-			// assert (((HashMap) client.get("test")) instanceof HashMap);
-			// System.out.println(System.currentTimeMillis() - start);
+			long start = System.currentTimeMillis();
+			for (int i = 0; i < 100000; i++) {
+				assert (client.set("hello" + i, 0, i));
+				assert ((Integer) client.get("hello" + i) == i);
+				assert (client.delete("hello" + i));
+
+			}
+			System.out.println(System.currentTimeMillis() - start);
+			client.shutdown();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

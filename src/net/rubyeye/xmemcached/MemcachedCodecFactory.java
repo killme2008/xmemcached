@@ -112,6 +112,7 @@ public class MemcachedCodecFactory implements CodecFactory<Command> {
 							notStoredIndex, errorIndex, clientErrorIndex,
 							serverErrorIndex);
 				} while (false);
+				//System.out.printf("valueIndex=%d, endIndex=%d, storedIndex=%d, notStoredIndex=%d, errorIndex=%d, clientErrorIndex=%d, serverErrorIndex=%d, min=%d, deletedIndex=%d, notFoundIndex=%d, versionIndex=%d,min=%d\n", valueIndex, endIndex, storedIndex, notStoredIndex, errorIndex, clientErrorIndex, serverErrorIndex, min, deletedIndex, notFoundIndex, versionIndex,min);
 				if (min < 0 && buffer.remaining() == 0)
 					return null;
 				else if (min >= 0 && buffer.remaining() > 0) {
@@ -132,6 +133,8 @@ public class MemcachedCodecFactory implements CodecFactory<Command> {
 							if (new String(bytes, 0, 3).equals("END")) {
 								command.setKey(keys);
 								command.setResult(datas);
+								if(datas.size()>1)
+									System.out.println("wrong");
 								return command;
 							} else if (new String(bytes, 0, 5).equals("VALUE")) {
 								String line = new String(bytes);

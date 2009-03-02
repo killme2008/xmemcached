@@ -1,6 +1,8 @@
 package net.rubyeye.xmemcached;
 
 import java.util.List;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import net.rubyeye.xmemcached.command.Command;
@@ -16,54 +18,48 @@ public class MemcachedHandler extends HandlerAdapter<Command> {
 
 	private Transcoder transcoder;
 
-	private Dispatcher dispatcher;
+	private static final int DEFAULT_COMMANDS_QUEUE_LEN = 16 * 1024;
 
-	protected LinkedBlockingQueue<Command> executingCmds = new LinkedBlockingQueue<Command>();
-
-	@Override
-	public void onException(Session session, Throwable t) {
-		super.onException(session, t);
-	}
+	protected BlockingQueue<Command> executingCmds = new ArrayBlockingQueue<Command>(
+			DEFAULT_COMMANDS_QUEUE_LEN);
 
 	@Override
 	public void onMessageSent(Session session, Command t) {
-		if (t != null)
-			executingCmds.add(t);
+		executingCmds.offer(t);
 	}
 
 	@Override
 	public void onReceive(Session session, final Command recvCmd) {
-		final Command executingCmd = executingCmds.poll();
-		dispatcher.dispatch(new Runnable() {
-			public void run() {
-				if (executingCmd == null)
-					return;
-				if (recvCmd.getException() != null) {
-					executingCmd.setException(recvCmd.getException());
-					executingCmd.getLatch().countDown();
-				} else {
+		try {
+			final Command executingCmd = executingCmds.take();
+			if (executingCmd == null)
+				return;
+			if (recvCmd.getException() != null) {
+				executingCmd.setException(recvCmd.getException());
+				executingCmd.getLatch().countDown();
+			} else {
 
-					switch (executingCmd.getCommandType()) {
-					case EXCEPTION:
+				switch (executingCmd.getCommandType()) {
+				case EXCEPTION:
 
-					case GET_ONE:
-						processGetOneCommand(recvCmd, executingCmd);
-						break;
+				case GET_ONE:
+					processGetOneCommand(recvCmd, executingCmd);
+					break;
 
-					case SET:
-					case ADD:
-					case REPLACE:
-					case DELETE:
-					case INCR:
-					case DECR:
-					case VERSION:
-						processCommand(recvCmd, executingCmd);
-						break;
-					}
+				case SET:
+				case ADD:
+				case REPLACE:
+				case DELETE:
+				case INCR:
+				case DECR:
+				case VERSION:
+					processCommand(recvCmd, executingCmd);
+					break;
 				}
-
 			}
-		});
+		} catch (InterruptedException e) {
+
+		}
 
 	}
 
@@ -82,16 +78,9 @@ public class MemcachedHandler extends HandlerAdapter<Command> {
 		executingCmd.getLatch().countDown();
 	}
 
-	@Override
-	public void onSessionStarted(Session session) {
-		super.onSessionStarted(session);
-	}
-
 	public MemcachedHandler(Transcoder transcoder) {
 		super();
 		this.transcoder = transcoder;
-		this.dispatcher = DispatcherFactory.newDispatcher(Runtime.getRuntime()
-				.availableProcessors());
 	}
 
 }
