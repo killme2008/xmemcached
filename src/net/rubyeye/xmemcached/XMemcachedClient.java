@@ -211,10 +211,10 @@ public class XMemcachedClient {
 
 	public static void main(String[] args) {
 		try {
-			XMemcachedClient client = new XMemcachedClient("192.168.222.100",
-					11211);
+			XMemcachedClient client = new XMemcachedClient("127.0.0.1", 11211);
 			long start = System.currentTimeMillis();
-			for (int i = 0; i < 10000; i++) {
+			for (int i = 0; i < 100000; i++) {
+				//System.out.println(i);
 				assert (client.set("hello" + i, 0, i));
 				assert ((Integer) client.get("hello" + i) == i);
 				assert (client.delete("hello" + i));

@@ -5,6 +5,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import com.google.code.yanf4j.nio.CodecFactory;
+import com.google.code.yanf4j.util.ByteBufferPattern;
 import com.google.code.yanf4j.util.ByteBufferUtils;
 
 import net.rubyeye.xmemcached.command.Command;
@@ -17,35 +18,40 @@ public class MemcachedCodecFactory implements CodecFactory<Command> {
 	private static final ByteBuffer SPLIT = ByteBuffer.wrap(Command.SPLIT
 			.getBytes());
 
-	private static final ByteBuffer VALUE = ByteBuffer.wrap("VALUE".getBytes());
+	private static final ByteBufferPattern SPLIT_PATTERN = ByteBufferPattern
+			.compile(SPLIT);
 
-	private static final ByteBuffer END = ByteBuffer.wrap("END\r\n".getBytes());
+	private static final ByteBufferPattern VALUE_PATTERN = ByteBufferPattern
+			.compile(ByteBuffer.wrap("VALUE".getBytes()));
 
-	private static final ByteBuffer STORED = ByteBuffer.wrap("STORED\r\n"
-			.getBytes());
+	private static final ByteBufferPattern END_PATTERN = ByteBufferPattern
+			.compile(ByteBuffer.wrap("END\r\n".getBytes()));
 
-	private static final ByteBuffer NOT_STORED = ByteBuffer
-			.wrap("NOT_STORED\r\n".getBytes());
+	private static final ByteBufferPattern STORED_PATTERN = ByteBufferPattern
+			.compile(ByteBuffer.wrap("STORED\r\n".getBytes()));
 
-	private static final ByteBuffer ERROR = ByteBuffer.wrap("ERROR\r\n"
-			.getBytes());
+	private static final ByteBufferPattern NOT_STORED_PATTERN = ByteBufferPattern
+			.compile(ByteBuffer.wrap("NOT_STORED\r\n".getBytes()));
 
-	private static final ByteBuffer CLIENT_ERROR = ByteBuffer
-			.wrap("CLIENT_ERROR\r\n".getBytes());
+	private static final ByteBufferPattern ERROR_PATTERN = ByteBufferPattern
+			.compile(ByteBuffer.wrap("ERROR\r\n".getBytes()));
 
-	private static final ByteBuffer SERVER_ERROR = ByteBuffer
-			.wrap("SERVER_ERROR\r\n".getBytes());
+	private static final ByteBufferPattern CLIENT_ERROR_PATTERN = ByteBufferPattern
+			.compile(ByteBuffer.wrap("CLIENT_ERROR\r\n".getBytes()));
 
-	private static final ByteBuffer DELETED = ByteBuffer.wrap("DELETED\r\n"
-			.getBytes());
+	private static final ByteBufferPattern SERVER_ERROR_PATTERN = ByteBufferPattern
+			.compile(ByteBuffer.wrap("SERVER_ERROR\r\n".getBytes()));
 
-	private static final ByteBuffer NOT_FOUND = ByteBuffer.wrap("NOT_FOUND\r\n"
-			.getBytes());
+	private static final ByteBufferPattern DELETED_PATTERN = ByteBufferPattern
+			.compile(ByteBuffer.wrap("DELETED\r\n".getBytes()));
 
-	private static final ByteBuffer VERSION = ByteBuffer.wrap("VERSION"
-			.getBytes());
+	private static final ByteBufferPattern NOT_FOUND_PATTERN = ByteBufferPattern
+			.compile(ByteBuffer.wrap("NOT_FOUND\r\n".getBytes()));
 
-	//todo 匹配算法仍然比较低效，有时间改成KMP算法
+	private static final ByteBufferPattern VERSION_PATTERN = ByteBufferPattern
+			.compile(ByteBuffer.wrap("VERSION".getBytes()));
+
+	// todo 匹配算法仍然比较低效，有时间改成KMP算法
 	public Decoder<Command> getDecoder() {
 		return new Decoder<Command>() {
 
@@ -56,55 +62,56 @@ public class MemcachedCodecFactory implements CodecFactory<Command> {
 				valueIndex = endIndex = storedIndex = notStoredIndex = errorIndex = clientErrorIndex = serverErrorIndex = notFoundIndex = deletedIndex = versionIndex = -1;
 				min = -2;
 				do {
-					valueIndex = ByteBufferUtils.indexOf(buffer, VALUE);
+					valueIndex = ByteBufferUtils.kmpIndexOf(buffer, VALUE_PATTERN);
 					if (valueIndex == origPos) {
 						min = valueIndex;
 						break;
 					}
-					endIndex = ByteBufferUtils.indexOf(buffer, END);
+					endIndex = ByteBufferUtils.kmpIndexOf(buffer, END_PATTERN);
 					if (endIndex == origPos) {
 						min = endIndex;
 						break;
 					}
-					storedIndex = ByteBufferUtils.indexOf(buffer, STORED);
+					storedIndex = ByteBufferUtils.kmpIndexOf(buffer, STORED_PATTERN);
 					if (storedIndex == origPos) {
 						min = storedIndex;
 						break;
 					}
-					notStoredIndex = ByteBufferUtils
-							.indexOf(buffer, NOT_STORED);
+					notStoredIndex = ByteBufferUtils.kmpIndexOf(buffer,
+							NOT_STORED_PATTERN);
 					if (notStoredIndex == origPos) {
 						min = notStoredIndex;
 						break;
 					}
-					deletedIndex = ByteBufferUtils.indexOf(buffer, DELETED);
+					deletedIndex = ByteBufferUtils.kmpIndexOf(buffer, DELETED_PATTERN);
 					if (deletedIndex == origPos) {
 						min = deletedIndex;
 						break;
 					}
-					notFoundIndex = ByteBufferUtils.indexOf(buffer, NOT_FOUND);
+					notFoundIndex = ByteBufferUtils.kmpIndexOf(buffer,
+							NOT_FOUND_PATTERN);
 					if (notFoundIndex == origPos) {
 						min = notFoundIndex;
 						break;
 					}
-					errorIndex = ByteBufferUtils.indexOf(buffer, ERROR);
+					errorIndex = ByteBufferUtils.kmpIndexOf(buffer, ERROR_PATTERN);
 					if (errorIndex == origPos) {
 						min = errorIndex;
 						break;
 					}
-					clientErrorIndex = ByteBufferUtils.indexOf(buffer,
-							CLIENT_ERROR);
+					clientErrorIndex = ByteBufferUtils.kmpIndexOf(buffer,
+							CLIENT_ERROR_PATTERN);
 					if (clientErrorIndex == origPos) {
 						min = clientErrorIndex;
 						break;
 					}
-					serverErrorIndex = ByteBufferUtils.indexOf(buffer,
-							SERVER_ERROR);
+					serverErrorIndex = ByteBufferUtils.kmpIndexOf(buffer,
+							SERVER_ERROR_PATTERN);
 					if (serverErrorIndex == origPos) {
 						min = serverErrorIndex;
 						break;
 					}
-					versionIndex = ByteBufferUtils.indexOf(buffer, VERSION);
+					versionIndex = ByteBufferUtils.kmpIndexOf(buffer, VERSION_PATTERN);
 					if (versionIndex == origPos) {
 						min = versionIndex;
 						break;
@@ -113,12 +120,18 @@ public class MemcachedCodecFactory implements CodecFactory<Command> {
 							notStoredIndex, errorIndex, clientErrorIndex,
 							serverErrorIndex);
 				} while (false);
-				//System.out.printf("valueIndex=%d, endIndex=%d, storedIndex=%d, notStoredIndex=%d, errorIndex=%d, clientErrorIndex=%d, serverErrorIndex=%d, min=%d, deletedIndex=%d, notFoundIndex=%d, versionIndex=%d,min=%d\n", valueIndex, endIndex, storedIndex, notStoredIndex, errorIndex, clientErrorIndex, serverErrorIndex, min, deletedIndex, notFoundIndex, versionIndex,min);
+				// System.out.printf("valueIndex=%d, endIndex=%d,
+				// storedIndex=%d, notStoredIndex=%d, errorIndex=%d,
+				// clientErrorIndex=%d, serverErrorIndex=%d, min=%d,
+				// deletedIndex=%d, notFoundIndex=%d, versionIndex=%d,min=%d\n",
+				// valueIndex, endIndex, storedIndex, notStoredIndex,
+				// errorIndex, clientErrorIndex, serverErrorIndex, min,
+				// deletedIndex, notFoundIndex, versionIndex,min);
 				if (min < 0 && buffer.remaining() == 0)
 					return null;
 				else if (min >= 0 && buffer.remaining() > 0) {
 					if (valueIndex == min) {
-						endIndex = ByteBufferUtils.indexOf(buffer, END,
+						endIndex = ByteBufferUtils.kmpIndexOf(buffer, END_PATTERN,
 								valueIndex);
 						// 还没有全部接收到
 						if (endIndex < 0)
@@ -134,7 +147,7 @@ public class MemcachedCodecFactory implements CodecFactory<Command> {
 							if (new String(bytes, 0, 3).equals("END")) {
 								command.setKey(keys);
 								command.setResult(datas);
-								if(datas.size()>1)
+								if (datas.size() > 1)
 									System.out.println("wrong");
 								return command;
 							} else if (new String(bytes, 0, 5).equals("VALUE")) {
@@ -310,7 +323,7 @@ public class MemcachedCodecFactory implements CodecFactory<Command> {
 			}
 
 			private byte[] parseLine(ByteBuffer buffer, int offset) {
-				int index = ByteBufferUtils.indexOf(buffer, SPLIT, offset);
+				int index = ByteBufferUtils.kmpIndexOf(buffer, SPLIT_PATTERN, offset);
 				if (index >= 0) {
 					int limit = buffer.limit();
 					buffer.limit(index);
