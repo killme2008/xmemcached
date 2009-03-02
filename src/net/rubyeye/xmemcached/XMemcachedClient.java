@@ -214,7 +214,7 @@ public class XMemcachedClient {
 			XMemcachedClient client = new XMemcachedClient("192.168.222.100",
 					11211);
 			long start = System.currentTimeMillis();
-			for (int i = 0; i < 100000; i++) {
+			for (int i = 0; i < 10000; i++) {
 				assert (client.set("hello" + i, 0, i));
 				assert ((Integer) client.get("hello" + i) == i);
 				assert (client.delete("hello" + i));

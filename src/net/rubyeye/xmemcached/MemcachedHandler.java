@@ -3,16 +3,12 @@ package net.rubyeye.xmemcached;
 import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
-
 import net.rubyeye.xmemcached.command.Command;
 import net.spy.memcached.transcoders.CachedData;
 import net.spy.memcached.transcoders.Transcoder;
 
-import com.google.code.yanf4j.nio.Dispatcher;
 import com.google.code.yanf4j.nio.Session;
 import com.google.code.yanf4j.nio.impl.HandlerAdapter;
-import com.google.code.yanf4j.nio.util.DispatcherFactory;
 
 public class MemcachedHandler extends HandlerAdapter<Command> {
 
@@ -25,7 +21,11 @@ public class MemcachedHandler extends HandlerAdapter<Command> {
 
 	@Override
 	public void onMessageSent(Session session, Command t) {
-		executingCmds.offer(t);
+		try {
+			executingCmds.put(t);
+		} catch (InterruptedException e) {
+
+		}
 	}
 
 	@Override

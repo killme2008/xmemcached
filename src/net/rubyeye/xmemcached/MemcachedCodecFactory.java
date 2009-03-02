@@ -45,6 +45,7 @@ public class MemcachedCodecFactory implements CodecFactory<Command> {
 	private static final ByteBuffer VERSION = ByteBuffer.wrap("VERSION"
 			.getBytes());
 
+	//todo 匹配算法仍然比较低效，有时间改成KMP算法
 	public Decoder<Command> getDecoder() {
 		return new Decoder<Command>() {
 
