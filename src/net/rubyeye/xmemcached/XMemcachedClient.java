@@ -141,6 +141,10 @@ public class XMemcachedClient {
 		return sendIncrOrDecrCommand(key, num, Command.CommandType.DECR,
 				"decr ");
 	}
+	
+	public void shutdown()throws IOException{
+		this.connector.stop();
+	}
 
 	private int sendIncrOrDecrCommand(final String key, final int num,
 			Command.CommandType cmdType, final String cmd)
