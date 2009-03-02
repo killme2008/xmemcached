@@ -3,32 +3,31 @@ package net.rubyeye.xmemcached.command;
 import java.nio.ByteBuffer;
 import java.util.concurrent.CountDownLatch;
 
-import net.spy.memcached.transcoders.CachedData;
-
 public class Command {
 	public static final String SPLIT = "\r\n";
 
 	Object key;
-	Object flag;
-	CachedData[] value;
 	Object result;
 	CountDownLatch latch;
 	CommandType commandType;
 	RuntimeException throwable;
 
 	public enum CommandType {
-		GET_ONE, GET_MANY, SET, REPLACE, ADD, EXCEPTION
+		GET_ONE, GET_MANY, SET, REPLACE, ADD, EXCEPTION, DELETE, VERSION, INCR, DECR
 	}
 
 	public Command() {
 		super();
 	}
 
-	public Command(Object key, CachedData[] value, Object result, String cmd,
-			CountDownLatch latch) {
+	public Command(CommandType cmdType, CountDownLatch latch) {
+		this.commandType = cmdType;
+		this.latch = latch;
+	}
+
+	public Command(Object key, Object result, String cmd, CountDownLatch latch) {
 		super();
 		this.key = key;
-		this.value = value;
 		this.result = result;
 		this.latch = latch;
 	}
@@ -40,43 +39,27 @@ public class Command {
 		this.latch = latch;
 	}
 
-	public Object getFlag() {
-		return flag;
-	}
-
-	public RuntimeException getThrowable() {
+	public synchronized RuntimeException getException() {
 		return throwable;
 	}
 
-	public void setThrowable(RuntimeException throwable) {
+	public synchronized void setException(RuntimeException throwable) {
 		this.throwable = throwable;
 	}
 
-	public void setFlag(int flag) {
-		this.flag = flag;
-	}
-
-	public Object getKey() {
+	public synchronized Object getKey() {
 		return key;
 	}
 
-	public void setKey(Object key) {
+	public synchronized void setKey(Object key) {
 		this.key = key;
 	}
 
-	public CachedData[] getValue() {
-		return value;
-	}
-
-	public void setValue(CachedData[] value) {
-		this.value = value;
-	}
-
-	public Object getResult() {
+	public synchronized Object getResult() {
 		return result;
 	}
 
-	public void setResult(Object result) {
+	public synchronized void setResult(Object result) {
 		this.result = result;
 	}
 

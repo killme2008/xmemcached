@@ -49,7 +49,7 @@ public class XMemcachedClient {
 			public ByteBuffer[] getCmd() {
 				StringBuffer sb = new StringBuffer("get ");
 				sb.append(this.getKey()).append(SPLIT);
-				//System.out.println(sb.toString());
+				// System.out.println(sb.toString());
 				return new ByteBuffer[] { ByteBuffer.wrap(sb.toString()
 						.getBytes()) };
 			}
@@ -60,8 +60,8 @@ public class XMemcachedClient {
 		if (!latch.await(TIMEOUT, TimeUnit.MILLISECONDS)) {
 			throw new TimeoutException("Timed out waiting for operation");
 		}
-		if (getCmd.getThrowable() != null)
-			throw getCmd.getThrowable();
+		if (getCmd.getException() != null)
+			throw getCmd.getException();
 		return getCmd.getResult();
 	}
 
@@ -85,6 +85,96 @@ public class XMemcachedClient {
 				"replace ");
 	}
 
+	public boolean delete(final String key, final int time)
+			throws TimeoutException, InterruptedException {
+		final CountDownLatch latch = new CountDownLatch(1);
+		Command command = new Command(key, Command.CommandType.DELETE, latch) {
+			@Override
+			public ByteBuffer[] getCmd() {
+				StringBuffer sb = new StringBuffer("delete ");
+				sb.append(key).append(" ").append(time).append(SPLIT);
+				return new ByteBuffer[] { ByteBuffer.wrap(sb.toString()
+						.getBytes()) };
+			}
+
+		};
+
+		this.connector.send(command);
+		if (!latch.await(TIMEOUT, TimeUnit.MILLISECONDS)) {
+			throw new TimeoutException("Timed out waiting for operation");
+		}
+		if (command.getException() != null)
+			throw command.getException();
+		return (Boolean) command.getResult();
+	}
+
+	public String version() throws TimeoutException, InterruptedException {
+		final CountDownLatch latch = new CountDownLatch(1);
+		Command command = new Command(Command.CommandType.VERSION, latch) {
+			@Override
+			public ByteBuffer[] getCmd() {
+				StringBuffer sb = new StringBuffer("version");
+				sb.append(SPLIT);
+				return new ByteBuffer[] { ByteBuffer.wrap(sb.toString()
+						.getBytes()) };
+			}
+
+		};
+
+		this.connector.send(command);
+		if (!latch.await(TIMEOUT, TimeUnit.MILLISECONDS)) {
+			throw new TimeoutException("Timed out waiting for operation");
+		}
+		if (command.getException() != null)
+			throw command.getException();
+		return (String) command.getResult();
+	}
+
+	public int incr(final String key, final int num) throws TimeoutException,
+			InterruptedException {
+		return sendIncrOrDecrCommand(key, num, Command.CommandType.INCR,
+				"incr ");
+	}
+
+	public int decr(final String key, final int num) throws TimeoutException,
+			InterruptedException {
+		return sendIncrOrDecrCommand(key, num, Command.CommandType.DECR,
+				"decr ");
+	}
+
+	private int sendIncrOrDecrCommand(final String key, final int num,
+			Command.CommandType cmdType, final String cmd)
+			throws InterruptedException, TimeoutException {
+		final CountDownLatch latch = new CountDownLatch(1);
+		Command command = new Command(key, cmdType, latch) {
+			@Override
+			public ByteBuffer[] getCmd() {
+				StringBuffer sb = new StringBuffer(cmd);
+				sb.append(key).append(" ").append(num).append(SPLIT);
+				return new ByteBuffer[] { ByteBuffer.wrap(sb.toString()
+						.getBytes()) };
+			}
+
+		};
+
+		this.connector.send(command);
+		if (!latch.await(TIMEOUT, TimeUnit.MILLISECONDS)) {
+			throw new TimeoutException("Timed out waiting for operation");
+		}
+		if (command.getException() != null)
+			throw command.getException();
+		if (command.getResult() instanceof Boolean
+				&& !((Boolean) command.getResult()))
+			return -1;
+		else
+			return (Integer) command.getResult();
+	}
+
+	public boolean delete(final String key) throws TimeoutException,
+			InterruptedException {
+		return delete(key, 0);
+	}
+
 	private boolean sendStoreCommand(final String key, final int exp,
 			Object value, Command.CommandType cmdType, final String cmd)
 			throws InterruptedException, TimeoutException {
@@ -99,7 +189,7 @@ public class XMemcachedClient {
 						.append(SPLIT);
 				ByteBuffer dataBuffer = ByteBuffer
 						.allocate(data.getData().length + 2);
-			//	System.out.println(sb.toString());
+				// System.out.println(sb.toString());
 				dataBuffer.put(data.getData());
 				dataBuffer.put(SPLIT.getBytes());
 				dataBuffer.flip();
@@ -113,8 +203,8 @@ public class XMemcachedClient {
 		if (!latch.await(TIMEOUT, TimeUnit.MILLISECONDS)) {
 			throw new TimeoutException("Timed out waiting for operation");
 		}
-		if (command.getThrowable() != null)
-			throw command.getThrowable();
+		if (command.getException() != null)
+			throw command.getException();
 		return (Boolean) command.getResult();
 	}
 
@@ -122,17 +212,18 @@ public class XMemcachedClient {
 		try {
 			XMemcachedClient client = new XMemcachedClient("192.168.222.100",
 					11211);
-			for (int i = 0; i < 100000; i++) {
-				assert (client.set("hello" + i,0,i));
-
-			}
-			long start = System.currentTimeMillis();
-			for (int i = 0; i < 100000; i++) {
-				assert ((Integer) client.get("hello" + i) == i);
-				
-			}
-			System.out.println(System.currentTimeMillis() - start);
-			System.out.println(client.get("hello"));
+		//	client.set("test", 0, 2);
+			System.out.println(client.decr("test", 4));
+			// long start = System.currentTimeMillis();
+			// for (int i = 0; i < 100000; i++) {
+			// assert (client.set("hello" + i, 0, i));
+			// // assert ((Integer) client.get("hello" + i) == i);
+			// //assert (client.delete("hello" + i));
+			//
+			// }
+			// System.out.println(System.currentTimeMillis() - start);
+			// // System.out.println(client.get("hello"));
+			// System.out.println(client.replace("shit", 0, 2));
 			// long start = System.currentTimeMillis();
 			// for (int i = 0; i < 10000; i++)
 			// assert (((HashMap) client.get("test")) instanceof HashMap);

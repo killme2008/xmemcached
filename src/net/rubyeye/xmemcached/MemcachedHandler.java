@@ -38,18 +38,28 @@ public class MemcachedHandler extends HandlerAdapter<Command> {
 			public void run() {
 				if (executingCmd == null)
 					return;
-				switch (executingCmd.getCommandType()) {
-				case EXCEPTION:
-					
-				case GET_ONE:
-					processGetOneCommand(recvCmd, executingCmd);
-					break;
-					
-				case SET:
-				case ADD:
-				case REPLACE:
-					processSetCommand(recvCmd, executingCmd);
-					break;
+				if (recvCmd.getException() != null) {
+					executingCmd.setException(recvCmd.getException());
+					executingCmd.getLatch().countDown();
+				} else {
+
+					switch (executingCmd.getCommandType()) {
+					case EXCEPTION:
+
+					case GET_ONE:
+						processGetOneCommand(recvCmd, executingCmd);
+						break;
+
+					case SET:
+					case ADD:
+					case REPLACE:
+					case DELETE:
+					case INCR:
+					case DECR:
+					case VERSION:
+						processCommand(recvCmd, executingCmd);
+						break;
+					}
 				}
 
 			}
@@ -57,7 +67,7 @@ public class MemcachedHandler extends HandlerAdapter<Command> {
 
 	}
 
-	private void processSetCommand(Command recvCmd, Command executingCmd) {
+	private void processCommand(Command recvCmd, Command executingCmd) {
 		executingCmd.setResult(recvCmd.getResult());
 		executingCmd.getLatch().countDown();
 	}

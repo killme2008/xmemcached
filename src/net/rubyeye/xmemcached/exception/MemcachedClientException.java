@@ -18,5 +18,5 @@ public class MemcachedClientException extends RuntimeException {
 		super(cause);
 	}
 
-	private static final long serialVersionUID = -136568012546568164L;
+	private static final long serialVersionUID = -236562546568164115L;
 }
