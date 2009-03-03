@@ -51,6 +51,7 @@ public class Example {
 			keys.add("hello");
 			keys.add("test");
 			Map<String, Object> map = client.get(keys);
+			System.out.println("map size:"+map.size());
 
 			// delete²Ù×÷
 			if (!client.delete("hello", 1000)) {
