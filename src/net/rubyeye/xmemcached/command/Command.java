@@ -3,7 +3,9 @@ package net.rubyeye.xmemcached.command;
 import java.nio.ByteBuffer;
 import java.util.concurrent.CountDownLatch;
 
-public class Command {
+import com.google.code.yanf4j.nio.Message;
+
+public class Command implements Message {
 	public static final String SPLIT = "\r\n";
 
 	Object key;
@@ -12,12 +14,21 @@ public class Command {
 	CommandType commandType;
 	RuntimeException throwable;
 
-	public enum CommandType {
-		GET_ONE, GET_MANY, SET, REPLACE, ADD, EXCEPTION, DELETE, VERSION, INCR, DECR
+	public enum CommandType implements Message {
+		GET_ONE, GET_MANY, SET, REPLACE, ADD, EXCEPTION, DELETE, VERSION, INCR, DECR, GET, STORE, OTHER;
+
+		public int getLength() {
+			return 4;
+		}
+
 	}
 
 	public Command() {
 		super();
+	}
+
+	public Command(CommandType cmdType) {
+		this.commandType = cmdType;
 	}
 
 	public Command(CommandType cmdType, CountDownLatch latch) {
@@ -77,6 +88,10 @@ public class Command {
 
 	public void setLatch(CountDownLatch latch) {
 		this.latch = latch;
+	}
+
+	public int getLength() {
+		return 4;
 	}
 
 }

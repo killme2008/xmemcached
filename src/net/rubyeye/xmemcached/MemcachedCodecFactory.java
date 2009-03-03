@@ -1,7 +1,7 @@
 package net.rubyeye.xmemcached;
 
 import java.nio.ByteBuffer;
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 
 import com.google.code.yanf4j.nio.CodecFactory;
@@ -133,13 +133,12 @@ public class MemcachedCodecFactory implements CodecFactory<Command> {
 					if (valueIndex == min) {
 						endIndex = ByteBufferUtils.kmpIndexOf(buffer, END_PATTERN,
 								valueIndex);
-						// 还没有全部接收到
 						if (endIndex < 0)
 							return null;
 						byte[] bytes = null;
-						Command command = new Command();
-						List<String> keys = new LinkedList<String>();
-						List<CachedData> datas = new LinkedList<CachedData>();
+						Command command = new Command(Command.CommandType.GET);
+						List<String> keys = new ArrayList<String>(30);
+						List<CachedData> datas = new ArrayList<CachedData>(30);
 						while (true) {
 							bytes = parseLine(buffer, valueIndex);
 							if (bytes == null || bytes.length == 0)
@@ -147,8 +146,6 @@ public class MemcachedCodecFactory implements CodecFactory<Command> {
 							if (new String(bytes, 0, 3).equals("END")) {
 								command.setKey(keys);
 								command.setResult(datas);
-								if (datas.size() > 1)
-									System.out.println("wrong");
 								return command;
 							} else if (new String(bytes, 0, 5).equals("VALUE")) {
 								String line = new String(bytes);
@@ -175,7 +172,6 @@ public class MemcachedCodecFactory implements CodecFactory<Command> {
 						return parseNotStored(buffer, notStoredIndex);
 					} else if (deletedIndex == min) {
 						return parseDeleted(buffer, deletedIndex);
-
 					} else if (notFoundIndex == min) {
 						return parseNotFound(buffer, notFoundIndex);
 					} else if (errorIndex == min) {
@@ -198,13 +194,13 @@ public class MemcachedCodecFactory implements CodecFactory<Command> {
 			private Command parseEndCommand(ByteBuffer buffer, int endIndex) {
 				if (parseLine(buffer, endIndex) == null)
 					return null;
-				return new Command();
+				return new Command(Command.CommandType.GET);
 			}
 
 			private Command parseStored(ByteBuffer buffer, int storedIndex) {
 				if (parseLine(buffer, storedIndex) == null)
 					return null;
-				return new Command() {
+				return new Command(Command.CommandType.STORE) {
 					public Object getResult() {
 						return true;
 					}
@@ -215,7 +211,7 @@ public class MemcachedCodecFactory implements CodecFactory<Command> {
 			private Command parseNotStored(ByteBuffer buffer, int notStoredIndex) {
 				if (parseLine(buffer, notStoredIndex) == null)
 					return null;
-				return new Command() {
+				return new Command(Command.CommandType.STORE) {
 					public Object getResult() {
 						return false;
 					}
@@ -226,7 +222,7 @@ public class MemcachedCodecFactory implements CodecFactory<Command> {
 			private Command parseDeleted(ByteBuffer buffer, int deletedIndex) {
 				if (parseLine(buffer, deletedIndex) == null)
 					return null;
-				return new Command() {
+				return new Command(Command.CommandType.OTHER) {
 					public Object getResult() {
 						return true;
 					}
@@ -237,7 +233,7 @@ public class MemcachedCodecFactory implements CodecFactory<Command> {
 			private Command parseNotFound(ByteBuffer buffer, int notFoundIndex) {
 				if (parseLine(buffer, notFoundIndex) == null)
 					return null;
-				return new Command() {
+				return new Command(Command.CommandType.OTHER) {
 					public Object getResult() {
 						return false;
 					}
@@ -248,7 +244,7 @@ public class MemcachedCodecFactory implements CodecFactory<Command> {
 			private Command parseException(ByteBuffer buffer, int errorIndex) {
 				if (parseLine(buffer, errorIndex) == null)
 					return null;
-				return new Command() {
+				return new Command(Command.CommandType.EXCEPTION) {
 					@Override
 					public RuntimeException getException() {
 						return new MemcachedException("unknown command");
@@ -265,7 +261,7 @@ public class MemcachedCodecFactory implements CodecFactory<Command> {
 				String[] items = new String(bytes).split(" ");
 				final String error = items.length > 1 ? items[1]
 						: "unknown client error";
-				return new Command() {
+				return new Command(Command.CommandType.EXCEPTION) {
 					@Override
 					public RuntimeException getException() {
 						return new MemcachedClientException(error);
@@ -313,7 +309,7 @@ public class MemcachedCodecFactory implements CodecFactory<Command> {
 				final byte[] bytes;
 				if ((bytes = parseLine(buffer, origPos)) == null)
 					return null;
-				return new Command() {
+				return new Command(Command.CommandType.OTHER) {
 					@Override
 					public Object getResult() {
 						return Integer.parseInt(new String(bytes));

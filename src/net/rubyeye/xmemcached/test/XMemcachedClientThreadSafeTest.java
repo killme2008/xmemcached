@@ -42,7 +42,7 @@ class TestThread implements Runnable {
 }
 
 public class XMemcachedClientThreadSafeTest {
-	static int num = 100;
+	static int num = 200;
 
 	public static void main(String args[]) throws Exception {
 		CyclicBarrier barrier = new CyclicBarrier(num + 1);
