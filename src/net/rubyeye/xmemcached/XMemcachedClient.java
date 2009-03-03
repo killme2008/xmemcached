@@ -188,7 +188,7 @@ public class XMemcachedClient {
 		Command command = new Command(Command.CommandType.VERSION, latch) {
 			@Override
 			public ByteBuffer[] getCmd() {
-				return new ByteBuffer[] { ByteBuffer.wrap("version\rn"
+				return new ByteBuffer[] { ByteBuffer.wrap("version\r\n"
 						.toString().getBytes()) };
 			}
 
