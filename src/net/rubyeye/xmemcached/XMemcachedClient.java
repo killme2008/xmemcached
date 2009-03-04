@@ -57,6 +57,14 @@ public class XMemcachedClient {
 		return connector;
 	}
 
+	public boolean isOptimiezeGet() {
+		return optimiezeGet;
+	}
+
+	public void setOptimiezeGet(boolean optimiezeGet) {
+		this.optimiezeGet = optimiezeGet;
+	}
+
 	public boolean isShutdown() {
 		return shutdown;
 	}
@@ -67,7 +75,7 @@ public class XMemcachedClient {
 		commands.push(cmd);
 	}
 
-	private static final boolean optimiezeGet = true;
+	private boolean optimiezeGet = true;
 
 	class CommandSender extends Thread {
 
@@ -153,9 +161,9 @@ public class XMemcachedClient {
 
 	private void connect(InetSocketAddress inetSocketAddress)
 			throws IOException {
-		//启动发送线程
+		// 启动发送线程
 		this.commandSender.start();
-		//连接
+		// 连接
 		this.connector.connect(inetSocketAddress);
 		try {
 			this.connector.awaitForConnected();
@@ -203,7 +211,7 @@ public class XMemcachedClient {
 		}
 	}
 
-	protected static final byte[] CRLF = { '\r', '\n' };
+	static final byte[] CRLF = { '\r', '\n' };
 	static final byte[] GET = { 'g', 'e', 't' };
 	static final byte[] DELETE = { 'd', 'e', 'l', 'e', 't', 'e' };
 	static final byte SPACE = ' ';
@@ -270,7 +278,7 @@ public class XMemcachedClient {
 				Command.CommandType.GET_MANY, latch) {
 			@Override
 			public ByteBuffer getCmd() {
-				byte[] keyBytes = ByteUtils.getBytes(key.toString());
+				byte[] keyBytes = ByteUtils.getBytes(key);
 				ByteBuffer buffer = ByteBuffer.allocate(GET.length
 						+ CRLF.length + 1 + keyBytes.length);
 				setArguments(buffer, GET, keyBytes);
@@ -363,7 +371,7 @@ public class XMemcachedClient {
 		Command command = new Command(Command.CommandType.VERSION, latch) {
 			@Override
 			public ByteBuffer getCmd() {
-				return ByteBuffer.wrap("version\r\n".toString().getBytes());
+				return ByteBuffer.wrap("version\r\n".getBytes());
 			}
 
 		};

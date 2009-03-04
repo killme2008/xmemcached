@@ -12,6 +12,10 @@ test write,thread num=50, repeat=10000,size=2, all=500000 ,velocity=13239 , usin
 test read,thread num=50, repeat=10000,size=2, all=500000 ,velocity=24113 , using time:20735
 test delete,thread num=50, repeat=10000,size=2, all=500000 ,velocity=14382 , using time:34765
 
+test write,thread num=100, repeat=10000,size=2, all=1000000 ,velocity=18068 , using time:55344
+test read,thread num=100, repeat=10000,size=2, all=1000000 ,velocity=29064 , using time:34406
+test delete,thread num=100, repeat=10000,size=2, all=1000000 ,velocity=18259 , using time:54766
+
 spymemcached
 test write,thread num=1, repeat=10000,size=2, all=10000 ,velocity=2870 , using time:3484
 test read,thread num=1, repeat=10000,size=2, all=10000 ,velocity=2922 , using time:3422
@@ -45,9 +49,9 @@ test write,thread num=50, repeat=100,size=2, all=5000 ,velocity=1561 , using tim
 test read,thread num=50, repeat=100,size=2, all=5000 ,velocity=1226 , using time:4078
 test delete,thread num=50, repeat=100,size=2, all=5000 ,velocity=11848 , using time:422
 
-test write,thread num=100, repeat=10000,size=2, all=1000000 ,velocity=18068 , using time:55344
-test read,thread num=100, repeat=10000,size=2, all=1000000 ,velocity=29064 , using time:34406
-test delete,thread num=100, repeat=10000,size=2, all=1000000 ,velocity=18259 , using time:54766
+test write,thread num=100, repeat=100,size=2, all=10000 ,velocity=1530 , using time:6532
+test read,thread num=100, repeat=100,size=2, all=10000 ,velocity=1223 , using time:8172
+test delete,thread num=100, repeat=100,size=2, all=10000 ,velocity=15600 , using time:641
 
 spymemcached
 
