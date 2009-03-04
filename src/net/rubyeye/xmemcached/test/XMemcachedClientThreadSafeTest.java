@@ -1,30 +1,11 @@
 package net.rubyeye.xmemcached.test;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.*;
 import net.rubyeye.xmemcached.XMemcachedClient;
-
-/**
- * ◊€∫œ≤‚ ‘¿‡
- * 
- * @author dennis
- * 
- */
-class NameClass implements Serializable {
-	String firstName;
-	String lastName;
-
-	public NameClass(String firstName, String lastName) {
-		super();
-		this.firstName = firstName;
-		this.lastName = lastName;
-	}
-
-}
 
 class TestThread implements Runnable {
 	private static final int ELEMENT_NUM = 500;
