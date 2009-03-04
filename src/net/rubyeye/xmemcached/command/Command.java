@@ -1,6 +1,7 @@
 package net.rubyeye.xmemcached.command;
 
 import java.nio.ByteBuffer;
+import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
 import com.google.code.yanf4j.nio.Message;
@@ -14,6 +15,8 @@ public class Command implements Message {
 	CommandType commandType;
 	RuntimeException throwable;
 
+	int mergetCount = -1;
+
 	public enum CommandType implements Message {
 		GET_ONE, GET_MANY, SET, REPLACE, ADD, EXCEPTION, DELETE, VERSION, INCR, DECR, GET, STORE, OTHER;
 
@@ -21,6 +24,14 @@ public class Command implements Message {
 			return 4;
 		}
 
+	}
+
+	public int getMergetCount() {
+		return mergetCount;
+	}
+
+	public void setMergetCount(int mergetCount) {
+		this.mergetCount = mergetCount;
 	}
 
 	public Command() {
@@ -50,6 +61,10 @@ public class Command implements Message {
 		this.latch = latch;
 	}
 
+	public List<Command> getMergeCommands() {
+		return null;
+	}
+
 	public synchronized RuntimeException getException() {
 		return throwable;
 	}
@@ -74,7 +89,7 @@ public class Command implements Message {
 		this.result = result;
 	}
 
-	public ByteBuffer[] getCmd() {
+	public ByteBuffer getCmd() {
 		return null;
 	}
 

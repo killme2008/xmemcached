@@ -2,7 +2,9 @@ package net.rubyeye.xmemcached;
 
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -10,13 +12,15 @@ import java.util.concurrent.TimeoutException;
 import java.io.IOException;
 
 import net.rubyeye.xmemcached.command.Command;
-import net.rubyeye.xmemcached.exception.MemcachedException;
+import net.rubyeye.xmemcached.utils.ByteUtils;
 import net.spy.memcached.transcoders.CachedData;
 import net.spy.memcached.transcoders.SerializingTranscoder;
 import net.spy.memcached.transcoders.Transcoder;
 
 import com.google.code.yanf4j.config.Configuration;
 import com.google.code.yanf4j.nio.TCPConnectorController;
+import com.google.code.yanf4j.util.Queue;
+import com.google.code.yanf4j.util.SimpleQueue;
 
 public class XMemcachedClient {
 
@@ -30,6 +34,113 @@ public class XMemcachedClient {
 
 	private static final long TIMEOUT = 1000;
 
+	/**
+	 * 测试的平均值，根据实际情况调整
+	 */
+	private int mergeFactor = 60;
+
+	private volatile boolean shutdown;
+
+	protected Queue<Command> commands = new SimpleQueue<Command>();
+
+	CommandSender commandSender;
+
+	public int getMergeFactor() {
+		return mergeFactor;
+	}
+
+	public void setMergeFactor(int mergeFactor) {
+		this.mergeFactor = mergeFactor;
+	}
+
+	public TCPConnectorController getConnector() {
+		return connector;
+	}
+
+	public boolean isShutdown() {
+		return shutdown;
+	}
+
+	private void sendCommand(Command cmd) throws InterruptedException {
+		if (this.shutdown)
+			throw new IllegalStateException();
+		commands.push(cmd);
+	}
+
+	private static final boolean optimiezeGet = true;
+
+	class CommandSender extends Thread {
+
+		// 统计数据，平均merge因子
+		int total = 0;
+		int count = 0;
+
+		public void run() {
+			while (!Thread.currentThread().isInterrupted()) {
+				try {
+					Command currentCmd = commands.pop();
+					final List<Command> mergeCommands = new ArrayList<Command>(
+							mergeFactor);
+					mergeCommands.add(currentCmd);
+					if (currentCmd.getCommandType().equals(
+							Command.CommandType.GET_ONE)) {
+						if (optimiezeGet)
+							optimizeGet(currentCmd, mergeCommands);
+						else
+							connector.send(currentCmd);
+					} else
+						connector.send(currentCmd);
+				} catch (InterruptedException e) {
+					Thread.currentThread().interrupt();
+				}
+			}
+		}
+
+		private void optimizeGet(Command currentCmd,
+				final List<Command> mergeCommands) throws InterruptedException {
+			int i = 1;
+			final StringBuilder key = new StringBuilder();
+			key.append((String) currentCmd.getKey());
+			while (i < mergeFactor) {
+				Command nextCmd = commands.peek();
+				if (nextCmd == null)
+					break;
+				if (nextCmd.getCommandType()
+						.equals(Command.CommandType.GET_ONE)) {
+					mergeCommands.add(commands.pop());
+					key.append(" ").append((String) nextCmd.getKey());
+					i++;
+				} else
+					break;
+			}
+			// 没有可以合并的，直接发送
+			if (i == 1)
+				connector.send(currentCmd);
+			else {
+				// 统计
+				count++;
+				total += mergeCommands.size();
+				currentCmd.setMergetCount(mergeCommands.size());
+				// 发送合并get操作
+				connector.send(new Command(key.toString(),
+						Command.CommandType.GET_ONE, null) {
+					public List<Command> getMergeCommands() {
+						return mergeCommands;
+					}
+
+					public ByteBuffer getCmd() {
+						byte[] keyBytes = ByteUtils.getBytes(key.toString());
+						ByteBuffer buffer = ByteBuffer.allocate(GET.length
+								+ CRLF.length + 1 + keyBytes.length);
+						setArguments(buffer, GET, keyBytes);
+						buffer.flip();
+						return buffer;
+					}
+				});
+			}
+		}
+	}
+
 	private TCPConnectorController connector;
 	@SuppressWarnings("unchecked")
 	private Transcoder transcoder;
@@ -42,12 +153,16 @@ public class XMemcachedClient {
 
 	private void connect(InetSocketAddress inetSocketAddress)
 			throws IOException {
+		// 启动发送线程
+		this.commandSender.start();
+		// 连接
 		this.connector.connect(inetSocketAddress);
 		try {
 			this.connector.awaitForConnected();
 		} catch (InterruptedException e) {
 
 		}
+		this.shutdown = false;
 	}
 
 	private void buildConnector() {
@@ -55,10 +170,12 @@ public class XMemcachedClient {
 		configuration.setTcpRecvBufferSize(TCP_RECV_BUFF_SIZE);
 		configuration.setSessionReadBufferSize(READ_BUFF_SIZE);
 		configuration.setTcpNoDelay(TCP_NO_DELAY);
+		this.shutdown = true;
 		this.connector = new TCPConnectorController(configuration);
 		this.connector.setSendBufferSize(TCP_SEND_BUFF_SIZE);
 		this.connector.setCodecFactory(new MemcachedCodecFactory());
 		this.transcoder = new SerializingTranscoder();
+		this.commandSender = new CommandSender();
 		this.connector.setHandler(new MemcachedHandler(this.transcoder));
 	}
 
@@ -69,39 +186,72 @@ public class XMemcachedClient {
 		connect(inetSocketAddress);
 	}
 
+	int MAX_KEY_LENGTH = 250;
+
 	private void checkKey(String key) {
-		if (key == null || key.length() == 0)
-			throw new MemcachedException("wrong key,key can not be blank");
-		if (key.indexOf(" ") >= 0)
-			throw new MemcachedException(
-					"wrong key,key can not have space character");
-		if (key.indexOf("\r\n") >= 0)
-			throw new MemcachedException(
-					"wrong key,key can not have \\r\\n character");
+		byte[] keyBytes = ByteUtils.getBytes(key);
+		if (keyBytes.length > MAX_KEY_LENGTH) {
+			throw new IllegalArgumentException("Key is too long (maxlen = "
+					+ MAX_KEY_LENGTH + ")");
+		}
+		// Validate the key
+		for (byte b : keyBytes) {
+			if (b == ' ' || b == '\n' || b == '\r' || b == 0) {
+				throw new IllegalArgumentException(
+						"Key contains invalid characters:  ``" + key + "''");
+			}
+		}
 	}
 
-	public Object get(final String key) throws TimeoutException,
+	protected static final byte[] CRLF = { '\r', '\n' };
+	static final byte[] GET = { 'g', 'e', 't' };
+	static final byte[] DELETE = { 'd', 'e', 'l', 'e', 't', 'e' };
+	static final byte SPACE = ' ';
+
+	protected final void setArguments(ByteBuffer bb, Object... args) {
+		boolean wasFirst = true;
+		for (Object o : args) {
+			if (wasFirst) {
+				wasFirst = false;
+			} else {
+				bb.put(SPACE);
+			}
+			if (o instanceof byte[])
+				bb.put((byte[]) o);
+			else
+				bb.put(ByteUtils.getBytes(String.valueOf(o)));
+		}
+		bb.put(CRLF);
+	}
+
+	public Object get(final String key, long timeout) throws TimeoutException,
 			InterruptedException {
 		checkKey(key);
 		final CountDownLatch latch = new CountDownLatch(1);
 		Command getCmd = new Command(key, Command.CommandType.GET_ONE, latch) {
 			@Override
-			public ByteBuffer[] getCmd() {
-				StringBuffer sb = new StringBuffer(6 + key.length());
-				sb.append("get ").append(this.getKey()).append(SPLIT);
-				return new ByteBuffer[] { ByteBuffer.wrap(sb.toString()
-						.getBytes()) };
+			public ByteBuffer getCmd() {
+				byte[] keyBytes = ByteUtils.getBytes(key);
+				ByteBuffer buffer = ByteBuffer.allocate(GET.length
+						+ CRLF.length + 1 + keyBytes.length);
+				setArguments(buffer, GET, keyBytes);
+				buffer.flip();
+				return buffer;
 			}
 
 		};
-
-		this.connector.send(getCmd);
-		if (!latch.await(TIMEOUT, TimeUnit.MILLISECONDS)) {
+		sendCommand(getCmd);
+		if (!latch.await(timeout, TimeUnit.MILLISECONDS)) {
 			throw new TimeoutException("Timed out waiting for operation");
 		}
 		if (getCmd.getException() != null)
 			throw getCmd.getException();
 		return getCmd.getResult();
+	}
+
+	public Object get(final String key) throws TimeoutException,
+			InterruptedException {
+		return get(key, TIMEOUT);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -110,25 +260,27 @@ public class XMemcachedClient {
 		if (keys == null || keys.size() == 0)
 			return null;
 		final CountDownLatch latch = new CountDownLatch(1);
-		StringBuffer sb = new StringBuffer(keys.size() * 5);
+		StringBuilder sb = new StringBuilder(keys.size() * 5);
 		for (String tmpKey : keys) {
 			checkKey(tmpKey);
 			sb.append(tmpKey).append(" ");
 		}
-		String key = sb.toString();
+		final String key = sb.toString();
 		Command getCmd = new Command(key.substring(0, key.length() - 1),
 				Command.CommandType.GET_MANY, latch) {
 			@Override
-			public ByteBuffer[] getCmd() {
-				StringBuffer sb = new StringBuffer("get ");
-				sb.append(this.getKey()).append(SPLIT);
-				return new ByteBuffer[] { ByteBuffer.wrap(sb.toString()
-						.getBytes()) };
+			public ByteBuffer getCmd() {
+				byte[] keyBytes = ByteUtils.getBytes(key.toString());
+				ByteBuffer buffer = ByteBuffer.allocate(GET.length
+						+ CRLF.length + 1 + keyBytes.length);
+				setArguments(buffer, GET, keyBytes);
+				buffer.flip();
+				return buffer;
 			}
 
 		};
 		long lazy = keys.size() / 1000 > 0 ? (keys.size() / 1000) : 1;
-		this.connector.send(getCmd);
+		sendCommand(getCmd);
 		if (!latch.await(TIMEOUT * lazy, TimeUnit.MILLISECONDS)) {
 			throw new TimeoutException("Timed out waiting for operation");
 		}
@@ -141,21 +293,42 @@ public class XMemcachedClient {
 			throws TimeoutException, InterruptedException {
 		checkKey(key);
 		return sendStoreCommand(key, exp, value, Command.CommandType.SET,
-				"set ");
+				"set", TIMEOUT);
+	}
+
+	public boolean set(final String key, final int exp, Object value,
+			long timeout) throws TimeoutException, InterruptedException {
+		checkKey(key);
+		return sendStoreCommand(key, exp, value, Command.CommandType.SET,
+				"set", timeout);
 	}
 
 	public boolean add(final String key, final int exp, Object value)
 			throws TimeoutException, InterruptedException {
 		checkKey(key);
 		return sendStoreCommand(key, exp, value, Command.CommandType.ADD,
-				"add ");
+				"add", TIMEOUT);
+	}
+
+	public boolean add(final String key, final int exp, Object value,
+			long timeout) throws TimeoutException, InterruptedException {
+		checkKey(key);
+		return sendStoreCommand(key, exp, value, Command.CommandType.SET,
+				"add", timeout);
 	}
 
 	public boolean replace(final String key, final int exp, Object value)
 			throws TimeoutException, InterruptedException {
 		checkKey(key);
 		return sendStoreCommand(key, exp, value, Command.CommandType.REPLACE,
-				"replace ");
+				"replace", TIMEOUT);
+	}
+
+	public boolean replace(final String key, final int exp, Object value,
+			long timeout) throws TimeoutException, InterruptedException {
+		checkKey(key);
+		return sendStoreCommand(key, exp, value, Command.CommandType.SET,
+				"replace", timeout);
 	}
 
 	public boolean delete(final String key, final int time)
@@ -164,17 +337,19 @@ public class XMemcachedClient {
 		final CountDownLatch latch = new CountDownLatch(1);
 		Command command = new Command(key, Command.CommandType.DELETE, latch) {
 			@Override
-			public ByteBuffer[] getCmd() {
-				StringBuffer sb = new StringBuffer(13 + key.length());
-				sb.append("delete ").append(key).append(" ").append(time)
-						.append(SPLIT);
-				return new ByteBuffer[] { ByteBuffer.wrap(sb.toString()
-						.getBytes()) };
+			public ByteBuffer getCmd() {
+				byte[] keyBytes = ByteUtils.getBytes(key);
+				byte[] timeBytes = ByteUtils.getBytes(String.valueOf(time));
+				ByteBuffer buffer = ByteBuffer.allocate(DELETE.length + 2
+						+ keyBytes.length + timeBytes.length + CRLF.length);
+				setArguments(buffer, DELETE, keyBytes, timeBytes);
+				buffer.flip();
+				return buffer;
 			}
 
 		};
 
-		this.connector.send(command);
+		sendCommand(command);
 		if (!latch.await(TIMEOUT, TimeUnit.MILLISECONDS)) {
 			throw new TimeoutException("Timed out waiting for operation");
 		}
@@ -187,14 +362,13 @@ public class XMemcachedClient {
 		final CountDownLatch latch = new CountDownLatch(1);
 		Command command = new Command(Command.CommandType.VERSION, latch) {
 			@Override
-			public ByteBuffer[] getCmd() {
-				return new ByteBuffer[] { ByteBuffer.wrap("version\r\n"
-						.toString().getBytes()) };
+			public ByteBuffer getCmd() {
+				return ByteBuffer.wrap("version\r\n".toString().getBytes());
 			}
 
 		};
 
-		this.connector.send(command);
+		sendCommand(command);
 		if (!latch.await(TIMEOUT, TimeUnit.MILLISECONDS)) {
 			throw new TimeoutException("Timed out waiting for operation");
 		}
@@ -206,19 +380,27 @@ public class XMemcachedClient {
 	public int incr(final String key, final int num) throws TimeoutException,
 			InterruptedException {
 		checkKey(key);
-		return sendIncrOrDecrCommand(key, num, Command.CommandType.INCR,
-				"incr ");
+		return sendIncrOrDecrCommand(key, num, Command.CommandType.INCR, "incr");
 	}
 
 	public int decr(final String key, final int num) throws TimeoutException,
 			InterruptedException {
 		checkKey(key);
-		return sendIncrOrDecrCommand(key, num, Command.CommandType.DECR,
-				"decr ");
+		return sendIncrOrDecrCommand(key, num, Command.CommandType.DECR, "decr");
 	}
 
 	public void shutdown() throws IOException {
+		if (this.shutdown)
+			return;
+		this.shutdown = true;
 		this.connector.stop();
+		this.commandSender.interrupt();
+		while (this.commandSender.isAlive())
+			try {
+				this.commandSender.join();
+			} catch (InterruptedException e) {
+
+			}
 	}
 
 	private int sendIncrOrDecrCommand(final String key, final int num,
@@ -227,17 +409,20 @@ public class XMemcachedClient {
 		final CountDownLatch latch = new CountDownLatch(1);
 		Command command = new Command(key, cmdType, latch) {
 			@Override
-			public ByteBuffer[] getCmd() {
-				StringBuffer sb = new StringBuffer(cmd.length() + 7);
-				sb.append(cmd).append(key).append(" ").append(num)
-						.append(SPLIT);
-				return new ByteBuffer[] { ByteBuffer.wrap(sb.toString()
-						.getBytes()) };
+			public ByteBuffer getCmd() {
+				byte[] numBytes = ByteUtils.getBytes(String.valueOf(num));
+				byte[] cmdBytes = ByteUtils.getBytes(cmd);
+				byte[] keyBytes = ByteUtils.getBytes(key);
+				ByteBuffer buffer = ByteBuffer.allocate(cmd.length() + 2
+						+ key.length() + numBytes.length + CRLF.length);
+				setArguments(buffer, cmdBytes, keyBytes, numBytes);
+				buffer.flip();
+				return buffer;
 			}
 
 		};
 
-		this.connector.send(command);
+		sendCommand(command);
 		if (!latch.await(TIMEOUT, TimeUnit.MILLISECONDS)) {
 			throw new TimeoutException("Timed out waiting for operation");
 		}
@@ -257,31 +442,34 @@ public class XMemcachedClient {
 
 	@SuppressWarnings("unchecked")
 	private boolean sendStoreCommand(final String key, final int exp,
-			final Object value, Command.CommandType cmdType, final String cmd)
-			throws InterruptedException, TimeoutException {
+			final Object value, Command.CommandType cmdType, final String cmd,
+			long timeout) throws InterruptedException, TimeoutException {
 		final CountDownLatch latch = new CountDownLatch(1);
 		Command command = new Command(key, cmdType, latch) {
 			@Override
-			public ByteBuffer[] getCmd() {
+			public ByteBuffer getCmd() {
 				final CachedData data = transcoder.encode(value);
-				StringBuffer sb = new StringBuffer(cmd.length() + 16
-						+ data.getData().length);
-				sb.append(cmd).append(key).append(" ").append(data.getFlags())
-						.append(" ").append(exp).append(" ").append(
-								data.getData().length).append(SPLIT);
-				ByteBuffer dataBuffer = ByteBuffer
-						.allocate(data.getData().length + 2);
-				dataBuffer.put(data.getData());
-				dataBuffer.put(SPLIT.getBytes());
-				dataBuffer.flip();
-				return new ByteBuffer[] {
-						ByteBuffer.wrap(sb.toString().getBytes()), dataBuffer };
+				byte[] keyBytes = ByteUtils.getBytes(key);
+				byte[] flagBytes = ByteUtils.getBytes(String.valueOf(data
+						.getFlags()));
+				byte[] expBytes = ByteUtils.getBytes(String.valueOf(exp));
+				byte[] dataLenBytes = ByteUtils.getBytes(String.valueOf(data
+						.getData().length));
+				ByteBuffer buffer = ByteBuffer.allocate(cmd.length() + 1
+						+ keyBytes.length + 1 + flagBytes.length + 1
+						+ expBytes.length + 1 + data.getData().length + 2
+						* CRLF.length + dataLenBytes.length);
+				setArguments(buffer, cmd, keyBytes, flagBytes, expBytes,
+						dataLenBytes);
+				setArguments(buffer, data.getData());
+				buffer.flip();
+				return buffer;
 			}
 
 		};
 
-		this.connector.send(command);
-		if (!latch.await(TIMEOUT, TimeUnit.MILLISECONDS)) {
+		sendCommand(command);
+		if (!latch.await(timeout, TimeUnit.MILLISECONDS)) {
 			throw new TimeoutException("Timed out waiting for operation");
 		}
 		if (command.getException() != null)

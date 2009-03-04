@@ -1,21 +1,10 @@
 package net.rubyeye.xmemcached.test;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 
 import net.rubyeye.xmemcached.XMemcachedClient;
 
 public class PerformanceTest {
-
-	static HashMap map = new HashMap();
-	static {
-		for (int i = 0; i < 100; i++)
-			map.put(i, i);
-	}
 
 	static class TestWriteRunnable implements Runnable {
 
@@ -38,8 +27,8 @@ public class PerformanceTest {
 			try {
 
 				for (int i = 0; i < repeat; i++) {
-					String key = String.valueOf(i);
-					if (!mc.set(key, 0, map)) {
+					String key = String.valueOf(start + i);
+					if (!mc.set(key, 0, key)) {
 						System.err.println("set error");
 					}
 
@@ -75,11 +64,46 @@ public class PerformanceTest {
 			try {
 				for (int i = 0; i < repeat; i++) {
 
-					String key = String.valueOf(i);
-					HashMap result = (HashMap) mc.get(key);
-					if (result.size() != 100) {
+					String key = String.valueOf(start + i);
+					String result = (String) mc.get(key);
+					if (!key.equals(result)) {
+						System.out.println(key + " " + result);
 						System.err.println("get error");
 					}
+				}
+
+			} catch (Exception e) {
+				e.printStackTrace();
+			} finally {
+				cd.countDown();
+			}
+		}
+
+	}
+
+	static class TestDeleteRunnable implements Runnable {
+
+		private XMemcachedClient mc;
+		private CountDownLatch cd;
+		int repeat;
+		int start;
+
+		public TestDeleteRunnable(XMemcachedClient mc, int start,
+				CountDownLatch cdl, int repeat) {
+			super();
+			this.mc = mc;
+			this.start = start;
+			this.cd = cdl;
+			this.repeat = repeat;
+
+		}
+
+		public void run() {
+			try {
+				for (int i = 0; i < repeat; i++) {
+					String key = String.valueOf(start + i);
+					if (!mc.delete(key))
+						System.err.println("delete error");
 				}
 
 			} catch (Exception e) {
@@ -101,51 +125,75 @@ public class PerformanceTest {
 
 			int size = Runtime.getRuntime().availableProcessors();
 
-			int thread = 1;
+			int thread = 100;
 
-			int repeat = 400;
+			int repeat = 10000;
 
 			XMemcachedClient mc = new XMemcachedClient(ip, port);
 
 			CountDownLatch cdl = new CountDownLatch(thread);
+			// ²âÊÔÐ´
 			long t = System.currentTimeMillis();
-			// for (int i = 0; i < thread; i++) {
-			// new Thread(new PerformanceTest.TestWriteRunnable(mc, i * 10000,
-			// cdl, repeat)).start();
-			// }
-
 			for (int i = 0; i < thread; i++) {
-				new Thread(new PerformanceTest.TestReadRunnable(mc, i * 10000,
+				new Thread(new PerformanceTest.TestWriteRunnable(mc, i * 10000,
 						cdl, repeat)).start();
 			}
-
 			try {
 				cdl.await();
 			} catch (InterruptedException e) {
 
 			}
-
-			long all = 2 * thread * repeat;
+			long all = thread * repeat;
 			long usingtime = (System.currentTimeMillis() - t);
 
 			System.out
 					.println(String
 							.format(
-									"thread num=%d, repeat=%d,size=%d, all=%d ,velocity=%d , using time:%d",
+									"test write,thread num=%d, repeat=%d,size=%d, all=%d ,velocity=%d , using time:%d",
 									thread, repeat, size, all, 1000 * all
 											/ usingtime, usingtime));
-			// ²âÊÔÅúÁ¿»ñÈ¡
+
+			// ²âÊÔ¶Á
+			cdl = new CountDownLatch(thread);
 			t = System.currentTimeMillis();
-			List<String> keys = new ArrayList<String>();
-			keys.add("test");
-			for (int i = 0; i < 400; i++)
-				keys.add(String.valueOf(i));
-			Map<String, Object> map = (HashMap<String, Object>) mc.get(keys);
-			System.out.println("bulk get " + map.size() + " map:"
-					+ (System.currentTimeMillis() - t));
-			for (String key : map.keySet()) {
-				assert (((Map) map.get(key)).size() == 100);
+			for (int i = 0; i < thread; i++) {
+				new Thread(new PerformanceTest.TestReadRunnable(mc, i * 10000,
+						cdl, repeat)).start();
 			}
+			try {
+				cdl.await();
+			} catch (InterruptedException e) {
+
+			}
+			all = thread * repeat;
+			usingtime = (System.currentTimeMillis() - t);
+			System.out
+					.println(String
+							.format(
+									"test read,thread num=%d, repeat=%d,size=%d, all=%d ,velocity=%d , using time:%d",
+									thread, repeat, size, all, 1000 * all
+											/ usingtime, usingtime));
+			// ²âÊÔÉ¾³ý
+			cdl = new CountDownLatch(thread);
+			t = System.currentTimeMillis();
+			for (int i = 0; i < thread; i++) {
+				new Thread(new PerformanceTest.TestDeleteRunnable(mc,
+						i * 10000, cdl, repeat)).start();
+			}
+			try {
+				cdl.await();
+			} catch (InterruptedException e) {
+
+			}
+			all = thread * repeat;
+			usingtime = (System.currentTimeMillis() - t);
+			System.out
+					.println(String
+							.format(
+									"test delete,thread num=%d, repeat=%d,size=%d, all=%d ,velocity=%d , using time:%d",
+									thread, repeat, size, all, 1000 * all
+											/ usingtime, usingtime));
+
 			mc.shutdown();
 		} catch (Exception e) {
 			e.printStackTrace();

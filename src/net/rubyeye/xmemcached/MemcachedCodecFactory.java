@@ -1,5 +1,6 @@
 package net.rubyeye.xmemcached;
 
+import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
@@ -12,6 +13,7 @@ import net.rubyeye.xmemcached.command.Command;
 import net.rubyeye.xmemcached.exception.MemcachedClientException;
 import net.rubyeye.xmemcached.exception.MemcachedException;
 import net.rubyeye.xmemcached.exception.MemcachedServerException;
+import net.rubyeye.xmemcached.utils.ByteUtils;
 import net.spy.memcached.transcoders.CachedData;
 
 public class MemcachedCodecFactory implements CodecFactory<Command> {
@@ -21,185 +23,146 @@ public class MemcachedCodecFactory implements CodecFactory<Command> {
 	private static final ByteBufferPattern SPLIT_PATTERN = ByteBufferPattern
 			.compile(SPLIT);
 
-	private static final ByteBufferPattern VALUE_PATTERN = ByteBufferPattern
-			.compile(ByteBuffer.wrap("VALUE".getBytes()));
+	enum ParseStatus {
+		NULL, GET, END, STORED, NOT_STORED, ERROR, CLIENT_ERROR, SERVER_ERROR, DELETED, NOT_FOUND, VERSION, INCR;
+	}
 
-	private static final ByteBufferPattern END_PATTERN = ByteBufferPattern
-			.compile(ByteBuffer.wrap("END\r\n".getBytes()));
-
-	private static final ByteBufferPattern STORED_PATTERN = ByteBufferPattern
-			.compile(ByteBuffer.wrap("STORED\r\n".getBytes()));
-
-	private static final ByteBufferPattern NOT_STORED_PATTERN = ByteBufferPattern
-			.compile(ByteBuffer.wrap("NOT_STORED\r\n".getBytes()));
-
-	private static final ByteBufferPattern ERROR_PATTERN = ByteBufferPattern
-			.compile(ByteBuffer.wrap("ERROR\r\n".getBytes()));
-
-	private static final ByteBufferPattern CLIENT_ERROR_PATTERN = ByteBufferPattern
-			.compile(ByteBuffer.wrap("CLIENT_ERROR\r\n".getBytes()));
-
-	private static final ByteBufferPattern SERVER_ERROR_PATTERN = ByteBufferPattern
-			.compile(ByteBuffer.wrap("SERVER_ERROR\r\n".getBytes()));
-
-	private static final ByteBufferPattern DELETED_PATTERN = ByteBufferPattern
-			.compile(ByteBuffer.wrap("DELETED\r\n".getBytes()));
-
-	private static final ByteBufferPattern NOT_FOUND_PATTERN = ByteBufferPattern
-			.compile(ByteBuffer.wrap("NOT_FOUND\r\n".getBytes()));
-
-	private static final ByteBufferPattern VERSION_PATTERN = ByteBufferPattern
-			.compile(ByteBuffer.wrap("VERSION".getBytes()));
-
-	// todo 匹配算法仍然比较低效，有时间改成KMP算法
+	@SuppressWarnings("unchecked")
 	public Decoder<Command> getDecoder() {
 		return new Decoder<Command>() {
+			private Command resultCommand;
+			private ParseStatus status = ParseStatus.NULL;
+			private String currentLine = null;
 
 			public Command decode(ByteBuffer buffer) {
 				int origPos = buffer.position();
-				// int origLimit = buffer.limit();
-				int valueIndex, endIndex, storedIndex, notStoredIndex, errorIndex, clientErrorIndex, serverErrorIndex, min, deletedIndex, notFoundIndex, versionIndex;
-				valueIndex = endIndex = storedIndex = notStoredIndex = errorIndex = clientErrorIndex = serverErrorIndex = notFoundIndex = deletedIndex = versionIndex = -1;
-				min = -2;
-				do {
-					valueIndex = ByteBufferUtils.kmpIndexOf(buffer, VALUE_PATTERN);
-					if (valueIndex == origPos) {
-						min = valueIndex;
-						break;
-					}
-					endIndex = ByteBufferUtils.kmpIndexOf(buffer, END_PATTERN);
-					if (endIndex == origPos) {
-						min = endIndex;
-						break;
-					}
-					storedIndex = ByteBufferUtils.kmpIndexOf(buffer, STORED_PATTERN);
-					if (storedIndex == origPos) {
-						min = storedIndex;
-						break;
-					}
-					notStoredIndex = ByteBufferUtils.kmpIndexOf(buffer,
-							NOT_STORED_PATTERN);
-					if (notStoredIndex == origPos) {
-						min = notStoredIndex;
-						break;
-					}
-					deletedIndex = ByteBufferUtils.kmpIndexOf(buffer, DELETED_PATTERN);
-					if (deletedIndex == origPos) {
-						min = deletedIndex;
-						break;
-					}
-					notFoundIndex = ByteBufferUtils.kmpIndexOf(buffer,
-							NOT_FOUND_PATTERN);
-					if (notFoundIndex == origPos) {
-						min = notFoundIndex;
-						break;
-					}
-					errorIndex = ByteBufferUtils.kmpIndexOf(buffer, ERROR_PATTERN);
-					if (errorIndex == origPos) {
-						min = errorIndex;
-						break;
-					}
-					clientErrorIndex = ByteBufferUtils.kmpIndexOf(buffer,
-							CLIENT_ERROR_PATTERN);
-					if (clientErrorIndex == origPos) {
-						min = clientErrorIndex;
-						break;
-					}
-					serverErrorIndex = ByteBufferUtils.kmpIndexOf(buffer,
-							SERVER_ERROR_PATTERN);
-					if (serverErrorIndex == origPos) {
-						min = serverErrorIndex;
-						break;
-					}
-					versionIndex = ByteBufferUtils.kmpIndexOf(buffer, VERSION_PATTERN);
-					if (versionIndex == origPos) {
-						min = versionIndex;
-						break;
-					}
-					min = min(valueIndex, endIndex, storedIndex,
-							notStoredIndex, errorIndex, clientErrorIndex,
-							serverErrorIndex);
-				} while (false);
-				// System.out.printf("valueIndex=%d, endIndex=%d,
-				// storedIndex=%d, notStoredIndex=%d, errorIndex=%d,
-				// clientErrorIndex=%d, serverErrorIndex=%d, min=%d,
-				// deletedIndex=%d, notFoundIndex=%d, versionIndex=%d,min=%d\n",
-				// valueIndex, endIndex, storedIndex, notStoredIndex,
-				// errorIndex, clientErrorIndex, serverErrorIndex, min,
-				// deletedIndex, notFoundIndex, versionIndex,min);
-				if (min < 0 && buffer.remaining() == 0)
-					return null;
-				else if (min >= 0 && buffer.remaining() > 0) {
-					if (valueIndex == min) {
-						endIndex = ByteBufferUtils.kmpIndexOf(buffer, END_PATTERN,
-								valueIndex);
-						if (endIndex < 0)
+				int origLimit = buffer.limit();
+				LABEL: while (true) {
+					switch (this.status) {
+					case NULL:
+						nextLine(buffer);
+						if (currentLine == null) {
 							return null;
-						byte[] bytes = null;
-						Command command = new Command(Command.CommandType.GET);
-						List<String> keys = new ArrayList<String>(30);
-						List<CachedData> datas = new ArrayList<CachedData>(30);
+						}
+						if (currentLine.startsWith("VALUE")) {
+							this.resultCommand = new Command(
+									Command.CommandType.GET);
+							List<String> keys = new ArrayList<String>(30);
+							this.resultCommand.setKey(keys);
+							List<CachedData> datas = new ArrayList<CachedData>(
+									30);
+							this.resultCommand.setResult(datas);
+							this.status = ParseStatus.GET;
+						} else if (currentLine.equals("END")) {
+							this.status = ParseStatus.END;
+						} else if (currentLine.equals("STORED")) {
+							this.status = ParseStatus.STORED;
+						} else if (currentLine.equals("NOT_STORED")) {
+							this.status = ParseStatus.NOT_STORED;
+						} else if (currentLine.equals("DELETED")) {
+							this.status = ParseStatus.DELETED;
+						} else if (currentLine.equals("NOT_FOUND")) {
+							this.status = ParseStatus.NOT_FOUND;
+						} else if (currentLine.equals("ERROR")) {
+							this.status = ParseStatus.ERROR;
+						} else if (currentLine.startsWith("CLIENT_ERROR")) {
+							this.status = ParseStatus.CLIENT_ERROR;
+						} else if (currentLine.startsWith("SERVER_ERROR")) {
+							this.status = ParseStatus.SERVER_ERROR;
+						} else if (currentLine.startsWith("VERSION ")) {
+							this.status = ParseStatus.VERSION;
+						} else {
+							this.status = ParseStatus.INCR;
+						}
+						if (!this.status.equals(ParseStatus.NULL))
+							continue LABEL;
+						else
+							return null;
+					case GET:
+						List<String> keys = (List<String>) this.resultCommand
+								.getKey();
+						List<CachedData> datas = (List<CachedData>) this.resultCommand
+								.getResult();
 						while (true) {
-							bytes = parseLine(buffer, valueIndex);
-							if (bytes == null || bytes.length == 0)
+							nextLine(buffer);
+							if (currentLine == null)
 								return null;
-							if (new String(bytes, 0, 3).equals("END")) {
-								command.setKey(keys);
-								command.setResult(datas);
-								return command;
-							} else if (new String(bytes, 0, 5).equals("VALUE")) {
-								String line = new String(bytes);
-								String[] items = line.split(" ");
-								keys.add(items[1]);
+							if (this.currentLine.equals("END")) {
+								Command returnCommand = this.resultCommand;
+								this.resultCommand = null;
+								reset();
+								return returnCommand;
+							} else if (currentLine.startsWith("VALUE")) {
+								String[] items = this.currentLine.split(" ");
 								int flag = Integer.parseInt(items[2]);
 								int dataLen = Integer.parseInt(items[3]);
+								// 数据不完整
+								if (buffer.remaining() < dataLen + 2) {
+									prevLine(buffer);
+									buffer.position(origPos).limit(origLimit);
+									this.currentLine = null;
+									return null;
+								}
+								keys.add(items[1]);
 								byte[] data = new byte[dataLen];
 								buffer.get(data);
 								datas.add(new CachedData(flag, data, dataLen));
 								buffer.position(buffer.position()
 										+ SPLIT.remaining());
-								valueIndex = buffer.position();
+								this.currentLine = null;
+							} else {
+								prevLine(buffer);
+								buffer.position(origPos).limit(origLimit);
+								this.currentLine = null;
+								return null;
 							}
+
 						}
+					case END:
+						return parseEndCommand();
+					case STORED:
+						return parseStored();
+					case NOT_STORED:
+						return parseNotStored();
+					case DELETED:
+						return parseDeleted();
+					case NOT_FOUND:
+						return parseNotFound();
+					case ERROR:
+						return parseException();
+					case CLIENT_ERROR:
+						return parseClientException();
+					case SERVER_ERROR:
+						return parseServerException();
+					case VERSION:
+						return parseVersionCommand();
+					case INCR:
+						return parseIncrDecrCommand();
+					default:
+						return null;
 
-					} else if (endIndex == min) {
-						return parseEndCommand(buffer, endIndex);
 					}
-
-					else if (storedIndex == min) {
-						return parseStored(buffer, storedIndex);
-					} else if (notStoredIndex == min) {
-						return parseNotStored(buffer, notStoredIndex);
-					} else if (deletedIndex == min) {
-						return parseDeleted(buffer, deletedIndex);
-					} else if (notFoundIndex == min) {
-						return parseNotFound(buffer, notFoundIndex);
-					} else if (errorIndex == min) {
-						return parseException(buffer, errorIndex);
-					} else if (clientErrorIndex == min) {
-						return parseClientException(buffer, clientErrorIndex);
-					} else if (serverErrorIndex == min) {
-						return parseServerException(buffer, serverErrorIndex);
-					} else if (versionIndex == min) {
-						return parseVersionCommand(buffer, versionIndex);
-					}
-				} else if (min < 0 && buffer.remaining() > 0) {
-					// incr,decr命令
-					return parseIncrDecrCommand(buffer, origPos);
-				} else
-					return null;
-				return null;
+				}
 			}
 
-			private Command parseEndCommand(ByteBuffer buffer, int endIndex) {
-				if (parseLine(buffer, endIndex) == null)
-					return null;
+			private void prevLine(ByteBuffer buffer) {
+				int nowPos;
+				nowPos = buffer.position();
+				byte[] lineBytes = ByteUtils.getBytes(this.currentLine);
+				int prevPos = nowPos - lineBytes.length - 2;
+				buffer.position(nowPos - lineBytes.length - 2);
+				buffer.put(lineBytes).put(SPLIT.array());
+				buffer.position(prevPos);
+				this.currentLine = null;
+			}
+
+			private Command parseEndCommand() {
+				reset();
 				return new Command(Command.CommandType.GET);
 			}
 
-			private Command parseStored(ByteBuffer buffer, int storedIndex) {
-				if (parseLine(buffer, storedIndex) == null)
-					return null;
+			private Command parseStored() {
+				reset();
 				return new Command(Command.CommandType.STORE) {
 					public Object getResult() {
 						return true;
@@ -208,9 +171,8 @@ public class MemcachedCodecFactory implements CodecFactory<Command> {
 				};
 			}
 
-			private Command parseNotStored(ByteBuffer buffer, int notStoredIndex) {
-				if (parseLine(buffer, notStoredIndex) == null)
-					return null;
+			private Command parseNotStored() {
+				reset();
 				return new Command(Command.CommandType.STORE) {
 					public Object getResult() {
 						return false;
@@ -219,9 +181,8 @@ public class MemcachedCodecFactory implements CodecFactory<Command> {
 				};
 			}
 
-			private Command parseDeleted(ByteBuffer buffer, int deletedIndex) {
-				if (parseLine(buffer, deletedIndex) == null)
-					return null;
+			private Command parseDeleted() {
+				reset();
 				return new Command(Command.CommandType.OTHER) {
 					public Object getResult() {
 						return true;
@@ -230,9 +191,8 @@ public class MemcachedCodecFactory implements CodecFactory<Command> {
 				};
 			}
 
-			private Command parseNotFound(ByteBuffer buffer, int notFoundIndex) {
-				if (parseLine(buffer, notFoundIndex) == null)
-					return null;
+			private Command parseNotFound() {
+				reset();
 				return new Command(Command.CommandType.OTHER) {
 					public Object getResult() {
 						return false;
@@ -241,9 +201,8 @@ public class MemcachedCodecFactory implements CodecFactory<Command> {
 				};
 			}
 
-			private Command parseException(ByteBuffer buffer, int errorIndex) {
-				if (parseLine(buffer, errorIndex) == null)
-					return null;
+			private Command parseException() {
+				reset();
 				return new Command(Command.CommandType.EXCEPTION) {
 					@Override
 					public RuntimeException getException() {
@@ -253,14 +212,11 @@ public class MemcachedCodecFactory implements CodecFactory<Command> {
 				};
 			}
 
-			private Command parseClientException(ByteBuffer buffer,
-					int clientErrorIndex) {
-				byte[] bytes = null;
-				if ((bytes = parseLine(buffer, clientErrorIndex)) == null)
-					return null;
-				String[] items = new String(bytes).split(" ");
+			private Command parseClientException() {
+				String[] items = this.currentLine.split(" ");
 				final String error = items.length > 1 ? items[1]
 						: "unknown client error";
+				reset();
 				return new Command(Command.CommandType.EXCEPTION) {
 					@Override
 					public RuntimeException getException() {
@@ -270,14 +226,11 @@ public class MemcachedCodecFactory implements CodecFactory<Command> {
 				};
 			}
 
-			private Command parseServerException(ByteBuffer buffer,
-					int serverErrorIndex) {
-				byte[] bytes = null;
-				if ((bytes = parseLine(buffer, serverErrorIndex)) == null)
-					return null;
-				String[] items = new String(bytes).split(" ");
+			private Command parseServerException() {
+				String[] items = this.currentLine.split(" ");
 				final String error = items.length > 1 ? items[1]
 						: "unknown server error";
+				reset();
 				return new Command() {
 					@Override
 					public RuntimeException getException() {
@@ -287,14 +240,11 @@ public class MemcachedCodecFactory implements CodecFactory<Command> {
 				};
 			}
 
-			private Command parseVersionCommand(ByteBuffer buffer,
-					int versionIndex) {
-				byte[] bytes = null;
-				if ((bytes = parseLine(buffer, versionIndex)) == null)
-					return null;
-				String[] items = new String(bytes).split(" ");
+			private Command parseVersionCommand() {
+				String[] items = this.currentLine.split(" ");
 				final String version = items.length > 1 ? items[1]
 						: "unknown version";
+				reset();
 				return new Command() {
 
 					@Override
@@ -305,21 +255,27 @@ public class MemcachedCodecFactory implements CodecFactory<Command> {
 				};
 			}
 
-			private Command parseIncrDecrCommand(ByteBuffer buffer, int origPos) {
-				final byte[] bytes;
-				if ((bytes = parseLine(buffer, origPos)) == null)
-					return null;
+			private void reset() {
+				this.status = ParseStatus.NULL;
+				this.currentLine = null;
+			}
+
+			private Command parseIncrDecrCommand() {
+				final Integer result = Integer.parseInt(this.currentLine);
+				reset();
 				return new Command(Command.CommandType.OTHER) {
 					@Override
 					public Object getResult() {
-						return Integer.parseInt(new String(bytes));
+						return result;
 					}
 
 				};
 			}
 
-			private byte[] parseLine(ByteBuffer buffer, int offset) {
-				int index = ByteBufferUtils.kmpIndexOf(buffer, SPLIT_PATTERN, offset);
+			private void nextLine(ByteBuffer buffer) {
+				if (this.currentLine != null)
+					return;
+				int index = ByteBufferUtils.kmpIndexOf(buffer, SPLIT_PATTERN);
 				if (index >= 0) {
 					int limit = buffer.limit();
 					buffer.limit(index);
@@ -327,18 +283,14 @@ public class MemcachedCodecFactory implements CodecFactory<Command> {
 					buffer.get(bytes);
 					buffer.limit(limit);
 					buffer.position(index + SPLIT.remaining());
-					return bytes;
+					try {
+						this.currentLine = new String(bytes, "utf-8");
+					} catch (UnsupportedEncodingException e) {
 
-				}
-				return null;
-			}
+					}
 
-			private int min(int a, int... nums) {
-				int min = a;
-				for (int i = 0; i < nums.length; i++)
-					if ((nums[i] < min || min < 0) && nums[i] >= 0)
-						min = nums[i];
-				return min;
+				} else
+					this.currentLine = null;
 			}
 
 		};
@@ -347,10 +299,9 @@ public class MemcachedCodecFactory implements CodecFactory<Command> {
 	public Encoder<Command> getEncoder() {
 		return new Encoder<Command>() {
 			public ByteBuffer[] encode(Command cmd) {
-				return cmd.getCmd();
+				return new ByteBuffer[] { cmd.getCmd() };
 			}
 
 		};
 	}
-
 }

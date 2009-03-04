@@ -1,6 +1,7 @@
 package net.rubyeye.xmemcached.test;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.io.Serializable;
@@ -51,7 +52,7 @@ public class Example {
 			keys.add("hello");
 			keys.add("test");
 			Map<String, Object> map = client.get(keys);
-			System.out.println("map size:"+map.size());
+			System.out.println("map size:" + map.size());
 
 			// delete操作
 			if (!client.delete("hello", 1000)) {
@@ -81,10 +82,35 @@ public class Example {
 			// delete
 			client.delete("dennis");
 			System.out.println("after delete:" + client.get("dennis"));
+
+			// 读写容器
+			map = new HashMap();
+			for (int i = 0; i < 1000; i++)
+				map.put(String.valueOf(i), i);
+			if (!client.set("map", 0, map, 10000)) {
+				System.err.println("set map error");
+			}
+			HashMap cachedMap = (HashMap) client.get("map", 100000);
+			if (cachedMap.size() != 1000)
+				System.err.println("get map error");
+			for (Object key : cachedMap.keySet()) {
+				if (!cachedMap.get(key).equals(Integer.parseInt((String) key))) {
+					System.err.println("get map error");
+				}
+			}
+			//读取不存在的key
+			for (int i = 0; i < 100; i++)
+				if (client.get("hello__" + i) != null)
+					System.err.println("get error");
+			//删除不存在的key
+			for (int i = 0; i < 100; i++)
+				if (client.delete("hello__" + i))
+					System.err.println("get error");
 			client.shutdown();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 
 	}
+
 }

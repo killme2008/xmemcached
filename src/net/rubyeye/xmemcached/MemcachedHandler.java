@@ -3,6 +3,7 @@ package net.rubyeye.xmemcached;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import net.rubyeye.xmemcached.command.Command;
 import net.spy.memcached.transcoders.CachedData;
 import net.spy.memcached.transcoders.Transcoder;
@@ -21,7 +22,16 @@ public class MemcachedHandler extends HandlerAdapter<Command> {
 	@Override
 	public void onMessageSent(Session session, Command t) {
 		try {
-			executingCmds.push(t);
+			if (t.getMergeCommands() == null) {
+				executingCmds.push(t);
+
+			} else {
+				List<Command> mergeCmds = t.getMergeCommands();
+				for (Command cmd : mergeCmds) {
+					executingCmds.push(cmd);
+				}
+
+			}
 		} catch (InterruptedException e) {
 
 		}
@@ -31,6 +41,7 @@ public class MemcachedHandler extends HandlerAdapter<Command> {
 	public void onReceive(Session session, final Command recvCmd) {
 		try {
 			final Command executingCmd = executingCmds.pop();
+
 			if (executingCmd == null)
 				return;
 			if (recvCmd.getException() != null) {
@@ -44,9 +55,8 @@ public class MemcachedHandler extends HandlerAdapter<Command> {
 					processGetManyCommand(recvCmd, executingCmd);
 					break;
 				case GET_ONE:
-					processGetOneCommand(recvCmd, executingCmd);
+					processGetOneCommand(session, recvCmd, executingCmd);
 					break;
-
 				case SET:
 				case ADD:
 				case REPLACE:
@@ -70,14 +80,63 @@ public class MemcachedHandler extends HandlerAdapter<Command> {
 	}
 
 	@SuppressWarnings("unchecked")
-	private void processGetOneCommand(Command recvCmd, Command executingCmd) {
+	private void processGetOneCommand(Session session, Command recvCmd,
+			Command executingCmd) {
+		int mergCount = executingCmd.getMergetCount();
+		// 无数据
 		if (recvCmd.getKey() == null) {
-			executingCmd.setResult(null);
+			if (mergCount < 0) {
+				// 单个，未合并
+				executingCmd.setResult(null);
+				executingCmd.getLatch().countDown();
+			} else {
+				int i = 0;
+				try {
+					Command nextCommand = executingCmd;
+					while (i < mergCount) {
+						nextCommand.setResult(null);
+						nextCommand.getLatch().countDown(); // 通知
+						i++;
+						if (i < mergCount)
+							nextCommand = this.executingCmds.pop();
+					}
+				} catch (InterruptedException e) {
+
+				}
+			}
 		} else {
-			executingCmd.setResult(transcoder
-					.decode(((List<CachedData>) recvCmd.getResult()).get(0)));
+			// 有缓存数据
+			List<CachedData> datas = (List<CachedData>) recvCmd.getResult();
+			List<String> keys = (List<String>) recvCmd.getKey();
+
+			if (mergCount < 0) {
+				// 未合并情况
+				if (!executingCmd.getKey().equals(keys.get(0)))
+					session.close(); // key不相符，关闭连接
+				executingCmd.setResult(transcoder.decode(datas.get(0)));
+				executingCmd.getLatch().countDown();
+			} else {
+				int i = 0;
+				try {
+					Command nextCommand = executingCmd;
+					while (i < mergCount) {
+						int index = keys.indexOf(nextCommand.getKey());
+						if (index >= 0) {
+							nextCommand.setResult(transcoder.decode(datas
+									.get(index)));
+						} else
+							nextCommand.setResult(null);
+						nextCommand.getLatch().countDown();
+						i++;
+						if (i < mergCount)
+							nextCommand = this.executingCmds.pop();
+					}
+				} catch (InterruptedException e) {
+
+				}
+			}
 		}
-		executingCmd.getLatch().countDown();
+
 	}
 
 	@SuppressWarnings("unchecked")
