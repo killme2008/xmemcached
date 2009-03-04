@@ -153,9 +153,9 @@ public class XMemcachedClient {
 
 	private void connect(InetSocketAddress inetSocketAddress)
 			throws IOException {
-		// 启动发送线程
+		//启动发送线程
 		this.commandSender.start();
-		// 连接
+		//连接
 		this.connector.connect(inetSocketAddress);
 		try {
 			this.connector.awaitForConnected();

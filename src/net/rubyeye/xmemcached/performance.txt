@@ -25,6 +25,10 @@ test write,thread num=50, repeat=10000,size=2, all=500000 ,velocity=19838 , usin
 test read,thread num=50, repeat=10000,size=2, all=500000 ,velocity=20685 , using time:24172
 test delete,thread num=50, repeat=10000,size=2, all=500000 ,velocity=22727 , using time:22000
 
+test write,thread num=100, repeat=10000,size=2, all=1000000 ,velocity=25427 , using time:39328
+test read,thread num=100, repeat=10000,size=2, all=1000000 ,velocity=22646 , using time:44157
+test delete,thread num=100, repeat=10000,size=2, all=1000000 ,velocity=26700 , using time:37453
+
 
 ≤‚ ‘2
 xmemcached
@@ -40,6 +44,10 @@ test delete,thread num=10, repeat=100,size=2, all=1000 ,velocity=8000 , using ti
 test write,thread num=50, repeat=100,size=2, all=5000 ,velocity=1561 , using time:3203
 test read,thread num=50, repeat=100,size=2, all=5000 ,velocity=1226 , using time:4078
 test delete,thread num=50, repeat=100,size=2, all=5000 ,velocity=11848 , using time:422
+
+test write,thread num=100, repeat=10000,size=2, all=1000000 ,velocity=18068 , using time:55344
+test read,thread num=100, repeat=10000,size=2, all=1000000 ,velocity=29064 , using time:34406
+test delete,thread num=100, repeat=10000,size=2, all=1000000 ,velocity=18259 , using time:54766
 
 spymemcached
 
