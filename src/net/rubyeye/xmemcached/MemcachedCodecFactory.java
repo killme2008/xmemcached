@@ -9,8 +9,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.google.code.yanf4j.nio.CodecFactory;
-import com.google.code.yanf4j.util.ByteBufferPattern;
-import com.google.code.yanf4j.util.ByteBufferUtils;
+import com.google.code.yanf4j.util.ByteBufferMatcher;
 
 import net.rubyeye.xmemcached.command.Command;
 import net.rubyeye.xmemcached.exception.MemcachedClientException;
@@ -18,15 +17,29 @@ import net.rubyeye.xmemcached.exception.MemcachedException;
 import net.rubyeye.xmemcached.exception.MemcachedServerException;
 import net.spy.memcached.transcoders.CachedData;
 
+/**
+ * 基于状态机的协议工厂
+ * 
+ * @author dennis
+ * 
+ */
 public class MemcachedCodecFactory implements CodecFactory<Command> {
 	private static final ByteBuffer SPLIT = ByteBuffer.wrap(Command.SPLIT
 			.getBytes());
 
 	protected static final Log log = LogFactory
 			.getLog(MemcachedCodecFactory.class);
+	/**
+	 * KMP算法匹配，比简单匹配还慢
+	 * 
+	 * private static final ByteBufferPattern SPLIT_PATTERN = ByteBufferPattern
+	 * .compile(SPLIT);
+	 */
 
-	private static final ByteBufferPattern SPLIT_PATTERN = ByteBufferPattern
-			.compile(SPLIT);
+	/**
+	 * BM算法匹配
+	 */
+	static ByteBufferMatcher SPLIT_MATCHER = new ByteBufferMatcher(SPLIT);
 
 	enum ParseStatus {
 		NULL, GET, END, STORED, NOT_STORED, ERROR, CLIENT_ERROR, SERVER_ERROR, DELETED, NOT_FOUND, VERSION, INCR;
@@ -270,7 +283,7 @@ public class MemcachedCodecFactory implements CodecFactory<Command> {
 			private void nextLine(ByteBuffer buffer) {
 				if (this.currentLine != null)
 					return;
-				int index = ByteBufferUtils.kmpIndexOf(buffer, SPLIT_PATTERN);
+				int index = SPLIT_MATCHER.matchFirst(buffer);
 				if (index >= 0) {
 					int limit = buffer.limit();
 					buffer.limit(index);
