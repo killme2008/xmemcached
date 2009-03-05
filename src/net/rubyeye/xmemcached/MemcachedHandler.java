@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -30,6 +32,7 @@ public class MemcachedHandler extends HandlerAdapter<Command> {
 	protected static final Log log = LogFactory.getLog(MemcachedHandler.class);
 
 	private int connectTries = 0;
+	ExecutorService executors = Executors.newCachedThreadPool();
 
 	@Override
 	public void onMessageSent(Session session, Command t) {
@@ -50,36 +53,37 @@ public class MemcachedHandler extends HandlerAdapter<Command> {
 
 	@Override
 	public void onReceive(Session session, final Command recvCmd) {
+		Command executingCmd = null;
 		try {
-			final Command executingCmd = executingCmds.pop();
-			if (executingCmd == null)
-				return;
-			if (recvCmd.getException() != null) {
-				executingCmd.setException(recvCmd.getException());
-				executingCmd.getLatch().countDown();
-			} else {
-
-				switch (executingCmd.getCommandType()) {
-				case EXCEPTION:
-				case GET_MANY:
-					processGetManyCommand(recvCmd, executingCmd);
-					break;
-				case GET_ONE:
-					processGetOneCommand(session, recvCmd, executingCmd);
-					break;
-				case SET:
-				case ADD:
-				case REPLACE:
-				case DELETE:
-				case INCR:
-				case DECR:
-				case VERSION:
-					processCommand(recvCmd, executingCmd);
-					break;
-				}
-			}
+			executingCmd = executingCmds.pop();
 		} catch (InterruptedException e) {
 			Thread.currentThread().interrupt();
+		}
+		if (executingCmd == null)
+			return;
+		if (recvCmd.getException() != null) {
+			executingCmd.setException(recvCmd.getException());
+			executingCmd.getLatch().countDown();
+		} else {
+
+			switch (executingCmd.getCommandType()) {
+			case EXCEPTION:
+			case GET_MANY:
+				processGetManyCommand(recvCmd, executingCmd);
+				break;
+			case GET_ONE:
+				processGetOneCommand(session, recvCmd, executingCmd);
+				break;
+			case SET:
+			case ADD:
+			case REPLACE:
+			case DELETE:
+			case INCR:
+			case DECR:
+			case VERSION:
+				processCommand(recvCmd, executingCmd);
+				break;
+			}
 		}
 
 	}
