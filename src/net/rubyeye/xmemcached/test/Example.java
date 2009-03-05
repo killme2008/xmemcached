@@ -32,7 +32,7 @@ class Name implements Serializable {
 public class Example {
 	public static void main(String[] args) {
 		try {
-			String ip = "192.168.222.100";
+			String ip = "localhost";
 
 			int port = 11211;
 			XMemcachedClient client = new XMemcachedClient(ip, port);

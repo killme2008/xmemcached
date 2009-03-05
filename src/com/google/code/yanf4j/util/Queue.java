@@ -45,5 +45,7 @@ public interface Queue<T> {
 	public void setHighWaterMark(int highWaterMark);
 
 	public boolean isFull();
+        
+        public void addFirst(T obj)throws InterruptedException;
 
 }

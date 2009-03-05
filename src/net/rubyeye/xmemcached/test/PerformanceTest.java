@@ -65,7 +65,7 @@ public class PerformanceTest {
 				for (int i = 0; i < repeat; i++) {
 
 					String key = String.valueOf(start + i);
-					String result = (String) mc.get(key);
+					String result = (String) mc.get(key,100000000);
 					if (!key.equals(result)) {
 						System.out.println(key + " " + result);
 						System.err.println("get error");
@@ -119,7 +119,7 @@ public class PerformanceTest {
 	// time:189187
 	static public void main(String[] args) {
 		try {
-			String ip = "192.168.222.100";
+			String ip = "localhost";
 
 			int port = 11211;
 
@@ -163,33 +163,26 @@ public class PerformanceTest {
 			} catch (InterruptedException e) {
 
 			}
-			all = thread * repeat;
-			usingtime = (System.currentTimeMillis() - t);
-			System.out
-					.println(String
-							.format(
-									"test read,thread num=%d, repeat=%d,size=%d, all=%d ,velocity=%d , using time:%d",
-									thread, repeat, size, all, 1000 * all
-											/ usingtime, usingtime));
-			cdl = new CountDownLatch(thread);
-			t = System.currentTimeMillis();
-			for (int i = 0; i < thread; i++) {
-				new Thread(new PerformanceTest.TestDeleteRunnable(mc,
-						i * 10000, cdl, repeat)).start();
-			}
-			try {
-				cdl.await();
-			} catch (InterruptedException e) {
-
-			}
-			all = thread * repeat;
-			usingtime = (System.currentTimeMillis() - t);
-			System.out
-					.println(String
-							.format(
-									"test delete,thread num=%d, repeat=%d,size=%d, all=%d ,velocity=%d , using time:%d",
-									thread, repeat, size, all, 1000 * all
-											/ usingtime, usingtime));
+                    all = thread * repeat;
+                    usingtime = (System.currentTimeMillis() - t);
+                    System.out.println(String.format(
+                            "test read,thread num=%d, repeat=%d,size=%d, all=%d ,velocity=%d , using time:%d",
+                            thread, repeat, size, all, 1000 * all / usingtime, usingtime));
+                    cdl = new CountDownLatch(thread);
+                    t = System.currentTimeMillis();
+                    for (int i = 0; i < thread; i++) {
+                        new Thread(new PerformanceTest.TestDeleteRunnable(mc,
+                                i * 10000, cdl, repeat)).start();
+                    }
+                    try {
+                        cdl.await();
+                    } catch (InterruptedException e) {
+                    }
+                    all = thread * repeat;
+                    usingtime = (System.currentTimeMillis() - t);
+                    System.out.println(String.format(
+                            "test delete,thread num=%d, repeat=%d,size=%d, all=%d ,velocity=%d , using time:%d",
+                            thread, repeat, size, all, 1000 * all / usingtime, usingtime));
 
 			mc.shutdown();
 		} catch (Exception e) {

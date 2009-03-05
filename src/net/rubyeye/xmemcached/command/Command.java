@@ -16,7 +16,7 @@ public class Command implements Message {
 	RuntimeException throwable;
 	ByteBuffer byteBuffer;
 
-	int mergetCount = -1;
+	int mergeCount = -1;
 
 	public enum CommandType implements Message {
 		GET_ONE, GET_MANY, SET, REPLACE, ADD, EXCEPTION, DELETE, VERSION, INCR, DECR, GET, STORE, OTHER;
@@ -33,12 +33,12 @@ public class Command implements Message {
 		this.commandType = commandType;
 	}
 
-	public int getMergetCount() {
-		return mergetCount;
+	public int getMergeCount() {
+		return mergeCount;
 	}
 
-	public void setMergetCount(int mergetCount) {
-		this.mergetCount = mergetCount;
+	public void setMergeCount(int mergetCount) {
+		this.mergeCount = mergetCount;
 	}
 
 	public Command() {

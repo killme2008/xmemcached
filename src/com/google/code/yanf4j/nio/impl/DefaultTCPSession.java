@@ -41,13 +41,13 @@ import com.google.code.yanf4j.nio.util.SelectorFactory;
  * @author dennis
  */
 public class DefaultTCPSession extends AbstractSession {
-	private long sessionTimeout = 0;
+	protected long sessionTimeout = 0;
 
-	private volatile long timestamp = -1;
+	protected volatile long timestamp = -1;
 
-	private volatile AtomicInteger idleCalledTimes = new AtomicInteger(0);
+	protected volatile AtomicInteger idleCalledTimes = new AtomicInteger(0);
 
-	private void updateTimeStamp() {
+	protected void updateTimeStamp() {
 		idleCalledTimes.set(0);
 		this.timestamp = System.currentTimeMillis();
 	}
@@ -117,7 +117,7 @@ public class DefaultTCPSession extends AbstractSession {
 				.getRemoteSocketAddress();
 	}
 
-	boolean isIdle() {
+	protected boolean isIdle() {
 		return this.sessionStatus.equals(SessionStatus.IDLE)
 				&& ((System.currentTimeMillis() - this.timestamp)
 						/ Configuration.CHECK_SESSION_IDLE_INTERVAL > this.idleCalledTimes
@@ -134,7 +134,7 @@ public class DefaultTCPSession extends AbstractSession {
 	 * @throws IOException
 	 * @throws ClosedChannelException
 	 */
-	private Object blockingWrite(SelectableChannel channel,
+	protected Object blockingWrite(SelectableChannel channel,
 			WriteMessage message, ByteBuffer[] writeBuffer) throws IOException,
 			ClosedChannelException {
 		SelectionKey tmpKey = null;
@@ -226,7 +226,7 @@ public class DefaultTCPSession extends AbstractSession {
 		}
 	}
 
-	int blockingRead() throws ClosedChannelException, IOException {
+    protected int blockingRead() throws ClosedChannelException, IOException {
 		log.debug("use temp selector for blocking read");
 		int n = -1;
 		Selector readSelector = SelectorFactory.getSelector();

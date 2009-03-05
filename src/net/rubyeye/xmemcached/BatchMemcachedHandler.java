@@ -135,7 +135,7 @@ public class BatchMemcachedHandler extends HandlerAdapter {
 	@SuppressWarnings("unchecked")
 	private void processGetOneCommand(Session session, Command recvCmd,
 			Command executingCmd) {
-		int mergCount = executingCmd.getMergetCount();
+		int mergCount = executingCmd.getMergeCount();
 		// �����
 		if (recvCmd.getKey() == null) {
 			if (mergCount < 0) {
