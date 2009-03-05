@@ -26,6 +26,12 @@ public class Command implements Message {
 		}
 
 	}
+	
+	
+
+	public void setCommandType(CommandType commandType) {
+		this.commandType = commandType;
+	}
 
 	public int getMergetCount() {
 		return mergetCount;
@@ -80,11 +86,11 @@ public class Command implements Message {
 		this.throwable = throwable;
 	}
 
-	public synchronized Object getKey() {
+	public Object getKey() {
 		return key;
 	}
 
-	public synchronized void setKey(Object key) {
+	public void setKey(Object key) {
 		this.key = key;
 	}
 

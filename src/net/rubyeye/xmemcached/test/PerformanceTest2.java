@@ -8,7 +8,7 @@ import net.rubyeye.xmemcached.XMemcachedClient;
 
 public class PerformanceTest2 {
 	static Map<String, NameClass> map2 = new HashMap<String, NameClass>();
-    static final int ELEMENT_NUM=100;
+	static final int ELEMENT_NUM = 100;
 	static {
 		for (int i = 0; i < ELEMENT_NUM; i++)
 			map2.put(String.valueOf(i), new NameClass(String.valueOf(i), String
@@ -135,14 +135,13 @@ public class PerformanceTest2 {
 
 			int size = Runtime.getRuntime().availableProcessors();
 
-			int thread = 100;
+			int thread = 50;
 
 			int repeat = 100;
 
 			XMemcachedClient mc = new XMemcachedClient(ip, port);
 
 			CountDownLatch cdl = new CountDownLatch(thread);
-			// ²âÊÔÐ´
 			long t = System.currentTimeMillis();
 			for (int i = 0; i < thread; i++) {
 				new Thread(new PerformanceTest2.TestWriteRunnable(mc,
@@ -163,7 +162,7 @@ public class PerformanceTest2 {
 									thread, repeat, size, all, 1000 * all
 											/ usingtime, usingtime));
 
-			// ²âÊÔ¶Á
+			// ï¿½ï¿½ï¿½Ô¶ï¿½
 			cdl = new CountDownLatch(thread);
 			t = System.currentTimeMillis();
 			for (int i = 0; i < thread; i++) {
@@ -183,7 +182,7 @@ public class PerformanceTest2 {
 									"test read,thread num=%d, repeat=%d,size=%d, all=%d ,velocity=%d , using time:%d",
 									thread, repeat, size, all, 1000 * all
 											/ usingtime, usingtime));
-			// ²âÊÔÉ¾³ý
+			// ï¿½ï¿½ï¿½ï¿½É¾ï¿½ï¿½
 			cdl = new CountDownLatch(thread);
 			t = System.currentTimeMillis();
 			for (int i = 0; i < thread; i++) {

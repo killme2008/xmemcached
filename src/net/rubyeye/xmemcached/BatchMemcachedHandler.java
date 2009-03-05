@@ -12,18 +12,19 @@ import org.apache.commons.logging.LogFactory;
 
 import net.rubyeye.xmemcached.command.Command;
 import net.rubyeye.xmemcached.utils.SimpleQueue;
+import net.rubyeye.xmemcached.utils.UnLockQueue;
 import net.spy.memcached.transcoders.CachedData;
 import net.spy.memcached.transcoders.Transcoder;
 
 import com.google.code.yanf4j.nio.Session;
 import com.google.code.yanf4j.nio.impl.HandlerAdapter;
-import com.google.code.yanf4j.util.Queue;
 
-public class MemcachedHandler extends HandlerAdapter<Command> {
+@SuppressWarnings("unchecked")
+public class BatchMemcachedHandler extends HandlerAdapter {
 	@SuppressWarnings("unchecked")
 	private Transcoder transcoder;
 
-	protected Queue<Command> executingCmds = new SimpleQueue<Command>();
+	protected UnLockQueue<Command> executingCmds = new UnLockQueue<Command>();
 
 	protected XMemcachedClient client;
 
@@ -32,15 +33,16 @@ public class MemcachedHandler extends HandlerAdapter<Command> {
 	protected static final Log log = LogFactory.getLog(MemcachedHandler.class);
 
 	private int connectTries = 0;
-	ExecutorService executors = Executors.newCachedThreadPool();
+	ExecutorService executors = Executors.newFixedThreadPool(2);
 
 	@Override
-	public void onMessageSent(Session session, Command t) {
+	public void onMessageSent(Session session, Object t) {
 		try {
-			if (t.getMergeCommands() == null) {
-				executingCmds.push(t);
+			Command sentCmd = (Command) t;
+			if (sentCmd.getMergeCommands() == null) {
+				executingCmds.push(sentCmd);
 			} else {
-				List<Command> mergeCmds = t.getMergeCommands();
+				List<Command> mergeCmds = sentCmd.getMergeCommands();
 				for (Command cmd : mergeCmds) {
 					executingCmds.push(cmd);
 				}
@@ -52,43 +54,48 @@ public class MemcachedHandler extends HandlerAdapter<Command> {
 	}
 
 	@Override
-	public void onSessionStarted(Session session) {
-		session.setUseBlockingWrite(true);
-		session.setUseBlockingRead(true);
-	}
-
-	@Override
-	public void onReceive(Session session, final Command recvCmd) {
-		Command executingCmd = null;
-		try {
-			executingCmd = executingCmds.pop();
-		} catch (InterruptedException e) {
-			Thread.currentThread().interrupt();
-		}
-		if (executingCmd == null)
+	public void onReceive(final Session session, final Object obj) {
+		final List<Command> recvCommands = (List<Command>) obj;
+		final int size = recvCommands.size();
+		if (size == 0)
 			return;
-		if (recvCmd.getException() != null) {
-			executingCmd.setException(recvCmd.getException());
-			executingCmd.getLatch().countDown();
-		} else {
 
-			switch (executingCmd.getCommandType()) {
-			case EXCEPTION:
-			case GET_MANY:
-				processGetManyCommand(recvCmd, executingCmd);
-				break;
-			case GET_ONE:
-				processGetOneCommand(session, recvCmd, executingCmd);
-				break;
-			case SET:
-			case ADD:
-			case REPLACE:
-			case DELETE:
-			case INCR:
-			case DECR:
-			case VERSION:
-				processCommand(recvCmd, executingCmd);
-				break;
+		for (int i = 0; i < size; i++) {
+
+			Command executingCmd = null;
+			try {
+				executingCmd = executingCmds.pop();
+			} catch (InterruptedException e) {
+				Thread.currentThread().interrupt();
+			}
+			if (executingCmd == null)
+				return;
+			Command recvCmd = recvCommands.get(i);
+			if (executingCmd == null)
+				return;
+			if (recvCmd.getException() != null) {
+				executingCmd.setException(recvCmd.getException());
+				executingCmd.getLatch().countDown();
+			} else {
+
+				switch (executingCmd.getCommandType()) {
+				case EXCEPTION:
+				case GET_MANY:
+					processGetManyCommand(recvCmd, executingCmd);
+					break;
+				case GET_ONE:
+					processGetOneCommand(session, recvCmd, executingCmd);
+					break;
+				case SET:
+				case ADD:
+				case REPLACE:
+				case DELETE:
+				case INCR:
+				case DECR:
+				case VERSION:
+					processCommand(recvCmd, executingCmd);
+					break;
+				}
 			}
 		}
 
@@ -201,7 +208,7 @@ public class MemcachedHandler extends HandlerAdapter<Command> {
 	}
 
 	@SuppressWarnings("unchecked")
-	public MemcachedHandler(Transcoder transcoder, XMemcachedClient client) {
+	public BatchMemcachedHandler(Transcoder transcoder, XMemcachedClient client) {
 		super();
 		this.transcoder = transcoder;
 		this.client = client;

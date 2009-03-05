@@ -132,7 +132,6 @@ public class PerformanceTest {
 			XMemcachedClient mc = new XMemcachedClient(ip, port);
 
 			CountDownLatch cdl = new CountDownLatch(thread);
-			// ≤‚ ‘–¥
 			long t = System.currentTimeMillis();
 			for (int i = 0; i < thread; i++) {
 				new Thread(new PerformanceTest.TestWriteRunnable(mc, i * 10000,
@@ -153,7 +152,6 @@ public class PerformanceTest {
 									thread, repeat, size, all, 1000 * all
 											/ usingtime, usingtime));
 
-			// ≤‚ ‘∂¡
 			cdl = new CountDownLatch(thread);
 			t = System.currentTimeMillis();
 			for (int i = 0; i < thread; i++) {
@@ -173,7 +171,6 @@ public class PerformanceTest {
 									"test read,thread num=%d, repeat=%d,size=%d, all=%d ,velocity=%d , using time:%d",
 									thread, repeat, size, all, 1000 * all
 											/ usingtime, usingtime));
-			// ≤‚ ‘…æ≥˝
 			cdl = new CountDownLatch(thread);
 			t = System.currentTimeMillis();
 			for (int i = 0; i < thread; i++) {

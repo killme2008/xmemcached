@@ -28,7 +28,7 @@ class TestThread implements Runnable {
 
 	int number;
 
-	final static int NUM = 2000;
+	final static int NUM = 1000;
 
 	public TestThread(int number, XMemcachedClient xmemcachedClient,
 			CyclicBarrier barrier) {
@@ -41,7 +41,6 @@ class TestThread implements Runnable {
 	public void run() {
 		try {
 			barrier.await();
-			// 增删简单类型
 			for (int i = 0; i < NUM; i++) {
 				assert (this.xmemcachedClient.set("test_" + number + "_" + i,
 						0, i, 2000));

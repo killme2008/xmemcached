@@ -3,6 +3,8 @@ package net.rubyeye.xmemcached;
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
@@ -15,27 +17,23 @@ import net.rubyeye.xmemcached.exception.MemcachedClientException;
 import net.rubyeye.xmemcached.exception.MemcachedException;
 import net.rubyeye.xmemcached.exception.MemcachedServerException;
 import net.rubyeye.xmemcached.utils.ByteBufferMatcher;
+import net.rubyeye.xmemcached.utils.ByteUtils;
 import net.spy.memcached.transcoders.CachedData;
+@SuppressWarnings("unchecked")
+public class BatchMemcachedCodecFactory implements CodecFactory {
+	private static final int MERGE_COUNT = 100;
 
-/**
- * 
- * @author dennis
- * 
- */
-public class MemcachedCodecFactory implements CodecFactory<Command> {
 	private static final ByteBuffer SPLIT = ByteBuffer.wrap(Command.SPLIT
 			.getBytes());
 
 	protected static final Log log = LogFactory
-			.getLog(MemcachedCodecFactory.class);
+			.getLog(BatchMemcachedCodecFactory.class);
 	/**
 	 * 
 	 * private static final ByteBufferPattern SPLIT_PATTERN = ByteBufferPattern
 	 * .compile(SPLIT);
 	 */
 
-	/**
-	 */
 	static ByteBufferMatcher SPLIT_MATCHER = new ByteBufferMatcher(SPLIT);
 
 	enum ParseStatus {
@@ -43,21 +41,34 @@ public class MemcachedCodecFactory implements CodecFactory<Command> {
 	}
 
 	@SuppressWarnings("unchecked")
-	public Decoder<Command> getDecoder() {
-		return new Decoder<Command>() {
+	public Decoder getDecoder() {
+		return new Decoder() {
 			private Command resultCommand;
 			private ParseStatus status = ParseStatus.NULL;
+			private List<byte[]> currentLines = null;
 			private String currentLine = null;
+			private List<Command> commands;
 
-			public Command decode(ByteBuffer buffer) {
-				int origPos = buffer.position();
-				int origLimit = buffer.limit();
+			private void prevLine(ByteBuffer buffer) {
+				if (this.currentLine != null) {
+					byte[] lineBytes = ByteUtils.getBytes(this.currentLine);
+					buffer.position(buffer.position() - lineBytes.length - 2);
+					this.currentLine = null;
+				}
+			}
+
+			public Object decode(ByteBuffer buffer) {
+				if (commands == null)
+					commands = new ArrayList<Command>(MERGE_COUNT);
 				LABEL: while (true) {
+					if (commands.size() >= MERGE_COUNT) {
+						return checkCommands();
+					}
 					switch (this.status) {
 					case NULL:
 						nextLine(buffer);
 						if (currentLine == null) {
-							return null;
+							return checkCommands();
 						}
 						if (currentLine.startsWith("VALUE")) {
 							this.resultCommand = new Command(
@@ -104,61 +115,78 @@ public class MemcachedCodecFactory implements CodecFactory<Command> {
 						while (true) {
 							nextLine(buffer);
 							if (currentLine == null)
-								return null;
+								return checkCommands();
 							if (this.currentLine.equals("END")) {
-								Command returnCommand = this.resultCommand;
+								commands.add(this.resultCommand);
 								this.resultCommand = null;
 								reset();
-								return returnCommand;
+								continue LABEL;
 							} else if (currentLine.startsWith("VALUE")) {
 								String[] items = this.currentLine.split(" ");
 								int flag = Integer.parseInt(items[2]);
 								int dataLen = Integer.parseInt(items[3]);
-								// ��ݲ�����
-								if (buffer.remaining() < dataLen + 2) {
-									buffer.position(origPos).limit(origLimit);
+								// 不够数据
+								if (currentLines == null
+										|| currentLines.size() == 0) {
+									prevLine(buffer);
 									this.currentLine = null;
-									return null;
+									return checkCommands();
 								}
 								keys.add(items[1]);
-								byte[] data = new byte[dataLen];
-								buffer.get(data);
+								byte[] data = currentLines.remove(0);
 								datas.add(new CachedData(flag, data, dataLen));
-								buffer.position(buffer.position()
-										+ SPLIT.remaining());
 								this.currentLine = null;
 							} else {
-								buffer.position(origPos).limit(origLimit);
+								prevLine(buffer);
 								this.currentLine = null;
-								return null;
+								return checkCommands();
 							}
 
 						}
 					case END:
-						return parseEndCommand();
+						commands.add(parseEndCommand());
+						break;
 					case STORED:
-						return parseStored();
+						commands.add(parseStored());
+						break;
 					case NOT_STORED:
-						return parseNotStored();
+						commands.add(parseNotStored());
+						break;
 					case DELETED:
-						return parseDeleted();
+						commands.add(parseDeleted());
+						break;
 					case NOT_FOUND:
-						return parseNotFound();
+						commands.add(parseNotFound());
+						break;
 					case ERROR:
-						return parseException();
+						commands.add(parseException());
+						break;
 					case CLIENT_ERROR:
-						return parseClientException();
+						commands.add(parseClientException());
+						break;
 					case SERVER_ERROR:
-						return parseServerException();
+						commands.add(parseServerException());
+						break;
 					case VERSION:
-						return parseVersionCommand();
+						commands.add(parseVersionCommand());
+						break;
 					case INCR:
-						return parseIncrDecrCommand();
+						commands.add(parseIncrDecrCommand());
+						break;
 					default:
-						return null;
-
+						return checkCommands();
 					}
 				}
+			}
+
+			private Object checkCommands() {
+				List<Command> returnCommands = this.commands;
+				this.commands = null;
+				if (returnCommands.size() > 0)
+					return returnCommands;
+
+				else
+					return null;
 			}
 
 			private Command parseEndCommand() {
@@ -280,31 +308,44 @@ public class MemcachedCodecFactory implements CodecFactory<Command> {
 			private void nextLine(ByteBuffer buffer) {
 				if (this.currentLine != null)
 					return;
-				int index = SPLIT_MATCHER.matchFirst(buffer);
-				if (index >= 0) {
-					int limit = buffer.limit();
-					buffer.limit(index);
-					byte[] bytes = new byte[buffer.remaining()];
-					buffer.get(bytes);
-					buffer.limit(limit);
-					buffer.position(index + SPLIT.remaining());
+				if (this.currentLines == null || this.currentLines.size() == 0) {
+					List<Integer> list = SPLIT_MATCHER.matchAll(buffer);
+					if (list == null || list.size() == 0)
+						return;
+					this.currentLines = new LinkedList<byte[]>();
+					Iterator<Integer> it = list.iterator();
+					while (it.hasNext()) {
+						int nextPos = it.next();
+						byte[] bytes = new byte[nextPos - buffer.position()];
+						buffer.get(bytes);
+						currentLines.add(bytes);
+						buffer.position(nextPos + SPLIT.remaining());
+					}
 					try {
-						this.currentLine = new String(bytes, "utf-8");
+						this.currentLine = new String(this.currentLines
+								.remove(0), "utf-8");
+						return;
 					} catch (UnsupportedEncodingException e) {
 
 					}
+				} else if (this.currentLines.size() > 0) {
+					try {
+						this.currentLine = new String(this.currentLines
+								.remove(0), "utf-8");
+						return;
+					} catch (UnsupportedEncodingException e) {
 
-				} else
-					this.currentLine = null;
+					}
+				}
 			}
 
 		};
 	}
 
-	public Encoder<Command> getEncoder() {
-		return new Encoder<Command>() {
-			public ByteBuffer[] encode(Command cmd) {
-				return new ByteBuffer[] { cmd.getByteBuffer() };
+	public Encoder getEncoder() {
+		return new Encoder() {
+			public ByteBuffer[] encode(Object cmd) {
+				return new ByteBuffer[] { ((Command) cmd).getByteBuffer() };
 			}
 
 		};

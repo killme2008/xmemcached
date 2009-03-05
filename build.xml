@@ -15,7 +15,7 @@
 		<mkdir dir="${build.dist}" />
 	</target>
 	<target name="compile" depends="init">
-		<javac encoding="gb2312" classpathref="classpath" debuglevel="line,source" target="1.6" srcdir="${src}" destdir="${build.classes}" debug="true" verbose="false" source="1.6">
+		<javac encoding="utf-8" classpathref="classpath" debuglevel="line,source" target="1.6" srcdir="${src}" destdir="${build.classes}" debug="true" verbose="false" source="1.6">
 		</javac>
 		<copyfile dest="${build.dist}/license.txt" src="${src}/license.txt" />
 	</target>

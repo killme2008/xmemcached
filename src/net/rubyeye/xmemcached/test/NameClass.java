@@ -3,7 +3,6 @@ package net.rubyeye.xmemcached.test;
 import java.io.Serializable;
 
 /**
- * ≤‚ ‘¿‡
  * 
  * @author dennis
  * 
