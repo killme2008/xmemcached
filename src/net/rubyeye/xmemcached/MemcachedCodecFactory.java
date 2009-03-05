@@ -16,7 +16,6 @@ import net.rubyeye.xmemcached.command.Command;
 import net.rubyeye.xmemcached.exception.MemcachedClientException;
 import net.rubyeye.xmemcached.exception.MemcachedException;
 import net.rubyeye.xmemcached.exception.MemcachedServerException;
-import net.rubyeye.xmemcached.utils.ByteUtils;
 import net.spy.memcached.transcoders.CachedData;
 
 public class MemcachedCodecFactory implements CodecFactory<Command> {
@@ -107,7 +106,6 @@ public class MemcachedCodecFactory implements CodecFactory<Command> {
 								int dataLen = Integer.parseInt(items[3]);
 								// 数据不完整
 								if (buffer.remaining() < dataLen + 2) {
-									prevLine(buffer);
 									buffer.position(origPos).limit(origLimit);
 									this.currentLine = null;
 									return null;
@@ -120,7 +118,6 @@ public class MemcachedCodecFactory implements CodecFactory<Command> {
 										+ SPLIT.remaining());
 								this.currentLine = null;
 							} else {
-								prevLine(buffer);
 								buffer.position(origPos).limit(origLimit);
 								this.currentLine = null;
 								return null;
@@ -152,17 +149,6 @@ public class MemcachedCodecFactory implements CodecFactory<Command> {
 
 					}
 				}
-			}
-
-			private void prevLine(ByteBuffer buffer) {
-				int nowPos;
-				nowPos = buffer.position();
-				byte[] lineBytes = ByteUtils.getBytes(this.currentLine);
-				int prevPos = nowPos - lineBytes.length - 2;
-				buffer.position(nowPos - lineBytes.length - 2);
-				buffer.put(lineBytes).put(SPLIT.array());
-				buffer.position(prevPos);
-				this.currentLine = null;
 			}
 
 			private Command parseEndCommand() {
@@ -308,7 +294,7 @@ public class MemcachedCodecFactory implements CodecFactory<Command> {
 	public Encoder<Command> getEncoder() {
 		return new Encoder<Command>() {
 			public ByteBuffer[] encode(Command cmd) {
-				return new ByteBuffer[] { cmd.getCmd() };
+				return new ByteBuffer[] { cmd.getByteBuffer() };
 			}
 
 		};

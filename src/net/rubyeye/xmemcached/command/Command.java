@@ -14,6 +14,7 @@ public class Command implements Message {
 	CountDownLatch latch;
 	CommandType commandType;
 	RuntimeException throwable;
+	ByteBuffer byteBuffer;
 
 	int mergetCount = -1;
 
@@ -60,6 +61,12 @@ public class Command implements Message {
 		this.commandType = commandType;
 		this.latch = latch;
 	}
+	
+	
+
+	public void setByteBuffer(ByteBuffer byteBuffer) {
+		this.byteBuffer = byteBuffer;
+	}
 
 	public List<Command> getMergeCommands() {
 		return null;
@@ -89,8 +96,8 @@ public class Command implements Message {
 		this.result = result;
 	}
 
-	public ByteBuffer getCmd() {
-		return null;
+	public ByteBuffer getByteBuffer() {
+		return this.byteBuffer;
 	}
 
 	public CountDownLatch getLatch() {

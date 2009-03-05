@@ -28,7 +28,7 @@ class TestThread implements Runnable {
 
 	int number;
 
-	final static int NUM = 10000;
+	final static int NUM = 2000;
 
 	public TestThread(int number, XMemcachedClient xmemcachedClient,
 			CyclicBarrier barrier) {
@@ -85,13 +85,13 @@ class TestThread implements Runnable {
 			barrier.await();
 		} catch (Exception e) {
 			e.printStackTrace();
-			System.err.println(this.number + " " + e.getMessage());
+//			System.err.println(this.number + " " + e.getMessage());
 		}
 	}
 }
 
 public class XMemcachedClientThreadSafeTest {
-	static int num = 500;
+	static int num = 1000;
 
 	public static void main(String args[]) throws Exception {
 		CyclicBarrier barrier = new CyclicBarrier(num + 1);

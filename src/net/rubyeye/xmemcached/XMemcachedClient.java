@@ -40,7 +40,7 @@ public class XMemcachedClient {
 	/**
 	 * 测试的平均值，根据实际情况调整
 	 */
-	private int mergeFactor = 60;
+	private int mergeFactor = 65;
 
 	private volatile boolean shutdown;
 
@@ -92,7 +92,8 @@ public class XMemcachedClient {
 					Command currentCmd = commands.pop();
 					if (currentCmd.getCommandType().equals(
 							Command.CommandType.GET_ONE)) {
-						final List<Command> mergeCommands = new ArrayList<Command>();
+						final List<Command> mergeCommands = new ArrayList<Command>(
+								30);
 						mergeCommands.add(currentCmd);
 						if (optimiezeGet)
 							optimizeGet(currentCmd, mergeCommands);
@@ -132,8 +133,10 @@ public class XMemcachedClient {
 				// 统计
 				currentCmd.setMergetCount(mergeCommands.size());
 				count++;
-				total +=currentCmd.getMergetCount();
-				log.debug("merge "+currentCmd.getMergetCount()+" get operations,current average merge factor is"+total/count);
+				total += currentCmd.getMergetCount();
+				log.debug("merge " + currentCmd.getMergetCount()
+						+ " get operations,current average merge factor is"
+						+ total / count);
 				// 发送合并get操作
 				connector.send(new Command(key.toString(),
 						Command.CommandType.GET_ONE, null) {
@@ -141,12 +144,13 @@ public class XMemcachedClient {
 						return mergeCommands;
 					}
 
-					public ByteBuffer getCmd() {
+					public ByteBuffer getByteBuffer() {
 						byte[] keyBytes = ByteUtils.getBytes(key.toString());
 						ByteBuffer buffer = ByteBuffer.allocate(GET.length
 								+ CRLF.length + 1 + keyBytes.length);
 						setArguments(buffer, GET, keyBytes);
 						buffer.flip();
+						setByteBuffer(buffer);
 						return buffer;
 					}
 				});
@@ -195,8 +199,7 @@ public class XMemcachedClient {
 		this.connector.setCodecFactory(new MemcachedCodecFactory());
 		this.transcoder = new SerializingTranscoder();
 		this.commandSender = new CommandSender();
-		this.connector.setHandler(new MemcachedHandler(this.transcoder,
-				this.connector));
+		this.connector.setHandler(new MemcachedHandler(this.transcoder, this));
 	}
 
 	public XMemcachedClient(InetSocketAddress inetSocketAddress)
@@ -226,10 +229,10 @@ public class XMemcachedClient {
 		}
 	}
 
-	static final byte[] CRLF = { '\r', '\n' };
-	static final byte[] GET = { 'g', 'e', 't' };
-	static final byte[] DELETE = { 'd', 'e', 'l', 'e', 't', 'e' };
-	static final byte SPACE = ' ';
+	private static final byte[] CRLF = { '\r', '\n' };
+	private static final byte[] GET = { 'g', 'e', 't' };
+	private static final byte[] DELETE = { 'd', 'e', 'l', 'e', 't', 'e' };
+	private static final byte SPACE = ' ';
 
 	protected final void setArguments(ByteBuffer bb, Object... args) {
 		boolean wasFirst = true;
@@ -253,12 +256,13 @@ public class XMemcachedClient {
 		final CountDownLatch latch = new CountDownLatch(1);
 		Command getCmd = new Command(key, Command.CommandType.GET_ONE, latch) {
 			@Override
-			public ByteBuffer getCmd() {
+			public ByteBuffer getByteBuffer() {
 				byte[] keyBytes = ByteUtils.getBytes(key);
 				ByteBuffer buffer = ByteBuffer.allocate(GET.length
 						+ CRLF.length + 1 + keyBytes.length);
 				setArguments(buffer, GET, keyBytes);
 				buffer.flip();
+				setByteBuffer(buffer);
 				return buffer;
 			}
 
@@ -292,12 +296,13 @@ public class XMemcachedClient {
 		Command getCmd = new Command(key.substring(0, key.length() - 1),
 				Command.CommandType.GET_MANY, latch) {
 			@Override
-			public ByteBuffer getCmd() {
+			public ByteBuffer getByteBuffer() {
 				byte[] keyBytes = ByteUtils.getBytes(key);
 				ByteBuffer buffer = ByteBuffer.allocate(GET.length
 						+ CRLF.length + 1 + keyBytes.length);
 				setArguments(buffer, GET, keyBytes);
 				buffer.flip();
+				setByteBuffer(buffer);
 				return buffer;
 			}
 
@@ -360,13 +365,14 @@ public class XMemcachedClient {
 		final CountDownLatch latch = new CountDownLatch(1);
 		Command command = new Command(key, Command.CommandType.DELETE, latch) {
 			@Override
-			public ByteBuffer getCmd() {
+			public ByteBuffer getByteBuffer() {
 				byte[] keyBytes = ByteUtils.getBytes(key);
 				byte[] timeBytes = ByteUtils.getBytes(String.valueOf(time));
 				ByteBuffer buffer = ByteBuffer.allocate(DELETE.length + 2
 						+ keyBytes.length + timeBytes.length + CRLF.length);
 				setArguments(buffer, DELETE, keyBytes, timeBytes);
 				buffer.flip();
+				setByteBuffer(buffer);
 				return buffer;
 			}
 
@@ -385,8 +391,10 @@ public class XMemcachedClient {
 		final CountDownLatch latch = new CountDownLatch(1);
 		Command command = new Command(Command.CommandType.VERSION, latch) {
 			@Override
-			public ByteBuffer getCmd() {
-				return ByteBuffer.wrap("version\r\n".getBytes());
+			public ByteBuffer getByteBuffer() {
+				ByteBuffer buffer = ByteBuffer.wrap("version\r\n".getBytes());
+				setByteBuffer(buffer);
+				return buffer;
 			}
 
 		};
@@ -432,7 +440,7 @@ public class XMemcachedClient {
 		final CountDownLatch latch = new CountDownLatch(1);
 		Command command = new Command(key, cmdType, latch) {
 			@Override
-			public ByteBuffer getCmd() {
+			public ByteBuffer getByteBuffer() {
 				byte[] numBytes = ByteUtils.getBytes(String.valueOf(num));
 				byte[] cmdBytes = ByteUtils.getBytes(cmd);
 				byte[] keyBytes = ByteUtils.getBytes(key);
@@ -440,6 +448,7 @@ public class XMemcachedClient {
 						+ key.length() + numBytes.length + CRLF.length);
 				setArguments(buffer, cmdBytes, keyBytes, numBytes);
 				buffer.flip();
+				setByteBuffer(buffer);
 				return buffer;
 			}
 
@@ -470,7 +479,7 @@ public class XMemcachedClient {
 		final CountDownLatch latch = new CountDownLatch(1);
 		Command command = new Command(key, cmdType, latch) {
 			@Override
-			public ByteBuffer getCmd() {
+			public ByteBuffer getByteBuffer() {
 				final CachedData data = transcoder.encode(value);
 				byte[] keyBytes = ByteUtils.getBytes(key);
 				byte[] flagBytes = ByteUtils.getBytes(String.valueOf(data
@@ -486,6 +495,7 @@ public class XMemcachedClient {
 						dataLenBytes);
 				setArguments(buffer, data.getData());
 				buffer.flip();
+				setByteBuffer(buffer);
 				return buffer;
 			}
 

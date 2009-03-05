@@ -13,7 +13,6 @@ import net.spy.memcached.transcoders.CachedData;
 import net.spy.memcached.transcoders.Transcoder;
 
 import com.google.code.yanf4j.nio.Session;
-import com.google.code.yanf4j.nio.TCPConnectorController;
 import com.google.code.yanf4j.nio.impl.HandlerAdapter;
 import com.google.code.yanf4j.util.Queue;
 import com.google.code.yanf4j.util.SimpleQueue;
@@ -24,7 +23,7 @@ public class MemcachedHandler extends HandlerAdapter<Command> {
 
 	protected Queue<Command> executingCmds = new SimpleQueue<Command>();
 
-	protected TCPConnectorController connector;
+	protected XMemcachedClient client;
 
 	private static final int MAX_TRIES = 5;
 
@@ -37,7 +36,6 @@ public class MemcachedHandler extends HandlerAdapter<Command> {
 		try {
 			if (t.getMergeCommands() == null) {
 				executingCmds.push(t);
-
 			} else {
 				List<Command> mergeCmds = t.getMergeCommands();
 				for (Command cmd : mergeCmds) {
@@ -93,20 +91,26 @@ public class MemcachedHandler extends HandlerAdapter<Command> {
 
 	@Override
 	public void onSessionClosed(Session session) {
-		log.error("session close");
+		log.warn("session close");
 		reconnect();
 	}
 
 	protected void reconnect() {
-		if (this.connectTries < MAX_TRIES) {
-			this.connectTries++;
-			log.warn("Try to reconnect the server,It had try "
-					+ this.connectTries + " times");
-			try {
-				this.connector.reconnect();
-				this.executingCmds.clear();
-			} catch (IOException e) {
-				log.error(e, e);
+		if (!this.client.isShutdown()) {
+			if (this.connectTries < MAX_TRIES) {
+				this.executingCmds.getLock().lock();
+				try {
+					this.connectTries++;
+					log.warn("Try to reconnect the server,It had try "
+							+ this.connectTries + " times");
+
+					client.getConnector().reconnect();
+					this.executingCmds.clear();
+				} catch (IOException e) {
+					log.error("reconnect error", e);
+				} finally {
+					this.executingCmds.getLock().unlock();
+				}
 			}
 		}
 	}
@@ -189,11 +193,10 @@ public class MemcachedHandler extends HandlerAdapter<Command> {
 	}
 
 	@SuppressWarnings("unchecked")
-	public MemcachedHandler(Transcoder transcoder,
-			TCPConnectorController connector) {
+	public MemcachedHandler(Transcoder transcoder, XMemcachedClient client) {
 		super();
 		this.transcoder = transcoder;
-		this.connector = connector;
+		this.client = client;
 	}
 
 }
