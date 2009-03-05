@@ -11,6 +11,9 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.io.IOException;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import net.rubyeye.xmemcached.command.Command;
 import net.rubyeye.xmemcached.utils.ByteUtils;
 import net.spy.memcached.transcoders.CachedData;
@@ -33,7 +36,7 @@ public class XMemcachedClient {
 	private static final int TCP_RECV_BUFF_SIZE = 16 * 1024;
 
 	private static final long TIMEOUT = 1000;
-
+	protected static final Log log = LogFactory.getLog(XMemcachedClient.class);
 	/**
 	 * 测试的平均值，根据实际情况调整
 	 */
@@ -87,11 +90,10 @@ public class XMemcachedClient {
 			while (!Thread.currentThread().isInterrupted()) {
 				try {
 					Command currentCmd = commands.pop();
-					final List<Command> mergeCommands = new ArrayList<Command>(
-							mergeFactor);
-					mergeCommands.add(currentCmd);
 					if (currentCmd.getCommandType().equals(
 							Command.CommandType.GET_ONE)) {
+						final List<Command> mergeCommands = new ArrayList<Command>();
+						mergeCommands.add(currentCmd);
 						if (optimiezeGet)
 							optimizeGet(currentCmd, mergeCommands);
 						else
@@ -100,6 +102,8 @@ public class XMemcachedClient {
 						connector.send(currentCmd);
 				} catch (InterruptedException e) {
 					Thread.currentThread().interrupt();
+				} catch (Exception e) {
+					log.error("send command error", e);
 				}
 			}
 		}
@@ -126,9 +130,10 @@ public class XMemcachedClient {
 				connector.send(currentCmd);
 			else {
 				// 统计
-				count++;
-				total += mergeCommands.size();
 				currentCmd.setMergetCount(mergeCommands.size());
+				count++;
+				total +=currentCmd.getMergetCount();
+				log.debug("merge "+currentCmd.getMergetCount()+" get operations,current average merge factor is"+total/count);
 				// 发送合并get操作
 				connector.send(new Command(key.toString(),
 						Command.CommandType.GET_ONE, null) {
@@ -153,18 +158,24 @@ public class XMemcachedClient {
 	@SuppressWarnings("unchecked")
 	private Transcoder transcoder;
 
+	private InetSocketAddress serverAddress;
+
 	public XMemcachedClient(String server, int port) throws IOException {
 		super();
+		if (server == null || server.length() == 0)
+			throw new IllegalArgumentException();
+		if (port <= 0)
+			throw new IllegalArgumentException();
+		this.serverAddress = new InetSocketAddress(server, port);
 		buildConnector();
-		connect(new InetSocketAddress(server, port));
+		connect();
 	}
 
-	private void connect(InetSocketAddress inetSocketAddress)
-			throws IOException {
+	private void connect() throws IOException {
 		// 启动发送线程
 		this.commandSender.start();
 		// 连接
-		this.connector.connect(inetSocketAddress);
+		this.connector.connect(this.serverAddress);
 		try {
 			this.connector.awaitForConnected();
 		} catch (InterruptedException e) {
@@ -184,14 +195,18 @@ public class XMemcachedClient {
 		this.connector.setCodecFactory(new MemcachedCodecFactory());
 		this.transcoder = new SerializingTranscoder();
 		this.commandSender = new CommandSender();
-		this.connector.setHandler(new MemcachedHandler(this.transcoder));
+		this.connector.setHandler(new MemcachedHandler(this.transcoder,
+				this.connector));
 	}
 
 	public XMemcachedClient(InetSocketAddress inetSocketAddress)
 			throws IOException {
 		super();
+		if (inetSocketAddress == null)
+			throw new IllegalArgumentException();
+		this.serverAddress = inetSocketAddress;
 		buildConnector();
-		connect(inetSocketAddress);
+		connect();
 	}
 
 	int MAX_KEY_LENGTH = 250;

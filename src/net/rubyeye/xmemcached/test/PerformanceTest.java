@@ -125,7 +125,7 @@ public class PerformanceTest {
 
 			int size = Runtime.getRuntime().availableProcessors();
 
-			int thread = 100;
+			int thread = 50;
 
 			int repeat = 10000;
 

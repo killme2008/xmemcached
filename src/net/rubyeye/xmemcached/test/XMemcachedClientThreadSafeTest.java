@@ -28,7 +28,7 @@ class TestThread implements Runnable {
 
 	int number;
 
-	final static int NUM = 1000;
+	final static int NUM = 10000;
 
 	public TestThread(int number, XMemcachedClient xmemcachedClient,
 			CyclicBarrier barrier) {

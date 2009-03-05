@@ -1,14 +1,19 @@
 package net.rubyeye.xmemcached;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import net.rubyeye.xmemcached.command.Command;
 import net.spy.memcached.transcoders.CachedData;
 import net.spy.memcached.transcoders.Transcoder;
 
 import com.google.code.yanf4j.nio.Session;
+import com.google.code.yanf4j.nio.TCPConnectorController;
 import com.google.code.yanf4j.nio.impl.HandlerAdapter;
 import com.google.code.yanf4j.util.Queue;
 import com.google.code.yanf4j.util.SimpleQueue;
@@ -18,6 +23,14 @@ public class MemcachedHandler extends HandlerAdapter<Command> {
 	private Transcoder transcoder;
 
 	protected Queue<Command> executingCmds = new SimpleQueue<Command>();
+
+	protected TCPConnectorController connector;
+
+	private static final int MAX_TRIES = 5;
+
+	protected static final Log log = LogFactory.getLog(MemcachedHandler.class);
+
+	private int connectTries = 0;
 
 	@Override
 	public void onMessageSent(Session session, Command t) {
@@ -41,7 +54,6 @@ public class MemcachedHandler extends HandlerAdapter<Command> {
 	public void onReceive(Session session, final Command recvCmd) {
 		try {
 			final Command executingCmd = executingCmds.pop();
-
 			if (executingCmd == null)
 				return;
 			if (recvCmd.getException() != null) {
@@ -69,7 +81,7 @@ public class MemcachedHandler extends HandlerAdapter<Command> {
 				}
 			}
 		} catch (InterruptedException e) {
-
+			Thread.currentThread().interrupt();
 		}
 
 	}
@@ -77,6 +89,26 @@ public class MemcachedHandler extends HandlerAdapter<Command> {
 	private void processCommand(Command recvCmd, Command executingCmd) {
 		executingCmd.setResult(recvCmd.getResult());
 		executingCmd.getLatch().countDown();
+	}
+
+	@Override
+	public void onSessionClosed(Session session) {
+		log.error("session close");
+		reconnect();
+	}
+
+	protected void reconnect() {
+		if (this.connectTries < MAX_TRIES) {
+			this.connectTries++;
+			log.warn("Try to reconnect the server,It had try "
+					+ this.connectTries + " times");
+			try {
+				this.connector.reconnect();
+				this.executingCmds.clear();
+			} catch (IOException e) {
+				log.error(e, e);
+			}
+		}
 	}
 
 	@SuppressWarnings("unchecked")
@@ -101,7 +133,7 @@ public class MemcachedHandler extends HandlerAdapter<Command> {
 							nextCommand = this.executingCmds.pop();
 					}
 				} catch (InterruptedException e) {
-
+					Thread.currentThread().interrupt();
 				}
 			}
 		} else {
@@ -112,7 +144,7 @@ public class MemcachedHandler extends HandlerAdapter<Command> {
 			if (mergCount < 0) {
 				// 未合并情况
 				if (!executingCmd.getKey().equals(keys.get(0)))
-					session.close(); // key不相符，关闭连接
+					reconnect(); // 重新连接
 				executingCmd.setResult(transcoder.decode(datas.get(0)));
 				executingCmd.getLatch().countDown();
 			} else {
@@ -132,7 +164,7 @@ public class MemcachedHandler extends HandlerAdapter<Command> {
 							nextCommand = this.executingCmds.pop();
 					}
 				} catch (InterruptedException e) {
-
+					Thread.currentThread().interrupt();
 				}
 			}
 		}
@@ -157,9 +189,11 @@ public class MemcachedHandler extends HandlerAdapter<Command> {
 	}
 
 	@SuppressWarnings("unchecked")
-	public MemcachedHandler(Transcoder transcoder) {
+	public MemcachedHandler(Transcoder transcoder,
+			TCPConnectorController connector) {
 		super();
 		this.transcoder = transcoder;
+		this.connector = connector;
 	}
 
 }

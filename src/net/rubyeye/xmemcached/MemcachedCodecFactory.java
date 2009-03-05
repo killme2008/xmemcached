@@ -5,6 +5,9 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import com.google.code.yanf4j.nio.CodecFactory;
 import com.google.code.yanf4j.util.ByteBufferPattern;
 import com.google.code.yanf4j.util.ByteBufferUtils;
@@ -19,6 +22,9 @@ import net.spy.memcached.transcoders.CachedData;
 public class MemcachedCodecFactory implements CodecFactory<Command> {
 	private static final ByteBuffer SPLIT = ByteBuffer.wrap(Command.SPLIT
 			.getBytes());
+
+	protected static final Log log = LogFactory
+			.getLog(MemcachedCodecFactory.class);
 
 	private static final ByteBufferPattern SPLIT_PATTERN = ByteBufferPattern
 			.compile(SPLIT);
@@ -53,14 +59,14 @@ public class MemcachedCodecFactory implements CodecFactory<Command> {
 									30);
 							this.resultCommand.setResult(datas);
 							this.status = ParseStatus.GET;
-						} else if (currentLine.equals("END")) {
-							this.status = ParseStatus.END;
 						} else if (currentLine.equals("STORED")) {
 							this.status = ParseStatus.STORED;
-						} else if (currentLine.equals("NOT_STORED")) {
-							this.status = ParseStatus.NOT_STORED;
 						} else if (currentLine.equals("DELETED")) {
 							this.status = ParseStatus.DELETED;
+						} else if (currentLine.equals("END")) {
+							this.status = ParseStatus.END;
+						} else if (currentLine.equals("NOT_STORED")) {
+							this.status = ParseStatus.NOT_STORED;
 						} else if (currentLine.equals("NOT_FOUND")) {
 							this.status = ParseStatus.NOT_FOUND;
 						} else if (currentLine.equals("ERROR")) {
@@ -76,8 +82,11 @@ public class MemcachedCodecFactory implements CodecFactory<Command> {
 						}
 						if (!this.status.equals(ParseStatus.NULL))
 							continue LABEL;
-						else
-							return null;
+						else {
+							log.error("unknow response:" + this.currentLine);
+							throw new IllegalStateException("unknown response:"
+									+ this.currentLine);
+						}
 					case GET:
 						List<String> keys = (List<String>) this.resultCommand
 								.getKey();
