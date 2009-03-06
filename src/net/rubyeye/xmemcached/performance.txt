@@ -1,73 +1,82 @@
+2008 3æœˆ6æ—¥æœ€æ–°æµ‹è¯•
+perfromance test1
 xmemcached
 
-test write,thread num=1, repeat=10000,size=2, all=10000 ,velocity=2237 , using time:4469
-test read,thread num=1, repeat=10000,size=2, all=10000 ,velocity=2352 , using time:4250
-test delete,thread num=1, repeat=10000,size=2, all=10000 ,velocity=2500 , using time:4000
+test write,thread num=1, repeat=10000,size=2, all=10000 ,velocity=3368 , using time:2969
+test read,thread num=1, repeat=10000,size=2, all=10000 ,velocity=3422 , using time:2922
+test delete,thread num=1, repeat=10000,size=2, all=10000 ,velocity=3787 , using time:2640
 
-test write,thread num=10, repeat=10000,size=2, all=100000 ,velocity=8579 , using time:11656
-test read,thread num=10, repeat=10000,size=2, all=100000 ,velocity=10440 , using time:9578
-test delete,thread num=10, repeat=10000,size=2, all=100000 ,velocity=8354 , using time:11969
+test write,thread num=10, repeat=10000,size=2, all=100000 ,velocity=12307 , using time:8125
+test read,thread num=10, repeat=10000,size=2, all=100000 ,velocity=15274 , using time:6547
+test delete,thread num=10, repeat=10000,size=2, all=100000 ,velocity=13473 , using time:7422
 
-test write,thread num=50, repeat=10000,size=2, all=500000 ,velocity=13239 , using time:37766
-test read,thread num=50, repeat=10000,size=2, all=500000 ,velocity=24113 , using time:20735
-test delete,thread num=50, repeat=10000,size=2, all=500000 ,velocity=14382 , using time:34765
+test write,thread num=50, repeat=10000,size=2, all=500000 ,velocity=22115 , using time:22609
+test read,thread num=50, repeat=10000,size=2, all=500000 ,velocity=30769 , using time:16250
+test delete,thread num=50, repeat=10000,size=2, all=500000 ,velocity=24483 , using time:20422
 
-test write,thread num=100, repeat=10000,size=2, all=1000000 ,velocity=18068 , using time:55344
-test read,thread num=100, repeat=10000,size=2, all=1000000 ,velocity=29064 , using time:34406
-test delete,thread num=100, repeat=10000,size=2, all=1000000 ,velocity=18259 , using time:54766
+test write,thread num=100, repeat=10000,size=2, all=1000000 ,velocity=22448 , using time:44546
+test read,thread num=100, repeat=10000,size=2, all=1000000 ,velocity=32569 , using time:30704
+test delete,thread num=100, repeat=10000,size=2, all=1000000 ,velocity=25538 , using time:39156
 
-spymemcached
-test write,thread num=1, repeat=10000,size=2, all=10000 ,velocity=2870 , using time:3484
-test read,thread num=1, repeat=10000,size=2, all=10000 ,velocity=2922 , using time:3422
-test delete,thread num=1, repeat=10000,size=2, all=10000 ,velocity=3018 , using time:3313
+test write,thread num=200, repeat=10000,size=2, all=2000000 ,velocity=24187 , using time:82687
+test read,thread num=200, repeat=10000,size=2, all=2000000 ,velocity=35320 , using time:56625
+test delete,thread num=200, repeat=10000,size=2, all=2000000 ,velocity=26683 , using time:74953
 
-test write,thread num=10, repeat=10000,size=2, all=100000 ,velocity=11015 , using time:9078
-test read,thread num=10, repeat=10000,size=2, all=100000 ,velocity=11227 , using time:8907
-test delete,thread num=10, repeat=10000,size=2, all=100000 ,velocity=11449 , using time:8734
-
-test write,thread num=50, repeat=10000,size=2, all=500000 ,velocity=19838 , using time:25203
-test read,thread num=50, repeat=10000,size=2, all=500000 ,velocity=20685 , using time:24172
-test delete,thread num=50, repeat=10000,size=2, all=500000 ,velocity=22727 , using time:22000
-
-test write,thread num=100, repeat=10000,size=2, all=1000000 ,velocity=25427 , using time:39328
-test read,thread num=100, repeat=10000,size=2, all=1000000 ,velocity=22646 , using time:44157
-test delete,thread num=100, repeat=10000,size=2, all=1000000 ,velocity=26700 , using time:37453
-
-
-²âÊÔ2
-xmemcached
-
-test write,thread num=1, repeat=100,size=2, all=100 ,velocity=427 , using time:234
-test read,thread num=1, repeat=100,size=2, all=100 ,velocity=492 , using time:203
-test delete,thread num=1, repeat=100,size=2, all=100 ,velocity=1282 , using time:78
-
-test write,thread num=10, repeat=100,size=2, all=1000 ,velocity=1103 , using time:906
-test read,thread num=10, repeat=100,size=2, all=1000 ,velocity=1122 , using time:891
-test delete,thread num=10, repeat=100,size=2, all=1000 ,velocity=8000 , using time:125
-
-test write,thread num=50, repeat=100,size=2, all=5000 ,velocity=1561 , using time:3203
-test read,thread num=50, repeat=100,size=2, all=5000 ,velocity=1226 , using time:4078
-test delete,thread num=50, repeat=100,size=2, all=5000 ,velocity=11848 , using time:422
-
-test write,thread num=100, repeat=100,size=2, all=10000 ,velocity=1530 , using time:6532
-test read,thread num=100, repeat=100,size=2, all=10000 ,velocity=1223 , using time:8172
-test delete,thread num=100, repeat=100,size=2, all=10000 ,velocity=15600 , using time:641
+test write,thread num=500, repeat=10000,size=2, all=5000000 ,velocity=24623 , using time:203062
+test read,thread num=500, repeat=10000,size=2, all=5000000 ,velocity=36955 , using time:135297
+test delete,thread num=500, repeat=10000,size=2, all=5000000 ,velocity=27609 , using time:181094
 
 spymemcached
 
+test write,thread num=1, repeat=10000,size=2, all=10000 ,velocity=3047 , using time:3281
+test read,thread num=1, repeat=10000,size=2, all=10000 ,velocity=3232 , using time:3094
+test delete,thread num=1, repeat=10000,size=2, all=10000 ,velocity=3404 , using time:2937
+
+test write,thread num=10, repeat=10000,size=2, all=100000 ,velocity=11742 , using time:8516
+test read,thread num=10, repeat=10000,size=2, all=100000 ,velocity=12623 , using time:7922
+test delete,thread num=10, repeat=10000,size=2, all=100000 ,velocity=13473 , using time:7422
+
+test write,thread num=50, repeat=10000,size=2, all=500000 ,velocity=23021 , using time:21719
+test read,thread num=50, repeat=10000,size=2, all=500000 ,velocity=22630 , using time:22094
+test delete,thread num=50, repeat=10000,size=2, all=500000 ,velocity=23222 , using time:21531
+
+test write,thread num=100, repeat=10000,size=2, all=1000000 ,velocity=25467 , using time:39266
+test read,thread num=100, repeat=10000,size=2, all=1000000 ,velocity=24105 , using time:41484
+test delete,thread num=100, repeat=10000,size=2, all=1000000 ,velocity=28119 , using time:35563
+
+
+
+performace test2
+
+xmemcached
 test write,thread num=1, repeat=100,size=2, all=100 ,velocity=492 , using time:203
-test read,thread num=1, repeat=100,size=2, all=100 ,velocity=492 , using time:203
-test delete,thread num=1, repeat=100,size=2, all=100 ,velocity=1063 , using time:94
+test read,thread num=1, repeat=100,size=2, all=100 ,velocity=581 , using time:172
 
-test write,thread num=10, repeat=100,size=2, all=1000 ,velocity=159 , using time:6281
-test read,thread num=10, repeat=100,size=2, all=1000 ,velocity=680 , using time:1469
-test delete,thread num=10, repeat=100,size=2, all=1000 ,velocity=6410 , using time:156
+test write,thread num=10, repeat=100,size=2, all=1000 ,velocity=1362 , using time:734
+test read,thread num=10, repeat=100,size=2, all=1000 ,velocity=831 , using time:1203
 
-test write,thread num=20, repeat=100,size=2, all=2000 ,velocity=77 , using time:25719
-test read,thread num=20, repeat=100,size=2, all=2000 ,velocity=934 , using time:2140
-test delete,thread num=20, repeat=100,size=2, all=2000 ,velocity=16000 , using time:125
+test write,thread num=30, repeat=100,size=2, all=3000 ,velocity=1536 , using time:1953
+test read,thread num=30, repeat=100,size=2, all=3000 ,velocity=1015 , using time:2953
 
+test write,thread num=50, repeat=100,size=2, all=5000 ,velocity=1608 , using time:3109
+test read,thread num=50, repeat=100,size=2, all=5000 ,velocity=1126 , using time:4438
 
+test write,thread num=100, repeat=100,size=2, all=10000 ,velocity=1576 , using time:6343
+test read,thread num=100, repeat=100,size=2, all=10000 ,velocity=989 , using time:10110
 
+spymemcached
 
+test write,thread num=1, repeat=100,size=2, all=100 ,velocity=377 , using time:265
+test read,thread num=1, repeat=100,size=2, all=100 ,velocity=531 , using time:188
 
+test write,thread num=10, repeat=100,size=2, all=1000 ,velocity=84 , using time:11844
+test read,thread num=10, repeat=100,size=2, all=1000 ,velocity=753 , using time:1328
+
+test write,thread num=30, repeat=100,size=2, all=3000 ,velocity=66 , using time:44922
+test read,thread num=30, repeat=100,size=2, all=3000 ,velocity=872 , using time:3437
+
+test write,thread num=50, repeat=100,size=2, all=5000 ,velocity=68 , using time:72469
+test read,thread num=50, repeat=100,size=2, all=5000 ,velocity=1084 , using time:4609
+
+test write,thread num=100, repeat=100,size=2, all=10000 ,velocity=62 , using time:160907
+test read,thread num=100, repeat=100,size=2, all=10000 ,velocity=1347 , using time:7422

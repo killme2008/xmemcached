@@ -119,13 +119,13 @@ public class PerformanceTest {
 	// time:189187
 	static public void main(String[] args) {
 		try {
-			String ip = "localhost";
+			String ip = "192.168.222.100";
 
 			int port = 11211;
 
 			int size = Runtime.getRuntime().availableProcessors();
 
-			int thread = 50;
+			int thread = 500;
 
 			int repeat = 10000;
 

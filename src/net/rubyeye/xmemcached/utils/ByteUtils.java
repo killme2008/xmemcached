@@ -3,6 +3,7 @@ package net.rubyeye.xmemcached.utils;
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 
+
 public class ByteUtils {
 
     public static final byte[] CRLF = {'\r', '\n'};
@@ -34,4 +35,20 @@ public class ByteUtils {
         }
         bb.put(CRLF);
     }
+
+	public static void checkKey(String key) {
+	    byte[] keyBytes = getBytes(key);
+	    if (keyBytes.length > ByteUtils.MAX_KEY_LENGTH) {
+	        throw new IllegalArgumentException("Key is too long (maxlen = " + ByteUtils.MAX_KEY_LENGTH + ")");
+	    }
+	    // Validate the key
+	    for (byte b : keyBytes) {
+	        if (b == ' ' || b == '\n' || b == '\r' || b == 0) {
+	            throw new IllegalArgumentException(
+	                    "Key contains invalid characters:  ``" + key + "''");
+	        }
+	    }
+	}
+
+	public static final int MAX_KEY_LENGTH = 250;
 }

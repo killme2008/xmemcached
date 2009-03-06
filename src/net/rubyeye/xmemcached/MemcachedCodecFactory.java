@@ -18,10 +18,12 @@ import net.rubyeye.xmemcached.utils.ByteBufferMatcher;
 import net.spy.memcached.transcoders.CachedData;
 
 /**
+ * 协议解析工厂，现在被MemcachedHandler替代
  * 
  * @author dennis
  * 
  */
+@Deprecated
 public class MemcachedCodecFactory implements CodecFactory<Command> {
 	private static final ByteBuffer SPLIT = ByteBuffer.wrap(Command.SPLIT
 			.getBytes());

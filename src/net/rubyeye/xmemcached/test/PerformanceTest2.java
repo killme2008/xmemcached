@@ -135,7 +135,7 @@ public class PerformanceTest2 {
 
 			int size = Runtime.getRuntime().availableProcessors();
 
-			int thread = 50;
+			int thread = 100;
 
 			int repeat = 100;
 
@@ -182,26 +182,27 @@ public class PerformanceTest2 {
 									"test read,thread num=%d, repeat=%d,size=%d, all=%d ,velocity=%d , using time:%d",
 									thread, repeat, size, all, 1000 * all
 											/ usingtime, usingtime));
-			// ����ɾ��
-			cdl = new CountDownLatch(thread);
-			t = System.currentTimeMillis();
-			for (int i = 0; i < thread; i++) {
-				new Thread(new PerformanceTest2.TestDeleteRunnable(mc,
-						i * 10000, cdl, repeat)).start();
-			}
-			try {
-				cdl.await();
-			} catch (InterruptedException e) {
-
-			}
-			all = thread * repeat;
-			usingtime = (System.currentTimeMillis() - t);
-			System.out
-					.println(String
-							.format(
-									"test delete,thread num=%d, repeat=%d,size=%d, all=%d ,velocity=%d , using time:%d",
-									thread, repeat, size, all, 1000 * all
-											/ usingtime, usingtime));
+			// // ����ɾ��
+			// cdl = new CountDownLatch(thread);
+			// t = System.currentTimeMillis();
+			// for (int i = 0; i < thread; i++) {
+			// new Thread(new PerformanceTest2.TestDeleteRunnable(mc,
+			// i * 10000, cdl, repeat)).start();
+			// }
+			// try {
+			// cdl.await();
+			// } catch (InterruptedException e) {
+			//
+			// }
+			// all = thread * repeat;
+			// usingtime = (System.currentTimeMillis() - t);
+			// System.out
+			// .println(String
+			// .format(
+			// "test delete,thread num=%d, repeat=%d,size=%d, all=%d
+			// ,velocity=%d , using time:%d",
+			// thread, repeat, size, all, 1000 * all
+			//											/ usingtime, usingtime));
 
 			mc.shutdown();
 		} catch (Exception e) {

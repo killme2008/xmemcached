@@ -1,6 +1,6 @@
 package net.rubyeye.xmemcached.exception;
 
-public class MemcachedServerException extends RuntimeException {
+public class MemcachedServerException extends MemcachedException {
 
 	public MemcachedServerException() {
 		super();

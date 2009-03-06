@@ -11,7 +11,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import net.rubyeye.xmemcached.command.Command;
-import net.rubyeye.xmemcached.utils.SimpleQueue;
 import net.rubyeye.xmemcached.utils.UnLockQueue;
 import net.spy.memcached.transcoders.CachedData;
 import net.spy.memcached.transcoders.Transcoder;
@@ -19,6 +18,13 @@ import net.spy.memcached.transcoders.Transcoder;
 import com.google.code.yanf4j.nio.Session;
 import com.google.code.yanf4j.nio.impl.HandlerAdapter;
 
+/**
+ * 协议派发批量处理类
+ * 
+ * @author dennis
+ * 
+ */
+@Deprecated
 @SuppressWarnings("unchecked")
 public class BatchMemcachedHandler extends HandlerAdapter {
 	@SuppressWarnings("unchecked")

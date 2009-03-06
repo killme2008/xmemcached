@@ -19,7 +19,15 @@ import net.rubyeye.xmemcached.exception.MemcachedServerException;
 import net.rubyeye.xmemcached.utils.ByteBufferMatcher;
 import net.rubyeye.xmemcached.utils.ByteUtils;
 import net.spy.memcached.transcoders.CachedData;
+
+/**
+ * 协议解析批量处理类
+ * 
+ * @author Administrator
+ * 
+ */
 @SuppressWarnings("unchecked")
+@Deprecated
 public class BatchMemcachedCodecFactory implements CodecFactory {
 	private static final int MERGE_COUNT = 100;
 
