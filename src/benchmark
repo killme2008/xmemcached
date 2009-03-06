@@ -1,0 +1,29 @@
+spymemcached
+
+test write,thread num=1, repeat=100,size=2, all=100 ,velocity=392 , using time:255
+test read,thread num=1, repeat=100,size=2, all=100 ,velocity=495 , using time:202
+
+test write,thread num=10, repeat=100,size=2, all=1000 ,velocity=1166 , using time:857
+test read,thread num=10, repeat=100,size=2, all=1000 ,velocity=1392 , using time:718
+
+test write,thread num=50, repeat=100,size=2, all=5000 ,velocity=1763 , using time:2835
+test read,thread num=50, repeat=100,size=2, all=5000 ,velocity=2287 , using time:2186
+
+test write,thread num=100, repeat=100,size=2, all=10000 ,velocity=1897 , using time:5271
+test read,thread num=100, repeat=100,size=2, all=10000 ,velocity=2236 , using time:4471
+
+
+xmemcached
+
+test write,thread num=1, repeat=100,size=2, all=100 ,velocity=555 , using time:180
+test read,thread num=1, repeat=100,size=2, all=100 ,velocity=531 , using time:188
+
+test write,thread num=10, repeat=100,size=2, all=1000 ,velocity=1283 , using time:779
+test read,thread num=10, repeat=100,size=2, all=1000 ,velocity=1243 , using time:804
+
+test write,thread num=50, repeat=100,size=2, all=5000 ,velocity=1889 , using time:2646
+test read,thread num=50, repeat=100,size=2, all=5000 ,velocity=1250 , using time:4000
+
+
+test write,thread num=100, repeat=100,size=2, all=10000 ,velocity=1940 , using time:5154
+test read,thread num=100, repeat=100,size=2, all=10000 ,velocity=1212 , using time:8249

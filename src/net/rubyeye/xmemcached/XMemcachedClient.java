@@ -38,32 +38,23 @@ public class XMemcachedClient {
 	 */
 	private volatile boolean shutdown;
 
-	public int getGetsMergeFactor() {
-		return this.connector.getSession().getsMergeFactor;
-	}
 
 	public void setGetsMergeFactor(int mergeFactor) {
-		this.connector.getSession().getsMergeFactor = mergeFactor;
+		this.connector.setGetsMergeFactor(mergeFactor);
 	}
 
 	public MemcachedConnector getConnector() {
 		return connector;
 	}
 
-	public boolean isOptimiezeGet() {
-		return this.connector.getSession().optimiezeGet;
-	}
 
 	public void setOptimiezeGet(boolean optimiezeGet) {
-		this.connector.getSession().optimiezeGet = optimiezeGet;
+		this.connector.setOptimiezeGet(optimiezeGet);
 	}
 
-	public boolean isOptimiezeSet() {
-		return this.connector.getSession().optimiezeSet;
-	}
 
 	public void setOptimiezeSet(boolean optimiezeSet) {
-		this.connector.getSession().optimiezeSet = optimiezeSet;
+		this.connector.setoptimizeSet(optimiezeSet);
 	}
 
 	public boolean isShutdown() {
