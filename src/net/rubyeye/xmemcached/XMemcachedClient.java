@@ -13,6 +13,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import net.rubyeye.xmemcached.command.Command;
+import net.rubyeye.xmemcached.exception.MemcachedException;
 import net.rubyeye.xmemcached.utils.ByteUtils;
 import net.spy.memcached.transcoders.CachedData;
 import net.spy.memcached.transcoders.SerializingTranscoder;
@@ -33,7 +34,7 @@ public class XMemcachedClient {
 	 * ���Ե�ƽ��ֵ�����ʵ��������
 	 */
 	private volatile boolean shutdown;
-	
+
 	public int getGetsMergeFactor() {
 		return this.connector.getSession().getsMergeFactor;
 	}
@@ -128,7 +129,7 @@ public class XMemcachedClient {
 	}
 
 	public Object get(final String key, long timeout) throws TimeoutException,
-			InterruptedException {
+			InterruptedException, MemcachedException {
 		ByteUtils.checkKey(key);
 		final CountDownLatch latch = new CountDownLatch(1);
 		byte[] keyBytes = ByteUtils.getBytes(key);
@@ -146,9 +147,7 @@ public class XMemcachedClient {
 			}
 		};
 		sendCommand(getCmd);
-		if (!latch.await(timeout, TimeUnit.MILLISECONDS)) {
-			throw new TimeoutException("Timed out waiting for operation");
-		}
+		latchWait(timeout, latch);
 		if (getCmd.getException() != null) {
 			throw getCmd.getException();
 		}
@@ -162,7 +161,7 @@ public class XMemcachedClient {
 
 	@SuppressWarnings("unchecked")
 	public Map<String, Object> get(Collection<String> keys)
-			throws TimeoutException, InterruptedException {
+			throws TimeoutException, InterruptedException, MemcachedException {
 		if (keys == null || keys.size() == 0) {
 			return null;
 		}
@@ -190,9 +189,7 @@ public class XMemcachedClient {
 		};
 		long lazy = keys.size() / 1000 > 0 ? (keys.size() / 1000) : 1;
 		sendCommand(getCmd);
-		if (!latch.await(TIMEOUT * lazy, TimeUnit.MILLISECONDS)) {
-			throw new TimeoutException("Timed out waiting for operation");
-		}
+		latchWait(TIMEOUT, latch);
 		if (getCmd.getException() != null) {
 			throw getCmd.getException();
 		}
@@ -200,21 +197,22 @@ public class XMemcachedClient {
 	}
 
 	public boolean set(final String key, final int exp, Object value)
-			throws TimeoutException, InterruptedException {
+			throws TimeoutException, InterruptedException, MemcachedException {
 		ByteUtils.checkKey(key);
 		return sendStoreCommand(key, exp, value, Command.CommandType.SET,
 				"set", TIMEOUT);
 	}
 
 	public boolean set(final String key, final int exp, Object value,
-			long timeout) throws TimeoutException, InterruptedException {
+			long timeout) throws TimeoutException, InterruptedException,
+			MemcachedException {
 		ByteUtils.checkKey(key);
 		return sendStoreCommand(key, exp, value, Command.CommandType.SET,
 				"set", timeout);
 	}
 
 	public boolean add(final String key, final int exp, Object value)
-			throws TimeoutException, InterruptedException {
+			throws TimeoutException, InterruptedException, MemcachedException {
 		ByteUtils.checkKey(key);
 		return sendStoreCommand(key, exp, value, Command.CommandType.ADD,
 				"add", TIMEOUT);
@@ -228,21 +226,22 @@ public class XMemcachedClient {
 	}
 
 	public boolean replace(final String key, final int exp, Object value)
-			throws TimeoutException, InterruptedException {
+			throws TimeoutException, InterruptedException, MemcachedException {
 		ByteUtils.checkKey(key);
 		return sendStoreCommand(key, exp, value, Command.CommandType.REPLACE,
 				"replace", TIMEOUT);
 	}
 
 	public boolean replace(final String key, final int exp, Object value,
-			long timeout) throws TimeoutException, InterruptedException {
+			long timeout) throws TimeoutException, InterruptedException,
+			MemcachedException {
 		ByteUtils.checkKey(key);
 		return sendStoreCommand(key, exp, value, Command.CommandType.SET,
 				"replace", timeout);
 	}
 
 	public boolean delete(final String key, final int time)
-			throws TimeoutException, InterruptedException {
+			throws TimeoutException, InterruptedException, MemcachedException {
 		ByteUtils.checkKey(key);
 		final CountDownLatch latch = new CountDownLatch(1);
 		byte[] keyBytes = ByteUtils.getBytes(key);
@@ -262,16 +261,15 @@ public class XMemcachedClient {
 		};
 
 		sendCommand(command);
-		if (!latch.await(TIMEOUT, TimeUnit.MILLISECONDS)) {
-			throw new TimeoutException("Timed out waiting for operation");
-		}
+		latchWait(TIMEOUT, latch);
 		if (command.getException() != null) {
 			throw command.getException();
 		}
 		return (Boolean) command.getResult();
 	}
 
-	public String version() throws TimeoutException, InterruptedException {
+	public String version() throws TimeoutException, InterruptedException,
+			MemcachedException {
 		final CountDownLatch latch = new CountDownLatch(1);
 		final ByteBuffer buffer = ByteBuffer.wrap("version\r\n".getBytes());
 		Command command = new Command(Command.CommandType.VERSION, latch) {
@@ -284,9 +282,7 @@ public class XMemcachedClient {
 		};
 
 		sendCommand(command);
-		if (!latch.await(TIMEOUT, TimeUnit.MILLISECONDS)) {
-			throw new TimeoutException("Timed out waiting for operation");
-		}
+		latchWait(TIMEOUT, latch);
 		if (command.getException() != null) {
 			throw command.getException();
 		}
@@ -315,7 +311,7 @@ public class XMemcachedClient {
 
 	private int sendIncrOrDecrCommand(final String key, final int num,
 			Command.CommandType cmdType, final String cmd)
-			throws InterruptedException, TimeoutException {
+			throws InterruptedException, TimeoutException, MemcachedException {
 		final CountDownLatch latch = new CountDownLatch(1);
 		byte[] numBytes = ByteUtils.getBytes(String.valueOf(num));
 		byte[] cmdBytes = ByteUtils.getBytes(cmd);
@@ -334,9 +330,7 @@ public class XMemcachedClient {
 		};
 
 		sendCommand(command);
-		if (!latch.await(TIMEOUT, TimeUnit.MILLISECONDS)) {
-			throw new TimeoutException("Timed out waiting for operation");
-		}
+		latchWait(TIMEOUT, latch);
 		if (command.getException() != null) {
 			throw command.getException();
 		}
@@ -356,7 +350,8 @@ public class XMemcachedClient {
 	@SuppressWarnings("unchecked")
 	private boolean sendStoreCommand(final String key, final int exp,
 			final Object value, Command.CommandType cmdType, final String cmd,
-			long timeout) throws InterruptedException, TimeoutException {
+			long timeout) throws InterruptedException, TimeoutException,
+			MemcachedException {
 		final CountDownLatch latch = new CountDownLatch(1);
 		final CachedData data = transcoder.encode(value);
 		byte[] keyBytes = ByteUtils.getBytes(key);
@@ -383,12 +378,17 @@ public class XMemcachedClient {
 		};
 
 		sendCommand(command);
-		if (!latch.await(timeout, TimeUnit.MILLISECONDS)) {
-			throw new TimeoutException("Timed out waiting for operation");
-		}
+		latchWait(timeout, latch);
 		if (command.getException() != null) {
 			throw command.getException();
 		}
 		return (Boolean) command.getResult();
+	}
+
+	private void latchWait(long timeout, final CountDownLatch latch)
+			throws InterruptedException, TimeoutException {
+		if (!latch.await(timeout, TimeUnit.MILLISECONDS)) {
+			throw new TimeoutException("Timed out waiting for operation");
+		}
 	}
 }

@@ -4,9 +4,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeoutException;
+import java.io.IOException;
 import java.io.Serializable;
 
 import net.rubyeye.xmemcached.XMemcachedClient;
+import net.rubyeye.xmemcached.exception.MemcachedException;
 
 class Name implements Serializable {
 	String firstName;
@@ -96,8 +99,14 @@ public class Example {
 				if (client.delete("hello__" + i))
 					System.err.println("get error");
 			client.shutdown();
-		} catch (Exception e) {
+		} catch (IOException e) {
 			e.printStackTrace();
+		} catch (TimeoutException e) {
+			// 超时
+		} catch (InterruptedException e) {
+
+		} catch (MemcachedException e) {
+			// 执行异常
 		}
 
 	}

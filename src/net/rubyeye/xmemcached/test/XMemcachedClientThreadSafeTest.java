@@ -8,7 +8,7 @@ import java.util.concurrent.*;
 import net.rubyeye.xmemcached.XMemcachedClient;
 
 class TestThread implements Runnable {
-	private static final int ELEMENT_NUM = 500;
+	private static final int ELEMENT_NUM = 200;
 	XMemcachedClient xmemcachedClient;
 	CyclicBarrier barrier;
 
@@ -90,7 +90,7 @@ class TestThread implements Runnable {
 }
 
 public class XMemcachedClientThreadSafeTest {
-	static int num = 1000;
+	static int num = 300;
 
 	public static void main(String args[]) throws Exception {
 		CyclicBarrier barrier = new CyclicBarrier(num + 1);
