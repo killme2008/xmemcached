@@ -14,6 +14,6 @@ import java.nio.ByteBuffer;
  */
 public interface MemcachedProtocolHandler {
 
-	boolean onReceive(ByteBuffer buffer);
+	public boolean onReceive(MemcachedTCPSession session, ByteBuffer buffer);
 
 }

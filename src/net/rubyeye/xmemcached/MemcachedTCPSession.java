@@ -22,10 +22,14 @@ import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
 import java.nio.channels.WritableByteChannel;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
+
+import net.rubyeye.xmemcached.MemcachedHandler.ParseStatus;
 import net.rubyeye.xmemcached.command.Command;
 import net.rubyeye.xmemcached.utils.ByteUtils;
 import net.rubyeye.xmemcached.utils.ExtendedQueue;
+import net.spy.memcached.transcoders.CachedData;
 
 /**
  * 针对memcached的session类
@@ -33,8 +37,18 @@ import net.rubyeye.xmemcached.utils.ExtendedQueue;
  * @author dennis
  */
 public class MemcachedTCPSession extends DefaultTCPSession {
-
+	String currentLine = null; // 当前行
+	
+	/**
+	 * 协议解析部分
+	 */
+	ParseStatus status = ParseStatus.NULL; // 当前状态
+	
 	private MemcachedProtocolHandler memcachedProtocolHandler;
+	protected List<Command> executingCmds = new LinkedList<Command>(); // 存储已经发送的命令
+	
+	List<String> keys; // get获取的key列表
+	List<CachedData> datas; // get获取的值列表
 
 	@SuppressWarnings("unchecked")
 	public MemcachedTCPSession(SocketChannel sc, SelectionKey sk,
@@ -217,7 +231,7 @@ public class MemcachedTCPSession extends DefaultTCPSession {
 				if (buffer != null && !buffer.hasRemaining()) {
 					writeQueue.pop(); // remove message
 
-					handler.onMessageSent(this, currentCommand);
+					executingCmds.add(currentCommand); // 添加到当前执行队列
 
 				} else { // not write complete, but write buffer is full
 
@@ -341,7 +355,7 @@ public class MemcachedTCPSession extends DefaultTCPSession {
 		while (readBuffer.hasRemaining()) {
 			try {
 				// 使用MemcachedProtocolHandler解析协议
-				received = this.memcachedProtocolHandler.onReceive(readBuffer);
+				received = this.memcachedProtocolHandler.onReceive(this,readBuffer);
 				if (!received) {
 					break;
 				}

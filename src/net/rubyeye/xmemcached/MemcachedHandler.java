@@ -32,15 +32,9 @@ import net.rubyeye.xmemcached.utils.ByteBufferMatcher;
 public class MemcachedHandler extends HandlerAdapter<Command> implements
 		MemcachedProtocolHandler {
 
-	/**
-	 * 协议解析部分
-	 */
-	private ParseStatus status = ParseStatus.NULL; // 当前状态
 	private static final ByteBuffer SPLIT = ByteBuffer.wrap(Command.SPLIT
 			.getBytes());
-	private String currentLine = null; // 当前行
-	List<String> keys; // get获取的key列表
-	List<CachedData> datas; // get获取的值列表
+
 	/**
 	 * BM算法匹配器，用于匹配行
 	 */
@@ -51,8 +45,8 @@ public class MemcachedHandler extends HandlerAdapter<Command> implements
 	 * 
 	 * @return
 	 */
-	private Command getCurrentExecutingCommand() {
-		return executingCmds.remove(0);
+	private Command getCurrentExecutingCommand(MemcachedTCPSession session) {
+		return session.executingCmds.remove(0);
 	}
 
 	/**
@@ -61,14 +55,14 @@ public class MemcachedHandler extends HandlerAdapter<Command> implements
 	 * @param result
 	 * @return
 	 */
-	private boolean notifyBoolean(Boolean result) {
-		Command executingCmd = getCurrentExecutingCommand();
+	private boolean notifyBoolean(MemcachedTCPSession session, Boolean result) {
+		Command executingCmd = getCurrentExecutingCommand(session);
 		if (executingCmd == null) {
 			return false;
 		} else {
 			executingCmd.setResult(result);
 			executingCmd.getLatch().countDown();
-			reset();
+			resetStatus(session);
 			return true;
 		}
 	}
@@ -84,70 +78,72 @@ public class MemcachedHandler extends HandlerAdapter<Command> implements
 		NULL, GET, END, STORED, NOT_STORED, ERROR, CLIENT_ERROR, SERVER_ERROR, DELETED, NOT_FOUND, VERSION, INCR;
 	}
 
-	public boolean onReceive(ByteBuffer buffer) {
+	int count = 0;
+
+	public boolean onReceive(MemcachedTCPSession session, ByteBuffer buffer) {
 		int origPos = buffer.position();
 		int origLimit = buffer.limit();
 		LABEL: while (true) {
-			switch (this.status) {
+			switch (session.status) {
 			case NULL:
-				nextLine(buffer);
-				if (currentLine == null) {
+				nextLine(session, buffer);
+				if (session.currentLine == null) {
 					return false;
 				}
-				if (currentLine.startsWith("VALUE")) {
-					this.keys = new ArrayList<String>(30);
-					this.datas = new ArrayList<CachedData>(30);
-					this.status = ParseStatus.GET;
-				} else if (currentLine.equals("STORED")) {
-					this.status = ParseStatus.STORED;
-				} else if (currentLine.equals("DELETED")) {
-					this.status = ParseStatus.DELETED;
-				} else if (currentLine.equals("END")) {
-					this.status = ParseStatus.END;
-				} else if (currentLine.equals("NOT_STORED")) {
-					this.status = ParseStatus.NOT_STORED;
-				} else if (currentLine.equals("NOT_FOUND")) {
-					this.status = ParseStatus.NOT_FOUND;
-				} else if (currentLine.equals("ERROR")) {
-					this.status = ParseStatus.ERROR;
-				} else if (currentLine.startsWith("CLIENT_ERROR")) {
-					this.status = ParseStatus.CLIENT_ERROR;
-				} else if (currentLine.startsWith("SERVER_ERROR")) {
-					this.status = ParseStatus.SERVER_ERROR;
-				} else if (currentLine.startsWith("VERSION ")) {
-					this.status = ParseStatus.VERSION;
+				if (session.currentLine.startsWith("VALUE")) {
+					session.keys = new ArrayList<String>(30);
+					session.datas = new ArrayList<CachedData>(30);
+					session.status = ParseStatus.GET;
+				} else if (session.currentLine.equals("STORED")) {
+					session.status = ParseStatus.STORED;
+				} else if (session.currentLine.equals("DELETED")) {
+					session.status = ParseStatus.DELETED;
+				} else if (session.currentLine.equals("END")) {
+					session.status = ParseStatus.END;
+				} else if (session.currentLine.equals("NOT_STORED")) {
+					session.status = ParseStatus.NOT_STORED;
+				} else if (session.currentLine.equals("NOT_FOUND")) {
+					session.status = ParseStatus.NOT_FOUND;
+				} else if (session.currentLine.equals("ERROR")) {
+					session.status = ParseStatus.ERROR;
+				} else if (session.currentLine.startsWith("CLIENT_ERROR")) {
+					session.status = ParseStatus.CLIENT_ERROR;
+				} else if (session.currentLine.startsWith("SERVER_ERROR")) {
+					session.status = ParseStatus.SERVER_ERROR;
+				} else if (session.currentLine.startsWith("VERSION ")) {
+					session.status = ParseStatus.VERSION;
 				} else {
-					this.status = ParseStatus.INCR;
+					session.status = ParseStatus.INCR;
 				}
-				if (!this.status.equals(ParseStatus.NULL)) {
+				if (!session.status.equals(ParseStatus.NULL)) {
 					continue LABEL;
 				} else {
-					log.error("unknow response:" + this.currentLine);
+					log.error("unknow response:" + session.currentLine);
 					throw new IllegalStateException("unknown response:"
-							+ this.currentLine);
+							+ session.currentLine);
 				}
 			case GET:
-				return parseGet(buffer, origPos, origLimit);
+				return parseGet(session, buffer, origPos, origLimit);
 			case END:
-				return parseEndCommand();
+				return parseEndCommand(session);
 			case STORED:
-				return parseStored();
+				return parseStored(session);
 			case NOT_STORED:
-				return parseNotStored();
+				return parseNotStored(session);
 			case DELETED:
-				return parseDeleted();
+				return parseDeleted(session);
 			case NOT_FOUND:
-				return parseNotFound();
+				return parseNotFound(session);
 			case ERROR:
-				return parseException();
+				return parseException(session);
 			case CLIENT_ERROR:
-				return parseClientException();
+				return parseClientException(session);
 			case SERVER_ERROR:
-				return parseServerException();
+				return parseServerException(session);
 			case VERSION:
-				return parseVersionCommand();
+				return parseVersionCommand(session);
 			case INCR:
-				return parseIncrDecrCommand();
+				return parseIncrDecrCommand(session);
 			default:
 				return false;
 
@@ -163,46 +159,49 @@ public class MemcachedHandler extends HandlerAdapter<Command> implements
 	 * @param origLimit
 	 * @return
 	 */
-	private boolean parseGet(ByteBuffer buffer, int origPos, int origLimit) {
+	private boolean parseGet(MemcachedTCPSession session, ByteBuffer buffer,
+			int origPos, int origLimit) {
 		while (true) {
-			nextLine(buffer);
-			if (currentLine == null) {
+			nextLine(session, buffer);
+			if (session.currentLine == null) {
 				return false;
 			}
-			if (this.currentLine.equals("END")) {
-				Command executingCommand = getCurrentExecutingCommand();
+			if (session.currentLine.equals("END")) {
+				Command executingCommand = getCurrentExecutingCommand(session);
 				if (executingCommand == null) {
 					return false;
 				}
 				if (executingCommand.getCommandType().equals(
 						Command.CommandType.GET_MANY)) {
-					processGetManyCommand(keys, datas, executingCommand);
+					processGetManyCommand(session.keys, session.datas,
+							executingCommand);
 				} else {
-					processGetOneCommand(keys, datas, executingCommand);
+					processGetOneCommand(session.keys, session.datas,
+							executingCommand);
 				}
-				this.keys = null;
-				this.datas = null;
-				reset();
+				session.datas = null;
+				session.keys = null;
+				resetStatus(session);
 				return true;
-			} else if (currentLine.startsWith("VALUE")) {
-				String[] items = this.currentLine.split(" ");
+			} else if (session.currentLine.startsWith("VALUE")) {
+				String[] items = session.currentLine.split(" ");
 				int flag = Integer.parseInt(items[2]);
 				int dataLen = Integer.parseInt(items[3]);
 				// 不够数据，返回
 				if (buffer.remaining() < dataLen + 2) {
 					buffer.position(origPos).limit(origLimit);
-					this.currentLine = null;
+					session.currentLine = null;
 					return false;
 				}
-				keys.add(items[1]);
+				session.keys.add(items[1]);
 				byte[] data = new byte[dataLen];
 				buffer.get(data);
-				datas.add(new CachedData(flag, data, dataLen));
+				session.datas.add(new CachedData(flag, data, dataLen));
 				buffer.position(buffer.position() + SPLIT.remaining());
-				this.currentLine = null;
+				session.currentLine = null;
 			} else {
 				buffer.position(origPos).limit(origLimit);
-				this.currentLine = null;
+				session.currentLine = null;
 				return false;
 			}
 
@@ -214,8 +213,8 @@ public class MemcachedHandler extends HandlerAdapter<Command> implements
 	 * 
 	 * @return
 	 */
-	private boolean parseEndCommand() {
-		Command executingCmd = getCurrentExecutingCommand();
+	private boolean parseEndCommand(MemcachedTCPSession session) {
+		Command executingCmd = getCurrentExecutingCommand(session);
 		int mergCount = executingCmd.getMergeCount();
 		if (mergCount < 0) {
 			// single
@@ -234,7 +233,7 @@ public class MemcachedHandler extends HandlerAdapter<Command> implements
 		}
 		executingCmd.setResult(null);
 		executingCmd.getLatch().countDown();
-		reset();
+		resetStatus(session);
 		return true;
 
 	}
@@ -244,8 +243,8 @@ public class MemcachedHandler extends HandlerAdapter<Command> implements
 	 * 
 	 * @return
 	 */
-	private boolean parseStored() {
-		return notifyBoolean(Boolean.TRUE);
+	private boolean parseStored(MemcachedTCPSession session) {
+		return notifyBoolean(session, Boolean.TRUE);
 	}
 
 	/**
@@ -253,8 +252,8 @@ public class MemcachedHandler extends HandlerAdapter<Command> implements
 	 * 
 	 * @return
 	 */
-	private boolean parseNotStored() {
-		return notifyBoolean(Boolean.FALSE);
+	private boolean parseNotStored(MemcachedTCPSession session) {
+		return notifyBoolean(session, Boolean.FALSE);
 	}
 
 	/**
@@ -262,8 +261,8 @@ public class MemcachedHandler extends HandlerAdapter<Command> implements
 	 * 
 	 * @return
 	 */
-	private boolean parseDeleted() {
-		return notifyBoolean(Boolean.TRUE);
+	private boolean parseDeleted(MemcachedTCPSession session) {
+		return notifyBoolean(session, Boolean.TRUE);
 	}
 
 	/**
@@ -271,8 +270,8 @@ public class MemcachedHandler extends HandlerAdapter<Command> implements
 	 * 
 	 * @return
 	 */
-	private boolean parseNotFound() {
-		return notifyBoolean(Boolean.FALSE);
+	private boolean parseNotFound(MemcachedTCPSession session) {
+		return notifyBoolean(session, Boolean.FALSE);
 	}
 
 	/**
@@ -280,13 +279,13 @@ public class MemcachedHandler extends HandlerAdapter<Command> implements
 	 * 
 	 * @return
 	 */
-	private boolean parseException() {
-		Command executingCmd = getCurrentExecutingCommand();
+	private boolean parseException(MemcachedTCPSession session) {
+		Command executingCmd = getCurrentExecutingCommand(session);
 		final MemcachedException exception = new MemcachedException(
 				"unknown command");
 		executingCmd.setException(exception);
 		executingCmd.getLatch().countDown();
-		reset();
+		resetStatus(session);
 		return true;
 	}
 
@@ -295,17 +294,17 @@ public class MemcachedHandler extends HandlerAdapter<Command> implements
 	 * 
 	 * @return
 	 */
-	private boolean parseClientException() {
-		String[] items = this.currentLine.split(" ");
+	private boolean parseClientException(MemcachedTCPSession session) {
+		String[] items = session.currentLine.split(" ");
 		final String error = items.length > 1 ? items[1]
 				: "unknown client error";
-		Command executingCmd = getCurrentExecutingCommand();
+		Command executingCmd = getCurrentExecutingCommand(session);
 
 		final MemcachedClientException exception = new MemcachedClientException(
 				error);
 		executingCmd.setException(exception);
 		executingCmd.getLatch().countDown();
-		reset();
+		resetStatus(session);
 
 		return true;
 	}
@@ -315,16 +314,16 @@ public class MemcachedHandler extends HandlerAdapter<Command> implements
 	 * 
 	 * @return
 	 */
-	private boolean parseServerException() {
-		String[] items = this.currentLine.split(" ");
+	private boolean parseServerException(MemcachedTCPSession session) {
+		String[] items = session.currentLine.split(" ");
 		final String error = items.length > 1 ? items[1]
 				: "unknown server error";
-		Command executingCmd = getCurrentExecutingCommand();
+		Command executingCmd = getCurrentExecutingCommand(session);
 		final MemcachedServerException exception = new MemcachedServerException(
 				error);
 		executingCmd.setException(exception);
 		executingCmd.getLatch().countDown();
-		reset();
+		resetStatus(session);
 		return true;
 
 	}
@@ -334,20 +333,20 @@ public class MemcachedHandler extends HandlerAdapter<Command> implements
 	 * 
 	 * @return
 	 */
-	private boolean parseVersionCommand() {
-		String[] items = this.currentLine.split(" ");
+	private boolean parseVersionCommand(MemcachedTCPSession session) {
+		String[] items = session.currentLine.split(" ");
 		final String version = items.length > 1 ? items[1] : "unknown version";
-		Command executingCmd = getCurrentExecutingCommand();
+		Command executingCmd = getCurrentExecutingCommand(session);
 		executingCmd.setResult(version);
 		executingCmd.getLatch().countDown();
-		reset();
+		resetStatus(session);
 		return true;
 
 	}
 
-	private void reset() {
-		this.status = ParseStatus.NULL;
-		this.currentLine = null;
+	private void resetStatus(MemcachedTCPSession session) {
+		session.status = ParseStatus.NULL;
+		session.currentLine = null;
 	}
 
 	/**
@@ -355,12 +354,12 @@ public class MemcachedHandler extends HandlerAdapter<Command> implements
 	 * 
 	 * @return
 	 */
-	private boolean parseIncrDecrCommand() {
-		final Integer result = Integer.parseInt(this.currentLine);
-		Command executingCmd = getCurrentExecutingCommand();
+	private boolean parseIncrDecrCommand(MemcachedTCPSession session) {
+		final Integer result = Integer.parseInt(session.currentLine);
+		Command executingCmd = getCurrentExecutingCommand(session);
 		executingCmd.setResult(result);
 		executingCmd.getLatch().countDown();
-		reset();
+		resetStatus(session);
 
 		return true;
 
@@ -371,8 +370,8 @@ public class MemcachedHandler extends HandlerAdapter<Command> implements
 	 * 
 	 * @param buffer
 	 */
-	protected void nextLine(ByteBuffer buffer) {
-		if (this.currentLine != null) {
+	protected void nextLine(MemcachedTCPSession session, ByteBuffer buffer) {
+		if (session.currentLine != null) {
 			return;
 		}
 
@@ -385,12 +384,12 @@ public class MemcachedHandler extends HandlerAdapter<Command> implements
 			buffer.limit(limit);
 			buffer.position(index + SPLIT.remaining());
 			try {
-				this.currentLine = new String(bytes, "utf-8");
+				session.currentLine = new String(bytes, "utf-8");
 			} catch (UnsupportedEncodingException e) {
 			}
 
 		} else {
-			this.currentLine = null;
+			session.currentLine = null;
 		}
 
 	}
@@ -400,7 +399,6 @@ public class MemcachedHandler extends HandlerAdapter<Command> implements
 	 */
 	@SuppressWarnings("unchecked")
 	private Transcoder transcoder;
-	protected List<Command> executingCmds = new LinkedList<Command>(); // 存储已经发送的命令
 	protected XMemcachedClient client;
 	private static final int MAX_TRIES = 5; // 重连最大次数
 	protected static final Log log = LogFactory.getLog(MemcachedHandler.class);
@@ -408,7 +406,7 @@ public class MemcachedHandler extends HandlerAdapter<Command> implements
 
 	@Override
 	public void onMessageSent(Session session, Command t) {
-		executingCmds.add(t);
+		((MemcachedTCPSession) session).executingCmds.add(t);
 	}
 
 	@Override
@@ -421,19 +419,21 @@ public class MemcachedHandler extends HandlerAdapter<Command> implements
 	@Override
 	public void onSessionClosed(Session session) {
 		log.warn("session close");
-		reconnect();
+		this.client.getConnector().removeSession((MemcachedTCPSession) session);
+		reconnect(session);
 	}
 
-	protected void reconnect() {
+	protected void reconnect(Session session) {
 		if (!this.client.isShutdown()) {
-			if (this.connectTries < MAX_TRIES) {
+			if (this.connectTries <= MAX_TRIES) {
 				try {
 					this.connectTries++;
 					log.warn("Try to reconnect the server,It had try "
 							+ this.connectTries + " times");
-
-					client.getConnector().reconnect();
-					this.executingCmds.clear();
+					((MemcachedTCPSession) session).executingCmds.clear();
+					this.resetStatus((MemcachedTCPSession) session);
+					// TODO
+					throw new IOException();
 				} catch (IOException e) {
 					log.error("reconnect error", e);
 				}
@@ -448,7 +448,8 @@ public class MemcachedHandler extends HandlerAdapter<Command> implements
 		if (mergeCount < 0) {
 			// single get
 			if (!executingCmd.getKey().equals(keys.get(0))) {
-				reconnect(); // error,reconnect
+				// TODO
+				reconnect(null); // error,reconnect
 
 			}
 			executingCmd.setResult(transcoder.decode(datas.get(0)));
@@ -486,5 +487,15 @@ public class MemcachedHandler extends HandlerAdapter<Command> implements
 		super();
 		this.transcoder = transcoder;
 		this.client = client;
+	}
+
+	@SuppressWarnings("unchecked")
+	public Transcoder getTranscoder() {
+		return transcoder;
+	}
+
+	@SuppressWarnings("unchecked")
+	public void setTranscoder(Transcoder transcoder) {
+		this.transcoder = transcoder;
 	}
 }

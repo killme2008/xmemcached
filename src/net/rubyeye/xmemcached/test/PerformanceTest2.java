@@ -131,15 +131,17 @@ public class PerformanceTest2 {
 		try {
 			String ip = "192.168.222.100";
 
-			int port = 11211;
-
 			int size = Runtime.getRuntime().availableProcessors();
 
-			int thread = 100;
+			int thread = 10;
 
 			int repeat = 100;
 
-			XMemcachedClient mc = new XMemcachedClient(ip, port);
+
+			XMemcachedClient mc = new XMemcachedClient();
+			mc.addServer(ip, 11211);
+			mc.addServer(ip, 12001);
+			mc.addServer(ip, 12000);
 
 			CountDownLatch cdl = new CountDownLatch(thread);
 			long t = System.currentTimeMillis();

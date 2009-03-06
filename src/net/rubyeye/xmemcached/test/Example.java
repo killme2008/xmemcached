@@ -38,7 +38,10 @@ public class Example {
 			String ip = "192.168.222.100";
 
 			int port = 11211;
-			XMemcachedClient client = new XMemcachedClient(ip, port);
+			XMemcachedClient client = new XMemcachedClient();
+			// 添加server
+			client.addServer(ip, port);
+
 			if (!client.set("hello", 0, "dennis")) {
 				System.err.println("set error");
 			}
@@ -98,6 +101,13 @@ public class Example {
 			for (int i = 0; i < 100; i++)
 				if (client.delete("hello__" + i))
 					System.err.println("get error");
+			client.setOptimiezeSet(true);
+			long start = System.currentTimeMillis();
+			for (int i = 0; i < 60; i++)
+				if (!client.set("test", 0, i))
+					System.out.println("set error");
+			System.out.println(System.currentTimeMillis() - start);
+			System.out.println(client.get("test"));
 			client.shutdown();
 		} catch (IOException e) {
 			e.printStackTrace();
