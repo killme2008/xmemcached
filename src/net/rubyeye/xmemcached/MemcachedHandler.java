@@ -408,7 +408,7 @@ public class MemcachedHandler extends HandlerAdapter<Command> implements
 
 	protected void reconnect(Session session) {
 		if (!this.client.isShutdown()) {
-			this.client.getConnector().addConnectSocketAddress(
+			this.client.getConnector().addToWatingQueue(
 					session.getRemoteSocketAddress());
 		}
 	}

@@ -231,7 +231,7 @@ public class MemcachedConnector extends SocketChannelController {
 		return session;
 	}
 
-	public void addConnectSocketAddress(InetSocketAddress address) {
+	public void addToWatingQueue(InetSocketAddress address) {
 		this.waitingQueue.add(address);
 	}
 
