@@ -26,7 +26,7 @@ import com.google.code.yanf4j.config.Configuration;
 
 public class XMemcachedClient {
 
-	private static final int CONNECT_TIMEOUT = 5000;
+	public static final int CONNECT_TIMEOUT = 5000;
 	private static final int TCP_SEND_BUFF_SIZE = 16 * 1024;
 	private static final boolean TCP_NO_DELAY = false;
 	private static final int READ_BUFF_SIZE = 32 * 1024;

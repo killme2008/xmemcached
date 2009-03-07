@@ -83,7 +83,7 @@ class TestThread implements Runnable {
 			assert (xmemcachedClient.delete("map2_" + number));
 			barrier.await();
 		} catch (Exception e) {
-			e.printStackTrace();
+			//e.printStackTrace();
 //			System.err.println(this.number + " " + e.getMessage());
 		}
 	}
