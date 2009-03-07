@@ -19,11 +19,16 @@ public class ArrayMemcachedSessionLocator implements MemcachedSessionLocator {
 	}
 
 	@Override
+	public long getIndexByKey(String key) {
+		long hash = hashAlgorighm.hash(key);
+		return hash % sessions.size();
+	}
+
+	@Override
 	public MemcachedTCPSession getSessionByKey(String key) {
 		if (sessions.size() == 0)
 			return null;
-		long hash = hashAlgorighm.hash(key);
-		long mod = hash % sessions.size();
+		long mod = getIndexByKey(key);
 		int findCount = 0;
 		Label: while (findCount < 10) {
 			MemcachedTCPSession session = sessions.get((int) mod);

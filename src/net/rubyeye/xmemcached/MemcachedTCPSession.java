@@ -26,6 +26,7 @@ import java.nio.channels.WritableByteChannel;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import net.rubyeye.xmemcached.MemcachedHandler.ParseStatus;
 import net.rubyeye.xmemcached.command.Command;
@@ -50,9 +51,7 @@ public class MemcachedTCPSession extends DefaultTCPSession {
 	private MemcachedProtocolHandler memcachedProtocolHandler;
 	protected List<Command> executingCmds = new LinkedList<Command>(); // 存储已经发送的命令
 
-	List<String> keys; // get获取的key列表
-
-	List<CachedData> datas; // get获取的值列表
+	Map<String,CachedData> currentValues=null;
 
 	private SocketAddress remoteSocketAddress;
 

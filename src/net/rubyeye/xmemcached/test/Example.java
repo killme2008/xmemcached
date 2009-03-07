@@ -104,7 +104,7 @@ public class Example {
 					System.err.println("get error");
 			
 			long start = System.currentTimeMillis();
-			for (int i = 0; i < 60; i++)
+			for (int i = 0; i < 200; i++)
 				if (!client.set("test", 0, i))
 					System.out.println("set error");
 			System.out.println(System.currentTimeMillis() - start);

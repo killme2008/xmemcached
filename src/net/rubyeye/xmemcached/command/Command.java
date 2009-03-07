@@ -61,7 +61,7 @@ public class Command implements Message {
 		this.latch = latch;
 	}
 
-	public Command(String key, CommandType commandType, CountDownLatch latch) {
+	public Command(Object key, CommandType commandType, CountDownLatch latch) {
 		super();
 		this.key = key;
 		this.commandType = commandType;

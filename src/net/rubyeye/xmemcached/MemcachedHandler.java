@@ -2,6 +2,7 @@ package net.rubyeye.xmemcached;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -81,8 +82,7 @@ public class MemcachedHandler extends HandlerAdapter<Command> implements
 					return false;
 				}
 				if (session.currentLine.startsWith("VALUE")) {
-					session.keys = new ArrayList<String>(30);
-					session.datas = new ArrayList<CachedData>(30);
+					session.currentValues = new HashMap<String, CachedData>();
 					session.status = ParseStatus.GET;
 				} else if (session.currentLine.equals("STORED")) {
 					session.status = ParseStatus.STORED;
@@ -163,14 +163,13 @@ public class MemcachedHandler extends HandlerAdapter<Command> implements
 				}
 				if (executingCommand.getCommandType().equals(
 						Command.CommandType.GET_MANY)) {
-					processGetManyCommand(session.keys, session.datas,
+					processGetManyCommand(session, session.currentValues,
 							executingCommand);
 				} else {
-					processGetOneCommand(session.keys, session.datas,
+					processGetOneCommand(session, session.currentValues,
 							executingCommand);
 				}
-				session.datas = null;
-				session.keys = null;
+				session.currentValues = null;
 				session.resetStatus();
 				return true;
 			} else if (session.currentLine.startsWith("VALUE")) {
@@ -183,10 +182,11 @@ public class MemcachedHandler extends HandlerAdapter<Command> implements
 					session.currentLine = null;
 					return false;
 				}
-				session.keys.add(items[1]);
+
 				byte[] data = new byte[dataLen];
 				buffer.get(data);
-				session.datas.add(new CachedData(flag, data, dataLen));
+				session.currentValues.put(items[1], new CachedData(flag, data,
+						dataLen));
 				buffer.position(buffer.position() + SPLIT.remaining());
 				session.currentLine = null;
 			} else {
@@ -414,27 +414,26 @@ public class MemcachedHandler extends HandlerAdapter<Command> implements
 	}
 
 	@SuppressWarnings("unchecked")
-	private void processGetOneCommand(List<String> keys,
-			List<CachedData> datas, Command executingCmd) {
+	private void processGetOneCommand(Session session,
+			Map<String, CachedData> values, Command executingCmd) {
 		int mergeCount = executingCmd.getMergeCount();
 		if (mergeCount < 0) {
 			// single get
-			if (!executingCmd.getKey().equals(keys.get(0))) {
-				// TODO
-				reconnect(null); // error,reconnect
-
+			if (values.get(executingCmd.getKey()) == null)
+				reconnect(session);
+			else {
+				executingCmd.setResult(transcoder.decode(values
+						.get(executingCmd.getKey())));
+				executingCmd.getLatch().countDown();
 			}
-			executingCmd.setResult(transcoder.decode(datas.get(0)));
-			executingCmd.getLatch().countDown();
 		} else {
 			List<Command> mergeCommands = executingCmd.getMergeCommands();
 			for (Command nextCommand : mergeCommands) {
-				int index = keys.indexOf(nextCommand.getKey());
-				if (index >= 0) {
-					nextCommand.setResult(transcoder.decode(datas.get(index)));
-				} else {
+				if (values.get(nextCommand.getKey()) == null)
 					nextCommand.setResult(null);
-				}
+				else
+					nextCommand.setResult(transcoder.decode(values
+							.get(nextCommand.getKey())));
 				nextCommand.getLatch().countDown();
 			}
 		}
@@ -442,14 +441,15 @@ public class MemcachedHandler extends HandlerAdapter<Command> implements
 	}
 
 	@SuppressWarnings("unchecked")
-	private void processGetManyCommand(List<String> keys,
-			List<CachedData> datas, Command executingCmd) {
+	private void processGetManyCommand(Session session,
+			Map<String, CachedData> values, Command executingCmd) {
 		Map<String, Object> result = new HashMap<String, Object>();
-		int len = keys.size();
-		for (int i = 0; i < len; i++) {
-			result.put(keys.get(i), transcoder.decode(datas.get(i)));
+		Iterator<Map.Entry<String, CachedData>> it = values.entrySet()
+				.iterator();
+		while (it.hasNext()) {
+			Map.Entry<String, CachedData> item = it.next();
+			result.put(item.getKey(), transcoder.decode(item.getValue()));
 		}
-
 		executingCmd.setResult(result);
 		executingCmd.getLatch().countDown();
 	}

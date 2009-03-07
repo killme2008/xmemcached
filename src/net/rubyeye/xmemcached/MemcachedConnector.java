@@ -15,6 +15,7 @@ import java.net.InetSocketAddress;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CountDownLatch;
@@ -275,6 +276,7 @@ public class MemcachedConnector extends SocketChannelController {
 					"There is no avriable session at this moment");
 		}
 		session.send(msg);
+
 	}
 
 	protected Session findSessionByKey(String key) {

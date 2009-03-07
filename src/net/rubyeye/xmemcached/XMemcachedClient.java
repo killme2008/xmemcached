@@ -3,7 +3,11 @@ package net.rubyeye.xmemcached;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -33,6 +37,8 @@ public class XMemcachedClient {
 	private static final int TCP_RECV_BUFF_SIZE = 16 * 1024;
 	private static final long TIMEOUT = 1000;
 	protected static final Log log = LogFactory.getLog(XMemcachedClient.class);
+
+	protected MemcachedSessionLocator sessionLocator;
 	/**
 	 * ���Ե�ƽ��ֵ�����ʵ��������
 	 */
@@ -133,13 +139,14 @@ public class XMemcachedClient {
 	private void buildConnector(MemcachedSessionLocator locator) {
 		if (locator == null)
 			throw new IllegalArgumentException();
+		this.sessionLocator = locator;
 		Configuration configuration = new Configuration();
 		configuration.setTcpRecvBufferSize(TCP_RECV_BUFF_SIZE);
 		configuration.setSessionReadBufferSize(READ_BUFF_SIZE);
 		configuration.setTcpNoDelay(TCP_NO_DELAY);
 		configuration.setReadThreadCount(0);
 		this.shutdown = true;
-		this.connector = new MemcachedConnector(configuration, locator);
+		this.connector = new MemcachedConnector(configuration, sessionLocator);
 		this.connector.setSendBufferSize(TCP_SEND_BUFF_SIZE);
 		this.transcoder = new SerializingTranscoder();
 		this.memcachedHandler = new MemcachedHandler(this.transcoder, this);
@@ -202,40 +209,58 @@ public class XMemcachedClient {
 	}
 
 	@SuppressWarnings("unchecked")
-	public Map<String, Object> get(Collection<String> keys)
+	public Map<String, Object> get(Collection<String> keyCollections)
 			throws TimeoutException, InterruptedException, MemcachedException {
-		if (keys == null || keys.size() == 0) {
+		if (keyCollections == null || keyCollections.size() == 0) {
 			return null;
 		}
-		final CountDownLatch latch = new CountDownLatch(1);
-		StringBuilder sb = new StringBuilder(keys.size() * 5);
-		for (String tmpKey : keys) {
-			ByteUtils.checkKey(tmpKey);
-			sb.append(tmpKey).append(" ");
+		Map<Long, List<String>> catalogMap = new HashMap<Long, List<String>>();
+
+		for (String key : keyCollections) {
+			long index = this.sessionLocator.getIndexByKey(key);
+			if (!catalogMap.containsKey(key)) {
+				List<String> tmpKeys = new LinkedList<String>();
+				tmpKeys.add(key);
+				catalogMap.put(index, tmpKeys);
+			} else
+				catalogMap.get(index).add(key);
 		}
-		final String key = sb.toString();
-		byte[] keyBytes = ByteUtils.getBytes(key);
-		final ByteBuffer buffer = ByteBuffer.allocate(ByteUtils.GET.length
-				+ ByteUtils.CRLF.length + 1 + keyBytes.length);
-		ByteUtils.setArguments(buffer, ByteUtils.GET, keyBytes);
-		buffer.flip();
+		
+		System.out.println(catalogMap);
 
-		Command getCmd = new Command(key.substring(0, key.length() - 1),
-				Command.CommandType.GET_MANY, latch) {
-
-			@Override
-			public ByteBuffer getByteBuffer() {
-				setByteBuffer(buffer);
-				return buffer;
-			}
-		};
-		long lazy = keys.size() / 1000 > 0 ? (keys.size() / 1000) : 1;
-		sendCommand(getCmd);
+		Collection<List<String>> catalogKeys = catalogMap.values();
+		final CountDownLatch latch = new CountDownLatch(catalogKeys.size());
+		Command getCmd = new Command(keyCollections,
+				Command.CommandType.GET_MANY, latch);
+		for (List<String> keys : catalogKeys) {
+			sendGetManyCommand(keyCollections, getCmd);
+		}
+		long lazy = keyCollections.size() / 1000 > 0 ? (keyCollections.size() / 1000)
+				: 1;
 		latchWait(lazy * TIMEOUT, latch);
 		if (getCmd.getException() != null) {
 			throw getCmd.getException();
 		}
 		return (Map<String, Object>) getCmd.getResult();
+	}
+
+	private void sendGetManyCommand(Collection<String> keys,
+			Command getCmd) throws InterruptedException,
+			TimeoutException {
+		StringBuilder sb = new StringBuilder(keys.size() * 5);
+		for (String tmpKey : keys) {
+			ByteUtils.checkKey(tmpKey);
+			sb.append(tmpKey).append(" ");
+		}
+		byte[] keyBytes = ByteUtils.getBytes(sb.toString());
+		final ByteBuffer buffer = ByteBuffer.allocate(ByteUtils.GET.length
+				+ ByteUtils.CRLF.length + 1 + keyBytes.length);
+		ByteUtils.setArguments(buffer, ByteUtils.GET, keyBytes);
+		buffer.flip();
+		getCmd.setByteBuffer(buffer);
+		getCmd.setKey(keys.remove(0));
+		sendCommand(getCmd);
+
 	}
 
 	public boolean set(final String key, final int exp, Object value)

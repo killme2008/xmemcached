@@ -120,7 +120,7 @@ public class PerformanceTest {
 		int port1 = 12000;
 		int port2 = 12001;
 		int port3 = 12002;
-		int thread = 10;
+		int thread = 100;
 		if (args.length >= 5) {
 			ip = args[0];
 			port1 = Integer.valueOf(args[1]);
@@ -142,8 +142,8 @@ public class PerformanceTest {
 
 			XMemcachedClient mc = new XMemcachedClient();
 			mc.addServer(ip, port1);
-			mc.addServer(ip, port2);
-			mc.addServer(ip, port3);
+			//mc.addServer(ip, port2);
+			//mc.addServer(ip, port3);
 			// mc.addServer(ip, port3);
 			// mc.addServer(ip, 12003);
 			// mc.addServer(ip, 12004);
