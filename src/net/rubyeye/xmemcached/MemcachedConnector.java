@@ -5,7 +5,6 @@
 package net.rubyeye.xmemcached;
 
 import com.google.code.yanf4j.config.Configuration;
-import com.google.code.yanf4j.nio.CodecFactory;
 import com.google.code.yanf4j.nio.Session;
 import com.google.code.yanf4j.nio.impl.SocketChannelController;
 import com.google.code.yanf4j.nio.util.EventType;

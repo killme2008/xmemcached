@@ -17,7 +17,6 @@ import com.google.code.yanf4j.nio.impl.HandlerAdapter;
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
-import java.util.LinkedList;
 import net.rubyeye.xmemcached.exception.MemcachedClientException;
 import net.rubyeye.xmemcached.exception.MemcachedException;
 import net.rubyeye.xmemcached.exception.MemcachedServerException;
@@ -231,8 +230,6 @@ public class MemcachedHandler extends HandlerAdapter<Command> implements
 			}
 
 		}
-		executingCmd.setResult(null);
-		executingCmd.getLatch().countDown();
 		resetStatus(session);
 		return true;
 

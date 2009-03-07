@@ -1,12 +1,11 @@
 package net.rubyeye.xmemcached.utils;
 
-import java.util.ArrayList;
+
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.locks.Condition;
 
 /**
  * Simple queue. All methods are thread-safe.

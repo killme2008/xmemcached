@@ -39,6 +39,7 @@ public class Example {
 
 			int port = 11211;
 			XMemcachedClient client = new XMemcachedClient();
+			//client.setOptimiezeSet(true);
 			// 添加server
 			client.addServer(ip, port);
 
@@ -101,7 +102,7 @@ public class Example {
 			for (int i = 0; i < 100; i++)
 				if (client.delete("hello__" + i))
 					System.err.println("get error");
-			client.setOptimiezeSet(true);
+			
 			long start = System.currentTimeMillis();
 			for (int i = 0; i < 60; i++)
 				if (!client.set("test", 0, i))
@@ -112,10 +113,12 @@ public class Example {
 		} catch (IOException e) {
 			e.printStackTrace();
 		} catch (TimeoutException e) {
+			e.printStackTrace();
 			// 超时
 		} catch (InterruptedException e) {
-
+			e.printStackTrace();
 		} catch (MemcachedException e) {
+			e.printStackTrace();
 			// 执行异常
 		}
 

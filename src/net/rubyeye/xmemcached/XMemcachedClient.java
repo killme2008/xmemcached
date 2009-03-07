@@ -26,7 +26,7 @@ import com.google.code.yanf4j.config.Configuration;
 
 public class XMemcachedClient {
 
-	private static final int CONNECT_TIMEOUT = 3000;
+	private static final int CONNECT_TIMEOUT = 5000;
 	private static final int TCP_SEND_BUFF_SIZE = 16 * 1024;
 	private static final boolean TCP_NO_DELAY = false;
 	private static final int READ_BUFF_SIZE = 32 * 1024;
@@ -38,7 +38,6 @@ public class XMemcachedClient {
 	 */
 	private volatile boolean shutdown;
 
-
 	public void setGetsMergeFactor(int mergeFactor) {
 		this.connector.setGetsMergeFactor(mergeFactor);
 	}
@@ -47,11 +46,9 @@ public class XMemcachedClient {
 		return connector;
 	}
 
-
 	public void setOptimiezeGet(boolean optimiezeGet) {
 		this.connector.setOptimiezeGet(optimiezeGet);
 	}
-
 
 	public void setOptimiezeSet(boolean optimiezeSet) {
 		this.connector.setoptimizeSet(optimiezeSet);
@@ -234,7 +231,7 @@ public class XMemcachedClient {
 		};
 		long lazy = keys.size() / 1000 > 0 ? (keys.size() / 1000) : 1;
 		sendCommand(getCmd);
-		latchWait(lazy, latch);
+		latchWait(lazy * TIMEOUT, latch);
 		if (getCmd.getException() != null) {
 			throw getCmd.getException();
 		}

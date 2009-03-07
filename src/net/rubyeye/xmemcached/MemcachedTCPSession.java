@@ -88,7 +88,7 @@ public class MemcachedTCPSession extends DefaultTCPSession {
         try {
             if (writeQueue.isEmpty()) {
                 if (writeQueue.push(message)) {
-                    sessionEventManager.register(this, EventType.ENABLE_WRITE); // 列表为空，注册监听写事件
+                    sessionEventManager.registerSession(this, EventType.ENABLE_WRITE); // 列表为空，注册监听写事件
 
                     return true;
                 } else {
@@ -249,7 +249,7 @@ public class MemcachedTCPSession extends DefaultTCPSession {
                 }
             }
             if (!writeComplete) {
-                sessionEventManager.register(this, EventType.ENABLE_WRITE); // listening
+                sessionEventManager.registerSession(this, EventType.ENABLE_WRITE); // listening
             // OP_WRITE
 
             }
