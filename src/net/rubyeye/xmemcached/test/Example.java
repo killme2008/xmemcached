@@ -119,7 +119,7 @@ public class Example {
 			if ((Integer) result.getValue() != 1)
 				System.err.println("gets error");
 			System.out.println("cas value:" + cas);
-			if (!client.cas("a", 0, 2, 1000, cas)) {
+			if (!client.cas("a", 0, 2, cas)) {
 				System.err.println("cas error");
 			}
 			result = client.gets("a");

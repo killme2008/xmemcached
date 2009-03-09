@@ -145,8 +145,8 @@ public class PerformanceTest {
 			// mc.addServer(ip, port2);
 			// mc.addServer(ip, port3);
 			// mc.addServer(ip, port3);
-			mc.addServer(ip, 12003);
-			mc.addServer(ip, 12004);
+			// mc.addServer(ip, 12003);
+			// mc.addServer(ip, 12004);
 			// mc.addServer(ip, 12005);
 			// mc.addServer(ip, 12006);
 			//

@@ -133,7 +133,7 @@ public class PerformanceTest2 {
 
 			int size = Runtime.getRuntime().availableProcessors();
 
-			int thread = Integer.parseInt(args[0]);
+			int thread = 100;
 
 			int repeat = 100;
 
@@ -141,7 +141,7 @@ public class PerformanceTest2 {
 			XMemcachedClient mc = new XMemcachedClient();
                         mc.setOptimiezeGet(false);
 			mc.addServer(ip, 12000);
-			//mc.addServer(ip, 12001);
+			mc.addServer(ip, 12001);
 			//mc.addServer(ip, 12000);
 
 			CountDownLatch cdl = new CountDownLatch(thread);

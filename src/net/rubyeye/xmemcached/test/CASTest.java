@@ -4,12 +4,10 @@ import java.util.concurrent.CountDownLatch;
 
 import net.rubyeye.xmemcached.CASOperation;
 import net.rubyeye.xmemcached.XMemcachedClient;
-
 /**
  * 测试CAS
- * 
  * @author dennis
- * 
+
  */
 class CASThread extends Thread {
 	private XMemcachedClient mc;

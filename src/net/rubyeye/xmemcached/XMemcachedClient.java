@@ -216,7 +216,13 @@ public class XMemcachedClient {
 		if (getCmd.getException() != null) {
 			throw getCmd.getException();
 		}
-		return getCmd.getResult();
+		CachedData data = (CachedData) getCmd.getResult();
+		if (data == null)
+			return null;
+		if (cmdType.equals(Command.CommandType.GETS_ONE)) {
+			return new GetsResponse(data.getCas(), this.transcoder.decode(data));
+		} else
+			return this.transcoder.decode(data);
 	}
 
 	public Object get(final String key) throws TimeoutException,
@@ -287,7 +293,7 @@ public class XMemcachedClient {
 		long lazy = keyCollections.size() / 1000 > 0 ? (keyCollections.size() / 1000)
 				: 1;
 		lazy = lazy > 5 ? 5 : lazy; // 最高5秒
-		latchWait(timeout*lazy, latch);
+		latchWait(timeout * lazy, latch);
 		for (Command getCmd : commands) {
 			if (getCmd.getException() != null)
 				throw getCmd.getException();
@@ -448,7 +454,8 @@ public class XMemcachedClient {
 			tryCount++;
 			result = gets(key);
 			if (result == null)
-				throw new NullPointerException("could not found the value for Key=" + key);
+				throw new NullPointerException(
+						"could not found the value for Key=" + key);
 			if (tryCount >= operation.getMaxTries())
 				throw new TimeoutException("CAS try times is greater than max");
 		}

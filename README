@@ -1,0 +1,61 @@
+==introduction==
+xmemcached
+  It's a java client api for memcached,It is implemented in java nio.
+
+homepage:  http://code.google.com/p/xmemcached/
+downloads; http://code.google.com/p/xmemcached/downloads/list 
+wiki :     http://code.google.com/p/xmemcached/w/list
+author : dennis zhuang(killme2008@gmail.com)
+==example==
+
+#new a XMemcachedClient instance
+XMemcachedClient client = new XMemcachedClient();
+
+#add memcached server
+
+client.addServer("localhost", 12001);
+client.addServer("localhost", 12003);
+
+..add other servers...
+
+#get operation
+
+String name = (String) client.get("test");
+
+#set add replace append prepend gets
+
+client.add("hello", 0, "dennis");
+client.replace("hello", 0, "dennis");
+client.append("hello", 0, " good");
+client.prepend("hello", 0, "hello ");
+GetsResponse response=client.gets("hello");
+long cas=response.getCas();
+Obejct value=response.getValue();
+#incr decr
+client.set("a",0,"1");
+client.incr("a",4); 
+client.deccr("a",4); 
+
+#cas
+
+client.cas("a", 0, new CASOperation() {
+		@Override
+    	public int getMaxTries() {
+			return 1;  //max try times
+		}
+		@Override
+		public Object getNewValue(long currentCAS, Object currentValue) {
+    		System.out.println("current value " + currentValue);
+			return 3;
+		}
+
+});
+
+# get server version
+memcached.version();
+
+#bulk get
+List<String> keys = new ArrayList<String>();
+keys.add("hello");
+keys.add("test");
+Map<String, Object> map = client.get(keys);

@@ -367,13 +367,7 @@ public class MemcachedHandler extends HandlerAdapter<Command> implements
 				reconnect(session);
 			else {
 				CachedData data = values.get(executingCmd.getKey());
-				if (executingCmd.getCommandType().equals(
-						Command.CommandType.GETS_ONE)) {
-					executingCmd.setResult(new GetsResponse(data.getCas(),
-							transcoder.decode(data)));
-				} else {
-					executingCmd.setResult(transcoder.decode(data));
-				}
+				executingCmd.setResult(data); // 设置CachedData返回，transcoder.decode()放到用户线程
 				executingCmd.getLatch().countDown();
 			}
 		} else {
@@ -383,13 +377,7 @@ public class MemcachedHandler extends HandlerAdapter<Command> implements
 				if (values.get(nextCommand.getKey()) == null)
 					nextCommand.setResult(null);
 				else {
-					CachedData data = values.get(nextCommand.getKey());
-					if (executingCmd.getCommandType().equals(
-							Command.CommandType.GETS_MANY)) {
-						nextCommand.setResult(new GetsResponse(data.getCas(),
-								transcoder.decode(data)));
-					} else
-						nextCommand.setResult(transcoder.decode(data));
+					nextCommand.setResult(values.get(nextCommand.getKey()));
 				}
 				nextCommand.getLatch().countDown();
 			}
@@ -407,9 +395,8 @@ public class MemcachedHandler extends HandlerAdapter<Command> implements
 					.iterator();
 			while (it.hasNext()) {
 				Map.Entry<String, CachedData> item = it.next();
-				GetsResponse getsResult = new GetsResponse(
-						item.getValue().getCas(), transcoder.decode(item
-								.getValue()));
+				GetsResponse getsResult = new GetsResponse(item.getValue()
+						.getCas(), transcoder.decode(item.getValue()));
 				result.put(item.getKey(), getsResult);
 			}
 		} else {
