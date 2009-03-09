@@ -187,9 +187,9 @@ public class XMemcachedClient {
 		return get(key, timeout, ByteUtils.GET, Command.CommandType.GET_ONE);
 	}
 
-	public GetsResult gets(final String key, long timeout)
+	public GetsResponse gets(final String key, long timeout)
 			throws TimeoutException, InterruptedException, MemcachedException {
-		return (GetsResult) get(key, timeout, ByteUtils.GETS,
+		return (GetsResponse) get(key, timeout, ByteUtils.GETS,
 				Command.CommandType.GETS_ONE);
 	}
 
@@ -224,9 +224,9 @@ public class XMemcachedClient {
 		return get(key, TIMEOUT, ByteUtils.GET, Command.CommandType.GET_ONE);
 	}
 
-	public GetsResult gets(final String key) throws TimeoutException,
+	public GetsResponse gets(final String key) throws TimeoutException,
 			InterruptedException {
-		return (GetsResult) get(key, TIMEOUT, ByteUtils.GETS,
+		return (GetsResponse) get(key, TIMEOUT, ByteUtils.GETS,
 				Command.CommandType.GETS_ONE);
 	}
 
@@ -250,21 +250,21 @@ public class XMemcachedClient {
 	}
 
 	@SuppressWarnings("unchecked")
-	public Map<String, GetsResult> gets(Collection<String> keyCollections)
+	public Map<String, GetsResponse> gets(Collection<String> keyCollections)
 			throws TimeoutException, InterruptedException, MemcachedException {
 		// 超时时间加倍
 		long lazy = keyCollections.size() / 1000 > 0 ? (keyCollections.size() / 1000)
 				: 1;
 		lazy = lazy > 3 ? 3 : lazy; // 最高3秒
-		return (Map<String, GetsResult>) get(keyCollections, lazy * TIMEOUT,
+		return (Map<String, GetsResponse>) get(keyCollections, lazy * TIMEOUT,
 				ByteUtils.GETS, Command.CommandType.GETS_MANY);
 	}
 
 	@SuppressWarnings("unchecked")
-	public Map<String, GetsResult> gets(Collection<String> keyCollections,
+	public Map<String, GetsResponse> gets(Collection<String> keyCollections,
 			long timeout) throws TimeoutException, InterruptedException,
 			MemcachedException {
-		return (Map<String, GetsResult>) get(keyCollections, timeout,
+		return (Map<String, GetsResponse>) get(keyCollections, timeout,
 				ByteUtils.GETS, Command.CommandType.GETS_MANY);
 	}
 
@@ -437,7 +437,7 @@ public class XMemcachedClient {
 		if (operation.getMaxTries() < 0)
 			throw new IllegalArgumentException("max tries less than 0");
 		int tryCount = 0;
-		GetsResult result = gets(key);
+		GetsResponse result = gets(key);
 		if (result == null)
 			throw new NullPointerException("could not found the key " + key);
 		while (tryCount < operation.getMaxTries()

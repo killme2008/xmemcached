@@ -9,7 +9,7 @@ import java.io.IOException;
 import java.io.Serializable;
 
 import net.rubyeye.xmemcached.CASOperation;
-import net.rubyeye.xmemcached.GetsResult;
+import net.rubyeye.xmemcached.GetsResponse;
 import net.rubyeye.xmemcached.XMemcachedClient;
 import net.rubyeye.xmemcached.exception.MemcachedException;
 
@@ -114,7 +114,7 @@ public class Example {
 
 			// 测试cas
 			client.set("a", 0, 1);
-			GetsResult result = client.gets("a");
+			GetsResponse result = client.gets("a");
 			long cas = result.getCas();
 			if ((Integer) result.getValue() != 1)
 				System.err.println("gets error");

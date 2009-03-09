@@ -369,7 +369,7 @@ public class MemcachedHandler extends HandlerAdapter<Command> implements
 				CachedData data = values.get(executingCmd.getKey());
 				if (executingCmd.getCommandType().equals(
 						Command.CommandType.GETS_ONE)) {
-					executingCmd.setResult(new GetsResult(data.getCas(),
+					executingCmd.setResult(new GetsResponse(data.getCas(),
 							transcoder.decode(data)));
 				} else {
 					executingCmd.setResult(transcoder.decode(data));
@@ -386,7 +386,7 @@ public class MemcachedHandler extends HandlerAdapter<Command> implements
 					CachedData data = values.get(nextCommand.getKey());
 					if (executingCmd.getCommandType().equals(
 							Command.CommandType.GETS_MANY)) {
-						nextCommand.setResult(new GetsResult(data.getCas(),
+						nextCommand.setResult(new GetsResponse(data.getCas(),
 								transcoder.decode(data)));
 					} else
 						nextCommand.setResult(transcoder.decode(data));
@@ -407,7 +407,7 @@ public class MemcachedHandler extends HandlerAdapter<Command> implements
 					.iterator();
 			while (it.hasNext()) {
 				Map.Entry<String, CachedData> item = it.next();
-				GetsResult getsResult = new GetsResult(
+				GetsResponse getsResult = new GetsResponse(
 						item.getValue().getCas(), transcoder.decode(item
 								.getValue()));
 				result.put(item.getKey(), getsResult);
