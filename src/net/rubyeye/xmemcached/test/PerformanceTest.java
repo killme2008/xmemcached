@@ -64,7 +64,7 @@ public class PerformanceTest {
 				for (int i = 0; i < repeat; i++) {
 
 					String key = String.valueOf(start + i);
-					String result = (String) mc.get(key, 100000000);
+					String result = (String) mc.get(key);
 					if (!key.equals(result)) {
 						System.out.println(key + " " + result);
 						System.err.println("get error");
@@ -142,11 +142,11 @@ public class PerformanceTest {
 
 			XMemcachedClient mc = new XMemcachedClient();
 			mc.addServer(ip, port1);
-			//mc.addServer(ip, port2);
-			//mc.addServer(ip, port3);
+			// mc.addServer(ip, port2);
 			// mc.addServer(ip, port3);
-			// mc.addServer(ip, 12003);
-			// mc.addServer(ip, 12004);
+			// mc.addServer(ip, port3);
+			mc.addServer(ip, 12003);
+			mc.addServer(ip, 12004);
 			// mc.addServer(ip, 12005);
 			// mc.addServer(ip, 12006);
 			//

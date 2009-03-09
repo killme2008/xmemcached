@@ -8,6 +8,8 @@ import java.util.concurrent.TimeoutException;
 import java.io.IOException;
 import java.io.Serializable;
 
+import net.rubyeye.xmemcached.CASOperation;
+import net.rubyeye.xmemcached.GetsResult;
 import net.rubyeye.xmemcached.XMemcachedClient;
 import net.rubyeye.xmemcached.exception.MemcachedException;
 
@@ -39,7 +41,7 @@ public class Example {
 
 			int port = 11211;
 			XMemcachedClient client = new XMemcachedClient();
-			//client.setOptimiezeSet(true);
+			// client.setOptimiezeSet(true);
 			// 添加server
 			client.addServer(ip, port);
 
@@ -48,7 +50,8 @@ public class Example {
 			}
 			client.add("hello", 0, "dennis");
 			client.replace("hello", 0, "dennis");
-
+			client.append("hello", 0, " good");
+			client.prepend("hello", 0, "hello ");
 			String name = (String) client.get("hello");
 			System.out.println(name);
 
@@ -88,7 +91,7 @@ public class Example {
 			if (!client.set("map", 0, map, 10000)) {
 				System.err.println("set map error");
 			}
-			HashMap cachedMap = (HashMap) client.get("map", 100000);
+			HashMap cachedMap = (HashMap) client.get("map");
 			if (cachedMap.size() != 1000)
 				System.err.println("get map error");
 			for (Object key : cachedMap.keySet()) {
@@ -102,13 +105,49 @@ public class Example {
 			for (int i = 0; i < 100; i++)
 				if (client.delete("hello__" + i))
 					System.err.println("get error");
-			
+
 			long start = System.currentTimeMillis();
 			for (int i = 0; i < 200; i++)
 				if (!client.set("test", 0, i))
 					System.out.println("set error");
 			System.out.println(System.currentTimeMillis() - start);
-			System.out.println(client.get("test"));
+
+			// 测试cas
+			client.set("a", 0, 1);
+			GetsResult result = client.gets("a");
+			long cas = result.getCas();
+			if ((Integer) result.getValue() != 1)
+				System.err.println("gets error");
+			System.out.println("cas value:" + cas);
+			if (!client.cas("a", 0, 2, 1000, cas)) {
+				System.err.println("cas error");
+			}
+			result = client.gets("a");
+			if ((Integer) result.getValue() != 2)
+				System.err.println("cas error");
+
+			/**
+			 * 合并gets和cas，利用CASOperation
+			 */
+			client.cas("a", 0, new CASOperation() {
+
+				@Override
+				public int getMaxTries() {
+					return 1;
+				}
+
+				@Override
+				public Object getNewValue(long currentCAS, Object currentValue) {
+					System.out.println("current value " + currentValue);
+					return 3;
+				}
+
+			});
+			result = client.gets("a");
+			if ((Integer) result.getValue() != 3)
+				System.err.println("cas error");
+			keys.add("a");
+			System.out.println(client.gets(keys).get("a").getValue());
 			client.shutdown();
 		} catch (IOException e) {
 			e.printStackTrace();

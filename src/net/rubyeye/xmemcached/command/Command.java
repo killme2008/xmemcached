@@ -19,15 +19,13 @@ public class Command implements Message {
 	int mergeCount = -1;
 
 	public enum CommandType implements Message {
-		GET_ONE, GET_MANY, SET, REPLACE, ADD, EXCEPTION, DELETE, VERSION, INCR, DECR, GET, STORE, OTHER;
+		GET_ONE, GET_MANY, SET, REPLACE, ADD, EXCEPTION, DELETE, VERSION, INCR, DECR, GETS_ONE, GETS_MANY,CAS;
 
 		public int getLength() {
 			return 4;
 		}
 
 	}
-	
-	
 
 	public void setCommandType(CommandType commandType) {
 		this.commandType = commandType;
@@ -67,8 +65,6 @@ public class Command implements Message {
 		this.commandType = commandType;
 		this.latch = latch;
 	}
-	
-	
 
 	public void setByteBuffer(ByteBuffer byteBuffer) {
 		this.byteBuffer = byteBuffer;

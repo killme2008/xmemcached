@@ -6,6 +6,12 @@ import net.rubyeye.xmemcached.HashAlgorithm;
 import net.rubyeye.xmemcached.MemcachedSessionLocator;
 import net.rubyeye.xmemcached.MemcachedTCPSession;
 
+/**
+ * 基于余数的分布查找
+ * 
+ * @author dennis
+ * 
+ */
 public class ArrayMemcachedSessionLocator implements MemcachedSessionLocator {
 	protected HashAlgorithm hashAlgorighm;
 	List<MemcachedTCPSession> sessions;
@@ -18,8 +24,7 @@ public class ArrayMemcachedSessionLocator implements MemcachedSessionLocator {
 		this.hashAlgorighm = hashAlgorighm;
 	}
 
-	@Override
-	public long getIndexByKey(String key) {
+	public long getHash(String key) {
 		long hash = hashAlgorighm.hash(key);
 		return hash % sessions.size();
 	}
@@ -28,7 +33,7 @@ public class ArrayMemcachedSessionLocator implements MemcachedSessionLocator {
 	public MemcachedTCPSession getSessionByKey(String key) {
 		if (sessions.size() == 0)
 			return null;
-		long mod = getIndexByKey(key);
+		long mod = getHash(key);
 		int findCount = 0;
 		Label: while (findCount < 10) {
 			MemcachedTCPSession session = sessions.get((int) mod);

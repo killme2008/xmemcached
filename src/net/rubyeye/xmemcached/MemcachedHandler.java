@@ -1,6 +1,5 @@
 package net.rubyeye.xmemcached;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -17,7 +16,6 @@ import com.google.code.yanf4j.nio.Session;
 import com.google.code.yanf4j.nio.impl.HandlerAdapter;
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
 import net.rubyeye.xmemcached.exception.MemcachedClientException;
 import net.rubyeye.xmemcached.exception.MemcachedException;
 import net.rubyeye.xmemcached.exception.MemcachedServerException;
@@ -66,7 +64,7 @@ public class MemcachedHandler extends HandlerAdapter<Command> implements
 	 */
 	enum ParseStatus {
 
-		NULL, GET, END, STORED, NOT_STORED, ERROR, CLIENT_ERROR, SERVER_ERROR, DELETED, NOT_FOUND, VERSION, INCR;
+		NULL, GET, END, STORED, NOT_STORED, ERROR, CLIENT_ERROR, SERVER_ERROR, DELETED, NOT_FOUND, VERSION, INCR, EXISTS;
 	}
 
 	int count = 0;
@@ -85,25 +83,27 @@ public class MemcachedHandler extends HandlerAdapter<Command> implements
 					session.currentValues = new HashMap<String, CachedData>();
 					session.status = ParseStatus.GET;
 				} else if (session.currentLine.equals("STORED")) {
-					session.status = ParseStatus.STORED;
+					return notifyBoolean(session, Boolean.TRUE);
 				} else if (session.currentLine.equals("DELETED")) {
-					session.status = ParseStatus.DELETED;
+					return notifyBoolean(session, Boolean.TRUE);
 				} else if (session.currentLine.equals("END")) {
-					session.status = ParseStatus.END;
+					return parseEndCommand(session);
+				} else if (session.currentLine.equals("EXISTS")) {
+					return notifyBoolean(session, Boolean.FALSE);
 				} else if (session.currentLine.equals("NOT_STORED")) {
-					session.status = ParseStatus.NOT_STORED;
+					return notifyBoolean(session, Boolean.FALSE);
 				} else if (session.currentLine.equals("NOT_FOUND")) {
-					session.status = ParseStatus.NOT_FOUND;
+					return notifyBoolean(session, Boolean.FALSE);
 				} else if (session.currentLine.equals("ERROR")) {
-					session.status = ParseStatus.ERROR;
+					return parseException(session);
 				} else if (session.currentLine.startsWith("CLIENT_ERROR")) {
-					session.status = ParseStatus.CLIENT_ERROR;
+					return parseClientException(session);
 				} else if (session.currentLine.startsWith("SERVER_ERROR")) {
-					session.status = ParseStatus.SERVER_ERROR;
+					return parseServerException(session);
 				} else if (session.currentLine.startsWith("VERSION ")) {
-					session.status = ParseStatus.VERSION;
+					return parseVersionCommand(session);
 				} else {
-					session.status = ParseStatus.INCR;
+					return parseIncrDecrCommand(session);
 				}
 				if (!session.status.equals(ParseStatus.NULL)) {
 					continue LABEL;
@@ -114,26 +114,6 @@ public class MemcachedHandler extends HandlerAdapter<Command> implements
 				}
 			case GET:
 				return parseGet(session, buffer, origPos, origLimit);
-			case END:
-				return parseEndCommand(session);
-			case STORED:
-				return parseStored(session);
-			case NOT_STORED:
-				return parseNotStored(session);
-			case DELETED:
-				return parseDeleted(session);
-			case NOT_FOUND:
-				return parseNotFound(session);
-			case ERROR:
-				return parseException(session);
-			case CLIENT_ERROR:
-				return parseClientException(session);
-			case SERVER_ERROR:
-				return parseServerException(session);
-			case VERSION:
-				return parseVersionCommand(session);
-			case INCR:
-				return parseIncrDecrCommand(session);
 			default:
 				return false;
 
@@ -162,7 +142,9 @@ public class MemcachedHandler extends HandlerAdapter<Command> implements
 					return false;
 				}
 				if (executingCommand.getCommandType().equals(
-						Command.CommandType.GET_MANY)) {
+						Command.CommandType.GET_MANY)
+						|| executingCommand.getCommandType().equals(
+								Command.CommandType.GETS_MANY)) {
 					processGetManyCommand(session, session.currentValues,
 							executingCommand);
 				} else {
@@ -182,11 +164,14 @@ public class MemcachedHandler extends HandlerAdapter<Command> implements
 					session.currentLine = null;
 					return false;
 				}
-
+				// 可能是gets操作
+				long casId = -1;
+				if (items.length >= 5)
+					casId = Long.parseLong(items[4]);
 				byte[] data = new byte[dataLen];
 				buffer.get(data);
 				session.currentValues.put(items[1], new CachedData(flag, data,
-						dataLen));
+						dataLen, casId));
 				buffer.position(buffer.position() + SPLIT.remaining());
 				session.currentLine = null;
 			} else {
@@ -214,52 +199,14 @@ public class MemcachedHandler extends HandlerAdapter<Command> implements
 			// merge get
 			List<Command> mergeCommands = executingCmd.getMergeCommands();
 			for (Command nextCommand : mergeCommands) {
-
 				nextCommand.setResult(null);
 				nextCommand.getLatch().countDown(); // notify
-
 			}
 
 		}
 		session.resetStatus();
 		return true;
 
-	}
-
-	/**
-	 * 解析存储协议response
-	 * 
-	 * @return
-	 */
-	private boolean parseStored(MemcachedTCPSession session) {
-		return notifyBoolean(session, Boolean.TRUE);
-	}
-
-	/**
-	 * 解析存储协议response
-	 * 
-	 * @return
-	 */
-	private boolean parseNotStored(MemcachedTCPSession session) {
-		return notifyBoolean(session, Boolean.FALSE);
-	}
-
-	/**
-	 * 解析delete协议response
-	 * 
-	 * @return
-	 */
-	private boolean parseDeleted(MemcachedTCPSession session) {
-		return notifyBoolean(session, Boolean.TRUE);
-	}
-
-	/**
-	 * 解析delete和incr协议response
-	 * 
-	 * @return
-	 */
-	private boolean parseNotFound(MemcachedTCPSession session) {
-		return notifyBoolean(session, Boolean.FALSE);
 	}
 
 	/**
@@ -383,9 +330,7 @@ public class MemcachedHandler extends HandlerAdapter<Command> implements
 	@SuppressWarnings("unchecked")
 	private Transcoder transcoder;
 	protected XMemcachedClient client;
-	private static final int MAX_TRIES = 5; // 重连最大次数
 	protected static final Log log = LogFactory.getLog(MemcachedHandler.class);
-	private int connectTries = 0;
 
 	@Override
 	public void onMessageSent(Session session, Command t) {
@@ -401,7 +346,6 @@ public class MemcachedHandler extends HandlerAdapter<Command> implements
 
 	@Override
 	public void onSessionClosed(Session session) {
-		log.warn("session close");
 		this.client.getConnector().removeSession((MemcachedTCPSession) session);
 		reconnect(session);
 	}
@@ -422,18 +366,31 @@ public class MemcachedHandler extends HandlerAdapter<Command> implements
 			if (values.get(executingCmd.getKey()) == null)
 				reconnect(session);
 			else {
-				executingCmd.setResult(transcoder.decode(values
-						.get(executingCmd.getKey())));
+				CachedData data = values.get(executingCmd.getKey());
+				if (executingCmd.getCommandType().equals(
+						Command.CommandType.GETS_ONE)) {
+					executingCmd.setResult(new GetsResult(data.getCas(),
+							transcoder.decode(data)));
+				} else {
+					executingCmd.setResult(transcoder.decode(data));
+				}
 				executingCmd.getLatch().countDown();
 			}
 		} else {
+			// merge get
 			List<Command> mergeCommands = executingCmd.getMergeCommands();
 			for (Command nextCommand : mergeCommands) {
 				if (values.get(nextCommand.getKey()) == null)
 					nextCommand.setResult(null);
-				else
-					nextCommand.setResult(transcoder.decode(values
-							.get(nextCommand.getKey())));
+				else {
+					CachedData data = values.get(nextCommand.getKey());
+					if (executingCmd.getCommandType().equals(
+							Command.CommandType.GETS_MANY)) {
+						nextCommand.setResult(new GetsResult(data.getCas(),
+								transcoder.decode(data)));
+					} else
+						nextCommand.setResult(transcoder.decode(data));
+				}
 				nextCommand.getLatch().countDown();
 			}
 		}
@@ -443,14 +400,27 @@ public class MemcachedHandler extends HandlerAdapter<Command> implements
 	@SuppressWarnings("unchecked")
 	private void processGetManyCommand(Session session,
 			Map<String, CachedData> values, Command executingCmd) {
-		Map<String, Object> result = new HashMap<String, Object>();
-		Iterator<Map.Entry<String, CachedData>> it = values.entrySet()
-				.iterator();
-		while (it.hasNext()) {
-			Map.Entry<String, CachedData> item = it.next();
-			result.put(item.getKey(), transcoder.decode(item.getValue()));
+		// 合并结果
+		if (executingCmd.getCommandType().equals(Command.CommandType.GETS_MANY)) {
+			Map result = (Map) executingCmd.getResult();
+			Iterator<Map.Entry<String, CachedData>> it = values.entrySet()
+					.iterator();
+			while (it.hasNext()) {
+				Map.Entry<String, CachedData> item = it.next();
+				GetsResult getsResult = new GetsResult(
+						item.getValue().getCas(), transcoder.decode(item
+								.getValue()));
+				result.put(item.getKey(), getsResult);
+			}
+		} else {
+			Map result = (Map) executingCmd.getResult();
+			Iterator<Map.Entry<String, CachedData>> it = values.entrySet()
+					.iterator();
+			while (it.hasNext()) {
+				Map.Entry<String, CachedData> item = it.next();
+				result.put(item.getKey(), transcoder.decode(item.getValue()));
+			}
 		}
-		executingCmd.setResult(result);
 		executingCmd.getLatch().countDown();
 	}
 

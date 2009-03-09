@@ -51,7 +51,7 @@ public class MemcachedTCPSession extends DefaultTCPSession {
 	private MemcachedProtocolHandler memcachedProtocolHandler;
 	protected List<Command> executingCmds = new LinkedList<Command>(); // 存储已经发送的命令
 
-	Map<String,CachedData> currentValues=null;
+	Map<String, CachedData> currentValues = null;
 
 	private SocketAddress remoteSocketAddress;
 
@@ -252,7 +252,10 @@ public class MemcachedTCPSession extends DefaultTCPSession {
 						currentCommand.getByteBuffer());
 				if (buffer != null && !buffer.hasRemaining()) {
 					writeQueue.pop(); // remove message
-
+					log
+							.debug("send command:"
+									+ new String(currentCommand.getByteBuffer()
+											.array()));
 					executingCmds.add(currentCommand); // 添加到当前执行队列
 
 				} else { // not write complete, but write buffer is full

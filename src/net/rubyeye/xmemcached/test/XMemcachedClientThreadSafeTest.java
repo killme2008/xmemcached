@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.*;
 import net.rubyeye.xmemcached.XMemcachedClient;
+import net.rubyeye.xmemcached.impl.KetamaMemcachedSessionLocator;
 
 class TestThread implements Runnable {
 	private static final int ELEMENT_NUM = 50;
@@ -28,7 +29,7 @@ class TestThread implements Runnable {
 
 	int number;
 
-	final static int NUM = 10000;
+	final static int NUM = 1000;
 
 	public TestThread(int number, XMemcachedClient xmemcachedClient,
 			CyclicBarrier barrier) {
@@ -83,7 +84,7 @@ class TestThread implements Runnable {
 			assert (xmemcachedClient.delete("map2_" + number));
 			barrier.await();
 		} catch (Exception e) {
-			//e.printStackTrace();
+			e.printStackTrace();
 //			System.err.println(this.number + " " + e.getMessage());
 		}
 	}
@@ -95,8 +96,11 @@ public class XMemcachedClientThreadSafeTest {
 	public static void main(String args[]) throws Exception {
 		CyclicBarrier barrier = new CyclicBarrier(num + 1);
 		String ip = "192.168.222.100";
-		XMemcachedClient client = new XMemcachedClient();
+		XMemcachedClient client = new XMemcachedClient(new KetamaMemcachedSessionLocator());
 		client.addServer(ip, 12000);
+		client.addServer(ip, 12001);
+		client.addServer(ip, 12003);
+		client.addServer(ip, 12004);
 		client.addServer(ip, 11211);
 		for (int i = 0; i < num; i++)
 			new Thread(new TestThread(i, client, barrier)).start();

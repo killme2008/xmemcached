@@ -14,10 +14,8 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -46,9 +44,9 @@ public class MemcachedConnector extends SocketChannelController {
 				try {
 					InetSocketAddress address = waitingQueue.take();
 					int tries = 0;
-					// 最多重连3次
+					// 最多重连10次
 					boolean connected = false;
-					while (tries < 3) {
+					while (tries < 10) {
 						Future<Boolean> future = connect(address);
 						tries++;
 						try {
@@ -58,7 +56,7 @@ public class MemcachedConnector extends SocketChannelController {
 									+ " times");
 							if (!future.get(XMemcachedClient.CONNECT_TIMEOUT,
 									TimeUnit.MILLISECONDS)) {
-								Thread.sleep(5000); // 5秒后再次重连
+								Thread.sleep(2000); // 2秒后再次重连
 								continue;
 							} else {
 								connected = true;
@@ -66,19 +64,22 @@ public class MemcachedConnector extends SocketChannelController {
 							}
 						} catch (TimeoutException e) {
 							future.cancel(true);
-							Thread.sleep(5000); // 5秒后再次重连
+							Thread.sleep(2000); // 2秒后再次重连
 							continue;
 						} catch (ExecutionException e) {
 							future.cancel(true);
-							Thread.sleep(5000); // 5秒后再次重连
+							Thread.sleep(2000); // 2秒后再次重连
 							continue;
 						}
 					}
-					if (!connected)
-						throw new IOException("connect to "
-								+ address.getHostName() + ":"
+					if (!connected) {
+						log.error("connect to " + address.getHostName() + ":"
 								+ address.getPort() + " fail");
-					Thread.sleep(3000);
+						// 加入队尾,稍后重试
+						waitingQueue.add(address);
+						// 暂停5秒
+						Thread.sleep(5000);
+					}
 				} catch (IOException e) {
 					log.error("monitor connect error", e);
 				} catch (InterruptedException e) {
@@ -101,7 +102,7 @@ public class MemcachedConnector extends SocketChannelController {
 
 	protected MemcachedSessionLocator sessionLocator;
 
-	class ConnectFuture implements Future<Boolean> {
+	static class ConnectFuture implements Future<Boolean> {
 
 		private boolean connected = false;
 		private boolean done = false;
@@ -166,13 +167,14 @@ public class MemcachedConnector extends SocketChannelController {
 		}
 	}
 
-	List<MemcachedTCPSession> memcachedSessions; // 连接管理
+	CopyOnWriteArrayList<MemcachedTCPSession> memcachedSessions; // 连接管理
 
 	public void addSession(MemcachedTCPSession session) {
 		log.warn("add session "
 				+ session.getRemoteSocketAddress().getHostName() + ":"
 				+ session.getRemoteSocketAddress().getPort());
 		this.memcachedSessions.add(session);
+		this.sessionLocator.setSessionList(this.memcachedSessions);
 	}
 
 	public void removeSession(MemcachedTCPSession session) {
@@ -180,6 +182,7 @@ public class MemcachedConnector extends SocketChannelController {
 				+ session.getRemoteSocketAddress().getHostName() + ":"
 				+ session.getRemoteSocketAddress().getPort());
 		this.memcachedSessions.remove(session);
+		this.sessionLocator.setSessionList(this.memcachedSessions);
 	}
 
 	private int sendBufferSize = 0;
@@ -295,7 +298,7 @@ public class MemcachedConnector extends SocketChannelController {
 	public MemcachedConnector(Configuration configuration,
 			MemcachedSessionLocator locator) {
 		super(configuration, null);
-		this.memcachedSessions = new ArrayList<MemcachedTCPSession>(20);
+		this.memcachedSessions = new CopyOnWriteArrayList<MemcachedTCPSession>();
 		this.sessionLocator = locator;
 		this.sessionLocator.setSessionList(memcachedSessions);
 		this.sessionMonitor = new SessionMonitor();

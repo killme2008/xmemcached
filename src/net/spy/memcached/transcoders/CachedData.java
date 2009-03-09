@@ -12,37 +12,48 @@ public final class CachedData {
 	/**
 	 * Maximum data size allowed by memcached.
 	 */
-	public static final int MAX_SIZE = 1024*1024;
+	public static final int MAX_SIZE = 1024 * 1024;
 
 	private final int flags;
 	private final byte[] data;
+	private final long casId;
 
-	/**
-	 * Get a CachedData instance for the given flags and byte array.
-	 *
-	 * @param f the flags
-	 * @param d the data
-	 * @param max_size the maximum allowable size.
-	 */
-	public CachedData(int f, byte[] d, int max_size) {
-		super();
-		if(d.length > max_size) {
-			throw new IllegalArgumentException(
-				"Cannot cache data larger than 1MB (you tried to cache a "
-					+ d.length + " byte object)");
-		}
-		flags=f;
-		data=d;
+	public long getCas() {
+		return casId;
 	}
 
 	/**
 	 * Get a CachedData instance for the given flags and byte array.
-	 *
-	 * @param f the flags
-	 * @param d the data
+	 * 
+	 * @param f
+	 *            the flags
+	 * @param d
+	 *            the data
+	 * @param max_size
+	 *            the maximum allowable size.
+	 */
+	public CachedData(int f, byte[] d, int max_size, long casId) {
+		super();
+		if (d.length > max_size) {
+			throw new IllegalArgumentException(
+					"Cannot cache data larger than 1MB (you tried to cache a "
+							+ d.length + " byte object)");
+		}
+		flags = f;
+		data = d;
+		this.casId = casId;
+	}
+
+	/**
+	 * Get a CachedData instance for the given flags and byte array.
+	 * 
+	 * @param f
+	 *            the flags
+	 * @param d
+	 *            the data
 	 */
 	public CachedData(int f, byte[] d) {
-		this(f, d, MAX_SIZE);
+		this(f, d, MAX_SIZE, -1);
 	}
 
 	/**
@@ -61,7 +72,7 @@ public final class CachedData {
 
 	@Override
 	public String toString() {
-		return "{CachedData flags=" + flags + " data="
-			+ Arrays.toString(data) + "}";
+		return "{CachedData flags=" + flags + " data=" + Arrays.toString(data)
+				+ "}";
 	}
 }

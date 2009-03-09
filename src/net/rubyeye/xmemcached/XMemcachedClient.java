@@ -7,7 +7,6 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -27,10 +26,11 @@ import net.spy.memcached.transcoders.SerializingTranscoder;
 import net.spy.memcached.transcoders.Transcoder;
 
 import com.google.code.yanf4j.config.Configuration;
+import com.google.code.yanf4j.nio.Session;
 
 public class XMemcachedClient {
 
-	public static final int CONNECT_TIMEOUT = 5000;
+	public static final int CONNECT_TIMEOUT = 3000;
 	private static final int TCP_SEND_BUFF_SIZE = 16 * 1024;
 	private static final boolean TCP_NO_DELAY = false;
 	private static final int READ_BUFF_SIZE = 32 * 1024;
@@ -98,33 +98,38 @@ public class XMemcachedClient {
 		connect(new InetSocketAddress(server, port));
 	}
 
-	public void addServer(InetSocketAddress inetSocketAddress)
-			throws IOException {
+	public void addServer(InetSocketAddress inetSocketAddress) {
 		if (inetSocketAddress == null) {
 			throw new IllegalArgumentException();
 		}
 		connect(inetSocketAddress);
 	}
 
-	private void connect(InetSocketAddress inetSocketAddress)
-			throws IOException {
-		Future<Boolean> future = this.connector.connect(inetSocketAddress);
+	private void connect(InetSocketAddress inetSocketAddress) {
+		Future<Boolean> future = null;
 		try {
+			future = this.connector.connect(inetSocketAddress);
+
 			if (!future.get(CONNECT_TIMEOUT, TimeUnit.MILLISECONDS))
-				throw new IOException("connect to "
-						+ inetSocketAddress.getHostName() + ":"
+				log.error("connect to " + inetSocketAddress.getHostName() + ":"
 						+ inetSocketAddress.getPort() + " fail");
 		} catch (InterruptedException e) {
 			Thread.currentThread().interrupt();
 		} catch (ExecutionException e) {
-			future.cancel(true);
-			throw new IOException(e);
+			if (future != null)
+				future.cancel(true);
+			log.error("connect to " + inetSocketAddress.getHostName() + ":"
+					+ inetSocketAddress.getPort() + " error", e);
 		} catch (TimeoutException e) {
-			future.cancel(true);
-			throw new IOException(e);
+			if (future != null)
+				future.cancel(true);
+			log.error("connect to " + inetSocketAddress.getHostName() + ":"
+					+ inetSocketAddress.getPort() + " timeout");
 		} catch (Exception e) {
-			future.cancel(true);
-			throw new IOException(e);
+			if (future != null)
+				future.cancel(true);
+			log.error("connect to " + inetSocketAddress.getHostName() + ":"
+					+ inetSocketAddress.getPort() + " error", e);
 		}
 
 	}
@@ -179,15 +184,26 @@ public class XMemcachedClient {
 
 	public Object get(final String key, long timeout) throws TimeoutException,
 			InterruptedException, MemcachedException {
+		return get(key, timeout, ByteUtils.GET, Command.CommandType.GET_ONE);
+	}
+
+	public GetsResult gets(final String key, long timeout)
+			throws TimeoutException, InterruptedException, MemcachedException {
+		return (GetsResult) get(key, timeout, ByteUtils.GETS,
+				Command.CommandType.GETS_ONE);
+	}
+
+	private Object get(final String key, long timeout, byte[] cmdBytes,
+			Command.CommandType cmdType) throws TimeoutException,
+			InterruptedException, MemcachedException {
 		ByteUtils.checkKey(key);
 		final CountDownLatch latch = new CountDownLatch(1);
 		byte[] keyBytes = ByteUtils.getBytes(key);
-		final ByteBuffer buffer = ByteBuffer.allocate(ByteUtils.GET.length
+		final ByteBuffer buffer = ByteBuffer.allocate(cmdBytes.length
 				+ ByteUtils.CRLF.length + 1 + keyBytes.length);
-		ByteUtils.setArguments(buffer, ByteUtils.GET, keyBytes);
+		ByteUtils.setArguments(buffer, cmdBytes, keyBytes);
 		buffer.flip();
-		Command getCmd = new Command(key, Command.CommandType.GET_ONE, latch) {
-
+		Command getCmd = new Command(key, cmdType, latch) {
 			@Override
 			public ByteBuffer getByteBuffer() {
 
@@ -205,69 +221,130 @@ public class XMemcachedClient {
 
 	public Object get(final String key) throws TimeoutException,
 			InterruptedException {
-		return get(key, TIMEOUT);
+		return get(key, TIMEOUT, ByteUtils.GET, Command.CommandType.GET_ONE);
+	}
+
+	public GetsResult gets(final String key) throws TimeoutException,
+			InterruptedException {
+		return (GetsResult) get(key, TIMEOUT, ByteUtils.GETS,
+				Command.CommandType.GETS_ONE);
 	}
 
 	@SuppressWarnings("unchecked")
 	public Map<String, Object> get(Collection<String> keyCollections)
 			throws TimeoutException, InterruptedException, MemcachedException {
+		// 超时时间加倍
+		long lazy = keyCollections.size() / 1000 > 0 ? (keyCollections.size() / 1000)
+				: 1;
+		lazy = lazy > 5 ? 5 : lazy; // 最高5秒
+		return (Map<String, Object>) get(keyCollections, lazy * TIMEOUT,
+				ByteUtils.GET, Command.CommandType.GET_MANY);
+	}
+
+	@SuppressWarnings("unchecked")
+	public Map<String, Object> get(Collection<String> keyCollections,
+			long timeout) throws TimeoutException, InterruptedException,
+			MemcachedException {
+		return (Map<String, Object>) get(keyCollections, timeout,
+				ByteUtils.GET, Command.CommandType.GET_MANY);
+	}
+
+	@SuppressWarnings("unchecked")
+	public Map<String, GetsResult> gets(Collection<String> keyCollections)
+			throws TimeoutException, InterruptedException, MemcachedException {
+		// 超时时间加倍
+		long lazy = keyCollections.size() / 1000 > 0 ? (keyCollections.size() / 1000)
+				: 1;
+		lazy = lazy > 3 ? 3 : lazy; // 最高3秒
+		return (Map<String, GetsResult>) get(keyCollections, lazy * TIMEOUT,
+				ByteUtils.GETS, Command.CommandType.GETS_MANY);
+	}
+
+	@SuppressWarnings("unchecked")
+	public Map<String, GetsResult> gets(Collection<String> keyCollections,
+			long timeout) throws TimeoutException, InterruptedException,
+			MemcachedException {
+		return (Map<String, GetsResult>) get(keyCollections, timeout,
+				ByteUtils.GETS, Command.CommandType.GETS_MANY);
+	}
+
+	@SuppressWarnings("unchecked")
+	private Map get(Collection<String> keyCollections, long timeout,
+			byte[] cmdBytes, Command.CommandType cmdType)
+			throws TimeoutException, InterruptedException, MemcachedException {
 		if (keyCollections == null || keyCollections.size() == 0) {
 			return null;
 		}
-		Map<Long, List<String>> catalogMap = new HashMap<Long, List<String>>();
+		Collection<List<String>> catalogKeys = catalogKeys(keyCollections);
+		Map result = new HashMap();
+		List<Command> commands = new LinkedList<Command>();
+		final CountDownLatch latch = new CountDownLatch(catalogKeys.size());
+		for (List<String> keys : catalogKeys) {
+			commands.add(sendGetManyCommand(keys, latch, result, cmdBytes,
+					cmdType));
+		}
+		// 超时时间加倍
+		long lazy = keyCollections.size() / 1000 > 0 ? (keyCollections.size() / 1000)
+				: 1;
+		lazy = lazy > 5 ? 5 : lazy; // 最高5秒
+		latchWait(timeout*lazy, latch);
+		for (Command getCmd : commands) {
+			if (getCmd.getException() != null)
+				throw getCmd.getException();
+		}
+		return result;
+	}
+
+	/**
+	 * 对key按照hash值进行分类，发送到不同节点
+	 * 
+	 * @param keyCollections
+	 * @return
+	 */
+	private Collection<List<String>> catalogKeys(
+			Collection<String> keyCollections) {
+		Map<Session, List<String>> catalogMap = new HashMap<Session, List<String>>();
 
 		for (String key : keyCollections) {
-			long index = this.sessionLocator.getIndexByKey(key);
-			if (!catalogMap.containsKey(key)) {
+			Session index = this.sessionLocator.getSessionByKey(key);
+			if (!catalogMap.containsKey(index)) {
 				List<String> tmpKeys = new LinkedList<String>();
 				tmpKeys.add(key);
 				catalogMap.put(index, tmpKeys);
 			} else
 				catalogMap.get(index).add(key);
 		}
-		
-		System.out.println(catalogMap);
 
 		Collection<List<String>> catalogKeys = catalogMap.values();
-		final CountDownLatch latch = new CountDownLatch(catalogKeys.size());
-		Command getCmd = new Command(keyCollections,
-				Command.CommandType.GET_MANY, latch);
-		for (List<String> keys : catalogKeys) {
-			sendGetManyCommand(keyCollections, getCmd);
-		}
-		long lazy = keyCollections.size() / 1000 > 0 ? (keyCollections.size() / 1000)
-				: 1;
-		latchWait(lazy * TIMEOUT, latch);
-		if (getCmd.getException() != null) {
-			throw getCmd.getException();
-		}
-		return (Map<String, Object>) getCmd.getResult();
+		return catalogKeys;
 	}
 
-	private void sendGetManyCommand(Collection<String> keys,
-			Command getCmd) throws InterruptedException,
-			TimeoutException {
+	@SuppressWarnings("unchecked")
+	private Command sendGetManyCommand(List<String> keys, CountDownLatch latch,
+			Map result, byte[] cmdBytes, Command.CommandType cmdType)
+			throws InterruptedException, TimeoutException {
+		Command getCmd = new Command(keys.get(0), cmdType, latch);
+		getCmd.setResult(result); // 共用一个result map
 		StringBuilder sb = new StringBuilder(keys.size() * 5);
 		for (String tmpKey : keys) {
 			ByteUtils.checkKey(tmpKey);
 			sb.append(tmpKey).append(" ");
 		}
 		byte[] keyBytes = ByteUtils.getBytes(sb.toString());
-		final ByteBuffer buffer = ByteBuffer.allocate(ByteUtils.GET.length
+		final ByteBuffer buffer = ByteBuffer.allocate(cmdBytes.length
 				+ ByteUtils.CRLF.length + 1 + keyBytes.length);
-		ByteUtils.setArguments(buffer, ByteUtils.GET, keyBytes);
+		ByteUtils.setArguments(buffer, cmdBytes, keyBytes);
 		buffer.flip();
 		getCmd.setByteBuffer(buffer);
-		getCmd.setKey(keys.remove(0));
 		sendCommand(getCmd);
-
+		return getCmd;
 	}
 
 	public boolean set(final String key, final int exp, Object value)
 			throws TimeoutException, InterruptedException, MemcachedException {
 		ByteUtils.checkKey(key);
 		return sendStoreCommand(key, exp, value, Command.CommandType.SET,
-				"set", TIMEOUT);
+				"set", TIMEOUT, -1);
 	}
 
 	public boolean set(final String key, final int exp, Object value,
@@ -275,28 +352,28 @@ public class XMemcachedClient {
 			MemcachedException {
 		ByteUtils.checkKey(key);
 		return sendStoreCommand(key, exp, value, Command.CommandType.SET,
-				"set", timeout);
+				"set", timeout, -1);
 	}
 
 	public boolean add(final String key, final int exp, Object value)
 			throws TimeoutException, InterruptedException, MemcachedException {
 		ByteUtils.checkKey(key);
 		return sendStoreCommand(key, exp, value, Command.CommandType.ADD,
-				"add", TIMEOUT);
+				"add", TIMEOUT, -1);
 	}
 
 	public boolean add(final String key, final int exp, Object value,
 			long timeout) throws TimeoutException, InterruptedException {
 		ByteUtils.checkKey(key);
 		return sendStoreCommand(key, exp, value, Command.CommandType.SET,
-				"add", timeout);
+				"add", timeout, -1);
 	}
 
 	public boolean replace(final String key, final int exp, Object value)
 			throws TimeoutException, InterruptedException, MemcachedException {
 		ByteUtils.checkKey(key);
 		return sendStoreCommand(key, exp, value, Command.CommandType.REPLACE,
-				"replace", TIMEOUT);
+				"replace", TIMEOUT, -1);
 	}
 
 	public boolean replace(final String key, final int exp, Object value,
@@ -304,7 +381,78 @@ public class XMemcachedClient {
 			MemcachedException {
 		ByteUtils.checkKey(key);
 		return sendStoreCommand(key, exp, value, Command.CommandType.SET,
-				"replace", timeout);
+				"replace", timeout, -1);
+	}
+
+	public boolean append(final String key, final int exp, Object value)
+			throws TimeoutException, InterruptedException, MemcachedException {
+		ByteUtils.checkKey(key);
+		return sendStoreCommand(key, exp, value, Command.CommandType.REPLACE,
+				"append", TIMEOUT, -1);
+	}
+
+	public boolean append(final String key, final int exp, Object value,
+			long timeout) throws TimeoutException, InterruptedException,
+			MemcachedException {
+		ByteUtils.checkKey(key);
+		return sendStoreCommand(key, exp, value, Command.CommandType.SET,
+				"append", timeout, -1);
+	}
+
+	public boolean prepend(final String key, final int exp, Object value)
+			throws TimeoutException, InterruptedException, MemcachedException {
+		ByteUtils.checkKey(key);
+		return sendStoreCommand(key, exp, value, Command.CommandType.REPLACE,
+				"prepend", TIMEOUT, -1);
+	}
+
+	public boolean prepend(final String key, final int exp, Object value,
+			long timeout) throws TimeoutException, InterruptedException,
+			MemcachedException {
+		ByteUtils.checkKey(key);
+		return sendStoreCommand(key, exp, value, Command.CommandType.SET,
+				"prepend", timeout, -1);
+	}
+
+	public boolean cas(final String key, final int exp, Object value,
+			long timeout, long cas) throws TimeoutException,
+			InterruptedException, MemcachedException {
+		ByteUtils.checkKey(key);
+		return sendStoreCommand(key, exp, value, Command.CommandType.CAS,
+				"cas", timeout, cas);
+	}
+
+	public boolean cas(final String key, final int exp, Object value, long cas)
+			throws TimeoutException, InterruptedException, MemcachedException {
+		ByteUtils.checkKey(key);
+		return sendStoreCommand(key, exp, value, Command.CommandType.CAS,
+				"cas", TIMEOUT, cas);
+	}
+
+	public boolean cas(final String key, final int exp, CASOperation operation)
+			throws TimeoutException, InterruptedException, MemcachedException {
+		ByteUtils.checkKey(key);
+		if (operation == null)
+			throw new IllegalArgumentException("CASOperation could not be null");
+		if (operation.getMaxTries() < 0)
+			throw new IllegalArgumentException("max tries less than 0");
+		int tryCount = 0;
+		GetsResult result = gets(key);
+		if (result == null)
+			throw new NullPointerException("could not found the key " + key);
+		while (tryCount < operation.getMaxTries()
+				&& result != null
+				&& !sendStoreCommand(key, exp, operation.getNewValue(result
+						.getCas(), result.getValue()), Command.CommandType.CAS,
+						"cas", TIMEOUT, result.getCas())) {
+			tryCount++;
+			result = gets(key);
+			if (result == null)
+				throw new NullPointerException("could not found the value for Key=" + key);
+			if (tryCount >= operation.getMaxTries())
+				throw new TimeoutException("CAS try times is greater than max");
+		}
+		return true;
 	}
 
 	public boolean delete(final String key, final int time)
@@ -415,10 +563,12 @@ public class XMemcachedClient {
 		return delete(key, 0);
 	}
 
+	@SuppressWarnings("unchecked")
 	public Transcoder getTranscoder() {
 		return transcoder;
 	}
 
+	@SuppressWarnings("unchecked")
 	public void setTranscoder(Transcoder transcoder) {
 		this.transcoder = transcoder;
 		this.memcachedHandler.setTranscoder(transcoder);
@@ -431,8 +581,10 @@ public class XMemcachedClient {
 	@SuppressWarnings("unchecked")
 	private boolean sendStoreCommand(final String key, final int exp,
 			final Object value, Command.CommandType cmdType, final String cmd,
-			long timeout) throws InterruptedException, TimeoutException,
-			MemcachedException {
+			long timeout, long cas) throws InterruptedException,
+			TimeoutException, MemcachedException {
+		if (value == null)
+			throw new IllegalArgumentException("value could not be null");
 		final CountDownLatch latch = new CountDownLatch(1);
 		final CachedData data = transcoder.encode(value);
 		byte[] keyBytes = ByteUtils.getBytes(key);
@@ -440,12 +592,20 @@ public class XMemcachedClient {
 		byte[] expBytes = ByteUtils.getBytes(String.valueOf(exp));
 		byte[] dataLenBytes = ByteUtils.getBytes(String
 				.valueOf(data.getData().length));
-		final ByteBuffer buffer = ByteBuffer.allocate(cmd.length() + 1
-				+ keyBytes.length + 1 + flagBytes.length + 1 + expBytes.length
-				+ 1 + data.getData().length + 2 * ByteUtils.CRLF.length
-				+ dataLenBytes.length);
-		ByteUtils.setArguments(buffer, cmd, keyBytes, flagBytes, expBytes,
-				dataLenBytes);
+		byte[] casBytes = ByteUtils.getBytes(String.valueOf(cas));
+		int size = cmd.length() + 1 + keyBytes.length + 1 + flagBytes.length
+				+ 1 + expBytes.length + 1 + data.getData().length + 2
+				* ByteUtils.CRLF.length + dataLenBytes.length;
+		if (cmdType.equals(Command.CommandType.CAS)) {
+			size += 1 + casBytes.length;
+		}
+		final ByteBuffer buffer = ByteBuffer.allocate(size);
+		if (cmdType.equals(Command.CommandType.CAS)) {
+			ByteUtils.setArguments(buffer, cmd, keyBytes, flagBytes, expBytes,
+					dataLenBytes, casBytes);
+		} else
+			ByteUtils.setArguments(buffer, cmd, keyBytes, flagBytes, expBytes,
+					dataLenBytes);
 		ByteUtils.setArguments(buffer, data.getData());
 		buffer.flip();
 		Command command = new Command(key, cmdType, latch) {

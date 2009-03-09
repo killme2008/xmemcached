@@ -141,7 +141,7 @@ public class SerializingTranscoder extends BaseSerializingTranscoder
 					o.getClass().getName(), b.length, compressed.length);
 			}
 		}
-		return new CachedData(flags, b, maxSize);
+		return new CachedData(flags, b, maxSize,-1);
 	}
 
 }
