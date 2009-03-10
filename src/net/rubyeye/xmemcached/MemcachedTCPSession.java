@@ -224,30 +224,9 @@ public class MemcachedTCPSession extends DefaultTCPSession {
 				currentCommand = (Command) writeQueue.peek();
 				if (currentCommand == null) {
 					writeComplete = true; // 写完队列
-
 					break;
 				}
-				if (currentCommand.getCommandType().equals(
-						Command.CommandType.GET_ONE)) {
-					final List<Command> mergeCommands = new ArrayList<Command>(
-							getsMergeFactor);
-					mergeCommands.add(currentCommand);
-					// 优化get操作
-					if (optimiezeGet) {
-						writeQueue.pop();
-						currentCommand = optimizeGet(currentCommand,
-								mergeCommands);
-						((ExtendedQueue) writeQueue).addFirst(currentCommand); // 加入队首
-
-					}
-				} else if (currentCommand.getCommandType().equals(
-						Command.CommandType.SET)
-						&& optimiezeSet) {
-					writeQueue.pop();
-					currentCommand = optimizeSet(currentCommand);
-					((ExtendedQueue) writeQueue).addFirst(currentCommand);// 加入队首
-
-				}
+				currentCommand = wrapCurrentCommand(currentCommand);
 				ByteBuffer buffer = writeToChannel(selectableChannel,
 						currentCommand.getByteBuffer());
 				if (buffer != null && !buffer.hasRemaining()) {
@@ -291,6 +270,31 @@ public class MemcachedTCPSession extends DefaultTCPSession {
 	}
 
 	@SuppressWarnings("unchecked")
+	private Command wrapCurrentCommand(Command currentCommand)
+			throws InterruptedException {
+		if (currentCommand.getCommandType().equals(Command.CommandType.GET_ONE)) {
+			final List<Command> mergeCommands = new ArrayList<Command>(
+					getsMergeFactor);
+			mergeCommands.add(currentCommand);
+			// 优化get操作
+			if (optimiezeGet) {
+				writeQueue.pop();
+				currentCommand = optimizeGet(currentCommand, mergeCommands);
+				((ExtendedQueue) writeQueue).addFirst(currentCommand); // 加入队首
+
+			}
+		} else if (currentCommand.getCommandType().equals(
+				Command.CommandType.SET)
+				&& optimiezeSet) {
+			writeQueue.pop();
+			currentCommand = optimizeSet(currentCommand);
+			((ExtendedQueue) writeQueue).addFirst(currentCommand);// 加入队首
+
+		}
+		return currentCommand;
+	}
+
+	@SuppressWarnings("unchecked")
 	protected ByteBuffer writeToChannel(SelectableChannel channel,
 			ByteBuffer writeBuffer) throws IOException {
 		updateTimeStamp();
@@ -299,7 +303,6 @@ public class MemcachedTCPSession extends DefaultTCPSession {
 
 		}
 		if (useBlockingWrite) { // 阻塞写
-
 			return blockingWrite(channel, writeBuffer);
 		} else {
 			while (true) {
