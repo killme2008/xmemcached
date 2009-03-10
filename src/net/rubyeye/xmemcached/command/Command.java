@@ -6,7 +6,7 @@ import java.util.concurrent.CountDownLatch;
 
 import com.google.code.yanf4j.nio.Message;
 
-public class Command implements Message {
+public class Command{
 	public static final String SPLIT = "\r\n";
 
 	Object key;
@@ -113,9 +113,4 @@ public class Command implements Message {
 	public void setLatch(CountDownLatch latch) {
 		this.latch = latch;
 	}
-
-	public int getLength() {
-		return 4;
-	}
-
 }

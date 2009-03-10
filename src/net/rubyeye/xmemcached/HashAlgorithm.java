@@ -52,8 +52,6 @@ public enum HashAlgorithm {
 
 	MYSQL_HASH,
 
-	SIMPLE_HASH,
-
 	ELF_HASH,
 
 	RS_HASH;
@@ -128,21 +126,15 @@ public enum HashAlgorithm {
 			int nr = 1,
 			nr2 = 4;
 			for (int i = 0; i < k.length(); i++) {
-				nr ^= (((nr & 63) + nr2) * ((int) k.charAt(i))) + (nr << 8);
+				nr ^= (((nr & 63) + nr2) * k.charAt(i)) + (nr << 8);
 				nr2 += 3;
 			}
 			return nr;
-		case SIMPLE_HASH:
-			int ret = 0;
-			for (int i = 0; i < k.length(); i++) {
-				ret = 31 * ret + k.charAt(i);
-			}
-			return ret;
 		case ELF_HASH:
 			long hash = 0;
 			long x = 0;
 			for (int i = 0; i < k.length(); i++) {
-				hash = (hash << 4) + (int) k.charAt(i);
+				hash = (hash << 4) + k.charAt(i);
 				if ((x = hash & 0xF0000000L) != 0) {
 					hash ^= (x >> 24);
 					hash &= ~x;
@@ -155,7 +147,7 @@ public enum HashAlgorithm {
 			long a = 63689;
 			hash = 0;
 			for (int i = 0; i < k.length(); i++) {
-				hash = hash * a + (int) k.charAt(i);
+				hash = hash * a + k.charAt(i);
 				a *= b;
 			}
 			return (hash & 0x7FFFFFFF);
