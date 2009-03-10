@@ -25,7 +25,9 @@ public class CacheHitRateTest {
 	public static void main(String[] args) throws Exception {
 		String ip = "192.168.222.100";
 
-		HashAlgorithm hashAlg = HashAlgorithm.NATIVE_HASH;
+		// 替换这个HashAlgorithm进行测试
+		HashAlgorithm hashAlg = HashAlgorithm.KETAMA_HASH;
+
 		XMemcachedClient client = new XMemcachedClient(
 				new KetamaMemcachedSessionLocator(hashAlg));
 		client.addServer(ip, 12000);
@@ -38,7 +40,13 @@ public class CacheHitRateTest {
 		client.addServer(ip, 12007);
 		client.addServer(ip, 12008);
 		client.addServer(ip, 12009);
+		//初始化数据
 		Set<String> keys = init(client);
+		testHashPerfromance(keys, HashAlgorithm.CRC32_HASH);
+		testHashPerfromance(keys, HashAlgorithm.KETAMA_HASH);
+		testHashPerfromance(keys, HashAlgorithm.FNV1_32_HASH);
+		testHashPerfromance(keys, HashAlgorithm.NATIVE_HASH);
+		testHashPerfromance(keys, HashAlgorithm.MYSQL_HASH);
 		// 此时应该是100%
 		printHitRate(client, keys);
 		// 添加两个节点后，查看命中率
@@ -46,6 +54,18 @@ public class CacheHitRateTest {
 		client.addServer(ip, 12011);
 		printHitRate(client, keys);
 		client.shutdown();
+	}
+
+	private static void testHashPerfromance(Set<String> keys,
+			HashAlgorithm hashAlg) {
+		long start = System.currentTimeMillis();
+		for (int i = 0; i < 1000; i++) {
+			for (String key : keys) {
+				hashAlg.hash(key);
+			}
+		}
+		System.out.println(hashAlg.name() + ":"
+				+ (System.currentTimeMillis() - start));
 	}
 
 	private static void printHitRate(XMemcachedClient client, Set<String> keys)
@@ -84,7 +104,7 @@ public class CacheHitRateTest {
 				}
 			}
 		}
-		System.out.println("words number=" + counters.size());
+		System.out.println("words number=" + counters.keySet().size());
 		Iterator<Map.Entry<String, Integer>> it = counters.entrySet()
 				.iterator();
 		while (it.hasNext()) {

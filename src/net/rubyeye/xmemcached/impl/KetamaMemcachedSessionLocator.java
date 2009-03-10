@@ -7,6 +7,7 @@ import java.util.TreeMap;
 import net.rubyeye.xmemcached.HashAlgorithm;
 import net.rubyeye.xmemcached.MemcachedSessionLocator;
 import net.rubyeye.xmemcached.MemcachedTCPSession;
+
 /**
  * ConnectionFactory instance that sets up a ketama compatible connection.
  *
@@ -31,7 +32,7 @@ import net.rubyeye.xmemcached.MemcachedTCPSession;
 public class KetamaMemcachedSessionLocator implements MemcachedSessionLocator {
 	static final int NUM_REPS = 160;
 
-	private SortedMap<Long, MemcachedTCPSession> ketamaSessions = new TreeMap<Long, MemcachedTCPSession>();
+	private TreeMap<Long, MemcachedTCPSession> ketamaSessions = new TreeMap<Long, MemcachedTCPSession>();
 
 	final HashAlgorithm hashAlg;
 
@@ -83,18 +84,21 @@ public class KetamaMemcachedSessionLocator implements MemcachedSessionLocator {
 
 	@Override
 	public MemcachedTCPSession getSessionByKey(String key) {
-		long hash = hashAlg.hash(key);
+		Long hash = hashAlg.hash(key);
+
 		final MemcachedTCPSession rv;
 		if (!ketamaSessions.containsKey(hash)) {
-			// Java 1.6 adds a ceilingKey method, but I'm still stuck in 1.5
-			// in a lot of places, so I'm doing this myself.
-			SortedMap<Long, MemcachedTCPSession> tailMap = ketamaSessions
-					.tailMap(hash);
-			if (tailMap.isEmpty()) {
+			hash = ketamaSessions.ceilingKey(hash);
+			if (hash == null)
 				hash = ketamaSessions.firstKey();
-			} else {
-				hash = tailMap.firstKey();
-			}
+			// jdk1.5采用 下列代码，xmemcached针对jdk1.6
+			// SortedMap<Long, MemcachedTCPSession> tailMap = ketamaSessions
+			// .tailMap(hash);
+			// if (tailMap.isEmpty()) {
+			// hash = ketamaSessions.firstKey();
+			// } else {
+			// hash = tailMap.firstKey();
+			// }
 		}
 		rv = ketamaSessions.get(hash);
 		return rv;

@@ -123,38 +123,36 @@ public enum HashAlgorithm {
 					| ((long) (bKey[1] & 0xFF) << 8) | (bKey[0] & 0xFF);
 			break;
 		case MYSQL_HASH:
-			int nr = 1,
-			nr2 = 4;
+			int nr2 = 4;
 			for (int i = 0; i < k.length(); i++) {
-				nr ^= (((nr & 63) + nr2) * k.charAt(i)) + (nr << 8);
+				rv ^= (((rv & 63) + nr2) * k.charAt(i)) + (rv << 8);
 				nr2 += 3;
 			}
-			return nr;
+			break;
 		case ELF_HASH:
-			long hash = 0;
 			long x = 0;
 			for (int i = 0; i < k.length(); i++) {
-				hash = (hash << 4) + k.charAt(i);
-				if ((x = hash & 0xF0000000L) != 0) {
-					hash ^= (x >> 24);
-					hash &= ~x;
+				rv = (rv << 4) + k.charAt(i);
+				if ((x = rv & 0xF0000000L) != 0) {
+					rv ^= (x >> 24);
+					rv &= ~x;
 				}
 			}
-
-			return (hash & 0x7FFFFFFF);
+			rv = (rv & 0x7FFFFFFF);
+			break;
 		case RS_HASH:
 			long b = 378551;
 			long a = 63689;
-			hash = 0;
 			for (int i = 0; i < k.length(); i++) {
-				hash = hash * a + k.charAt(i);
+				rv = rv * a + k.charAt(i);
 				a *= b;
 			}
-			return (hash & 0x7FFFFFFF);
-
+			rv = (rv & 0x7FFFFFFF);
+			break;
 		default:
 			assert false;
 		}
+
 		return rv & 0xffffffffL; /* Truncate to 32-bits */
 	}
 
@@ -174,7 +172,11 @@ public enum HashAlgorithm {
 	}
 
 	public static void main(String[] args) {
-		for (int i = 0; i < 1000; i++)
-			System.out.println(HashAlgorithm.RS_HASH.hash(String.valueOf(i)));
+		HashAlgorithm alg=HashAlgorithm.CRC32_HASH;
+		long h=0;
+		long start=System.currentTimeMillis();
+		for(int i=0;i<100000;i++)
+			h=alg.hash("MYSQL_HASH");
+		System.out.println(System.currentTimeMillis()-start);
 	}
 }
