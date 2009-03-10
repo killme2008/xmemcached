@@ -45,15 +45,11 @@ public class MemcachedHandler extends HandlerAdapter<Command> implements
 	 * @return
 	 */
 	private boolean notifyBoolean(MemcachedTCPSession session, Boolean result) {
-		Command executingCmd = session.getCurrentExecutingCommand();
-		if (executingCmd == null) {
-			return false;
-		} else {
-			executingCmd.setResult(result);
-			executingCmd.getLatch().countDown();
-			session.resetStatus();
-			return true;
-		}
+		final Command executingCmd = session.getCurrentExecutingCommand();
+		executingCmd.setResult(result);
+		executingCmd.getLatch().countDown();
+		session.resetStatus();
+		return true;
 	}
 
 	/**
@@ -374,11 +370,7 @@ public class MemcachedHandler extends HandlerAdapter<Command> implements
 			// merge get
 			List<Command> mergeCommands = executingCmd.getMergeCommands();
 			for (Command nextCommand : mergeCommands) {
-				if (values.get(nextCommand.getKey()) == null)
-					nextCommand.setResult(null);
-				else {
-					nextCommand.setResult(values.get(nextCommand.getKey()));
-				}
+				nextCommand.setResult(values.get(nextCommand.getKey()));
 				nextCommand.getLatch().countDown();
 			}
 		}

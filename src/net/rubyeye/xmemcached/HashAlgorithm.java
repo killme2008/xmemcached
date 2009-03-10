@@ -48,7 +48,15 @@ public enum HashAlgorithm {
 	/**
 	 * MD5-based hash algorithm used by ketama.
 	 */
-	KETAMA_HASH;
+	KETAMA_HASH,
+	/**
+	 * php hash
+	 */
+	PHP_HASH,
+
+	MYSQL_HASH,
+
+	SIMPLE_HASH;
 
 	private static final long FNV_64_INIT = 0xcbf29ce484222325L;
 	private static final long FNV_64_PRIME = 0x100000001b3L;
@@ -116,6 +124,32 @@ public enum HashAlgorithm {
 					| ((long) (bKey[2] & 0xFF) << 16)
 					| ((long) (bKey[1] & 0xFF) << 8) | (bKey[0] & 0xFF);
 			break;
+		case PHP_HASH:
+			long h = 0,
+			g;
+			int len = k.length();
+			for (int i = 0; i < len; i++) {
+				h = (h << 4) + (int) k.charAt(i);
+				if ((g = (h & 0xF0000000)) != 0) {
+					h = h ^ (g >> 24);
+					h = h ^ g;
+				}
+			}
+			return h;
+		case MYSQL_HASH:
+			int nr = 1,
+			nr2 = 4;
+			for (int i = 0; i < k.length(); i++) {
+				nr ^= (((nr & 63) + nr2) * ((int) k.charAt(i))) + (nr << 8);
+				nr2 += 3;
+			}
+			return nr;
+		case SIMPLE_HASH:
+			int ret = 0;
+			for (int i = 0; i < k.length(); i++) {
+				ret = 31 * ret + k.charAt(i);
+			}
+			return ret;
 		default:
 			assert false;
 		}
@@ -135,5 +169,11 @@ public enum HashAlgorithm {
 		md5.reset();
 		md5.update(ByteUtils.getBytes(k));
 		return md5.digest();
+	}
+
+	public static void main(String[] args) {
+		for (int i = 0; i < 1000; i++)
+			System.out.println(HashAlgorithm.SIMPLE_HASH
+					.hash(String.valueOf(i)));
 	}
 }
