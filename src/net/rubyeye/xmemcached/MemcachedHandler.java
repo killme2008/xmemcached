@@ -225,7 +225,7 @@ public class MemcachedHandler extends HandlerAdapter<Command> implements
 	private boolean parseException(MemcachedTCPSession session) {
 		Command executingCmd = session.getCurrentExecutingCommand();
 		final MemcachedException exception = new MemcachedException(
-				"unknown command");
+				"Unknown command,please check your memcached version");
 		executingCmd.setException(exception);
 		executingCmd.getLatch().countDown();
 		session.resetStatus();

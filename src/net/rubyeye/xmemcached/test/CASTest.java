@@ -36,7 +36,7 @@ class CASThread extends Thread {
 			if (mc.cas("a", 0, new CASOperation() {
 				@Override
 				public int getMaxTries() {
-					return 50;
+					return 100;
 				}
 
 				@Override
@@ -59,7 +59,7 @@ public class CASTest {
 
 	public static void main(String[] args) throws Exception {
 		XMemcachedClient mc = new XMemcachedClient();
-		mc.addServer("192.168.222.100", 11211);
+		mc.addServer("localhost", 12000);
 		// 设置初始值为0
 		mc.set("a", 0, 0);
 		CountDownLatch cdl = new CountDownLatch(NUM);
