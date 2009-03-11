@@ -272,7 +272,8 @@ public class MemcachedConnector extends SocketChannelController {
 		}
 	}
 
-	public void send(Command msg) throws InterruptedException {
+	public void send(Command msg) throws InterruptedException,
+			MemcachedException {
 		Session session = findSessionByKey((String) msg.getKey());
 		if (session == null) {
 			throw new MemcachedException(

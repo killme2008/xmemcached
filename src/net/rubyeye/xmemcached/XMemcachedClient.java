@@ -64,7 +64,8 @@ public class XMemcachedClient {
 		return shutdown;
 	}
 
-	private void sendCommand(Command cmd) throws InterruptedException {
+	private void sendCommand(Command cmd) throws InterruptedException,
+			MemcachedException {
 		if (this.shutdown) {
 			throw new IllegalStateException();
 		}
@@ -226,12 +227,12 @@ public class XMemcachedClient {
 	}
 
 	public Object get(final String key) throws TimeoutException,
-			InterruptedException {
+			InterruptedException, MemcachedException {
 		return get(key, TIMEOUT, ByteUtils.GET, Command.CommandType.GET_ONE);
 	}
 
 	public GetsResponse gets(final String key) throws TimeoutException,
-			InterruptedException {
+			InterruptedException, MemcachedException {
 		return (GetsResponse) get(key, TIMEOUT, ByteUtils.GETS,
 				Command.CommandType.GETS_ONE);
 	}
@@ -242,7 +243,7 @@ public class XMemcachedClient {
 		// 超时时间加倍
 		long lazy = keyCollections.size() / 1000 > 0 ? (keyCollections.size() / 1000)
 				: 1;
-		lazy = lazy > 5 ? 5 : lazy; // 最高5秒
+		lazy = lazy > 3 ? 3 : lazy; // 最高3秒
 		return (Map<String, Object>) get(keyCollections, lazy * TIMEOUT,
 				ByteUtils.GET, Command.CommandType.GET_MANY);
 	}
@@ -292,7 +293,7 @@ public class XMemcachedClient {
 		// 超时时间加倍
 		long lazy = keyCollections.size() / 1000 > 0 ? (keyCollections.size() / 1000)
 				: 1;
-		lazy = lazy > 5 ? 5 : lazy; // 最高5秒
+		lazy = lazy > 3 ? 3 : lazy; // 最高3秒
 		latchWait(timeout * lazy, latch);
 		for (Command getCmd : commands) {
 			if (getCmd.getException() != null)
@@ -328,7 +329,7 @@ public class XMemcachedClient {
 	@SuppressWarnings("unchecked")
 	private Command sendGetManyCommand(List<String> keys, CountDownLatch latch,
 			Map result, byte[] cmdBytes, Command.CommandType cmdType)
-			throws InterruptedException, TimeoutException {
+			throws InterruptedException, TimeoutException, MemcachedException {
 		Command getCmd = new Command(keys.get(0), cmdType, latch);
 		getCmd.setResult(result); // 共用一个result map
 		StringBuilder sb = new StringBuilder(keys.size() * 5);
@@ -369,7 +370,8 @@ public class XMemcachedClient {
 	}
 
 	public boolean add(final String key, final int exp, Object value,
-			long timeout) throws TimeoutException, InterruptedException {
+			long timeout) throws TimeoutException, InterruptedException,
+			MemcachedException {
 		ByteUtils.checkKey(key);
 		return sendStoreCommand(key, exp, value, Command.CommandType.SET,
 				"add", timeout, -1);
@@ -441,11 +443,13 @@ public class XMemcachedClient {
 		if (operation == null)
 			throw new IllegalArgumentException("CASOperation could not be null");
 		if (operation.getMaxTries() < 0)
-			throw new IllegalArgumentException("max tries less than 0");
+			throw new IllegalArgumentException(
+					"max tries must be greater than 0");
 		int tryCount = 0;
 		GetsResponse result = gets(key);
 		if (result == null)
-			throw new NullPointerException("could not found the key " + key);
+			throw new NullPointerException(
+					"could not found the value for Key=" + key);
 		while (tryCount < operation.getMaxTries()
 				&& result != null
 				&& !sendStoreCommand(key, exp, operation.getNewValue(result
@@ -490,10 +494,12 @@ public class XMemcachedClient {
 		return (Boolean) command.getResult();
 	}
 
+	static final ByteBuffer VERSION = ByteBuffer.wrap("version\r\n".getBytes());
+
 	public String version() throws TimeoutException, InterruptedException,
 			MemcachedException {
 		final CountDownLatch latch = new CountDownLatch(1);
-		final ByteBuffer buffer = ByteBuffer.wrap("version\r\n".getBytes());
+		final ByteBuffer buffer = VERSION.slice();
 		Command command = new Command("version", Command.CommandType.VERSION,
 				latch) {
 
@@ -513,13 +519,13 @@ public class XMemcachedClient {
 	}
 
 	public int incr(final String key, final int num) throws TimeoutException,
-			InterruptedException {
+			InterruptedException, MemcachedException {
 		ByteUtils.checkKey(key);
 		return sendIncrOrDecrCommand(key, num, Command.CommandType.INCR, "incr");
 	}
 
 	public int decr(final String key, final int num) throws TimeoutException,
-			InterruptedException {
+			InterruptedException, MemcachedException {
 		ByteUtils.checkKey(key);
 		return sendIncrOrDecrCommand(key, num, Command.CommandType.DECR, "decr");
 	}
@@ -566,7 +572,7 @@ public class XMemcachedClient {
 	}
 
 	public boolean delete(final String key) throws TimeoutException,
-			InterruptedException {
+			InterruptedException, MemcachedException {
 		return delete(key, 0);
 	}
 
@@ -592,6 +598,9 @@ public class XMemcachedClient {
 			TimeoutException, MemcachedException {
 		if (value == null)
 			throw new IllegalArgumentException("value could not be null");
+		if (exp < 0)
+			throw new IllegalArgumentException(
+					"Expire time must be greater than 0");
 		final CountDownLatch latch = new CountDownLatch(1);
 		final CachedData data = transcoder.encode(value);
 		byte[] keyBytes = ByteUtils.getBytes(key);

@@ -4,26 +4,22 @@ import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
-import com.google.code.yanf4j.nio.Message;
+import net.rubyeye.xmemcached.exception.MemcachedException;
 
-public class Command{
+public class Command {
 	public static final String SPLIT = "\r\n";
 
 	Object key;
 	Object result;
 	CountDownLatch latch;
 	CommandType commandType;
-	RuntimeException throwable;
+	MemcachedException throwable;
 	ByteBuffer byteBuffer;
 
 	int mergeCount = -1;
 
-	public enum CommandType implements Message {
-		GET_ONE, GET_MANY, SET, REPLACE, ADD, EXCEPTION, DELETE, VERSION, INCR, DECR, GETS_ONE, GETS_MANY,CAS;
-
-		public int getLength() {
-			return 4;
-		}
+	public enum CommandType {
+		GET_ONE, GET_MANY, SET, REPLACE, ADD, EXCEPTION, DELETE, VERSION, INCR, DECR, GETS_ONE, GETS_MANY, CAS;
 
 	}
 
@@ -74,11 +70,11 @@ public class Command{
 		return null;
 	}
 
-	public synchronized RuntimeException getException() {
+	public synchronized MemcachedException getException() {
 		return throwable;
 	}
 
-	public synchronized void setException(RuntimeException throwable) {
+	public synchronized void setException(MemcachedException throwable) {
 		this.throwable = throwable;
 	}
 

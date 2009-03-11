@@ -9,7 +9,7 @@ public interface CASOperation {
 	public int getMaxTries();
 
 	/**
-	 * 当失败时回调
+	 * 根据当前value和cas返回想要设置的新value
 	 * 
 	 * @param currentCAS
 	 * @param currentValue

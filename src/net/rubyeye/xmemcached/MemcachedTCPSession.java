@@ -43,9 +43,6 @@ public class MemcachedTCPSession extends DefaultTCPSession {
 
 	String currentLine = null; // 当前行
 
-	/**
-	 * 协议解析部分
-	 */
 	ParseStatus status = ParseStatus.NULL; // 当前状态
 
 	private MemcachedProtocolHandler memcachedProtocolHandler;

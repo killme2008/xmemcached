@@ -37,8 +37,8 @@ public class ByteUtils {
 	}
 
 	public static void checkKey(String key) {
-		if (key == null)
-			throw new IllegalArgumentException("Key must not be null");
+		if (key == null || key.trim().length() == 0)
+			throw new IllegalArgumentException("Key must not be blank");
 		byte[] keyBytes = getBytes(key);
 		if (keyBytes.length > ByteUtils.MAX_KEY_LENGTH) {
 			throw new IllegalArgumentException("Key is too long (maxlen = "

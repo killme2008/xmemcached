@@ -9,6 +9,7 @@ import java.util.concurrent.TimeoutException;
 
 import net.rubyeye.xmemcached.HashAlgorithm;
 import net.rubyeye.xmemcached.XMemcachedClient;
+import net.rubyeye.xmemcached.exception.MemcachedException;
 import net.rubyeye.xmemcached.impl.KetamaMemcachedSessionLocator;
 import com.google.code.yanf4j.util.ResourcesUtils;
 
@@ -69,7 +70,7 @@ public class CacheHitRateTest {
 	}
 
 	private static void printHitRate(XMemcachedClient client, Set<String> keys)
-			throws TimeoutException, InterruptedException {
+			throws TimeoutException, InterruptedException,MemcachedException {
 		int total = 0;
 		int hits = 0;
 		for (String key : keys) {
