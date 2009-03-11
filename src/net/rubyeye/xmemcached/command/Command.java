@@ -70,11 +70,11 @@ public class Command {
 		return null;
 	}
 
-	public synchronized MemcachedException getException() {
+	public MemcachedException getException() {
 		return throwable;
 	}
 
-	public synchronized void setException(MemcachedException throwable) {
+	public void setException(MemcachedException throwable) {
 		this.throwable = throwable;
 	}
 
@@ -86,11 +86,11 @@ public class Command {
 		this.key = key;
 	}
 
-	public synchronized Object getResult() {
+	public Object getResult() {
 		return result;
 	}
 
-	public synchronized void setResult(Object result) {
+	public void setResult(Object result) {
 		this.result = result;
 	}
 

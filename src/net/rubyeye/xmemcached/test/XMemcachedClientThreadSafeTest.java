@@ -99,8 +99,8 @@ public class XMemcachedClientThreadSafeTest {
 		XMemcachedClient client = new XMemcachedClient(new KetamaMemcachedSessionLocator());
 		client.addServer(ip, 12000);
 		client.addServer(ip, 12001);
+		client.addServer(ip, 12002);
 		client.addServer(ip, 12003);
-		client.addServer(ip, 12004);
 		for (int i = 0; i < num; i++)
 			new Thread(new TestThread(i, client, barrier)).start();
 		long start = System.currentTimeMillis();
