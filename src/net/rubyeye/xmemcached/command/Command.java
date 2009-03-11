@@ -1,9 +1,9 @@
 package net.rubyeye.xmemcached.command;
 
-import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
+import net.rubyeye.xmemcached.buffer.ByteBufferWrapper;
 import net.rubyeye.xmemcached.exception.MemcachedException;
 
 public class Command {
@@ -14,7 +14,7 @@ public class Command {
 	CountDownLatch latch;
 	CommandType commandType;
 	MemcachedException throwable;
-	ByteBuffer byteBuffer;
+	ByteBufferWrapper byteBufferWrapper;
 
 	int mergeCount = -1;
 
@@ -62,8 +62,8 @@ public class Command {
 		this.latch = latch;
 	}
 
-	public void setByteBuffer(ByteBuffer byteBuffer) {
-		this.byteBuffer = byteBuffer;
+	public void setByteBufferWrapper(ByteBufferWrapper byteBufferWrapper) {
+		this.byteBufferWrapper = byteBufferWrapper;
 	}
 
 	public List<Command> getMergeCommands() {
@@ -94,8 +94,8 @@ public class Command {
 		this.result = result;
 	}
 
-	public ByteBuffer getByteBuffer() {
-		return this.byteBuffer;
+	public ByteBufferWrapper getByteBufferWrapper() {
+		return this.byteBufferWrapper;
 	}
 
 	public CountDownLatch getLatch() {

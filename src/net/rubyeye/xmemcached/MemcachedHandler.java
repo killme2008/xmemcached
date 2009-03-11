@@ -14,6 +14,7 @@ import net.spy.memcached.transcoders.Transcoder;
 
 import com.google.code.yanf4j.nio.Session;
 import com.google.code.yanf4j.nio.impl.HandlerAdapter;
+
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import net.rubyeye.xmemcached.exception.MemcachedClientException;
@@ -301,7 +302,12 @@ public class MemcachedHandler extends HandlerAdapter<Command> implements
 			return;
 		}
 
+		/**
+		 * 测试表明采用BM算法匹配效率 > 朴素匹配 > KMP匹配，
+		 * 如果你有更好的建议，请email给我
+		 */
 		int index = SPLIT_MATCHER.matchFirst(buffer);
+		// int index = ByteBufferUtils.indexOf(buffer, SPLIT);
 		if (index >= 0) {
 			int limit = buffer.limit();
 			buffer.limit(index);
@@ -369,6 +375,7 @@ public class MemcachedHandler extends HandlerAdapter<Command> implements
 		} else {
 			// merge get
 			List<Command> mergeCommands = executingCmd.getMergeCommands();
+			executingCmd.getByteBufferWrapper().free();
 			for (Command nextCommand : mergeCommands) {
 				nextCommand.setResult(values.get(nextCommand.getKey()));
 				nextCommand.getLatch().countDown();
@@ -419,4 +426,19 @@ public class MemcachedHandler extends HandlerAdapter<Command> implements
 	public void setTranscoder(Transcoder transcoder) {
 		this.transcoder = transcoder;
 	}
+
+	// public static void main(String[] args) throws Exception {
+	// String line = "VALUE test 0 0 1 10\\r\\nVALUE test 0 0 1 10\\r\\nVERSION
+	// 1.2.4\r\nSTORED\r\nDELETED\r\n";
+	//
+	// ByteBuffer buffer = ByteBuffer.wrap(line.getBytes());
+	// int index = -1;
+	// long start = System.currentTimeMillis();
+	// for (int i = 0; i < 1000000; i++)
+	// //index=SPLIT_MATCHER.matchFirst(buffer);
+	// index=ByteBufferUtils.kmpIndexOf(buffer, SPLIT);
+	// System.out.println(System.currentTimeMillis() - start);
+	// System.out.println(index);
+	//
+	// }
 }

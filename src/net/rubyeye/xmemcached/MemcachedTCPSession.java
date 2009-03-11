@@ -29,6 +29,8 @@ import java.util.List;
 import java.util.Map;
 
 import net.rubyeye.xmemcached.MemcachedHandler.ParseStatus;
+import net.rubyeye.xmemcached.buffer.BufferAllocator;
+import net.rubyeye.xmemcached.buffer.ByteBufferWrapper;
 import net.rubyeye.xmemcached.command.Command;
 import net.rubyeye.xmemcached.utils.ByteUtils;
 import net.rubyeye.xmemcached.utils.ExtendedQueue;
@@ -52,18 +54,22 @@ public class MemcachedTCPSession extends DefaultTCPSession {
 
 	private SocketAddress remoteSocketAddress;
 
+	private volatile BufferAllocator allocator;
+
 	@SuppressWarnings("unchecked")
 	public MemcachedTCPSession(SocketChannel sc, SelectionKey sk,
 			Handler handler, SessionEventManager reactor,
 			CodecFactory codecFactory, int readRecvBufferSize,
 			Statistics statistics, Queue<WriteMessage> queue,
 			long sessionTimeout, boolean handleReadWriteConcurrently,
-			boolean optimiezeGet, boolean optimiezeSet) {
+			boolean optimiezeGet, boolean optimiezeSet,
+			BufferAllocator allocator) {
 		super(sc, sk, handler, reactor, codecFactory, readRecvBufferSize,
 				statistics, queue, sessionTimeout, handleReadWriteConcurrently);
 		this.optimiezeGet = optimiezeGet;
 		this.optimiezeSet = optimiezeSet;
 		remoteSocketAddress = sc.socket().getRemoteSocketAddress();
+		this.allocator = allocator;
 	}
 
 	public InetSocketAddress getRemoteSocketAddress() {
@@ -180,8 +186,9 @@ public class MemcachedTCPSession extends DefaultTCPSession {
 	private Command newMergedCommand(final List<Command> mergeCommands,
 			final StringBuilder key) {
 		byte[] keyBytes = ByteUtils.getBytes(key.toString());
-		final ByteBuffer buffer = ByteBuffer.allocate(ByteUtils.GET.length
-				+ ByteUtils.CRLF.length + 1 + keyBytes.length);
+		final ByteBufferWrapper buffer = allocator
+				.allocate(ByteUtils.GET.length + ByteUtils.CRLF.length + 1
+						+ keyBytes.length);
 		ByteUtils.setArguments(buffer, ByteUtils.GET, keyBytes);
 		buffer.flip();
 		return new Command(key.toString(), Command.CommandType.GET_ONE, null) {
@@ -194,8 +201,8 @@ public class MemcachedTCPSession extends DefaultTCPSession {
 				return mergeCommands;
 			}
 
-			public ByteBuffer getByteBuffer() {
-				setByteBuffer(buffer);
+			public ByteBufferWrapper getByteBufferWrapper() {
+				setByteBufferWrapper(buffer);
 				return buffer;
 			}
 		};
@@ -225,13 +232,12 @@ public class MemcachedTCPSession extends DefaultTCPSession {
 				}
 				currentCommand = wrapCurrentCommand(currentCommand);
 				ByteBuffer buffer = writeToChannel(selectableChannel,
-						currentCommand.getByteBuffer());
+						currentCommand.getByteBufferWrapper().getByteBuffer());
 				if (buffer != null && !buffer.hasRemaining()) {
 					writeQueue.pop(); // remove message
-					log
-							.debug("send command:"
-									+ new String(currentCommand.getByteBuffer()
-											.array()));
+					log.debug("send command:"
+							+ new String(currentCommand.getByteBufferWrapper()
+									.getByteBuffer().array()));
 					executingCmds.add(currentCommand); // 添加到当前执行队列
 
 				} else { // not write complete, but write buffer is full

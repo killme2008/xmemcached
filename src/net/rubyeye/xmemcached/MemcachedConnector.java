@@ -23,6 +23,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+import net.rubyeye.xmemcached.buffer.BufferAllocator;
 import net.rubyeye.xmemcached.command.Command;
 import net.rubyeye.xmemcached.exception.MemcachedException;
 import net.rubyeye.xmemcached.utils.SimpleQueue;
@@ -34,6 +35,7 @@ import net.rubyeye.xmemcached.utils.SimpleQueue;
  */
 public class MemcachedConnector extends SocketChannelController {
 	final BlockingQueue<InetSocketAddress> waitingQueue = new LinkedBlockingQueue<InetSocketAddress>();
+	private BufferAllocator allocator;
 
 	private SessionMonitor sessionMonitor;
 
@@ -297,12 +299,13 @@ public class MemcachedConnector extends SocketChannelController {
 	}
 
 	public MemcachedConnector(Configuration configuration,
-			MemcachedSessionLocator locator) {
+			MemcachedSessionLocator locator, BufferAllocator allocator) {
 		super(configuration, null);
 		this.memcachedSessions = new CopyOnWriteArrayList<MemcachedTCPSession>();
 		this.sessionLocator = locator;
 		this.sessionLocator.setSessionList(memcachedSessions);
 		this.sessionMonitor = new SessionMonitor();
+		this.allocator = allocator;
 	}
 
 	/**
@@ -324,9 +327,17 @@ public class MemcachedConnector extends SocketChannelController {
 				getReactor(), getCodecFactory(), configuration
 						.getSessionReadBufferSize(), statistics, queue,
 				sessionTimeout, handleReadWriteConcurrently, this.optimiezeGet,
-				this.optimizeSet);
+				this.optimizeSet, this.allocator);
 		session.setMemcachedProtocolHandler(this.getMemcachedProtocolHandler());
 		session.setMergeGetsCount(this.mergeGetsCount);
 		return session;
+	}
+
+	public BufferAllocator getByteBufferAllocator() {
+		return allocator;
+	}
+
+	public void setByteBufferAllocator(BufferAllocator allocator) {
+		this.allocator = allocator;
 	}
 }

@@ -17,6 +17,10 @@ import java.io.IOException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import net.rubyeye.xmemcached.buffer.BufferAllocator;
+import net.rubyeye.xmemcached.buffer.ByteBufferWrapper;
+import net.rubyeye.xmemcached.buffer.SimpleBufferAllocator;
+import net.rubyeye.xmemcached.buffer.SimpleByteBufferWrapper;
 import net.rubyeye.xmemcached.command.Command;
 import net.rubyeye.xmemcached.exception.MemcachedException;
 import net.rubyeye.xmemcached.impl.ArrayMemcachedSessionLocator;
@@ -77,10 +81,13 @@ public class XMemcachedClient {
 	private Transcoder transcoder;
 	private MemcachedHandler memcachedHandler;
 
+	private BufferAllocator byteBufferAllocator;
+
 	public XMemcachedClient(String server, int port) throws IOException {
 		super();
 		checkServerPort(server, port);
-		buildConnector(new ArrayMemcachedSessionLocator());
+		buildConnector(new ArrayMemcachedSessionLocator(),
+				new SimpleBufferAllocator());
 		startConnector();
 		connect(new InetSocketAddress(server, port));
 	}
@@ -142,17 +149,20 @@ public class XMemcachedClient {
 		}
 	}
 
-	private void buildConnector(MemcachedSessionLocator locator) {
-		if (locator == null)
+	private void buildConnector(MemcachedSessionLocator locator,
+			BufferAllocator allocator) {
+		if (locator == null || allocator == null)
 			throw new IllegalArgumentException();
 		this.sessionLocator = locator;
+		this.byteBufferAllocator = allocator;
 		Configuration configuration = new Configuration();
 		configuration.setTcpRecvBufferSize(TCP_RECV_BUFF_SIZE);
 		configuration.setSessionReadBufferSize(READ_BUFF_SIZE);
 		configuration.setTcpNoDelay(TCP_NO_DELAY);
 		configuration.setReadThreadCount(0);
 		this.shutdown = true;
-		this.connector = new MemcachedConnector(configuration, sessionLocator);
+		this.connector = new MemcachedConnector(configuration, sessionLocator,
+				allocator);
 		this.connector.setSendBufferSize(TCP_SEND_BUFF_SIZE);
 		this.transcoder = new SerializingTranscoder();
 		this.memcachedHandler = new MemcachedHandler(this.transcoder, this);
@@ -166,20 +176,33 @@ public class XMemcachedClient {
 		if (inetSocketAddress == null) {
 			throw new IllegalArgumentException();
 		}
-		buildConnector(new ArrayMemcachedSessionLocator());
+		buildConnector(new ArrayMemcachedSessionLocator(),
+				new SimpleBufferAllocator());
 		startConnector();
 		connect(inetSocketAddress);
 	}
 
 	public XMemcachedClient() throws IOException {
 		super();
-		buildConnector(new ArrayMemcachedSessionLocator());
+		buildConnector(new ArrayMemcachedSessionLocator(),
+				new SimpleBufferAllocator());
 		startConnector();
 	}
 
 	public XMemcachedClient(MemcachedSessionLocator locator) throws IOException {
+		this(locator, new SimpleBufferAllocator());
+	}
+
+	public XMemcachedClient(MemcachedSessionLocator locator,
+			BufferAllocator allocator) throws IOException {
 		super();
-		buildConnector(locator);
+		buildConnector(locator, allocator);
+		startConnector();
+	}
+
+	public XMemcachedClient(BufferAllocator allocator) throws IOException {
+		super();
+		buildConnector(new ArrayMemcachedSessionLocator(), allocator);
 		startConnector();
 	}
 
@@ -200,20 +223,22 @@ public class XMemcachedClient {
 		ByteUtils.checkKey(key);
 		final CountDownLatch latch = new CountDownLatch(1);
 		byte[] keyBytes = ByteUtils.getBytes(key);
-		final ByteBuffer buffer = ByteBuffer.allocate(cmdBytes.length
-				+ ByteUtils.CRLF.length + 1 + keyBytes.length);
+		final ByteBufferWrapper buffer = this.byteBufferAllocator
+				.allocate(cmdBytes.length + ByteUtils.CRLF.length + 1
+						+ keyBytes.length);
 		ByteUtils.setArguments(buffer, cmdBytes, keyBytes);
 		buffer.flip();
 		Command getCmd = new Command(key, cmdType, latch) {
 			@Override
-			public ByteBuffer getByteBuffer() {
+			public ByteBufferWrapper getByteBufferWrapper() {
 
-				setByteBuffer(buffer);
+				setByteBufferWrapper(buffer);
 				return buffer;
 			}
 		};
 		sendCommand(getCmd);
 		latchWait(timeout, latch);
+		buffer.free(); // free buffer
 		if (getCmd.getException() != null) {
 			throw getCmd.getException();
 		}
@@ -296,6 +321,7 @@ public class XMemcachedClient {
 		lazy = lazy > 3 ? 3 : lazy; // 最高3秒
 		latchWait(timeout * lazy, latch);
 		for (Command getCmd : commands) {
+			getCmd.getByteBufferWrapper().free();
 			if (getCmd.getException() != null)
 				throw getCmd.getException();
 		}
@@ -338,11 +364,12 @@ public class XMemcachedClient {
 			sb.append(tmpKey).append(" ");
 		}
 		byte[] keyBytes = ByteUtils.getBytes(sb.toString());
-		final ByteBuffer buffer = ByteBuffer.allocate(cmdBytes.length
-				+ ByteUtils.CRLF.length + 1 + keyBytes.length);
+		final ByteBufferWrapper buffer = this.byteBufferAllocator
+				.allocate(cmdBytes.length + ByteUtils.CRLF.length + 1
+						+ keyBytes.length);
 		ByteUtils.setArguments(buffer, cmdBytes, keyBytes);
 		buffer.flip();
-		getCmd.setByteBuffer(buffer);
+		getCmd.setByteBufferWrapper(buffer);
 		sendCommand(getCmd);
 		return getCmd;
 	}
@@ -448,8 +475,8 @@ public class XMemcachedClient {
 		int tryCount = 0;
 		GetsResponse result = gets(key);
 		if (result == null)
-			throw new NullPointerException(
-					"could not found the value for Key=" + key);
+			throw new NullPointerException("could not found the value for Key="
+					+ key);
 		while (tryCount < operation.getMaxTries()
 				&& result != null
 				&& !sendStoreCommand(key, exp, operation.getNewValue(result
@@ -472,22 +499,23 @@ public class XMemcachedClient {
 		final CountDownLatch latch = new CountDownLatch(1);
 		byte[] keyBytes = ByteUtils.getBytes(key);
 		byte[] timeBytes = ByteUtils.getBytes(String.valueOf(time));
-		final ByteBuffer buffer = ByteBuffer.allocate(ByteUtils.DELETE.length
-				+ 2 + keyBytes.length + timeBytes.length
-				+ ByteUtils.CRLF.length);
+		final ByteBufferWrapper buffer = this.byteBufferAllocator
+				.allocate(ByteUtils.DELETE.length + 2 + keyBytes.length
+						+ timeBytes.length + ByteUtils.CRLF.length);
 		ByteUtils.setArguments(buffer, ByteUtils.DELETE, keyBytes, timeBytes);
 		buffer.flip();
 		Command command = new Command(key, Command.CommandType.DELETE, latch) {
 
 			@Override
-			public ByteBuffer getByteBuffer() {
-				setByteBuffer(buffer);
+			public ByteBufferWrapper getByteBufferWrapper() {
+				setByteBufferWrapper(buffer);
 				return buffer;
 			}
 		};
 
 		sendCommand(command);
 		latchWait(TIMEOUT, latch);
+		buffer.free();
 		if (command.getException() != null) {
 			throw command.getException();
 		}
@@ -499,19 +527,21 @@ public class XMemcachedClient {
 	public String version() throws TimeoutException, InterruptedException,
 			MemcachedException {
 		final CountDownLatch latch = new CountDownLatch(1);
-		final ByteBuffer buffer = VERSION.slice();
+		final ByteBufferWrapper buffer = new SimpleByteBufferWrapper(VERSION
+				.slice());
 		Command command = new Command("version", Command.CommandType.VERSION,
 				latch) {
 
 			@Override
-			public ByteBuffer getByteBuffer() {
-				setByteBuffer(buffer);
+			public ByteBufferWrapper getByteBufferWrapper() {
+				setByteBufferWrapper(buffer);
 				return buffer;
 			}
 		};
 
 		sendCommand(command);
 		latchWait(TIMEOUT, latch);
+		buffer.free(); //free buffer
 		if (command.getException() != null) {
 			throw command.getException();
 		}
@@ -545,21 +575,23 @@ public class XMemcachedClient {
 		byte[] numBytes = ByteUtils.getBytes(String.valueOf(num));
 		byte[] cmdBytes = ByteUtils.getBytes(cmd);
 		byte[] keyBytes = ByteUtils.getBytes(key);
-		final ByteBuffer buffer = ByteBuffer.allocate(cmd.length() + 2
-				+ key.length() + numBytes.length + ByteUtils.CRLF.length);
+		final ByteBufferWrapper buffer = this.byteBufferAllocator.allocate(cmd
+				.length()
+				+ 2 + key.length() + numBytes.length + ByteUtils.CRLF.length);
 		ByteUtils.setArguments(buffer, cmdBytes, keyBytes, numBytes);
 		buffer.flip();
 		Command command = new Command(key, cmdType, latch) {
 
 			@Override
-			public ByteBuffer getByteBuffer() {
-				setByteBuffer(buffer);
+			public ByteBufferWrapper getByteBufferWrapper() {
+				setByteBufferWrapper(buffer);
 				return buffer;
 			}
 		};
 
 		sendCommand(command);
 		latchWait(TIMEOUT, latch);
+		buffer.free();
 		if (command.getException() != null) {
 			throw command.getException();
 		}
@@ -615,7 +647,8 @@ public class XMemcachedClient {
 		if (cmdType.equals(Command.CommandType.CAS)) {
 			size += 1 + casBytes.length;
 		}
-		final ByteBuffer buffer = ByteBuffer.allocate(size);
+		final ByteBufferWrapper buffer = this.byteBufferAllocator
+				.allocate(size);
 		if (cmdType.equals(Command.CommandType.CAS)) {
 			ByteUtils.setArguments(buffer, cmd, keyBytes, flagBytes, expBytes,
 					dataLenBytes, casBytes);
@@ -627,15 +660,16 @@ public class XMemcachedClient {
 		Command command = new Command(key, cmdType, latch) {
 
 			@Override
-			public ByteBuffer getByteBuffer() {
+			public ByteBufferWrapper getByteBufferWrapper() {
 
-				setByteBuffer(buffer);
+				setByteBufferWrapper(buffer);
 				return buffer;
 			}
 		};
 
 		sendCommand(command);
 		latchWait(timeout, latch);
+		buffer.free();
 		if (command.getException() != null) {
 			throw command.getException();
 		}

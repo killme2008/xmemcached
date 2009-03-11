@@ -3,6 +3,7 @@ package net.rubyeye.xmemcached.test;
 import java.util.concurrent.CountDownLatch;
 
 import net.rubyeye.xmemcached.XMemcachedClient;
+import net.rubyeye.xmemcached.buffer.CachedBufferAllocator;
 
 public class PerformanceTest {
 
@@ -120,7 +121,7 @@ public class PerformanceTest {
 		int port1 = 12000;
 		int port2 = 12001;
 		int port3 = 12002;
-		int thread = 100;
+		int thread = 200;
 		if (args.length >= 5) {
 			ip = args[0];
 			port1 = Integer.valueOf(args[1]);

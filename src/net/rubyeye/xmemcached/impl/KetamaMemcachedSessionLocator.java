@@ -1,7 +1,6 @@
 package net.rubyeye.xmemcached.impl;
 
 import java.util.List;
-import java.util.SortedMap;
 import java.util.TreeMap;
 
 import net.rubyeye.xmemcached.HashAlgorithm;

@@ -101,7 +101,6 @@ public class XMemcachedClientThreadSafeTest {
 		client.addServer(ip, 12001);
 		client.addServer(ip, 12003);
 		client.addServer(ip, 12004);
-		client.addServer(ip, 11211);
 		for (int i = 0; i < num; i++)
 			new Thread(new TestThread(i, client, barrier)).start();
 		long start = System.currentTimeMillis();
