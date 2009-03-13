@@ -31,9 +31,10 @@ import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
 import java.nio.channels.WritableByteChannel;
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
 
 import net.rubyeye.xmemcached.MemcachedHandler.ParseStatus;
 import net.rubyeye.xmemcached.buffer.BufferAllocator;
@@ -42,6 +43,7 @@ import net.rubyeye.xmemcached.command.Command;
 import net.rubyeye.xmemcached.command.OperationStatus;
 import net.rubyeye.xmemcached.utils.ByteUtils;
 import net.rubyeye.xmemcached.utils.ExtendedQueue;
+import net.rubyeye.xmemcached.utils.SimpleBlockingQueue;
 import net.spy.memcached.transcoders.CachedData;
 
 /**
@@ -56,7 +58,7 @@ public class MemcachedTCPSession extends DefaultTCPSession {
 	ParseStatus status = ParseStatus.NULL; // 当前状态
 
 	private MemcachedProtocolHandler memcachedProtocolHandler;
-	protected List<Command> executingCmds = new LinkedList<Command>(); // 存储已经发送的命令
+	protected BlockingQueue<Command> executingCmds; // 存储已经发送的命令
 
 	Map<String, CachedData> currentValues = null;
 
@@ -71,13 +73,17 @@ public class MemcachedTCPSession extends DefaultTCPSession {
 			Statistics statistics, Queue<WriteMessage> queue,
 			long sessionTimeout, boolean handleReadWriteConcurrently,
 			boolean optimiezeGet, boolean optimiezeSet,
-			BufferAllocator allocator) {
+			BufferAllocator allocator, int readThreadCount) {
 		super(sc, sk, handler, reactor, codecFactory, readRecvBufferSize,
 				statistics, queue, sessionTimeout, handleReadWriteConcurrently);
 		this.optimiezeGet = optimiezeGet;
 		this.optimiezeSet = optimiezeSet;
 		remoteSocketAddress = sc.socket().getRemoteSocketAddress();
 		this.allocator = allocator;
+		if (readThreadCount > 0)
+			this.executingCmds = new ArrayBlockingQueue<Command>(16 * 1024);
+		else
+			this.executingCmds = new SimpleBlockingQueue<Command>();
 	}
 
 	public InetSocketAddress getRemoteSocketAddress() {
@@ -253,9 +259,11 @@ public class MemcachedTCPSession extends DefaultTCPSession {
 						currentCommand.getByteBufferWrapper().getByteBuffer());
 				if (buffer != null && !buffer.hasRemaining()) {
 					writeQueue.pop(); // remove message
-					log.debug("send command:"
-							+ new String(currentCommand.getByteBufferWrapper()
-									.getByteBuffer().array()));
+					if (log.isDebugEnabled())
+						log.debug("send command:"
+								+ new String(currentCommand
+										.getByteBufferWrapper().getByteBuffer()
+										.array()));
 					executingCmds.add(currentCommand); // 添加到当前执行队列
 
 				} else { // not write complete, but write buffer is full
@@ -434,8 +442,13 @@ public class MemcachedTCPSession extends DefaultTCPSession {
 	 * @return
 	 */
 	Command getCurrentExecutingCommand() {
-		Command cmd = executingCmds.remove(0);
-		cmd.setStatus(OperationStatus.PROCESSING);
-		return cmd;
+		try {
+			Command cmd = executingCmds.take();
+			cmd.setStatus(OperationStatus.PROCESSING);
+			return cmd;
+		} catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
+		}
+		return null;
 	}
 }

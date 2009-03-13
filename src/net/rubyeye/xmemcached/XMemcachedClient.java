@@ -51,6 +51,7 @@ import com.google.code.yanf4j.nio.Session;
  */
 public class XMemcachedClient {
 
+	private static final int READ_THREAD_COUNT = 0;
 	public static final int CONNECT_TIMEOUT = 3000;
 	private static final int TCP_SEND_BUFF_SIZE = 16 * 1024;
 	private static final boolean TCP_NO_DELAY = false;
@@ -104,7 +105,7 @@ public class XMemcachedClient {
 		super();
 		checkServerPort(server, port);
 		buildConnector(new ArrayMemcachedSessionLocator(),
-				new SimpleBufferAllocator());
+				new SimpleBufferAllocator(), getDefaultConfiguration());
 		startConnector();
 		connect(new InetSocketAddress(server, port));
 	}
@@ -167,16 +168,11 @@ public class XMemcachedClient {
 	}
 
 	private void buildConnector(MemcachedSessionLocator locator,
-			BufferAllocator allocator) {
+			BufferAllocator allocator, Configuration configuration) {
 		if (locator == null || allocator == null)
 			throw new IllegalArgumentException();
 		this.sessionLocator = locator;
 		this.byteBufferAllocator = allocator;
-		Configuration configuration = new Configuration();
-		configuration.setTcpRecvBufferSize(TCP_RECV_BUFF_SIZE);
-		configuration.setSessionReadBufferSize(READ_BUFF_SIZE);
-		configuration.setTcpNoDelay(TCP_NO_DELAY);
-		configuration.setReadThreadCount(0);
 		this.shutdown = true;
 		this.connector = new MemcachedConnector(configuration, sessionLocator,
 				allocator);
@@ -187,6 +183,22 @@ public class XMemcachedClient {
 		this.connector.setMemcachedProtocolHandler(memcachedHandler);
 	}
 
+	public XMemcachedClient(Configuration configuration) throws IOException {
+		super();
+		buildConnector(new ArrayMemcachedSessionLocator(),
+				new SimpleBufferAllocator(), configuration);
+		startConnector();
+	}
+
+	public static Configuration getDefaultConfiguration() {
+		Configuration configuration = new Configuration();
+		configuration.setTcpRecvBufferSize(TCP_RECV_BUFF_SIZE);
+		configuration.setSessionReadBufferSize(READ_BUFF_SIZE);
+		configuration.setTcpNoDelay(TCP_NO_DELAY);
+		configuration.setReadThreadCount(READ_THREAD_COUNT);
+		return configuration;
+	}
+
 	public XMemcachedClient(InetSocketAddress inetSocketAddress)
 			throws IOException {
 		super();
@@ -194,7 +206,7 @@ public class XMemcachedClient {
 			throw new IllegalArgumentException();
 		}
 		buildConnector(new ArrayMemcachedSessionLocator(),
-				new SimpleBufferAllocator());
+				new SimpleBufferAllocator(), getDefaultConfiguration());
 		startConnector();
 		connect(inetSocketAddress);
 	}
@@ -202,7 +214,7 @@ public class XMemcachedClient {
 	public XMemcachedClient() throws IOException {
 		super();
 		buildConnector(new ArrayMemcachedSessionLocator(),
-				new SimpleBufferAllocator());
+				new SimpleBufferAllocator(), getDefaultConfiguration());
 		startConnector();
 	}
 
@@ -213,13 +225,14 @@ public class XMemcachedClient {
 	public XMemcachedClient(MemcachedSessionLocator locator,
 			BufferAllocator allocator) throws IOException {
 		super();
-		buildConnector(locator, allocator);
+		buildConnector(locator, allocator, getDefaultConfiguration());
 		startConnector();
 	}
 
 	public XMemcachedClient(BufferAllocator allocator) throws IOException {
 		super();
-		buildConnector(new ArrayMemcachedSessionLocator(), allocator);
+		buildConnector(new ArrayMemcachedSessionLocator(), allocator,
+				getDefaultConfiguration());
 		startConnector();
 	}
 

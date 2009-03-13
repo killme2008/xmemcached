@@ -334,7 +334,7 @@ public class MemcachedConnector extends SocketChannelController {
 				getReactor(), getCodecFactory(), configuration
 						.getSessionReadBufferSize(), statistics, queue,
 				sessionTimeout, handleReadWriteConcurrently, this.optimiezeGet,
-				this.optimizeSet, this.allocator);
+				this.optimizeSet, this.allocator, this.getReadThreadCount());
 		session.setMemcachedProtocolHandler(this.getMemcachedProtocolHandler());
 		session.setMergeGetsCount(this.mergeGetsCount);
 		return session;
