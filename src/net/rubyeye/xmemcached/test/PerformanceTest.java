@@ -1,5 +1,6 @@
 package net.rubyeye.xmemcached.test;
 
+import com.google.code.yanf4j.config.Configuration;
 import java.util.concurrent.CountDownLatch;
 
 import net.rubyeye.xmemcached.XMemcachedClient;
@@ -117,7 +118,7 @@ public class PerformanceTest {
 	// thread num=10, repeat=10000,size=2, all=200000 ,velocity=1057 , using
 	// time:189187
 	static public void main(String[] args) {
-		String ip = "192.168.222.100";
+		String ip = "localhost";
 		int port1 = 12000;
 		int port2 = 12001;
 		int port3 = 12002;
@@ -140,16 +141,17 @@ public class PerformanceTest {
 			int size = Runtime.getRuntime().availableProcessors();
 
 			int repeat = 10000;
-
+                        Configuration conf=XMemcachedClient.getDefaultConfiguration();
+                        conf.setReadThreadCount(5);
 			XMemcachedClient mc = new XMemcachedClient(
-					new CachedBufferAllocator());
+					conf,new CachedBufferAllocator());
 			mc.addServer(ip, port1);
 			mc.addServer(ip, port2);
 			// mc.addServer(ip, port2);
+			 mc.addServer(ip, port3);
 			// mc.addServer(ip, port3);
-			// mc.addServer(ip, port3);
-			// mc.addServer(ip, 12003);
-			// mc.addServer(ip, 12004);
+			 mc.addServer(ip, 12003);
+			 mc.addServer(ip, 12004);
 			// mc.addServer(ip, 12005);
 			// mc.addServer(ip, 12006);
 			//

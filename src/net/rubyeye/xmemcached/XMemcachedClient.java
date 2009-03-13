@@ -169,8 +169,12 @@ public class XMemcachedClient {
 
 	private void buildConnector(MemcachedSessionLocator locator,
 			BufferAllocator allocator, Configuration configuration) {
-		if (locator == null || allocator == null)
-			throw new IllegalArgumentException();
+		if (locator == null)
+                    locator=new ArrayMemcachedSessionLocator();
+                if(allocator==null)
+                    allocator=new SimpleBufferAllocator();
+                if(configuration==null)
+                    configuration=getDefaultConfiguration();
 		this.sessionLocator = locator;
 		this.byteBufferAllocator = allocator;
 		this.shutdown = true;
@@ -184,11 +188,23 @@ public class XMemcachedClient {
 	}
 
 	public XMemcachedClient(Configuration configuration) throws IOException {
-		super();
-		buildConnector(new ArrayMemcachedSessionLocator(),
+		this(new ArrayMemcachedSessionLocator(),
 				new SimpleBufferAllocator(), configuration);
-		startConnector();
+		
 	}
+        
+        public XMemcachedClient(Configuration configuration,BufferAllocator allocator) throws IOException {
+		this(new ArrayMemcachedSessionLocator(),
+				allocator, configuration);
+		
+	}
+        
+        public XMemcachedClient(Configuration configuration,MemcachedSessionLocator locator) throws IOException {
+		this(locator,
+			  new SimpleBufferAllocator(), configuration);
+		
+	}
+        
 
 	public static Configuration getDefaultConfiguration() {
 		Configuration configuration = new Configuration();
@@ -219,21 +235,20 @@ public class XMemcachedClient {
 	}
 
 	public XMemcachedClient(MemcachedSessionLocator locator) throws IOException {
-		this(locator, new SimpleBufferAllocator());
+		this(locator, new SimpleBufferAllocator(),getDefaultConfiguration());
 	}
 
 	public XMemcachedClient(MemcachedSessionLocator locator,
-			BufferAllocator allocator) throws IOException {
+			BufferAllocator allocator,Configuration conf) throws IOException {
 		super();
-		buildConnector(locator, allocator, getDefaultConfiguration());
+		buildConnector(locator, allocator, conf);
 		startConnector();
 	}
 
 	public XMemcachedClient(BufferAllocator allocator) throws IOException {
-		super();
-		buildConnector(new ArrayMemcachedSessionLocator(), allocator,
+		this(new ArrayMemcachedSessionLocator(), allocator,
 				getDefaultConfiguration());
-		startConnector();
+		
 	}
 
 	public Object get(final String key, long timeout) throws TimeoutException,
