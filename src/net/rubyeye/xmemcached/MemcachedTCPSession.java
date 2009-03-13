@@ -39,6 +39,7 @@ import net.rubyeye.xmemcached.MemcachedHandler.ParseStatus;
 import net.rubyeye.xmemcached.buffer.BufferAllocator;
 import net.rubyeye.xmemcached.buffer.ByteBufferWrapper;
 import net.rubyeye.xmemcached.command.Command;
+import net.rubyeye.xmemcached.command.OperationStatus;
 import net.rubyeye.xmemcached.utils.ByteUtils;
 import net.rubyeye.xmemcached.utils.ExtendedQueue;
 import net.spy.memcached.transcoders.CachedData;
@@ -131,6 +132,7 @@ public class MemcachedTCPSession extends DefaultTCPSession {
 	 */
 	private Command optimizeSet(Command currentCmd) throws InterruptedException {
 		Command finalCommand = currentCmd;
+		finalCommand.setStatus(OperationStatus.WRITING);
 		while (true) {
 			Command nextCmd = (Command) this.writeQueue.peek();
 			if (nextCmd == null) {
@@ -143,6 +145,7 @@ public class MemcachedTCPSession extends DefaultTCPSession {
 			// 相同key，后续的set将覆盖此时的set
 			if (nextCommandType.equals(Command.CommandType.SET)) {
 				finalCommand.getLatch().countDown();
+				finalCommand.setStatus(OperationStatus.DONE);
 				finalCommand = (Command) writeQueue.pop();
 			} else {
 				break;
@@ -169,6 +172,7 @@ public class MemcachedTCPSession extends DefaultTCPSession {
 			final List<Command> mergeCommands) throws InterruptedException {
 		int i = 1;
 		final StringBuilder key = new StringBuilder();
+		currentCmd.setStatus(OperationStatus.WRITING);
 		key.append((String) currentCmd.getKey());
 		while (i < getsMergeFactor) {
 			Command nextCmd = (Command) this.writeQueue.peek();
@@ -178,6 +182,7 @@ public class MemcachedTCPSession extends DefaultTCPSession {
 			if (nextCmd.getCommandType().equals(Command.CommandType.GET_ONE)) {
 				mergeCommands.add((Command) this.writeQueue.pop());
 				key.append(" ").append((String) nextCmd.getKey());
+				nextCmd.setStatus(OperationStatus.WRITING);
 				i++;
 			} else {
 				break;
@@ -237,7 +242,13 @@ public class MemcachedTCPSession extends DefaultTCPSession {
 					writeComplete = true; // 写完队列
 					break;
 				}
+				// 判断是否已经被取消
+				if (currentCommand.isCancel()) {
+					writeQueue.pop();
+					continue;
+				}
 				currentCommand = wrapCurrentCommand(currentCommand);
+				currentCommand.setStatus(OperationStatus.WRITING);
 				ByteBuffer buffer = writeToChannel(selectableChannel,
 						currentCommand.getByteBufferWrapper().getByteBuffer());
 				if (buffer != null && !buffer.hasRemaining()) {
@@ -423,6 +434,8 @@ public class MemcachedTCPSession extends DefaultTCPSession {
 	 * @return
 	 */
 	Command getCurrentExecutingCommand() {
-		return executingCmds.remove(0);
+		Command cmd = executingCmds.remove(0);
+		cmd.setStatus(OperationStatus.PROCESSING);
+		return cmd;
 	}
 }

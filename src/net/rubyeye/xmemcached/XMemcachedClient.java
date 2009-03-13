@@ -42,10 +42,12 @@ import net.spy.memcached.transcoders.Transcoder;
 
 import com.google.code.yanf4j.config.Configuration;
 import com.google.code.yanf4j.nio.Session;
+
 /**
  * 核心类，客户端应用类
+ * 
  * @author dennis(killme2008@gmail.com)
- *
+ * 
  */
 public class XMemcachedClient {
 
@@ -252,7 +254,7 @@ public class XMemcachedClient {
 			}
 		};
 		sendCommand(getCmd);
-		latchWait(timeout, latch);
+		latchWait(getCmd, timeout, latch);
 		buffer.free(); // free buffer
 		if (getCmd.getException() != null) {
 			throw getCmd.getException();
@@ -333,8 +335,13 @@ public class XMemcachedClient {
 		// 超时时间加倍
 		long lazy = keyCollections.size() / 1000 > 0 ? (keyCollections.size() / 1000)
 				: 1;
-		lazy = lazy > 3 ? 3 : lazy; // 最高3秒
-		latchWait(timeout * lazy, latch);
+		lazy = lazy > 3 ? 3 : lazy;
+		if (!latch.await(timeout * lazy, TimeUnit.MILLISECONDS)) {
+			for (Command getCmd : commands) {
+				getCmd.cancel();
+			}
+			throw new TimeoutException("Timed out waiting for operation");
+		}
 		for (Command getCmd : commands) {
 			getCmd.getByteBufferWrapper().free();
 			if (getCmd.getException() != null)
@@ -529,11 +536,14 @@ public class XMemcachedClient {
 		};
 
 		sendCommand(command);
-		latchWait(TIMEOUT, latch);
+		latchWait(command, TIMEOUT, latch);
 		buffer.free();
 		if (command.getException() != null) {
 			throw command.getException();
 		}
+		if (command.getResult() == null)
+			throw new MemcachedException(
+					"Operation fail,may be caused by networking or timeout");
 		return (Boolean) command.getResult();
 	}
 
@@ -555,11 +565,14 @@ public class XMemcachedClient {
 		};
 
 		sendCommand(command);
-		latchWait(TIMEOUT, latch);
-		buffer.free(); //free buffer
+		latchWait(command, TIMEOUT, latch);
+		buffer.free(); // free buffer
 		if (command.getException() != null) {
 			throw command.getException();
 		}
+		if (command.getResult() == null)
+			throw new MemcachedException(
+					"Operation fail,may be caused by networking or timeout");
 		return (String) command.getResult();
 	}
 
@@ -605,11 +618,14 @@ public class XMemcachedClient {
 		};
 
 		sendCommand(command);
-		latchWait(TIMEOUT, latch);
+		latchWait(command, TIMEOUT, latch);
 		buffer.free();
 		if (command.getException() != null) {
 			throw command.getException();
 		}
+		if (command.getResult() == null)
+			throw new MemcachedException(
+					"Operation fail,may be caused by networking or timeout");
 		if (command.getResult() instanceof Boolean
 				&& !((Boolean) command.getResult())) {
 			return -1;
@@ -683,17 +699,21 @@ public class XMemcachedClient {
 		};
 
 		sendCommand(command);
-		latchWait(timeout, latch);
+		latchWait(command, timeout, latch);
 		buffer.free();
 		if (command.getException() != null) {
 			throw command.getException();
 		}
+		if (command.getResult() == null)
+			throw new MemcachedException(
+					"Operation fail,may be caused by networking or timeout");
 		return (Boolean) command.getResult();
 	}
 
-	private void latchWait(long timeout, final CountDownLatch latch)
+	private void latchWait(Command cmd, long timeout, final CountDownLatch latch)
 			throws InterruptedException, TimeoutException {
 		if (!latch.await(timeout, TimeUnit.MILLISECONDS)) {
+			cmd.cancel();
 			throw new TimeoutException("Timed out waiting for operation");
 		}
 	}

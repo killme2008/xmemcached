@@ -20,6 +20,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import net.rubyeye.xmemcached.command.Command;
+import net.rubyeye.xmemcached.command.OperationStatus;
 import net.spy.memcached.transcoders.CachedData;
 import net.spy.memcached.transcoders.Transcoder;
 
@@ -60,6 +61,7 @@ public class MemcachedHandler extends HandlerAdapter<Command> implements
 		final Command executingCmd = session.getCurrentExecutingCommand();
 		executingCmd.setResult(result);
 		executingCmd.getLatch().countDown();
+		executingCmd.setStatus(OperationStatus.DONE);
 		session.resetStatus();
 		return true;
 	}
@@ -201,14 +203,14 @@ public class MemcachedHandler extends HandlerAdapter<Command> implements
 		int mergCount = executingCmd.getMergeCount();
 		if (mergCount < 0) {
 			// single
-			executingCmd.setResult(null);
 			executingCmd.getLatch().countDown();
+			executingCmd.setStatus(OperationStatus.DONE);
 		} else {
 			// merge get
 			List<Command> mergeCommands = executingCmd.getMergeCommands();
 			for (Command nextCommand : mergeCommands) {
-				nextCommand.setResult(null);
 				nextCommand.getLatch().countDown(); // notify
+				nextCommand.setStatus(OperationStatus.DONE);
 			}
 
 		}
@@ -228,6 +230,7 @@ public class MemcachedHandler extends HandlerAdapter<Command> implements
 				"Unknown command,please check your memcached version");
 		executingCmd.setException(exception);
 		executingCmd.getLatch().countDown();
+		executingCmd.setStatus(OperationStatus.DONE);
 		session.resetStatus();
 		return true;
 	}
@@ -247,6 +250,7 @@ public class MemcachedHandler extends HandlerAdapter<Command> implements
 				error);
 		executingCmd.setException(exception);
 		executingCmd.getLatch().countDown();
+		executingCmd.setStatus(OperationStatus.DONE);
 		session.resetStatus();
 
 		return true;
@@ -266,6 +270,7 @@ public class MemcachedHandler extends HandlerAdapter<Command> implements
 				error);
 		executingCmd.setException(exception);
 		executingCmd.getLatch().countDown();
+		executingCmd.setStatus(OperationStatus.DONE);
 		session.resetStatus();
 		return true;
 
@@ -282,6 +287,7 @@ public class MemcachedHandler extends HandlerAdapter<Command> implements
 		Command executingCmd = session.getCurrentExecutingCommand();
 		executingCmd.setResult(version);
 		executingCmd.getLatch().countDown();
+		executingCmd.setStatus(OperationStatus.DONE);
 		session.resetStatus();
 		return true;
 
@@ -297,6 +303,7 @@ public class MemcachedHandler extends HandlerAdapter<Command> implements
 		Command executingCmd = session.getCurrentExecutingCommand();
 		executingCmd.setResult(result);
 		executingCmd.getLatch().countDown();
+		executingCmd.setStatus(OperationStatus.DONE);
 		session.resetStatus();
 
 		return true;
@@ -314,8 +321,7 @@ public class MemcachedHandler extends HandlerAdapter<Command> implements
 		}
 
 		/**
-		 * 测试表明采用BM算法匹配效率 > 朴素匹配 > KMP匹配，
-		 * 如果你有更好的建议，请email给我
+		 * 测试表明采用BM算法匹配效率 > 朴素匹配 > KMP匹配， 如果你有更好的建议，请email给我
 		 */
 		int index = SPLIT_MATCHER.matchFirst(buffer);
 		// int index = ByteBufferUtils.indexOf(buffer, SPLIT);
@@ -347,7 +353,9 @@ public class MemcachedHandler extends HandlerAdapter<Command> implements
 
 	@Override
 	public void onMessageSent(Session session, Command t) {
+		t.setStatus(OperationStatus.SENT);
 		((MemcachedTCPSession) session).executingCmds.add(t);
+
 	}
 
 	@Override
@@ -382,6 +390,7 @@ public class MemcachedHandler extends HandlerAdapter<Command> implements
 				CachedData data = values.get(executingCmd.getKey());
 				executingCmd.setResult(data); // 设置CachedData返回，transcoder.decode()放到用户线程
 				executingCmd.getLatch().countDown();
+				executingCmd.setStatus(OperationStatus.DONE);
 			}
 		} else {
 			// merge get
@@ -390,6 +399,7 @@ public class MemcachedHandler extends HandlerAdapter<Command> implements
 			for (Command nextCommand : mergeCommands) {
 				nextCommand.setResult(values.get(nextCommand.getKey()));
 				nextCommand.getLatch().countDown();
+				nextCommand.setStatus(OperationStatus.DONE);
 			}
 		}
 
@@ -419,6 +429,7 @@ public class MemcachedHandler extends HandlerAdapter<Command> implements
 			}
 		}
 		executingCmd.getLatch().countDown();
+		executingCmd.setStatus(OperationStatus.DONE);
 	}
 
 	@SuppressWarnings("unchecked")

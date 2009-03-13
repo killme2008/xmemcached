@@ -85,7 +85,7 @@ class TestThread implements Runnable {
 			barrier.await();
 		} catch (Exception e) {
 			e.printStackTrace();
-//			System.err.println(this.number + " " + e.getMessage());
+			// System.err.println(this.number + " " + e.getMessage());
 		}
 	}
 }
@@ -96,11 +96,12 @@ public class XMemcachedClientThreadSafeTest {
 	public static void main(String args[]) throws Exception {
 		CyclicBarrier barrier = new CyclicBarrier(num + 1);
 		String ip = "192.168.222.100";
-		XMemcachedClient client = new XMemcachedClient(new KetamaMemcachedSessionLocator());
+		XMemcachedClient client = new XMemcachedClient(
+				new KetamaMemcachedSessionLocator());
 		client.addServer(ip, 12000);
 		client.addServer(ip, 12001);
-		client.addServer(ip, 12002);
-		client.addServer(ip, 12003);
+		// client.addServer(ip, 12002);
+		// client.addServer(ip, 12003);
 		for (int i = 0; i < num; i++)
 			new Thread(new TestThread(i, client, barrier)).start();
 		long start = System.currentTimeMillis();

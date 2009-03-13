@@ -13,6 +13,8 @@ package net.rubyeye.xmemcached.command;
 
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 
 import net.rubyeye.xmemcached.buffer.ByteBufferWrapper;
 import net.rubyeye.xmemcached.exception.MemcachedException;
@@ -27,11 +29,16 @@ public class Command {
 	public static final String SPLIT = "\r\n";
 
 	Object key; // 关键字
-	Object result; // memcached返回结果
+	AtomicReference<Object> result = new AtomicReference<Object>(null); // memcached返回结果
 	CountDownLatch latch;
 	CommandType commandType;
 	MemcachedException throwable; // 执行异常
 	ByteBufferWrapper byteBufferWrapper;
+
+	AtomicBoolean cancel = new AtomicBoolean(false);
+
+	AtomicReference<OperationStatus> status = new AtomicReference<OperationStatus>(
+			null);
 
 	int mergeCount = -1;
 
@@ -60,22 +67,18 @@ public class Command {
 
 	public Command() {
 		super();
+		this.status.set(OperationStatus.SENDING);
 	}
 
 	public Command(CommandType cmdType) {
 		this.commandType = cmdType;
+		this.status.set(OperationStatus.SENDING);
 	}
 
 	public Command(CommandType cmdType, CountDownLatch latch) {
 		this.commandType = cmdType;
 		this.latch = latch;
-	}
-
-	public Command(Object key, Object result, String cmd, CountDownLatch latch) {
-		super();
-		this.key = key;
-		this.result = result;
-		this.latch = latch;
+		this.status.set(OperationStatus.SENDING);
 	}
 
 	public Command(Object key, CommandType commandType, CountDownLatch latch) {
@@ -83,6 +86,15 @@ public class Command {
 		this.key = key;
 		this.commandType = commandType;
 		this.latch = latch;
+		this.status.set(OperationStatus.SENDING);
+	}
+
+	public OperationStatus getStatus() {
+		return status.get();
+	}
+
+	public void setStatus(OperationStatus status) {
+		this.status.set(status);
 	}
 
 	public void setByteBufferWrapper(ByteBufferWrapper byteBufferWrapper) {
@@ -110,15 +122,24 @@ public class Command {
 	}
 
 	public Object getResult() {
-		return result;
+		return result.get();
 	}
 
 	public void setResult(Object result) {
-		this.result = result;
+		this.result.compareAndSet(null, result);
 	}
 
 	public ByteBufferWrapper getByteBufferWrapper() {
 		return this.byteBufferWrapper;
+	}
+
+	public boolean isCancel() {
+		return this.status.get().equals(OperationStatus.SENDING)
+				&& cancel.get();
+	}
+
+	public void cancel() {
+		this.cancel.set(true);
 	}
 
 	public CountDownLatch getLatch() {
