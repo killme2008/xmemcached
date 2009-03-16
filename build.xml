@@ -1,5 +1,4 @@
 <project basedir="." name="xmemcached" default="build-package">
-    <import file="nbproject/profiler-build-impl.xml"/>
     <property file="build.properties" />
     <path id="classpath">
         <pathelement location="${build.classes}" />
