@@ -41,7 +41,19 @@ import net.rubyeye.xmemcached.utils.SimpleQueue;
  * @author dennis
  */
 public class MemcachedConnector extends SocketChannelController {
-	final BlockingQueue<InetSocketAddress> waitingQueue = new LinkedBlockingQueue<InetSocketAddress>();
+
+	public static class ReconnectRequest {
+		InetSocketAddress address;
+		int tries;
+
+		public ReconnectRequest(InetSocketAddress address, int tries) {
+			super();
+			this.address = address;
+			this.tries = tries; // 记录重连次数
+		}
+	}
+
+	final BlockingQueue<ReconnectRequest> waitingQueue = new LinkedBlockingQueue<ReconnectRequest>();
 	private BufferAllocator allocator;
 
 	private SessionMonitor sessionMonitor;
@@ -51,18 +63,19 @@ public class MemcachedConnector extends SocketChannelController {
 			while (!Thread.currentThread().isInterrupted()) {
 
 				try {
-					InetSocketAddress address = waitingQueue.take();
-					int tries = 0;
-					// 最多重连10次
+					ReconnectRequest request = waitingQueue.take();
+					InetSocketAddress address = request.address;
 					boolean connected = false;
-					while (tries < 10) {
+					int tries = 0;
+					while (tries < 3) {
 						Future<Boolean> future = connect(address);
 						tries++;
+						request.tries++;
 						try {
 							log.warn("try to connect to "
 									+ address.getHostName() + ":"
-									+ address.getPort() + " for " + tries
-									+ " times");
+									+ address.getPort() + " for "
+									+ request.tries + " times");
 							if (!future.get(XMemcachedClient.CONNECT_TIMEOUT,
 									TimeUnit.MILLISECONDS)) {
 								Thread.sleep(2000); // 2秒后再次重连
@@ -85,9 +98,8 @@ public class MemcachedConnector extends SocketChannelController {
 						log.error("connect to " + address.getHostName() + ":"
 								+ address.getPort() + " fail");
 						// 加入队尾,稍后重试
-						waitingQueue.add(address);
-						// 暂停5秒
-						Thread.sleep(5000);
+						waitingQueue.add(request);
+						Thread.sleep(XMemcachedClient.CONNECT_TIMEOUT);
 					}
 				} catch (IOException e) {
 					log.error("monitor connect error", e);
@@ -244,8 +256,8 @@ public class MemcachedConnector extends SocketChannelController {
 		return session;
 	}
 
-	public void addToWatingQueue(InetSocketAddress address) {
-		this.waitingQueue.add(address);
+	public void addToWatingQueue(ReconnectRequest request) {
+		this.waitingQueue.add(request);
 	}
 
 	public Future<Boolean> connect(InetSocketAddress address)

@@ -361,7 +361,7 @@ public class MemcachedHandler extends HandlerAdapter<Command> implements
 	@Override
 	public void onSessionStarted(Session session) {
 		// 启用阻塞读写，因为memcached通常跑在局域网内，网络状况良好，采用阻塞读写效率更好
-		//session.setUseBlockingWrite(true);
+		// session.setUseBlockingWrite(true);
 		session.setUseBlockingRead(true);
 	}
 
@@ -374,7 +374,8 @@ public class MemcachedHandler extends HandlerAdapter<Command> implements
 	protected void reconnect(Session session) {
 		if (!this.client.isShutdown()) {
 			this.client.getConnector().addToWatingQueue(
-					session.getRemoteSocketAddress());
+					new MemcachedConnector.ReconnectRequest(session
+							.getRemoteSocketAddress(), 0));
 		}
 	}
 
