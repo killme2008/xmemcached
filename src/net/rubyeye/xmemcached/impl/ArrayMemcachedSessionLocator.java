@@ -45,18 +45,11 @@ public class ArrayMemcachedSessionLocator implements MemcachedSessionLocator {
 		if (sessions.size() == 0)
 			return null;
 		long mod = getHash(key);
-		int findCount = 0;
-		Label: while (findCount < 10) {
-			MemcachedTCPSession session = sessions.get((int) mod);
-			findCount++;
-			session = sessions.get((int) mod);
-			if (session == null || session.isClose()) {
-				mod = (mod > sessions.size() - 1) ? 0 : mod + 1;
-				break Label;
-			} else
-				return session;
+		MemcachedTCPSession session = sessions.get((int) mod);
+		if (session == null || session.isClose()) {
+			session = sessions.get(0);
 		}
-		return null;
+		return session;
 	}
 
 	@Override

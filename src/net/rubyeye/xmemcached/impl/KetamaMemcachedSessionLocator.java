@@ -20,16 +20,17 @@ import net.rubyeye.xmemcached.MemcachedTCPSession;
 
 /**
  * ConnectionFactory instance that sets up a ketama compatible connection.
- *
+ * 
  * <p>
  * This implementation piggy-backs on the functionality of the
  * <code>DefaultConnectionFactory</code> in terms of connections and queue
  * handling. Where it differs is that it uses both the <code>
- * KetamaNodeLocator</code> and the <code>HashAlgorithm.KETAMA_HASH</code>
- * to provide consistent node hashing.
- *
+ * KetamaNodeLocator</code>
+ * and the <code>HashAlgorithm.KETAMA_HASH</code> to provide consistent node
+ * hashing.
+ * 
  * @see http://www.last.fm/user/RJ/journal/2007/04/10/392555/
- *
+ * 
  * </p>
  */
 

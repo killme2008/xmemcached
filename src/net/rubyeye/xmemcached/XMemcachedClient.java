@@ -57,7 +57,7 @@ public class XMemcachedClient {
 	private static final boolean TCP_NO_DELAY = false;
 	private static final int READ_BUFF_SIZE = 32 * 1024;
 	private static final int TCP_RECV_BUFF_SIZE = 16 * 1024;
-	private static final long TIMEOUT = 1000;
+	public static final long DEFAULT_TIMEOUT = 1000;
 	protected static final Log log = LogFactory.getLog(XMemcachedClient.class);
 
 	protected MemcachedSessionLocator sessionLocator;
@@ -170,11 +170,11 @@ public class XMemcachedClient {
 	private void buildConnector(MemcachedSessionLocator locator,
 			BufferAllocator allocator, Configuration configuration) {
 		if (locator == null)
-                    locator=new ArrayMemcachedSessionLocator();
-                if(allocator==null)
-                    allocator=new SimpleBufferAllocator();
-                if(configuration==null)
-                    configuration=getDefaultConfiguration();
+			locator = new ArrayMemcachedSessionLocator();
+		if (allocator == null)
+			allocator = new SimpleBufferAllocator();
+		if (configuration == null)
+			configuration = getDefaultConfiguration();
 		this.sessionLocator = locator;
 		this.byteBufferAllocator = allocator;
 		this.shutdown = true;
@@ -188,23 +188,22 @@ public class XMemcachedClient {
 	}
 
 	public XMemcachedClient(Configuration configuration) throws IOException {
-		this(new ArrayMemcachedSessionLocator(),
-				new SimpleBufferAllocator(), configuration);
-		
+		this(new ArrayMemcachedSessionLocator(), new SimpleBufferAllocator(),
+				configuration);
+
 	}
-        
-        public XMemcachedClient(Configuration configuration,BufferAllocator allocator) throws IOException {
-		this(new ArrayMemcachedSessionLocator(),
-				allocator, configuration);
-		
+
+	public XMemcachedClient(Configuration configuration,
+			BufferAllocator allocator) throws IOException {
+		this(new ArrayMemcachedSessionLocator(), allocator, configuration);
+
 	}
-        
-        public XMemcachedClient(Configuration configuration,MemcachedSessionLocator locator) throws IOException {
-		this(locator,
-			  new SimpleBufferAllocator(), configuration);
-		
+
+	public XMemcachedClient(Configuration configuration,
+			MemcachedSessionLocator locator) throws IOException {
+		this(locator, new SimpleBufferAllocator(), configuration);
+
 	}
-        
 
 	public static Configuration getDefaultConfiguration() {
 		Configuration configuration = new Configuration();
@@ -235,11 +234,11 @@ public class XMemcachedClient {
 	}
 
 	public XMemcachedClient(MemcachedSessionLocator locator) throws IOException {
-		this(locator, new SimpleBufferAllocator(),getDefaultConfiguration());
+		this(locator, new SimpleBufferAllocator(), getDefaultConfiguration());
 	}
 
 	public XMemcachedClient(MemcachedSessionLocator locator,
-			BufferAllocator allocator,Configuration conf) throws IOException {
+			BufferAllocator allocator, Configuration conf) throws IOException {
 		super();
 		buildConnector(locator, allocator, conf);
 		startConnector();
@@ -248,7 +247,7 @@ public class XMemcachedClient {
 	public XMemcachedClient(BufferAllocator allocator) throws IOException {
 		this(new ArrayMemcachedSessionLocator(), allocator,
 				getDefaultConfiguration());
-		
+
 	}
 
 	public Object get(final String key, long timeout) throws TimeoutException,
@@ -298,12 +297,13 @@ public class XMemcachedClient {
 
 	public Object get(final String key) throws TimeoutException,
 			InterruptedException, MemcachedException {
-		return get(key, TIMEOUT, ByteUtils.GET, Command.CommandType.GET_ONE);
+		return get(key, DEFAULT_TIMEOUT, ByteUtils.GET,
+				Command.CommandType.GET_ONE);
 	}
 
 	public GetsResponse gets(final String key) throws TimeoutException,
 			InterruptedException, MemcachedException {
-		return (GetsResponse) get(key, TIMEOUT, ByteUtils.GETS,
+		return (GetsResponse) get(key, DEFAULT_TIMEOUT, ByteUtils.GETS,
 				Command.CommandType.GETS_ONE);
 	}
 
@@ -314,8 +314,9 @@ public class XMemcachedClient {
 		long lazy = keyCollections.size() / 1000 > 0 ? (keyCollections.size() / 1000)
 				: 1;
 		lazy = lazy > 3 ? 3 : lazy; // 最高3秒
-		return (Map<String, Object>) get(keyCollections, lazy * TIMEOUT,
-				ByteUtils.GET, Command.CommandType.GET_MANY);
+		return (Map<String, Object>) get(keyCollections,
+				lazy * DEFAULT_TIMEOUT, ByteUtils.GET,
+				Command.CommandType.GET_MANY);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -333,8 +334,9 @@ public class XMemcachedClient {
 		long lazy = keyCollections.size() / 1000 > 0 ? (keyCollections.size() / 1000)
 				: 1;
 		lazy = lazy > 3 ? 3 : lazy; // 最高3秒
-		return (Map<String, GetsResponse>) get(keyCollections, lazy * TIMEOUT,
-				ByteUtils.GETS, Command.CommandType.GETS_MANY);
+		return (Map<String, GetsResponse>) get(keyCollections, lazy
+				* DEFAULT_TIMEOUT, ByteUtils.GETS,
+				Command.CommandType.GETS_MANY);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -428,7 +430,7 @@ public class XMemcachedClient {
 			throws TimeoutException, InterruptedException, MemcachedException {
 		ByteUtils.checkKey(key);
 		return sendStoreCommand(key, exp, value, Command.CommandType.SET,
-				"set", TIMEOUT, -1);
+				"set", DEFAULT_TIMEOUT, -1);
 	}
 
 	public boolean set(final String key, final int exp, Object value,
@@ -443,7 +445,7 @@ public class XMemcachedClient {
 			throws TimeoutException, InterruptedException, MemcachedException {
 		ByteUtils.checkKey(key);
 		return sendStoreCommand(key, exp, value, Command.CommandType.ADD,
-				"add", TIMEOUT, -1);
+				"add", DEFAULT_TIMEOUT, -1);
 	}
 
 	public boolean add(final String key, final int exp, Object value,
@@ -458,7 +460,7 @@ public class XMemcachedClient {
 			throws TimeoutException, InterruptedException, MemcachedException {
 		ByteUtils.checkKey(key);
 		return sendStoreCommand(key, exp, value, Command.CommandType.REPLACE,
-				"replace", TIMEOUT, -1);
+				"replace", DEFAULT_TIMEOUT, -1);
 	}
 
 	public boolean replace(final String key, final int exp, Object value,
@@ -473,7 +475,7 @@ public class XMemcachedClient {
 			throws TimeoutException, InterruptedException, MemcachedException {
 		ByteUtils.checkKey(key);
 		return sendStoreCommand(key, exp, value, Command.CommandType.REPLACE,
-				"append", TIMEOUT, -1);
+				"append", DEFAULT_TIMEOUT, -1);
 	}
 
 	public boolean append(final String key, final int exp, Object value,
@@ -488,7 +490,7 @@ public class XMemcachedClient {
 			throws TimeoutException, InterruptedException, MemcachedException {
 		ByteUtils.checkKey(key);
 		return sendStoreCommand(key, exp, value, Command.CommandType.REPLACE,
-				"prepend", TIMEOUT, -1);
+				"prepend", DEFAULT_TIMEOUT, -1);
 	}
 
 	public boolean prepend(final String key, final int exp, Object value,
@@ -511,7 +513,7 @@ public class XMemcachedClient {
 			throws TimeoutException, InterruptedException, MemcachedException {
 		ByteUtils.checkKey(key);
 		return sendStoreCommand(key, exp, value, Command.CommandType.CAS,
-				"cas", TIMEOUT, cas);
+				"cas", DEFAULT_TIMEOUT, cas);
 	}
 
 	public boolean cas(final String key, final int exp, CASOperation operation)
@@ -531,7 +533,7 @@ public class XMemcachedClient {
 				&& result != null
 				&& !sendStoreCommand(key, exp, operation.getNewValue(result
 						.getCas(), result.getValue()), Command.CommandType.CAS,
-						"cas", TIMEOUT, result.getCas())) {
+						"cas", DEFAULT_TIMEOUT, result.getCas())) {
 			tryCount++;
 			result = gets(key);
 			if (result == null)
@@ -564,7 +566,7 @@ public class XMemcachedClient {
 		};
 
 		sendCommand(command);
-		latchWait(command, TIMEOUT, latch);
+		latchWait(command, DEFAULT_TIMEOUT, latch);
 		buffer.free();
 		if (command.getException() != null) {
 			throw command.getException();
@@ -593,7 +595,7 @@ public class XMemcachedClient {
 		};
 
 		sendCommand(command);
-		latchWait(command, TIMEOUT, latch);
+		latchWait(command, DEFAULT_TIMEOUT, latch);
 		buffer.free(); // free buffer
 		if (command.getException() != null) {
 			throw command.getException();
@@ -646,7 +648,7 @@ public class XMemcachedClient {
 		};
 
 		sendCommand(command);
-		latchWait(command, TIMEOUT, latch);
+		latchWait(command, DEFAULT_TIMEOUT, latch);
 		buffer.free();
 		if (command.getException() != null) {
 			throw command.getException();
