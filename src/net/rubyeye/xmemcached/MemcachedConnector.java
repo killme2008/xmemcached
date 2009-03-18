@@ -53,8 +53,8 @@ public class MemcachedConnector extends SocketChannelController {
 		}
 	}
 
-	final BlockingQueue<ReconnectRequest> waitingQueue = new LinkedBlockingQueue<ReconnectRequest>();
-	private BufferAllocator allocator;
+	private final BlockingQueue<ReconnectRequest> waitingQueue = new LinkedBlockingQueue<ReconnectRequest>();
+	private BufferAllocator bufferAllocator;
 
 	private SessionMonitor sessionMonitor;
 
@@ -195,7 +195,7 @@ public class MemcachedConnector extends SocketChannelController {
 				+ session.getRemoteSocketAddress().getHostName() + ":"
 				+ session.getRemoteSocketAddress().getPort());
 		this.memcachedSessions.add(session);
-		this.sessionLocator.setSessionList(this.memcachedSessions);
+		this.sessionLocator.updateSessionList(this.memcachedSessions);
 	}
 
 	public void removeSession(MemcachedTCPSession session) {
@@ -203,7 +203,7 @@ public class MemcachedConnector extends SocketChannelController {
 				+ session.getRemoteSocketAddress().getHostName() + ":"
 				+ session.getRemoteSocketAddress().getPort());
 		this.memcachedSessions.remove(session);
-		this.sessionLocator.setSessionList(this.memcachedSessions);
+		this.sessionLocator.updateSessionList(this.memcachedSessions);
 	}
 
 	private int sendBufferSize = 0;
@@ -322,9 +322,9 @@ public class MemcachedConnector extends SocketChannelController {
 		super(configuration, null);
 		this.memcachedSessions = new CopyOnWriteArrayList<MemcachedTCPSession>();
 		this.sessionLocator = locator;
-		this.sessionLocator.setSessionList(memcachedSessions);
+		this.sessionLocator.updateSessionList(memcachedSessions);
 		this.sessionMonitor = new SessionMonitor();
-		this.allocator = allocator;
+		this.bufferAllocator = allocator;
 	}
 
 	/**
@@ -346,17 +346,17 @@ public class MemcachedConnector extends SocketChannelController {
 				getReactor(), getCodecFactory(), configuration
 						.getSessionReadBufferSize(), statistics, queue,
 				sessionTimeout, handleReadWriteConcurrently, this.optimiezeGet,
-				this.optimizeSet, this.allocator, this.getReadThreadCount());
+				this.optimizeSet, this.bufferAllocator, this.getReadThreadCount());
 		session.setMemcachedProtocolHandler(this.getMemcachedProtocolHandler());
 		session.setMergeGetsCount(this.mergeGetsCount);
 		return session;
 	}
 
 	public BufferAllocator getByteBufferAllocator() {
-		return allocator;
+		return bufferAllocator;
 	}
 
 	public void setByteBufferAllocator(BufferAllocator allocator) {
-		this.allocator = allocator;
+		this.bufferAllocator = allocator;
 	}
 }

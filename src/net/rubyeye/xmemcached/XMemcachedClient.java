@@ -150,7 +150,7 @@ public class XMemcachedClient {
 			if (future != null)
 				future.cancel(true);
 			log.error("connect to " + inetSocketAddress.getHostName() + ":"
-					+ inetSocketAddress.getPort() + " timeout");
+					+ inetSocketAddress.getPort() + " timeout",e);
 		} catch (Exception e) {
 			if (future != null)
 				future.cancel(true);

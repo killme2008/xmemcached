@@ -142,16 +142,14 @@ public class PerformanceTest {
 
 			int repeat = 10000;
                         Configuration conf=XMemcachedClient.getDefaultConfiguration();
-                        conf.setReadThreadCount(5);
+                        conf.setReadThreadCount(3);
 			XMemcachedClient mc = new XMemcachedClient(
 					conf,new CachedBufferAllocator());
 			mc.addServer(ip, port1);
 			mc.addServer(ip, port2);
 			// mc.addServer(ip, port2);
 			 mc.addServer(ip, port3);
-			// mc.addServer(ip, port3);
-			 mc.addServer(ip, 12003);
-			 mc.addServer(ip, 12004);
+		
 			// mc.addServer(ip, 12005);
 			// mc.addServer(ip, 12006);
 			//
