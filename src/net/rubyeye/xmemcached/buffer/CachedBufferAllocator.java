@@ -28,9 +28,11 @@ import net.rubyeye.xmemcached.utils.CircularQueue;
 public class CachedBufferAllocator implements BufferAllocator {
 
 	private static final int DEFAULT_MAX_POOL_SIZE = 8;
+
 	private static final int DEFAULT_MAX_CACHED_BUFFER_SIZE = 1 << 18; // 256KB
 
 	private final int maxPoolSize;
+
 	private final int maxCachedBufferSize;
 
 	private final ThreadLocal<Map<Integer, Queue<CachedByteBufferWrapper>>> heapBuffers;
@@ -128,9 +130,19 @@ public class CachedBufferAllocator implements BufferAllocator {
 	public void dispose() {
 	}
 
+	public static BufferAllocator newInstance() {
+		return new CachedBufferAllocator();
+	}
+
+	public static BufferAllocator newInstance(int maxPoolSize,
+			int maxCachedBufferSize) {
+		return new CachedBufferAllocator(maxPoolSize, maxCachedBufferSize);
+	}
+
 	public class CachedByteBufferWrapper implements ByteBufferWrapper {
 
 		Thread ownerThread; // 所分配的线程
+
 		ByteBuffer origBuffer;
 
 		public CachedByteBufferWrapper(ByteBuffer origBuffer) {

@@ -53,7 +53,7 @@ public class ArrayMemcachedSessionLocator implements MemcachedSessionLocator {
 	}
 
 	@Override
-	public void updateSessionList(List<MemcachedTCPSession> list) {
+	public void updateSessionList(final List<MemcachedTCPSession> list) {
 		sessions = list;
 	}
 }

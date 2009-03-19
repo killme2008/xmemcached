@@ -12,17 +12,27 @@
 package net.rubyeye.xmemcached.utils;
 
 import java.io.UnsupportedEncodingException;
-import java.nio.ByteBuffer;
-import java.nio.charset.Charset;
 
 import net.rubyeye.xmemcached.buffer.ByteBufferWrapper;
 
 public class ByteUtils {
 
+	/**
+	 * 防止创建
+	 * 
+	 */
+	private ByteUtils() {
+
+	}
+
 	public static final byte[] CRLF = { '\r', '\n' };
+
 	public static final byte[] GET = { 'g', 'e', 't' };
+
 	public static final byte[] GETS = { 'g', 'e', 't', 's' };
+
 	public static final byte[] DELETE = { 'd', 'e', 'l', 'e', 't', 'e' };
+
 	public static final byte SPACE = ' ';
 
 	public static byte[] getBytes(String k) {

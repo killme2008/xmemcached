@@ -28,4 +28,8 @@ public class SimpleBufferAllocator implements BufferAllocator {
 	public void dispose() {
 	}
 
+	public static BufferAllocator newInstance() {
+		return new SimpleBufferAllocator();
+	}
+
 }

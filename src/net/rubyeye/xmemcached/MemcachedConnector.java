@@ -44,6 +44,7 @@ public class MemcachedConnector extends SocketChannelController {
 
 	public static class ReconnectRequest {
 		InetSocketAddress address;
+
 		int tries;
 
 		public ReconnectRequest(InetSocketAddress address, int tries) {
@@ -54,6 +55,7 @@ public class MemcachedConnector extends SocketChannelController {
 	}
 
 	private final BlockingQueue<ReconnectRequest> waitingQueue = new LinkedBlockingQueue<ReconnectRequest>();
+
 	private BufferAllocator bufferAllocator;
 
 	private SessionMonitor sessionMonitor;
@@ -111,6 +113,7 @@ public class MemcachedConnector extends SocketChannelController {
 	}
 
 	private boolean optimiezeGet = true;
+
 	private boolean optimizeSet = false;
 
 	public void setOptimiezeGet(boolean optimiezeGet) {
@@ -126,9 +129,13 @@ public class MemcachedConnector extends SocketChannelController {
 	static class ConnectFuture implements Future<Boolean> {
 
 		private boolean connected = false;
+
 		private boolean done = false;
+
 		private boolean cancel = false;
+
 		private CountDownLatch latch = new CountDownLatch(1);
+
 		private Exception exception;
 
 		public boolean isConnected() {
@@ -207,7 +214,9 @@ public class MemcachedConnector extends SocketChannelController {
 	}
 
 	private int sendBufferSize = 0;
+
 	protected MemcachedProtocolHandler memcachedProtocolHandler;
+
 	private MemcachedTCPSession session;
 
 	public int getSendBufferSize() {
@@ -226,7 +235,7 @@ public class MemcachedConnector extends SocketChannelController {
 	public void onConnect(SelectionKey key) throws IOException {
 		key.interestOps(key.interestOps() & ~SelectionKey.OP_CONNECT);
 		ConnectFuture future = (ConnectFuture) key.attachment();
-		if (future.isCancelled()) {
+		if (future == null || future.isCancelled()) {
 			key.channel().close();
 			key.cancel();
 			return;
@@ -293,14 +302,14 @@ public class MemcachedConnector extends SocketChannelController {
 		}
 	}
 
-	public void send(Command msg) throws InterruptedException,
+	public boolean send(Command msg) throws InterruptedException,
 			MemcachedException {
 		Session session = findSessionByKey((String) msg.getKey());
 		if (session == null) {
 			throw new MemcachedException(
 					"There is no avriable session at this moment");
 		}
-		session.send(msg);
+		return session.send(msg);
 
 	}
 
@@ -346,7 +355,8 @@ public class MemcachedConnector extends SocketChannelController {
 				getReactor(), getCodecFactory(), configuration
 						.getSessionReadBufferSize(), statistics, queue,
 				sessionTimeout, handleReadWriteConcurrently, this.optimiezeGet,
-				this.optimizeSet, this.bufferAllocator, this.getReadThreadCount());
+				this.optimizeSet, this.bufferAllocator, this
+						.getReadThreadCount());
 		session.setMemcachedProtocolHandler(this.getMemcachedProtocolHandler());
 		session.setMergeGetsCount(this.mergeGetsCount);
 		return session;

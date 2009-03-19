@@ -145,19 +145,5 @@ public class ByteBufferMatcher {
 		return b < 0 ? b & 0x7F + 128 : b;
 	}
 
-	public static void main(String[] args) {
-		String hello = "hel;lo";
-		ByteBufferMatcher m = new ByteBufferMatcher(ByteBuffer.wrap(hello
-				.getBytes()));
-		m.bmPreprocess();
-		System.out.println(m.matchFirst(ByteBuffer.wrap("hel;lo".getBytes())));
-		System.out.println(m.matchFirst(ByteBuffer.wrap("hel;l0".getBytes())));
-		System.out.println(m.matchFirst(ByteBuffer.wrap("hello hel;lo"
-				.getBytes())));
-		System.out.println(m.matchFirst(ByteBuffer.wrap("hel;lo good "
-				.getBytes())));
-		System.out.println(m.matchFirst(ByteBuffer.wrap("abcdefghel;lo good "
-				.getBytes())));
-		System.out.println(m.matchFirst(ByteBuffer.wrap("".getBytes())));
-	}
+	
 }

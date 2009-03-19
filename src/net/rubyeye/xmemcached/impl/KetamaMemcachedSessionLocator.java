@@ -116,7 +116,7 @@ public class KetamaMemcachedSessionLocator implements MemcachedSessionLocator {
 	}
 
 	@Override
-	public void updateSessionList(List<MemcachedTCPSession> list) {
+	public void updateSessionList(final List<MemcachedTCPSession> list) {
 		buildMap(list, this.hashAlg);
 	}
 

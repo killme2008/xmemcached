@@ -12,7 +12,12 @@
 package net.rubyeye.xmemcached.utils;
 
 import com.google.code.yanf4j.util.Queue;
-
+/**
+ * 扩展queue,谈价addFirst
+ * @author dennis
+ *
+ * @param <T>
+ */
 public interface ExtendedQueue<T> extends Queue<T> {
 	public void addFirst(T obj);
 }

@@ -52,15 +52,23 @@ import com.google.code.yanf4j.nio.Session;
 public class XMemcachedClient {
 
 	private static final int READ_THREAD_COUNT = 0;
+
 	public static final int CONNECT_TIMEOUT = 3000;
+
 	private static final int TCP_SEND_BUFF_SIZE = 16 * 1024;
+
 	private static final boolean TCP_NO_DELAY = false;
+
 	private static final int READ_BUFF_SIZE = 32 * 1024;
+
 	private static final int TCP_RECV_BUFF_SIZE = 16 * 1024;
+
 	public static final long DEFAULT_TIMEOUT = 1000;
+
 	protected static final Log log = LogFactory.getLog(XMemcachedClient.class);
 
 	protected MemcachedSessionLocator sessionLocator;
+
 	/**
 	 * ���Ե�ƽ��ֵ�����ʵ��������
 	 */
@@ -86,17 +94,19 @@ public class XMemcachedClient {
 		return shutdown;
 	}
 
-	private void sendCommand(Command cmd) throws InterruptedException,
+	private boolean sendCommand(Command cmd) throws InterruptedException,
 			MemcachedException {
 		if (this.shutdown) {
 			throw new IllegalStateException();
 		}
-		connector.send(cmd);
+		return connector.send(cmd);
 	}
 
 	private MemcachedConnector connector;
+
 	@SuppressWarnings("unchecked")
 	private Transcoder transcoder;
+
 	private MemcachedHandler memcachedHandler;
 
 	private BufferAllocator byteBufferAllocator;
@@ -150,7 +160,7 @@ public class XMemcachedClient {
 			if (future != null)
 				future.cancel(true);
 			log.error("connect to " + inetSocketAddress.getHostName() + ":"
-					+ inetSocketAddress.getPort() + " timeout",e);
+					+ inetSocketAddress.getPort() + " timeout", e);
 		} catch (Exception e) {
 			if (future != null)
 				future.cancel(true);
@@ -280,7 +290,8 @@ public class XMemcachedClient {
 				return buffer;
 			}
 		};
-		sendCommand(getCmd);
+		if (!sendCommand(getCmd))
+			throw new MemcachedException("send command fail");
 		latchWait(getCmd, timeout, latch);
 		buffer.free(); // free buffer
 		if (getCmd.getException() != null) {
@@ -289,7 +300,7 @@ public class XMemcachedClient {
 		CachedData data = (CachedData) getCmd.getResult();
 		if (data == null)
 			return null;
-		if (cmdType.equals(Command.CommandType.GETS_ONE)) {
+		if (cmdType == Command.CommandType.GETS_ONE) {
 			return new GetsResponse(data.getCas(), this.transcoder.decode(data));
 		} else
 			return this.transcoder.decode(data);
@@ -422,7 +433,8 @@ public class XMemcachedClient {
 		ByteUtils.setArguments(buffer, cmdBytes, keyBytes);
 		buffer.flip();
 		getCmd.setByteBufferWrapper(buffer);
-		sendCommand(getCmd);
+		if (!sendCommand(getCmd))
+			throw new MemcachedException("send command fail");
 		return getCmd;
 	}
 
@@ -565,7 +577,8 @@ public class XMemcachedClient {
 			}
 		};
 
-		sendCommand(command);
+		if (!sendCommand(command))
+			throw new MemcachedException("send command fail");
 		latchWait(command, DEFAULT_TIMEOUT, latch);
 		buffer.free();
 		if (command.getException() != null) {
@@ -594,7 +607,8 @@ public class XMemcachedClient {
 			}
 		};
 
-		sendCommand(command);
+		if (!sendCommand(command))
+			throw new MemcachedException("send command fail");
 		latchWait(command, DEFAULT_TIMEOUT, latch);
 		buffer.free(); // free buffer
 		if (command.getException() != null) {
@@ -647,7 +661,8 @@ public class XMemcachedClient {
 			}
 		};
 
-		sendCommand(command);
+		if (!sendCommand(command))
+			throw new MemcachedException("send command fail");
 		latchWait(command, DEFAULT_TIMEOUT, latch);
 		buffer.free();
 		if (command.getException() != null) {
@@ -705,12 +720,12 @@ public class XMemcachedClient {
 		int size = cmd.length() + 1 + keyBytes.length + 1 + flagBytes.length
 				+ 1 + expBytes.length + 1 + data.getData().length + 2
 				* ByteUtils.CRLF.length + dataLenBytes.length;
-		if (cmdType.equals(Command.CommandType.CAS)) {
+		if (cmdType == Command.CommandType.CAS) {
 			size += 1 + casBytes.length;
 		}
 		final ByteBufferWrapper buffer = this.byteBufferAllocator
 				.allocate(size);
-		if (cmdType.equals(Command.CommandType.CAS)) {
+		if (cmdType == Command.CommandType.CAS) {
 			ByteUtils.setArguments(buffer, cmd, keyBytes, flagBytes, expBytes,
 					dataLenBytes, casBytes);
 		} else
@@ -728,7 +743,8 @@ public class XMemcachedClient {
 			}
 		};
 
-		sendCommand(command);
+		if (!sendCommand(command))
+			throw new MemcachedException("send command fail");
 		latchWait(command, timeout, latch);
 		buffer.free();
 		if (command.getException() != null) {

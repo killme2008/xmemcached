@@ -29,10 +29,15 @@ public class Command {
 	public static final String SPLIT = "\r\n";
 
 	Object key; // 关键字
+
 	AtomicReference<Object> result = new AtomicReference<Object>(null); // memcached返回结果
+
 	CountDownLatch latch;
+
 	CommandType commandType;
+
 	MemcachedException throwable; // 执行异常
+
 	ByteBufferWrapper byteBufferWrapper;
 
 	AtomicBoolean cancel = new AtomicBoolean(false);
@@ -134,8 +139,7 @@ public class Command {
 	}
 
 	public boolean isCancel() {
-		return this.status.get().equals(OperationStatus.SENDING)
-				&& cancel.get();
+		return this.status.get() == OperationStatus.SENDING && cancel.get();
 	}
 
 	public void cancel() {
