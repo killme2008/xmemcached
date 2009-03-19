@@ -118,7 +118,7 @@ public class PerformanceTest {
 	// thread num=10, repeat=10000,size=2, all=200000 ,velocity=1057 , using
 	// time:189187
 	static public void main(String[] args) {
-		String ip = "localhost";
+		String ip = "192.168.222.100";
 		int port1 = 12000;
 		int port2 = 12001;
 		int port3 = 12002;
@@ -146,9 +146,9 @@ public class PerformanceTest {
 			XMemcachedClient mc = new XMemcachedClient(
 					conf,new CachedBufferAllocator());
 			mc.addServer(ip, port1);
-			mc.addServer(ip, port2);
+			//mc.addServer(ip, port2);
 			// mc.addServer(ip, port2);
-			 mc.addServer(ip, port3);
+			// mc.addServer(ip, port3);
 		
 			// mc.addServer(ip, 12005);
 			// mc.addServer(ip, 12006);

@@ -176,15 +176,17 @@ public class MemcachedHandler extends HandlerAdapter<Command> implements
 				if (executingCommand == null) {
 					return false;
 				}
-				if (executingCommand.getCommandType().equals(
-						Command.CommandType.GET_MANY)
-						|| executingCommand.getCommandType().equals(
-								Command.CommandType.GETS_MANY)) {
+				if (executingCommand.getCommandType() == Command.CommandType.GET_MANY
+						|| executingCommand.getCommandType() == Command.CommandType.GETS_MANY) {
 					processGetManyCommand(session, session.currentValues,
 							executingCommand);
-				} else {
+				} else if (executingCommand.getCommandType() == Command.CommandType.GET_ONE
+						|| executingCommand.getCommandType() == Command.CommandType.GETS_ONE) {
 					processGetOneCommand(session, session.currentValues,
 							executingCommand);
+				} else {
+					session.close();
+					return false;
 				}
 				session.currentValues = null;
 				session.resetStatus();
@@ -226,6 +228,14 @@ public class MemcachedHandler extends HandlerAdapter<Command> implements
 	 */
 	private boolean parseEndCommand(MemcachedTCPSession session) {
 		Command executingCmd = session.getCurrentExecutingCommand();
+		Command.CommandType cmdType = executingCmd.getCommandType();
+		if (cmdType != Command.CommandType.GET_ONE
+				&& cmdType != Command.CommandType.GETS_ONE
+				&& cmdType != Command.CommandType.GET_MANY
+				&& cmdType != Command.CommandType.GETS_MANY) {
+			session.close();
+			return false;
+		}
 		int mergCount = executingCmd.getMergeCount();
 		if (mergCount < 0) {
 			// single
@@ -333,7 +343,7 @@ public class MemcachedHandler extends HandlerAdapter<Command> implements
 		final Integer result = Integer.parseInt(session.currentLine);
 		Command executingCmd = session.getCurrentExecutingCommand();
 		if (executingCmd.getCommandType() != Command.CommandType.INCR
-				|| executingCmd.getCommandType() != Command.CommandType.DECR) {
+				&& executingCmd.getCommandType() != Command.CommandType.DECR) {
 			session.close();
 			return false;
 		}
@@ -420,11 +430,6 @@ public class MemcachedHandler extends HandlerAdapter<Command> implements
 	@SuppressWarnings("unchecked")
 	private void processGetOneCommand(Session session,
 			Map<String, CachedData> values, Command executingCmd) {
-		if (executingCmd.getCommandType() != Command.CommandType.GET_ONE
-				|| executingCmd.getCommandType() != Command.CommandType.GETS_ONE) {
-			session.close();
-			return;
-		}
 		int mergeCount = executingCmd.getMergeCount();
 		if (mergeCount < 0) {
 			// single get
@@ -453,11 +458,6 @@ public class MemcachedHandler extends HandlerAdapter<Command> implements
 	@SuppressWarnings("unchecked")
 	private void processGetManyCommand(Session session,
 			Map<String, CachedData> values, Command executingCmd) {
-		if (executingCmd.getCommandType() != Command.CommandType.GET_MANY
-				|| executingCmd.getCommandType() != Command.CommandType.GETS_MANY) {
-			session.close();
-			return;
-		}
 		// 合并结果
 		if (executingCmd.getCommandType() == Command.CommandType.GETS_MANY) {
 			Map result = (Map) executingCmd.getResult();

@@ -129,9 +129,7 @@ public class MemcachedTCPSession extends DefaultTCPSession {
 			if (needRegister) {
 				sessionEventManager.registerSession(this,
 						EventType.ENABLE_WRITE); // 列表为空，注册监听写事件
-
 				this.sessionEventManager.wakeup(); // wakeup selector
-
 			}
 		}
 	}
@@ -156,7 +154,7 @@ public class MemcachedTCPSession extends DefaultTCPSession {
 			}
 			Command.CommandType nextCommandType = nextCmd.getCommandType();
 			// 相同key，后续的set将覆盖此时的set
-			if (nextCommandType==Command.CommandType.SET) {
+			if (nextCommandType == Command.CommandType.SET) {
 				finalCommand.getLatch().countDown();
 				finalCommand.setStatus(OperationStatus.DONE);
 				finalCommand = (Command) writeQueue.pop();
@@ -192,7 +190,7 @@ public class MemcachedTCPSession extends DefaultTCPSession {
 			if (nextCmd == null) {
 				break;
 			}
-			if (nextCmd.getCommandType()==Command.CommandType.GET_ONE) {
+			if (nextCmd.getCommandType() == Command.CommandType.GET_ONE) {
 				mergeCommands.add((Command) this.writeQueue.pop());
 				key.append(" ").append((String) nextCmd.getKey());
 				nextCmd.setStatus(OperationStatus.WRITING);
