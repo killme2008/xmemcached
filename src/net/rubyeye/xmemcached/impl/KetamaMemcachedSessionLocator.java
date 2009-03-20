@@ -63,8 +63,7 @@ public class KetamaMemcachedSessionLocator implements MemcachedSessionLocator {
 	}
 
 	private void buildMap(List<MemcachedTCPSession> list, HashAlgorithm alg) {
-		TreeMap<Long, MemcachedTCPSession> sessionMap = ketamaSessions;
-		sessionMap.clear();
+		TreeMap<Long, MemcachedTCPSession> sessionMap = new TreeMap<Long, MemcachedTCPSession>();
 		for (MemcachedTCPSession session : list) {
 			String sockStr = String.valueOf(session.getRemoteSocketAddress());
 			/**
