@@ -43,7 +43,7 @@ import net.rubyeye.xmemcached.MemcachedTCPSession;
 public class KetamaMemcachedSessionLocator implements MemcachedSessionLocator {
 	static final int NUM_REPS = 160;
 
-	private TreeMap<Long, MemcachedTCPSession> ketamaSessions = new TreeMap<Long, MemcachedTCPSession>();
+	private volatile TreeMap<Long, MemcachedTCPSession> ketamaSessions = new TreeMap<Long, MemcachedTCPSession>();
 
 	final HashAlgorithm hashAlg;
 
@@ -63,6 +63,8 @@ public class KetamaMemcachedSessionLocator implements MemcachedSessionLocator {
 	}
 
 	private void buildMap(List<MemcachedTCPSession> list, HashAlgorithm alg) {
+		TreeMap<Long, MemcachedTCPSession> sessionMap = ketamaSessions;
+		sessionMap.clear();
 		for (MemcachedTCPSession session : list) {
 			String sockStr = String.valueOf(session.getRemoteSocketAddress());
 			/**
@@ -76,17 +78,17 @@ public class KetamaMemcachedSessionLocator implements MemcachedSessionLocator {
 								| ((long) (digest[2 + h * 4] & 0xFF) << 16)
 								| ((long) (digest[1 + h * 4] & 0xFF) << 8)
 								| (digest[h * 4] & 0xFF);
-						ketamaSessions.put(k, session);
+						sessionMap.put(k, session);
 					}
 
 				}
 			} else {
 				for (int i = 0; i < NUM_REPS; i++) {
-					ketamaSessions
-							.put(hashAlg.hash(sockStr + "-" + i), session);
+					sessionMap.put(hashAlg.hash(sockStr + "-" + i), session);
 				}
 			}
 		}
+		ketamaSessions = sessionMap;
 	}
 
 	long getMaxKey() {
@@ -96,12 +98,12 @@ public class KetamaMemcachedSessionLocator implements MemcachedSessionLocator {
 	@Override
 	public MemcachedTCPSession getSessionByKey(String key) {
 		Long hash = hashAlg.hash(key);
-
+		TreeMap<Long, MemcachedTCPSession> sessionMap = ketamaSessions;
 		final MemcachedTCPSession rv;
-		if (!ketamaSessions.containsKey(hash)) {
-			hash = ketamaSessions.ceilingKey(hash);
+		if (!sessionMap.containsKey(hash)) {
+			hash = sessionMap.ceilingKey(hash);
 			if (hash == null)
-				hash = ketamaSessions.firstKey();
+				hash = sessionMap.firstKey();
 			// jdk1.5采用 下列代码，xmemcached针对jdk1.6
 			// SortedMap<Long, MemcachedTCPSession> tailMap = ketamaSessions
 			// .tailMap(hash);
@@ -111,7 +113,7 @@ public class KetamaMemcachedSessionLocator implements MemcachedSessionLocator {
 			// hash = tailMap.firstKey();
 			// }
 		}
-		rv = ketamaSessions.get(hash);
+		rv = sessionMap.get(hash);
 		return rv;
 	}
 

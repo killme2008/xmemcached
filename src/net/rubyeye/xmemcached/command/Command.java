@@ -13,9 +13,6 @@ package net.rubyeye.xmemcached.command;
 
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicReference;
-
 import net.rubyeye.xmemcached.buffer.ByteBufferWrapper;
 import net.rubyeye.xmemcached.exception.MemcachedException;
 
@@ -30,7 +27,7 @@ public class Command {
 
 	Object key; // 关键字
 
-	AtomicReference<Object> result = new AtomicReference<Object>(null); // memcached返回结果
+	volatile Object result = null; // memcached返回结果
 
 	CountDownLatch latch;
 
@@ -40,10 +37,9 @@ public class Command {
 
 	ByteBufferWrapper byteBufferWrapper;
 
-	AtomicBoolean cancel = new AtomicBoolean(false);
+	volatile boolean cancel = false;
 
-	AtomicReference<OperationStatus> status = new AtomicReference<OperationStatus>(
-			null);
+	volatile OperationStatus status = null;
 
 	int mergeCount = -1;
 
@@ -72,18 +68,18 @@ public class Command {
 
 	public Command() {
 		super();
-		this.status.set(OperationStatus.SENDING);
+		this.status = OperationStatus.SENDING;
 	}
 
 	public Command(CommandType cmdType) {
 		this.commandType = cmdType;
-		this.status.set(OperationStatus.SENDING);
+		this.status = OperationStatus.SENDING;
 	}
 
 	public Command(CommandType cmdType, CountDownLatch latch) {
 		this.commandType = cmdType;
 		this.latch = latch;
-		this.status.set(OperationStatus.SENDING);
+		this.status = OperationStatus.SENDING;
 	}
 
 	public Command(Object key, CommandType commandType, CountDownLatch latch) {
@@ -91,15 +87,15 @@ public class Command {
 		this.key = key;
 		this.commandType = commandType;
 		this.latch = latch;
-		this.status.set(OperationStatus.SENDING);
+		this.status = OperationStatus.SENDING;
 	}
 
 	public OperationStatus getStatus() {
-		return status.get();
+		return status;
 	}
 
 	public void setStatus(OperationStatus status) {
-		this.status.set(status);
+		this.status = status;
 	}
 
 	public void setByteBufferWrapper(ByteBufferWrapper byteBufferWrapper) {
@@ -127,11 +123,11 @@ public class Command {
 	}
 
 	public Object getResult() {
-		return result.get();
+		return result;
 	}
 
 	public void setResult(Object result) {
-		this.result.compareAndSet(null, result);
+		this.result = result;
 	}
 
 	public ByteBufferWrapper getByteBufferWrapper() {
@@ -139,11 +135,11 @@ public class Command {
 	}
 
 	public boolean isCancel() {
-		return this.status.get() == OperationStatus.SENDING && cancel.get();
+		return this.status == OperationStatus.SENDING && cancel;
 	}
 
 	public void cancel() {
-		this.cancel.set(true);
+		this.cancel = true;
 	}
 
 	public CountDownLatch getLatch() {
