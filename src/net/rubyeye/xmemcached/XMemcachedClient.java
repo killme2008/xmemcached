@@ -197,6 +197,52 @@ public class XMemcachedClient {
 		this.connector.setMemcachedProtocolHandler(memcachedHandler);
 	}
 
+	/**
+	 * builder模式，用于创建XMemcachedClient
+	 * 
+	 * @author Administrator
+	 * 
+	 */
+	public static class XMemcachedClientBuilder {
+		private MemcachedSessionLocator sessionLocator = new ArrayMemcachedSessionLocator();
+		private BufferAllocator bufferAllocator = new SimpleBufferAllocator();
+		private Configuration configuration = getDefaultConfiguration();
+
+		public XMemcachedClientBuilder() {
+			super();
+		}
+
+		public MemcachedSessionLocator getSessionLocator() {
+			return sessionLocator;
+		}
+
+		public void setSessionLocator(MemcachedSessionLocator sessionLocator) {
+			this.sessionLocator = sessionLocator;
+		}
+
+		public BufferAllocator getBufferAllocator() {
+			return bufferAllocator;
+		}
+
+		public void setBufferAllocator(BufferAllocator bufferAllocator) {
+			this.bufferAllocator = bufferAllocator;
+		}
+
+		public Configuration getConfiguration() {
+			return configuration;
+		}
+
+		public void setConfiguration(Configuration configuration) {
+			this.configuration = configuration;
+		}
+
+		public XMemcachedClient makeXMemcachedClient() throws IOException {
+			return new XMemcachedClient(this.sessionLocator,
+					this.bufferAllocator, this.configuration);
+		}
+
+	}
+
 	public XMemcachedClient(Configuration configuration) throws IOException {
 		this(new ArrayMemcachedSessionLocator(), new SimpleBufferAllocator(),
 				configuration);
