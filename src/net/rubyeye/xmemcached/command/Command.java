@@ -25,23 +25,23 @@ import net.rubyeye.xmemcached.exception.MemcachedException;
 public class Command {
 	public static final String SPLIT = "\r\n";
 
-	Object key; // 关键字
+	private  Object key; // 关键字
 
-	volatile Object result = null; // memcached返回结果
+	private volatile Object result = null; // memcached返回结果
 
-	CountDownLatch latch;
+	private CountDownLatch latch;
 
-	CommandType commandType;
+	private CommandType commandType;
 
-	MemcachedException throwable; // 执行异常
+	private MemcachedException throwable; // 执行异常
 
-	ByteBufferWrapper byteBufferWrapper;
+	private ByteBufferWrapper byteBufferWrapper;
 
-	volatile boolean cancel = false;
+	private volatile boolean cancel = false;
 
-	volatile OperationStatus status = null;
+	private volatile OperationStatus status = null;
 
-	int mergeCount = -1;
+	private int mergeCount = -1;
 
 	/**
 	 * 命令类型
@@ -54,7 +54,7 @@ public class Command {
 
 	}
 
-	public void setCommandType(CommandType commandType) {
+	public void setCommandType(final CommandType commandType) {
 		this.commandType = commandType;
 	}
 
@@ -62,7 +62,7 @@ public class Command {
 		return mergeCount;
 	}
 
-	public void setMergeCount(int mergetCount) {
+	public void setMergeCount(final int mergetCount) {
 		this.mergeCount = mergetCount;
 	}
 
@@ -71,12 +71,12 @@ public class Command {
 		this.status = OperationStatus.SENDING;
 	}
 
-	public Command(CommandType cmdType) {
+	public Command(final CommandType cmdType) {
 		this.commandType = cmdType;
 		this.status = OperationStatus.SENDING;
 	}
 
-	public Command(CommandType cmdType, CountDownLatch latch) {
+	public Command(final CommandType cmdType, final CountDownLatch latch) {
 		this.commandType = cmdType;
 		this.latch = latch;
 		this.status = OperationStatus.SENDING;

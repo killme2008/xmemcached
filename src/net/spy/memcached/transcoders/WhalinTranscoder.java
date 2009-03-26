@@ -45,19 +45,19 @@ public class WhalinTranscoder extends BaseSerializingTranscoder
 					rv=Boolean.valueOf(this.decodeBoolean(data));
 					break;
 				case SPECIAL_INT:
-					rv=new Integer(tu.decodeInt(data));
+					rv=Integer.valueOf(tu.decodeInt(data));
 					break;
 				case SPECIAL_SHORT:
-					rv=new Short((short)tu.decodeInt(data));
+					rv=Short.valueOf((short)tu.decodeInt(data));
 					break;
 				case SPECIAL_LONG:
-					rv=new Long(tu.decodeLong(data));
+					rv=Long.valueOf(tu.decodeLong(data));
 					break;
 				case SPECIAL_DATE:
 					rv=new Date(tu.decodeLong(data));
 					break;
 				case SPECIAL_BYTE:
-					rv=new Byte(tu.decodeByte(data));
+					rv=Byte.valueOf(tu.decodeByte(data));
 					break;
 				case SPECIAL_FLOAT:
 					rv=new Float(Float.intBitsToFloat(tu.decodeInt(data)));

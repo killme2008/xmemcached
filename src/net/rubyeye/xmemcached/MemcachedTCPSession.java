@@ -65,7 +65,7 @@ public class MemcachedTCPSession extends DefaultTCPSession {
 
 	private SocketAddress remoteSocketAddress;
 
-	private volatile BufferAllocator bufferAllocator;
+	private transient volatile BufferAllocator bufferAllocator;
 
 	@SuppressWarnings("unchecked")
 	public MemcachedTCPSession(SocketChannel sc, SelectionKey sk,
@@ -307,8 +307,9 @@ public class MemcachedTCPSession extends DefaultTCPSession {
 	}
 
 	@SuppressWarnings("unchecked")
-	private Command wrapCurrentCommand(Command currentCommand)
-			throws InterruptedException {
+	private Command wrapCurrentCommand(Command cmd)
+	 		throws InterruptedException {
+		Command currentCommand=cmd;
 		if (currentCommand.getCommandType() == Command.CommandType.GET_ONE) {
 			final List<Command> mergeCommands = new ArrayList<Command>(
 					getsMergeFactor);

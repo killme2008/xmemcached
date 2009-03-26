@@ -43,7 +43,7 @@ import net.rubyeye.xmemcached.MemcachedTCPSession;
 public class KetamaMemcachedSessionLocator implements MemcachedSessionLocator {
 	static final int NUM_REPS = 160;
 
-	private volatile TreeMap<Long, MemcachedTCPSession> ketamaSessions = new TreeMap<Long, MemcachedTCPSession>();
+	private transient volatile TreeMap<Long, MemcachedTCPSession> ketamaSessions = new TreeMap<Long, MemcachedTCPSession>();
 
 	final HashAlgorithm hashAlg;
 

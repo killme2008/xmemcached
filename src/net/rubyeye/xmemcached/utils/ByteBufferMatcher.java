@@ -22,15 +22,15 @@ import java.util.List;
  * 
  */
 public class ByteBufferMatcher {
-	ByteBuffer pattern;
-	int remaining;
-	int occ[] = new int[256];
-	int[] f;
-	int[] s;
+	private ByteBuffer pattern;
+	private int remaining;
+	private final int occ[] = new int[256];
+	private int[] f;
+	private int[] s;
 
 	public ByteBufferMatcher(ByteBuffer buffer) {
 		if (buffer == null || buffer.remaining() == 0)
-			throw new NullPointerException("blank buffer");
+			throw new IllegalArgumentException("blank buffer");
 		this.pattern = buffer;
 		this.remaining = buffer.remaining();
 		f = new int[remaining + 1];
@@ -41,7 +41,7 @@ public class ByteBufferMatcher {
 	/**
 	 * 模式预处理
 	 */
-	public void bmPreprocess() {
+	public final void bmPreprocess() {
 		badBytePreProcess();
 		goodBytePreProcess1();
 		goodBytePreProcess2();

@@ -15,7 +15,7 @@ import java.io.UnsupportedEncodingException;
 
 import net.rubyeye.xmemcached.buffer.ByteBufferWrapper;
 
-public class ByteUtils {
+public final class ByteUtils {
 
 	/**
 	 * 防止创建

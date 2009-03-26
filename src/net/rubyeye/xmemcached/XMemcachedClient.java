@@ -585,7 +585,7 @@ public class XMemcachedClient {
 		int tryCount = 0;
 		GetsResponse result = gets(key);
 		if (result == null)
-			throw new NullPointerException("could not found the value for Key="
+			throw new MemcachedException("could not found the value for Key="
 					+ key);
 		while (tryCount < operation.getMaxTries()
 				&& result != null
@@ -595,7 +595,7 @@ public class XMemcachedClient {
 			tryCount++;
 			result = gets(key);
 			if (result == null)
-				throw new NullPointerException(
+				throw new MemcachedException(
 						"could not found the value for Key=" + key);
 			if (tryCount >= operation.getMaxTries())
 				throw new TimeoutException("CAS try times is greater than max");
