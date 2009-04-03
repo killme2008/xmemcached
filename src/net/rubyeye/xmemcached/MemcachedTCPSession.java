@@ -1,12 +1,12 @@
 /**
  *Copyright [2009-2010] [dennis zhuang(killme2008@gmail.com)]
  *Licensed under the Apache License, Version 2.0 (the "License");
- *you may not use this file except in compliance with the License. 
- *You may obtain a copy of the License at 
- *             http://www.apache.org/licenses/LICENSE-2.0 
- *Unless required by applicable law or agreed to in writing, 
- *software distributed under the License is distributed on an "AS IS" BASIS, 
- *WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, 
+ *you may not use this file except in compliance with the License.
+ *You may obtain a copy of the License at
+ *             http://www.apache.org/licenses/LICENSE-2.0
+ *Unless required by applicable law or agreed to in writing,
+ *software distributed under the License is distributed on an "AS IS" BASIS,
+ *WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
  *either express or implied. See the License for the specific language governing permissions and limitations under the License
  */
 package net.rubyeye.xmemcached;
@@ -31,6 +31,8 @@ import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
 import java.nio.channels.WritableByteChannel;
 import java.util.ArrayList;
+import java.util.Deque;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -48,7 +50,7 @@ import net.spy.memcached.transcoders.CachedData;
 
 /**
  * 针对memcached的session类
- * 
+ *
  * @author dennis
  */
 public class MemcachedTCPSession extends DefaultTCPSession {
@@ -136,7 +138,7 @@ public class MemcachedTCPSession extends DefaultTCPSession {
 
 	/**
 	 * 优化set操作，连续的set如果key相同将合并成最后一个set操作
-	 * 
+	 *
 	 * @param currentCmd
 	 * @return
 	 * @throws InterruptedException
@@ -173,7 +175,7 @@ public class MemcachedTCPSession extends DefaultTCPSession {
 
 	/**
 	 * 优化get操作，连续的get操作将合并成一个
-	 * 
+	 *
 	 * @param currentCmd
 	 * @param mergeCommands
 	 * @return
@@ -307,9 +309,8 @@ public class MemcachedTCPSession extends DefaultTCPSession {
 	}
 
 	@SuppressWarnings("unchecked")
-	private Command wrapCurrentCommand(Command cmd)
-	 		throws InterruptedException {
-		Command currentCommand=cmd;
+	private Command wrapCurrentCommand(Command cmd) throws InterruptedException {
+		Command currentCommand = cmd;
 		if (currentCommand.getCommandType() == Command.CommandType.GET_ONE) {
 			final List<Command> mergeCommands = new ArrayList<Command>(
 					getsMergeFactor);
@@ -358,7 +359,7 @@ public class MemcachedTCPSession extends DefaultTCPSession {
 
 	/**
 	 * 强制写完
-	 * 
+	 *
 	 * @param channel
 	 * @param message
 	 * @param writeBuffer
@@ -447,7 +448,7 @@ public class MemcachedTCPSession extends DefaultTCPSession {
 
 	/**
 	 * 获取当前执行command
-	 * 
+	 *
 	 * @return
 	 */
 	Command getCurrentExecutingCommand() {

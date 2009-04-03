@@ -33,7 +33,7 @@ import java.util.concurrent.TimeoutException;
 import net.rubyeye.xmemcached.buffer.BufferAllocator;
 import net.rubyeye.xmemcached.command.Command;
 import net.rubyeye.xmemcached.exception.MemcachedException;
-import net.rubyeye.xmemcached.utils.SimpleQueue;
+import net.rubyeye.xmemcached.utils.ExtendedSimpleQueue;
 
 /**
  * 针对memcached的连接管理类
@@ -340,7 +340,7 @@ public class MemcachedConnector extends SocketChannelController {
 	 * 使用扩展queue
 	 */
 	protected Queue<Session.WriteMessage> buildQueue() {
-		return new SimpleQueue<Session.WriteMessage>();
+		return new ExtendedSimpleQueue<Session.WriteMessage>();
 	}
 
 	private int mergeGetsCount = 65;

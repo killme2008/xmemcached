@@ -3,19 +3,18 @@ package net.rubyeye.xmemcached.utils;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
 
 /**
  * 基于LinkedList实现的伪BlockingQueue，非线程安全
- * 
+ *
  * @author dennis
- * 
+ *
  * @param <T>
  */
 public class SimpleBlockingQueue<T> implements BlockingQueue<T> {
-	private List<T> list = new LinkedList<T>();
+	private LinkedList<T> list = new LinkedList<T>();
 
 	@Override
 	public T element() {
@@ -26,14 +25,14 @@ public class SimpleBlockingQueue<T> implements BlockingQueue<T> {
 	public T peek() {
 		if (list.isEmpty())
 			return null;
-		return list.get(0);
+		return list.peek();
 	}
 
 	@Override
 	public T poll() {
 		if (list.isEmpty())
 			return null;
-		return list.remove(0);
+		return list.pop();
 	}
 
 	@Override
@@ -147,7 +146,6 @@ public class SimpleBlockingQueue<T> implements BlockingQueue<T> {
 	public T take() throws InterruptedException {
 		if (list.isEmpty())
 			return null;
-		return this.list.remove(0);
+		return this.list.pop();
 	}
-
 }
