@@ -454,7 +454,8 @@ public class MemcachedTCPSession extends DefaultTCPSession {
 	Command getCurrentExecutingCommand() {
 		try {
 			Command cmd = executingCmds.take();
-			cmd.setStatus(OperationStatus.PROCESSING);
+			if (cmd != null)
+				cmd.setStatus(OperationStatus.PROCESSING);
 			return cmd;
 		} catch (InterruptedException e) {
 			Thread.currentThread().interrupt();

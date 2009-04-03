@@ -1,12 +1,12 @@
 /**
  *Copyright [2009-2010] [dennis zhuang(killme2008@gmail.com)]
  *Licensed under the Apache License, Version 2.0 (the "License");
- *you may not use this file except in compliance with the License. 
- *You may obtain a copy of the License at 
- *             http://www.apache.org/licenses/LICENSE-2.0 
- *Unless required by applicable law or agreed to in writing, 
- *software distributed under the License is distributed on an "AS IS" BASIS, 
- *WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, 
+ *you may not use this file except in compliance with the License.
+ *You may obtain a copy of the License at
+ *             http://www.apache.org/licenses/LICENSE-2.0
+ *Unless required by applicable law or agreed to in writing,
+ *software distributed under the License is distributed on an "AS IS" BASIS,
+ *WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
  *either express or implied. See the License for the specific language governing permissions and limitations under the License
  */
 package net.rubyeye.xmemcached;
@@ -36,9 +36,9 @@ import net.rubyeye.xmemcached.utils.ByteBufferMatcher;
 
 /**
  * 核心类，负责协议解析和消息派发
- * 
+ *
  * @author dennis
- * 
+ *
  */
 public class MemcachedHandler extends HandlerAdapter<Command> implements
 		MemcachedProtocolHandler {
@@ -53,7 +53,7 @@ public class MemcachedHandler extends HandlerAdapter<Command> implements
 
 	/**
 	 * 返回boolean值并唤醒
-	 * 
+	 *
 	 * @param result
 	 * @return
 	 */
@@ -83,9 +83,9 @@ public class MemcachedHandler extends HandlerAdapter<Command> implements
 
 	/**
 	 * 解析状态
-	 * 
+	 *
 	 * @author dennis
-	 * 
+	 *
 	 */
 	enum ParseStatus {
 
@@ -158,7 +158,7 @@ public class MemcachedHandler extends HandlerAdapter<Command> implements
 
 	/**
 	 * 解析get协议response
-	 * 
+	 *
 	 * @param buffer
 	 * @param origPos
 	 * @param origLimit
@@ -223,7 +223,7 @@ public class MemcachedHandler extends HandlerAdapter<Command> implements
 
 	/**
 	 * 解析get协议返回空
-	 * 
+	 *
 	 * @return
 	 */
 	private boolean parseEndCommand(MemcachedTCPSession session) {
@@ -258,13 +258,14 @@ public class MemcachedHandler extends HandlerAdapter<Command> implements
 
 	/**
 	 * 解析错误response
-	 * 
+	 *
 	 * @return
 	 */
 	private boolean parseException(MemcachedTCPSession session) {
 		Command executingCmd = session.getCurrentExecutingCommand();
 		final MemcachedException exception = new MemcachedException(
-				"Unknown command,please check your memcached version");
+				"Unknown command:" + executingCmd.toString()
+						+ ",please check your memcached version");
 		executingCmd.setException(exception);
 		executingCmd.getLatch().countDown();
 		executingCmd.setStatus(OperationStatus.DONE);
@@ -274,7 +275,7 @@ public class MemcachedHandler extends HandlerAdapter<Command> implements
 
 	/**
 	 * 解析错误response
-	 * 
+	 *
 	 * @return
 	 */
 	private boolean parseClientException(MemcachedTCPSession session) {
@@ -282,9 +283,8 @@ public class MemcachedHandler extends HandlerAdapter<Command> implements
 		final String error = items.length > 1 ? items[1]
 				: "unknown client error";
 		Command executingCmd = session.getCurrentExecutingCommand();
-
 		final MemcachedClientException exception = new MemcachedClientException(
-				error);
+				error + ",command:" + executingCmd.toString());
 		executingCmd.setException(exception);
 		executingCmd.getLatch().countDown();
 		executingCmd.setStatus(OperationStatus.DONE);
@@ -295,7 +295,7 @@ public class MemcachedHandler extends HandlerAdapter<Command> implements
 
 	/**
 	 * 解析错误response
-	 * 
+	 *
 	 * @return
 	 */
 	private boolean parseServerException(MemcachedTCPSession session) {
@@ -304,7 +304,7 @@ public class MemcachedHandler extends HandlerAdapter<Command> implements
 				: "unknown server error";
 		Command executingCmd = session.getCurrentExecutingCommand();
 		final MemcachedServerException exception = new MemcachedServerException(
-				error);
+				error + ",command:" + executingCmd.toString());
 		executingCmd.setException(exception);
 		executingCmd.getLatch().countDown();
 		executingCmd.setStatus(OperationStatus.DONE);
@@ -315,7 +315,7 @@ public class MemcachedHandler extends HandlerAdapter<Command> implements
 
 	/**
 	 * 解析version协议response
-	 * 
+	 *
 	 * @return
 	 */
 	private boolean parseVersionCommand(MemcachedTCPSession session) {
@@ -336,7 +336,7 @@ public class MemcachedHandler extends HandlerAdapter<Command> implements
 
 	/**
 	 * 解析incr,decr协议response
-	 * 
+	 *
 	 * @return
 	 */
 	private boolean parseIncrDecrCommand(MemcachedTCPSession session) {
@@ -358,7 +358,7 @@ public class MemcachedHandler extends HandlerAdapter<Command> implements
 
 	/**
 	 * 获取下一行
-	 * 
+	 *
 	 * @param buffer
 	 */
 	protected void nextLine(MemcachedTCPSession session, ByteBuffer buffer) {
@@ -437,7 +437,8 @@ public class MemcachedHandler extends HandlerAdapter<Command> implements
 				reconnect(session);
 			} else {
 				CachedData data = values.get(executingCmd.getKey());
-				executingCmd.setResult(data); // 设置CachedData返回，transcoder.decode()放到用户线程
+				executingCmd.setResult(data); //设置CachedData返回，transcoder.decode
+				// ()放到用户线程
 
 				executingCmd.getLatch().countDown();
 				executingCmd.setStatus(OperationStatus.DONE);

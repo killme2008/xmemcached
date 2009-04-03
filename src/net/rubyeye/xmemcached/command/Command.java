@@ -1,16 +1,17 @@
 /**
  *Copyright [2009-2010] [dennis zhuang]
  *Licensed under the Apache License, Version 2.0 (the "License");
- *you may not use this file except in compliance with the License. 
- *You may obtain a copy of the License at 
- *             http://www.apache.org/licenses/LICENSE-2.0 
- *Unless required by applicable law or agreed to in writing, 
- *software distributed under the License is distributed on an "AS IS" BASIS, 
- *WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, 
+ *you may not use this file except in compliance with the License.
+ *You may obtain a copy of the License at
+ *             http://www.apache.org/licenses/LICENSE-2.0
+ *Unless required by applicable law or agreed to in writing,
+ *software distributed under the License is distributed on an "AS IS" BASIS,
+ *WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
  *either express or implied. See the License for the specific language governing permissions and limitations under the License
  */
 package net.rubyeye.xmemcached.command;
 
+import java.io.UnsupportedEncodingException;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import net.rubyeye.xmemcached.buffer.ByteBufferWrapper;
@@ -18,14 +19,14 @@ import net.rubyeye.xmemcached.exception.MemcachedException;
 
 /**
  * memcached命令类
- * 
+ *
  * @author Administrator
- * 
+ *
  */
 public class Command {
 	public static final String SPLIT = "\r\n";
 
-	private  Object key; // 关键字
+	private Object key; // 关键字
 
 	private volatile Object result = null; // memcached返回结果
 
@@ -45,9 +46,9 @@ public class Command {
 
 	/**
 	 * 命令类型
-	 * 
+	 *
 	 * @author dennis
-	 * 
+	 *
 	 */
 	public enum CommandType {
 		GET_ONE, GET_MANY, SET, REPLACE, ADD, EXCEPTION, DELETE, VERSION, INCR, DECR, GETS_ONE, GETS_MANY, CAS;
@@ -132,6 +133,16 @@ public class Command {
 
 	public ByteBufferWrapper getByteBufferWrapper() {
 		return this.byteBufferWrapper;
+	}
+
+	public String toString() {
+		try {
+			return new String(this.byteBufferWrapper.getByteBuffer().array(),
+					"utf-8");
+		} catch (UnsupportedEncodingException e) {
+
+		}
+		return null;
 	}
 
 	public boolean isCancel() {
