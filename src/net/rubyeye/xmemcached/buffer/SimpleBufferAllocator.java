@@ -21,8 +21,8 @@ import java.nio.ByteBuffer;
  */
 public class SimpleBufferAllocator implements BufferAllocator {
 
-	public ByteBufferWrapper allocate(int capacity) {
-		return new SimpleByteBufferWrapper(ByteBuffer.allocate(capacity));
+	public IoBuffer allocate(int capacity) {
+		return new SimpleIoBuffer(ByteBuffer.allocate(capacity));
 	}
 
 	public void dispose() {

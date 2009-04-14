@@ -1,8 +1,8 @@
 package net.rubyeye.xmemcached.utils;
 
+import java.util.ArrayDeque;
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
 
@@ -15,11 +15,11 @@ import java.util.concurrent.TimeUnit;
  */
 public class SimpleBlockingQueue<T> implements BlockingQueue<T> {
 
-    private LinkedList<T> list = new LinkedList<T>();
+    private ArrayDeque<T> list = new ArrayDeque<T>(500);
 
     @Override
     public T element() {
-        throw new UnsupportedOperationException();
+        return list.element();
     }
 
     @Override
@@ -141,6 +141,6 @@ public class SimpleBlockingQueue<T> implements BlockingQueue<T> {
 
     @Override
     public T take() throws InterruptedException {
-        return this.list.pop();
+        return this.list.remove();
     }
 }

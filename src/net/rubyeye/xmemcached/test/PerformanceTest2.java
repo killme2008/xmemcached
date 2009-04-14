@@ -3,12 +3,12 @@ package net.rubyeye.xmemcached.test;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
-
+import net.rubyeye.xmemcached.XMemcachedClientBuilder;
 import net.rubyeye.xmemcached.XMemcachedClient;
 
 public class PerformanceTest2 {
 	static Map<String, NameClass> map2 = new HashMap<String, NameClass>();
-	static final int ELEMENT_NUM = 100;
+	static final int ELEMENT_NUM = 200;
 	static {
 		for (int i = 0; i < ELEMENT_NUM; i++)
 			map2.put(String.valueOf(i), new NameClass(String.valueOf(i), String
@@ -37,7 +37,7 @@ public class PerformanceTest2 {
 
 				for (int i = 0; i < repeat; i++) {
 					String key = String.valueOf(start + i);
-					if (!mc.set(key, 0, map2)) {
+					if (!mc.set(key, 0, map2,2000)) {
 						System.err.println("set error");
 					}
 
@@ -76,9 +76,9 @@ public class PerformanceTest2 {
 
 					String key = String.valueOf(start + i);
 					Map<String, NameClass> result = (Map<String, NameClass>) mc
-							.get(key);
-					if (result.size() != ELEMENT_NUM) {
-						System.err.println("get error");
+							.get(key,5000);
+					if (result==null||result.size() != ELEMENT_NUM) {
+						System.err.println("get "+key+" error");
 					}
 				}
 
@@ -129,7 +129,7 @@ public class PerformanceTest2 {
 	// time:189187
 	static public void main(String[] args) {
 		try {
-			String ip = "192.168.222.100";
+			String ip = "localhost";
 
 			int size = Runtime.getRuntime().availableProcessors();
 
@@ -138,11 +138,13 @@ public class PerformanceTest2 {
 			int repeat = 100;
 
 
-			XMemcachedClient mc = new XMemcachedClient();
-                        mc.setOptimiezeGet(false);
+
+			XMemcachedClientBuilder builder = new XMemcachedClientBuilder();
+            builder.getConfiguration().setReadThreadCount(0);
+            XMemcachedClient mc = builder.build();
+            mc.setOptimizeMergeBuffer(true);
+            mc.addServer(ip, 12001);
 			mc.addServer(ip, 12000);
-			mc.addServer(ip, 12001);
-			//mc.addServer(ip, 12000);
 
 			CountDownLatch cdl = new CountDownLatch(thread);
 			long t = System.currentTimeMillis();

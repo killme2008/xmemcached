@@ -11,6 +11,7 @@
  */
 package net.rubyeye.xmemcached;
 
+import com.google.code.yanf4j.nio.Session;
 import java.util.List;
 
 /**
@@ -19,7 +20,7 @@ import java.util.List;
  *
  */
 public interface MemcachedSessionLocator {
-	public MemcachedTCPSession getSessionByKey(String key);
+	public Session getSessionByKey(String key);
 
 	public void updateSessionList(List<MemcachedTCPSession> list);
 }

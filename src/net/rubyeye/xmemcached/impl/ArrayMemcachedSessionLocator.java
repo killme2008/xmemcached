@@ -11,6 +11,7 @@
  */
 package net.rubyeye.xmemcached.impl;
 
+import com.google.code.yanf4j.nio.Session;
 import java.util.List;
 
 import net.rubyeye.xmemcached.HashAlgorithm;
@@ -24,36 +25,48 @@ import net.rubyeye.xmemcached.MemcachedTCPSession;
  * 
  */
 public class ArrayMemcachedSessionLocator implements MemcachedSessionLocator {
-	protected HashAlgorithm hashAlgorighm;
-	List<MemcachedTCPSession> sessions;
 
-	public ArrayMemcachedSessionLocator() {
-		this.hashAlgorighm = HashAlgorithm.NATIVE_HASH;
-	}
+    protected HashAlgorithm hashAlgorighm;
+    List<MemcachedTCPSession> sessions;
 
-	public ArrayMemcachedSessionLocator(HashAlgorithm hashAlgorighm) {
-		this.hashAlgorighm = hashAlgorighm;
-	}
+    public ArrayMemcachedSessionLocator() {
+        this.hashAlgorighm = HashAlgorithm.NATIVE_HASH;
+    }
 
-	public long getHash(String key) {
-		long hash = hashAlgorighm.hash(key);
-		return hash % sessions.size();
-	}
+    public ArrayMemcachedSessionLocator(HashAlgorithm hashAlgorighm) {
+        this.hashAlgorighm = hashAlgorighm;
+    }
 
-	@Override
-	public MemcachedTCPSession getSessionByKey(String key) {
-		if (sessions.size() == 0)
-			return null;
-		long mod = getHash(key);
-		MemcachedTCPSession session = sessions.get((int) mod);
-		if (session == null || session.isClose()) {
-			session = sessions.get(0);
-		}
-		return session;
-	}
+    public long getHash(String key) {
+        long hash = hashAlgorighm.hash(key);
+        return hash % sessions.size();
+    }
 
-	@Override
-	public void updateSessionList(final List<MemcachedTCPSession> list) {
-		sessions = list;
-	}
+    @Override
+    public Session getSessionByKey(String key) {
+        if (sessions.size() == 0) {
+            return null;
+        }
+        long start = getHash(key);
+        MemcachedTCPSession session = sessions.get((int) start);
+        long next = getNext(start);
+        while ((session == null || session.isClose()) && next != start) {
+            session = sessions.get((int) next);
+            next = getNext(next);
+        }
+        return session;
+    }
+
+    public final long getNext(long start) {
+        if (start == sessions.size() - 1) {
+            return 0;
+        } else {
+            return start + 1;
+        }
+    }
+
+    @Override
+    public void updateSessionList(final List<MemcachedTCPSession> list) {
+        sessions = list;
+    }
 }

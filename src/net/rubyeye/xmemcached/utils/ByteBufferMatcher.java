@@ -55,7 +55,7 @@ public class ByteBufferMatcher {
      * @param p
      * @return
      */
-    void badBytePreProcess() {
+    private final void badBytePreProcess() {
         int j;
         for (int i = 0; i < 255; i++) {
             occ[i] = -1;
@@ -69,7 +69,7 @@ public class ByteBufferMatcher {
     /**
      * 好字符预处理情况1
      */
-    void goodBytePreProcess1() {
+    private final void goodBytePreProcess1() {
         int i = remaining, j = remaining + 1;
         f[i] = j;
         while (i > 0) {
@@ -88,7 +88,7 @@ public class ByteBufferMatcher {
     /**
      * 好字符预处理情况2
      */
-    void goodBytePreProcess2() {
+    private final void goodBytePreProcess2() {
         int i, j;
         j = f[0];
         for (i = 0; i <= remaining; i++) {
@@ -101,7 +101,7 @@ public class ByteBufferMatcher {
         }
     }
 
-    public int matchFirst(ByteBuffer buffer) {
+    public final int matchFirst(ByteBuffer buffer) {
         if (buffer == null || buffer.remaining() == 0) {
             return -1;
         }
@@ -122,7 +122,7 @@ public class ByteBufferMatcher {
         return -1;
     }
 
-    public List<Integer> matchAll(ByteBuffer buffer) {
+    public final List<Integer> matchAll(final ByteBuffer buffer) {
         if (buffer == null || buffer.remaining() == 0) {
             return null;
         }
@@ -144,7 +144,7 @@ public class ByteBufferMatcher {
         return result;
     }
 
-    int max(int i, int j) {
+    private static final int max(int i, int j) {
         // if (i > 0 && j < 0)
         // return i;
         // else if (i < 0 && j > 0)
@@ -153,7 +153,7 @@ public class ByteBufferMatcher {
         return i > j ? i : j;
     }
 
-    public static int unsigned(byte b) {
+    public static final int unsigned(byte b) {
         return b & 0xFF;
     }
 }

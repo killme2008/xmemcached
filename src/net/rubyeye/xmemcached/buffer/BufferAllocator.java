@@ -16,7 +16,7 @@ package net.rubyeye.xmemcached.buffer;
  * @author dennis(killme2008@gmail.com)
  */
 public interface BufferAllocator {
-	public ByteBufferWrapper allocate(int capacity);
+	public IoBuffer allocate(int capacity);
 	
 	public void dispose();
 }

@@ -1,10 +1,10 @@
 package net.rubyeye.xmemcached.test;
 
-import com.google.code.yanf4j.config.Configuration;
 import java.util.concurrent.CountDownLatch;
 
 import net.rubyeye.xmemcached.XMemcachedClient;
-import net.rubyeye.xmemcached.buffer.CachedBufferAllocator;
+import net.rubyeye.xmemcached.XMemcachedClientBuilder;
+import net.rubyeye.xmemcached.impl.KetamaMemcachedSessionLocator;
 
 public class PerformanceTest {
 
@@ -122,7 +122,7 @@ public class PerformanceTest {
         int port1 = 12000;
         int port2 = 12001;
         int port3 = 12002;
-        int thread = 100;
+        int thread = 50;
         if (args.length >= 5) {
             ip = args[0];
             port1 = Integer.valueOf(args[1]);
@@ -141,10 +141,11 @@ public class PerformanceTest {
             int size = Runtime.getRuntime().availableProcessors();
 
             int repeat = 10000;
-            Configuration conf = XMemcachedClient.getDefaultConfiguration();
-            conf.setReadThreadCount(1);
-            XMemcachedClient mc = new XMemcachedClient(
-                    conf);
+            XMemcachedClientBuilder builder = new XMemcachedClientBuilder();
+            builder.getConfiguration().setReadThreadCount(0);
+           // builder.setSessionLocator(new KetamaMemcachedSessionLocator());
+            XMemcachedClient mc = builder.build();
+           // mc.setOptimizeMergeBuffer(false);
             mc.addServer(ip, port1);
             mc.addServer(ip, port2);
             // mc.addServer(ip, port2);

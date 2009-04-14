@@ -12,10 +12,12 @@
 package net.rubyeye.xmemcached.command;
 
 import java.io.UnsupportedEncodingException;
+import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
-import net.rubyeye.xmemcached.buffer.ByteBufferWrapper;
+import net.rubyeye.xmemcached.buffer.IoBuffer;
 import net.rubyeye.xmemcached.exception.MemcachedException;
+import net.spy.memcached.transcoders.CachedData;
 
 /**
  * memcached命令类
@@ -24,144 +26,147 @@ import net.rubyeye.xmemcached.exception.MemcachedException;
  *
  */
 public class Command {
-	public static final String SPLIT = "\r\n";
 
-	private Object key; // 关键字
+    public static final String SPLIT = "\r\n";
+    private Object key; // 关键字
+    private volatile Object result = null; // memcached返回结果
+    private CountDownLatch latch;
+    private CommandType commandType;
+    private MemcachedException throwable; // 执行异常
+    private IoBuffer ioBuffer;
+    private volatile boolean cancel = false;
+    private volatile OperationStatus status = null;
+    private int mergeCount = -1;
+    private CachedData storedData;
 
-	private volatile Object result = null; // memcached返回结果
+    /**
+     * 命令类型
+     *
+     * @author dennis
+     *
+     */
+    public enum CommandType {
 
-	private CountDownLatch latch;
+        GET_ONE, GET_MANY, SET, REPLACE, ADD, EXCEPTION, DELETE, VERSION, INCR, DECR, GETS_ONE, GETS_MANY, CAS, APPEND, PREPEND;
+    }
 
-	private CommandType commandType;
+    public void setCommandType(final CommandType commandType) {
+        this.commandType = commandType;
+    }
 
-	private MemcachedException throwable; // 执行异常
+    public int getMergeCount() {
+        return mergeCount;
+    }
 
-	private ByteBufferWrapper byteBufferWrapper;
+    public void setMergeCount(final int mergetCount) {
+        this.mergeCount = mergetCount;
+    }
 
-	private volatile boolean cancel = false;
+    public Command() {
+        super();
+        this.status = OperationStatus.SENDING;
+    }
 
-	private volatile OperationStatus status = null;
+    public Command(final CommandType cmdType) {
+        this.commandType = cmdType;
+        this.status = OperationStatus.SENDING;
+    }
 
-	private int mergeCount = -1;
+    public Command(final CommandType cmdType, final CountDownLatch latch) {
+        this.commandType = cmdType;
+        this.latch = latch;
+        this.status = OperationStatus.SENDING;
+    }
 
-	/**
-	 * 命令类型
-	 *
-	 * @author dennis
-	 *
-	 */
-	public enum CommandType {
-		GET_ONE, GET_MANY, SET, REPLACE, ADD, EXCEPTION, DELETE, VERSION, INCR, DECR, GETS_ONE, GETS_MANY, CAS;
+    public Command(Object key, CommandType commandType, CountDownLatch latch) {
+        super();
+        this.key = key;
+        this.commandType = commandType;
+        this.latch = latch;
+        this.status = OperationStatus.SENDING;
+    }
 
-	}
+    public OperationStatus getStatus() {
+        return status;
+    }
 
-	public void setCommandType(final CommandType commandType) {
-		this.commandType = commandType;
-	}
+    public void setStatus(OperationStatus status) {
+        this.status = status;
+    }
 
-	public int getMergeCount() {
-		return mergeCount;
-	}
+    public void setIoBuffer(IoBuffer byteBufferWrapper) {
+        this.ioBuffer = byteBufferWrapper;
+    }
 
-	public void setMergeCount(final int mergetCount) {
-		this.mergeCount = mergetCount;
-	}
+    public List<Command> getMergeCommands() {
+        return null;
+    }
 
-	public Command() {
-		super();
-		this.status = OperationStatus.SENDING;
-	}
+    public CachedData getStoredData() {
+        return storedData;
+    }
 
-	public Command(final CommandType cmdType) {
-		this.commandType = cmdType;
-		this.status = OperationStatus.SENDING;
-	}
+    public void setStoredData(CachedData storedData) {
+        this.storedData = storedData;
+    }
 
-	public Command(final CommandType cmdType, final CountDownLatch latch) {
-		this.commandType = cmdType;
-		this.latch = latch;
-		this.status = OperationStatus.SENDING;
-	}
+    public MemcachedException getException() {
+        return throwable;
+    }
 
-	public Command(Object key, CommandType commandType, CountDownLatch latch) {
-		super();
-		this.key = key;
-		this.commandType = commandType;
-		this.latch = latch;
-		this.status = OperationStatus.SENDING;
-	}
+    public void setException(MemcachedException throwable) {
+        this.throwable = throwable;
+    }
 
-	public OperationStatus getStatus() {
-		return status;
-	}
+    public Object getKey() {
+        return key;
+    }
 
-	public void setStatus(OperationStatus status) {
-		this.status = status;
-	}
+    public void setKey(Object key) {
+        this.key = key;
+    }
 
-	public void setByteBufferWrapper(ByteBufferWrapper byteBufferWrapper) {
-		this.byteBufferWrapper = byteBufferWrapper;
-	}
+    public Object getResult() {
+        return result;
+    }
 
-	public List<Command> getMergeCommands() {
-		return null;
-	}
+    public void setResult(Object result) {
+        this.result = result;
+    }
 
-	public MemcachedException getException() {
-		return throwable;
-	}
+    public IoBuffer getIoBuffer() {
+        return this.ioBuffer;
+    }
 
-	public void setException(MemcachedException throwable) {
-		this.throwable = throwable;
-	}
+    public String toString() {
+        try {
+            return new String(this.ioBuffer.getByteBuffer().array(),
+                    "utf-8");
+        } catch (UnsupportedEncodingException e) {
+        }
+        return null;
+    }
 
-	public Object getKey() {
-		return key;
-	}
+    public boolean isCancel() {
+        return this.status == OperationStatus.SENDING && cancel;
+    }
 
-	public void setKey(Object key) {
-		this.key = key;
-	}
+    public void cancel() {
+        this.cancel = true;
+        if (this.ioBuffer != null) {
+            this.ioBuffer.free();
+        }
+    }
 
-	public Object getResult() {
-		return result;
-	}
+    public CountDownLatch getLatch() {
+        return latch;
+    }
 
-	public void setResult(Object result) {
-		this.result = result;
-	}
+    public CommandType getCommandType() {
+        return commandType;
+    }
 
-	public ByteBufferWrapper getByteBufferWrapper() {
-		return this.byteBufferWrapper;
-	}
-
-	public String toString() {
-		try {
-			return new String(this.byteBufferWrapper.getByteBuffer().array(),
-					"utf-8");
-		} catch (UnsupportedEncodingException e) {
-
-		}
-		return null;
-	}
-
-	public boolean isCancel() {
-		return this.status == OperationStatus.SENDING && cancel;
-	}
-
-	public void cancel() {
-		this.cancel = true;
-	}
-
-	public CountDownLatch getLatch() {
-		return latch;
-	}
-
-	public CommandType getCommandType() {
-		return commandType;
-	}
-
-	public void setLatch(CountDownLatch latch) {
-		this.latch = latch;
-	}
+    public void setLatch(CountDownLatch latch) {
+        this.latch = latch;
+    }
 }

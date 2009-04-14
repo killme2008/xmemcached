@@ -29,7 +29,7 @@ class TestThread implements Runnable {
 
 	int number;
 
-	final static int NUM = 1000;
+	final static int NUM = 10000;
 
 	public TestThread(int number, XMemcachedClient xmemcachedClient,
 			CyclicBarrier barrier) {
@@ -95,7 +95,7 @@ public class XMemcachedClientThreadSafeTest {
 
 	public static void main(String args[]) throws Exception {
 		CyclicBarrier barrier = new CyclicBarrier(num + 1);
-		String ip = "192.168.222.100";
+		String ip = "localhost";
 		XMemcachedClient client = new XMemcachedClient(
 				new KetamaMemcachedSessionLocator());
 		client.addServer(ip, 12000);

@@ -9,34 +9,19 @@
  *WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, 
  *either express or implied. See the License for the specific language governing permissions and limitations under the License
  */
-package net.rubyeye.xmemcached.buffer;
+package net.rubyeye.xmemcached.utils;
 
-import java.nio.ByteBuffer;
+import com.google.code.yanf4j.util.Queue;
+
 /**
- * ByteBuffer封装类
+ * 扩展queue,谈价addFirst
  * @author dennis
  *
+ * @param <T>
  */
-public interface ByteBufferWrapper {
-	public ByteBuffer getByteBuffer();
+public interface Deque<T> extends Queue<T> {
 
-	public void put(byte[] bytes);
+    public void addFirst(T obj);
 
-	public void free();
-
-	public void clear();
-
-	public int position();
-
-	public int capacity();
-
-	public void position(int pos);
-
-	public void limit(int limit);
-
-	public int limit();
-	
-	public void flip();
-	
-	public void put(byte b);
+    public T removeLast();
 }
