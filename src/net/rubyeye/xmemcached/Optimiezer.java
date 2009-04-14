@@ -14,13 +14,14 @@ import net.rubyeye.xmemcached.command.Command;
  * @author dennis
  */
 public interface Optimiezer {
+	@SuppressWarnings("unchecked")
+	Command optimieze(final Command currentCommand, final Queue writeQueue,
+			final BlockingQueue<Command> executingCmds, int sendBufferSize);
 
-    Command optimieze(final Command currentCommand, final Queue writeQueue, final BlockingQueue<Command> executingCmds, int sendBufferSize);
+	void setMergeFactor(int mergeFactor);
 
-    void setMergeFactor(int mergeFactor);
+	void setOptimiezeGet(boolean optimiezeGet);
 
-    void setOptimiezeGet(boolean optimiezeGet);
-
-    void setOptimiezeMergeBuffer(boolean optimiezeMergeBuffer);
+	void setOptimiezeMergeBuffer(boolean optimiezeMergeBuffer);
 
 }

@@ -96,6 +96,7 @@ public class OptimiezerImpl implements Optimiezer {
      * @return
      * @throws InterruptedException
      */
+    @SuppressWarnings("unchecked")
     private Command optimiezeBuffer(final Command currentCommand, final Queue writeQueue, final BlockingQueue<Command> executingCmds, int sendBufferSize) {
         final List<ByteBuffer> buffers = getLocalList();
         final ByteBuffer endBuffer = currentCommand.getIoBuffer().getByteBuffer();
@@ -159,6 +160,7 @@ public class OptimiezerImpl implements Optimiezer {
      * @return
      * @throws InterruptedException
      */
+    @SuppressWarnings("unchecked")
     private Command optimizeGet(final Command currentCmd, final Queue writeQueue, final BlockingQueue<Command> executingCmds,
             final List<Command> mergeCommands) {
         int mergeCount = 1;

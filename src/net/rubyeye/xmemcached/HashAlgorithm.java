@@ -28,7 +28,7 @@ public enum HashAlgorithm {
 	 * FNV hashes are designed to be fast while maintaining a low collision
 	 * rate. The FNV speed allows one to quickly hash lots of data while
 	 * maintaining a reasonable collision rate.
-	 * 
+	 *
 	 * @see http://www.isthe.com/chongo/tech/comp/fnv/
 	 * @see http://en.wikipedia.org/wiki/Fowler_Noll_Vo_hash
 	 */
@@ -64,7 +64,7 @@ public enum HashAlgorithm {
 
 	/**
 	 * Compute the hash for the given key.
-	 * 
+	 *
 	 * @return a positive integer hash
 	 */
 	public long hash(final String k) {
@@ -171,12 +171,12 @@ public enum HashAlgorithm {
 		return md5.digest();
 	}
 
-	public static void main(String[] args) {
-		HashAlgorithm alg=HashAlgorithm.CRC32_HASH;
-		long h=0;
-		long start=System.currentTimeMillis();
-		for(int i=0;i<100000;i++)
-			h=alg.hash("MYSQL_HASH");
-		System.out.println(System.currentTimeMillis()-start);
-	}
+	// public static void main(String[] args) {
+	// HashAlgorithm alg=HashAlgorithm.CRC32_HASH;
+	// long h=0;
+	// long start=System.currentTimeMillis();
+	// for(int i=0;i<100000;i++)
+	// h=alg.hash("MYSQL_HASH");
+	// System.out.println(System.currentTimeMillis()-start);
+	// }
 }

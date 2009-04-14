@@ -12,7 +12,6 @@
 package net.rubyeye.xmemcached.command;
 
 import java.io.UnsupportedEncodingException;
-import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import net.rubyeye.xmemcached.buffer.IoBuffer;

@@ -1,12 +1,12 @@
 /**
  *Copyright [2009-2010] [dennis zhuang(killme2008@gmail.com)]
  *Licensed under the Apache License, Version 2.0 (the "License");
- *you may not use this file except in compliance with the License. 
- *You may obtain a copy of the License at 
- *             http://www.apache.org/licenses/LICENSE-2.0 
- *Unless required by applicable law or agreed to in writing, 
- *software distributed under the License is distributed on an "AS IS" BASIS, 
- *WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, 
+ *you may not use this file except in compliance with the License.
+ *You may obtain a copy of the License at
+ *             http://www.apache.org/licenses/LICENSE-2.0
+ *Unless required by applicable law or agreed to in writing,
+ *software distributed under the License is distributed on an "AS IS" BASIS,
+ *WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
  *either express or implied. See the License for the specific language governing permissions and limitations under the License
  */
 package net.rubyeye.xmemcached.impl;
@@ -21,7 +21,7 @@ import net.rubyeye.xmemcached.MemcachedTCPSession;
 
 /**
  * ConnectionFactory instance that sets up a ketama compatible connection.
- * 
+ *
  * <p>
  * This implementation piggy-backs on the functionality of the
  * <code>DefaultConnectionFactory</code> in terms of connections and queue
@@ -29,22 +29,22 @@ import net.rubyeye.xmemcached.MemcachedTCPSession;
  * KetamaNodeLocator</code>
  * and the <code>HashAlgorithm.KETAMA_HASH</code> to provide consistent node
  * hashing.
- * 
+ *
  * @see http://www.last.fm/user/RJ/journal/2007/04/10/392555/
- * 
+ *
  * </p>
  */
 /**
  * 一致性hash算法，基于TreeMap，直接从spymemcached挪用
- * 
+ *
  * @author dennis
- * 
+ *
  */
 public class KetamaMemcachedSessionLocator implements MemcachedSessionLocator {
 
     static final int NUM_REPS = 160;
     private transient volatile TreeMap<Long, MemcachedTCPSession> ketamaSessions = new TreeMap<Long, MemcachedTCPSession>();
-    final HashAlgorithm hashAlg;
+    private final HashAlgorithm hashAlg;
     private volatile int maxTries;
 
     public KetamaMemcachedSessionLocator() {
@@ -90,7 +90,7 @@ public class KetamaMemcachedSessionLocator implements MemcachedSessionLocator {
     }
 
     @Override
-    public final Session getSessionByKey(String key) {
+    public final Session getSessionByKey(final String key) {
         Long hash = hashAlg.hash(key);
         MemcachedTCPSession rv = getSessionByHash(hash);
         int tries = 0;

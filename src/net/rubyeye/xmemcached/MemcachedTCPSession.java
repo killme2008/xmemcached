@@ -31,7 +31,6 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
 import net.rubyeye.xmemcached.MemcachedHandler.ParseStatus;
-import net.rubyeye.xmemcached.buffer.BufferAllocator;
 import net.rubyeye.xmemcached.command.Command;
 import net.rubyeye.xmemcached.command.OperationStatus;
 
@@ -45,208 +44,205 @@ import net.spy.memcached.transcoders.CachedData;
  */
 public class MemcachedTCPSession extends DefaultTCPSession {
 
-    String currentLine = null; // 当前行
-    ParseStatus status = ParseStatus.NULL; // 当前状态
-    private MemcachedProtocolHandler memcachedProtocolHandler;
-    protected BlockingQueue<Command> executingCmds; // 存储已经发送的命令
-    Map<String, CachedData> currentValues = null;
-    private SocketAddress remoteSocketAddress;
-    private transient volatile BufferAllocator bufferAllocator;
-    private int sendBufferSize;
-    private Optimiezer optimiezer;
+	String currentLine = null; // 当前行
+	ParseStatus status = ParseStatus.NULL; // 当前状态
+	private MemcachedProtocolHandler memcachedProtocolHandler;
+	protected BlockingQueue<Command> executingCmds; // 存储已经发送的命令
+	Map<String, CachedData> currentValues = null;
+	private SocketAddress remoteSocketAddress;
+	private int sendBufferSize;
+	private Optimiezer optimiezer;
 
-    @SuppressWarnings("unchecked")
-    public MemcachedTCPSession(SessionConfig sessionConfig, int readRecvBufferSize,
-            Optimiezer optimiezer,
-            BufferAllocator allocator, int readThreadCount) {
-        super(sessionConfig, readRecvBufferSize, -1);
-        this.optimiezer = optimiezer;
-        remoteSocketAddress = ((SocketChannel) this.selectableChannel).socket().getRemoteSocketAddress();
-        try {
-            this.sendBufferSize = ((SocketChannel) this.selectableChannel).socket().getSendBufferSize();
-        } catch (SocketException e) {
-            this.sendBufferSize = 8 * 1024;
-        }
-        this.bufferAllocator = allocator;
-        if (readThreadCount > 0) {
-            this.executingCmds = new ArrayBlockingQueue<Command>(16 * 1024);
-        } else {
-            this.executingCmds = new SimpleBlockingQueue<Command>();
-        }
-    }
+	public MemcachedTCPSession(SessionConfig sessionConfig,
+			int readRecvBufferSize, Optimiezer optimiezer, int readThreadCount) {
+		super(sessionConfig, readRecvBufferSize, -1);
+		this.optimiezer = optimiezer;
+		remoteSocketAddress = ((SocketChannel) this.selectableChannel).socket()
+				.getRemoteSocketAddress();
+		try {
+			this.sendBufferSize = ((SocketChannel) this.selectableChannel)
+					.socket().getSendBufferSize();
+		} catch (SocketException e) {
+			this.sendBufferSize = 8 * 1024;
+		}
+		if (readThreadCount > 0) {
+			this.executingCmds = new ArrayBlockingQueue<Command>(16 * 1024);
+		} else {
+			this.executingCmds = new SimpleBlockingQueue<Command>();
+		}
+	}
 
-    public InetSocketAddress getRemoteSocketAddress() {
-        return (InetSocketAddress) remoteSocketAddress;
-    }
+	public InetSocketAddress getRemoteSocketAddress() {
+		return (InetSocketAddress) remoteSocketAddress;
+	}
 
-    public void setMemcachedProtocolHandler(
-            MemcachedProtocolHandler memcachedProtocolHandler) {
-        this.memcachedProtocolHandler = memcachedProtocolHandler;
-    }
+	public void setMemcachedProtocolHandler(
+			MemcachedProtocolHandler memcachedProtocolHandler) {
+		this.memcachedProtocolHandler = memcachedProtocolHandler;
+	}
 
-    public MemcachedProtocolHandler getMemcachedProtocolHandler() {
-        return this.memcachedProtocolHandler;
-    }
+	public MemcachedProtocolHandler getMemcachedProtocolHandler() {
+		return this.memcachedProtocolHandler;
+	}
 
-    @SuppressWarnings("unchecked")
-    public boolean send(Object msg) throws InterruptedException {
-        if (isClose()) {
-            return false;
-        }
-        Command message = (Command) msg;
-        writeQueue.getLock().lock();
-        boolean needRegister = false;
-        try {
-            if (writeQueue.isEmpty()) {
-                if (writeQueue.add(message)) {
-                    needRegister = true;
-                    return true;
-                } else {
-                    return false;
-                }
-            } else {
-                return writeQueue.add(message);
-            }
-        } finally {
-            writeQueue.getLock().unlock();
-            if (needRegister) {
-                sessionEventManager.registerSession(this,
-                        EventType.ENABLE_WRITE); // 列表为空，注册监听写事件
-                this.sessionEventManager.wakeup(); // wakeup selector
-            }
-        }
-    }
+	@SuppressWarnings("unchecked")
+	public boolean send(Object msg) throws InterruptedException {
+		if (isClose()) {
+			return false;
+		}
+		Command message = (Command) msg;
+		writeQueue.getLock().lock();
+		boolean needRegister = false;
+		try {
+			if (writeQueue.isEmpty()) {
+				if (writeQueue.add(message)) {
+					needRegister = true;
+					return true;
+				} else {
+					return false;
+				}
+			} else {
+				return writeQueue.add(message);
+			}
+		} finally {
+			writeQueue.getLock().unlock();
+			if (needRegister) {
+				sessionEventManager.registerSession(this,
+						EventType.ENABLE_WRITE); // 列表为空，注册监听写事件
+				this.sessionEventManager.wakeup(); // wakeup selector
+			}
+		}
+	}
 
-    @SuppressWarnings("unchecked")
-    protected void onWrite() {
-        Command currentCommand = null;
-        try {
-            if (getSessionStatus() == SessionStatus.WRITING) // 用户可能正在调用flush方法
-            {
-                return;
-            }
-            if (getSessionStatus() == SessionStatus.READING // 不允许读写并行
-                    && !handleReadWriteConcurrently) {
-                return;
-            }
-            selectionKey.interestOps(selectionKey.interestOps() & ~SelectionKey.OP_WRITE);
-            setSessionStatus(SessionStatus.WRITING);
-            boolean writeComplete = false;
-            while (true) {
-                currentCommand = (Command) writeQueue.peek();
-                if (currentCommand == null) {
-                    writeComplete = true; // 写完队列
-                    break;
-                }
-                // 判断是否已经被取消
-                if (currentCommand.isCancel()) {
-                    writeQueue.remove();
-                    continue;
-                }
-                if (currentCommand.getStatus() == OperationStatus.SENDING) {
-                    currentCommand = this.optimiezer.optimieze(currentCommand, this.writeQueue, this.executingCmds, this.sendBufferSize);
-                }
-                currentCommand.setStatus(OperationStatus.WRITING);
-                boolean complete = writeToChannel(selectableChannel,
-                        currentCommand.getIoBuffer().getByteBuffer());
-                if (complete) {
-                    if (log.isDebugEnabled()) {
+	@SuppressWarnings("unchecked")
+	protected void onWrite() {
+		Command currentCommand = null;
+		try {
+			if (getSessionStatus() == SessionStatus.WRITING) // 用户可能正在调用flush方法
+			{
+				return;
+			}
+			if (getSessionStatus() == SessionStatus.READING // 不允许读写并行
+					&& !handleReadWriteConcurrently) {
+				return;
+			}
+			selectionKey.interestOps(selectionKey.interestOps()
+					& ~SelectionKey.OP_WRITE);
+			setSessionStatus(SessionStatus.WRITING);
+			boolean writeComplete = false;
+			while (true) {
+				currentCommand = (Command) writeQueue.peek();
+				if (currentCommand == null) {
+					writeComplete = true; // 写完队列
+					break;
+				}
+				// 判断是否已经被取消
+				if (currentCommand.isCancel()) {
+					writeQueue.remove();
+					continue;
+				}
+				if (currentCommand.getStatus() == OperationStatus.SENDING) {
+					currentCommand = this.optimiezer.optimieze(currentCommand,
+							this.writeQueue, this.executingCmds,
+							this.sendBufferSize);
+				}
+				currentCommand.setStatus(OperationStatus.WRITING);
+				boolean complete = writeToChannel(selectableChannel,
+						currentCommand.getIoBuffer().getByteBuffer());
+				if (complete) {
+					if (log.isDebugEnabled()) {
 
-                        log.debug("send command:" + currentCommand.toString());
-                    }
-                    this.handler.onMessageSent(this, writeQueue.remove());
-                } else { // not write complete, but write buffer is full
-                    break;
-                }
-            }
-            if (!writeComplete) {
-                sessionEventManager.registerSession(this,
-                        EventType.ENABLE_WRITE);
-            }
-            setSessionStatus(SessionStatus.IDLE);
-        } catch (CancelledKeyException cke) {
-            log.error(cke, cke);
-            handler.onException(this, cke);
-            close();
+						log.debug("send command:" + currentCommand.toString());
+					}
+					this.handler.onMessageSent(this, writeQueue.remove());
+				} else { // not write complete, but write buffer is full
+					break;
+				}
+			}
+			if (!writeComplete) {
+				sessionEventManager.registerSession(this,
+						EventType.ENABLE_WRITE);
+			}
+			setSessionStatus(SessionStatus.IDLE);
+		} catch (CancelledKeyException cke) {
+			log.error(cke, cke);
+			handler.onException(this, cke);
+			close();
 
-        } catch (ClosedChannelException cce) {
-            log.error(cce, cce);
-            handler.onException(this, cce);
-            close();
-        } catch (IOException ioe) {
-            log.error(ioe, ioe);
-            handler.onException(this, ioe);
-            close();
-        } catch (Exception e) {
-            handler.onException(this, e);
-            log.error(e, e);
-            close();
-        }
-    }
+		} catch (ClosedChannelException cce) {
+			log.error(cce, cce);
+			handler.onException(this, cce);
+			close();
+		} catch (IOException ioe) {
+			log.error(ioe, ioe);
+			handler.onException(this, ioe);
+			close();
+		} catch (Exception e) {
+			handler.onException(this, e);
+			log.error(e, e);
+			close();
+		}
+	}
 
-    @SuppressWarnings("unchecked")
-    protected boolean writeToChannel(SelectableChannel channel,
-            ByteBuffer writeBuffer) throws IOException {
-        while (true) {
-            long n = doRealWrite(channel, writeBuffer);
-            if (writeBuffer == null || !writeBuffer.hasRemaining()) {
-                return true;
-            } else if (n == 0) {
-                return false; // 未写完，等待下次写
-            }
-        }
-    }
+	protected boolean writeToChannel(SelectableChannel channel,
+			ByteBuffer writeBuffer) throws IOException {
+		while (true) {
+			long n = doRealWrite(channel, writeBuffer);
+			if (writeBuffer == null || !writeBuffer.hasRemaining()) {
+				return true;
+			} else if (n == 0) {
+				return false; // 未写完，等待下次写
+			}
+		}
+	}
 
-    protected long doRealWrite(SelectableChannel channel, ByteBuffer buffer)
-            throws IOException {
-        return ((WritableByteChannel) (channel)).write(buffer);
-    }
+	protected long doRealWrite(SelectableChannel channel, ByteBuffer buffer)
+			throws IOException {
+		return ((WritableByteChannel) (channel)).write(buffer);
+	}
 
-    /**
-     * 解码，产生message，调用处理器处理
-     */
-    @SuppressWarnings("unchecked")
-    public void decode() {
-        boolean processed = false;
-        while (readBuffer.hasRemaining()) {
-            try {
-                // 使用MemcachedProtocolHandler解析协议
-                if (!this.memcachedProtocolHandler.onReceive(this,
-                        readBuffer)) {
-                    break;
-                }
-            } catch (Exception e) {
-                handler.onException(this, e);
-                log.error(e, e);
-                e.printStackTrace();
-                super.close();
-                break;
-            }
-        }
-    }
+	/**
+	 * 解码，产生message，调用处理器处理
+	 */
+	public void decode() {
+		while (readBuffer.hasRemaining()) {
+			try {
+				// 使用MemcachedProtocolHandler解析协议
+				if (!this.memcachedProtocolHandler.onReceive(this, readBuffer)) {
+					break;
+				}
+			} catch (Exception e) {
+				handler.onException(this, e);
+				log.error(e, e);
+				e.printStackTrace();
+				super.close();
+				break;
+			}
+		}
+	}
 
-    public final void resetStatus() {
-        status = ParseStatus.NULL;
-        currentLine = null;
-    }
+	public final void resetStatus() {
+		status = ParseStatus.NULL;
+		currentLine = null;
+	}
 
-    /**
-     * 获取当前执行command
-     *
-     * @return
-     */
-    Command getCurrentExecutingCommand() {
-        try {
-            Command cmd = executingCmds.take();
-            if (cmd != null) {
-                cmd.setStatus(OperationStatus.PROCESSING);
-            } else {
-                throw new NoSuchElementException();
-            }
-            return cmd;
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
-        return null;
-    }
+	/**
+	 * 获取当前执行command
+	 *
+	 * @return
+	 */
+	Command getCurrentExecutingCommand() {
+		try {
+			Command cmd = executingCmds.take();
+			if (cmd != null) {
+				cmd.setStatus(OperationStatus.PROCESSING);
+			} else {
+				throw new NoSuchElementException();
+			}
+			return cmd;
+		} catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
+		}
+		return null;
+	}
 }
