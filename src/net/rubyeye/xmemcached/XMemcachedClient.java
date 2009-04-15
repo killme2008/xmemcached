@@ -52,7 +52,7 @@ import com.google.code.yanf4j.nio.Session;
 public class XMemcachedClient {
 
 	public static final int DEFAULT_READ_THREAD_COUNT = 0;
-	public static final int DEFAULT_CONNECT_TIMEOUT = 3000;
+	public static final int DEFAULT_CONNECT_TIMEOUT = 10000;
 	public static final int DEFAULT_TCP_SEND_BUFF_SIZE = 16 * 1024;
 	public static final boolean DEFAULT_TCP_NO_DELAY = false;
 	public static final int DEFAULT_SESSION_READ_BUFF_SIZE = 32 * 1024;
@@ -114,7 +114,8 @@ public class XMemcachedClient {
 		}
 	}
 
-	public final void addServer(final String server,final int port) throws IOException {
+	public final void addServer(final String server, final int port)
+			throws IOException {
 		checkServerPort(server, port);
 		connect(new InetSocketAddress(server, port));
 	}
@@ -132,7 +133,9 @@ public class XMemcachedClient {
 		try {
 			future = this.connector.connect(inetSocketAddress);
 
-			if (!future.get(DEFAULT_CONNECT_TIMEOUT, TimeUnit.MILLISECONDS)) {
+			if (!future.isDone()
+					&& !future.get(DEFAULT_CONNECT_TIMEOUT,
+							TimeUnit.MILLISECONDS)) {
 				log.error("connect to " + inetSocketAddress.getHostName() + ":"
 						+ inetSocketAddress.getPort() + " fail");
 			} else {

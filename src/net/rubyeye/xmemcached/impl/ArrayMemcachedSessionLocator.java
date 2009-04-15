@@ -37,28 +37,30 @@ public class ArrayMemcachedSessionLocator implements MemcachedSessionLocator {
 		this.hashAlgorighm = hashAlgorighm;
 	}
 
-	public final long getHash(String key) {
+	public final long getHash(int size, String key) {
 		long hash = hashAlgorighm.hash(key);
-		return hash % sessions.size();
+		return hash % size;
 	}
 
 	@Override
 	public final Session getSessionByKey(final String key) {
-		if (sessions.size() == 0) {
+		List<MemcachedTCPSession> sessionList = sessions;
+		int size = sessionList.size();
+		if (size == 0) {
 			return null;
 		}
-		long start = getHash(key);
-		MemcachedTCPSession session = sessions.get((int) start);
-		long next = getNext(start);
+		long start = getHash(size, key);
+		MemcachedTCPSession session = sessionList.get((int) start);
+		long next = getNext(size, start);
 		while ((session == null || session.isClose()) && next != start) {
-			session = sessions.get((int) next);
-			next = getNext(next);
+			session = sessionList.get((int) next);
+			next = getNext(size, next);
 		}
 		return session;
 	}
 
-	public final long getNext(long start) {
-		if (start == sessions.size() - 1) {
+	public final long getNext(int size, long start) {
+		if (start == size - 1) {
 			return 0;
 		} else {
 			return start + 1;
