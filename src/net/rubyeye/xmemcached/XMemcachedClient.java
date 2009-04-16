@@ -360,8 +360,7 @@ public class XMemcachedClient {
 		return get(key, timeout, this.transcoder);
 	}
 
-	@SuppressWarnings("unchecked")
-	public Object get(final String key, Transcoder transcoder)
+	public <T> T get(final String key, Transcoder<T> transcoder)
 			throws TimeoutException, InterruptedException, MemcachedException {
 		return get(key, DEFAULT_OP_TIMEOUT, transcoder);
 	}
@@ -469,7 +468,7 @@ public class XMemcachedClient {
 				ByteUtils.GET, Command.CommandType.GET_MANY, transcoder);
 	}
 
-	public Map<String, Object> get(Collection<String> keyCollections)
+	public <T> Map<String, T> get(Collection<String> keyCollections)
 			throws TimeoutException, InterruptedException, MemcachedException {
 		// 超时时间加倍
 		long lazy = keyCollections.size() / 1000 > 0 ? (keyCollections.size() / 1000)
@@ -479,10 +478,10 @@ public class XMemcachedClient {
 	}
 
 	@SuppressWarnings("unchecked")
-	public Map<String, Object> get(Collection<String> keyCollections,
+	public <T> Map<String, T> get(Collection<String> keyCollections,
 			long timeout) throws TimeoutException, InterruptedException,
 			MemcachedException {
-		return (Map<String, Object>) get(keyCollections, timeout,
+		return (Map<String, T>) get(keyCollections, timeout,
 				this.transcoder);
 	}
 
@@ -645,9 +644,8 @@ public class XMemcachedClient {
 		return set(key, exp, value, this.transcoder, timeout);
 	}
 
-	@SuppressWarnings("unchecked")
-	public boolean set(final String key, final int exp, Object value,
-			Transcoder transcoder) throws TimeoutException,
+	public <T> boolean set(final String key, final int exp, T value,
+			Transcoder<T> transcoder) throws TimeoutException,
 			InterruptedException, MemcachedException {
 		return set(key, exp, value, transcoder, DEFAULT_OP_TIMEOUT);
 	}
@@ -693,9 +691,9 @@ public class XMemcachedClient {
 		return add(key, exp, value, this.transcoder, timeout);
 	}
 
-	@SuppressWarnings("unchecked")
-	public boolean add(final String key, final int exp, Object value,
-			Transcoder transcoder) throws TimeoutException,
+
+	public <T> boolean add(final String key, final int exp, T value,
+			Transcoder<T> transcoder) throws TimeoutException,
 			InterruptedException, MemcachedException {
 		return add(key, exp, value, transcoder, DEFAULT_OP_TIMEOUT);
 	}
@@ -712,9 +710,8 @@ public class XMemcachedClient {
 		return replace(key, exp, value, this.transcoder, timeout);
 	}
 
-	@SuppressWarnings("unchecked")
-	public boolean replace(final String key, final int exp, Object value,
-			Transcoder transcoder) throws TimeoutException,
+	public <T> boolean replace(final String key, final int exp, T value,
+			Transcoder<T> transcoder) throws TimeoutException,
 			InterruptedException, MemcachedException {
 		return replace(key, exp, value, transcoder, DEFAULT_OP_TIMEOUT);
 	}
@@ -803,9 +800,8 @@ public class XMemcachedClient {
 		return cas(key, exp, value, this.transcoder, timeout, cas);
 	}
 
-	@SuppressWarnings("unchecked")
-	public boolean cas(final String key, final int exp, Object value,
-			Transcoder transcoder, long cas) throws TimeoutException,
+	public <T> boolean cas(final String key, final int exp, T value,
+			Transcoder<T> transcoder, long cas) throws TimeoutException,
 			InterruptedException, MemcachedException {
 		return cas(key, exp, value, transcoder, DEFAULT_OP_TIMEOUT, cas);
 	}
