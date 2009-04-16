@@ -17,6 +17,7 @@ import java.util.concurrent.CountDownLatch;
 import net.rubyeye.xmemcached.buffer.IoBuffer;
 import net.rubyeye.xmemcached.exception.MemcachedException;
 import net.spy.memcached.transcoders.CachedData;
+import net.spy.memcached.transcoders.Transcoder;
 
 /**
  * memcached命令类
@@ -26,146 +27,157 @@ import net.spy.memcached.transcoders.CachedData;
  */
 public class Command {
 
-    public static final String SPLIT = "\r\n";
-    private Object key; // 关键字
-    private volatile Object result = null; // memcached返回结果
-    private CountDownLatch latch;
-    private CommandType commandType;
-    private MemcachedException throwable; // 执行异常
-    private IoBuffer ioBuffer;
-    private volatile boolean cancel = false;
-    private volatile OperationStatus status = null;
-    private int mergeCount = -1;
-    private CachedData storedData;
+	public static final String SPLIT = "\r\n";
+	private Object key; // 关键字
+	private volatile Object result = null; // memcached返回结果
+	private CountDownLatch latch;
+	private CommandType commandType;
+	private MemcachedException throwable; // 执行异常
+	private IoBuffer ioBuffer;
+	private volatile boolean cancel = false;
+	private volatile OperationStatus status = null;
+	private int mergeCount = -1;
+	private CachedData storedData;
+	@SuppressWarnings("unchecked")
+	private Transcoder transcoder;
 
-    /**
-     * 命令类型
-     *
-     * @author dennis
-     *
-     */
-    public enum CommandType {
+	/**
+	 * 命令类型
+	 *
+	 * @author dennis
+	 *
+	 */
+	public enum CommandType {
 
-        GET_ONE, GET_MANY, SET, REPLACE, ADD, EXCEPTION, DELETE, VERSION, INCR, DECR, GETS_ONE, GETS_MANY, CAS, APPEND, PREPEND;
-    }
+		GET_ONE, GET_MANY, SET, REPLACE, ADD, EXCEPTION, DELETE, VERSION, INCR, DECR, GETS_ONE, GETS_MANY, CAS, APPEND, PREPEND;
+	}
 
-    public void setCommandType(final CommandType commandType) {
-        this.commandType = commandType;
-    }
+	public void setCommandType(final CommandType commandType) {
+		this.commandType = commandType;
+	}
 
-    public int getMergeCount() {
-        return mergeCount;
-    }
+	public int getMergeCount() {
+		return mergeCount;
+	}
 
-    public void setMergeCount(final int mergetCount) {
-        this.mergeCount = mergetCount;
-    }
+	@SuppressWarnings("unchecked")
+	public Transcoder getTranscoder() {
+		return transcoder;
+	}
 
-    public Command() {
-        super();
-        this.status = OperationStatus.SENDING;
-    }
+	@SuppressWarnings("unchecked")
+	public void setTranscoder(Transcoder transcoder) {
+		this.transcoder = transcoder;
+	}
 
-    public Command(final CommandType cmdType) {
-        this.commandType = cmdType;
-        this.status = OperationStatus.SENDING;
-    }
+	public void setMergeCount(final int mergetCount) {
+		this.mergeCount = mergetCount;
+	}
 
-    public Command(final CommandType cmdType, final CountDownLatch latch) {
-        this.commandType = cmdType;
-        this.latch = latch;
-        this.status = OperationStatus.SENDING;
-    }
+	public Command() {
+		super();
+		this.status = OperationStatus.SENDING;
+	}
 
-    public Command(Object key, CommandType commandType, CountDownLatch latch) {
-        super();
-        this.key = key;
-        this.commandType = commandType;
-        this.latch = latch;
-        this.status = OperationStatus.SENDING;
-    }
+	public Command(final CommandType cmdType) {
+		this.commandType = cmdType;
+		this.status = OperationStatus.SENDING;
+	}
 
-    public OperationStatus getStatus() {
-        return status;
-    }
+	public Command(final CommandType cmdType, final CountDownLatch latch) {
+		this.commandType = cmdType;
+		this.latch = latch;
+		this.status = OperationStatus.SENDING;
+	}
 
-    public void setStatus(OperationStatus status) {
-        this.status = status;
-    }
+	public Command(Object key, CommandType commandType, CountDownLatch latch) {
+		super();
+		this.key = key;
+		this.commandType = commandType;
+		this.latch = latch;
+		this.status = OperationStatus.SENDING;
+	}
 
-    public void setIoBuffer(IoBuffer byteBufferWrapper) {
-        this.ioBuffer = byteBufferWrapper;
-    }
+	public OperationStatus getStatus() {
+		return status;
+	}
 
-    public List<Command> getMergeCommands() {
-        return null;
-    }
+	public void setStatus(OperationStatus status) {
+		this.status = status;
+	}
 
-    public CachedData getStoredData() {
-        return storedData;
-    }
+	public void setIoBuffer(IoBuffer byteBufferWrapper) {
+		this.ioBuffer = byteBufferWrapper;
+	}
 
-    public void setStoredData(CachedData storedData) {
-        this.storedData = storedData;
-    }
+	public List<Command> getMergeCommands() {
+		return null;
+	}
 
-    public MemcachedException getException() {
-        return throwable;
-    }
+	public CachedData getStoredData() {
+		return storedData;
+	}
 
-    public void setException(MemcachedException throwable) {
-        this.throwable = throwable;
-    }
+	public void setStoredData(CachedData storedData) {
+		this.storedData = storedData;
+	}
 
-    public Object getKey() {
-        return key;
-    }
+	public MemcachedException getException() {
+		return throwable;
+	}
 
-    public void setKey(Object key) {
-        this.key = key;
-    }
+	public void setException(MemcachedException throwable) {
+		this.throwable = throwable;
+	}
 
-    public Object getResult() {
-        return result;
-    }
+	public Object getKey() {
+		return key;
+	}
 
-    public void setResult(Object result) {
-        this.result = result;
-    }
+	public void setKey(Object key) {
+		this.key = key;
+	}
 
-    public IoBuffer getIoBuffer() {
-        return this.ioBuffer;
-    }
+	public Object getResult() {
+		return result;
+	}
 
-    public String toString() {
-        try {
-            return new String(this.ioBuffer.getByteBuffer().array(),
-                    "utf-8");
-        } catch (UnsupportedEncodingException e) {
-        }
-        return null;
-    }
+	public void setResult(Object result) {
+		this.result = result;
+	}
 
-    public boolean isCancel() {
-        return this.status == OperationStatus.SENDING && cancel;
-    }
+	public IoBuffer getIoBuffer() {
+		return this.ioBuffer;
+	}
 
-    public void cancel() {
-        this.cancel = true;
-        if (this.ioBuffer != null) {
-            this.ioBuffer.free();
-        }
-    }
+	public String toString() {
+		try {
+			return new String(this.ioBuffer.getByteBuffer().array(), "utf-8");
+		} catch (UnsupportedEncodingException e) {
+		}
+		return null;
+	}
 
-    public CountDownLatch getLatch() {
-        return latch;
-    }
+	public boolean isCancel() {
+		return this.status == OperationStatus.SENDING && cancel;
+	}
 
-    public CommandType getCommandType() {
-        return commandType;
-    }
+	public void cancel() {
+		this.cancel = true;
+		if (this.ioBuffer != null) {
+			this.ioBuffer.free();
+		}
+	}
 
-    public void setLatch(CountDownLatch latch) {
-        this.latch = latch;
-    }
+	public CountDownLatch getLatch() {
+		return latch;
+	}
+
+	public CommandType getCommandType() {
+		return commandType;
+	}
+
+	public void setLatch(CountDownLatch latch) {
+		this.latch = latch;
+	}
 }

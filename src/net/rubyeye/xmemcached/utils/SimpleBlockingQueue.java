@@ -7,7 +7,7 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
 
 /**
- * 基于LinkedList实现的伪BlockingQueue，非线程安全
+ * 基于ArrayDeque实现的伪BlockingQueue，非线程安全
  *
  * @author dennis
  *

@@ -93,7 +93,8 @@ public class MemcachedHandler extends HandlerAdapter<Command> implements
 
 	int count = 0;
 
-	public boolean onReceive(final MemcachedTCPSession session,final ByteBuffer buffer) {
+	public boolean onReceive(final MemcachedTCPSession session,
+			final ByteBuffer buffer) {
 		int origPos = buffer.position();
 		int origLimit = buffer.limit();
 		LABEL: while (true) {
@@ -123,7 +124,7 @@ public class MemcachedHandler extends HandlerAdapter<Command> implements
 							Command.CommandType.CAS);
 				} else if (session.currentLine.equals("NOT_STORED")) {
 					return notifyBoolean(session, Boolean.FALSE,
-							Command.CommandType.ADD,
+							Command.CommandType.SET, Command.CommandType.ADD,
 							Command.CommandType.REPLACE,
 							Command.CommandType.APPEND,
 							Command.CommandType.PREPEND);
@@ -266,7 +267,7 @@ public class MemcachedHandler extends HandlerAdapter<Command> implements
 	 */
 	private static final boolean parseException(MemcachedTCPSession session) {
 		Command executingCmd = session.getCurrentExecutingCommand();
-		System.out.println(session.currentLine);
+
 		final MemcachedException exception = new MemcachedException(
 				"Unknown command:" + executingCmd.toString()
 						+ ",please check your memcached version");
@@ -470,7 +471,8 @@ public class MemcachedHandler extends HandlerAdapter<Command> implements
 			while (it.hasNext()) {
 				Map.Entry<String, CachedData> item = it.next();
 				GetsResponse getsResult = new GetsResponse(item.getValue()
-						.getCas(), transcoder.decode(item.getValue()));
+						.getCas(), executingCmd.getTranscoder().decode(
+						item.getValue()));
 				result.put(item.getKey(), getsResult);
 			}
 		} else {
@@ -479,7 +481,8 @@ public class MemcachedHandler extends HandlerAdapter<Command> implements
 					.iterator();
 			while (it.hasNext()) {
 				Map.Entry<String, CachedData> item = it.next();
-				result.put(item.getKey(), transcoder.decode(item.getValue()));
+				result.put(item.getKey(), executingCmd.getTranscoder().decode(
+						item.getValue()));
 			}
 		}
 		executingCmd.getLatch().countDown();

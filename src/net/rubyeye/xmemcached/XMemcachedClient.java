@@ -12,7 +12,6 @@
 package net.rubyeye.xmemcached;
 
 import java.net.InetSocketAddress;
-import java.nio.ByteBuffer;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -29,9 +28,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import net.rubyeye.xmemcached.buffer.BufferAllocator;
-import net.rubyeye.xmemcached.buffer.IoBuffer;
 import net.rubyeye.xmemcached.buffer.SimpleBufferAllocator;
-import net.rubyeye.xmemcached.buffer.SimpleIoBuffer;
 import net.rubyeye.xmemcached.command.Command;
 import net.rubyeye.xmemcached.exception.MemcachedException;
 import net.rubyeye.xmemcached.impl.ArrayMemcachedSessionLocator;
@@ -51,33 +48,82 @@ import com.google.code.yanf4j.nio.Session;
  */
 public class XMemcachedClient {
 
+	/**
+	 * 默认的读buffer线程数
+	 */
 	public static final int DEFAULT_READ_THREAD_COUNT = 0;
-	public static final int DEFAULT_CONNECT_TIMEOUT = 10000;
+	/**
+	 * 默认的连接超时,30秒
+	 */
+	public static final int DEFAULT_CONNECT_TIMEOUT = 30000;
+	/**
+	 * 默认的socket发送缓冲区大小，16K
+	 */
 	public static final int DEFAULT_TCP_SEND_BUFF_SIZE = 16 * 1024;
+	/**
+	 * 默认启用Nagle算法
+	 */
 	public static final boolean DEFAULT_TCP_NO_DELAY = false;
+	/**
+	 * 默认的session内的缓冲区大小，32K
+	 */
 	public static final int DEFAULT_SESSION_READ_BUFF_SIZE = 32 * 1024;
+	/**
+	 * 默认的Socket接收缓冲区大小，16K
+	 */
 	public static final int DEFAULT_TCP_RECV_BUFF_SIZE = 16 * 1024;
+	/**
+	 * 默认的操作超时时间，1秒
+	 */
 	public static final long DEFAULT_OP_TIMEOUT = 1000;
 	private static final Log log = LogFactory.getLog(XMemcachedClient.class);
 	private MemcachedSessionLocator sessionLocator;
 	private volatile boolean shutdown;
 
+	/**
+	 * 设置合并系数，这一参数影响get优化和合并缓存区优化，这个系数决定最多的合并command数，默认是150
+	 *
+	 * @param mergeFactor
+	 */
 	public void setMergeFactor(int mergeFactor) {
+		if (mergeFactor < 0)
+			throw new IllegalArgumentException("mergeFactor<0");
 		this.connector.setMergeFactor(mergeFactor);
 	}
 
+	/**
+	 * 返回连接管理器
+	 *
+	 * @return
+	 */
 	public MemcachedConnector getConnector() {
 		return connector;
 	}
 
+	/**
+	 * 设置是否启用get优化，xmemcached会将连续的get操作尽可能合并成一个getMulti操作，默认开启
+	 *
+	 * @param optimiezeGet
+	 */
 	public void setOptimiezeGet(boolean optimiezeGet) {
 		this.connector.setOptimiezeGet(optimiezeGet);
 	}
 
+	/**
+	 * 是否启用缓存区合并优化，xmemcached会尽可能将连续的命令合并起来，以形成一个socket.getSendBufferSize()
+	 * 大小的packet发出，默认开启
+	 *
+	 * @param optimizeMergeBuffer
+	 */
 	public void setOptimizeMergeBuffer(boolean optimizeMergeBuffer) {
 		this.connector.setOptimizeMergeBuffer(optimizeMergeBuffer);
 	}
 
+	/**
+	 * 是否已经关闭xmemcached客户端
+	 *
+	 * @return
+	 */
 	public boolean isShutdown() {
 		return shutdown;
 	}
@@ -94,7 +140,6 @@ public class XMemcachedClient {
 	@SuppressWarnings("unchecked")
 	private Transcoder transcoder;
 	private MemcachedHandler memcachedHandler;
-	private BufferAllocator byteBufferAllocator;
 
 	public XMemcachedClient(String server, int port) throws IOException {
 		super();
@@ -114,12 +159,24 @@ public class XMemcachedClient {
 		}
 	}
 
+	/**
+	 * 添加memcached节点
+	 *
+	 * @param server
+	 * @param port
+	 * @throws IOException
+	 */
 	public final void addServer(final String server, final int port)
 			throws IOException {
 		checkServerPort(server, port);
 		connect(new InetSocketAddress(server, port));
 	}
 
+	/**
+	 * 添加memcached节点
+	 *
+	 * @param inetSocketAddress
+	 */
 	public final void addServer(final InetSocketAddress inetSocketAddress) {
 		if (inetSocketAddress == null) {
 			throw new IllegalArgumentException();
@@ -190,7 +247,7 @@ public class XMemcachedClient {
 			configuration = getDefaultConfiguration();
 		}
 
-		this.byteBufferAllocator = allocator;
+		CommandFactory.setBufferAllocator(allocator);
 		this.shutdown = true;
 		this.transcoder = new SerializingTranscoder();
 		this.sessionLocator = locator;
@@ -200,6 +257,16 @@ public class XMemcachedClient {
 		this.memcachedHandler = new MemcachedHandler(this.transcoder, this);
 		this.connector.setHandler(memcachedHandler);
 		this.connector.setMemcachedProtocolHandler(memcachedHandler);
+	}
+
+	/**
+	 * 设置IoBuffer分配器，默认采用SimpleBufferAllocator
+	 *
+	 * @param bufferAllocator
+	 * @return
+	 */
+	public void setBufferAllocator(BufferAllocator bufferAllocator) {
+		CommandFactory.setBufferAllocator(bufferAllocator);
 	}
 
 	public XMemcachedClient(Configuration configuration) throws IOException {
@@ -265,71 +332,150 @@ public class XMemcachedClient {
 
 	}
 
+	/**
+	 * 获取key对应的缓存项
+	 *
+	 * @param <T>
+	 * @param key
+	 *            关键字key
+	 * @param timeout
+	 *            操作的超时时间，单位毫秒
+	 * @param transcoder
+	 *            缓存项的转换器，如果为null就默认使用内部的转换器负责判断类型并反序列化
+	 * @return
+	 * @throws TimeoutException
+	 * @throws InterruptedException
+	 * @throws MemcachedException
+	 */
+	@SuppressWarnings("unchecked")
+	public <T> T get(final String key, long timeout, Transcoder<T> transcoder)
+			throws TimeoutException, InterruptedException, MemcachedException {
+		return (T) get0(key, timeout, ByteUtils.GET,
+				Command.CommandType.GET_ONE, transcoder);
+	}
+
+	@SuppressWarnings("unchecked")
 	public Object get(final String key, long timeout) throws TimeoutException,
 			InterruptedException, MemcachedException {
-		return get(key, timeout, ByteUtils.GET, Command.CommandType.GET_ONE);
+		return get(key, timeout, this.transcoder);
 	}
 
-	public GetsResponse gets(final String key, long timeout)
+	@SuppressWarnings("unchecked")
+	public Object get(final String key, Transcoder transcoder)
 			throws TimeoutException, InterruptedException, MemcachedException {
-		return (GetsResponse) get(key, timeout, ByteUtils.GETS,
-				Command.CommandType.GETS_ONE);
-	}
-
-	private Object get(final String key, long timeout, byte[] cmdBytes,
-			Command.CommandType cmdType) throws TimeoutException,
-			InterruptedException, MemcachedException {
-		ByteUtils.checkKey(key);
-		final CountDownLatch latch = new CountDownLatch(1);
-		byte[] keyBytes = ByteUtils.getBytes(key);
-		final IoBuffer buffer = this.byteBufferAllocator
-				.allocate(cmdBytes.length + ByteUtils.CRLF.length + 1
-						+ keyBytes.length);
-		ByteUtils.setArguments(buffer, cmdBytes, keyBytes);
-		buffer.flip();
-		Command getCmd = new Command(key, cmdType, latch);
-		getCmd.setIoBuffer(buffer);
-		if (!sendCommand(getCmd)) {
-			throw new MemcachedException("send command fail");
-		}
-		latchWait(getCmd, timeout, latch);
-		buffer.free(); // free buffer
-		if (getCmd.getException() != null) {
-			throw getCmd.getException();
-		}
-		CachedData data = (CachedData) getCmd.getResult();
-		if (data == null) {
-			return null;
-		}
-		if (cmdType == Command.CommandType.GETS_ONE) {
-			return new GetsResponse(data.getCas(), this.transcoder.decode(data));
-		} else {
-			return this.transcoder.decode(data);
-		}
+		return get(key, DEFAULT_OP_TIMEOUT, transcoder);
 	}
 
 	public Object get(final String key) throws TimeoutException,
 			InterruptedException, MemcachedException {
-		return get(key, DEFAULT_OP_TIMEOUT, ByteUtils.GET,
-				Command.CommandType.GET_ONE);
-	}
-
-	public GetsResponse gets(final String key) throws TimeoutException,
-			InterruptedException, MemcachedException {
-		return (GetsResponse) get(key, DEFAULT_OP_TIMEOUT, ByteUtils.GETS,
-				Command.CommandType.GETS_ONE);
+		return get(key, DEFAULT_OP_TIMEOUT);
 	}
 
 	@SuppressWarnings("unchecked")
+	private <T> Object get0(final String key, long timeout, byte[] cmdBytes,
+			Command.CommandType cmdType, Transcoder<T> transcoder)
+			throws TimeoutException, InterruptedException, MemcachedException {
+		ByteUtils.checkKey(key);
+		final Command command = CommandFactory.createGetCommand(key, cmdBytes,
+				cmdType);
+		if (!sendCommand(command)) {
+			throw new MemcachedException("send command fail");
+		}
+		latchWait(command, timeout);
+		command.getIoBuffer().free(); // free buffer
+		if (command.getException() != null) {
+			throw command.getException();
+		}
+		CachedData data = (CachedData) command.getResult();
+		if (data == null) {
+			return null;
+		}
+		if (transcoder == null)
+			transcoder = this.transcoder;
+		if (cmdType == Command.CommandType.GETS_ONE) {
+			return new GetsResponse<T>(data.getCas(), transcoder.decode(data));
+		} else {
+			return transcoder.decode(data);
+		}
+	}
+
+	/**
+	 * 类似get,但是gets将返回缓存项的cas值，可用于cas操作，参见cas方法
+	 *
+	 * @param <T>
+	 * @param key
+	 * @param timeout
+	 * @param transcoder
+	 * @return GetsResponse
+	 * @throws TimeoutException
+	 * @throws InterruptedException
+	 * @throws MemcachedException
+	 */
+	@SuppressWarnings("unchecked")
+	public <T> GetsResponse<T> gets(final String key, long timeout,
+			Transcoder<T> transcoder) throws TimeoutException,
+			InterruptedException, MemcachedException {
+		return (GetsResponse<T>) get0(key, timeout, ByteUtils.GETS,
+				Command.CommandType.GETS_ONE, transcoder);
+	}
+
+	public <T> GetsResponse<T> gets(final String key) throws TimeoutException,
+			InterruptedException, MemcachedException {
+		return gets(key, DEFAULT_OP_TIMEOUT);
+	}
+
+	@SuppressWarnings("unchecked")
+	public <T> GetsResponse<T> gets(final String key, long timeout)
+			throws TimeoutException, InterruptedException, MemcachedException {
+		return gets(key, timeout, this.transcoder);
+	}
+
+	@SuppressWarnings("unchecked")
+	public <T> GetsResponse<T> gets(final String key, Transcoder transcoder)
+			throws TimeoutException, InterruptedException, MemcachedException {
+		return gets(key, DEFAULT_OP_TIMEOUT, transcoder);
+	}
+
+	/**
+	 * memcached的getMulti，批量获取一批key对应的缓存项
+	 *
+	 * @param <T>
+	 * @param keyCollections
+	 *            关键字集合
+	 * @param timeout
+	 *            操作超时
+	 * @param transcoder
+	 *            转换器
+	 * @return map对象，存储存在的缓存项
+	 * @throws TimeoutException
+	 * @throws InterruptedException
+	 * @throws MemcachedException
+	 */
+	public <T> Map<String, T> get(Collection<String> keyCollections,
+			long timeout, Transcoder<T> transcoder) throws TimeoutException,
+			InterruptedException, MemcachedException {
+		return getMulti0(keyCollections, timeout, ByteUtils.GET,
+				Command.CommandType.GET_MANY, transcoder);
+	}
+
+	public <T> Map<String, T> get(Collection<String> keyCollections,
+			Transcoder<T> transcoder) throws TimeoutException,
+			InterruptedException, MemcachedException {
+		// 超时时间加倍
+		long lazy = keyCollections.size() / 1000 > 0 ? (keyCollections.size() / 1000)
+				: 1;
+		lazy = lazy > 3 ? 3 : lazy; // 最高3秒
+		return getMulti0(keyCollections, lazy * DEFAULT_OP_TIMEOUT,
+				ByteUtils.GET, Command.CommandType.GET_MANY, transcoder);
+	}
+
 	public Map<String, Object> get(Collection<String> keyCollections)
 			throws TimeoutException, InterruptedException, MemcachedException {
 		// 超时时间加倍
 		long lazy = keyCollections.size() / 1000 > 0 ? (keyCollections.size() / 1000)
 				: 1;
 		lazy = lazy > 3 ? 3 : lazy; // 最高3秒
-		return (Map<String, Object>) get(keyCollections, lazy
-				* DEFAULT_OP_TIMEOUT, ByteUtils.GET,
-				Command.CommandType.GET_MANY);
+		return get(keyCollections, lazy * DEFAULT_OP_TIMEOUT);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -337,7 +483,29 @@ public class XMemcachedClient {
 			long timeout) throws TimeoutException, InterruptedException,
 			MemcachedException {
 		return (Map<String, Object>) get(keyCollections, timeout,
-				ByteUtils.GET, Command.CommandType.GET_MANY);
+				this.transcoder);
+	}
+
+	/**
+	 * 类似getMulti，但是返回缓存项的cas值，返回的map中value存储的是GetsResponse对象
+	 *
+	 * @param <T>
+	 * @param keyCollections
+	 * @param timeout
+	 * @param transcoder
+	 * @return
+	 * @throws TimeoutException
+	 * @throws InterruptedException
+	 * @throws MemcachedException
+	 */
+	@SuppressWarnings("unchecked")
+	public <T> Map<String, GetsResponse<T>> gets(
+			Collection<String> keyCollections, long timeout,
+			Transcoder<T> transcoder) throws TimeoutException,
+			InterruptedException, MemcachedException {
+		return (Map<String, GetsResponse<T>>) getMulti0(keyCollections,
+				timeout, ByteUtils.GETS, Command.CommandType.GETS_MANY,
+				transcoder);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -347,33 +515,37 @@ public class XMemcachedClient {
 		long lazy = keyCollections.size() / 1000 > 0 ? (keyCollections.size() / 1000)
 				: 1;
 		lazy = lazy > 3 ? 3 : lazy; // 最高3秒
-		return (Map<String, GetsResponse>) get(keyCollections, lazy
-				* DEFAULT_OP_TIMEOUT, ByteUtils.GETS,
-				Command.CommandType.GETS_MANY);
+		return gets(keyCollections, 3 * DEFAULT_OP_TIMEOUT);
 	}
 
 	@SuppressWarnings("unchecked")
 	public Map<String, GetsResponse> gets(Collection<String> keyCollections,
 			long timeout) throws TimeoutException, InterruptedException,
 			MemcachedException {
-		return (Map<String, GetsResponse>) get(keyCollections, timeout,
-				ByteUtils.GETS, Command.CommandType.GETS_MANY);
+		return gets(keyCollections, timeout, this.transcoder);
 	}
 
 	@SuppressWarnings("unchecked")
-	private Map get(Collection<String> keyCollections, long timeout,
-			byte[] cmdBytes, Command.CommandType cmdType)
-			throws TimeoutException, InterruptedException, MemcachedException {
+	public Map<String, GetsResponse> gets(Collection<String> keyCollections,
+			Transcoder transcoder) throws TimeoutException,
+			InterruptedException, MemcachedException {
+		return gets(keyCollections, DEFAULT_OP_TIMEOUT, transcoder);
+	}
+
+	private <T> Map<String, T> getMulti0(Collection<String> keyCollections,
+			long timeout, byte[] cmdBytes, Command.CommandType cmdType,
+			Transcoder<T> transcoder) throws TimeoutException,
+			InterruptedException, MemcachedException {
 		if (keyCollections == null || keyCollections.size() == 0) {
 			return null;
 		}
 		Collection<List<String>> catalogKeys = catalogKeys(keyCollections);
-		Map result = new HashMap();
+		Map<String, T> result = new HashMap<String, T>();
 		List<Command> commands = new LinkedList<Command>();
 		final CountDownLatch latch = new CountDownLatch(catalogKeys.size());
 		for (List<String> keys : catalogKeys) {
-			commands.add(sendGetManyCommand(keys, latch, result, cmdBytes,
-					cmdType));
+			commands.add(sendGetMultiCommand(keys, latch, result, cmdBytes,
+					cmdType, transcoder));
 		}
 		// 超时时间加倍
 		long lazy = keyCollections.size() / 1000 > 0 ? (keyCollections.size() / 1000)
@@ -419,119 +591,266 @@ public class XMemcachedClient {
 		return catalogKeys;
 	}
 
-	@SuppressWarnings("unchecked")
-	private Command sendGetManyCommand(List<String> keys, CountDownLatch latch,
-			Map result, byte[] cmdBytes, Command.CommandType cmdType)
+	private <T> Command sendGetMultiCommand(List<String> keys,
+			CountDownLatch latch, Map<String, T> result, byte[] cmdBytes,
+			Command.CommandType cmdType, Transcoder<T> transcoder)
 			throws InterruptedException, TimeoutException, MemcachedException {
-		Command command = new Command(keys.get(0), cmdType, latch);
-		command.setResult(result); // 共用一个result map
-		StringBuilder sb = new StringBuilder(keys.size() * 5);
-		for (String tmpKey : keys) {
-			ByteUtils.checkKey(tmpKey);
-			sb.append(tmpKey).append(" ");
-		}
-		byte[] keyBytes = ByteUtils.getBytes(sb.toString());
-		final IoBuffer buffer = this.byteBufferAllocator
-				.allocate(cmdBytes.length + ByteUtils.CRLF.length + 1
-						+ keyBytes.length);
-		ByteUtils.setArguments(buffer, cmdBytes, keyBytes);
-		buffer.flip();
-		command.setIoBuffer(buffer);
+		final Command command = CommandFactory.createGetMultiCommand(keys,
+				latch, result, cmdBytes, cmdType, transcoder);
 		if (!sendCommand(command)) {
 			throw new MemcachedException("send command fail");
 		}
 		return command;
 	}
 
-	public boolean set(final String key, final int exp, Object value)
-			throws TimeoutException, InterruptedException, MemcachedException {
+	/**
+	 * 设置key对应的项为value，无论key是否已经存在，成功返回true，否则返回false
+	 *
+	 * @param <T>
+	 * @param key
+	 *            缓存关键字
+	 * @param exp
+	 *            缓存的超时时间
+	 * @param value
+	 *            缓存的值对象
+	 * @param transcoder
+	 *            对象转换器
+	 * @param timeout
+	 *            操作的超时时间，单位是毫秒
+	 * @return
+	 * @throws TimeoutException
+	 *             操作超时抛出此异常
+	 * @throws InterruptedException
+	 *             操作被中断
+	 * @throws MemcachedException
+	 *             memcached异常，可能是客户端或者memcached server返回的错误
+	 */
+	public <T> boolean set(final String key, final int exp, T value,
+			Transcoder<T> transcoder, long timeout) throws TimeoutException,
+			InterruptedException, MemcachedException {
 		ByteUtils.checkKey(key);
 		return sendStoreCommand(key, exp, value, Command.CommandType.SET,
-				"set", DEFAULT_OP_TIMEOUT, -1);
+				"set", timeout, -1, transcoder);
 	}
 
+	public boolean set(final String key, final int exp, Object value)
+			throws TimeoutException, InterruptedException, MemcachedException {
+		return set(key, exp, value, DEFAULT_OP_TIMEOUT);
+	}
+
+	@SuppressWarnings("unchecked")
 	public boolean set(final String key, final int exp, Object value,
 			long timeout) throws TimeoutException, InterruptedException,
 			MemcachedException {
+		return set(key, exp, value, this.transcoder, timeout);
+	}
+
+	@SuppressWarnings("unchecked")
+	public boolean set(final String key, final int exp, Object value,
+			Transcoder transcoder) throws TimeoutException,
+			InterruptedException, MemcachedException {
+		return set(key, exp, value, transcoder, DEFAULT_OP_TIMEOUT);
+	}
+
+	/**
+	 *添加key-value缓存项，仅在key不存在的情况下才能添加成功，成功返回true，否则返回false
+	 *
+	 * @param <T>
+	 * @param key
+	 * @param exp
+	 *            缓存的超时时间，0为永不过期（memcached默认为一个月）
+	 * @param value
+	 *            缓存的值对象
+	 * @param transcoder
+	 *            值对象的转换器
+	 * @param timeout
+	 *            操作的超时时间，单位毫秒
+	 * @return
+	 * @throws TimeoutException
+	 *             操作超时抛出此异常
+	 * @throws InterruptedException
+	 *             操作被中断
+	 * @throws MemcachedException
+	 *             memcached异常，可能是客户端或者memcached server返回的错误
+	 */
+	public <T> boolean add(final String key, final int exp, T value,
+			Transcoder<T> transcoder, long timeout) throws TimeoutException,
+			InterruptedException, MemcachedException {
 		ByteUtils.checkKey(key);
 		return sendStoreCommand(key, exp, value, Command.CommandType.SET,
-				"set", timeout, -1);
+				"add", timeout, -1, transcoder);
 	}
 
 	public boolean add(final String key, final int exp, Object value)
 			throws TimeoutException, InterruptedException, MemcachedException {
-		ByteUtils.checkKey(key);
-		return sendStoreCommand(key, exp, value, Command.CommandType.ADD,
-				"add", DEFAULT_OP_TIMEOUT, -1);
+		return add(key, exp, value, DEFAULT_OP_TIMEOUT);
 	}
 
+	@SuppressWarnings("unchecked")
 	public boolean add(final String key, final int exp, Object value,
 			long timeout) throws TimeoutException, InterruptedException,
 			MemcachedException {
-		ByteUtils.checkKey(key);
-		return sendStoreCommand(key, exp, value, Command.CommandType.SET,
-				"add", timeout, -1);
+		return add(key, exp, value, this.transcoder, timeout);
+	}
+
+	@SuppressWarnings("unchecked")
+	public boolean add(final String key, final int exp, Object value,
+			Transcoder transcoder) throws TimeoutException,
+			InterruptedException, MemcachedException {
+		return add(key, exp, value, transcoder, DEFAULT_OP_TIMEOUT);
 	}
 
 	public boolean replace(final String key, final int exp, Object value)
 			throws TimeoutException, InterruptedException, MemcachedException {
-		ByteUtils.checkKey(key);
-		return sendStoreCommand(key, exp, value, Command.CommandType.REPLACE,
-				"replace", DEFAULT_OP_TIMEOUT, -1);
+		return replace(key, exp, value, DEFAULT_OP_TIMEOUT);
 	}
 
+	@SuppressWarnings("unchecked")
 	public boolean replace(final String key, final int exp, Object value,
 			long timeout) throws TimeoutException, InterruptedException,
 			MemcachedException {
+		return replace(key, exp, value, this.transcoder, timeout);
+	}
+
+	@SuppressWarnings("unchecked")
+	public boolean replace(final String key, final int exp, Object value,
+			Transcoder transcoder) throws TimeoutException,
+			InterruptedException, MemcachedException {
+		return replace(key, exp, value, transcoder, DEFAULT_OP_TIMEOUT);
+	}
+
+	/**
+	 * 替代key对应的值，当且仅当key对应的缓存项存在的时候可以替换，如果key不存在返回false，如果替代成功返回true
+	 *
+	 * @param <T>
+	 * @param key
+	 * @param exp
+	 *            缓存的超时时间
+	 * @param value
+	 *            值对象
+	 * @param transcoder
+	 *            值对象的转换器
+	 * @param timeout
+	 *            操作的超时时间,单位毫秒
+	 * @return
+	 * @throws TimeoutException
+	 * @throws InterruptedException
+	 * @throws MemcachedException
+	 */
+	public <T> boolean replace(final String key, final int exp, T value,
+			Transcoder<T> transcoder, long timeout) throws TimeoutException,
+			InterruptedException, MemcachedException {
 		ByteUtils.checkKey(key);
 		return sendStoreCommand(key, exp, value, Command.CommandType.SET,
-				"replace", timeout, -1);
+				"replace", timeout, -1, transcoder);
 	}
 
+	/**
+	 * 将value添加到key对应的缓存项后面连接起来，这一操作仅对String有意义。
+	 *
+	 * @param key
+	 * @param value
+	 * @return
+	 * @throws TimeoutException
+	 * @throws InterruptedException
+	 * @throws MemcachedException
+	 */
 	public boolean append(final String key, Object value)
 			throws TimeoutException, InterruptedException, MemcachedException {
-		ByteUtils.checkKey(key);
-		return sendStoreCommand(key, 0, value, Command.CommandType.APPEND,
-				"append", DEFAULT_OP_TIMEOUT, -1);
+		return append(key, value, DEFAULT_OP_TIMEOUT);
 	}
 
+	@SuppressWarnings("unchecked")
 	public boolean append(final String key, Object value, long timeout)
 			throws TimeoutException, InterruptedException, MemcachedException {
 		ByteUtils.checkKey(key);
 		return sendStoreCommand(key, 0, value, Command.CommandType.APPEND,
-				"append", timeout, -1);
+				"append", timeout, -1, this.transcoder);
 	}
 
+	/**
+	 * 类似append，是将value附加到key对应的缓存项前面，这一操作仅对String有实际意义
+	 *
+	 * @param key
+	 * @param value
+	 * @return
+	 * @throws TimeoutException
+	 * @throws InterruptedException
+	 * @throws MemcachedException
+	 */
 	public boolean prepend(final String key, Object value)
 			throws TimeoutException, InterruptedException, MemcachedException {
-		ByteUtils.checkKey(key);
-		return sendStoreCommand(key, 0, value, Command.CommandType.PREPEND,
-				"prepend", DEFAULT_OP_TIMEOUT, -1);
+		return prepend(key, value, DEFAULT_OP_TIMEOUT);
 	}
 
+	@SuppressWarnings("unchecked")
 	public boolean prepend(final String key, Object value, long timeout)
 			throws TimeoutException, InterruptedException, MemcachedException {
 		ByteUtils.checkKey(key);
 		return sendStoreCommand(key, 0, value, Command.CommandType.PREPEND,
-				"prepend", timeout, -1);
-	}
-
-	public boolean cas(final String key, final int exp, Object value,
-			long timeout, long cas) throws TimeoutException,
-			InterruptedException, MemcachedException {
-		ByteUtils.checkKey(key);
-		return sendStoreCommand(key, exp, value, Command.CommandType.CAS,
-				"cas", timeout, cas);
+				"prepend", timeout, -1, this.transcoder);
 	}
 
 	public boolean cas(final String key, final int exp, Object value, long cas)
 			throws TimeoutException, InterruptedException, MemcachedException {
-		ByteUtils.checkKey(key);
-		return sendStoreCommand(key, exp, value, Command.CommandType.CAS,
-				"cas", DEFAULT_OP_TIMEOUT, cas);
+		return cas(key, exp, value, DEFAULT_OP_TIMEOUT, cas);
 	}
 
-	public boolean cas(final String key, final int exp, CASOperation operation)
+	@SuppressWarnings("unchecked")
+	public boolean cas(final String key, final int exp, Object value,
+			long timeout, long cas) throws TimeoutException,
+			InterruptedException, MemcachedException {
+		return cas(key, exp, value, this.transcoder, timeout, cas);
+	}
+
+	@SuppressWarnings("unchecked")
+	public boolean cas(final String key, final int exp, Object value,
+			Transcoder transcoder, long cas) throws TimeoutException,
+			InterruptedException, MemcachedException {
+		return cas(key, exp, value, transcoder, DEFAULT_OP_TIMEOUT, cas);
+	}
+
+	/**
+	 * cas原子替换key对应的value，当且仅当cas值相等的时候替换成功
+	 *
+	 * @param <T>
+	 * @param key
+	 * @param exp
+	 * @param value
+	 * @param transcoder
+	 * @param timeout
+	 * @param cas
+	 * @return
+	 * @throws TimeoutException
+	 * @throws InterruptedException
+	 * @throws MemcachedException
+	 */
+	public <T> boolean cas(final String key, final int exp, T value,
+			Transcoder<T> transcoder, long timeout, long cas)
+			throws TimeoutException, InterruptedException, MemcachedException {
+		ByteUtils.checkKey(key);
+		return sendStoreCommand(key, exp, value, Command.CommandType.CAS,
+				"cas", timeout, cas, transcoder);
+	}
+
+	/**
+	 * 原子替换key对应的value值，当且仅当cas值相等时替换成功，具体使用参见wiki
+	 *
+	 * @param <T>
+	 * @param key
+	 * @param exp
+	 *            操作的超时时间
+	 * @param operation
+	 *            CASOperation对象，包装cas操作
+	 * @param transcoder
+	 *            对象转换器
+	 * @return
+	 * @throws TimeoutException
+	 * @throws InterruptedException
+	 * @throws MemcachedException
+	 */
+	public <T> boolean cas(final String key, final int exp,
+			CASOperation<T> operation, Transcoder<T> transcoder)
 			throws TimeoutException, InterruptedException, MemcachedException {
 		ByteUtils.checkKey(key);
 		if (operation == null) {
@@ -542,7 +861,7 @@ public class XMemcachedClient {
 					"max tries must be greater than 0");
 		}
 		int tryCount = 0;
-		GetsResponse result = gets(key);
+		GetsResponse<T> result = gets(key);
 		if (result == null) {
 			throw new MemcachedException("could not found the value for Key="
 					+ key);
@@ -551,7 +870,7 @@ public class XMemcachedClient {
 				&& result != null
 				&& !sendStoreCommand(key, exp, operation.getNewValue(result
 						.getCas(), result.getValue()), Command.CommandType.CAS,
-						"cas", DEFAULT_OP_TIMEOUT, result.getCas())) {
+						"cas", DEFAULT_OP_TIMEOUT, result.getCas(), transcoder)) {
 			tryCount++;
 			result = gets(key);
 			if (result == null) {
@@ -565,25 +884,22 @@ public class XMemcachedClient {
 		return true;
 	}
 
+	@SuppressWarnings("unchecked")
+	public <T> boolean cas(final String key, final int exp,
+			CASOperation<T> operation) throws TimeoutException,
+			InterruptedException, MemcachedException {
+		return cas(key, exp, operation, this.transcoder);
+	}
+
 	public boolean delete(final String key, final int time)
 			throws TimeoutException, InterruptedException, MemcachedException {
 		ByteUtils.checkKey(key);
-		final CountDownLatch latch = new CountDownLatch(1);
-		byte[] keyBytes = ByteUtils.getBytes(key);
-		byte[] timeBytes = ByteUtils.getBytes(String.valueOf(time));
-		final IoBuffer buffer = this.byteBufferAllocator
-				.allocate(ByteUtils.DELETE.length + 2 + keyBytes.length
-						+ timeBytes.length + ByteUtils.CRLF.length);
-		ByteUtils.setArguments(buffer, ByteUtils.DELETE, keyBytes, timeBytes);
-		buffer.flip();
-		Command command = new Command(key, Command.CommandType.DELETE, latch);
-		command.setIoBuffer(buffer);
-
+		final Command command = CommandFactory.createDeleteCommand(key, time);
 		if (!sendCommand(command)) {
 			throw new MemcachedException("send command fail");
 		}
-		latchWait(command, DEFAULT_OP_TIMEOUT, latch);
-		buffer.free();
+		latchWait(command, DEFAULT_OP_TIMEOUT);
+		command.getIoBuffer().free();
 		if (command.getException() != null) {
 			throw command.getException();
 		}
@@ -594,21 +910,14 @@ public class XMemcachedClient {
 		return (Boolean) command.getResult();
 	}
 
-	static final ByteBuffer VERSION = ByteBuffer.wrap("version\r\n".getBytes());
-
-	public String version() throws TimeoutException, InterruptedException,
-			MemcachedException {
-		final CountDownLatch latch = new CountDownLatch(1);
-		final IoBuffer buffer = new SimpleIoBuffer(VERSION.slice());
-		Command command = new Command("version", Command.CommandType.VERSION,
-				latch);
-		command.setIoBuffer(buffer);
-
+	public final String version() throws TimeoutException,
+			InterruptedException, MemcachedException {
+		final Command command = CommandFactory.createVersionCommand();
 		if (!sendCommand(command)) {
 			throw new MemcachedException("send command fail");
 		}
-		latchWait(command, DEFAULT_OP_TIMEOUT, latch);
-		buffer.free(); // free buffer
+		latchWait(command, DEFAULT_OP_TIMEOUT);
+		command.getIoBuffer().free(); // free buffer
 		if (command.getException() != null) {
 			throw command.getException();
 		}
@@ -642,22 +951,13 @@ public class XMemcachedClient {
 	private int sendIncrOrDecrCommand(final String key, final int num,
 			Command.CommandType cmdType, final String cmd)
 			throws InterruptedException, TimeoutException, MemcachedException {
-		final CountDownLatch latch = new CountDownLatch(1);
-		byte[] numBytes = ByteUtils.getBytes(String.valueOf(num));
-		byte[] cmdBytes = ByteUtils.getBytes(cmd);
-		byte[] keyBytes = ByteUtils.getBytes(key);
-		final IoBuffer buffer = this.byteBufferAllocator.allocate(cmd.length()
-				+ 2 + key.length() + numBytes.length + ByteUtils.CRLF.length);
-		ByteUtils.setArguments(buffer, cmdBytes, keyBytes, numBytes);
-		buffer.flip();
-		Command command = new Command(key, cmdType, latch);
-		command.setIoBuffer(buffer);
-
+		final Command command = CommandFactory.createIncrDecrCommand(key, num,
+				cmdType, cmd);
 		if (!sendCommand(command)) {
 			throw new MemcachedException("send command fail");
 		}
-		latchWait(command, DEFAULT_OP_TIMEOUT, latch);
-		buffer.free();
+		latchWait(command, DEFAULT_OP_TIMEOUT);
+		command.getIoBuffer().free();
 		if (command.getException() != null) {
 			throw command.getException();
 		}
@@ -694,10 +994,10 @@ public class XMemcachedClient {
 	}
 
 	@SuppressWarnings("unchecked")
-	private boolean sendStoreCommand(final String key, final int exp,
-			final Object value, Command.CommandType cmdType, final String cmd,
-			long timeout, long cas) throws InterruptedException,
-			TimeoutException, MemcachedException {
+	private <T> boolean sendStoreCommand(final String key, final int exp,
+			final T value, Command.CommandType cmdType, final String cmd,
+			long timeout, long cas, Transcoder<T> transcoder)
+			throws InterruptedException, TimeoutException, MemcachedException {
 		if (value == null) {
 			throw new IllegalArgumentException("value could not be null");
 		}
@@ -705,38 +1005,16 @@ public class XMemcachedClient {
 			throw new IllegalArgumentException(
 					"Expire time must be greater than 0");
 		}
-		final CountDownLatch latch = new CountDownLatch(1);
-		final CachedData data = transcoder.encode(value);
-		byte[] keyBytes = ByteUtils.getBytes(key);
-		byte[] flagBytes = ByteUtils.getBytes(String.valueOf(data.getFlags()));
-		byte[] expBytes = ByteUtils.getBytes(String.valueOf(exp));
-		byte[] dataLenBytes = ByteUtils.getBytes(String
-				.valueOf(data.getData().length));
-		byte[] casBytes = ByteUtils.getBytes(String.valueOf(cas));
-		int size = cmd.length() + 1 + keyBytes.length + 1 + flagBytes.length
-				+ 1 + expBytes.length + 1 + data.getData().length + 2
-				* ByteUtils.CRLF.length + dataLenBytes.length;
-		if (cmdType == Command.CommandType.CAS) {
-			size += 1 + casBytes.length;
-		}
-		final IoBuffer buffer = this.byteBufferAllocator.allocate(size);
-		if (cmdType == Command.CommandType.CAS) {
-			ByteUtils.setArguments(buffer, cmd, keyBytes, flagBytes, expBytes,
-					dataLenBytes, casBytes);
-		} else {
-			ByteUtils.setArguments(buffer, cmd, keyBytes, flagBytes, expBytes,
-					dataLenBytes);
-		}
-		ByteUtils.setArguments(buffer, data.getData());
-		buffer.flip();
-		Command command = new Command(key, cmdType, latch);
-		command.setIoBuffer(buffer);
+		if (transcoder == null)
+			transcoder = this.transcoder;
+		final Command command = CommandFactory.createStoreCommand(key, exp,
+				value, cmdType, cmd, cas, transcoder);
 
 		if (!sendCommand(command)) {
 			throw new MemcachedException("send command fail");
 		}
-		latchWait(command, timeout, latch);
-		buffer.free();
+		latchWait(command, timeout);
+		command.getIoBuffer().free();
 		if (command.getException() != null) {
 			throw command.getException();
 		}
@@ -747,9 +1025,9 @@ public class XMemcachedClient {
 		return (Boolean) command.getResult();
 	}
 
-	private void latchWait(Command cmd, long timeout, final CountDownLatch latch)
+	private void latchWait(Command cmd, long timeout)
 			throws InterruptedException, TimeoutException {
-		if (!latch.await(timeout, TimeUnit.MILLISECONDS)) {
+		if (!cmd.getLatch().await(timeout, TimeUnit.MILLISECONDS)) {
 			cmd.cancel();
 			throw new TimeoutException("Timed out waiting for operation");
 		}
