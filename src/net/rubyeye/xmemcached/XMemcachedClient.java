@@ -24,6 +24,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.io.IOException;
 
+import net.rubyeye.xmemcached.command.Command.CommandType;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -129,6 +130,11 @@ public final class XMemcachedClient {
         return shutdown;
     }
 
+    private final <T> GetsResponse<T> gets0(final String key, byte[] keyBytes, Transcoder<T> transcoder) throws MemcachedException, TimeoutException, InterruptedException {
+        GetsResponse<T> result = (GetsResponse<T>) sendGetCommand(key, keyBytes, ByteUtils.GETS, Command.CommandType.GETS_ONE, DEFAULT_OP_TIMEOUT, transcoder);
+        return result;
+    }
+
     private final boolean sendCommand(Command cmd) throws InterruptedException,
             MemcachedException {
         if (this.shutdown) {
@@ -218,6 +224,30 @@ public final class XMemcachedClient {
             this.connector.addToWatingQueue(new MemcachedConnector.ReconnectRequest(
                     inetSocketAddress, 0));
 
+        }
+    }
+
+    private final <T> Object sendGetCommand(final String key, byte[] keyBytes, byte[] cmdBytes, CommandType cmdType, long timeout, Transcoder<T> transcoder) throws InterruptedException, TimeoutException, MemcachedException, MemcachedException {
+        final Command command = CommandFactory.createGetCommand(key, keyBytes, cmdBytes, cmdType);
+        if (!sendCommand(command)) {
+            throw new MemcachedException("send command fail");
+        }
+        latchWait(command, timeout);
+        command.getIoBuffer().free(); // free buffer
+        if (command.getException() != null) {
+            throw command.getException();
+        }
+        CachedData data = (CachedData) command.getResult();
+        if (data == null) {
+            return null;
+        }
+        if (transcoder == null) {
+            transcoder = this.transcoder;
+        }
+        if (cmdType == Command.CommandType.GETS_ONE) {
+            return new GetsResponse<T>(data.getCas(), transcoder.decode(data));
+        } else {
+            return transcoder.decode(data);
         }
     }
 
@@ -368,29 +398,9 @@ public final class XMemcachedClient {
     private <T> Object get0(final String key, long timeout, byte[] cmdBytes,
             Command.CommandType cmdType, Transcoder<T> transcoder)
             throws TimeoutException, InterruptedException, MemcachedException {
-        ByteUtils.checkKey(key);
-        final Command command = CommandFactory.createGetCommand(key, cmdBytes,
-                cmdType);
-        if (!sendCommand(command)) {
-            throw new MemcachedException("send command fail");
-        }
-        latchWait(command, timeout);
-        command.getIoBuffer().free(); // free buffer
-        if (command.getException() != null) {
-            throw command.getException();
-        }
-        CachedData data = (CachedData) command.getResult();
-        if (data == null) {
-            return null;
-        }
-        if (transcoder == null) {
-            transcoder = this.transcoder;
-        }
-        if (cmdType == Command.CommandType.GETS_ONE) {
-            return new GetsResponse<T>(data.getCas(), transcoder.decode(data));
-        } else {
-            return transcoder.decode(data);
-        }
+        byte[] keyBytes = ByteUtils.getBytes(key);
+        ByteUtils.checkKey(keyBytes);
+        return sendGetCommand(key, keyBytes, cmdBytes, cmdType, timeout, transcoder);
     }
 
     /**
@@ -622,7 +632,6 @@ public final class XMemcachedClient {
     public final <T> boolean set(final String key, final int exp, T value,
             Transcoder<T> transcoder, long timeout) throws TimeoutException,
             InterruptedException, MemcachedException {
-        ByteUtils.checkKey(key);
         return sendStoreCommand(key, exp, value, Command.CommandType.SET,
                 "set", timeout, -1, transcoder);
     }
@@ -669,7 +678,6 @@ public final class XMemcachedClient {
     public final <T> boolean add(final String key, final int exp, T value,
             Transcoder<T> transcoder, long timeout) throws TimeoutException,
             InterruptedException, MemcachedException {
-        ByteUtils.checkKey(key);
         return sendStoreCommand(key, exp, value, Command.CommandType.SET,
                 "add", timeout, -1, transcoder);
     }
@@ -731,7 +739,6 @@ public final class XMemcachedClient {
     public final <T> boolean replace(final String key, final int exp, T value,
             Transcoder<T> transcoder, long timeout) throws TimeoutException,
             InterruptedException, MemcachedException {
-        ByteUtils.checkKey(key);
         return sendStoreCommand(key, exp, value, Command.CommandType.SET,
                 "replace", timeout, -1, transcoder);
     }
@@ -754,7 +761,7 @@ public final class XMemcachedClient {
     @SuppressWarnings("unchecked")
     public final boolean append(final String key, Object value, long timeout)
             throws TimeoutException, InterruptedException, MemcachedException {
-        ByteUtils.checkKey(key);
+
         return sendStoreCommand(key, 0, value, Command.CommandType.APPEND,
                 "append", timeout, -1, this.transcoder);
     }
@@ -777,7 +784,6 @@ public final class XMemcachedClient {
     @SuppressWarnings("unchecked")
     public final boolean prepend(final String key, Object value, long timeout)
             throws TimeoutException, InterruptedException, MemcachedException {
-        ByteUtils.checkKey(key);
         return sendStoreCommand(key, 0, value, Command.CommandType.PREPEND,
                 "prepend", timeout, -1, this.transcoder);
     }
@@ -818,7 +824,6 @@ public final class XMemcachedClient {
     public final <T> boolean cas(final String key, final int exp, T value,
             Transcoder<T> transcoder, long timeout, long cas)
             throws TimeoutException, InterruptedException, MemcachedException {
-        ByteUtils.checkKey(key);
         return sendStoreCommand(key, exp, value, Command.CommandType.CAS,
                 "cas", timeout, cas, transcoder);
     }
@@ -842,7 +847,8 @@ public final class XMemcachedClient {
     public final <T> boolean cas(final String key, final int exp,
             CASOperation<T> operation, Transcoder<T> transcoder)
             throws TimeoutException, InterruptedException, MemcachedException {
-        ByteUtils.checkKey(key);
+        byte[] keyBytes = ByteUtils.getBytes(key);
+        ByteUtils.checkKey(keyBytes);
         if (operation == null) {
             throw new IllegalArgumentException("CASOperation could not be null");
         }
@@ -851,14 +857,14 @@ public final class XMemcachedClient {
                     "max tries must be greater than 0");
         }
         int tryCount = 0;
-        GetsResponse<T> result = gets(key);
+        GetsResponse<T> result = gets0(key, keyBytes, transcoder);
         if (result == null) {
             throw new MemcachedException("could not found the value for Key=" + key);
         }
         while (tryCount < operation.getMaxTries() && result != null && !sendStoreCommand(key, exp, operation.getNewValue(result.getCas(), result.getValue()), Command.CommandType.CAS,
                 "cas", DEFAULT_OP_TIMEOUT, result.getCas(), transcoder)) {
             tryCount++;
-            result = gets(key);
+            result = gets0(key, keyBytes, transcoder);
             if (result == null) {
                 throw new MemcachedException(
                         "could not gets the value for Key=" + key);
@@ -879,8 +885,9 @@ public final class XMemcachedClient {
 
     public final boolean delete(final String key, final int time)
             throws TimeoutException, InterruptedException, MemcachedException {
-        ByteUtils.checkKey(key);
-        final Command command = CommandFactory.createDeleteCommand(key, time);
+        final byte[] keyBytes = ByteUtils.getBytes(key);
+        ByteUtils.checkKey(keyBytes);
+        final Command command = CommandFactory.createDeleteCommand(key, keyBytes, time);
         if (!sendCommand(command)) {
             throw new MemcachedException("send command fail");
         }
@@ -916,13 +923,11 @@ public final class XMemcachedClient {
 
     public final int incr(final String key, final int num) throws TimeoutException,
             InterruptedException, MemcachedException {
-        ByteUtils.checkKey(key);
         return sendIncrOrDecrCommand(key, num, Command.CommandType.INCR, "incr");
     }
 
     public final int decr(final String key, final int num) throws TimeoutException,
             InterruptedException, MemcachedException {
-        ByteUtils.checkKey(key);
         return sendIncrOrDecrCommand(key, num, Command.CommandType.DECR, "decr");
     }
 
@@ -937,7 +942,9 @@ public final class XMemcachedClient {
     private int sendIncrOrDecrCommand(final String key, final int num,
             Command.CommandType cmdType, final String cmd)
             throws InterruptedException, TimeoutException, MemcachedException {
-        final Command command = CommandFactory.createIncrDecrCommand(key, num,
+        final byte[] keyBytes = ByteUtils.getBytes(key);
+        ByteUtils.checkKey(keyBytes);
+        final Command command = CommandFactory.createIncrDecrCommand(key, keyBytes, num,
                 cmdType, cmd);
         if (!sendCommand(command)) {
             throw new MemcachedException("send command fail");
@@ -983,6 +990,8 @@ public final class XMemcachedClient {
             final T value, Command.CommandType cmdType, final String cmd,
             long timeout, long cas, Transcoder<T> transcoder)
             throws InterruptedException, TimeoutException, MemcachedException {
+        byte[] keyBytes = ByteUtils.getBytes(key);
+        ByteUtils.checkKey(keyBytes);
         if (value == null) {
             throw new IllegalArgumentException("value could not be null");
         }
@@ -993,7 +1002,7 @@ public final class XMemcachedClient {
         if (transcoder == null) {
             transcoder = this.transcoder;
         }
-        final Command command = CommandFactory.createStoreCommand(key, exp,
+        final Command command = CommandFactory.createStoreCommand(key, keyBytes, exp,
                 value, cmdType, cmd, cas, transcoder);
 
         if (!sendCommand(command)) {

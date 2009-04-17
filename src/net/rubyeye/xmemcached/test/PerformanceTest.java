@@ -129,8 +129,8 @@ public class PerformanceTest {
 
 			int repeat = 10000;
 			XMemcachedClientBuilder builder = new XMemcachedClientBuilder();
-			builder.getConfiguration().setReadThreadCount(0);
-            builder.setBufferAllocator(new CachedBufferAllocator());
+			builder.getConfiguration().setReadThreadCount(2);
+           // builder.setBufferAllocator();
 			// builder.setSessionLocator(new KetamaMemcachedSessionLocator());
 			XMemcachedClient mc = builder.build();
 			// mc.setOptimizeMergeBuffer(false);

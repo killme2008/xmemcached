@@ -16,6 +16,7 @@ import java.io.UnsupportedEncodingException;
 import net.rubyeye.xmemcached.buffer.IoBuffer;
 
 public final class ByteUtils {
+
     public static final String DEFAULT_CHARSET = "utf-8";
 
     /**
@@ -31,6 +32,9 @@ public final class ByteUtils {
     public static final byte SPACE = ' ';
 
     public static final byte[] getBytes(String k) {
+        if (k == null || k.length() == 0) {
+            throw new IllegalArgumentException("Key must not be blank");
+        }
         try {
             return k.getBytes(DEFAULT_CHARSET);
         } catch (UnsupportedEncodingException e) {
@@ -55,8 +59,27 @@ public final class ByteUtils {
         bb.put(CRLF);
     }
 
+    public static final void checkKey(final byte[] keyBytes) {
+
+        if (keyBytes.length > ByteUtils.MAX_KEY_LENGTH) {
+            throw new IllegalArgumentException("Key is too long (maxlen = " + ByteUtils.MAX_KEY_LENGTH + ")");
+        }
+        // Validate the key
+        for (byte b : keyBytes) {
+            if (b == ' ' || b == '\n' || b == '\r' || b == 0) {
+                try {
+                    throw new IllegalArgumentException(
+                            "Key contains invalid characters:  ``" + new String(keyBytes, "utf-8") + "''");
+
+                } catch (UnsupportedEncodingException e) {
+                }
+            }
+
+        }
+    }
+
     public static final void checkKey(final String key) {
-        if (key == null || key.trim().length() == 0) {
+        if (key == null || key.length() == 0) {
             throw new IllegalArgumentException("Key must not be blank");
         }
         byte[] keyBytes = getBytes(key);
@@ -66,9 +89,14 @@ public final class ByteUtils {
         // Validate the key
         for (byte b : keyBytes) {
             if (b == ' ' || b == '\n' || b == '\r' || b == 0) {
-                throw new IllegalArgumentException(
-                        "Key contains invalid characters:  ``" + key + "''");
+                try {
+                    throw new IllegalArgumentException(
+                            "Key contains invalid characters:  ``" + new String(keyBytes, "utf-8") + "''");
+
+                } catch (UnsupportedEncodingException e) {
+                }
             }
+
         }
     }
     public static final int MAX_KEY_LENGTH = 250;

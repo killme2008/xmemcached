@@ -23,8 +23,7 @@ public class SimpleIoBuffer implements IoBuffer {
 
     @Override
     public final void free() {
-        this.origBuffer.clear();
-    // do nothing
+        this.origBuffer = null;
     }
 
     @Override
