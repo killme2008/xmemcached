@@ -44,311 +44,332 @@ import net.rubyeye.xmemcached.utils.SimpleDeque;
  */
 public class MemcachedConnector extends SocketChannelController {
 
-    public static class ReconnectRequest {
+	public static class ReconnectRequest {
 
-        InetSocketAddress address;
-        int tries;
+		InetSocketAddress address;
+		int tries;
 
-        public ReconnectRequest(InetSocketAddress address, int tries) {
-            super();
-            this.address = address;
-            this.tries = tries; // 记录重连次数
-        }
-    }
-    private final BlockingQueue<ReconnectRequest> waitingQueue = new LinkedBlockingQueue<ReconnectRequest>();
-    private BufferAllocator bufferAllocator;
-    private SessionMonitor sessionMonitor;
-    private Optimiezer optimiezer;
+		public ReconnectRequest(InetSocketAddress address, int tries) {
+			super();
+			this.address = address;
+			this.tries = tries; // 记录重连次数
+		}
+	}
 
-    class SessionMonitor extends Thread {
+	private final BlockingQueue<ReconnectRequest> waitingQueue = new LinkedBlockingQueue<ReconnectRequest>();
+	private BufferAllocator bufferAllocator;
+	private SessionMonitor sessionMonitor;
+	private Optimiezer optimiezer;
 
-        public void run() {
-            while (!Thread.currentThread().isInterrupted()) {
+	class SessionMonitor extends Thread {
 
-                try {
-                    ReconnectRequest request = waitingQueue.take();
-                    InetSocketAddress address = request.address;
-                    boolean connected = false;
-                    int tries = 0;
-                    while (tries < 3) {
-                        Future<Boolean> future = connect(address);
-                        tries++;
-                        request.tries++;
-                        try {
-                            log.warn("try to connect to " + address.getHostName() + ":" + address.getPort() + " for " + request.tries + " times");
-                            if (!future.isDone() && !future.get(
-                                    XMemcachedClient.DEFAULT_CONNECT_TIMEOUT,
-                                    TimeUnit.MILLISECONDS)) {
-                                Thread.sleep(2000); // 2秒后再次重连
-                                continue;
-                            } else {
-                                connected = true;
-                                break;
-                            }
-                        } catch (TimeoutException e) {
-                            future.cancel(true);
-                            Thread.sleep(2000); // 2秒后再次重连
-                            continue;
-                        } catch (ExecutionException e) {
-                            future.cancel(true);
-                            Thread.sleep(2000); // 2秒后再次重连
-                            continue;
-                        }
-                    }
-                    if (!connected) {
-                        log.error("connect to " + address.getHostName() + ":" + address.getPort() + " fail");
-                        // 加入队尾,稍后重试
-                        waitingQueue.add(request);
-                        Thread.sleep(XMemcachedClient.DEFAULT_CONNECT_TIMEOUT);
-                    }
-                } catch (IOException e) {
-                    log.error("monitor connect error", e);
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                }
-            }
-        }
-    }
+		public void run() {
+			while (!Thread.currentThread().isInterrupted()) {
 
-    public void setOptimiezeGet(boolean optimiezeGet) {
-        this.optimiezer.setOptimiezeGet(optimiezeGet);
-    }
+				try {
+					ReconnectRequest request = waitingQueue.take();
+					InetSocketAddress address = request.address;
+					boolean connected = false;
+					int tries = 0;
+					while (tries < 3) {
+						Future<Boolean> future = connect(address);
+						tries++;
+						request.tries++;
+						try {
+							log.warn("try to connect to "
+									+ address.getHostName() + ":"
+									+ address.getPort() + " for "
+									+ request.tries + " times");
+							if (!future.isDone()
+									&& !future
+											.get(
+													XMemcachedClient.DEFAULT_CONNECT_TIMEOUT,
+													TimeUnit.MILLISECONDS)) {
+								Thread.sleep(2000); // 2秒后再次重连
+								continue;
+							} else {
+								connected = true;
+								break;
+							}
+						} catch (TimeoutException e) {
+							future.cancel(true);
+							Thread.sleep(2000); // 2秒后再次重连
+							continue;
+						} catch (ExecutionException e) {
+							future.cancel(true);
+							Thread.sleep(2000); // 2秒后再次重连
+							continue;
+						}
+					}
+					if (!connected) {
+						log.error("connect to " + address.getHostName() + ":"
+								+ address.getPort() + " fail");
+						// 加入队尾,稍后重试
+						waitingQueue.add(request);
+						Thread.sleep(XMemcachedClient.DEFAULT_CONNECT_TIMEOUT);
+					}
+				} catch (IOException e) {
+					log.error("monitor connect error", e);
+				} catch (InterruptedException e) {
+					Thread.currentThread().interrupt();
+				}
+			}
+		}
+	}
 
-    public void setOptimizeMergeBuffer(boolean optimizeMergeBuffer) {
-        this.optimiezer.setOptimiezeMergeBuffer(optimizeMergeBuffer);
-    }
-    protected MemcachedSessionLocator sessionLocator;
+	public void setOptimiezeGet(boolean optimiezeGet) {
+		this.optimiezer.setOptimiezeGet(optimiezeGet);
+	}
 
-    static class ConnectFuture implements Future<Boolean> {
+	public void setOptimizeMergeBuffer(boolean optimizeMergeBuffer) {
+		this.optimiezer.setOptimiezeMergeBuffer(optimizeMergeBuffer);
+	}
 
-        private volatile boolean connected = false;
-        private volatile boolean done = false;
-        private volatile boolean cancel = false;
-        private CountDownLatch latch = new CountDownLatch(1);
-        private volatile Exception exception;
+	protected MemcachedSessionLocator sessionLocator;
 
-        public boolean isConnected() {
-            return connected;
-        }
+	static class ConnectFuture implements Future<Boolean> {
 
-        public void setConnected(boolean connected) {
-            this.latch.countDown();
-            this.connected = connected;
-            done = true;
-        }
+		private volatile boolean connected = false;
+		private volatile boolean done = false;
+		private volatile boolean cancel = false;
+		private CountDownLatch latch = new CountDownLatch(1);
+		private volatile Exception exception;
 
-        public Exception getException() {
-            return exception;
-        }
+		public boolean isConnected() {
+			return connected;
+		}
 
-        public void setException(Exception exception) {
-            this.latch.countDown();
-            this.exception = exception;
-            done = true;
+		public void setConnected(boolean connected) {
+			this.latch.countDown();
+			this.connected = connected;
+			done = true;
+		}
 
-        }
+		public Exception getException() {
+			return exception;
+		}
 
-        @Override
-        public boolean cancel(boolean mayInterruptIfRunning) {
-            this.cancel = true;
-            return cancel;
-        }
+		public void setException(Exception exception) {
+			this.latch.countDown();
+			this.exception = exception;
+			done = true;
 
-        @Override
-        public Boolean get() throws InterruptedException, ExecutionException {
-            this.latch.await();
-            if (this.exception != null) {
-                throw new ExecutionException(exception);
-            }
-            return connected ? Boolean.TRUE : Boolean.FALSE;
-        }
+		}
 
-        @Override
-        public Boolean get(long timeout, TimeUnit unit)
-                throws InterruptedException, ExecutionException,
-                TimeoutException {
-            if (!this.latch.await(timeout, unit) && !connected) {
-                throw new TimeoutException("connect timeout");
-            }
-            return connected ? Boolean.TRUE : Boolean.FALSE;
-        }
+		@Override
+		public boolean cancel(boolean mayInterruptIfRunning) {
+			this.cancel = true;
+			return cancel;
+		}
 
-        @Override
-        public boolean isCancelled() {
-            return cancel;
-        }
+		@Override
+		public Boolean get() throws InterruptedException, ExecutionException {
+			this.latch.await();
+			if (this.exception != null) {
+				throw new ExecutionException(exception);
+			}
+			return connected ? Boolean.TRUE : Boolean.FALSE;
+		}
 
-        @Override
-        public boolean isDone() {
-            return done;
-        }
-    }
-    CopyOnWriteArrayList<MemcachedTCPSession> memcachedSessions; // 连接管理
+		@Override
+		public Boolean get(long timeout, TimeUnit unit)
+				throws InterruptedException, ExecutionException,
+				TimeoutException {
+			if (!this.latch.await(timeout, unit) && !connected) {
+				throw new TimeoutException("connect timeout");
+			}
+			return connected ? Boolean.TRUE : Boolean.FALSE;
+		}
 
-    public void addSession(MemcachedTCPSession session) {
-        log.warn("add session " + session.getRemoteSocketAddress().getHostName() + ":" + session.getRemoteSocketAddress().getPort());
-        this.memcachedSessions.add(session);
-        this.sessionLocator.updateSessionList(this.memcachedSessions);
-    }
+		@Override
+		public boolean isCancelled() {
+			return cancel;
+		}
 
-    public void removeSession(MemcachedTCPSession session) {
-        log.warn("remove session " + session.getRemoteSocketAddress().getHostName() + ":" + session.getRemoteSocketAddress().getPort());
-        this.memcachedSessions.remove(session);
-        this.sessionLocator.updateSessionList(this.memcachedSessions);
-    }
-    private int sendBufferSize = 0;
-    protected MemcachedProtocolHandler memcachedProtocolHandler;
-    private MemcachedTCPSession session;
+		@Override
+		public boolean isDone() {
+			return done;
+		}
+	}
 
-    public int getSendBufferSize() {
-        return sendBufferSize;
-    }
+	CopyOnWriteArrayList<MemcachedTCPSession> memcachedSessions; // 连接管理
 
-    public void setSendBufferSize(int sendBufferSize) {
-        this.sendBufferSize = sendBufferSize;
-    }
+	public void addSession(MemcachedTCPSession session) {
+		log.warn("add session "
+				+ session.getRemoteSocketAddress().getHostName() + ":"
+				+ session.getRemoteSocketAddress().getPort());
+		this.memcachedSessions.add(session);
+		this.sessionLocator.updateSessionList(this.memcachedSessions);
+	}
 
-    @Override
-    protected void doStart() throws IOException {
-        this.sessionMonitor.start();
-    }
+	public void removeSession(MemcachedTCPSession session) {
+		log.warn("remove session "
+				+ session.getRemoteSocketAddress().getHostName() + ":"
+				+ session.getRemoteSocketAddress().getPort());
+		this.memcachedSessions.remove(session);
+		this.sessionLocator.updateSessionList(this.memcachedSessions);
+	}
 
-    public void onConnect(SelectionKey key) throws IOException {
-        key.interestOps(key.interestOps() & ~SelectionKey.OP_CONNECT);
-        ConnectFuture future = (ConnectFuture) key.attachment();
-        if (future == null || future.isCancelled()) {
-            key.channel().close();
-            key.cancel();
-            return;
-        }
-        try {
-            if (!((SocketChannel) (key.channel())).finishConnect()) {
-                future.setException(new IOException("Connect Fail"));
-            } else {
-                addSession(createSession(key, (SocketChannel) (key.channel())));
-                future.setConnected(true);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            future.setException(e);
-            throw new IOException(e);
-        }
-    }
+	private int sendBufferSize = 0;
+	protected MemcachedProtocolHandler memcachedProtocolHandler;
+	private MemcachedTCPSession session;
 
-    protected MemcachedTCPSession createSession(SelectionKey key,
-            SocketChannel socketChannel) {
-        MemcachedTCPSession session = (MemcachedTCPSession) buildSession(
-                socketChannel, key);
-        session.onEvent(EventType.ENABLE_READ, selector);
-        key.attach(session);
-        session.start();
-        session.onEvent(EventType.CONNECTED, selector);
-        return session;
-    }
+	public int getSendBufferSize() {
+		return sendBufferSize;
+	}
 
-    public void addToWatingQueue(ReconnectRequest request) {
-        this.waitingQueue.add(request);
-    }
+	public void setSendBufferSize(int sendBufferSize) {
+		this.sendBufferSize = sendBufferSize;
+	}
 
-    public Future<Boolean> connect(InetSocketAddress address)
-            throws IOException {
-        SocketChannel socketChannel = SocketChannel.open();
-        socketChannel.configureBlocking(false);
-        socketChannel.socket().setSoTimeout(timeout);
-        socketChannel.socket().setReuseAddress(reuseAddress); // 重用端口
+	@Override
+	protected void doStart() throws IOException {
+		this.sessionMonitor.start();
+	}
 
-        if (this.receiveBufferSize > 0) {
-            socketChannel.socket().setReceiveBufferSize(receiveBufferSize); // 设置接收缓冲区
+	public void onConnect(SelectionKey key) throws IOException {
+		key.interestOps(key.interestOps() & ~SelectionKey.OP_CONNECT);
+		ConnectFuture future = (ConnectFuture) key.attachment();
+		if (future == null || future.isCancelled()) {
+			key.channel().close();
+			key.cancel();
+			return;
+		}
+		try {
+			if (!((SocketChannel) (key.channel())).finishConnect()) {
+				future.setException(new IOException("Connect Fail"));
+			} else {
+				addSession(createSession(key, (SocketChannel) (key.channel())));
+				future.setConnected(true);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			future.setException(e);
+			throw new IOException(e);
+		}
+	}
 
-        }
-        socketChannel.socket().bind(this.socketAddress);
-        if (this.sendBufferSize > 0) {
-            socketChannel.socket().setSendBufferSize(this.sendBufferSize);
-        }
-        ConnectFuture future = new ConnectFuture();
-        if (!socketChannel.connect(address)) {
-            this.reactor.registerChannel(socketChannel, SelectionKey.OP_CONNECT, future);
-            //socketChannel.register(this.selector, SelectionKey.OP_CONNECT,
-            //		future);
-            this.reactor.wakeup();
-        } else {
-            SelectionKey selectionKey = socketChannel.register(this.selector, 0);
-            addSession(createSession(selectionKey, socketChannel));
-            future.setConnected(true);
-        }
-        return future;
-    }
+	protected MemcachedTCPSession createSession(SelectionKey key,
+			SocketChannel socketChannel) {
+		MemcachedTCPSession session = (MemcachedTCPSession) buildSession(
+				socketChannel, key);
+		session.onEvent(EventType.ENABLE_READ, selector);
+		key.attach(session);
+		session.start();
+		session.onEvent(EventType.CONNECTED, selector);
+		return session;
+	}
 
-    public void closeChannel() throws IOException {
-        this.sessionMonitor.interrupt();
-        while (sessionMonitor.isAlive()) {
-            try {
-                this.sessionMonitor.join();
-            } catch (InterruptedException e) {
-            }
-        }
-    }
+	public void addToWatingQueue(ReconnectRequest request) {
+		this.waitingQueue.add(request);
+	}
 
-    public final boolean send(final Command msg) throws InterruptedException,
-            MemcachedException {
-        Session session = findSessionByKey((String) msg.getKey());
-        if (session == null) {
-            throw new MemcachedException(
-                    "There is no avriable session at this moment");
-        }
-        return session.send(msg);
+	public Future<Boolean> connect(InetSocketAddress address)
+			throws IOException {
+		SocketChannel socketChannel = SocketChannel.open();
+		socketChannel.configureBlocking(false);
+		socketChannel.socket().setSoTimeout(timeout);
+		socketChannel.socket().setReuseAddress(reuseAddress); // 重用端口
 
-    }
+		if (this.receiveBufferSize > 0) {
+			socketChannel.socket().setReceiveBufferSize(receiveBufferSize); // 设置接收缓冲区
 
-    protected Session findSessionByKey(String key) {
-        return sessionLocator.getSessionByKey(key);
-    }
+		}
+		socketChannel.socket().bind(this.socketAddress);
+		if (this.sendBufferSize > 0) {
+			socketChannel.socket().setSendBufferSize(this.sendBufferSize);
+		}
+		ConnectFuture future = new ConnectFuture();
+		if (!socketChannel.connect(address)) {
+			this.reactor.registerChannel(socketChannel,
+					SelectionKey.OP_CONNECT, future);
+			// socketChannel.register(this.selector, SelectionKey.OP_CONNECT,
+			// future);
+			this.reactor.wakeup();
+		} else {
+			SelectionKey selectionKey = socketChannel
+					.register(this.selector, 0);
+			addSession(createSession(selectionKey, socketChannel));
+			future.setConnected(true);
+		}
+		return future;
+	}
 
-    public void setMemcachedProtocolHandler(
-            MemcachedProtocolHandler memcachedProtocolHandler) {
-        this.memcachedProtocolHandler = memcachedProtocolHandler;
-    }
+	public void closeChannel() throws IOException {
+		this.sessionMonitor.interrupt();
+		while (sessionMonitor.isAlive()) {
+			try {
+				this.sessionMonitor.join();
+			} catch (InterruptedException e) {
+			}
+		}
+	}
 
-    public MemcachedProtocolHandler getMemcachedProtocolHandler() {
-        return this.memcachedProtocolHandler;
-    }
+	public final boolean send(final Command msg) throws MemcachedException {
+		Session session = findSessionByKey((String) msg.getKey());
+		if (session == null) {
+			throw new MemcachedException(
+					"There is no avriable session at this moment");
+		}
+		try {
+			return session.send(msg);
+		} catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
+		}
+		return false;
+	}
 
-    public MemcachedConnector(Configuration configuration,
-            MemcachedSessionLocator locator, BufferAllocator allocator) {
-        super(configuration, null);
-        this.memcachedSessions = new CopyOnWriteArrayList<MemcachedTCPSession>();
-        this.sessionLocator = locator;
-        this.sessionLocator.updateSessionList(memcachedSessions);
-        this.sessionMonitor = new SessionMonitor();
-        this.bufferAllocator = allocator;
-        this.optimiezer = new OptimiezerImpl(this.bufferAllocator);
-    }
+	protected Session findSessionByKey(String key) {
+		return sessionLocator.getSessionByKey(key);
+	}
 
-    /**
-     * 使用扩展queue
-     */
-    protected Queue<Session.WriteMessage> buildQueue() {
-        return new SimpleDeque<Session.WriteMessage>(500);
-    }
+	public void setMemcachedProtocolHandler(
+			MemcachedProtocolHandler memcachedProtocolHandler) {
+		this.memcachedProtocolHandler = memcachedProtocolHandler;
+	}
 
-    public void setMergeFactor(int mergeFactor) {
-        this.optimiezer.setMergeFactor(mergeFactor);
-    }
+	public MemcachedProtocolHandler getMemcachedProtocolHandler() {
+		return this.memcachedProtocolHandler;
+	}
 
-    protected Session buildSession(SocketChannel sc, SelectionKey selectionKey) {
-        Queue<Session.WriteMessage> queue = buildQueue();
-        final SessionConfig sessionCofig = buildSessionConfig(sc, selectionKey,
-                queue);
-        session = new MemcachedTCPSession(sessionCofig, configuration.getSessionReadBufferSize(), this.optimiezer, this.getReadThreadCount());
-        session.setMemcachedProtocolHandler(this.getMemcachedProtocolHandler());
-        return session;
-    }
+	public MemcachedConnector(Configuration configuration,
+			MemcachedSessionLocator locator, BufferAllocator allocator) {
+		super(configuration, null);
+		this.memcachedSessions = new CopyOnWriteArrayList<MemcachedTCPSession>();
+		this.sessionLocator = locator;
+		this.sessionLocator.updateSessionList(memcachedSessions);
+		this.sessionMonitor = new SessionMonitor();
+		this.bufferAllocator = allocator;
+		this.optimiezer = new OptimiezerImpl(this.bufferAllocator);
+	}
 
-    public BufferAllocator getByteBufferAllocator() {
-        return bufferAllocator;
-    }
+	/**
+	 * 使用扩展queue
+	 */
+	protected Queue<Session.WriteMessage> buildQueue() {
+		return new SimpleDeque<Session.WriteMessage>(500);
+	}
 
-    public void setByteBufferAllocator(BufferAllocator allocator) {
-        this.bufferAllocator = allocator;
-    }
+	public void setMergeFactor(int mergeFactor) {
+		this.optimiezer.setMergeFactor(mergeFactor);
+	}
+
+	protected Session buildSession(SocketChannel sc, SelectionKey selectionKey) {
+		Queue<Session.WriteMessage> queue = buildQueue();
+		final SessionConfig sessionCofig = buildSessionConfig(sc, selectionKey,
+				queue);
+		session = new MemcachedTCPSession(sessionCofig, configuration
+				.getSessionReadBufferSize(), this.optimiezer, this
+				.getReadThreadCount());
+		session.setMemcachedProtocolHandler(this.getMemcachedProtocolHandler());
+		return session;
+	}
+
+	public BufferAllocator getByteBufferAllocator() {
+		return bufferAllocator;
+	}
+
+	public void setByteBufferAllocator(BufferAllocator allocator) {
+		this.bufferAllocator = allocator;
+	}
 }
