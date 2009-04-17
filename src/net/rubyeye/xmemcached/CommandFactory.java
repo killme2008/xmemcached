@@ -20,10 +20,10 @@ import net.spy.memcached.transcoders.Transcoder;
  * @author dennis
  *
  */
-public class CommandFactory {
+public final class CommandFactory {
 	private static BufferAllocator bufferAllocator = new SimpleBufferAllocator();
 
-	public static final synchronized void setBufferAllocator(
+	public static final void setBufferAllocator(
 			BufferAllocator allocator) {
 		BufferAllocator oldAllocator = bufferAllocator;
 		bufferAllocator = allocator;

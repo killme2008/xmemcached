@@ -4,6 +4,7 @@ import java.util.concurrent.CountDownLatch;
 
 import net.rubyeye.xmemcached.XMemcachedClient;
 import net.rubyeye.xmemcached.XMemcachedClientBuilder;
+import net.rubyeye.xmemcached.buffer.CachedBufferAllocator;
 
 public class PerformanceTest {
 
@@ -121,7 +122,7 @@ public class PerformanceTest {
 		int port1 = 12000;
 		int port2 = 12001;
 		int port3 = 12002;
-		int thread = 50;
+		int thread = 100;
 		try {
 
 			int size = Runtime.getRuntime().availableProcessors();
@@ -129,12 +130,13 @@ public class PerformanceTest {
 			int repeat = 10000;
 			XMemcachedClientBuilder builder = new XMemcachedClientBuilder();
 			builder.getConfiguration().setReadThreadCount(0);
+            builder.setBufferAllocator(new CachedBufferAllocator());
 			// builder.setSessionLocator(new KetamaMemcachedSessionLocator());
 			XMemcachedClient mc = builder.build();
 			// mc.setOptimizeMergeBuffer(false);
 			mc.addServer(ip, port1);
 			mc.addServer(ip, port2);
-			mc.addServer(ip, port3);
+			//mc.addServer(ip, port3);
 
 			// mc.addServer(ip, 12005);
 			// mc.addServer(ip, 12006);

@@ -102,24 +102,16 @@ public class Command {
 		return status;
 	}
 
-	public void setStatus(OperationStatus status) {
+	public final void setStatus(OperationStatus status) {
 		this.status = status;
 	}
 
-	public void setIoBuffer(IoBuffer byteBufferWrapper) {
+	public final void setIoBuffer(IoBuffer byteBufferWrapper) {
 		this.ioBuffer = byteBufferWrapper;
 	}
 
 	public List<Command> getMergeCommands() {
 		return null;
-	}
-
-	public CachedData getStoredData() {
-		return storedData;
-	}
-
-	public void setStoredData(CachedData storedData) {
-		this.storedData = storedData;
 	}
 
 	public MemcachedException getException() {
@@ -130,23 +122,23 @@ public class Command {
 		this.throwable = throwable;
 	}
 
-	public Object getKey() {
+	public final Object getKey() {
 		return key;
 	}
 
-	public void setKey(Object key) {
+	public final void setKey(Object key) {
 		this.key = key;
 	}
 
-	public Object getResult() {
+	public final Object getResult() {
 		return result;
 	}
 
-	public void setResult(Object result) {
+	public final void setResult(Object result) {
 		this.result = result;
 	}
 
-	public IoBuffer getIoBuffer() {
+	public final IoBuffer getIoBuffer() {
 		return this.ioBuffer;
 	}
 
@@ -162,22 +154,32 @@ public class Command {
 		return this.status == OperationStatus.SENDING && cancel;
 	}
 
-	public void cancel() {
+	public final void cancel() {
 		this.cancel = true;
 		if (this.ioBuffer != null) {
 			this.ioBuffer.free();
 		}
 	}
 
-	public CountDownLatch getLatch() {
+	public final CountDownLatch getLatch() {
 		return latch;
 	}
 
-	public CommandType getCommandType() {
+	public final CommandType getCommandType() {
 		return commandType;
 	}
 
-	public void setLatch(CountDownLatch latch) {
+	public final void setLatch(CountDownLatch latch) {
 		this.latch = latch;
 	}
+
+    public CachedData getStoredData() {
+        return storedData;
+    }
+
+    public void setStoredData(CachedData storedData) {
+        this.storedData = storedData;
+    }
+
+
 }
