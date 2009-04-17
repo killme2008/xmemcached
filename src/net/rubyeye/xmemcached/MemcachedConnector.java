@@ -311,12 +311,7 @@ public class MemcachedConnector extends SocketChannelController {
 			throw new MemcachedException(
 					"There is no avriable session at this moment");
 		}
-		try {
-			return session.send(msg);
-		} catch (InterruptedException e) {
-			Thread.currentThread().interrupt();
-		}
-		return false;
+		return session.send(msg);
 	}
 
 	protected Session findSessionByKey(String key) {

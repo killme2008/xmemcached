@@ -121,7 +121,7 @@ public class VirtualSession implements Session {
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public boolean send(Object packet) throws InterruptedException {
+	public boolean send(Object packet) {
 		Command command = (Command) packet;
 		String key = (String) command.getKey();
 		switch (command.getCommandType()) {

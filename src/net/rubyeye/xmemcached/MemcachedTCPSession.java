@@ -86,7 +86,7 @@ public class MemcachedTCPSession extends DefaultTCPSession {
 	}
 
 	@SuppressWarnings("unchecked")
-	public boolean send(Object msg) throws InterruptedException {
+	public boolean send(Object msg){
 		if (isClose()) {
 			return false;
 		}
