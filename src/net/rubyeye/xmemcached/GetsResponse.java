@@ -43,4 +43,8 @@ public class GetsResponse<T> {
 		this.value = value;
 	}
 
+	public String toString() {
+		return "GetsResponse[cas=" + cas + ",value=" + value.toString() + "]";
+	}
+
 }

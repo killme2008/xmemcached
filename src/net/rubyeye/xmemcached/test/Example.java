@@ -25,6 +25,7 @@ import net.rubyeye.xmemcached.XMemcachedClient;
 import net.rubyeye.xmemcached.buffer.CachedBufferAllocator;
 import net.rubyeye.xmemcached.exception.MemcachedException;
 import net.spy.memcached.transcoders.IntegerTranscoder;
+import net.spy.memcached.transcoders.StringTranscoder;
 
 class Name implements Serializable {
 
@@ -51,9 +52,9 @@ public class Example {
 
 	public static void main(String[] args) {
 		try {
-			String ip = "211.100.27.182";
+			String ip = "localhost";
 
-			int port = 12002;
+			int port = 12000;
 			XMemcachedClient client = new XMemcachedClient(
 					new CachedBufferAllocator());
 			// client.setOptimiezeSet(true);
@@ -67,7 +68,7 @@ public class Example {
 			client.replace("hello", 0, "dennis");
 			client.append("hello", " good");
 			client.prepend("hello", "hello ");
-			String name = (String) client.get("hello");
+			String name = client.get("hello", new StringTranscoder());
 			System.out.println(name);
 
 			List<String> keys = new ArrayList<String>();
@@ -81,11 +82,12 @@ public class Example {
 				System.err.println("delete error");
 			}
 
-			client.incr("a", 4);
-			client.decr("a", 4);
+			client.set("a", 0, "4");
+			System.out.println(client.incr("a", 4));
+			System.out.println(client.decr("a", 4));
 
 			String version = client.version();
-			System.out.println(version);
+			System.out.println("memcached version:" + version);
 			Name dennis = new Name("dennis", "zhuang", 26, -1);
 			System.out.println("dennis:" + dennis);
 			client.set("dennis", 0, dennis);
@@ -136,7 +138,7 @@ public class Example {
 				}
 			}
 			System.out.println(System.currentTimeMillis() - start);
-
+			client.delete("test");
 			// 测试cas
 			client.set("a", 0, 1);
 			GetsResponse<Integer> result = client.gets("a");
@@ -149,9 +151,14 @@ public class Example {
 				System.err.println("cas error");
 			}
 			result = client.gets("a");
-			if ((Integer) result.getValue() != 2) {
+
+			if (result.getValue() != 2) {
 				System.err.println("cas error");
 			}
+			List<String> getsKeys=new ArrayList<String>();
+			getsKeys.add("a");
+			Map<String,GetsResponse<Integer>> getsMap=client.gets(getsKeys);
+            System.out.println("getsMap:"+getsMap.toString());
 
 			/**
 			 * 合并gets和cas，利用CASOperation

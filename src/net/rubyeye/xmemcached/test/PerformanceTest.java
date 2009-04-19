@@ -8,6 +8,12 @@ import net.rubyeye.xmemcached.buffer.CachedBufferAllocator;
 
 public class PerformanceTest {
 
+	/**
+	 * 写线程
+	 *
+	 * @author dennis
+	 *
+	 */
 	static class TestWriteRunnable implements Runnable {
 
 		private XMemcachedClient mc;
@@ -44,6 +50,12 @@ public class PerformanceTest {
 		}
 	}
 
+	/**
+	 * 读线程
+	 *
+	 * @author dennis
+	 *
+	 */
 	static class TestReadRunnable implements Runnable {
 
 		private XMemcachedClient mc;
@@ -81,6 +93,12 @@ public class PerformanceTest {
 		}
 	}
 
+	/**
+	 * 删除线程
+	 *
+	 * @author dennis
+	 *
+	 */
 	static class TestDeleteRunnable implements Runnable {
 
 		private XMemcachedClient mc;
@@ -115,98 +133,106 @@ public class PerformanceTest {
 		}
 	}
 
-	// thread num=10, repeat=10000,size=2, all=200000 ,velocity=1057 , using
-	// time:189187
 	static public void main(String[] args) {
-		String ip = "localhost";
-		int port1 = 12000;
-		int port2 = 12001;
-		int port3 = 12002;
-		int thread = 100;
+		int thread = 100; // 线程数
+		int repeat = 10000;  //循环次数
 		try {
 
 			int size = Runtime.getRuntime().availableProcessors();
 
-			int repeat = 10000;
 			XMemcachedClientBuilder builder = new XMemcachedClientBuilder();
-			builder.getConfiguration().setReadThreadCount(0);
-           // builder.setBufferAllocator();
+			builder.getConfiguration().setReadThreadCount(0); // 设置读线程数
+			// builder.setBufferAllocator();
 			// builder.setSessionLocator(new KetamaMemcachedSessionLocator());
 			XMemcachedClient mc = builder.build();
 			// mc.setOptimizeMergeBuffer(false);
-			mc.addServer(ip, port1);
-			mc.addServer(ip, port2);
-			//mc.addServer(ip, port3);
+			mc.addServer("localhost", 12000); // 添加节点
+			mc.addServer("localhost", 12001);
 
-			// mc.addServer(ip, 12005);
-			// mc.addServer(ip, 12006);
-			//
-			// mc.addServer(ip, 12007);
-			//
-			// mc.addServer(ip, 12008);
-			//
-			// mc.addServer(ip, 12009);
-
-			CountDownLatch cdl = new CountDownLatch(thread);
-			long t = System.currentTimeMillis();
-			for (int i = 0; i < thread; i++) {
-				new Thread(new PerformanceTest.TestWriteRunnable(mc, i * 10000,
-						cdl, repeat)).start();
-			}
-			try {
-				cdl.await();
-			} catch (InterruptedException e) {
-			}
-			long all = thread * repeat;
-			long usingtime = (System.currentTimeMillis() - t);
-
-			System.out
-					.println(String
-							.format(
-									"test write,thread num=%d, repeat=%d,size=%d, all=%d ,velocity=%d , using time:%d",
-									thread, repeat, size, all, 1000 * all
-											/ usingtime, usingtime));
-
-			cdl = new CountDownLatch(thread);
-			t = System.currentTimeMillis();
-			for (int i = 0; i < thread; i++) {
-				new Thread(new PerformanceTest.TestReadRunnable(mc, i * 10000,
-						cdl, repeat)).start();
-			}
-			try {
-				cdl.await();
-			} catch (InterruptedException e) {
-			}
-			all = thread * repeat;
-			usingtime = (System.currentTimeMillis() - t);
-			System.out
-					.println(String
-							.format(
-									"test read,thread num=%d, repeat=%d,size=%d, all=%d ,velocity=%d , using time:%d",
-									thread, repeat, size, all, 1000 * all
-											/ usingtime, usingtime));
-			cdl = new CountDownLatch(thread);
-			t = System.currentTimeMillis();
-			for (int i = 0; i < thread; i++) {
-				new Thread(new PerformanceTest.TestDeleteRunnable(mc,
-						i * 10000, cdl, repeat)).start();
-			}
-			try {
-				cdl.await();
-			} catch (InterruptedException e) {
-			}
-			all = thread * repeat;
-			usingtime = (System.currentTimeMillis() - t);
-			System.out
-					.println(String
-							.format(
-									"test delete,thread num=%d, repeat=%d,size=%d, all=%d ,velocity=%d , using time:%d",
-									thread, repeat, size, all, 1000 * all
-											/ usingtime, usingtime));
+			// 分别测试写、读、删除
+			testWrite(thread, size, repeat, mc);
+			testRead(thread, size, repeat, mc);
+			testDelete(thread, size, repeat, mc);
 
 			mc.shutdown();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+	}
+
+	private static void testDelete(int thread, int size, int repeat,
+			XMemcachedClient mc) {
+		CountDownLatch cdl;
+		long t;
+		long all;
+		long usingtime;
+		cdl = new CountDownLatch(thread);
+		t = System.currentTimeMillis();
+		for (int i = 0; i < thread; i++) {
+			new Thread(new PerformanceTest.TestDeleteRunnable(mc, i * 10000,
+					cdl, repeat)).start();
+		}
+		try {
+			cdl.await();
+		} catch (InterruptedException e) {
+		}
+		all = thread * repeat;
+		usingtime = (System.currentTimeMillis() - t);
+		System.out
+				.println(String
+						.format(
+								"test delete,thread num=%d, repeat=%d,size=%d, all=%d ,velocity=%d , using time:%d",
+								thread, repeat, size, all, 1000 * all
+										/ usingtime, usingtime));
+	}
+
+	private static void testRead(int thread, int size, int repeat,
+			XMemcachedClient mc) {
+		CountDownLatch cdl;
+		long t;
+		long all;
+		long usingtime;
+
+		cdl = new CountDownLatch(thread);
+		t = System.currentTimeMillis();
+		for (int i = 0; i < thread; i++) {
+			new Thread(new PerformanceTest.TestReadRunnable(mc, i * 10000, cdl,
+					repeat)).start();
+		}
+		try {
+			cdl.await();
+		} catch (InterruptedException e) {
+		}
+		all = thread * repeat;
+		usingtime = (System.currentTimeMillis() - t);
+		System.out
+				.println(String
+						.format(
+								"test read,thread num=%d, repeat=%d,size=%d, all=%d ,velocity=%d , using time:%d",
+								thread, repeat, size, all, 1000 * all
+										/ usingtime, usingtime));
+	}
+
+	private static void testWrite(int thread, int size, int repeat,
+			XMemcachedClient mc) {
+		CountDownLatch cdl = new CountDownLatch(thread);
+		long t = System.currentTimeMillis();
+		for (int i = 0; i < thread; i++) {
+			new Thread(new PerformanceTest.TestWriteRunnable(mc, i * 10000,
+					cdl, repeat)).start();
+		}
+		try {
+			cdl.await();
+		} catch (InterruptedException e) {
+		}
+		long all = thread * repeat;
+		long usingtime = (System.currentTimeMillis() - t);
+
+		System.out
+				.println(String
+						.format(
+								"test write,thread num=%d, repeat=%d,size=%d, all=%d ,velocity=%d , using time:%d",
+								thread, repeat, size, all, 1000 * all
+										/ usingtime, usingtime));
 	}
 }

@@ -3,9 +3,9 @@ package net.rubyeye.xmemcached.test;
 import java.io.Serializable;
 
 /**
- * 
+ *
  * @author dennis
- * 
+ *
  */
 public class NameClass implements Serializable {
 	String firstName;
@@ -16,5 +16,7 @@ public class NameClass implements Serializable {
 		this.firstName = firstName;
 		this.lastName = lastName;
 	}
+
+	public static final long serialVersionUID = -5404950940509405049l;
 
 }

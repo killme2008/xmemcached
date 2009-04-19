@@ -23,7 +23,7 @@ public abstract class BaseSerializingTranscoder extends SpyObject {
 	 */
 	public static final int DEFAULT_COMPRESSION_THRESHOLD = 16384;
 
-	private static final String DEFAULT_CHARSET = "UTF-8";
+	public static final String DEFAULT_CHARSET = "UTF-8";
 
 	protected int compressionThreshold=DEFAULT_COMPRESSION_THRESHOLD;
 	protected String charset=DEFAULT_CHARSET;
@@ -100,7 +100,7 @@ public abstract class BaseSerializingTranscoder extends SpyObject {
 	/**
 	 * Compress the given array of bytes.
 	 */
-	protected byte[] compress(byte[] in) {
+	public static final byte[] compress(byte[] in) {
 		if(in == null) {
 			throw new NullPointerException("Can't compress null");
 		}
@@ -116,7 +116,7 @@ public abstract class BaseSerializingTranscoder extends SpyObject {
 			CloseUtil.close(bos);
 		}
 		byte[] rv=bos.toByteArray();
-		getLogger().debug("Compressed %d bytes to %d", in.length, rv.length);
+		//getLogger().debug("Compressed %d bytes to %d", in.length, rv.length);
 		return rv;
 	}
 

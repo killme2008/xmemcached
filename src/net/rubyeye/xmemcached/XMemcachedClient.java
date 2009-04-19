@@ -243,7 +243,7 @@ public final class XMemcachedClient {
 	@SuppressWarnings("unchecked")
 	private final <T> Object fetch0(final String key, final byte[] keyBytes,
 			final byte[] cmdBytes, final CommandType cmdType,
-			final long timeout,Transcoder<T> transcoder)
+			final long timeout, Transcoder<T> transcoder)
 			throws InterruptedException, TimeoutException, MemcachedException,
 			MemcachedException {
 		final Command command = CommandFactory.createGetCommand(key, keyBytes,
@@ -533,8 +533,7 @@ public final class XMemcachedClient {
 				transcoder);
 	}
 
-	@SuppressWarnings("unchecked")
-	public final Map<String, GetsResponse> gets(
+	public final <T> Map<String, GetsResponse<T>> gets(
 			final Collection<String> keyCollections) throws TimeoutException,
 			InterruptedException, MemcachedException {
 		// 超时时间加倍
@@ -545,14 +544,14 @@ public final class XMemcachedClient {
 	}
 
 	@SuppressWarnings("unchecked")
-	public final Map<String, GetsResponse> gets(
+	public final <T> Map<String, GetsResponse<T>> gets(
 			final Collection<String> keyCollections, final long timeout)
 			throws TimeoutException, InterruptedException, MemcachedException {
 		return gets(keyCollections, timeout, this.transcoder);
 	}
 
 	@SuppressWarnings("unchecked")
-	public final Map<String, GetsResponse> gets(
+	public final <T> Map<String, GetsResponse<T>> gets(
 			final Collection<String> keyCollections, final Transcoder transcoder)
 			throws TimeoutException, InterruptedException, MemcachedException {
 		return gets(keyCollections, DEFAULT_OP_TIMEOUT, transcoder);

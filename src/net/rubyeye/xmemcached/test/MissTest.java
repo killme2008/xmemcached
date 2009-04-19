@@ -5,7 +5,7 @@ import net.rubyeye.xmemcached.XMemcachedClient;
 public class MissTest {
 	public static void main(String[] args) throws Exception {
 		XMemcachedClient mc = new XMemcachedClient();
-		mc.addServer("192.168.222.100", 12000);
+		mc.addServer("localhost", 12000);
 		for (int i = 0; i < 10000; i++)
 			mc.delete(String.valueOf(i));
 		for (int i = 0; i < 10000; i++)

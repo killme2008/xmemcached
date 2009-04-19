@@ -14,13 +14,12 @@ import net.rubyeye.xmemcached.impl.KetamaMemcachedSessionLocator;
 public class MultiServerExample {
 	public static void main(String[] args) {
 		try {
-			String ip = "192.168.222.100";
+			String ip = "localhost";
 			/**
 			 * 采用一致性哈希算法
 			 */
 			XMemcachedClient client = new XMemcachedClient(
 					new KetamaMemcachedSessionLocator());
-			client.addServer(ip, 11211);
 			client.addServer(ip, 12000);
 			client.addServer(ip, 12001);
 

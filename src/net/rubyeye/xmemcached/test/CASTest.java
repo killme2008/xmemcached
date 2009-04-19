@@ -22,6 +22,26 @@ import net.rubyeye.xmemcached.XMemcachedClient;
  * @author dennis
  */
 class CASThread extends Thread {
+	/**
+	 * 递增操作类，尝试在现有值上+1
+	 *
+	 * @author dennis
+	 *
+	 */
+	static final class IncrmentOperation implements CASOperation<Integer> {
+		@Override
+		public int getMaxTries() {
+			return 100; // 最大重试次数
+		}
+
+		@Override
+		public Integer getNewValue(long currentCAS, Integer currentValue) {
+			System.out.println("currentValue=" + currentValue + ",currentCAS="
+					+ currentCAS);
+			return currentValue + 1; // 当前值+1
+		}
+	}
+
 	private XMemcachedClient mc;
 	private CountDownLatch cd;
 
@@ -34,20 +54,7 @@ class CASThread extends Thread {
 
 	public void run() {
 		try {
-			if (mc.cas("a", 0, new CASOperation<Integer>() {
-				@Override
-				public int getMaxTries() {
-					return 100;
-				}
-
-				@Override
-				public Integer getNewValue(long currentCAS, Integer currentValue) {
-					System.out.println("currentValue=" + currentValue
-							+ ",currentCAS=" + currentCAS);
-					return currentValue + 1;
-				}
-
-			}))
+			if (mc.cas("a", 0, new IncrmentOperation()))
 				this.cd.countDown();
 		} catch (Exception e) {
 			e.printStackTrace();
