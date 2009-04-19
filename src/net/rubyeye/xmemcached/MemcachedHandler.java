@@ -30,9 +30,10 @@ import com.google.code.yanf4j.nio.impl.HandlerAdapter;
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import net.rubyeye.xmemcached.exception.MemcachedClientException;
-import net.rubyeye.xmemcached.exception.MemcachedException;
 import net.rubyeye.xmemcached.exception.MemcachedServerException;
-import net.rubyeye.xmemcached.utils.ByteBufferMatcher;
+import net.rubyeye.xmemcached.exception.UnknownCommandException;
+
+import com.google.code.yanf4j.util.ByteBufferMatcher;
 
 /**
  * 核心类，负责协议解析和消息派发
@@ -48,7 +49,8 @@ public class MemcachedHandler extends HandlerAdapter<Command> implements
 	/**
 	 * BM算法匹配器，用于匹配行
 	 */
-	static ByteBufferMatcher SPLIT_MATCHER = new ByteBufferMatcher(SPLIT);
+	private static final ByteBufferMatcher SPLIT_MATCHER = new ByteBufferMatcher(
+			SPLIT);
 
 	/**
 	 * 返回boolean值并唤醒
@@ -268,7 +270,7 @@ public class MemcachedHandler extends HandlerAdapter<Command> implements
 	private static final boolean parseException(MemcachedTCPSession session) {
 		Command executingCmd = session.getCurrentExecutingCommand();
 
-		final MemcachedException exception = new MemcachedException(
+		final UnknownCommandException exception = new UnknownCommandException(
 				"Unknown command:" + executingCmd.toString()
 						+ ",please check your memcached version");
 		executingCmd.setException(exception);
@@ -464,7 +466,17 @@ public class MemcachedHandler extends HandlerAdapter<Command> implements
 	private void processGetManyCommand(Session session,
 			Map<String, CachedData> values, Command executingCmd) {
 		// 合并结果
-		if (executingCmd.getCommandType() == Command.CommandType.GETS_MANY) {
+		if (executingCmd.getCommandType() == Command.CommandType.GET_MANY) {
+			Map result = (Map) executingCmd.getResult();
+			Iterator<Map.Entry<String, CachedData>> it = values.entrySet()
+					.iterator();
+			while (it.hasNext()) {
+				Map.Entry<String, CachedData> item = it.next();
+				result.put(item.getKey(), executingCmd.getTranscoder().decode(
+						item.getValue()));
+			}
+
+		} else {
 			Map result = (Map) executingCmd.getResult();
 			Iterator<Map.Entry<String, CachedData>> it = values.entrySet()
 					.iterator();
@@ -474,15 +486,6 @@ public class MemcachedHandler extends HandlerAdapter<Command> implements
 						.getCas(), executingCmd.getTranscoder().decode(
 						item.getValue()));
 				result.put(item.getKey(), getsResult);
-			}
-		} else {
-			Map result = (Map) executingCmd.getResult();
-			Iterator<Map.Entry<String, CachedData>> it = values.entrySet()
-					.iterator();
-			while (it.hasNext()) {
-				Map.Entry<String, CachedData> item = it.next();
-				result.put(item.getKey(), executingCmd.getTranscoder().decode(
-						item.getValue()));
 			}
 		}
 		executingCmd.getLatch().countDown();
@@ -505,4 +508,5 @@ public class MemcachedHandler extends HandlerAdapter<Command> implements
 	public void setTranscoder(Transcoder transcoder) {
 		this.transcoder = transcoder;
 	}
+
 }

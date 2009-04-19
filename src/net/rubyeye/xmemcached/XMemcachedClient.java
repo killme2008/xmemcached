@@ -253,9 +253,7 @@ public final class XMemcachedClient {
 		}
 		latchWait(command, timeout);
 		command.getIoBuffer().free(); // free buffer
-		if (command.getException() != null) {
-			throw command.getException();
-		}
+		checkException(command);
 		CachedData data = (CachedData) command.getResult();
 		if (data == null) {
 			return null;
@@ -543,7 +541,7 @@ public final class XMemcachedClient {
 		long lazy = keyCollections.size() / 1000 > 0 ? (keyCollections.size() / 1000)
 				: 1;
 		lazy = lazy > 3 ? 3 : lazy; // 最高3秒
-		return gets(keyCollections, 3 * DEFAULT_OP_TIMEOUT);
+		return gets(keyCollections, lazy * DEFAULT_OP_TIMEOUT);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -588,9 +586,7 @@ public final class XMemcachedClient {
 		}
 		for (Command getCmd : commands) {
 			getCmd.getIoBuffer().free();
-			if (getCmd.getException() != null) {
-				throw getCmd.getException();
-			}
+			checkException(getCmd);
 		}
 		return result;
 	}
@@ -929,14 +925,19 @@ public final class XMemcachedClient {
 		}
 		latchWait(command, DEFAULT_OP_TIMEOUT);
 		command.getIoBuffer().free();
-		if (command.getException() != null) {
-			throw command.getException();
-		}
+		checkException(command);
 		if (command.getResult() == null) {
 			throw new MemcachedException(
 					"Operation fail,may be caused by networking or timeout");
 		}
 		return (Boolean) command.getResult();
+	}
+
+	private void checkException(final Command command)
+			throws MemcachedException {
+		if (command.getException() != null) {
+			throw new MemcachedException(command.getException());
+		}
 	}
 
 	public final String version() throws TimeoutException,
@@ -947,9 +948,7 @@ public final class XMemcachedClient {
 		}
 		latchWait(command, DEFAULT_OP_TIMEOUT);
 		command.getIoBuffer().free(); // free buffer
-		if (command.getException() != null) {
-			throw command.getException();
-		}
+		checkException(command);
 		if (command.getResult() == null) {
 			throw new MemcachedException(
 					"Operation fail,may be caused by networking or timeout");
@@ -987,9 +986,7 @@ public final class XMemcachedClient {
 		}
 		latchWait(command, DEFAULT_OP_TIMEOUT);
 		command.getIoBuffer().free();
-		if (command.getException() != null) {
-			throw command.getException();
-		}
+		checkException(command);
 		if (command.getResult() == null) {
 			throw new MemcachedException(
 					"Operation fail,may be caused by networking or timeout");
@@ -1047,9 +1044,7 @@ public final class XMemcachedClient {
 		}
 		latchWait(command, timeout);
 		command.getIoBuffer().free();
-		if (command.getException() != null) {
-			throw command.getException();
-		}
+		checkException(command);
 		if (command.getResult() == null) {
 			throw new MemcachedException(
 					"Operation fail,may be caused by networking or timeout");

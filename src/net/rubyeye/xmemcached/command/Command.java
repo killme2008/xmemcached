@@ -32,7 +32,7 @@ public class Command {
 	private volatile Object result = null; // memcached返回结果
 	private CountDownLatch latch;
 	private CommandType commandType;
-	private MemcachedException throwable; // 执行异常
+	private Exception exception; // 执行异常
 	private IoBuffer ioBuffer;
 	private volatile boolean cancel = false;
 	private volatile OperationStatus status = null;
@@ -114,12 +114,12 @@ public class Command {
 		return null;
 	}
 
-	public MemcachedException getException() {
-		return throwable;
+	public Exception getException() {
+		return exception;
 	}
 
-	public void setException(MemcachedException throwable) {
-		this.throwable = throwable;
+	public void setException(Exception throwable) {
+		this.exception = throwable;
 	}
 
 	public final Object getKey() {
@@ -173,13 +173,12 @@ public class Command {
 		this.latch = latch;
 	}
 
-    public CachedData getStoredData() {
-        return storedData;
-    }
+	public CachedData getStoredData() {
+		return storedData;
+	}
 
-    public void setStoredData(CachedData storedData) {
-        this.storedData = storedData;
-    }
-
+	public void setStoredData(CachedData storedData) {
+		this.storedData = storedData;
+	}
 
 }

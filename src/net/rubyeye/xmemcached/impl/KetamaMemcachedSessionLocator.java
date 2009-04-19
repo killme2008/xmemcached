@@ -94,7 +94,7 @@ public class KetamaMemcachedSessionLocator implements MemcachedSessionLocator {
         Long hash = hashAlg.hash(key);
         MemcachedTCPSession rv = getSessionByHash(hash);
         int tries = 0;
-        while ((rv == null || rv.isClose()) && tries++ < this.maxTries) {
+        while ((rv == null || rv.isClosed()) && tries++ < this.maxTries) {
             hash = nextHash(hash, key, tries);
             rv = getSessionByHash(hash);
         }

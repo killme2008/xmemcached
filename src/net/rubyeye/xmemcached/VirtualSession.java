@@ -54,7 +54,7 @@ public class VirtualSession implements Session {
 
 	@Override
 	public void close() {
-		if (isClose()) {
+		if (isClosed()) {
 			return;
 		}
 		this.closed = true;
@@ -90,7 +90,7 @@ public class VirtualSession implements Session {
 	}
 
 	@Override
-	public boolean isClose() {
+	public boolean isClosed() {
 		return this.closed;
 	}
 
@@ -133,6 +133,7 @@ public class VirtualSession implements Session {
 			this.cache.put(key, command.getStoredData());
 			command.setResult(Boolean.TRUE);
 			command.getLatch().countDown();
+			break;
 		case ADD:
 			synchronized (cache) {
 				if (cache.get(key) == null) {

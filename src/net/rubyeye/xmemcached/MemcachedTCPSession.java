@@ -86,35 +86,6 @@ public class MemcachedTCPSession extends DefaultTCPSession {
 	}
 
 	@SuppressWarnings("unchecked")
-	public boolean send(Object msg){
-		if (isClose()) {
-			return false;
-		}
-		Command message = (Command) msg;
-		writeQueue.getLock().lock();
-		boolean needRegister = false;
-		try {
-			if (writeQueue.isEmpty()) {
-				if (writeQueue.add(message)) {
-					needRegister = true;
-					return true;
-				} else {
-					return false;
-				}
-			} else {
-				return writeQueue.add(message);
-			}
-		} finally {
-			writeQueue.getLock().unlock();
-			if (needRegister) {
-				sessionEventManager.registerSession(this,
-						EventType.ENABLE_WRITE); // 列表为空，注册监听写事件
-				this.sessionEventManager.wakeup(); // wakeup selector
-			}
-		}
-	}
-
-	@SuppressWarnings("unchecked")
 	protected void onWrite() {
 		Command currentCommand = null;
 		try {
@@ -166,19 +137,19 @@ public class MemcachedTCPSession extends DefaultTCPSession {
 			setSessionStatus(SessionStatus.IDLE);
 		} catch (CancelledKeyException cke) {
 			log.error(cke, cke);
-			handler.onException(this, cke);
+			onException(cke);
 			close();
 
 		} catch (ClosedChannelException cce) {
 			log.error(cce, cce);
-			handler.onException(this, cce);
+			onException(cce);
 			close();
 		} catch (IOException ioe) {
 			log.error(ioe, ioe);
-			handler.onException(this, ioe);
+			onException(ioe);
 			close();
 		} catch (Exception e) {
-			handler.onException(this, e);
+			onException(e);
 			log.error(e, e);
 			close();
 		}
@@ -245,4 +216,11 @@ public class MemcachedTCPSession extends DefaultTCPSession {
 		}
 		return null;
 	}
+
+	@Override
+	protected final Object wrapMessage(Object msg) {
+		return msg;
+	}
+
+
 }
