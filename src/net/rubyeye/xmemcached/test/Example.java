@@ -51,9 +51,9 @@ public class Example {
 
 	public static void main(String[] args) {
 		try {
-			String ip = "localhost";
+			String ip = "211.100.27.182";
 
-			int port = 12000;
+			int port = 12002;
 			XMemcachedClient client = new XMemcachedClient(
 					new CachedBufferAllocator());
 			// client.setOptimiezeSet(true);

@@ -243,7 +243,7 @@ public final class XMemcachedClient {
 	@SuppressWarnings("unchecked")
 	private final <T> Object fetch0(final String key, final byte[] keyBytes,
 			final byte[] cmdBytes, final CommandType cmdType,
-			final long timeout, Transcoder<T> transcoder)
+			final long timeout,Transcoder<T> transcoder)
 			throws InterruptedException, TimeoutException, MemcachedException,
 			MemcachedException {
 		final Command command = CommandFactory.createGetCommand(key, keyBytes,

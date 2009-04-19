@@ -42,94 +42,91 @@ import net.rubyeye.xmemcached.MemcachedTCPSession;
  */
 public class KetamaMemcachedSessionLocator implements MemcachedSessionLocator {
 
-    static final int NUM_REPS = 160;
-    private transient volatile TreeMap<Long, MemcachedTCPSession> ketamaSessions = new TreeMap<Long, MemcachedTCPSession>();
-    private final HashAlgorithm hashAlg;
-    private volatile int maxTries;
+	static final int NUM_REPS = 160;
+	private transient volatile TreeMap<Long, MemcachedTCPSession> ketamaSessions = new TreeMap<Long, MemcachedTCPSession>();
+	private final HashAlgorithm hashAlg;
+	private volatile int maxTries;
 
-    public KetamaMemcachedSessionLocator() {
-        this.hashAlg = HashAlgorithm.KETAMA_HASH;
-    }
+	public KetamaMemcachedSessionLocator() {
+		this.hashAlg = HashAlgorithm.KETAMA_HASH;
+	}
 
-    public KetamaMemcachedSessionLocator(HashAlgorithm alg) {
-        this.hashAlg = alg;
-    }
+	public KetamaMemcachedSessionLocator(HashAlgorithm alg) {
+		this.hashAlg = alg;
+	}
 
-    public KetamaMemcachedSessionLocator(List<MemcachedTCPSession> list,
-            HashAlgorithm alg) {
-        super();
-        hashAlg = alg;
-        buildMap(list, alg);
-    }
+	public KetamaMemcachedSessionLocator(List<MemcachedTCPSession> list,
+			HashAlgorithm alg) {
+		super();
+		hashAlg = alg;
+		buildMap(list, alg);
+	}
 
-    private final void buildMap(List<MemcachedTCPSession> list, HashAlgorithm alg) {
-        TreeMap<Long, MemcachedTCPSession> sessionMap = new TreeMap<Long, MemcachedTCPSession>();
+	private final void buildMap(List<MemcachedTCPSession> list,
+			HashAlgorithm alg) {
+		TreeMap<Long, MemcachedTCPSession> sessionMap = new TreeMap<Long, MemcachedTCPSession>();
 
-        for (MemcachedTCPSession session : list) {
-            String sockStr = String.valueOf(session.getRemoteSocketAddress());
-            /**
-             * 按照spy作者的说法，这里是对KETAMA_HASH做特殊处理，为了复用chunk，具体我并不明白，暂时直接拷贝
-             */
-            if (alg == HashAlgorithm.KETAMA_HASH) {
-                for (int i = 0; i < NUM_REPS / 4; i++) {
-                    byte[] digest = HashAlgorithm.computeMd5(sockStr + "-" + i);
-                    for (int h = 0; h < 4; h++) {
-                        Long k = ((long) (digest[3 + h * 4] & 0xFF) << 24) | ((long) (digest[2 + h * 4] & 0xFF) << 16) | ((long) (digest[1 + h * 4] & 0xFF) << 8) | (digest[h * 4] & 0xFF);
-                        sessionMap.put(k, session);
-                    }
+		for (MemcachedTCPSession session : list) {
+			String sockStr = String.valueOf(session.getRemoteSocketAddress());
+			/**
+			 * 按照spy作者的说法，这里是对KETAMA_HASH做特殊处理，为了复用chunk，具体我并不明白，暂时直接拷贝
+			 */
+			if (alg == HashAlgorithm.KETAMA_HASH) {
+				for (int i = 0; i < NUM_REPS / 4; i++) {
+					byte[] digest = HashAlgorithm.computeMd5(sockStr + "-" + i);
+					for (int h = 0; h < 4; h++) {
+						Long k = ((long) (digest[3 + h * 4] & 0xFF) << 24)
+								| ((long) (digest[2 + h * 4] & 0xFF) << 16)
+								| ((long) (digest[1 + h * 4] & 0xFF) << 8)
+								| (digest[h * 4] & 0xFF);
+						sessionMap.put(k, session);
+					}
 
-                }
-            } else {
-                for (int i = 0; i < NUM_REPS; i++) {
-                    sessionMap.put(alg.hash(sockStr + "-" + i), session);
-                }
-            }
-        }
-        ketamaSessions = sessionMap;
-        this.maxTries = list.size();
-    }
+				}
+			} else {
+				for (int i = 0; i < NUM_REPS; i++) {
+					sessionMap.put(alg.hash(sockStr + "-" + i), session);
+				}
+			}
+		}
+		ketamaSessions = sessionMap;
+		this.maxTries = list.size();
+	}
 
-    @Override
-    public final Session getSessionByKey(final String key) {
-        Long hash = hashAlg.hash(key);
-        MemcachedTCPSession rv = getSessionByHash(hash);
-        int tries = 0;
-        while ((rv == null || rv.isClosed()) && tries++ < this.maxTries) {
-            hash = nextHash(hash, key, tries);
-            rv = getSessionByHash(hash);
-        }
-        return rv;
-    }
+	@Override
+	public final Session getSessionByKey(final String key) {
+		Long hash = hashAlg.hash(key);
+		MemcachedTCPSession rv = getSessionByHash(hash);
+		int tries = 0;
+		while ((rv == null || rv.isClosed()) && tries++ < this.maxTries) {
+			hash = nextHash(hash, key, tries);
+			rv = getSessionByHash(hash);
+		}
+		return rv;
+	}
 
-    private final MemcachedTCPSession getSessionByHash(Long hash) {
-        TreeMap<Long, MemcachedTCPSession> sessionMap = ketamaSessions;
-        if (!sessionMap.containsKey(hash)) {
-            hash = sessionMap.ceilingKey(hash);
-            if (hash == null) {
-                hash = sessionMap.firstKey();
-            }
-        // jdk1.5采用 下列代码，xmemcached针对jdk1.6
-        // SortedMap<Long, MemcachedTCPSession> tailMap = ketamaSessions
-        // .tailMap(hash);
-        // if (tailMap.isEmpty()) {
-        // hash = ketamaSessions.firstKey();
-        // } else {
-        // hash = tailMap.firstKey();
-        // }
-        }
+	private final MemcachedTCPSession getSessionByHash(final Long hash) {
+		TreeMap<Long, MemcachedTCPSession> sessionMap = ketamaSessions;
+		Long resultHash = hash;
+		if (!sessionMap.containsKey(hash)) {
+			resultHash = sessionMap.ceilingKey(hash);
+			if (hash == null) {
+				resultHash = sessionMap.firstKey();
+			}
+		}
 
-        return sessionMap.get(hash);
-    }
+		return sessionMap.get(resultHash);
+	}
 
-    private final long nextHash(long hashVal, String key, int tries) {
-        long tmpKey = hashAlg.hash(tries + key);
-        hashVal += (int) (tmpKey ^ (tmpKey >>> 32));
-        hashVal &= 0xffffffffL; /* truncate to 32-bits */
-        return hashVal;
-    }
+	private final long nextHash(long hashVal, String key, int tries) {
+		long tmpKey = hashAlg.hash(tries + key);
+		hashVal += (int) (tmpKey ^ (tmpKey >>> 32));
+		hashVal &= 0xffffffffL; /* truncate to 32-bits */
+		return hashVal;
+	}
 
-    @Override
-    public final void updateSessionList(final List<MemcachedTCPSession> list) {
-        buildMap(list, this.hashAlg);
-    }
+	@Override
+	public final void updateSessionList(final List<MemcachedTCPSession> list) {
+		buildMap(list, this.hashAlg);
+	}
 }

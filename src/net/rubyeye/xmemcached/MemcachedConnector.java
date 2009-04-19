@@ -30,6 +30,9 @@ import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import net.rubyeye.xmemcached.buffer.BufferAllocator;
 import net.rubyeye.xmemcached.command.Command;
@@ -129,66 +132,117 @@ public class MemcachedConnector extends SocketChannelController {
 
 	static class ConnectFuture implements Future<Boolean> {
 
-		private volatile boolean connected = false;
-		private volatile boolean done = false;
-		private volatile boolean cancel = false;
-		private CountDownLatch latch = new CountDownLatch(1);
+		private boolean connected = false;
+		private boolean done = false;
+		private boolean cancel = false;
+		private Lock lock = new ReentrantLock();
+		private Condition notDone = lock.newCondition();
 		private volatile Exception exception;
 
 		public boolean isConnected() {
-			return connected;
+			lock.lock();
+			try {
+				return connected;
+			} finally {
+				lock.unlock();
+			}
 		}
 
 		public void setConnected(boolean connected) {
-			this.latch.countDown();
-			this.connected = connected;
-			done = true;
+			lock.lock();
+			try {
+				this.connected = connected;
+				done = true;
+				notDone.signal();
+			} finally {
+				lock.unlock();
+			}
 		}
 
 		public Exception getException() {
-			return exception;
+			lock.lock();
+			try {
+				return this.exception;
+			} finally {
+				lock.unlock();
+			}
 		}
 
 		public void setException(Exception exception) {
-			this.latch.countDown();
-			this.exception = exception;
-			done = true;
-
+			lock.lock();
+			try {
+				this.exception = exception;
+				done = true;
+				notDone.signal();
+			} finally {
+				lock.unlock();
+			}
 		}
 
 		@Override
 		public boolean cancel(boolean mayInterruptIfRunning) {
-			this.cancel = true;
-			return cancel;
+			lock.lock();
+			try {
+				cancel = true;
+				return cancel;
+			} finally {
+				lock.unlock();
+			}
 		}
 
 		@Override
 		public Boolean get() throws InterruptedException, ExecutionException {
-			this.latch.await();
-			if (this.exception != null) {
-				throw new ExecutionException(exception);
+			lock.lock();
+			try {
+				while (!done)
+					notDone.await();
+				if (this.exception != null) {
+					throw new ExecutionException(exception);
+				}
+				return connected;
+			} finally {
+				lock.unlock();
 			}
-			return connected ? Boolean.TRUE : Boolean.FALSE;
 		}
 
 		@Override
 		public Boolean get(long timeout, TimeUnit unit)
 				throws InterruptedException, ExecutionException,
 				TimeoutException {
-			if (!this.latch.await(timeout, unit) && !connected) {
-				throw new TimeoutException("connect timeout");
+			lock.lock();
+			try {
+
+				while (!done) {
+					if (!notDone.await(timeout, unit))
+						throw new TimeoutException("connect timeout");
+				}
+				if (this.exception != null) {
+					throw new ExecutionException(exception);
+				}
+				return connected;
+			} finally {
+				lock.unlock();
 			}
-			return connected ? Boolean.TRUE : Boolean.FALSE;
 		}
 
 		@Override
 		public boolean isCancelled() {
-			return cancel;
+			lock.lock();
+			try {
+				return cancel;
+			} finally {
+				lock.unlock();
+			}
 		}
 
 		@Override
 		public boolean isDone() {
-			return done;
+			lock.lock();
+			try {
+				return done;
+			} finally {
+				lock.unlock();
+			}
 		}
 	}
 
