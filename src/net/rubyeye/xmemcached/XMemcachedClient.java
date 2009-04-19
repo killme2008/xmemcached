@@ -550,9 +550,8 @@ public final class XMemcachedClient {
 		return gets(keyCollections, timeout, this.transcoder);
 	}
 
-	@SuppressWarnings("unchecked")
 	public final <T> Map<String, GetsResponse<T>> gets(
-			final Collection<String> keyCollections, final Transcoder transcoder)
+			final Collection<String> keyCollections, final Transcoder<T> transcoder)
 			throws TimeoutException, InterruptedException, MemcachedException {
 		return gets(keyCollections, DEFAULT_OP_TIMEOUT, transcoder);
 	}
