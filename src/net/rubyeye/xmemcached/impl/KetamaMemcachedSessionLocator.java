@@ -108,9 +108,9 @@ public class KetamaMemcachedSessionLocator implements MemcachedSessionLocator {
 	private final MemcachedTCPSession getSessionByHash(final Long hash) {
 		TreeMap<Long, MemcachedTCPSession> sessionMap = ketamaSessions;
 		Long resultHash = hash;
-		if (!sessionMap.containsKey(hash)) {
-			resultHash = sessionMap.ceilingKey(hash);
-			if (hash == null) {
+		if (!sessionMap.containsKey(resultHash)) {
+			resultHash = sessionMap.ceilingKey(resultHash);
+			if (resultHash == null) {
 				resultHash = sessionMap.firstKey();
 			}
 		}
