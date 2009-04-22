@@ -26,7 +26,7 @@
 		<jar destfile="${build.dist}/${ant.project.name}-${project.version}.jar" basedir="${build.classes}">
 			<include name="**/*.*" />
 		</jar>
-		<tar tarfile="${build.dist}/${ant.project.name}-bin-${project.version}.tar.gz" basedir="." compression="gzip">
+		<tar tarfile="${build.dist}/${ant.project.name}-bin-${project.version}-with-dependences.tar.gz" basedir="." compression="gzip">
 			<include name="**/lib/*" />
 			<include name="**/dist/*" />
 		</tar>
@@ -43,11 +43,11 @@
 		</antcall>
 		<antcall target="compress-source">
 		</antcall>
-		<antcall target="build-doc" />
+		<!--<antcall target="build-doc" /> -->
 	</target>
 	<target name="compress-source">
-		<delete file="${build.dist}/${ant.project.name}-src-${project.version}.tar.gz" />
-		<tar tarfile="${build.dist}/${ant.project.name}-src-${project.version}.tar.gz" basedir="./" compression="gzip">
+		<delete file="${build.dist}/${ant.project.name}-src-${project.version}-with-dependences.tar.gz" />
+		<tar tarfile="${build.dist}/${ant.project.name}-src-${project.version}-with-dependences.tar.gz" basedir="./" compression="gzip">
 			<include name="**/*.java" />
 			<include name="**/*.xml" />
 			<include name="**/*.properties" />
