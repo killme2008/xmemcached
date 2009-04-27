@@ -10,7 +10,8 @@ import java.util.concurrent.BlockingQueue;
 import net.rubyeye.xmemcached.command.Command;
 
 /**
- *
+ * xmemcached优化器，决定优化策略
+ * 
  * @author dennis
  */
 public interface Optimiezer {
