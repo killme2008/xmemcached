@@ -34,12 +34,13 @@ import net.rubyeye.xmemcached.exception.MemcachedServerException;
 import net.rubyeye.xmemcached.exception.UnknownCommandException;
 
 import com.google.code.yanf4j.util.ByteBufferMatcher;
+import com.google.code.yanf4j.util.ShiftAndByteBufferMatcher;
 
 /**
  * 核心类，负责协议解析和消息派发
- *
+ * 
  * @author dennis
- *
+ * 
  */
 public class MemcachedHandler extends HandlerAdapter<Command> implements
 		MemcachedProtocolHandler {
@@ -47,14 +48,14 @@ public class MemcachedHandler extends HandlerAdapter<Command> implements
 	private static final ByteBuffer SPLIT = ByteBuffer.wrap(Command.SPLIT
 			.getBytes());
 	/**
-	 * BM算法匹配器，用于匹配行
+	 * shift-and算法匹配器，用于匹配行
 	 */
-	private static final ByteBufferMatcher SPLIT_MATCHER = new ByteBufferMatcher(
+	private static final ByteBufferMatcher SPLIT_MATCHER = new ShiftAndByteBufferMatcher(
 			SPLIT);
 
 	/**
 	 * 返回boolean值并唤醒
-	 *
+	 * 
 	 * @param result
 	 * @return
 	 */
@@ -84,9 +85,9 @@ public class MemcachedHandler extends HandlerAdapter<Command> implements
 
 	/**
 	 * 解析状态
-	 *
+	 * 
 	 * @author dennis
-	 *
+	 * 
 	 */
 	enum ParseStatus {
 
@@ -164,7 +165,7 @@ public class MemcachedHandler extends HandlerAdapter<Command> implements
 
 	/**
 	 * 解析get协议response
-	 *
+	 * 
 	 * @param buffer
 	 * @param origPos
 	 * @param origLimit
@@ -229,7 +230,7 @@ public class MemcachedHandler extends HandlerAdapter<Command> implements
 
 	/**
 	 * 解析get协议返回空
-	 *
+	 * 
 	 * @return
 	 */
 	private static final boolean parseEndCommand(MemcachedTCPSession session) {
@@ -264,7 +265,7 @@ public class MemcachedHandler extends HandlerAdapter<Command> implements
 
 	/**
 	 * 解析错误response
-	 *
+	 * 
 	 * @return
 	 */
 	private static final boolean parseException(MemcachedTCPSession session) {
@@ -282,7 +283,7 @@ public class MemcachedHandler extends HandlerAdapter<Command> implements
 
 	/**
 	 * 解析错误response
-	 *
+	 * 
 	 * @return
 	 */
 	private static final boolean parseClientException(
@@ -303,7 +304,7 @@ public class MemcachedHandler extends HandlerAdapter<Command> implements
 
 	/**
 	 * 解析错误response
-	 *
+	 * 
 	 * @return
 	 */
 	private final boolean parseServerException(MemcachedTCPSession session) {
@@ -323,7 +324,7 @@ public class MemcachedHandler extends HandlerAdapter<Command> implements
 
 	/**
 	 * 解析version协议response
-	 *
+	 * 
 	 * @return
 	 */
 	private final boolean parseVersionCommand(MemcachedTCPSession session) {
@@ -344,7 +345,7 @@ public class MemcachedHandler extends HandlerAdapter<Command> implements
 
 	/**
 	 * 解析incr,decr协议response
-	 *
+	 * 
 	 * @return
 	 */
 	private final boolean parseIncrDecrCommand(MemcachedTCPSession session) {
@@ -366,7 +367,7 @@ public class MemcachedHandler extends HandlerAdapter<Command> implements
 
 	/**
 	 * 获取下一行
-	 *
+	 * 
 	 * @param buffer
 	 */
 	protected static final void nextLine(MemcachedTCPSession session,
@@ -376,7 +377,7 @@ public class MemcachedHandler extends HandlerAdapter<Command> implements
 		}
 
 		/**
-		 * 测试表明采用BM算法匹配效率 > 朴素匹配 > KMP匹配， 如果你有更好的建议，请email给我
+		 * 测试表明采用 Shift-And算法匹配 >BM算法匹配效率 > 朴素匹配 > KMP匹配， 如果你有更好的建议，请email给我
 		 */
 		int index = SPLIT_MATCHER.matchFirst(buffer);
 		// int index = ByteBufferUtils.indexOf(buffer, SPLIT);
@@ -443,7 +444,7 @@ public class MemcachedHandler extends HandlerAdapter<Command> implements
 				reconnect(session);
 			} else {
 				CachedData data = values.get(executingCmd.getKey());
-				executingCmd.setResult(data); //设置CachedData返回，transcoder.decode
+				executingCmd.setResult(data); // 设置CachedData返回，transcoder.decode
 				// ()放到用户线程
 
 				executingCmd.getLatch().countDown();
