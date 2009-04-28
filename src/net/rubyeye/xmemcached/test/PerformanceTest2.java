@@ -5,10 +5,11 @@ import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import net.rubyeye.xmemcached.XMemcachedClientBuilder;
 import net.rubyeye.xmemcached.XMemcachedClient;
+import net.rubyeye.xmemcached.utils.AddrUtil;
 
 public class PerformanceTest2 {
 	static Map<String, NameClass> map2 = new HashMap<String, NameClass>();
-	static final int ELEMENT_NUM = 200;
+	static final int ELEMENT_NUM = 50;
 	static {
 		for (int i = 0; i < ELEMENT_NUM; i++)
 			map2.put(String.valueOf(i), new NameClass(String.valueOf(i), String
@@ -91,61 +92,23 @@ public class PerformanceTest2 {
 
 	}
 
-	static class TestDeleteRunnable implements Runnable {
-
-		private XMemcachedClient mc;
-		private CountDownLatch cd;
-		int repeat;
-		int start;
-
-		public TestDeleteRunnable(XMemcachedClient mc, int start,
-				CountDownLatch cdl, int repeat) {
-			super();
-			this.mc = mc;
-			this.start = start;
-			this.cd = cdl;
-			this.repeat = repeat;
-
-		}
-
-		public void run() {
-			try {
-				for (int i = 0; i < repeat; i++) {
-					String key = String.valueOf(start + i);
-					if (!mc.delete(key))
-						System.err.println("delete error");
-				}
-
-			} catch (Exception e) {
-				e.printStackTrace();
-			} finally {
-				cd.countDown();
-			}
-		}
-
-	}
-
 	// thread num=10, repeat=10000,size=2, all=200000 ,velocity=1057 , using
 	// time:189187
 	static public void main(String[] args) {
 		try {
-			String ip = "localhost";
 
-			int size = Runtime.getRuntime().availableProcessors();
+			int cpuCount = Runtime.getRuntime().availableProcessors();
 
 			int thread = 100;
 
 			int repeat = 100;
 
-			XMemcachedClientBuilder builder = new XMemcachedClientBuilder();
+			XMemcachedClientBuilder builder = new XMemcachedClientBuilder(
+					AddrUtil.getAddresses("192.168.207.101:12000"));
 			builder.getConfiguration().setReadThreadCount(0);
 			XMemcachedClient mc = builder.build();
-			mc.addServer(ip, 12001);
-			mc.addServer(ip, 12000);
-
-			testWrite(size, thread, repeat, mc);
-
-			testRead(size, thread, repeat, mc);
+			testWrite(cpuCount, thread, repeat, mc);
+			testRead(cpuCount, thread, repeat, mc);
 			mc.shutdown();
 		} catch (Exception e) {
 			e.printStackTrace();

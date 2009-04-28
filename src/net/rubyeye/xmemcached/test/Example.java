@@ -22,8 +22,9 @@ import java.io.Serializable;
 import net.rubyeye.xmemcached.CASOperation;
 import net.rubyeye.xmemcached.GetsResponse;
 import net.rubyeye.xmemcached.XMemcachedClient;
-import net.rubyeye.xmemcached.buffer.CachedBufferAllocator;
+import net.rubyeye.xmemcached.XMemcachedClientBuilder;
 import net.rubyeye.xmemcached.exception.MemcachedException;
+import net.rubyeye.xmemcached.utils.AddrUtil;
 import net.spy.memcached.transcoders.IntegerTranscoder;
 import net.spy.memcached.transcoders.StringTranscoder;
 
@@ -52,15 +53,10 @@ public class Example {
 
 	public static void main(String[] args) {
 		try {
-			String ip = "localhost";
 
-			int port = 12000;
-			XMemcachedClient client = new XMemcachedClient(
-					new CachedBufferAllocator());
-			// client.setOptimiezeSet(true);
-			// 添加server
-			client.addServer(ip, port);
-
+			XMemcachedClientBuilder builder = new XMemcachedClientBuilder(
+					AddrUtil.getAddresses("192.168.207.101:12000"));
+            XMemcachedClient client=builder.build();
 			if (!client.set("hello", 0, "dennis")) {
 				System.err.println("set error");
 			}

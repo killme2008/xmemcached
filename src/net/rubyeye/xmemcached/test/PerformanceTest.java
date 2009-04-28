@@ -5,14 +5,16 @@ import java.util.concurrent.CountDownLatch;
 import net.rubyeye.xmemcached.XMemcachedClient;
 import net.rubyeye.xmemcached.XMemcachedClientBuilder;
 import net.rubyeye.xmemcached.buffer.CachedBufferAllocator;
+import net.rubyeye.xmemcached.impl.KetamaMemcachedSessionLocator;
+import net.rubyeye.xmemcached.utils.AddrUtil;
 
 public class PerformanceTest {
 
 	/**
 	 * 写线程
-	 *
+	 * 
 	 * @author dennis
-	 *
+	 * 
 	 */
 	static class TestWriteRunnable implements Runnable {
 
@@ -52,9 +54,9 @@ public class PerformanceTest {
 
 	/**
 	 * 读线程
-	 *
+	 * 
 	 * @author dennis
-	 *
+	 * 
 	 */
 	static class TestReadRunnable implements Runnable {
 
@@ -78,7 +80,7 @@ public class PerformanceTest {
 				for (int i = 0; i < repeat; i++) {
 
 					String key = String.valueOf(start + i);
-					String result = (String) mc.get(key);
+					String result = (String) mc.get(key,5000);
 					if (!key.equals(result)) {
 						System.out.println(key + " " + result);
 						System.err.println("get error");
@@ -95,9 +97,9 @@ public class PerformanceTest {
 
 	/**
 	 * 删除线程
-	 *
+	 * 
 	 * @author dennis
-	 *
+	 * 
 	 */
 	static class TestDeleteRunnable implements Runnable {
 
@@ -134,21 +136,22 @@ public class PerformanceTest {
 	}
 
 	static public void main(String[] args) {
-		int thread = 100; // 线程数
-		int repeat = 10000;  //循环次数
+		if (args.length < 3) {
+			System.out.println("Usage:[program name] threads repeats servers");
+			System.exit(1);
+		}
+		int thread = Integer.parseInt(args[0]); // 线程数
+		int repeat = Integer.parseInt(args[1]); // 循环次数
 		try {
-
 			int size = Runtime.getRuntime().availableProcessors();
 
-			XMemcachedClientBuilder builder = new XMemcachedClientBuilder();
-			builder.getConfiguration().setReadThreadCount(0); // 设置读线程数
-			// builder.setBufferAllocator();
-			// builder.setSessionLocator(new KetamaMemcachedSessionLocator());
+			XMemcachedClientBuilder builder = new XMemcachedClientBuilder(
+					AddrUtil.getAddresses(args[2]));
+			 builder.getConfiguration().setTcpRecvBufferSize(8*1024);
+			builder.setBufferAllocator(new CachedBufferAllocator());
+			builder.setSessionLocator(new KetamaMemcachedSessionLocator());
 			XMemcachedClient mc = builder.build();
 			// mc.setOptimizeMergeBuffer(false);
-			mc.addServer("localhost", 12000); // 添加节点
-			mc.addServer("localhost", 12001);
-
 			// 分别测试写、读、删除
 			testWrite(thread, size, repeat, mc);
 			testRead(thread, size, repeat, mc);
@@ -167,7 +170,7 @@ public class PerformanceTest {
 		long all;
 		long usingtime;
 		cdl = new CountDownLatch(thread);
-		t = System.currentTimeMillis();
+		t = System.nanoTime();
 		for (int i = 0; i < thread; i++) {
 			new Thread(new PerformanceTest.TestDeleteRunnable(mc, i * 10000,
 					cdl, repeat)).start();
@@ -177,24 +180,19 @@ public class PerformanceTest {
 		} catch (InterruptedException e) {
 		}
 		all = thread * repeat;
-		usingtime = (System.currentTimeMillis() - t);
+		usingtime = (System.nanoTime() - t);
 		System.out
 				.println(String
 						.format(
 								"test delete,thread num=%d, repeat=%d,size=%d, all=%d ,velocity=%d , using time:%d",
 								thread, repeat, size, all, 1000 * all
-										/ usingtime, usingtime));
+										/ (usingtime / 1000000), usingtime));
 	}
 
 	private static void testRead(int thread, int size, int repeat,
 			XMemcachedClient mc) {
-		CountDownLatch cdl;
-		long t;
-		long all;
-		long usingtime;
-
-		cdl = new CountDownLatch(thread);
-		t = System.currentTimeMillis();
+		CountDownLatch cdl = new CountDownLatch(thread);
+		long t = System.nanoTime();
 		for (int i = 0; i < thread; i++) {
 			new Thread(new PerformanceTest.TestReadRunnable(mc, i * 10000, cdl,
 					repeat)).start();
@@ -203,20 +201,20 @@ public class PerformanceTest {
 			cdl.await();
 		} catch (InterruptedException e) {
 		}
-		all = thread * repeat;
-		usingtime = (System.currentTimeMillis() - t);
+		long all = thread * repeat;
+		long usingtime = (System.nanoTime() - t);
 		System.out
 				.println(String
 						.format(
 								"test read,thread num=%d, repeat=%d,size=%d, all=%d ,velocity=%d , using time:%d",
 								thread, repeat, size, all, 1000 * all
-										/ usingtime, usingtime));
+										/ (usingtime / 1000000), usingtime));
 	}
 
 	private static void testWrite(int thread, int size, int repeat,
 			XMemcachedClient mc) {
 		CountDownLatch cdl = new CountDownLatch(thread);
-		long t = System.currentTimeMillis();
+		long start = System.nanoTime();
 		for (int i = 0; i < thread; i++) {
 			new Thread(new PerformanceTest.TestWriteRunnable(mc, i * 10000,
 					cdl, repeat)).start();
@@ -226,13 +224,13 @@ public class PerformanceTest {
 		} catch (InterruptedException e) {
 		}
 		long all = thread * repeat;
-		long usingtime = (System.currentTimeMillis() - t);
+		long usingtime = (System.nanoTime() - start);
 
 		System.out
 				.println(String
 						.format(
 								"test write,thread num=%d, repeat=%d,size=%d, all=%d ,velocity=%d , using time:%d",
 								thread, repeat, size, all, 1000 * all
-										/ usingtime, usingtime));
+										/ (usingtime / 1000000), usingtime));
 	}
 }

@@ -43,9 +43,9 @@ import com.google.code.yanf4j.nio.Session;
 
 /**
  * XMemcached客户端API核心类，通过此类的实例与memcached交互。
- *
+ * 
  * @author dennis(killme2008@gmail.com)
- *
+ * 
  */
 public final class XMemcachedClient {
 
@@ -83,7 +83,7 @@ public final class XMemcachedClient {
 
 	/**
 	 * 设置合并系数，这一参数影响get优化和合并缓存区优化，这个系数决定最多的合并command数，默认是150
-	 *
+	 * 
 	 * @param mergeFactor
 	 */
 	public final void setMergeFactor(final int mergeFactor) {
@@ -95,7 +95,7 @@ public final class XMemcachedClient {
 
 	/**
 	 * 返回连接管理器
-	 *
+	 * 
 	 * @return
 	 */
 	public final MemcachedConnector getConnector() {
@@ -104,7 +104,7 @@ public final class XMemcachedClient {
 
 	/**
 	 * 设置是否启用get优化，xmemcached会将连续的get操作尽可能合并成一个getMulti操作，默认开启
-	 *
+	 * 
 	 * @param optimiezeGet
 	 */
 	public final void setOptimiezeGet(final boolean optimiezeGet) {
@@ -114,7 +114,7 @@ public final class XMemcachedClient {
 	/**
 	 * 是否启用缓存区合并优化，xmemcached会尽可能将连续的命令合并起来，以形成一个socket.getSendBufferSize()
 	 * 大小的packet发出，默认开启
-	 *
+	 * 
 	 * @param optimizeMergeBuffer
 	 */
 	public final void setOptimizeMergeBuffer(final boolean optimizeMergeBuffer) {
@@ -123,7 +123,7 @@ public final class XMemcachedClient {
 
 	/**
 	 * 是否已经关闭xmemcached客户端
-	 *
+	 * 
 	 * @return
 	 */
 	public final boolean isShutdown() {
@@ -174,7 +174,7 @@ public final class XMemcachedClient {
 
 	/**
 	 * 添加memcached节点
-	 *
+	 * 
 	 * @param server
 	 * @param port
 	 * @throws IOException
@@ -187,7 +187,7 @@ public final class XMemcachedClient {
 
 	/**
 	 * 添加memcached节点
-	 *
+	 * 
 	 * @param inetSocketAddress
 	 */
 	public final void addServer(final InetSocketAddress inetSocketAddress) {
@@ -302,7 +302,7 @@ public final class XMemcachedClient {
 
 	/**
 	 * 设置IoBuffer分配器，默认采用SimpleBufferAllocator
-	 *
+	 * 
 	 * @param bufferAllocator
 	 * @return
 	 */
@@ -368,15 +368,41 @@ public final class XMemcachedClient {
 		startConnector();
 	}
 
+	public XMemcachedClient(MemcachedSessionLocator locator,
+			BufferAllocator allocator, Configuration conf,
+			List<InetSocketAddress> addressList) throws IOException {
+		super();
+		buildConnector(locator, allocator, conf);
+		startConnector();
+		if (addressList != null) {
+			for (InetSocketAddress inetSocketAddress : addressList) {
+				connect(inetSocketAddress);
+			}
+		}
+	}
+
 	public XMemcachedClient(BufferAllocator allocator) throws IOException {
 		this(new ArrayMemcachedSessionLocator(), allocator,
 				getDefaultConfiguration());
 
 	}
 
+	public XMemcachedClient(List<InetSocketAddress> addressList)
+			throws IOException {
+		super();
+		if (addressList == null || addressList.isEmpty())
+			throw new IllegalArgumentException("Empty address list");
+		buildConnector(new ArrayMemcachedSessionLocator(),
+				new SimpleBufferAllocator(), getDefaultConfiguration());
+		startConnector();
+		for (InetSocketAddress inetSocketAddress : addressList) {
+			connect(inetSocketAddress);
+		}
+	}
+
 	/**
 	 * 获取key对应的缓存项
-	 *
+	 * 
 	 * @param <T>
 	 * @param key
 	 *            关键字key
@@ -424,7 +450,7 @@ public final class XMemcachedClient {
 
 	/**
 	 * 类似get,但是gets将返回缓存项的cas值，可用于cas操作，参见cas方法
-	 *
+	 * 
 	 * @param <T>
 	 * @param key
 	 * @param timeout
@@ -462,7 +488,7 @@ public final class XMemcachedClient {
 
 	/**
 	 * memcached的getMulti，批量获取一批key对应的缓存项
-	 *
+	 * 
 	 * @param <T>
 	 * @param keyCollections
 	 *            关键字集合
@@ -513,7 +539,7 @@ public final class XMemcachedClient {
 
 	/**
 	 * 类似getMulti，但是返回缓存项的cas值，返回的map中value存储的是GetsResponse对象
-	 *
+	 * 
 	 * @param <T>
 	 * @param keyCollections
 	 * @param timeout
@@ -551,8 +577,9 @@ public final class XMemcachedClient {
 	}
 
 	public final <T> Map<String, GetsResponse<T>> gets(
-			final Collection<String> keyCollections, final Transcoder<T> transcoder)
-			throws TimeoutException, InterruptedException, MemcachedException {
+			final Collection<String> keyCollections,
+			final Transcoder<T> transcoder) throws TimeoutException,
+			InterruptedException, MemcachedException {
 		return gets(keyCollections, DEFAULT_OP_TIMEOUT, transcoder);
 	}
 
@@ -591,7 +618,7 @@ public final class XMemcachedClient {
 
 	/**
 	 * 对key按照hash值进行分类，发送到不同节点
-	 *
+	 * 
 	 * @param keyCollections
 	 * @return
 	 */
@@ -629,7 +656,7 @@ public final class XMemcachedClient {
 
 	/**
 	 * 设置key对应的项为value，无论key是否已经存在，成功返回true，否则返回false
-	 *
+	 * 
 	 * @param <T>
 	 * @param key
 	 *            缓存关键字
@@ -676,7 +703,7 @@ public final class XMemcachedClient {
 
 	/**
 	 *添加key-value缓存项，仅在key不存在的情况下才能添加成功，成功返回true，否则返回false
-	 *
+	 * 
 	 * @param <T>
 	 * @param key
 	 * @param exp
@@ -741,7 +768,7 @@ public final class XMemcachedClient {
 
 	/**
 	 * 替代key对应的值，当且仅当key对应的缓存项存在的时候可以替换，如果key不存在返回false，如果替代成功返回true
-	 *
+	 * 
 	 * @param <T>
 	 * @param key
 	 * @param exp
@@ -766,7 +793,7 @@ public final class XMemcachedClient {
 
 	/**
 	 * 将value添加到key对应的缓存项后面连接起来，这一操作仅对String有意义。
-	 *
+	 * 
 	 * @param key
 	 * @param value
 	 * @return
@@ -790,7 +817,7 @@ public final class XMemcachedClient {
 
 	/**
 	 * 类似append，是将value附加到key对应的缓存项前面，这一操作仅对String有实际意义
-	 *
+	 * 
 	 * @param key
 	 * @param value
 	 * @return
@@ -819,7 +846,7 @@ public final class XMemcachedClient {
 
 	/**
 	 * cas原子替换key对应的value，当且仅当cas值相等的时候替换成功
-	 *
+	 * 
 	 * @param <T>
 	 * @param key
 	 * @param exp
@@ -855,7 +882,7 @@ public final class XMemcachedClient {
 
 	/**
 	 * 原子替换key对应的value值，当且仅当cas值相等时替换成功，具体使用参见wiki
-	 *
+	 * 
 	 * @param <T>
 	 * @param key
 	 * @param exp

@@ -95,11 +95,10 @@ public class XMemcachedClientThreadSafeTest {
 
 	public static void main(String args[]) throws Exception {
 		CyclicBarrier barrier = new CyclicBarrier(num + 1);
-		String ip = "localhost";
+		String ip = "192.168.207.101";
 		XMemcachedClient client = new XMemcachedClient(
 				new KetamaMemcachedSessionLocator());
 		client.addServer(ip, 12000);
-		client.addServer(ip, 12001);
 		// client.addServer(ip, 12002);
 		// client.addServer(ip, 12003);
 		for (int i = 0; i < num; i++)

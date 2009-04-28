@@ -67,7 +67,7 @@ public class CASTest {
 
 	public static void main(String[] args) throws Exception {
 		XMemcachedClient mc = new XMemcachedClient();
-		mc.addServer("localhost", 12000);
+		mc.addServer("192.168.207.101", 12000);
 		// 设置初始值为0
 		mc.set("a", 0, 0);
 		CountDownLatch cdl = new CountDownLatch(NUM);
