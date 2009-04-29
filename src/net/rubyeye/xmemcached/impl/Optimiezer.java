@@ -67,7 +67,7 @@ public class Optimiezer implements OptimiezerMBean, MemcachedOptimiezer {
 
 	public void setOptimiezeGet(boolean optimiezeGet) {
 		log.warn("change optimiezeGet from " + this.mergeFactor + " to "
-				+ mergeFactor);
+				+ optimiezeGet);
 		this.optimiezeGet = optimiezeGet;
 	}
 
@@ -77,7 +77,7 @@ public class Optimiezer implements OptimiezerMBean, MemcachedOptimiezer {
 
 	public void setOptimiezeMergeBuffer(boolean optimiezeMergeBuffer) {
 		log.warn("change optimiezeMergeBuffer from " + this.mergeFactor
-				+ " to " + mergeFactor);
+				+ " to " + optimiezeMergeBuffer);
 		this.optimiezeMergeBuffer = optimiezeMergeBuffer;
 	}
 
