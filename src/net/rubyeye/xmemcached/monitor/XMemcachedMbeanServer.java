@@ -11,15 +11,16 @@ import javax.management.remote.JMXConnectorServer;
 import javax.management.remote.JMXConnectorServerFactory;
 import javax.management.remote.JMXServiceURL;
 
-import org.apache.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 /**
  * @author dennis
  * 
  */
 public final class XMemcachedMbeanServer {
-	private static final Logger log = Logger
-			.getLogger(XMemcachedMbeanServer.class);
+	private static final Log log = LogFactory
+			.getLog(XMemcachedMbeanServer.class);
 
 	private MBeanServer mbserver = null;
 

@@ -10,6 +10,10 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import net.rubyeye.xmemcached.buffer.BufferAllocator;
 import net.rubyeye.xmemcached.buffer.IoBuffer;
 import net.rubyeye.xmemcached.command.Command;
@@ -29,6 +33,7 @@ public class Optimiezer implements OptimiezerMBean, MemcachedOptimiezer {
 	private boolean optimiezeGet = true;
 	private boolean optimiezeMergeBuffer = true;
 	BufferAllocator bufferAllocator;
+	private static final Log log = LogFactory.getLog(Optimiezer.class);
 
 	public Optimiezer() {
 		XMemcachedMbeanServer.getInstance().registMBean(
@@ -50,7 +55,10 @@ public class Optimiezer implements OptimiezerMBean, MemcachedOptimiezer {
 	}
 
 	public void setMergeFactor(int mergeFactor) {
+		log.warn("change mergeFactor from " + this.mergeFactor + " to "
+				+ mergeFactor);
 		this.mergeFactor = mergeFactor;
+
 	}
 
 	public boolean isOptimiezeGet() {
@@ -58,6 +66,8 @@ public class Optimiezer implements OptimiezerMBean, MemcachedOptimiezer {
 	}
 
 	public void setOptimiezeGet(boolean optimiezeGet) {
+		log.warn("change optimiezeGet from " + this.mergeFactor + " to "
+				+ mergeFactor);
 		this.optimiezeGet = optimiezeGet;
 	}
 
@@ -66,6 +76,8 @@ public class Optimiezer implements OptimiezerMBean, MemcachedOptimiezer {
 	}
 
 	public void setOptimiezeMergeBuffer(boolean optimiezeMergeBuffer) {
+		log.warn("change optimiezeMergeBuffer from " + this.mergeFactor
+				+ " to " + mergeFactor);
 		this.optimiezeMergeBuffer = optimiezeMergeBuffer;
 	}
 
@@ -201,6 +213,7 @@ public class Optimiezer implements OptimiezerMBean, MemcachedOptimiezer {
 		if (mergeCount == 1) {
 			return currentCmd;
 		} else {
+			log.debug("merge optimieze:merge " + mergeCount + " get command");
 			return newMergedCommand(mergeCommands, key);
 		}
 	}
