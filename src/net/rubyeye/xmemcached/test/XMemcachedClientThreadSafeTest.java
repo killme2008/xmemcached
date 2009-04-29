@@ -48,7 +48,7 @@ class TestThread implements Runnable {
 			}
 			for (int i = 0; i < NUM; i++) {
 				assert ((Integer) this.xmemcachedClient.get("test_" + number
-						+ "_" + i) == i);
+						+ "_" + i, 2000) == i);
 			}
 			for (int i = 0; i < NUM; i++) {
 				assert (this.xmemcachedClient
@@ -56,11 +56,11 @@ class TestThread implements Runnable {
 			}
 			for (int i = 0; i < NUM; i++) {
 				assert ((Integer) this.xmemcachedClient.get("test_" + number
-						+ "_" + i) == null);
+						+ "_" + i, 2000) == null);
 			}
 			assert (xmemcachedClient.set("list_" + number, 0, list));
-			List<Integer> cachedList = (List<Integer>) xmemcachedClient
-					.get("list_" + number);
+			List<Integer> cachedList = (List<Integer>) xmemcachedClient.get(
+					"list_" + number, 2000);
 			assert (cachedList.size() == ELEMENT_NUM);
 			for (int i = 0; i < ELEMENT_NUM; i++)
 				assert (cachedList.get(i) == i);
@@ -68,7 +68,7 @@ class TestThread implements Runnable {
 
 			assert (xmemcachedClient.set("map_" + number, 0, map));
 			Map<String, Integer> cachedMap = (Map<String, Integer>) xmemcachedClient
-					.get("map_" + number);
+					.get("map_" + number, 2000);
 			assert (cachedMap.size() == ELEMENT_NUM);
 			for (int i = 0; i < ELEMENT_NUM; i++)
 				assert (cachedMap.get(String.valueOf(i)) == i);
@@ -76,7 +76,7 @@ class TestThread implements Runnable {
 
 			assert (xmemcachedClient.set("map2_" + number, 0, map2));
 			Map<String, NameClass> cachedMap2 = (Map<String, NameClass>) xmemcachedClient
-					.get("map2_" + number);
+					.get("map2_" + number, 2000);
 			assert (cachedMap2.size() == ELEMENT_NUM);
 			for (int i = 0; i < ELEMENT_NUM; i++)
 				assert (((NameClass) cachedMap2.get(String.valueOf(i))).firstName

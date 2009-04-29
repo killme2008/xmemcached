@@ -59,7 +59,7 @@ public class MemcachedHandler extends HandlerAdapter<Command> implements
 
 	private Map<Command.CommandType, AtomicLong> counterMap = new HashMap<Command.CommandType, AtomicLong>();
 
-	private volatile boolean statistics = Boolean.valueOf(System.getProperty(
+	private boolean statistics = Boolean.valueOf(System.getProperty(
 			Constants.XMEMCACHED_STATISTICS_ENABLE, "false"));
 
 	/**
@@ -559,7 +559,7 @@ public class MemcachedHandler extends HandlerAdapter<Command> implements
 	}
 
 	public final void statistics(Command.CommandType cmdType) {
-		if (isStatistics())
+		if (this.statistics)
 			this.counterMap.get(cmdType).incrementAndGet();
 	}
 
