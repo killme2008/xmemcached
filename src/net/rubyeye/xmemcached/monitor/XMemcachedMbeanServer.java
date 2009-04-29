@@ -15,6 +15,17 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 /**
+ * jmx MBeanServer，通过RMI发布，你可以通过service:jmx:rmi:///jndi/rmi://[host]:[port]/[
+ * name]访问此服务</br>
+ * 
+ * 默认JMX未开启，你可以通过启动参数java
+ * -Dxmemcached.jmx.enable=true来启用，默认的port是7077，默认的name是xmemcachedServer
+ * 这些参数可以通过下列参数来修改:</br>
+ * <ul>
+ * <li>-Dxmemcached.rmi.port</li>
+ * <li>-Dxmemcached.rmi.name</li>
+ * </ul>
+ * 
  * @author dennis
  * 
  */
@@ -39,26 +50,25 @@ public final class XMemcachedMbeanServer {
 		}
 		String host = System.getProperty("hostName", hostName);
 		try {
-			boolean useJmx = Boolean.parseBoolean(System.getProperty(
+			boolean enableJMX = Boolean.parseBoolean(System.getProperty(
 					Constants.XMEMCACHED_JMX_ENABLE, "false"));
-			System.out.println(useJmx);
-			if (useJmx) {
+			if (enableJMX) {
 				mbserver = ManagementFactory.getPlatformMBeanServer();
 				int port = Integer.parseInt(System.getProperty(
 						Constants.XMEMCACHED_RMI_PORT, "7077"));
 				String rmiName = System.getProperty(
 						Constants.XMEMCACHED_RMI_NAME, "xmemcachedServer");
-				Registry reg = null;
+				Registry registry = null;
 				try {
-					reg = LocateRegistry.getRegistry(port);
-					reg.list();
+					registry = LocateRegistry.getRegistry(port);
+					registry.list();
 				} catch (Exception e) {
-					reg = null;
+					registry = null;
 				}
-				if (null == reg) {
-					reg = LocateRegistry.createRegistry(port);
+				if (null == registry) {
+					registry = LocateRegistry.createRegistry(port);
 				}
-				reg.list();
+				registry.list();
 				String serverURL = "service:jmx:rmi:///jndi/rmi://" + host
 						+ ":" + port + "/" + rmiName;
 				JMXServiceURL url = new JMXServiceURL(serverURL);
