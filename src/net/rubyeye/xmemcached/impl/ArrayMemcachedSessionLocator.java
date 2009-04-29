@@ -16,18 +16,17 @@ import java.util.List;
 
 import net.rubyeye.xmemcached.HashAlgorithm;
 import net.rubyeye.xmemcached.MemcachedSessionLocator;
-import net.rubyeye.xmemcached.MemcachedTCPSession;
 
 /**
  * 基于余数的分布查找
- *
+ * 
  * @author dennis
- *
+ * 
  */
 public class ArrayMemcachedSessionLocator implements MemcachedSessionLocator {
 
 	private HashAlgorithm hashAlgorighm;
-	private List<MemcachedTCPSession> sessions;
+	private transient volatile List<Session> sessions;
 
 	public ArrayMemcachedSessionLocator() {
 		this.hashAlgorighm = HashAlgorithm.NATIVE_HASH;
@@ -39,18 +38,18 @@ public class ArrayMemcachedSessionLocator implements MemcachedSessionLocator {
 
 	public final long getHash(int size, String key) {
 		long hash = hashAlgorighm.hash(key);
-		return hash & (size - 1);
+		return hash % size;
 	}
 
 	@Override
 	public final Session getSessionByKey(final String key) {
-		List<MemcachedTCPSession> sessionList = sessions;
+		List<Session> sessionList = sessions;
 		int size = sessionList.size();
 		if (size == 0) {
 			return null;
 		}
 		long start = getHash(size, key);
-		MemcachedTCPSession session = sessionList.get((int) start);
+		Session session = sessionList.get((int) start);
 		if (session == null || session.isClosed()) {
 			long next = getNext(size, start);
 			while ((session == null || session.isClosed()) && next != start) {
@@ -70,7 +69,8 @@ public class ArrayMemcachedSessionLocator implements MemcachedSessionLocator {
 	}
 
 	@Override
-	public final void updateSessionList(final List<MemcachedTCPSession> list) {
+	public final void updateSessionList(final List<Session> list) {
 		sessions = list;
+
 	}
 }

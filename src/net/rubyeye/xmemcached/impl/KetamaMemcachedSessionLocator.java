@@ -12,12 +12,14 @@
 package net.rubyeye.xmemcached.impl;
 
 import com.google.code.yanf4j.nio.Session;
+
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.TreeMap;
 
 import net.rubyeye.xmemcached.HashAlgorithm;
 import net.rubyeye.xmemcached.MemcachedSessionLocator;
-import net.rubyeye.xmemcached.MemcachedTCPSession;
 
 /**
  * ConnectionFactory instance that sets up a ketama compatible connection.
@@ -36,14 +38,14 @@ import net.rubyeye.xmemcached.MemcachedTCPSession;
  */
 /**
  * 一致性hash算法，基于TreeMap，直接从spymemcached挪用
- *
+ * 
  * @author dennis
- *
+ * 
  */
 public class KetamaMemcachedSessionLocator implements MemcachedSessionLocator {
 
 	static final int NUM_REPS = 160;
-	private transient volatile TreeMap<Long, MemcachedTCPSession> ketamaSessions = new TreeMap<Long, MemcachedTCPSession>();
+	private transient volatile TreeMap<Long, Session> ketamaSessions = new TreeMap<Long, Session>();
 	private final HashAlgorithm hashAlg;
 	private volatile int maxTries;
 
@@ -51,22 +53,24 @@ public class KetamaMemcachedSessionLocator implements MemcachedSessionLocator {
 		this.hashAlg = HashAlgorithm.KETAMA_HASH;
 	}
 
+	public final Map<Long, Session> getSessionMap() {
+		return Collections.unmodifiableMap(ketamaSessions);
+	}
+
 	public KetamaMemcachedSessionLocator(HashAlgorithm alg) {
 		this.hashAlg = alg;
 	}
 
-	public KetamaMemcachedSessionLocator(List<MemcachedTCPSession> list,
-			HashAlgorithm alg) {
+	public KetamaMemcachedSessionLocator(List<Session> list, HashAlgorithm alg) {
 		super();
 		hashAlg = alg;
 		buildMap(list, alg);
 	}
 
-	private final void buildMap(List<MemcachedTCPSession> list,
-			HashAlgorithm alg) {
-		TreeMap<Long, MemcachedTCPSession> sessionMap = new TreeMap<Long, MemcachedTCPSession>();
+	private final void buildMap(List<Session> list, HashAlgorithm alg) {
+		TreeMap<Long, Session> sessionMap = new TreeMap<Long, Session>();
 
-		for (MemcachedTCPSession session : list) {
+		for (Session session : list) {
 			String sockStr = String.valueOf(session.getRemoteSocketAddress());
 			/**
 			 * 按照spy作者的说法，这里是对KETAMA_HASH做特殊处理，为了复用chunk，具体我并不明白，暂时直接拷贝
@@ -75,7 +79,7 @@ public class KetamaMemcachedSessionLocator implements MemcachedSessionLocator {
 				for (int i = 0; i < NUM_REPS / 4; i++) {
 					byte[] digest = HashAlgorithm.computeMd5(sockStr + "-" + i);
 					for (int h = 0; h < 4; h++) {
-						Long k = ((long) (digest[3 + h * 4] & 0xFF) << 24)
+						long k = ((long) (digest[3 + h * 4] & 0xFF) << 24)
 								| ((long) (digest[2 + h * 4] & 0xFF) << 16)
 								| ((long) (digest[1 + h * 4] & 0xFF) << 8)
 								| (digest[h * 4] & 0xFF);
@@ -95,8 +99,8 @@ public class KetamaMemcachedSessionLocator implements MemcachedSessionLocator {
 
 	@Override
 	public final Session getSessionByKey(final String key) {
-		Long hash = hashAlg.hash(key);
-		MemcachedTCPSession rv = getSessionByHash(hash);
+		long hash = hashAlg.hash(key);
+		Session rv = getSessionByHash(hash);
 		int tries = 0;
 		while ((rv == null || rv.isClosed()) && tries++ < this.maxTries) {
 			hash = nextHash(hash, key, tries);
@@ -105,8 +109,8 @@ public class KetamaMemcachedSessionLocator implements MemcachedSessionLocator {
 		return rv;
 	}
 
-	private final MemcachedTCPSession getSessionByHash(final Long hash) {
-		TreeMap<Long, MemcachedTCPSession> sessionMap = ketamaSessions;
+	public final Session getSessionByHash(final long hash) {
+		TreeMap<Long, Session> sessionMap = ketamaSessions;
 		Long resultHash = hash;
 		if (!sessionMap.containsKey(resultHash)) {
 			resultHash = sessionMap.ceilingKey(resultHash);
@@ -114,11 +118,10 @@ public class KetamaMemcachedSessionLocator implements MemcachedSessionLocator {
 				resultHash = sessionMap.firstKey();
 			}
 		}
-
 		return sessionMap.get(resultHash);
 	}
 
-	private final long nextHash(long hashVal, String key, int tries) {
+	public final long nextHash(long hashVal, String key, int tries) {
 		long tmpKey = hashAlg.hash(tries + key);
 		hashVal += (int) (tmpKey ^ (tmpKey >>> 32));
 		hashVal &= 0xffffffffL; /* truncate to 32-bits */
@@ -126,7 +129,7 @@ public class KetamaMemcachedSessionLocator implements MemcachedSessionLocator {
 	}
 
 	@Override
-	public final void updateSessionList(final List<MemcachedTCPSession> list) {
+	public final void updateSessionList(final List<Session> list) {
 		buildMap(list, this.hashAlg);
 	}
 }

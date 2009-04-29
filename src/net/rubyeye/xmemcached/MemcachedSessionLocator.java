@@ -22,5 +22,5 @@ import java.util.List;
 public interface MemcachedSessionLocator {
 	public Session getSessionByKey(final String key);
 
-	public void updateSessionList(final List<MemcachedTCPSession> list);
+	public void updateSessionList(final List<Session> list);
 }

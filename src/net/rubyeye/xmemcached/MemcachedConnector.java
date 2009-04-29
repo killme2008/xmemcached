@@ -24,7 +24,6 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -37,12 +36,13 @@ import java.util.concurrent.locks.ReentrantLock;
 import net.rubyeye.xmemcached.buffer.BufferAllocator;
 import net.rubyeye.xmemcached.command.Command;
 import net.rubyeye.xmemcached.exception.MemcachedException;
-import net.rubyeye.xmemcached.impl.OptimiezerImpl;
+import net.rubyeye.xmemcached.impl.Optimiezer;
+import net.rubyeye.xmemcached.impl.OptimiezerMBean;
 import net.rubyeye.xmemcached.utils.SimpleDeque;
 
 /**
  * 针对memcached的连接管理类
- *
+ * 
  * @author dennis
  */
 public class MemcachedConnector extends SocketChannelController {
@@ -62,7 +62,7 @@ public class MemcachedConnector extends SocketChannelController {
 	private final BlockingQueue<ReconnectRequest> waitingQueue = new LinkedBlockingQueue<ReconnectRequest>();
 	private BufferAllocator bufferAllocator;
 	private SessionMonitor sessionMonitor;
-	private Optimiezer optimiezer;
+	private MemcachedOptimiezer optimiezer;
 
 	class SessionMonitor extends Thread {
 
@@ -121,11 +121,12 @@ public class MemcachedConnector extends SocketChannelController {
 	}
 
 	public void setOptimiezeGet(boolean optimiezeGet) {
-		this.optimiezer.setOptimiezeGet(optimiezeGet);
+		((OptimiezerMBean) this.optimiezer).setOptimiezeGet(optimiezeGet);
 	}
 
 	public void setOptimizeMergeBuffer(boolean optimizeMergeBuffer) {
-		this.optimiezer.setOptimiezeMergeBuffer(optimizeMergeBuffer);
+		((OptimiezerMBean) this.optimiezer)
+				.setOptimiezeMergeBuffer(optimizeMergeBuffer);
 	}
 
 	protected MemcachedSessionLocator sessionLocator;
@@ -246,7 +247,7 @@ public class MemcachedConnector extends SocketChannelController {
 		}
 	}
 
-	CopyOnWriteArrayList<MemcachedTCPSession> memcachedSessions; // 连接管理
+	CopyOnWriteArrayList<Session> memcachedSessions; // 连接管理
 
 	public void addSession(MemcachedTCPSession session) {
 		log.warn("add session "
@@ -384,12 +385,13 @@ public class MemcachedConnector extends SocketChannelController {
 	public MemcachedConnector(Configuration configuration,
 			MemcachedSessionLocator locator, BufferAllocator allocator) {
 		super(configuration, null);
-		this.memcachedSessions = new CopyOnWriteArrayList<MemcachedTCPSession>();
+		this.memcachedSessions = new CopyOnWriteArrayList<Session>();
 		this.sessionLocator = locator;
 		this.sessionLocator.updateSessionList(memcachedSessions);
 		this.sessionMonitor = new SessionMonitor();
 		this.bufferAllocator = allocator;
-		this.optimiezer = new OptimiezerImpl(this.bufferAllocator);
+		this.optimiezer = new Optimiezer();
+		this.optimiezer.setBufferAllocator(this.bufferAllocator);
 	}
 
 	/**
@@ -400,7 +402,7 @@ public class MemcachedConnector extends SocketChannelController {
 	}
 
 	public void setMergeFactor(int mergeFactor) {
-		this.optimiezer.setMergeFactor(mergeFactor);
+		((OptimiezerMBean) this.optimiezer).setMergeFactor(mergeFactor);
 	}
 
 	protected Session buildSession(SocketChannel sc, SelectionKey selectionKey) {

@@ -51,10 +51,10 @@ public class MemcachedTCPSession extends DefaultTCPSession {
 	Map<String, CachedData> currentValues = null;
 	private SocketAddress remoteSocketAddress;
 	private int sendBufferSize;
-	private Optimiezer optimiezer;
+	private MemcachedOptimiezer optimiezer;
 
 	public MemcachedTCPSession(SessionConfig sessionConfig,
-			int readRecvBufferSize, Optimiezer optimiezer, int readThreadCount) {
+			int readRecvBufferSize, MemcachedOptimiezer optimiezer, int readThreadCount) {
 		super(sessionConfig, readRecvBufferSize, -1);
 		this.optimiezer = optimiezer;
 		remoteSocketAddress = ((SocketChannel) this.selectableChannel).socket()

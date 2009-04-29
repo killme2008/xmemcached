@@ -4,9 +4,9 @@ import java.io.UnsupportedEncodingException;
 
 /**
  * String转换器，通常不建议直接使用这个类
- *
+ * 
  * @author dennis
- *
+ * 
  */
 public class StringTranscoder implements Transcoder<String> {
 
@@ -36,16 +36,18 @@ public class StringTranscoder implements Transcoder<String> {
 			throw new RuntimeException("Decode String error");
 	}
 
+	public static final int STRING_FLAG = 0;
+
 	@Override
 	public CachedData encode(String o) {
 		byte[] b = null;
-		int flags = 0;
+
 		try {
 			b = o.getBytes(charset);
 		} catch (UnsupportedEncodingException e) {
 			throw new RuntimeException(e);
 		}
-		return new CachedData(flags, b);
+		return new CachedData(STRING_FLAG, b);
 	}
 
 }

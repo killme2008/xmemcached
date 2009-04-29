@@ -15,12 +15,14 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicLong;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import net.rubyeye.xmemcached.command.Command;
 import net.rubyeye.xmemcached.command.OperationStatus;
+import net.rubyeye.xmemcached.command.Command.CommandType;
 import net.spy.memcached.transcoders.CachedData;
 import net.spy.memcached.transcoders.Transcoder;
 
@@ -32,6 +34,8 @@ import java.nio.ByteBuffer;
 import net.rubyeye.xmemcached.exception.MemcachedClientException;
 import net.rubyeye.xmemcached.exception.MemcachedServerException;
 import net.rubyeye.xmemcached.exception.UnknownCommandException;
+import net.rubyeye.xmemcached.monitor.Constants;
+import net.rubyeye.xmemcached.monitor.XMemcachedMbeanServer;
 
 import com.google.code.yanf4j.util.ByteBufferMatcher;
 import com.google.code.yanf4j.util.ShiftAndByteBufferMatcher;
@@ -43,7 +47,7 @@ import com.google.code.yanf4j.util.ShiftAndByteBufferMatcher;
  * 
  */
 public class MemcachedHandler extends HandlerAdapter<Command> implements
-		MemcachedProtocolHandler {
+		MemcachedProtocolHandler, MemcachedHandlerMBean {
 
 	private static final ByteBuffer SPLIT = ByteBuffer.wrap(Command.SPLIT
 			.getBytes());
@@ -53,13 +57,18 @@ public class MemcachedHandler extends HandlerAdapter<Command> implements
 	private static final ByteBufferMatcher SPLIT_MATCHER = new ShiftAndByteBufferMatcher(
 			SPLIT);
 
+	private Map<Command.CommandType, AtomicLong> counterMap = new HashMap<Command.CommandType, AtomicLong>();
+
+	private volatile boolean statistics = Boolean.valueOf(System.getProperty(
+			Constants.XMEMCACHED_STATISTICS_ENABLE, "false"));
+
 	/**
 	 * 返回boolean值并唤醒
 	 * 
 	 * @param result
 	 * @return
 	 */
-	private final static boolean notifyBoolean(MemcachedTCPSession session,
+	private final boolean notifyBoolean(MemcachedTCPSession session,
 			Boolean result, Command.CommandType expectedCmdType,
 			Command.CommandType... otherExpectedCmdType) {
 		final Command executingCmd = session.getCurrentExecutingCommand();
@@ -72,6 +81,7 @@ public class MemcachedHandler extends HandlerAdapter<Command> implements
 				}
 			}
 		}
+		statistics(executingCmd.getCommandType());
 		if (!isExpected) {
 			session.close();
 			return false;
@@ -233,7 +243,7 @@ public class MemcachedHandler extends HandlerAdapter<Command> implements
 	 * 
 	 * @return
 	 */
-	private static final boolean parseEndCommand(MemcachedTCPSession session) {
+	private final boolean parseEndCommand(MemcachedTCPSession session) {
 		Command executingCmd = session.getCurrentExecutingCommand();
 		Command.CommandType cmdType = executingCmd.getCommandType();
 		if (cmdType != Command.CommandType.GET_ONE
@@ -243,6 +253,10 @@ public class MemcachedHandler extends HandlerAdapter<Command> implements
 			session.close();
 			return false;
 		}
+		if (executingCmd.getCommandType() == Command.CommandType.GET_ONE)
+			statistics(Command.CommandType.GET_MSS);
+		else
+			statistics(cmdType);
 		int mergCount = executingCmd.getMergeCount();
 		if (mergCount < 0) {
 			// single
@@ -286,12 +300,13 @@ public class MemcachedHandler extends HandlerAdapter<Command> implements
 	 * 
 	 * @return
 	 */
-	private static final boolean parseClientException(
-			MemcachedTCPSession session) {
+	private final boolean parseClientException(MemcachedTCPSession session) {
 		int index = session.currentLine.indexOf(" ");
 		final String error = index > 0 ? session.currentLine
 				.substring(index + 1) : "unknown client error";
 		Command executingCmd = session.getCurrentExecutingCommand();
+		if (executingCmd.getCommandType() == Command.CommandType.GET_ONE)
+			statistics(Command.CommandType.GET_MSS);
 		final MemcachedClientException exception = new MemcachedClientException(
 				error + ",command:" + executingCmd.toString());
 		executingCmd.setException(exception);
@@ -312,6 +327,8 @@ public class MemcachedHandler extends HandlerAdapter<Command> implements
 		final String error = index > 0 ? session.currentLine
 				.substring(index + 1) : "unknown server error";
 		Command executingCmd = session.getCurrentExecutingCommand();
+		if (executingCmd.getCommandType() == Command.CommandType.GET_ONE)
+			statistics(Command.CommandType.GET_MSS);
 		final MemcachedServerException exception = new MemcachedServerException(
 				error + ",command:" + executingCmd.toString());
 		executingCmd.setException(exception);
@@ -351,6 +368,7 @@ public class MemcachedHandler extends HandlerAdapter<Command> implements
 	private final boolean parseIncrDecrCommand(MemcachedTCPSession session) {
 		final Integer result = Integer.parseInt(session.currentLine);
 		Command executingCmd = session.getCurrentExecutingCommand();
+		statistics(executingCmd.getCommandType());
 		if (executingCmd.getCommandType() != Command.CommandType.INCR
 				&& executingCmd.getCommandType() != Command.CommandType.DECR) {
 			session.close();
@@ -443,7 +461,12 @@ public class MemcachedHandler extends HandlerAdapter<Command> implements
 			if (values.get(executingCmd.getKey()) == null) {
 				reconnect(session);
 			} else {
+
 				CachedData data = values.get(executingCmd.getKey());
+				if (data != null)
+					statistics(CommandType.GET_HIT);
+				else
+					statistics(CommandType.GET_MSS);
 				executingCmd.setResult(data); // 设置CachedData返回，transcoder.decode
 				// ()放到用户线程
 
@@ -455,7 +478,12 @@ public class MemcachedHandler extends HandlerAdapter<Command> implements
 			List<Command> mergeCommands = executingCmd.getMergeCommands();
 			executingCmd.getIoBuffer().free();
 			for (Command nextCommand : mergeCommands) {
-				nextCommand.setResult(values.get(nextCommand.getKey()));
+				CachedData data = values.get(nextCommand.getKey());
+				nextCommand.setResult(data);
+				if (data != null)
+					statistics(CommandType.GET_HIT);
+				else
+					statistics(CommandType.GET_MSS);
 				nextCommand.getLatch().countDown();
 				nextCommand.setStatus(OperationStatus.DONE);
 			}
@@ -468,6 +496,7 @@ public class MemcachedHandler extends HandlerAdapter<Command> implements
 			Map<String, CachedData> values, Command executingCmd) {
 		// 合并结果
 		if (executingCmd.getCommandType() == Command.CommandType.GET_MANY) {
+			statistics(CommandType.GET_MANY);
 			Map result = (Map) executingCmd.getResult();
 			Iterator<Map.Entry<String, CachedData>> it = values.entrySet()
 					.iterator();
@@ -478,6 +507,7 @@ public class MemcachedHandler extends HandlerAdapter<Command> implements
 			}
 
 		} else {
+			statistics(CommandType.GETS_MANY);
 			Map result = (Map) executingCmd.getResult();
 			Iterator<Map.Entry<String, CachedData>> it = values.entrySet()
 					.iterator();
@@ -498,6 +528,46 @@ public class MemcachedHandler extends HandlerAdapter<Command> implements
 		super();
 		this.transcoder = transcoder;
 		this.client = client;
+		buildCounterMap();
+		XMemcachedMbeanServer.getInstance().registMBean(
+				this,
+				this.getClass().getPackage().getName() + ":type="
+						+ this.getClass().getSimpleName());
+	}
+
+	private void buildCounterMap() {
+		Map<Command.CommandType, AtomicLong> map = new HashMap<Command.CommandType, AtomicLong>();
+		map.put(Command.CommandType.APPEND, new AtomicLong());
+		map.put(Command.CommandType.SET, new AtomicLong());
+		map.put(Command.CommandType.PREPEND, new AtomicLong());
+		map.put(Command.CommandType.CAS, new AtomicLong());
+		map.put(Command.CommandType.ADD, new AtomicLong());
+		map.put(Command.CommandType.REPLACE, new AtomicLong());
+		map.put(Command.CommandType.DELETE, new AtomicLong());
+		map.put(Command.CommandType.INCR, new AtomicLong());
+		map.put(Command.CommandType.DECR, new AtomicLong());
+		map.put(Command.CommandType.GET_HIT, new AtomicLong());
+		map.put(Command.CommandType.GET_MSS, new AtomicLong());
+		map.put(Command.CommandType.GET_MANY, new AtomicLong());
+		map.put(Command.CommandType.GETS_MANY, new AtomicLong());
+		this.counterMap = map;
+	}
+
+	@Override
+	public final boolean isStatistics() {
+		return this.statistics;
+	}
+
+	public final void statistics(Command.CommandType cmdType) {
+		if (isStatistics())
+			this.counterMap.get(cmdType).incrementAndGet();
+	}
+
+	@Override
+	public final void setStatistics(boolean statistics) {
+		this.statistics = statistics;
+		buildCounterMap();
+
 	}
 
 	@SuppressWarnings("unchecked")
@@ -508,6 +578,71 @@ public class MemcachedHandler extends HandlerAdapter<Command> implements
 	@SuppressWarnings("unchecked")
 	public void setTranscoder(Transcoder transcoder) {
 		this.transcoder = transcoder;
+	}
+
+	@Override
+	public long getAppendCount() {
+		return counterMap.get(Command.CommandType.APPEND).get();
+	}
+
+	@Override
+	public long getCASCount() {
+		return counterMap.get(Command.CommandType.CAS).get();
+	}
+
+	@Override
+	public long getDecrCount() {
+		return counterMap.get(Command.CommandType.DECR).get();
+	}
+
+	@Override
+	public long getDeleteCount() {
+		return counterMap.get(Command.CommandType.DELETE).get();
+	}
+
+	@Override
+	public long getGetHitCount() {
+		return counterMap.get(Command.CommandType.GET_HIT).get();
+	}
+
+	@Override
+	public long getGetMissCount() {
+		return counterMap.get(Command.CommandType.GET_MSS).get();
+	}
+
+	@Override
+	public long getIncrCount() {
+		return counterMap.get(Command.CommandType.INCR).get();
+	}
+
+	@Override
+	public long getMultiGetCount() {
+		return counterMap.get(Command.CommandType.GET_MANY).get();
+	}
+
+	@Override
+	public long getMultiGetsCount() {
+		return counterMap.get(Command.CommandType.GETS_MANY).get();
+	}
+
+	@Override
+	public long getPrependCount() {
+		return counterMap.get(Command.CommandType.PREPEND).get();
+	}
+
+	@Override
+	public long getSetCount() {
+		return counterMap.get(Command.CommandType.SET).get();
+	}
+
+	@Override
+	public long getAddCount() {
+		return counterMap.get(Command.CommandType.ADD).get();
+	}
+
+	@Override
+	public long getReplaceCount() {
+		return counterMap.get(Command.CommandType.REPLACE).get();
 	}
 
 }

@@ -14,7 +14,7 @@ package net.rubyeye.xmemcached.utils;
 import com.google.code.yanf4j.util.Queue;
 
 /**
- * 扩展queue,谈价addFirst
+ * 扩展queue,添加addFirst
  * @author dennis
  *
  * @param <T>

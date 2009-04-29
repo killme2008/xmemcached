@@ -15,7 +15,6 @@ import java.io.UnsupportedEncodingException;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import net.rubyeye.xmemcached.buffer.IoBuffer;
-import net.rubyeye.xmemcached.exception.MemcachedException;
 import net.spy.memcached.transcoders.CachedData;
 import net.spy.memcached.transcoders.Transcoder;
 
@@ -49,7 +48,7 @@ public class Command {
 	 */
 	public enum CommandType {
 
-		GET_ONE, GET_MANY, SET, REPLACE, ADD, EXCEPTION, DELETE, VERSION, INCR, DECR, GETS_ONE, GETS_MANY, CAS, APPEND, PREPEND;
+		GET_ONE, GET_MANY, SET, REPLACE, ADD, EXCEPTION, DELETE, VERSION, INCR, DECR, GETS_ONE, GETS_MANY, CAS, APPEND, PREPEND,GET_HIT,GET_MSS;
 	}
 
 	public void setCommandType(final CommandType commandType) {
@@ -147,7 +146,7 @@ public class Command {
 			return new String(this.ioBuffer.getByteBuffer().array(), "utf-8");
 		} catch (UnsupportedEncodingException e) {
 		}
-		return null;
+		return "[error]";
 	}
 
 	public boolean isCancel() {
