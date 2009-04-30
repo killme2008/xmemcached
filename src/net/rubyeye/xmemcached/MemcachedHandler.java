@@ -15,8 +15,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicLong;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -34,8 +32,7 @@ import java.nio.ByteBuffer;
 import net.rubyeye.xmemcached.exception.MemcachedClientException;
 import net.rubyeye.xmemcached.exception.MemcachedServerException;
 import net.rubyeye.xmemcached.exception.UnknownCommandException;
-import net.rubyeye.xmemcached.monitor.Constants;
-import net.rubyeye.xmemcached.monitor.XMemcachedMbeanServer;
+import net.rubyeye.xmemcached.monitor.StatisticsHandler;
 
 import com.google.code.yanf4j.util.ByteBufferMatcher;
 import com.google.code.yanf4j.util.ShiftAndByteBufferMatcher;
@@ -47,7 +44,7 @@ import com.google.code.yanf4j.util.ShiftAndByteBufferMatcher;
  * 
  */
 public class MemcachedHandler extends HandlerAdapter<Command> implements
-		MemcachedProtocolHandler, MemcachedHandlerMBean {
+		MemcachedProtocolHandler {
 
 	private static final ByteBuffer SPLIT = ByteBuffer.wrap(Command.SPLIT
 			.getBytes());
@@ -57,10 +54,7 @@ public class MemcachedHandler extends HandlerAdapter<Command> implements
 	private static final ByteBufferMatcher SPLIT_MATCHER = new ShiftAndByteBufferMatcher(
 			SPLIT);
 
-	private Map<Command.CommandType, AtomicLong> counterMap = new HashMap<Command.CommandType, AtomicLong>();
-
-	private boolean statistics = Boolean.valueOf(System.getProperty(
-			Constants.XMEMCACHED_STATISTICS_ENABLE, "false"));
+	private StatisticsHandler statisticsHandler;
 
 	/**
 	 * 返回boolean值并唤醒
@@ -523,50 +517,16 @@ public class MemcachedHandler extends HandlerAdapter<Command> implements
 		executingCmd.setStatus(OperationStatus.DONE);
 	}
 
+	public final void statistics(Command.CommandType cmdType) {
+		this.statisticsHandler.statistics(cmdType);
+	}
+
 	@SuppressWarnings("unchecked")
 	public MemcachedHandler(Transcoder transcoder, XMemcachedClient client) {
 		super();
 		this.transcoder = transcoder;
 		this.client = client;
-		buildCounterMap();
-		XMemcachedMbeanServer.getInstance().registMBean(
-				this,
-				this.getClass().getPackage().getName() + ":type="
-						+ this.getClass().getSimpleName());
-	}
-
-	private void buildCounterMap() {
-		Map<Command.CommandType, AtomicLong> map = new HashMap<Command.CommandType, AtomicLong>();
-		map.put(Command.CommandType.APPEND, new AtomicLong());
-		map.put(Command.CommandType.SET, new AtomicLong());
-		map.put(Command.CommandType.PREPEND, new AtomicLong());
-		map.put(Command.CommandType.CAS, new AtomicLong());
-		map.put(Command.CommandType.ADD, new AtomicLong());
-		map.put(Command.CommandType.REPLACE, new AtomicLong());
-		map.put(Command.CommandType.DELETE, new AtomicLong());
-		map.put(Command.CommandType.INCR, new AtomicLong());
-		map.put(Command.CommandType.DECR, new AtomicLong());
-		map.put(Command.CommandType.GET_HIT, new AtomicLong());
-		map.put(Command.CommandType.GET_MSS, new AtomicLong());
-		map.put(Command.CommandType.GET_MANY, new AtomicLong());
-		map.put(Command.CommandType.GETS_MANY, new AtomicLong());
-		this.counterMap = map;
-	}
-
-	@Override
-	public final boolean isStatistics() {
-		return this.statistics;
-	}
-
-	public final void statistics(Command.CommandType cmdType) {
-		if (this.statistics)
-			this.counterMap.get(cmdType).incrementAndGet();
-	}
-
-	@Override
-	public final void setStatistics(boolean statistics) {
-		this.statistics = statistics;
-		buildCounterMap();
+		this.statisticsHandler = new StatisticsHandler();
 
 	}
 
@@ -578,71 +538,6 @@ public class MemcachedHandler extends HandlerAdapter<Command> implements
 	@SuppressWarnings("unchecked")
 	public void setTranscoder(Transcoder transcoder) {
 		this.transcoder = transcoder;
-	}
-
-	@Override
-	public long getAppendCount() {
-		return counterMap.get(Command.CommandType.APPEND).get();
-	}
-
-	@Override
-	public long getCASCount() {
-		return counterMap.get(Command.CommandType.CAS).get();
-	}
-
-	@Override
-	public long getDecrCount() {
-		return counterMap.get(Command.CommandType.DECR).get();
-	}
-
-	@Override
-	public long getDeleteCount() {
-		return counterMap.get(Command.CommandType.DELETE).get();
-	}
-
-	@Override
-	public long getGetHitCount() {
-		return counterMap.get(Command.CommandType.GET_HIT).get();
-	}
-
-	@Override
-	public long getGetMissCount() {
-		return counterMap.get(Command.CommandType.GET_MSS).get();
-	}
-
-	@Override
-	public long getIncrCount() {
-		return counterMap.get(Command.CommandType.INCR).get();
-	}
-
-	@Override
-	public long getMultiGetCount() {
-		return counterMap.get(Command.CommandType.GET_MANY).get();
-	}
-
-	@Override
-	public long getMultiGetsCount() {
-		return counterMap.get(Command.CommandType.GETS_MANY).get();
-	}
-
-	@Override
-	public long getPrependCount() {
-		return counterMap.get(Command.CommandType.PREPEND).get();
-	}
-
-	@Override
-	public long getSetCount() {
-		return counterMap.get(Command.CommandType.SET).get();
-	}
-
-	@Override
-	public long getAddCount() {
-		return counterMap.get(Command.CommandType.ADD).get();
-	}
-
-	@Override
-	public long getReplaceCount() {
-		return counterMap.get(Command.CommandType.REPLACE).get();
 	}
 
 }
