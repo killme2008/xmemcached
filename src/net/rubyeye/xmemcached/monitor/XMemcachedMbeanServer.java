@@ -103,7 +103,7 @@ public final class XMemcachedMbeanServer {
 
 	public final void shutdown() {
 		try {
-			if (connectorServer.isActive()) {
+			if (connectorServer != null && connectorServer.isActive()) {
 				connectorServer.stop();
 				log.warn("JMXConnector stop");
 			}
