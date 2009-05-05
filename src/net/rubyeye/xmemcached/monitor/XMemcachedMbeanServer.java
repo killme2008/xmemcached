@@ -36,6 +36,7 @@ public final class XMemcachedMbeanServer {
 	private MBeanServer mbserver = null;
 
 	private static XMemcachedMbeanServer instance = new XMemcachedMbeanServer();
+	private JMXConnectorServer connectorServer;
 
 	private XMemcachedMbeanServer() {
 		// 创建MBServer
@@ -72,15 +73,18 @@ public final class XMemcachedMbeanServer {
 				String serverURL = "service:jmx:rmi:///jndi/rmi://" + host
 						+ ":" + port + "/" + rmiName;
 				JMXServiceURL url = new JMXServiceURL(serverURL);
-				final JMXConnectorServer connectorServer = JMXConnectorServerFactory
+				connectorServer = JMXConnectorServerFactory
 						.newJMXConnectorServer(url, null, mbserver);
 				connectorServer.start();
 				Runtime.getRuntime().addShutdownHook(new Thread() {
 					@Override
 					public void run() {
 						try {
-							System.err.println("JMXConnector stop");
-							connectorServer.stop();
+
+							if (connectorServer.isActive()) {
+								connectorServer.stop();
+								log.warn("JMXConnector stop");
+							}
 						} catch (IOException e) {
 							log.error(e);
 						}
@@ -95,6 +99,17 @@ public final class XMemcachedMbeanServer {
 
 	public static XMemcachedMbeanServer getInstance() {
 		return instance;
+	}
+
+	public final void shutdown() {
+		try {
+			if (connectorServer.isActive()) {
+				connectorServer.stop();
+				log.warn("JMXConnector stop");
+			}
+		} catch (IOException e) {
+			log.error(e);
+		}
 	}
 
 	public void registMBean(Object o, String name) {

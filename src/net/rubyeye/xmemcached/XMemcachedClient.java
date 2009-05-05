@@ -33,6 +33,7 @@ import net.rubyeye.xmemcached.buffer.SimpleBufferAllocator;
 import net.rubyeye.xmemcached.command.Command;
 import net.rubyeye.xmemcached.exception.MemcachedException;
 import net.rubyeye.xmemcached.impl.ArrayMemcachedSessionLocator;
+import net.rubyeye.xmemcached.monitor.XMemcachedMbeanServer;
 import net.rubyeye.xmemcached.utils.ByteUtils;
 import net.spy.memcached.transcoders.CachedData;
 import net.spy.memcached.transcoders.SerializingTranscoder;
@@ -1018,6 +1019,7 @@ public final class XMemcachedClient {
 		}
 		this.shutdown = true;
 		this.connector.stop();
+		XMemcachedMbeanServer.getInstance().shutdown();
 	}
 
 	private int sendIncrOrDecrCommand(final String key, final int num,

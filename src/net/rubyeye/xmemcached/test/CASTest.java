@@ -78,7 +78,6 @@ public class CASTest {
 		cdl.await();
 		// 打印结果,最后结果应该为NUM
 		System.out.println("result=" + mc.get("a"));
-		Thread.sleep(100000000);
 		mc.shutdown();
 	}
 }

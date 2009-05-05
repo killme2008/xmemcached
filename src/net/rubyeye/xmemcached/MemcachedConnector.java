@@ -154,7 +154,7 @@ public class MemcachedConnector extends SocketChannelController {
 			try {
 				this.connected = connected;
 				done = true;
-				notDone.signal();
+				notDone.signalAll();
 			} finally {
 				lock.unlock();
 			}
@@ -174,7 +174,7 @@ public class MemcachedConnector extends SocketChannelController {
 			try {
 				this.exception = exception;
 				done = true;
-				notDone.signal();
+				notDone.signalAll();
 			} finally {
 				lock.unlock();
 			}
