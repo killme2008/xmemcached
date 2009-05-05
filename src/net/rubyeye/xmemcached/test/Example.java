@@ -178,6 +178,8 @@ public class Example {
 			}
 			keys.add("a");
 			System.out.println(client.gets(keys).get("a").getValue());
+			client.set("b", 0, 10000);
+			client.flushAll();
 			client.shutdown();
 		} catch (IOException e) {
 			e.printStackTrace();

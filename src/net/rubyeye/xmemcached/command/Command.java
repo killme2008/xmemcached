@@ -20,9 +20,9 @@ import net.spy.memcached.transcoders.Transcoder;
 
 /**
  * memcached命令类
- *
+ * 
  * @author Administrator
- *
+ * 
  */
 public class Command {
 
@@ -42,13 +42,13 @@ public class Command {
 
 	/**
 	 * 命令类型
-	 *
+	 * 
 	 * @author dennis
-	 *
+	 * 
 	 */
 	public enum CommandType {
 
-		GET_ONE, GET_MANY, SET, REPLACE, ADD, EXCEPTION, DELETE, VERSION, INCR, DECR, GETS_ONE, GETS_MANY, CAS, APPEND, PREPEND,GET_HIT,GET_MSS;
+		FLUSH_ALL, GET_ONE, GET_MANY, SET, REPLACE, ADD, EXCEPTION, DELETE, VERSION, INCR, DECR, GETS_ONE, GETS_MANY, CAS, APPEND, PREPEND, GET_HIT, GET_MSS;
 	}
 
 	public void setCommandType(final CommandType commandType) {

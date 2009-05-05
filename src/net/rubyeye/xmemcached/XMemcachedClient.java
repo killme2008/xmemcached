@@ -991,6 +991,27 @@ public final class XMemcachedClient {
 		return sendIncrOrDecrCommand(key, num, Command.CommandType.DECR, "decr");
 	}
 
+	public final boolean flushAll() throws TimeoutException,
+			InterruptedException, MemcachedException {
+		return flushAll(DEFAULT_OP_TIMEOUT);
+	}
+
+	public final boolean flushAll(long timeout) throws TimeoutException,
+			InterruptedException, MemcachedException {
+		final Command command = CommandFactory.createFlushAllCommand();
+		if (!sendCommand(command)) {
+			throw new MemcachedException("send command fail");
+		}
+		latchWait(command, timeout);
+		command.getIoBuffer().free(); // free buffer
+		checkException(command);
+		if (command.getResult() == null) {
+			throw new MemcachedException(
+					"Operation fail,may be caused by networking or timeout");
+		}
+		return (Boolean) command.getResult();
+	}
+
 	public final void shutdown() throws IOException {
 		if (this.shutdown) {
 			return;

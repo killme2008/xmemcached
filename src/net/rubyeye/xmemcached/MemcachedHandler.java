@@ -148,6 +148,9 @@ public class MemcachedHandler extends HandlerAdapter<Command> implements
 					return parseServerException(session);
 				} else if (session.currentLine.startsWith("VERSION ")) {
 					return parseVersionCommand(session);
+				} else if (session.currentLine.equals("OK")) {
+					return notifyBoolean(session, true,
+							Command.CommandType.FLUSH_ALL);
 				} else {
 					return parseIncrDecrCommand(session);
 				}

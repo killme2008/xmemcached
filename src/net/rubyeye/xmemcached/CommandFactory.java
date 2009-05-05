@@ -69,6 +69,23 @@ public final class CommandFactory {
 		return command;
 	}
 
+	static final ByteBuffer FLUSH_ALL = ByteBuffer.wrap("flush_all\r\n"
+			.getBytes());
+
+	/**
+	 * 创建flush_all命令
+	 * 
+	 * @return
+	 */
+	public static final Command createFlushAllCommand() {
+		final CountDownLatch latch = new CountDownLatch(1);
+		final IoBuffer buffer = new SimpleIoBuffer(FLUSH_ALL.slice());
+		Command command = new Command("flush_all",
+				Command.CommandType.FLUSH_ALL, latch);
+		command.setIoBuffer(buffer);
+		return command;
+	}
+
 	/**
 	 * 创建存储命令，如set,add,replace,append,prepend,cas
 	 * 
