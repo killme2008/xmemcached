@@ -162,7 +162,7 @@ public class Optimiezer implements OptimiezerMBean, MemcachedOptimiezer {
 		return currentCommand;
 	}
 
-	private ThreadLocal<List<ByteBuffer>> threadLocal = new ThreadLocal<List<ByteBuffer>>() {
+	private final ThreadLocal<List<ByteBuffer>> threadLocal = new ThreadLocal<List<ByteBuffer>>() {
 
 		@Override
 		protected List<ByteBuffer> initialValue() {
@@ -170,7 +170,7 @@ public class Optimiezer implements OptimiezerMBean, MemcachedOptimiezer {
 		}
 	};
 
-	public List<ByteBuffer> getLocalList() {
+	public final List<ByteBuffer> getLocalList() {
 		List<ByteBuffer> list = threadLocal.get();
 		list.clear();
 		return list;
