@@ -1044,11 +1044,25 @@ public final class XMemcachedClient {
 	 */
 	public final void flushAll(String host, long timeout)
 			throws TimeoutException, InterruptedException, MemcachedException {
+		InetSocketAddress address = AddrUtil.getAddress(host);
+		flushAll(address, timeout);
+	}
+
+	public void flushAll(InetSocketAddress address) throws MemcachedException,
+			InterruptedException, TimeoutException {
+		flushAll(address, DEFAULT_OP_TIMEOUT);
+	}
+
+	public void flushAll(InetSocketAddress address, long timeout)
+			throws MemcachedException, InterruptedException, TimeoutException {
+		if (address == null)
+			throw new IllegalArgumentException("Null adderss");
 		CountDownLatch latch = new CountDownLatch(1);
-		Session session = this.connector.getSessionByAddress(AddrUtil
-				.getAddress(host));
+
+		Session session = this.connector.getSessionByAddress(address);
 		if (session == null)
-			throw new MemcachedException("could not find session for " + host
+			throw new MemcachedException("could not find session for "
+					+ address.getHostName() + ":" + address.getPort()
 					+ ",maybe it have not been connected");
 		Command command = CommandFactory.createFlushAllCommand();
 		command.setLatch(latch);
