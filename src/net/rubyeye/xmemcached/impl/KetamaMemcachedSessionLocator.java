@@ -13,6 +13,7 @@ package net.rubyeye.xmemcached.impl;
 
 import com.google.code.yanf4j.nio.Session;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -67,7 +68,7 @@ public class KetamaMemcachedSessionLocator implements MemcachedSessionLocator {
 		buildMap(list, alg);
 	}
 
-	private final void buildMap(List<Session> list, HashAlgorithm alg) {
+	private final void buildMap(Collection<Session> list, HashAlgorithm alg) {
 		TreeMap<Long, Session> sessionMap = new TreeMap<Long, Session>();
 
 		for (Session session : list) {
@@ -129,7 +130,7 @@ public class KetamaMemcachedSessionLocator implements MemcachedSessionLocator {
 	}
 
 	@Override
-	public final void updateSessionList(final List<Session> list) {
+	public final void updateSessions(final Collection<Session> list) {
 		buildMap(list, this.hashAlg);
 	}
 }

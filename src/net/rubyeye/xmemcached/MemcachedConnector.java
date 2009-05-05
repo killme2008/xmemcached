@@ -23,7 +23,7 @@ import java.net.InetSocketAddress;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -247,22 +247,25 @@ public class MemcachedConnector extends SocketChannelController {
 		}
 	}
 
-	CopyOnWriteArrayList<Session> memcachedSessions; // 连接管理
+	private final ConcurrentHashMap<InetSocketAddress, Session> sessionMap = new ConcurrentHashMap<InetSocketAddress, Session>();
 
 	public void addSession(MemcachedTCPSession session) {
 		log.warn("add session "
 				+ session.getRemoteSocketAddress().getHostName() + ":"
 				+ session.getRemoteSocketAddress().getPort());
-		this.memcachedSessions.add(session);
-		this.sessionLocator.updateSessionList(this.memcachedSessions);
+		Session oldSession = this.sessionMap.put(session
+				.getRemoteSocketAddress(), session);
+		if (oldSession != null)
+			oldSession.close();
+		this.sessionLocator.updateSessions(sessionMap.values());
 	}
 
 	public void removeSession(MemcachedTCPSession session) {
 		log.warn("remove session "
 				+ session.getRemoteSocketAddress().getHostName() + ":"
 				+ session.getRemoteSocketAddress().getPort());
-		this.memcachedSessions.remove(session);
-		this.sessionLocator.updateSessionList(this.memcachedSessions);
+		this.sessionMap.remove(session.getRemoteSocketAddress());
+		this.sessionLocator.updateSessions(sessionMap.values());
 	}
 
 	private int sendBufferSize = 0;
@@ -369,8 +372,18 @@ public class MemcachedConnector extends SocketChannelController {
 		return session.send(msg);
 	}
 
-	protected Session findSessionByKey(String key) {
+	protected final Session findSessionByKey(String key) {
 		return sessionLocator.getSessionByKey(key);
+	}
+
+	/**
+	 * 根据InetSocketAddress获取session
+	 * 
+	 * @param addr
+	 * @return
+	 */
+	public final Session getSessionByAddress(InetSocketAddress addr) {
+		return this.sessionMap.get(addr);
 	}
 
 	public void setMemcachedProtocolHandler(
@@ -385,9 +398,8 @@ public class MemcachedConnector extends SocketChannelController {
 	public MemcachedConnector(Configuration configuration,
 			MemcachedSessionLocator locator, BufferAllocator allocator) {
 		super(configuration, null);
-		this.memcachedSessions = new CopyOnWriteArrayList<Session>();
 		this.sessionLocator = locator;
-		this.sessionLocator.updateSessionList(memcachedSessions);
+		this.sessionLocator.updateSessions(this.sessionMap.values());
 		this.sessionMonitor = new SessionMonitor();
 		this.bufferAllocator = allocator;
 		this.optimiezer = new Optimiezer();

@@ -39,7 +39,7 @@ import net.spy.memcached.transcoders.CachedData;
 
 /**
  * 针对memcached的session类
- *
+ * 
  * @author dennis
  */
 public class MemcachedTCPSession extends DefaultTCPSession {
@@ -54,7 +54,8 @@ public class MemcachedTCPSession extends DefaultTCPSession {
 	private MemcachedOptimiezer optimiezer;
 
 	public MemcachedTCPSession(SessionConfig sessionConfig,
-			int readRecvBufferSize, MemcachedOptimiezer optimiezer, int readThreadCount) {
+			int readRecvBufferSize, MemcachedOptimiezer optimiezer,
+			int readThreadCount) {
 		super(sessionConfig, readRecvBufferSize, -1);
 		this.optimiezer = optimiezer;
 		remoteSocketAddress = ((SocketChannel) this.selectableChannel).socket()
@@ -158,6 +159,8 @@ public class MemcachedTCPSession extends DefaultTCPSession {
 	protected boolean writeToChannel(SelectableChannel channel,
 			ByteBuffer writeBuffer) throws IOException {
 		while (true) {
+			if (writeBuffer == null || !writeBuffer.hasRemaining())
+				return true;
 			long n = doRealWrite(channel, writeBuffer);
 			if (writeBuffer == null || !writeBuffer.hasRemaining()) {
 				return true;
@@ -199,10 +202,10 @@ public class MemcachedTCPSession extends DefaultTCPSession {
 
 	/**
 	 * 获取当前执行command
-	 *
+	 * 
 	 * @return
 	 */
-	Command getCurrentExecutingCommand() {
+	Command pollCurrentExecutingCommand() {
 		try {
 			Command cmd = executingCmds.take();
 			if (cmd != null) {
@@ -217,10 +220,16 @@ public class MemcachedTCPSession extends DefaultTCPSession {
 		return null;
 	}
 
+	Command peekCurrentExecutingCommand() {
+		Command cmd = executingCmds.peek();
+		if (cmd == null)
+			throw new NoSuchElementException();
+		return cmd;
+	}
+
 	@Override
 	protected final Object wrapMessage(Object msg) {
 		return msg;
 	}
-
 
 }

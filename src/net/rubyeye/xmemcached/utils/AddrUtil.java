@@ -5,8 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * copy from spymemcached
- * Convenience utilities for simplifying common address
+ * copy from spymemcached Convenience utilities for simplifying common address
  * parsing.
  */
 public class AddrUtil {
@@ -43,5 +42,24 @@ public class AddrUtil {
 		}
 		assert !addrs.isEmpty() : "No addrs found";
 		return addrs;
+	}
+
+	public static InetSocketAddress getAddress(String host) {
+		if (host == null) {
+			throw new NullPointerException("Null host");
+		}
+		if (host.trim().equals("")) {
+			throw new IllegalArgumentException("No hosts in:  ``" + host + "''");
+		}
+
+		int finalColon = host.lastIndexOf(':');
+		if (finalColon < 1) {
+			throw new IllegalArgumentException("Invalid server ``" + host
+					+ "'' in list:  " + host);
+
+		}
+		String hostPart = host.substring(0, finalColon);
+		String portNum = host.substring(finalColon + 1);
+		return new InetSocketAddress(hostPart, Integer.parseInt(portNum));
 	}
 }

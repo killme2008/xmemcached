@@ -99,16 +99,20 @@ public class PerformanceTest2 {
 
 			int cpuCount = Runtime.getRuntime().availableProcessors();
 
-			int thread = 100;
+			int thread = 10;
 
 			int repeat = 100;
 
 			XMemcachedClientBuilder builder = new XMemcachedClientBuilder(
-					AddrUtil.getAddresses("192.168.207.101:12000"));
+					AddrUtil
+							.getAddresses("192.168.207.101:12000 192.168.207.101:12001"));
 			builder.getConfiguration().setReadThreadCount(0);
 			XMemcachedClient mc = builder.build();
 			testWrite(cpuCount, thread, repeat, mc);
 			testRead(cpuCount, thread, repeat, mc);
+			mc.flushAll(10000); // delete all
+			System.out.println(mc.stats("192.168.207.101:12000"));
+			System.out.println(mc.stats("192.168.207.101:12001"));
 			mc.shutdown();
 		} catch (Exception e) {
 			e.printStackTrace();

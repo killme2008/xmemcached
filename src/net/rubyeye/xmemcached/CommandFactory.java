@@ -78,10 +78,23 @@ public final class CommandFactory {
 	 * @return
 	 */
 	public static final Command createFlushAllCommand() {
-		final CountDownLatch latch = new CountDownLatch(1);
 		final IoBuffer buffer = new SimpleIoBuffer(FLUSH_ALL.slice());
 		Command command = new Command("flush_all",
-				Command.CommandType.FLUSH_ALL, latch);
+				Command.CommandType.FLUSH_ALL, null);
+		command.setIoBuffer(buffer);
+		return command;
+	}
+
+	static final ByteBuffer STATS = ByteBuffer.wrap("stats\r\n".getBytes());
+
+	/**
+	 * 创建flush_all命令
+	 * 
+	 * @return
+	 */
+	public static final Command createStatsCommand() {
+		final IoBuffer buffer = new SimpleIoBuffer(STATS.slice());
+		Command command = new Command("stats", Command.CommandType.STATS, null);
 		command.setIoBuffer(buffer);
 		return command;
 	}

@@ -34,6 +34,7 @@ import net.rubyeye.xmemcached.command.Command;
 import net.rubyeye.xmemcached.exception.MemcachedException;
 import net.rubyeye.xmemcached.impl.ArrayMemcachedSessionLocator;
 import net.rubyeye.xmemcached.monitor.XMemcachedMbeanServer;
+import net.rubyeye.xmemcached.utils.AddrUtil;
 import net.rubyeye.xmemcached.utils.ByteUtils;
 import net.spy.memcached.transcoders.CachedData;
 import net.spy.memcached.transcoders.SerializingTranscoder;
@@ -55,9 +56,9 @@ public final class XMemcachedClient {
 	 */
 	public static final int DEFAULT_READ_THREAD_COUNT = 0;
 	/**
-	 * 默认的连接超时,30秒
+	 * 默认的连接超时,1分钟
 	 */
-	public static final int DEFAULT_CONNECT_TIMEOUT = 30000;
+	public static final int DEFAULT_CONNECT_TIMEOUT = 60000;
 	/**
 	 * 默认的socket发送缓冲区大小，16K
 	 */
@@ -992,25 +993,147 @@ public final class XMemcachedClient {
 		return sendIncrOrDecrCommand(key, num, Command.CommandType.DECR, "decr");
 	}
 
-	public final boolean flushAll() throws TimeoutException,
-			InterruptedException, MemcachedException {
-		return flushAll(DEFAULT_OP_TIMEOUT);
+	/**
+	 * 使cache中所有的数据项失效，如果是连接多个节点的memcached，那么所有的memcached中的数据项都将失效
+	 * 
+	 * @throws TimeoutException
+	 * @throws InterruptedException
+	 * @throws MemcachedException
+	 */
+	public final void flushAll() throws TimeoutException, InterruptedException,
+			MemcachedException {
+		flushAll(DEFAULT_OP_TIMEOUT);
 	}
 
-	public final boolean flushAll(long timeout) throws TimeoutException,
+	/**
+	 * 使cache中所有的数据项失效,如果是连接多个节点的memcached，那么所有的memcached中的数据项都将失效
+	 * 
+	 * @param timeout
+	 *            操作超时时间
+	 * @throws TimeoutException
+	 * @throws InterruptedException
+	 * @throws MemcachedException
+	 */
+	public final void flushAll(long timeout) throws TimeoutException,
 			InterruptedException, MemcachedException {
-		final Command command = CommandFactory.createFlushAllCommand();
-		if (!sendCommand(command)) {
+		final Collection<Session> sessions = this.connector.getSessionSet();
+		CountDownLatch latch = new CountDownLatch(sessions.size());
+		for (Session session : sessions) {
+			if (session != null && !session.isClosed()) {
+				Command command = CommandFactory.createFlushAllCommand();
+				command.setLatch(latch);
+				session.send(command);
+			} else
+				latch.countDown();
+		}
+		if (!latch.await(timeout, TimeUnit.MILLISECONDS)) {
+			throw new TimeoutException("Timed out waiting for operation");
+		}
+	}
+
+	/**
+	 * 使指定memcached节点的数据项失效
+	 * 
+	 * @param host
+	 *            memcached节点host ip:port的形式
+	 * @param timeout
+	 *            操作超时时间
+	 * @throws TimeoutException
+	 * @throws InterruptedException
+	 * @throws MemcachedException
+	 */
+	public final void flushAll(String host, long timeout)
+			throws TimeoutException, InterruptedException, MemcachedException {
+		CountDownLatch latch = new CountDownLatch(1);
+		Session session = this.connector.getSessionByAddress(AddrUtil
+				.getAddress(host));
+		if (session == null)
+			throw new MemcachedException("could not find session for " + host
+					+ ",maybe it have not been connected");
+		Command command = CommandFactory.createFlushAllCommand();
+		command.setLatch(latch);
+		if (!session.send(command))
 			throw new MemcachedException("send command fail");
+		if (!latch.await(timeout, TimeUnit.MILLISECONDS)) {
+			throw new TimeoutException("Timed out waiting for operation");
 		}
-		latchWait(command, timeout);
-		command.getIoBuffer().free(); // free buffer
-		checkException(command);
-		if (command.getResult() == null) {
-			throw new MemcachedException(
-					"Operation fail,may be caused by networking or timeout");
+	}
+
+	/**
+	 * 使指定memcached节点的数据项失效
+	 * 
+	 * @param host
+	 *            memcached节点host ip:port的形式
+	 * @throws TimeoutException
+	 * @throws InterruptedException
+	 * @throws MemcachedException
+	 */
+	public final void flushAll(String host) throws TimeoutException,
+			InterruptedException, MemcachedException {
+		flushAll(host, DEFAULT_OP_TIMEOUT);
+	}
+
+	/**
+	 * 查看特定节点的memcached server统计信息
+	 * 
+	 * @param host
+	 *            memcached节点host ip:port的形式
+	 * @param timeout
+	 *            操作超时
+	 * @return
+	 * @throws TimeoutException
+	 * @throws InterruptedException
+	 * @throws MemcachedException
+	 */
+	public Map<String, String> stats(String host, long timeout)
+			throws TimeoutException, InterruptedException, MemcachedException {
+		InetSocketAddress address = AddrUtil.getAddress(host);
+		return stats(address, timeout);
+	}
+
+	public Map<String, String> stats(String host) throws TimeoutException,
+			InterruptedException, MemcachedException {
+		return stats(host, DEFAULT_OP_TIMEOUT);
+	}
+
+	public Map<String, String> stats(InetSocketAddress address)
+			throws MemcachedException, InterruptedException, TimeoutException {
+		return stats(address, DEFAULT_OP_TIMEOUT);
+	}
+
+	/**
+	 * 查看特定节点的memcached server统计信息
+	 * 
+	 * @param address
+	 *            节点地址
+	 * @param timeout
+	 *            操作超时
+	 * @return
+	 * @throws MemcachedException
+	 * @throws InterruptedException
+	 * @throws TimeoutException
+	 */
+	public Map<String, String> stats(InetSocketAddress address, long timeout)
+			throws MemcachedException, InterruptedException, TimeoutException {
+		if (address == null)
+			throw new IllegalArgumentException("Null inetSocketAddress");
+		CountDownLatch latch = new CountDownLatch(1);
+
+		Session session = this.connector.getSessionByAddress(address);
+		if (session == null)
+			throw new MemcachedException("could not find session for "
+					+ address.getHostName() + ":" + address.getPort()
+					+ ",maybe it have not been connected");
+		Map<String, String> result = new HashMap<String, String>();
+		Command command = CommandFactory.createStatsCommand();
+		command.setResult(result);
+		command.setLatch(latch);
+		if (!session.send(command))
+			throw new MemcachedException("send command fail");
+		if (!latch.await(timeout, TimeUnit.MILLISECONDS)) {
+			throw new TimeoutException("Timed out waiting for operation");
 		}
-		return (Boolean) command.getResult();
+		return result;
 	}
 
 	public final void shutdown() throws IOException {

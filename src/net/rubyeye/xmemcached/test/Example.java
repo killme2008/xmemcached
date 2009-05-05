@@ -56,7 +56,7 @@ public class Example {
 
 			XMemcachedClientBuilder builder = new XMemcachedClientBuilder(
 					AddrUtil.getAddresses("192.168.207.101:12000"));
-            XMemcachedClient client=builder.build();
+			XMemcachedClient client = builder.build();
 			if (!client.set("hello", 0, "dennis")) {
 				System.err.println("set error");
 			}
@@ -151,10 +151,10 @@ public class Example {
 			if (result.getValue() != 2) {
 				System.err.println("cas error");
 			}
-			List<String> getsKeys=new ArrayList<String>();
+			List<String> getsKeys = new ArrayList<String>();
 			getsKeys.add("a");
-			Map<String,GetsResponse<Integer>> getsMap=client.gets(getsKeys);
-            System.out.println("getsMap:"+getsMap.toString());
+			Map<String, GetsResponse<Integer>> getsMap = client.gets(getsKeys);
+			System.out.println("getsMap:" + getsMap.toString());
 
 			/**
 			 * 合并gets和cas，利用CASOperation
@@ -178,8 +178,8 @@ public class Example {
 			}
 			keys.add("a");
 			System.out.println(client.gets(keys).get("a").getValue());
-			client.set("b", 0, 10000);
-			client.flushAll();
+			client.flushAll(); // 使所有数据项失效
+			System.out.println(client.stats("192.168.207.101:12000", 1000)); // 查看统计信息
 			client.shutdown();
 		} catch (IOException e) {
 			e.printStackTrace();

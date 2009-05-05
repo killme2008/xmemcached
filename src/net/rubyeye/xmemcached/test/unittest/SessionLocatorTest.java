@@ -22,7 +22,7 @@ public class SessionLocatorTest extends TestCase {
 		for (int i = 8080; i < 8100; i++) {
 			sessions.add(new MockSession(i));
 		}
-		sessionLocator.updateSessionList(sessions);
+		sessionLocator.updateSessions(sessions);
 		for (int i = 1; i <= 10; i++) {
 			String key = String.valueOf(i);
 			int mod = key.hashCode() % sessions.size();
@@ -41,7 +41,7 @@ public class SessionLocatorTest extends TestCase {
 		assertSame(sessions.get(oldIndex + 1), sessionLocator
 				.getSessionByKey(key));
 		sessions = new ArrayList<Session>();
-		sessionLocator.updateSessionList(sessions);
+		sessionLocator.updateSessions(sessions);
 		assertNull(sessionLocator.getSessionByKey(key));
 	}
 
@@ -52,7 +52,7 @@ public class SessionLocatorTest extends TestCase {
 		for (int i = 8080; i < 8100; i++) {
 			sessions.add(new MockSession(i));
 		}
-		sessionLocator.updateSessionList(sessions);
+		sessionLocator.updateSessions(sessions);
 		for (int i = 1; i <= 10; i++) {
 			String key = String.valueOf(i);
 

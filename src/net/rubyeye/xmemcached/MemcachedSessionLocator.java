@@ -12,15 +12,17 @@
 package net.rubyeye.xmemcached;
 
 import com.google.code.yanf4j.nio.Session;
-import java.util.List;
+
+import java.util.Collection;
 
 /**
  * session查找接口，依据key查找存储的session
+ * 
  * @author dennis
- *
+ * 
  */
 public interface MemcachedSessionLocator {
 	public Session getSessionByKey(final String key);
 
-	public void updateSessionList(final List<Session> list);
+	public void updateSessions(final Collection<Session> list);
 }

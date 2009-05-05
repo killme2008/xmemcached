@@ -12,6 +12,9 @@
 package net.rubyeye.xmemcached.impl;
 
 import com.google.code.yanf4j.nio.Session;
+
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import net.rubyeye.xmemcached.HashAlgorithm;
@@ -69,8 +72,8 @@ public class ArrayMemcachedSessionLocator implements MemcachedSessionLocator {
 	}
 
 	@Override
-	public final void updateSessionList(final List<Session> list) {
-		sessions = list;
+	public final void updateSessions(final Collection<Session> list) {
+		sessions = new ArrayList<Session>(list);
 
 	}
 }
