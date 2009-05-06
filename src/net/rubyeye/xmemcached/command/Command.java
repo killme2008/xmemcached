@@ -14,9 +14,10 @@ package net.rubyeye.xmemcached.command;
 import java.io.UnsupportedEncodingException;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
+
+import net.rubyeye.memcached.transcoders.CachedData;
+import net.rubyeye.memcached.transcoders.Transcoder;
 import net.rubyeye.xmemcached.buffer.IoBuffer;
-import net.spy.memcached.transcoders.CachedData;
-import net.spy.memcached.transcoders.Transcoder;
 
 /**
  * memcached命令类

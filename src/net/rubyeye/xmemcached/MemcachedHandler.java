@@ -18,11 +18,11 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import net.rubyeye.memcached.transcoders.CachedData;
+import net.rubyeye.memcached.transcoders.Transcoder;
 import net.rubyeye.xmemcached.command.Command;
 import net.rubyeye.xmemcached.command.OperationStatus;
 import net.rubyeye.xmemcached.command.Command.CommandType;
-import net.spy.memcached.transcoders.CachedData;
-import net.spy.memcached.transcoders.Transcoder;
 
 import com.google.code.yanf4j.nio.Session;
 import com.google.code.yanf4j.nio.impl.HandlerAdapter;

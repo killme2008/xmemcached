@@ -3,11 +3,11 @@ package net.rubyeye.xmemcached.test.unittest;
 import java.util.ArrayList;
 import java.util.List;
 
+import net.rubyeye.memcached.transcoders.StringTranscoder;
+import net.rubyeye.memcached.transcoders.Transcoder;
 import net.rubyeye.xmemcached.CommandFactory;
 import net.rubyeye.xmemcached.command.Command;
 import net.rubyeye.xmemcached.utils.ByteUtils;
-import net.spy.memcached.transcoders.StringTranscoder;
-import net.spy.memcached.transcoders.Transcoder;
 import junit.framework.TestCase;
 
 public class CommandFactoryTest extends TestCase {

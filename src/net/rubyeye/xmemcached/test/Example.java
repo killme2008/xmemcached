@@ -19,14 +19,14 @@ import java.util.concurrent.TimeoutException;
 import java.io.IOException;
 import java.io.Serializable;
 
+import net.rubyeye.memcached.transcoders.IntegerTranscoder;
+import net.rubyeye.memcached.transcoders.StringTranscoder;
 import net.rubyeye.xmemcached.CASOperation;
 import net.rubyeye.xmemcached.GetsResponse;
 import net.rubyeye.xmemcached.XMemcachedClient;
 import net.rubyeye.xmemcached.XMemcachedClientBuilder;
 import net.rubyeye.xmemcached.exception.MemcachedException;
 import net.rubyeye.xmemcached.utils.AddrUtil;
-import net.spy.memcached.transcoders.IntegerTranscoder;
-import net.spy.memcached.transcoders.StringTranscoder;
 
 class Name implements Serializable {
 

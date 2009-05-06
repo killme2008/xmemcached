@@ -5,14 +5,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 
+import net.rubyeye.memcached.transcoders.CachedData;
+import net.rubyeye.memcached.transcoders.Transcoder;
 import net.rubyeye.xmemcached.buffer.BufferAllocator;
 import net.rubyeye.xmemcached.buffer.IoBuffer;
 import net.rubyeye.xmemcached.buffer.SimpleBufferAllocator;
 import net.rubyeye.xmemcached.buffer.SimpleIoBuffer;
 import net.rubyeye.xmemcached.command.Command;
 import net.rubyeye.xmemcached.utils.ByteUtils;
-import net.spy.memcached.transcoders.CachedData;
-import net.spy.memcached.transcoders.Transcoder;
 
 /**
  * command工厂类，创建command

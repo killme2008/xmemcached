@@ -15,10 +15,11 @@ import java.nio.channels.FileChannel;
 import java.nio.channels.Selector;
 import java.util.Collections;
 import java.util.Map;
+
+import net.rubyeye.memcached.transcoders.CachedData;
+import net.rubyeye.memcached.transcoders.Transcoder;
 import net.rubyeye.xmemcached.command.Command;
 import net.rubyeye.xmemcached.utils.LRUMap;
-import net.spy.memcached.transcoders.CachedData;
-import net.spy.memcached.transcoders.Transcoder;
 
 /**
  * virtual node

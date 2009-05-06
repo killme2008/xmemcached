@@ -24,6 +24,9 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.io.IOException;
 
+import net.rubyeye.memcached.transcoders.CachedData;
+import net.rubyeye.memcached.transcoders.SerializingTranscoder;
+import net.rubyeye.memcached.transcoders.Transcoder;
 import net.rubyeye.xmemcached.command.Command.CommandType;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -36,9 +39,6 @@ import net.rubyeye.xmemcached.impl.ArrayMemcachedSessionLocator;
 import net.rubyeye.xmemcached.monitor.XMemcachedMbeanServer;
 import net.rubyeye.xmemcached.utils.AddrUtil;
 import net.rubyeye.xmemcached.utils.ByteUtils;
-import net.spy.memcached.transcoders.CachedData;
-import net.spy.memcached.transcoders.SerializingTranscoder;
-import net.spy.memcached.transcoders.Transcoder;
 
 import com.google.code.yanf4j.config.Configuration;
 import com.google.code.yanf4j.nio.Session;
@@ -1048,12 +1048,12 @@ public final class XMemcachedClient {
 		flushAll(address, timeout);
 	}
 
-	public void flushAll(InetSocketAddress address) throws MemcachedException,
+	public final void flushAll(InetSocketAddress address) throws MemcachedException,
 			InterruptedException, TimeoutException {
 		flushAll(address, DEFAULT_OP_TIMEOUT);
 	}
 
-	public void flushAll(InetSocketAddress address, long timeout)
+	public final void flushAll(InetSocketAddress address, long timeout)
 			throws MemcachedException, InterruptedException, TimeoutException {
 		if (address == null)
 			throw new IllegalArgumentException("Null adderss");
@@ -1099,18 +1099,18 @@ public final class XMemcachedClient {
 	 * @throws InterruptedException
 	 * @throws MemcachedException
 	 */
-	public Map<String, String> stats(String host, long timeout)
+	public final Map<String, String> stats(String host, long timeout)
 			throws TimeoutException, InterruptedException, MemcachedException {
 		InetSocketAddress address = AddrUtil.getAddress(host);
 		return stats(address, timeout);
 	}
 
-	public Map<String, String> stats(String host) throws TimeoutException,
+	public final Map<String, String> stats(String host) throws TimeoutException,
 			InterruptedException, MemcachedException {
 		return stats(host, DEFAULT_OP_TIMEOUT);
 	}
 
-	public Map<String, String> stats(InetSocketAddress address)
+	public final Map<String, String> stats(InetSocketAddress address)
 			throws MemcachedException, InterruptedException, TimeoutException {
 		return stats(address, DEFAULT_OP_TIMEOUT);
 	}
@@ -1127,7 +1127,7 @@ public final class XMemcachedClient {
 	 * @throws InterruptedException
 	 * @throws TimeoutException
 	 */
-	public Map<String, String> stats(InetSocketAddress address, long timeout)
+	public final Map<String, String> stats(InetSocketAddress address, long timeout)
 			throws MemcachedException, InterruptedException, TimeoutException {
 		if (address == null)
 			throw new IllegalArgumentException("Null inetSocketAddress");
@@ -1159,7 +1159,7 @@ public final class XMemcachedClient {
 		XMemcachedMbeanServer.getInstance().shutdown();
 	}
 
-	private int sendIncrOrDecrCommand(final String key, final int num,
+	private final int sendIncrOrDecrCommand(final String key, final int num,
 			final Command.CommandType cmdType, final String cmd)
 			throws InterruptedException, TimeoutException, MemcachedException {
 		final byte[] keyBytes = ByteUtils.getBytes(key);
