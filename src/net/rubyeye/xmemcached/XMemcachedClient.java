@@ -882,27 +882,10 @@ public final class XMemcachedClient {
 		return cas(key, exp, value, transcoder, DEFAULT_OP_TIMEOUT, cas);
 	}
 
-	/**
-	 * 原子替换key对应的value值，当且仅当cas值相等时替换成功，具体使用参见wiki
-	 * 
-	 * @param <T>
-	 * @param key
-	 * @param exp
-	 *            操作的超时时间
-	 * @param operation
-	 *            CASOperation对象，包装cas操作
-	 * @param transcoder
-	 *            对象转换器
-	 * @return
-	 * @throws TimeoutException
-	 * @throws InterruptedException
-	 * @throws MemcachedException
-	 */
-	public final <T> boolean cas(final String key, final int exp,
-			final CASOperation<T> operation, final Transcoder<T> transcoder)
+	private final <T> boolean cas0(final String key, final int exp,
+			GetsResponse<T> getsResponse, final CASOperation<T> operation,
+			final Transcoder<T> transcoder, byte[] keyBytes)
 			throws TimeoutException, InterruptedException, MemcachedException {
-		byte[] keyBytes = ByteUtils.getBytes(key);
-		ByteUtils.checkKey(keyBytes);
 		if (operation == null) {
 			throw new IllegalArgumentException("CASOperation could not be null");
 		}
@@ -911,10 +894,9 @@ public final class XMemcachedClient {
 					"max tries must be greater than 0");
 		}
 		int tryCount = 0;
-		GetsResponse<T> result = gets0(key, keyBytes, transcoder);
+		GetsResponse<T> result = getsResponse;
 		if (result == null) {
-			throw new MemcachedException("could not found the value for Key="
-					+ key);
+			throw new MemcachedException("Null GetsResponse");
 		}
 		while (tryCount < operation.getMaxTries()
 				&& result != null
@@ -934,11 +916,79 @@ public final class XMemcachedClient {
 		return true;
 	}
 
+	/**
+	 * 原子替换key对应的value值，当且仅当cas值相等时替换成功，具体使用参见wiki
+	 * 
+	 * @param <T>
+	 * @param key
+	 * @param exp
+	 *            缓存数据项的超时时间
+	 * @param operation
+	 *            CASOperation对象，包装cas操作
+	 * @param transcoder
+	 *            对象转换器
+	 * @return
+	 * @throws TimeoutException
+	 * @throws InterruptedException
+	 * @throws MemcachedException
+	 */
+	public final <T> boolean cas(final String key, final int exp,
+			final CASOperation<T> operation, final Transcoder<T> transcoder)
+			throws TimeoutException, InterruptedException, MemcachedException {
+		byte[] keyBytes = ByteUtils.getBytes(key);
+		GetsResponse<T> result = gets0(key, keyBytes, transcoder);
+		return cas0(key, exp, result, operation, transcoder, keyBytes);
+	}
+
+	/**
+	 * 原子替换key对应的value值，当且仅当cas值相等时替换成功
+	 * 
+	 * @param <T>
+	 * @param key
+	 * @param exp
+	 *            缓存数据项的超时时间
+	 * @param getsReponse
+	 *            gets返回的结果
+	 * @param operation
+	 *            CASOperation操作
+	 * @param transcoder
+	 * @return
+	 * @throws TimeoutException
+	 * @throws InterruptedException
+	 * @throws MemcachedException
+	 */
+	public final <T> boolean cas(final String key, final int exp,
+			GetsResponse<T> getsReponse, final CASOperation<T> operation,
+			final Transcoder<T> transcoder) throws TimeoutException,
+			InterruptedException, MemcachedException {
+		byte[] keyBytes = ByteUtils.getBytes(key);
+		return cas0(key, exp, getsReponse, operation, transcoder, keyBytes);
+	}
+
+	@SuppressWarnings("unchecked")
+	public final <T> boolean cas(final String key, final int exp,
+			GetsResponse<T> getsReponse, final CASOperation<T> operation)
+			throws TimeoutException, InterruptedException, MemcachedException {
+		return cas(key, exp, getsReponse, operation, this.transcoder);
+	}
+
+	public final <T> boolean cas(final String key, GetsResponse<T> getsReponse,
+			final CASOperation<T> operation) throws TimeoutException,
+			InterruptedException, MemcachedException {
+		return cas(key, 0, getsReponse, operation);
+	}
+
 	@SuppressWarnings("unchecked")
 	public final <T> boolean cas(final String key, final int exp,
 			final CASOperation<T> operation) throws TimeoutException,
 			InterruptedException, MemcachedException {
 		return cas(key, exp, operation, this.transcoder);
+	}
+
+	public final <T> boolean cas(final String key,
+			final CASOperation<T> operation) throws TimeoutException,
+			InterruptedException, MemcachedException {
+		return cas(key, 0, operation);
 	}
 
 	public final boolean delete(final String key, final int time)
@@ -1048,8 +1098,8 @@ public final class XMemcachedClient {
 		flushAll(address, timeout);
 	}
 
-	public final void flushAll(InetSocketAddress address) throws MemcachedException,
-			InterruptedException, TimeoutException {
+	public final void flushAll(InetSocketAddress address)
+			throws MemcachedException, InterruptedException, TimeoutException {
 		flushAll(address, DEFAULT_OP_TIMEOUT);
 	}
 
@@ -1105,8 +1155,8 @@ public final class XMemcachedClient {
 		return stats(address, timeout);
 	}
 
-	public final Map<String, String> stats(String host) throws TimeoutException,
-			InterruptedException, MemcachedException {
+	public final Map<String, String> stats(String host)
+			throws TimeoutException, InterruptedException, MemcachedException {
 		return stats(host, DEFAULT_OP_TIMEOUT);
 	}
 
@@ -1127,8 +1177,9 @@ public final class XMemcachedClient {
 	 * @throws InterruptedException
 	 * @throws TimeoutException
 	 */
-	public final Map<String, String> stats(InetSocketAddress address, long timeout)
-			throws MemcachedException, InterruptedException, TimeoutException {
+	public final Map<String, String> stats(InetSocketAddress address,
+			long timeout) throws MemcachedException, InterruptedException,
+			TimeoutException {
 		if (address == null)
 			throw new IllegalArgumentException("Null inetSocketAddress");
 		CountDownLatch latch = new CountDownLatch(1);

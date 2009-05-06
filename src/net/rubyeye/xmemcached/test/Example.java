@@ -176,9 +176,29 @@ public class Example {
 			if (result.getValue() != 3) {
 				System.err.println("cas error");
 			}
+			result.setCas(100);// 改变cas值，因此需要试2次
+			client.cas("a", result, new CASOperation<Integer>() {
+
+				@Override
+				public int getMaxTries() {
+					return 2;
+				}
+
+				@Override
+				public Integer getNewValue(long currentCAS, Integer currentValue) {
+					System.out.println("current value " + currentValue);
+					return 4;
+				}
+			});
+			result = client.gets("a");
+			if (result.getValue() != 4) {
+				System.err.println("cas error");
+			}
 			keys.add("a");
+			// 批量gets
 			System.out.println(client.gets(keys).get("a").getValue());
 			client.flushAll(); // 使所有数据项失效
+			// 查看统计信息
 			System.out.println(client.stats("192.168.207.101:12000", 1000)); // 查看统计信息
 			client.shutdown();
 		} catch (IOException e) {
