@@ -5,6 +5,9 @@
 		<fileset dir="${build.lib}">
 			<include name="*.jar" />
 		</fileset>
+		<fileset dir="D:\ide\eclipse\plugins\org.junit4_4.3.1">
+			<include name="*.jar" />
+		</fileset>
 	</path>
 	<target name="init" description="初始化">
 		<delete dir="${build.classes}">

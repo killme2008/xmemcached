@@ -5,7 +5,7 @@
 	<groupId>xmemcached</groupId>
 	<artifactId>xmemcached</artifactId>
 	<packaging>jar</packaging>
-	<version>1.10-SNAPSHOT</version>
+	<version>1.10-rc1</version>
 	<name>xmemcached</name>
 	<url>http://maven.apache.org</url>
 	<build>
