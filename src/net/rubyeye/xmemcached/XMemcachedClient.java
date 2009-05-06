@@ -24,9 +24,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.io.IOException;
 
-import net.rubyeye.memcached.transcoders.CachedData;
-import net.rubyeye.memcached.transcoders.SerializingTranscoder;
-import net.rubyeye.memcached.transcoders.Transcoder;
 import net.rubyeye.xmemcached.command.Command.CommandType;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -37,6 +34,9 @@ import net.rubyeye.xmemcached.command.Command;
 import net.rubyeye.xmemcached.exception.MemcachedException;
 import net.rubyeye.xmemcached.impl.ArrayMemcachedSessionLocator;
 import net.rubyeye.xmemcached.monitor.XMemcachedMbeanServer;
+import net.rubyeye.xmemcached.transcoders.CachedData;
+import net.rubyeye.xmemcached.transcoders.SerializingTranscoder;
+import net.rubyeye.xmemcached.transcoders.Transcoder;
 import net.rubyeye.xmemcached.utils.AddrUtil;
 import net.rubyeye.xmemcached.utils.ByteUtils;
 

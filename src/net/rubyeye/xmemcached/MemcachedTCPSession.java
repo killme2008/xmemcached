@@ -30,11 +30,11 @@ import java.util.NoSuchElementException;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
-import net.rubyeye.memcached.transcoders.CachedData;
 import net.rubyeye.xmemcached.MemcachedHandler.ParseStatus;
 import net.rubyeye.xmemcached.command.Command;
 import net.rubyeye.xmemcached.command.OperationStatus;
 
+import net.rubyeye.xmemcached.transcoders.CachedData;
 import net.rubyeye.xmemcached.utils.SimpleBlockingQueue;
 
 /**

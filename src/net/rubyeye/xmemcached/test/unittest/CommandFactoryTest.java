@@ -3,10 +3,10 @@ package net.rubyeye.xmemcached.test.unittest;
 import java.util.ArrayList;
 import java.util.List;
 
-import net.rubyeye.memcached.transcoders.StringTranscoder;
-import net.rubyeye.memcached.transcoders.Transcoder;
 import net.rubyeye.xmemcached.CommandFactory;
 import net.rubyeye.xmemcached.command.Command;
+import net.rubyeye.xmemcached.transcoders.StringTranscoder;
+import net.rubyeye.xmemcached.transcoders.Transcoder;
 import net.rubyeye.xmemcached.utils.ByteUtils;
 import junit.framework.TestCase;
 

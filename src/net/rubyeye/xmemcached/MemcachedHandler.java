@@ -18,8 +18,6 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import net.rubyeye.memcached.transcoders.CachedData;
-import net.rubyeye.memcached.transcoders.Transcoder;
 import net.rubyeye.xmemcached.command.Command;
 import net.rubyeye.xmemcached.command.OperationStatus;
 import net.rubyeye.xmemcached.command.Command.CommandType;
@@ -33,6 +31,8 @@ import net.rubyeye.xmemcached.exception.MemcachedClientException;
 import net.rubyeye.xmemcached.exception.MemcachedServerException;
 import net.rubyeye.xmemcached.exception.UnknownCommandException;
 import net.rubyeye.xmemcached.monitor.StatisticsHandler;
+import net.rubyeye.xmemcached.transcoders.CachedData;
+import net.rubyeye.xmemcached.transcoders.Transcoder;
 
 import com.google.code.yanf4j.util.ByteBufferMatcher;
 import com.google.code.yanf4j.util.ShiftAndByteBufferMatcher;
