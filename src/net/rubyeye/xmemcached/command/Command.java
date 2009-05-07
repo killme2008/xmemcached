@@ -165,6 +165,12 @@ public class Command {
 		return latch;
 	}
 
+	public final void countDownLatch() {
+		this.latch.countDown();
+		if (this.latch.getCount() == 0)
+			this.status = OperationStatus.DONE;
+	}
+
 	public final CommandType getCommandType() {
 		return commandType;
 	}

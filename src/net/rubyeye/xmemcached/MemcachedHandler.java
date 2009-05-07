@@ -81,8 +81,7 @@ public class MemcachedHandler extends HandlerAdapter<Command> implements
 			return false;
 		}
 		executingCmd.setResult(result);
-		executingCmd.getLatch().countDown();
-		executingCmd.setStatus(OperationStatus.DONE);
+		executingCmd.countDownLatch();
 		session.resetStatus();
 		return true;
 	}
@@ -190,7 +189,7 @@ public class MemcachedHandler extends HandlerAdapter<Command> implements
 				Command executingCommand = session
 						.pollCurrentExecutingCommand();
 				session.resetStatus();
-				executingCommand.getLatch().countDown();
+				executingCommand.countDownLatch();
 				return true;
 			}
 			String[] items = line.split(" ");
@@ -290,16 +289,12 @@ public class MemcachedHandler extends HandlerAdapter<Command> implements
 			statistics(cmdType);
 		int mergCount = executingCmd.getMergeCount();
 		if (mergCount < 0) {
-			// single
-			executingCmd.getLatch().countDown();
-			executingCmd.setStatus(OperationStatus.DONE);
+			executingCmd.countDownLatch();
 		} else {
 			// merge get
 			List<Command> mergeCommands = executingCmd.getMergeCommands();
 			for (Command nextCommand : mergeCommands) {
-				nextCommand.getLatch().countDown(); // notify
-
-				nextCommand.setStatus(OperationStatus.DONE);
+				nextCommand.countDownLatch();
 			}
 
 		}
@@ -320,8 +315,7 @@ public class MemcachedHandler extends HandlerAdapter<Command> implements
 				"Unknown command:" + executingCmd.toString()
 						+ ",please check your memcached version");
 		executingCmd.setException(exception);
-		executingCmd.getLatch().countDown();
-		executingCmd.setStatus(OperationStatus.DONE);
+		executingCmd.countDownLatch();
 		session.resetStatus();
 		return true;
 	}
@@ -341,8 +335,7 @@ public class MemcachedHandler extends HandlerAdapter<Command> implements
 		final MemcachedClientException exception = new MemcachedClientException(
 				error + ",command:" + executingCmd.toString());
 		executingCmd.setException(exception);
-		executingCmd.getLatch().countDown();
-		executingCmd.setStatus(OperationStatus.DONE);
+		executingCmd.countDownLatch();
 		session.resetStatus();
 
 		return true;
@@ -363,8 +356,7 @@ public class MemcachedHandler extends HandlerAdapter<Command> implements
 		final MemcachedServerException exception = new MemcachedServerException(
 				error + ",command:" + executingCmd.toString());
 		executingCmd.setException(exception);
-		executingCmd.getLatch().countDown();
-		executingCmd.setStatus(OperationStatus.DONE);
+		executingCmd.countDownLatch();
 		session.resetStatus();
 		return true;
 
@@ -384,8 +376,7 @@ public class MemcachedHandler extends HandlerAdapter<Command> implements
 			return false;
 		}
 		executingCmd.setResult(version);
-		executingCmd.getLatch().countDown();
-		executingCmd.setStatus(OperationStatus.DONE);
+		executingCmd.countDownLatch();
 		session.resetStatus();
 		return true;
 
@@ -406,8 +397,7 @@ public class MemcachedHandler extends HandlerAdapter<Command> implements
 			return false;
 		}
 		executingCmd.setResult(result);
-		executingCmd.getLatch().countDown();
-		executingCmd.setStatus(OperationStatus.DONE);
+		executingCmd.countDownLatch();
 		session.resetStatus();
 
 		return true;
@@ -501,8 +491,7 @@ public class MemcachedHandler extends HandlerAdapter<Command> implements
 				executingCmd.setResult(data); // 设置CachedData返回，transcoder.decode
 				// ()放到用户线程
 
-				executingCmd.getLatch().countDown();
-				executingCmd.setStatus(OperationStatus.DONE);
+				executingCmd.countDownLatch();
 			}
 		} else {
 			// merge get
@@ -515,8 +504,7 @@ public class MemcachedHandler extends HandlerAdapter<Command> implements
 					statistics(CommandType.GET_HIT);
 				else
 					statistics(CommandType.GET_MSS);
-				nextCommand.getLatch().countDown();
-				nextCommand.setStatus(OperationStatus.DONE);
+				nextCommand.countDownLatch();
 			}
 		}
 
@@ -550,8 +538,7 @@ public class MemcachedHandler extends HandlerAdapter<Command> implements
 				result.put(item.getKey(), getsResult);
 			}
 		}
-		executingCmd.getLatch().countDown();
-		executingCmd.setStatus(OperationStatus.DONE);
+		executingCmd.countDownLatch();
 	}
 
 	public final void statistics(Command.CommandType cmdType) {
