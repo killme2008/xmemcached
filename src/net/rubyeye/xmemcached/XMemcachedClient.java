@@ -87,6 +87,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean {
 	@SuppressWarnings("unchecked")
 	private Transcoder transcoder;
 	private MemcachedHandler memcachedHandler;
+	private long connectTimeout = DEFAULT_CONNECT_TIMEOUT; // 连接超时
 
 	/**
 	 * 设置合并系数，这一参数影响get优化和合并缓存区优化，这个系数决定最多的合并command数，默认是150
@@ -98,6 +99,26 @@ public final class XMemcachedClient implements XMemcachedClientMBean {
 			throw new IllegalArgumentException("mergeFactor<0");
 		}
 		this.connector.setMergeFactor(mergeFactor);
+	}
+
+	/**
+	 * 获取连接超时，单位毫秒,默认一分钟
+	 * 
+	 * @param connectTimeout
+	 */
+	public long getConnectTimeout() {
+		return connectTimeout;
+	}
+
+	/**
+	 * 设置连接超时,单位毫秒，默认一分钟
+	 * 
+	 * @param connectTimeout
+	 */
+	public void setConnectTimeout(long connectTimeout) {
+		if (connectTimeout < 0)
+			throw new IllegalArgumentException("connectTimeout<0");
+		this.connectTimeout = connectTimeout;
 	}
 
 	/**
@@ -261,8 +282,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean {
 			future = this.connector.connect(inetSocketAddress);
 
 			if (!future.isDone()
-					&& !future.get(DEFAULT_CONNECT_TIMEOUT,
-							TimeUnit.MILLISECONDS)) {
+					&& !future.get(this.connectTimeout, TimeUnit.MILLISECONDS)) {
 				log.error("connect to " + inetSocketAddress.getHostName() + ":"
 						+ inetSocketAddress.getPort() + " fail");
 			} else {
