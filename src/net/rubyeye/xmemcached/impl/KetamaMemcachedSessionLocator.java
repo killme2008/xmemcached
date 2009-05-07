@@ -38,7 +38,7 @@ import net.rubyeye.xmemcached.MemcachedSessionLocator;
  * </p>
  */
 /**
- * 一致性hash算法，基于TreeMap，直接从spymemcached挪用
+ * 一致性hash算法，基于TreeMap.ceilingKey()方法
  * 
  * @author dennis
  * 
