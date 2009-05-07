@@ -12,6 +12,7 @@
 package net.rubyeye.xmemcached;
 
 import java.net.InetSocketAddress;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -49,7 +50,7 @@ import com.google.code.yanf4j.nio.Session;
  * @author dennis(killme2008@gmail.com)
  * 
  */
-public final class XMemcachedClient {
+public final class XMemcachedClient implements XMemcachedClientMBean {
 
 	/**
 	 * 默认的读buffer线程数
@@ -82,6 +83,10 @@ public final class XMemcachedClient {
 	private static final Log log = LogFactory.getLog(XMemcachedClient.class);
 	private MemcachedSessionLocator sessionLocator;
 	private volatile boolean shutdown;
+	private MemcachedConnector connector;
+	@SuppressWarnings("unchecked")
+	private Transcoder transcoder;
+	private MemcachedHandler memcachedHandler;
 
 	/**
 	 * 设置合并系数，这一参数影响get优化和合并缓存区优化，这个系数决定最多的合并command数，默认是150
@@ -150,18 +155,13 @@ public final class XMemcachedClient {
 		return connector.send(cmd);
 	}
 
-	private MemcachedConnector connector;
-	@SuppressWarnings("unchecked")
-	private Transcoder transcoder;
-	private MemcachedHandler memcachedHandler;
-
 	public XMemcachedClient(final String server, final int port)
 			throws IOException {
 		super();
 		checkServerPort(server, port);
 		buildConnector(new ArrayMemcachedSessionLocator(),
 				new SimpleBufferAllocator(), getDefaultConfiguration());
-		startConnector();
+		start0();
 		connect(new InetSocketAddress(server, port));
 	}
 
@@ -175,11 +175,12 @@ public final class XMemcachedClient {
 	}
 
 	/**
-	 * 添加memcached节点
+	 * 添加memcached server，调用线程将阻塞，直接到连接成功或者失败
 	 * 
 	 * @param server
+	 *            IP地址
 	 * @param port
-	 * @throws IOException
+	 *            端口
 	 */
 	public final void addServer(final String server, final int port)
 			throws IOException {
@@ -188,20 +189,74 @@ public final class XMemcachedClient {
 	}
 
 	/**
-	 * 添加memcached节点
+	 * 添加memcached server，调用线程将阻塞，直接到连接成功或者失败
 	 * 
 	 * @param inetSocketAddress
+	 *            memcached服务器地址
 	 */
-	public final void addServer(final InetSocketAddress inetSocketAddress) {
+	public final void addServer(final InetSocketAddress inetSocketAddress)
+			throws IOException {
 		if (inetSocketAddress == null) {
 			throw new IllegalArgumentException();
 		}
 		connect(inetSocketAddress);
 	}
 
-	private void connect(final InetSocketAddress inetSocketAddress) {
+	/**
+	 * 添加memcached server
+	 * 
+	 * @param host
+	 *            形式如[host1]:[port1] [host2]:[port2] ...形式的服务器列表字符串
+	 */
+	public final void addServer(String hostList) throws IOException {
+		List<InetSocketAddress> addresses = AddrUtil.getAddresses(hostList);
+		if (addresses != null && addresses.size() > 0) {
+			for (InetSocketAddress address : addresses) {
+				connector.connect(address);
+			}
+		}
+	}
+
+	/**
+	 * 查看当前服务器列表
+	 */
+	@Override
+	public final List<String> getServersDescription() {
+		final List<String> result = new ArrayList<String>();
+		for (InetSocketAddress socketAddress : this.connector
+				.getServerAddresses()) {
+			result.add(socketAddress.getHostName() + ":"
+					+ socketAddress.getPort());
+		}
+		return result;
+	}
+
+	/**
+	 * 移除memcached server
+	 * 
+	 * @param host
+	 *            形式如[host1]:[port1] [host2]:[port2] ...形式的服务器列表字符串
+	 */
+	public final void removeServer(String hostList) {
+		List<InetSocketAddress> addresses = AddrUtil.getAddresses(hostList);
+		if (addresses != null && addresses.size() > 0) {
+			for (InetSocketAddress address : addresses) {
+				MemcachedTCPSession session = (MemcachedTCPSession) this.connector
+						.getSessionByAddress(address);
+				if (session != null) {
+					// 默认连接断开会自动重连，禁止自动重连
+					session.setAllowReconnect(false);
+					// 关闭连接
+					session.close();
+				}
+			}
+		}
+	}
+
+	void connect(final InetSocketAddress inetSocketAddress) throws IOException {
 		Future<Boolean> future = null;
 		boolean connected = false;
+		Throwable throwable = null;
 		try {
 			future = this.connector.connect(inetSocketAddress);
 
@@ -219,18 +274,21 @@ public final class XMemcachedClient {
 			if (future != null) {
 				future.cancel(true);
 			}
+			throwable = e;
 			log.error("connect to " + inetSocketAddress.getHostName() + ":"
 					+ inetSocketAddress.getPort() + " error", e);
 		} catch (TimeoutException e) {
 			if (future != null) {
 				future.cancel(true);
 			}
+			throwable = e;
 			log.error("connect to " + inetSocketAddress.getHostName() + ":"
 					+ inetSocketAddress.getPort() + " timeout", e);
 		} catch (Exception e) {
 			if (future != null) {
 				future.cancel(true);
 			}
+			throwable = e;
 			log.error("connect to " + inetSocketAddress.getHostName() + ":"
 					+ inetSocketAddress.getPort() + " error", e);
 		}
@@ -238,6 +296,7 @@ public final class XMemcachedClient {
 			this.connector
 					.addToWatingQueue(new MemcachedConnector.ReconnectRequest(
 							inetSocketAddress, 0));
+			throw new IOException(throwable);
 
 		}
 	}
@@ -270,6 +329,11 @@ public final class XMemcachedClient {
 		}
 	}
 
+	private final void start0() throws IOException {
+		registerMBean();
+		startConnector();
+	}
+
 	private final void startConnector() throws IOException {
 		if (this.shutdown) {
 			this.connector.start();
@@ -289,7 +353,6 @@ public final class XMemcachedClient {
 		if (configuration == null) {
 			configuration = getDefaultConfiguration();
 		}
-
 		CommandFactory.setBufferAllocator(allocator);
 		this.shutdown = true;
 		this.transcoder = new SerializingTranscoder();
@@ -300,6 +363,14 @@ public final class XMemcachedClient {
 		this.memcachedHandler = new MemcachedHandler(this.transcoder, this);
 		this.connector.setHandler(memcachedHandler);
 		this.connector.setMemcachedProtocolHandler(memcachedHandler);
+	}
+
+	private final void registerMBean() {
+		if (this.shutdown)
+			XMemcachedMbeanServer.getInstance().registMBean(
+					this,
+					this.getClass().getPackage().getName() + ":type="
+							+ this.getClass().getSimpleName());
 	}
 
 	/**
@@ -348,7 +419,7 @@ public final class XMemcachedClient {
 		}
 		buildConnector(new ArrayMemcachedSessionLocator(),
 				new SimpleBufferAllocator(), getDefaultConfiguration());
-		startConnector();
+		start0();
 		connect(inetSocketAddress);
 	}
 
@@ -356,7 +427,7 @@ public final class XMemcachedClient {
 		super();
 		buildConnector(new ArrayMemcachedSessionLocator(),
 				new SimpleBufferAllocator(), getDefaultConfiguration());
-		startConnector();
+		start0();
 	}
 
 	public XMemcachedClient(MemcachedSessionLocator locator) throws IOException {
@@ -367,7 +438,7 @@ public final class XMemcachedClient {
 			BufferAllocator allocator, Configuration conf) throws IOException {
 		super();
 		buildConnector(locator, allocator, conf);
-		startConnector();
+		start0();
 	}
 
 	public XMemcachedClient(MemcachedSessionLocator locator,
@@ -375,7 +446,7 @@ public final class XMemcachedClient {
 			List<InetSocketAddress> addressList) throws IOException {
 		super();
 		buildConnector(locator, allocator, conf);
-		startConnector();
+		start0();
 		if (addressList != null) {
 			for (InetSocketAddress inetSocketAddress : addressList) {
 				connect(inetSocketAddress);
@@ -396,7 +467,7 @@ public final class XMemcachedClient {
 			throw new IllegalArgumentException("Empty address list");
 		buildConnector(new ArrayMemcachedSessionLocator(),
 				new SimpleBufferAllocator(), getDefaultConfiguration());
-		startConnector();
+		start0();
 		for (InetSocketAddress inetSocketAddress : addressList) {
 			connect(inetSocketAddress);
 		}

@@ -52,6 +52,7 @@ public class MemcachedTCPSession extends DefaultTCPSession {
 	private SocketAddress remoteSocketAddress;
 	private int sendBufferSize;
 	private MemcachedOptimiezer optimiezer;
+	private volatile boolean allowReconnect; // 是否允许自动重连
 
 	public MemcachedTCPSession(SessionConfig sessionConfig,
 			int readRecvBufferSize, MemcachedOptimiezer optimiezer,
@@ -60,6 +61,7 @@ public class MemcachedTCPSession extends DefaultTCPSession {
 		this.optimiezer = optimiezer;
 		remoteSocketAddress = ((SocketChannel) this.selectableChannel).socket()
 				.getRemoteSocketAddress();
+		this.allowReconnect = true;
 		try {
 			this.sendBufferSize = ((SocketChannel) this.selectableChannel)
 					.socket().getSendBufferSize();
@@ -230,6 +232,14 @@ public class MemcachedTCPSession extends DefaultTCPSession {
 	@Override
 	protected final Object wrapMessage(Object msg) {
 		return msg;
+	}
+
+	public boolean isAllowReconnect() {
+		return allowReconnect;
+	}
+
+	public void setAllowReconnect(boolean reconnected) {
+		this.allowReconnect = reconnected;
 	}
 
 }

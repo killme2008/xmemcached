@@ -463,9 +463,15 @@ public class MemcachedHandler extends HandlerAdapter<Command> implements
 	@Override
 	public void onSessionClosed(Session session) {
 		this.client.getConnector().removeSession((MemcachedTCPSession) session);
-		reconnect(session);
+		if (((MemcachedTCPSession) session).isAllowReconnect())
+			reconnect(session);
 	}
 
+	/**
+	 * 自动重连
+	 * 
+	 * @param session
+	 */
 	protected void reconnect(Session session) {
 		if (!this.client.isShutdown()) {
 			this.client.getConnector().addToWatingQueue(

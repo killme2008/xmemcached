@@ -22,6 +22,8 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
@@ -64,6 +66,8 @@ public class MemcachedConnector extends SocketChannelController {
 	private SessionMonitor sessionMonitor;
 	private MemcachedOptimiezer optimiezer;
 
+	public static final long CHECK_RECONNECT_INTERVAL = 10000L;
+
 	class SessionMonitor extends Thread {
 
 		public void run() {
@@ -79,7 +83,7 @@ public class MemcachedConnector extends SocketChannelController {
 						tries++;
 						request.tries++;
 						try {
-							log.warn("try to connect to "
+							log.warn("try to reconnect to "
 									+ address.getHostName() + ":"
 									+ address.getPort() + " for "
 									+ request.tries + " times");
@@ -96,20 +100,18 @@ public class MemcachedConnector extends SocketChannelController {
 							}
 						} catch (TimeoutException e) {
 							future.cancel(true);
-							Thread.sleep(2000); // 2秒后再次重连
 							continue;
 						} catch (ExecutionException e) {
 							future.cancel(true);
-							Thread.sleep(2000); // 2秒后再次重连
 							continue;
 						}
 					}
 					if (!connected) {
-						log.error("connect to " + address.getHostName() + ":"
+						log.error("reconnect to " + address.getHostName() + ":"
 								+ address.getPort() + " fail");
 						// 加入队尾,稍后重试
 						waitingQueue.add(request);
-						Thread.sleep(XMemcachedClient.DEFAULT_CONNECT_TIMEOUT);
+						Thread.sleep(CHECK_RECONNECT_INTERVAL);
 					}
 				} catch (IOException e) {
 					log.error("monitor connect error", e);
@@ -434,5 +436,9 @@ public class MemcachedConnector extends SocketChannelController {
 
 	public void setByteBufferAllocator(BufferAllocator allocator) {
 		this.bufferAllocator = allocator;
+	}
+
+	public Collection<InetSocketAddress> getServerAddresses() {
+		return Collections.unmodifiableCollection(this.sessionMap.keySet());
 	}
 }
