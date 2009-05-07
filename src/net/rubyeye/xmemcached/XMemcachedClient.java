@@ -176,6 +176,15 @@ public final class XMemcachedClient implements XMemcachedClientMBean {
 		return connector.send(cmd);
 	}
 
+	/**
+	 * XMemcached构造函数
+	 * 
+	 * @param server
+	 *            服务器IP
+	 * @param port
+	 *            服务器端口
+	 * @throws IOException
+	 */
 	public XMemcachedClient(final String server, final int port)
 			throws IOException {
 		super();
@@ -239,7 +248,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean {
 	}
 
 	/**
-	 * 查看当前服务器列表
+	 * 返回当前服务器列表描述字符串
 	 */
 	@Override
 	public final List<String> getServersDescription() {
@@ -274,7 +283,8 @@ public final class XMemcachedClient implements XMemcachedClientMBean {
 		}
 	}
 
-	void connect(final InetSocketAddress inetSocketAddress) throws IOException {
+	private void connect(final InetSocketAddress inetSocketAddress)
+			throws IOException {
 		Future<Boolean> future = null;
 		boolean connected = false;
 		Throwable throwable = null;
@@ -403,6 +413,13 @@ public final class XMemcachedClient implements XMemcachedClientMBean {
 		CommandFactory.setBufferAllocator(bufferAllocator);
 	}
 
+	/**
+	 * XMemcached构造函数
+	 * 
+	 * @param configuration
+	 *            yanf4j网络参数配置
+	 * @throws IOException
+	 */
 	public XMemcachedClient(final Configuration configuration)
 			throws IOException {
 		this(new ArrayMemcachedSessionLocator(), new SimpleBufferAllocator(),
@@ -410,18 +427,43 @@ public final class XMemcachedClient implements XMemcachedClientMBean {
 
 	}
 
+	/**
+	 * XMemcached构造函数
+	 * 
+	 * @param configuration
+	 *            yanf4j网络参数配置
+	 * @param allocator
+	 *            ByteBuffer分配器
+	 * @throws IOException
+	 */
 	public XMemcachedClient(final Configuration configuration,
 			final BufferAllocator allocator) throws IOException {
 		this(new ArrayMemcachedSessionLocator(), allocator, configuration);
 
 	}
 
+	/**
+	 * XMemcached构造函数
+	 * 
+	 * @param configuration
+	 *            yanf4j网络参数配置
+	 * @param allocator
+	 *            ByteBuffer分配器
+	 * @param locator
+	 *            连接查找器，采用余数分布或者一致性哈希
+	 * @throws IOException
+	 */
 	public XMemcachedClient(final Configuration configuration,
 			final MemcachedSessionLocator locator) throws IOException {
 		this(locator, new SimpleBufferAllocator(), configuration);
 
 	}
 
+	/**
+	 * 返回默认yanf4j网络参数配置
+	 * 
+	 * @return
+	 */
 	public static final Configuration getDefaultConfiguration() {
 		final Configuration configuration = new Configuration();
 		configuration.setTcpRecvBufferSize(DEFAULT_TCP_RECV_BUFF_SIZE);
@@ -431,6 +473,13 @@ public final class XMemcachedClient implements XMemcachedClientMBean {
 		return configuration;
 	}
 
+	/**
+	 * XMemcached构造函数
+	 * 
+	 * @param inetSocketAddress
+	 *            服务器IP地址
+	 * @throws IOException
+	 */
 	public XMemcachedClient(final InetSocketAddress inetSocketAddress)
 			throws IOException {
 		super();
@@ -500,9 +549,9 @@ public final class XMemcachedClient implements XMemcachedClientMBean {
 	 * @param key
 	 *            关键字key
 	 * @param timeout
-	 *            操作的超时时间，单位毫秒
+	 *            操作的超时时间，单位毫秒，超过此时间没有响应就抛出TimeoutException
 	 * @param transcoder
-	 *            缓存项的转换器，如果为null就默认使用内部的转换器负责判断类型并反序列化
+	 *            数据项的序列化转换器，如果为null就默认使用内部的转换器负责判断类型并反序列化
 	 * @return
 	 * @throws TimeoutException
 	 * @throws InterruptedException
@@ -546,9 +595,12 @@ public final class XMemcachedClient implements XMemcachedClientMBean {
 	 * 
 	 * @param <T>
 	 * @param key
+	 *            关键字
 	 * @param timeout
+	 *            操作的超时时间
 	 * @param transcoder
-	 * @return GetsResponse
+	 *            数据项的反序列化转换器
+	 * @return GetsResponse 返回GetsResponse对象
 	 * @throws TimeoutException
 	 * @throws InterruptedException
 	 * @throws MemcachedException
@@ -580,16 +632,16 @@ public final class XMemcachedClient implements XMemcachedClientMBean {
 	}
 
 	/**
-	 * memcached的getMulti，批量获取一批key对应的缓存项
+	 * memcached的getMulti操作，批量获取一批key对应的数据项
 	 * 
 	 * @param <T>
 	 * @param keyCollections
 	 *            关键字集合
 	 * @param timeout
-	 *            操作超时
+	 *            操作超时时间
 	 * @param transcoder
-	 *            转换器
-	 * @return map对象，存储存在的缓存项
+	 *            数据项的反序列化转换器
+	 * @return map对象，map中是缓存中存在着的数据项，如果不存在将不会在map中出现
 	 * @throws TimeoutException
 	 * @throws InterruptedException
 	 * @throws MemcachedException
@@ -631,7 +683,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean {
 	}
 
 	/**
-	 * 类似getMulti，但是返回缓存项的cas值，返回的map中value存储的是GetsResponse对象
+	 * 类似getMulti，但是返回数据项的cas值，返回的map中value存储的是GetsResponse对象
 	 * 
 	 * @param <T>
 	 * @param keyCollections
@@ -748,7 +800,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean {
 	}
 
 	/**
-	 * 设置key对应的项为value，无论key是否已经存在，成功返回true，否则返回false
+	 * 设置key对应的项为value，无论key是否已经存在
 	 * 
 	 * @param <T>
 	 * @param key
@@ -758,10 +810,10 @@ public final class XMemcachedClient implements XMemcachedClientMBean {
 	 * @param value
 	 *            缓存的值对象
 	 * @param transcoder
-	 *            对象转换器
+	 *            对象的序列化转换器
 	 * @param timeout
 	 *            操作的超时时间，单位是毫秒
-	 * @return
+	 * @return 成功返回true，否则返回false
 	 * @throws TimeoutException
 	 *             操作超时抛出此异常
 	 * @throws InterruptedException
@@ -795,7 +847,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean {
 	}
 
 	/**
-	 *添加key-value缓存项，仅在key不存在的情况下才能添加成功，成功返回true，否则返回false
+	 *添加key-value缓存项，仅在key不存在的情况下才能添加成功
 	 * 
 	 * @param <T>
 	 * @param key
@@ -807,7 +859,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean {
 	 *            值对象的转换器
 	 * @param timeout
 	 *            操作的超时时间，单位毫秒
-	 * @return
+	 * @return 成功返回true，否则返回false
 	 * @throws TimeoutException
 	 *             操作超时抛出此异常
 	 * @throws InterruptedException
@@ -840,6 +892,31 @@ public final class XMemcachedClient implements XMemcachedClientMBean {
 		return add(key, exp, value, transcoder, DEFAULT_OP_TIMEOUT);
 	}
 
+	/**
+	 * 替代key对应的值，当且仅当key对应的缓存项存在的时候可以替换
+	 * 
+	 * @param <T>
+	 * @param key
+	 * @param exp
+	 *            缓存的超时时间
+	 * @param value
+	 *            值对象
+	 * @param transcoder
+	 *            值对象的转换器
+	 * @param timeout
+	 *            操作的超时时间,单位毫秒
+	 * @return 如果key不存在返回false，如果替代成功返回true
+	 * @throws TimeoutException
+	 * @throws InterruptedException
+	 * @throws MemcachedException
+	 */
+	public final <T> boolean replace(final String key, final int exp,
+			final T value, final Transcoder<T> transcoder, final long timeout)
+			throws TimeoutException, InterruptedException, MemcachedException {
+		return sendStoreCommand(key, exp, value, Command.CommandType.SET,
+				"replace", timeout, -1, transcoder);
+	}
+
 	public final boolean replace(final String key, final int exp,
 			final Object value) throws TimeoutException, InterruptedException,
 			MemcachedException {
@@ -857,31 +934,6 @@ public final class XMemcachedClient implements XMemcachedClientMBean {
 			final T value, final Transcoder<T> transcoder)
 			throws TimeoutException, InterruptedException, MemcachedException {
 		return replace(key, exp, value, transcoder, DEFAULT_OP_TIMEOUT);
-	}
-
-	/**
-	 * 替代key对应的值，当且仅当key对应的缓存项存在的时候可以替换，如果key不存在返回false，如果替代成功返回true
-	 * 
-	 * @param <T>
-	 * @param key
-	 * @param exp
-	 *            缓存的超时时间
-	 * @param value
-	 *            值对象
-	 * @param transcoder
-	 *            值对象的转换器
-	 * @param timeout
-	 *            操作的超时时间,单位毫秒
-	 * @return
-	 * @throws TimeoutException
-	 * @throws InterruptedException
-	 * @throws MemcachedException
-	 */
-	public final <T> boolean replace(final String key, final int exp,
-			final T value, final Transcoder<T> transcoder, final long timeout)
-			throws TimeoutException, InterruptedException, MemcachedException {
-		return sendStoreCommand(key, exp, value, Command.CommandType.SET,
-				"replace", timeout, -1, transcoder);
 	}
 
 	/**
@@ -1082,6 +1134,18 @@ public final class XMemcachedClient implements XMemcachedClientMBean {
 		return cas(key, 0, operation);
 	}
 
+	/**
+	 * 从缓存中移除key对应的数据项,memcached移除数据项，如果指定了time，那么将放入一个delete
+	 * queue，直到时间到达才真正移除，在此段时间内，add、replace同一个key的操作将失败
+	 * 
+	 * @param key
+	 * @param time
+	 *            单位为秒，客户端希望memcached server拒绝接受相同key的add,replace操作的时间
+	 * @return
+	 * @throws TimeoutException
+	 * @throws InterruptedException
+	 * @throws MemcachedException
+	 */
 	public final boolean delete(final String key, final int time)
 			throws TimeoutException, InterruptedException, MemcachedException {
 		final byte[] keyBytes = ByteUtils.getBytes(key);
@@ -1108,6 +1172,15 @@ public final class XMemcachedClient implements XMemcachedClientMBean {
 		}
 	}
 
+	/**
+	 * 获取memcached版本，此方法在多个节点的情况下将按照"version"字符串的hash值查找对应的连接并发送version协议，
+	 * 也就说此方法仅返回某个节点的memcached版本，如果要查询特定节点的memcached版本，请参考stats方法
+	 * 
+	 * @return 版本号字符串
+	 * @throws TimeoutException
+	 * @throws InterruptedException
+	 * @throws MemcachedException
+	 */
 	public final String version() throws TimeoutException,
 			InterruptedException, MemcachedException {
 		final Command command = CommandFactory.createVersionCommand();
@@ -1124,11 +1197,33 @@ public final class XMemcachedClient implements XMemcachedClientMBean {
 		return (String) command.getResult();
 	}
 
+	/**
+	 * 递增key对应的value
+	 * 
+	 * @param key
+	 * @param num
+	 *            增加的幅度
+	 * @return
+	 * @throws TimeoutException
+	 * @throws InterruptedException
+	 * @throws MemcachedException
+	 */
 	public final int incr(final String key, final int num)
 			throws TimeoutException, InterruptedException, MemcachedException {
 		return sendIncrOrDecrCommand(key, num, Command.CommandType.INCR, "incr");
 	}
 
+	/**
+	 * 递减key对应的value
+	 * 
+	 * @param key
+	 * @param num
+	 *            递减的幅度
+	 * @return
+	 * @throws TimeoutException
+	 * @throws InterruptedException
+	 * @throws MemcachedException
+	 */
 	public final int decr(final String key, final int num)
 			throws TimeoutException, InterruptedException, MemcachedException {
 		return sendIncrOrDecrCommand(key, num, Command.CommandType.DECR, "decr");
@@ -1229,7 +1324,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean {
 	}
 
 	/**
-	 * 查看特定节点的memcached server统计信息
+	 * 查看指定节点的memcached server统计信息
 	 * 
 	 * @param host
 	 *            memcached节点host ip:port的形式
@@ -1331,19 +1426,25 @@ public final class XMemcachedClient implements XMemcachedClientMBean {
 		return delete(key, 0);
 	}
 
+	/**
+	 * 返回默认的序列化转换器，默认使用SerializingTranscoder
+	 * 
+	 * @return
+	 */
 	@SuppressWarnings("unchecked")
 	public final Transcoder getTranscoder() {
 		return transcoder;
 	}
 
+	/**
+	 * 设置默认的序列化转换器，在调用xmemcached各种方法时，如果没有指定转换器，将使用此默认转换器
+	 * 
+	 * @param transcoder
+	 */
 	@SuppressWarnings("unchecked")
 	public final void setTranscoder(final Transcoder transcoder) {
 		this.transcoder = transcoder;
 		this.memcachedHandler.setTranscoder(transcoder);
-	}
-
-	public final MemcachedHandler getMemcachedHandler() {
-		return memcachedHandler;
 	}
 
 	@SuppressWarnings("unchecked")
