@@ -27,7 +27,6 @@ import net.rubyeye.xmemcached.transcoders.Transcoder;
  */
 public class Command {
 
-	public static final String SPLIT = "\r\n";
 	private Object key; // 关键字
 	private volatile Object result = null; // memcached返回结果
 	private CountDownLatch latch;

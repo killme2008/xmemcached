@@ -163,7 +163,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean {
 			final byte[] keyBytes, final Transcoder<T> transcoder)
 			throws MemcachedException, TimeoutException, InterruptedException {
 		GetsResponse<T> result = (GetsResponse<T>) fetch0(key, keyBytes,
-				ByteUtils.GETS, Command.CommandType.GETS_ONE,
+				CommandFactory.GETS, Command.CommandType.GETS_ONE,
 				DEFAULT_OP_TIMEOUT, transcoder);
 		return result;
 	}
@@ -561,7 +561,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean {
 	public final <T> T get(final String key, final long timeout,
 			final Transcoder<T> transcoder) throws TimeoutException,
 			InterruptedException, MemcachedException {
-		return (T) get0(key, timeout, ByteUtils.GET,
+		return (T) get0(key, timeout, CommandFactory.GET,
 				Command.CommandType.GET_ONE, transcoder);
 	}
 
@@ -609,7 +609,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean {
 	public final <T> GetsResponse<T> gets(final String key, final long timeout,
 			final Transcoder<T> transcoder) throws TimeoutException,
 			InterruptedException, MemcachedException {
-		return (GetsResponse<T>) get0(key, timeout, ByteUtils.GETS,
+		return (GetsResponse<T>) get0(key, timeout, CommandFactory.GETS,
 				Command.CommandType.GETS_ONE, transcoder);
 	}
 
@@ -650,7 +650,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean {
 			final Collection<String> keyCollections, final long timeout,
 			final Transcoder<T> transcoder) throws TimeoutException,
 			InterruptedException, MemcachedException {
-		return getMulti0(keyCollections, timeout, ByteUtils.GET,
+		return getMulti0(keyCollections, timeout, CommandFactory.GET,
 				Command.CommandType.GET_MANY, transcoder);
 	}
 
@@ -663,7 +663,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean {
 				: 1;
 		lazy = lazy > 3 ? 3 : lazy; // 最高3秒
 		return getMulti0(keyCollections, lazy * DEFAULT_OP_TIMEOUT,
-				ByteUtils.GET, Command.CommandType.GET_MANY, transcoder);
+				CommandFactory.GET, Command.CommandType.GET_MANY, transcoder);
 	}
 
 	public final <T> Map<String, T> get(final Collection<String> keyCollections)
@@ -700,7 +700,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean {
 			final Transcoder<T> transcoder) throws TimeoutException,
 			InterruptedException, MemcachedException {
 		return (Map<String, GetsResponse<T>>) getMulti0(keyCollections,
-				timeout, ByteUtils.GETS, Command.CommandType.GETS_MANY,
+				timeout, CommandFactory.GETS, Command.CommandType.GETS_MANY,
 				transcoder);
 	}
 

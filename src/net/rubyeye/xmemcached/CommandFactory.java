@@ -44,16 +44,15 @@ public final class CommandFactory {
 		final CountDownLatch latch = new CountDownLatch(1);
 		byte[] timeBytes = ByteUtils.getBytes(String.valueOf(time));
 		final IoBuffer buffer = bufferAllocator
-				.allocate(ByteUtils.DELETE.length + 2 + keyBytes.length
-						+ timeBytes.length + ByteUtils.CRLF.length);
-		ByteUtils.setArguments(buffer, ByteUtils.DELETE, keyBytes, timeBytes);
+				.allocate(CommandFactory.DELETE.length + 2 + keyBytes.length
+						+ timeBytes.length + CommandFactory.CRLF.length);
+		ByteUtils.setArguments(buffer, CommandFactory.DELETE, keyBytes,
+				timeBytes);
 		buffer.flip();
 		Command command = new Command(key, Command.CommandType.DELETE, latch);
 		command.setIoBuffer(buffer);
 		return command;
 	}
-
-	static final ByteBuffer VERSION = ByteBuffer.wrap("version\r\n".getBytes());
 
 	/**
 	 * 创建version command
@@ -69,11 +68,8 @@ public final class CommandFactory {
 		return command;
 	}
 
-	static final ByteBuffer FLUSH_ALL = ByteBuffer.wrap("flush_all\r\n"
-			.getBytes());
-
 	/**
-	 * 创建flush_all命令
+	 * create flush_all command
 	 * 
 	 * @return
 	 */
@@ -85,10 +81,8 @@ public final class CommandFactory {
 		return command;
 	}
 
-	static final ByteBuffer STATS = ByteBuffer.wrap("stats\r\n".getBytes());
-
 	/**
-	 * 创建flush_all命令
+	 * create flush_all command
 	 * 
 	 * @return
 	 */
@@ -126,7 +120,7 @@ public final class CommandFactory {
 		byte[] casBytes = ByteUtils.getBytes(String.valueOf(cas));
 		int size = cmd.length() + 1 + keyBytes.length + 1 + flagBytes.length
 				+ 1 + expBytes.length + 1 + data.getData().length + 2
-				* ByteUtils.CRLF.length + dataLenBytes.length;
+				* CommandFactory.CRLF.length + dataLenBytes.length;
 		if (cmdType == Command.CommandType.CAS) {
 			size += 1 + casBytes.length;
 		}
@@ -161,7 +155,7 @@ public final class CommandFactory {
 			final Command.CommandType cmdType) {
 		final CountDownLatch latch = new CountDownLatch(1);
 		final IoBuffer buffer = bufferAllocator.allocate(cmdBytes.length
-				+ ByteUtils.CRLF.length + 1 + keyBytes.length);
+				+ CommandFactory.CRLF.length + 1 + keyBytes.length);
 		ByteUtils.setArguments(buffer, cmdBytes, keyBytes);
 		buffer.flip();
 		Command command = new Command(key, cmdType, latch);
@@ -196,7 +190,7 @@ public final class CommandFactory {
 		byte[] keyBytes = ByteUtils.getBytes(gatherKey.substring(0, gatherKey
 				.length() - 1));
 		final IoBuffer buffer = bufferAllocator.allocate(cmdBytes.length
-				+ ByteUtils.CRLF.length + 1 + keyBytes.length);
+				+ CommandFactory.CRLF.length + 1 + keyBytes.length);
 		ByteUtils.setArguments(buffer, cmdBytes, keyBytes);
 		buffer.flip();
 		command.setIoBuffer(buffer);
@@ -210,11 +204,24 @@ public final class CommandFactory {
 		byte[] numBytes = ByteUtils.getBytes(String.valueOf(num));
 		byte[] cmdBytes = ByteUtils.getBytes(cmd);
 		final IoBuffer buffer = bufferAllocator.allocate(cmd.length() + 2
-				+ key.length() + numBytes.length + ByteUtils.CRLF.length);
+				+ key.length() + numBytes.length + CommandFactory.CRLF.length);
 		ByteUtils.setArguments(buffer, cmdBytes, keyBytes, numBytes);
 		buffer.flip();
 		Command command = new Command(key, cmdType, latch);
 		command.setIoBuffer(buffer);
 		return command;
 	}
+
+	public static final byte[] CRLF = { '\r', '\n' };
+	public static final byte[] GET = { 'g', 'e', 't' };
+	public static final byte[] GETS = { 'g', 'e', 't', 's' };
+	public static final byte[] DELETE = { 'd', 'e', 'l', 'e', 't', 'e' };
+	public static final byte SPACE = ' ';
+	public static final ByteBuffer STATS = ByteBuffer.wrap("stats\r\n"
+			.getBytes());
+	public static final ByteBuffer FLUSH_ALL = ByteBuffer.wrap("flush_all\r\n"
+			.getBytes());
+	public static final ByteBuffer VERSION = ByteBuffer.wrap("version\r\n"
+			.getBytes());
+	public static final String SPLIT = "\r\n";
 }

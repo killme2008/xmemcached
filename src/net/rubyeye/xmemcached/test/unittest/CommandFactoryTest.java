@@ -56,7 +56,7 @@ public class CommandFactoryTest extends TestCase {
 		String key = "test";
 		byte[] keyBytes = ByteUtils.getBytes(key);
 		Command getCmd = CommandFactory.createGetCommand(key, keyBytes,
-				ByteUtils.GET, Command.CommandType.GET_ONE);
+				CommandFactory.GET, Command.CommandType.GET_ONE);
 		assertEquals(Command.CommandType.GET_ONE, getCmd.getCommandType());
 		String commandStr = new String(getCmd.getIoBuffer().getByteBuffer()
 				.array());
@@ -88,7 +88,7 @@ public class CommandFactoryTest extends TestCase {
 		keys.add("a");
 
 		Command cmd = CommandFactory.createGetMultiCommand(keys, null, null,
-				ByteUtils.GET, Command.CommandType.GET_MANY, null);
+				CommandFactory.GET, Command.CommandType.GET_MANY, null);
 		assertEquals(Command.CommandType.GET_MANY, cmd.getCommandType());
 		String commandStr = new String(cmd.getIoBuffer().getByteBuffer()
 				.array());

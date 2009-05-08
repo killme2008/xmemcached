@@ -13,6 +13,7 @@ package net.rubyeye.xmemcached.utils;
 
 import java.io.UnsupportedEncodingException;
 
+import net.rubyeye.xmemcached.CommandFactory;
 import net.rubyeye.xmemcached.buffer.IoBuffer;
 
 public final class ByteUtils {
@@ -25,12 +26,6 @@ public final class ByteUtils {
      */
     private ByteUtils() {
     }
-    public static final byte[] CRLF = {'\r', '\n'};
-    public static final byte[] GET = {'g', 'e', 't'};
-    public static final byte[] GETS = {'g', 'e', 't', 's'};
-    public static final byte[] DELETE = {'d', 'e', 'l', 'e', 't', 'e'};
-    public static final byte SPACE = ' ';
-
     public static final byte[] getBytes(String k) {
         if (k == null || k.length() == 0) {
             throw new IllegalArgumentException("Key must not be blank");
@@ -48,7 +43,7 @@ public final class ByteUtils {
             if (wasFirst) {
                 wasFirst = false;
             } else {
-                bb.put(SPACE);
+                bb.put(CommandFactory.SPACE);
             }
             if (o instanceof byte[]) {
                 bb.put((byte[]) o);
@@ -56,7 +51,7 @@ public final class ByteUtils {
                 bb.put(getBytes(String.valueOf(o)));
             }
         }
-        bb.put(CRLF);
+        bb.put(CommandFactory.CRLF);
     }
 
     public static final void checkKey(final byte[] keyBytes) {

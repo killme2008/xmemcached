@@ -124,8 +124,9 @@ public class MemcachedTCPSession extends DefaultTCPSession {
 				boolean complete = writeToChannel(selectableChannel,
 						currentCommand.getIoBuffer().getByteBuffer());
 				if (complete) {
+				//	System.out.println("send command:" + currentCommand.toString());
 					if (log.isDebugEnabled()) {
-
+						
 						log.debug("send command:" + currentCommand.toString());
 					}
 					this.handler.onMessageSent(this, writeQueue.remove());
@@ -158,7 +159,7 @@ public class MemcachedTCPSession extends DefaultTCPSession {
 		}
 	}
 
-	protected boolean writeToChannel(SelectableChannel channel,
+	protected final boolean writeToChannel(SelectableChannel channel,
 			ByteBuffer writeBuffer) throws IOException {
 		while (true) {
 			if (writeBuffer == null || !writeBuffer.hasRemaining())

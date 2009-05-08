@@ -46,7 +46,7 @@ import com.google.code.yanf4j.util.ShiftAndByteBufferMatcher;
 public class MemcachedHandler extends HandlerAdapter<Command> implements
 		MemcachedProtocolHandler {
 
-	private static final ByteBuffer SPLIT = ByteBuffer.wrap(Command.SPLIT
+	private static final ByteBuffer SPLIT = ByteBuffer.wrap(CommandFactory.SPLIT
 			.getBytes());
 	/**
 	 * shift-and算法匹配器，用于匹配行

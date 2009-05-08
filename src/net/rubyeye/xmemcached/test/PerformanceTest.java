@@ -22,14 +22,18 @@ public class PerformanceTest {
 		private CountDownLatch cd;
 		int repeat;
 		int start;
+		int keySize;
+		int valueSize;
 
 		public TestWriteRunnable(XMemcachedClient mc, int start,
-				CountDownLatch cdl, int repeat) {
+				CountDownLatch cdl, int repeat, int keySize, int valueSize) {
 			super();
 			this.mc = mc;
 			this.start = start;
 			this.cd = cdl;
 			this.repeat = repeat;
+			this.keySize = keySize;
+			this.valueSize = valueSize;
 
 		}
 
@@ -37,8 +41,8 @@ public class PerformanceTest {
 			try {
 
 				for (int i = 0; i < repeat; i++) {
-					String key = String.valueOf(start + i);
-					if (!mc.set(key, 0, key)) {
+					String key = getKey(start + i);
+					if (!mc.set(key, 0, getValue(start + i))) {
 						System.err.println("set error");
 					}
 
@@ -49,6 +53,20 @@ public class PerformanceTest {
 			} finally {
 				cd.countDown();
 			}
+		}
+
+		private final String getKey(int n) {
+			StringBuilder sb = new StringBuilder(n);
+			while (sb.length() < keySize)
+				sb.append("k");
+			return sb.toString();
+		}
+
+		private final String getValue(int n) {
+			StringBuilder sb = new StringBuilder(n);
+			while (sb.length() < valueSize)
+				sb.append("v");
+			return sb.toString();
 		}
 	}
 
@@ -65,23 +83,42 @@ public class PerformanceTest {
 		int repeat;
 		int start;
 
+		int keySize;
+		int valueSize;
+
 		public TestReadRunnable(XMemcachedClient mc, int start,
-				CountDownLatch cdl, int repeat) {
+				CountDownLatch cdl, int repeat, int keySize, int valueSize) {
 			super();
 			this.mc = mc;
 			this.start = start;
 			this.cd = cdl;
 			this.repeat = repeat;
+			this.keySize = keySize;
+			this.valueSize = valueSize;
 
+		}
+
+		private final String getKey(int n) {
+			StringBuilder sb = new StringBuilder(n);
+			while (sb.length() < keySize)
+				sb.append("k");
+			return sb.toString();
+		}
+
+		private final String getValue(int n) {
+			StringBuilder sb = new StringBuilder(n);
+			while (sb.length() < valueSize)
+				sb.append("v");
+			return sb.toString();
 		}
 
 		public void run() {
 			try {
 				for (int i = 0; i < repeat; i++) {
 
-					String key = String.valueOf(start + i);
-					String result = (String) mc.get(key,5000);
-					if (!key.equals(result)) {
+					String key = getKey(start + i);
+					String result = (String) mc.get(key, 5000);
+					if (!result.equals(getValue(start + i))) {
 						System.out.println(key + " " + result);
 						System.err.println("get error");
 					}
@@ -108,22 +145,34 @@ public class PerformanceTest {
 		int repeat;
 		int start;
 
+		int keySize;
+		int valueSize;
+
 		public TestDeleteRunnable(XMemcachedClient mc, int start,
-				CountDownLatch cdl, int repeat) {
+				CountDownLatch cdl, int repeat, int keySize, int valueSize) {
 			super();
 			this.mc = mc;
 			this.start = start;
 			this.cd = cdl;
 			this.repeat = repeat;
+			this.keySize = keySize;
+			this.valueSize = valueSize;
 
+		}
+
+		private final String getKey(int n) {
+			StringBuilder sb = new StringBuilder(n);
+			while (sb.length() < keySize)
+				sb.append("k");
+			return sb.toString();
 		}
 
 		public void run() {
 			try {
 				for (int i = 0; i < repeat; i++) {
-					String key = String.valueOf(start + i);
+					String key = getKey(start + i);
 					if (!mc.delete(key)) {
-						System.err.println("delete error");
+						System.err.println("delete "+key +" error");
 					}
 				}
 
@@ -137,25 +186,25 @@ public class PerformanceTest {
 
 	static public void main(String[] args) {
 		if (args.length < 3) {
-			System.out.println("Usage:[program name] threads repeats servers");
+			System.out
+					.println("Usage:[program name] threads totalTimes servers");
 			System.exit(1);
 		}
 		int thread = Integer.parseInt(args[0]); // 线程数
-		int repeat = Integer.parseInt(args[1]); // 循环次数
+		int repeat = Integer.parseInt(args[1]) / thread; // 循环次数
+		int keySize = Integer.parseInt(args[2]);
+		int valueSize = Integer.parseInt(args[3]);
 		try {
 			int size = Runtime.getRuntime().availableProcessors();
 
 			XMemcachedClientBuilder builder = new XMemcachedClientBuilder(
-					AddrUtil.getAddresses(args[2]));
-			 builder.getConfiguration().setTcpRecvBufferSize(8*1024);
-			builder.setBufferAllocator(new CachedBufferAllocator());
-			builder.setSessionLocator(new KetamaMemcachedSessionLocator());
+					AddrUtil.getAddresses(args[4]));
 			XMemcachedClient mc = builder.build();
 			// mc.setOptimizeMergeBuffer(false);
 			// 分别测试写、读、删除
-			testWrite(thread, size, repeat, mc);
-			testRead(thread, size, repeat, mc);
-			testDelete(thread, size, repeat, mc);
+			testWrite(thread, size, repeat, keySize, valueSize, mc);
+			testRead(thread, size, repeat, keySize, valueSize, mc);
+			testDelete(thread, size, repeat, keySize, valueSize, mc);
 
 			mc.shutdown();
 		} catch (Exception e) {
@@ -164,7 +213,7 @@ public class PerformanceTest {
 	}
 
 	private static void testDelete(int thread, int size, int repeat,
-			XMemcachedClient mc) {
+			int keySize, int valueSize, XMemcachedClient mc) {
 		CountDownLatch cdl;
 		long t;
 		long all;
@@ -173,7 +222,7 @@ public class PerformanceTest {
 		t = System.nanoTime();
 		for (int i = 0; i < thread; i++) {
 			new Thread(new PerformanceTest.TestDeleteRunnable(mc, i * 10000,
-					cdl, repeat)).start();
+					cdl, repeat, keySize, valueSize)).start();
 		}
 		try {
 			cdl.await();
@@ -189,13 +238,13 @@ public class PerformanceTest {
 										/ (usingtime / 1000000), usingtime));
 	}
 
-	private static void testRead(int thread, int size, int repeat,
-			XMemcachedClient mc) {
+	private static void testRead(int thread, int size, int repeat, int keySize,
+			int valueSize, XMemcachedClient mc) {
 		CountDownLatch cdl = new CountDownLatch(thread);
 		long t = System.nanoTime();
 		for (int i = 0; i < thread; i++) {
 			new Thread(new PerformanceTest.TestReadRunnable(mc, i * 10000, cdl,
-					repeat)).start();
+					repeat, keySize, valueSize)).start();
 		}
 		try {
 			cdl.await();
@@ -212,12 +261,12 @@ public class PerformanceTest {
 	}
 
 	private static void testWrite(int thread, int size, int repeat,
-			XMemcachedClient mc) {
+			int keySize, int valueSize, XMemcachedClient mc) {
 		CountDownLatch cdl = new CountDownLatch(thread);
 		long start = System.nanoTime();
 		for (int i = 0; i < thread; i++) {
 			new Thread(new PerformanceTest.TestWriteRunnable(mc, i * 10000,
-					cdl, repeat)).start();
+					cdl, repeat, keySize, valueSize)).start();
 		}
 		try {
 			cdl.await();
