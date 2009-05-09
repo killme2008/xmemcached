@@ -201,6 +201,7 @@ public class Example {
 			// 查看统计信息
 			System.out.println(client.stats("192.168.207.101:12000", 1000)); // 查看统计信息
 			client.shutdown();
+			
 		} catch (IOException e) {
 			e.printStackTrace();
 		} catch (TimeoutException e) {

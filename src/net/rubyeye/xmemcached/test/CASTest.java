@@ -15,29 +15,28 @@ import java.util.concurrent.CountDownLatch;
 
 import net.rubyeye.xmemcached.CASOperation;
 import net.rubyeye.xmemcached.XMemcachedClient;
+import net.rubyeye.xmemcached.utils.AddrUtil;
 
 /**
  * 测试CAS
- *
+ * 
  * @author dennis
  */
 class CASThread extends Thread {
 	/**
 	 * 递增操作类，尝试在现有值上+1
-	 *
+	 * 
 	 * @author dennis
-	 *
+	 * 
 	 */
 	static final class IncrmentOperation implements CASOperation<Integer> {
 		@Override
 		public int getMaxTries() {
-			return 100; // 最大重试次数
+			return Integer.MAX_VALUE; // 最大重试次数
 		}
 
 		@Override
 		public Integer getNewValue(long currentCAS, Integer currentValue) {
-			System.out.println("currentValue=" + currentValue + ",currentCAS="
-					+ currentCAS);
 			return currentValue + 1; // 当前值+1
 		}
 	}
@@ -63,22 +62,26 @@ class CASThread extends Thread {
 }
 
 public class CASTest {
-	static int NUM = 100;
 
 	public static void main(String[] args) throws Exception {
-		XMemcachedClient mc = new XMemcachedClient();
-		mc.addServer("192.168.207.101", 12000);
+		if (args.length < 2) {
+			System.err.println("Usage:java CASTest [threadNum] [server]");
+		}
+		int NUM = Integer.parseInt(args[0]);
+		XMemcachedClient mc = new XMemcachedClient(AddrUtil.getAddress(args[1]));
 		// 设置初始值为0
 		mc.set("a", 0, 0);
 		CountDownLatch cdl = new CountDownLatch(NUM);
+		long start = System.currentTimeMillis();
 		// 开NUM个线程递增变量a
 		for (int i = 0; i < NUM; i++)
 			new CASThread(mc, cdl).start();
 
 		cdl.await();
+		System.out.println("test cas,timed:"
+				+ (System.currentTimeMillis() - start));
 		// 打印结果,最后结果应该为NUM
 		System.out.println("result=" + mc.get("a"));
-		Thread.sleep(1000000);
 		mc.shutdown();
 	}
 }

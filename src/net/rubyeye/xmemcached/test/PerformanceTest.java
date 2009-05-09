@@ -56,14 +56,14 @@ public class PerformanceTest {
 		}
 
 		private final String getKey(int n) {
-			StringBuilder sb = new StringBuilder(n);
+			StringBuilder sb = new StringBuilder(String.valueOf(n));
 			while (sb.length() < keySize)
 				sb.append("k");
 			return sb.toString();
 		}
 
 		private final String getValue(int n) {
-			StringBuilder sb = new StringBuilder(n);
+			StringBuilder sb = new StringBuilder(String.valueOf(n));
 			while (sb.length() < valueSize)
 				sb.append("v");
 			return sb.toString();
@@ -99,14 +99,14 @@ public class PerformanceTest {
 		}
 
 		private final String getKey(int n) {
-			StringBuilder sb = new StringBuilder(n);
+			StringBuilder sb = new StringBuilder(String.valueOf(n));
 			while (sb.length() < keySize)
 				sb.append("k");
 			return sb.toString();
 		}
 
 		private final String getValue(int n) {
-			StringBuilder sb = new StringBuilder(n);
+			StringBuilder sb = new StringBuilder(String.valueOf(n));
 			while (sb.length() < valueSize)
 				sb.append("v");
 			return sb.toString();
@@ -161,7 +161,7 @@ public class PerformanceTest {
 		}
 
 		private final String getKey(int n) {
-			StringBuilder sb = new StringBuilder(n);
+			StringBuilder sb = new StringBuilder(String.valueOf(n));
 			while (sb.length() < keySize)
 				sb.append("k");
 			return sb.toString();
@@ -172,7 +172,7 @@ public class PerformanceTest {
 				for (int i = 0; i < repeat; i++) {
 					String key = getKey(start + i);
 					if (!mc.delete(key)) {
-						System.err.println("delete "+key +" error");
+						System.err.println("delete " + key + " error");
 					}
 				}
 
@@ -221,7 +221,7 @@ public class PerformanceTest {
 		cdl = new CountDownLatch(thread);
 		t = System.nanoTime();
 		for (int i = 0; i < thread; i++) {
-			new Thread(new PerformanceTest.TestDeleteRunnable(mc, i * 10000,
+			new Thread(new PerformanceTest.TestDeleteRunnable(mc, i * repeat,
 					cdl, repeat, keySize, valueSize)).start();
 		}
 		try {
@@ -243,8 +243,8 @@ public class PerformanceTest {
 		CountDownLatch cdl = new CountDownLatch(thread);
 		long t = System.nanoTime();
 		for (int i = 0; i < thread; i++) {
-			new Thread(new PerformanceTest.TestReadRunnable(mc, i * 10000, cdl,
-					repeat, keySize, valueSize)).start();
+			new Thread(new PerformanceTest.TestReadRunnable(mc, i * repeat,
+					cdl, repeat, keySize, valueSize)).start();
 		}
 		try {
 			cdl.await();
@@ -265,7 +265,7 @@ public class PerformanceTest {
 		CountDownLatch cdl = new CountDownLatch(thread);
 		long start = System.nanoTime();
 		for (int i = 0; i < thread; i++) {
-			new Thread(new PerformanceTest.TestWriteRunnable(mc, i * 10000,
+			new Thread(new PerformanceTest.TestWriteRunnable(mc, i * repeat,
 					cdl, repeat, keySize, valueSize)).start();
 		}
 		try {
