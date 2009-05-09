@@ -24,7 +24,7 @@ import net.rubyeye.xmemcached.utils.ByteUtils;
 import net.rubyeye.xmemcached.utils.Deque;
 
 /**
- * 
+ *
  * @author dennis
  */
 public class Optimiezer implements OptimiezerMBean, MemcachedOptimiezer {
@@ -96,7 +96,7 @@ public class Optimiezer implements OptimiezerMBean, MemcachedOptimiezer {
 
 	/**
 	 *merge buffers to fit socket's send buffer size
-	 * 
+	 *
 	 * @param currentCommand
 	 * @return
 	 * @throws InterruptedException
@@ -118,7 +118,7 @@ public class Optimiezer implements OptimiezerMBean, MemcachedOptimiezer {
 
 	/**
 	 * Merge get operation to multi-get operation
-	 * 
+	 *
 	 * @param currentCmd
 	 * @param mergeCommands
 	 * @return
@@ -128,14 +128,11 @@ public class Optimiezer implements OptimiezerMBean, MemcachedOptimiezer {
 	public final Command optimiezeGet(final Queue writeQueue,
 			final BlockingQueue<Command> executingCmds, Command optimiezeCommand) {
 		if (optimiezeCommand.getCommandType() == Command.CommandType.GET_ONE) {
-			final List<Command> mergeCommands = new ArrayList<Command>(
-					mergeFactor / 2);
-			mergeCommands.add(optimiezeCommand);
 			// 优化get操作
 			if (optimiezeGet) {
 				writeQueue.remove();
 				optimiezeCommand = mergeGetCommands(optimiezeCommand,
-						writeQueue, executingCmds, mergeCommands);
+						writeQueue, executingCmds);
 				((Deque) writeQueue).addFirst(optimiezeCommand); // 加入队首
 			}
 		}
@@ -151,13 +148,12 @@ public class Optimiezer implements OptimiezerMBean, MemcachedOptimiezer {
 		if (nextCmd == null)
 			return lastCommand;
 
-		ByteBuffer nextBuffer = nextCmd.getIoBuffer().getByteBuffer();
 		final List<Command> commands = getLocalList();
 		final ByteBuffer firstBuffer = firstCommand.getIoBuffer()
 				.getByteBuffer();
 		int totalBytes = firstBuffer.remaining();
 		commands.add(firstCommand);
-		while (totalBytes + nextBuffer.remaining() <= sendBufferSize) {
+		while (totalBytes + nextCmd.getIoBuffer().getByteBuffer().remaining() <= sendBufferSize) {
 			if (nextCmd.getStatus() == OperationStatus.WRITING) {
 				break;
 			}
@@ -167,20 +163,28 @@ public class Optimiezer implements OptimiezerMBean, MemcachedOptimiezer {
 			}
 			nextCmd.setStatus(OperationStatus.WRITING);
 
-			if (!nextBuffer.hasRemaining()) {
+			if (!nextCmd.getIoBuffer().getByteBuffer().hasRemaining()) {
 				writeQueue.remove();
 				continue;
 			}
-			commands.add(nextCmd);
-			totalBytes += nextBuffer.remaining();
+
 			writeQueue.remove();
+			// if it is get_one command,try to merge get commands
+			if (nextCmd.getCommandType() == Command.CommandType.GET_ONE
+					&& optimiezeGet)
+				nextCmd = mergeGetCommands(nextCmd, writeQueue, executingCmds);
+
+			commands.add(nextCmd);
 			lastCommand = nextCmd;
+			totalBytes += nextCmd.getIoBuffer().getByteBuffer().remaining();
+
+			if (totalBytes > sendBufferSize)
+				break;
 
 			nextCmd = (Command) writeQueue.peek();
 			if (nextCmd == null) {
 				break;
 			}
-			nextBuffer = nextCmd.getIoBuffer().getByteBuffer();
 		}
 		if (commands.size() > 1) {
 			// ArrayIoBuffer arrayBuffer = new ArrayIoBuffer(buffers);
@@ -214,8 +218,8 @@ public class Optimiezer implements OptimiezerMBean, MemcachedOptimiezer {
 
 	@SuppressWarnings("unchecked")
 	private final Command mergeGetCommands(final Command currentCmd,
-			final Queue writeQueue, final BlockingQueue<Command> executingCmds,
-			final List<Command> mergeCommands) {
+			final Queue writeQueue, final BlockingQueue<Command> executingCmds) {
+		List<Command> mergeCommands = null;
 		int mergeCount = 1;
 		final StringBuilder key = new StringBuilder();
 		currentCmd.setStatus(OperationStatus.WRITING);
@@ -230,6 +234,10 @@ public class Optimiezer implements OptimiezerMBean, MemcachedOptimiezer {
 				continue;
 			}
 			if (nextCmd.getCommandType() == Command.CommandType.GET_ONE) {
+				if (mergeCommands == null) { // lazy initialize
+					mergeCommands = new ArrayList<Command>(mergeFactor / 2);
+					mergeCommands.add(currentCmd);
+				}
 				nextCmd.setStatus(OperationStatus.WRITING);
 				mergeCommands.add((Command) writeQueue.remove());
 				key.append(" ").append((String) nextCmd.getKey());

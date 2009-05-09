@@ -144,9 +144,9 @@ public class OptimezerTest extends TestCase {
 				writeQueue, executingCmds, 30);
 		assertNotSame(currentCmd, optimiezeCommand);
 		ByteBuffer mergeBuffer = optimiezeCommand.getIoBuffer().getByteBuffer();
-		assertTrue(mergeBuffer.remaining() < 30);
-		assertEquals(6 + 1, writeQueue.size()); // remain six commands
-		assertEquals("get 0\r\nget 1\r\nget 2\r\nget 3\r\n", new String(
+		assertEquals(1, writeQueue.size()); // remain six commands
+		assertSame(Command.CommandType.GET_ONE,((Command)writeQueue.peek()).getCommandType());
+		assertEquals("get 0\r\nget 1 2 3 4 5 6 7 8 9\r\n", new String(
 				mergeBuffer.array())); // current command at last
 	}
 
@@ -158,9 +158,8 @@ public class OptimezerTest extends TestCase {
 		assertNotSame(currentCmd, optimiezeCommand);
 		assertTrue(mergeBuffer.remaining() < 100);
 		assertEquals(1, writeQueue.size());
-		assertEquals(
-				"get 0\r\nget 1\r\nget 2\r\nget 3\r\nget 4\r\nget 5\r\nget 6\r\nget 7\r\nget 8\r\nget 9\r\n",
-				new String(mergeBuffer.array())); // current command at last
+		assertEquals("get 0\r\nget 1 2 3 4 5 6 7 8 9\r\n", new String(
+				mergeBuffer.array())); // current command at last
 	}
 
 	public void testMergeBufferWithEmptyWriteQueue() {
@@ -191,10 +190,10 @@ public class OptimezerTest extends TestCase {
 			else
 				sb.append(String.valueOf(i));
 		sb.append("\r\n");
-		for(int i=0;i<10;i++)
-			sb.append("delete "+String.valueOf(i)+" 0\r\n");
+		for (int i = 0; i < 10; i++)
+			sb.append("delete " + String.valueOf(i) + " 0\r\n");
 		assertEquals(sb.toString(), new String(mergeBuffer.array()));
-		assertEquals(1,writeQueue.size());
-		assertSame(optimiezeCommand,writeQueue.peek());
+		assertEquals(1, writeQueue.size());
+		assertSame(optimiezeCommand, writeQueue.peek());
 	}
 }
