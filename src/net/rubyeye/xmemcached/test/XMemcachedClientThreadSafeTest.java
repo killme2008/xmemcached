@@ -5,12 +5,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.*;
+
+import net.rubyeye.xmemcached.MemcachedClient;
 import net.rubyeye.xmemcached.XMemcachedClient;
 import net.rubyeye.xmemcached.impl.KetamaMemcachedSessionLocator;
 
 class TestThread implements Runnable {
 	private static final int ELEMENT_NUM = 50;
-	XMemcachedClient xmemcachedClient;
+	MemcachedClient xmemcachedClient;
 	CyclicBarrier barrier;
 
 	static List<Integer> list = new ArrayList<Integer>();
@@ -31,7 +33,7 @@ class TestThread implements Runnable {
 
 	final static int NUM = 10000;
 
-	public TestThread(int number, XMemcachedClient xmemcachedClient,
+	public TestThread(int number, MemcachedClient xmemcachedClient,
 			CyclicBarrier barrier) {
 		this.xmemcachedClient = xmemcachedClient;
 		this.number = number;
@@ -96,7 +98,7 @@ public class XMemcachedClientThreadSafeTest {
 	public static void main(String args[]) throws Exception {
 		CyclicBarrier barrier = new CyclicBarrier(num + 1);
 		String ip = "localhost";
-		XMemcachedClient client = new XMemcachedClient(
+		MemcachedClient client = new XMemcachedClient(
 				);
 		client.addServer(ip, 12000);
 		// client.addServer(ip, 12002);

@@ -3,13 +3,15 @@ package net.rubyeye.xmemcached.test;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
+
+import net.rubyeye.xmemcached.MemcachedClient;
+import net.rubyeye.xmemcached.MemcachedClientBuilder;
 import net.rubyeye.xmemcached.XMemcachedClientBuilder;
-import net.rubyeye.xmemcached.XMemcachedClient;
 import net.rubyeye.xmemcached.utils.AddrUtil;
 
 public class PerformanceTest2 {
 	static Map<String, NameClass> map2 = new HashMap<String, NameClass>();
-	static final int ELEMENT_NUM = 50;
+	static final int ELEMENT_NUM = 100;
 	static {
 		for (int i = 0; i < ELEMENT_NUM; i++)
 			map2.put(String.valueOf(i), new NameClass(String.valueOf(i), String
@@ -18,12 +20,12 @@ public class PerformanceTest2 {
 
 	static class TestWriteRunnable implements Runnable {
 
-		private XMemcachedClient mc;
+		private MemcachedClient mc;
 		private CountDownLatch cd;
 		int repeat;
 		int start;
 
-		public TestWriteRunnable(XMemcachedClient mc, int start,
+		public TestWriteRunnable(MemcachedClient mc, int start,
 				CountDownLatch cdl, int repeat) {
 			super();
 			this.mc = mc;
@@ -55,12 +57,12 @@ public class PerformanceTest2 {
 
 	static class TestReadRunnable implements Runnable {
 
-		private XMemcachedClient mc;
+		private MemcachedClient mc;
 		private CountDownLatch cd;
 		int repeat;
 		int start;
 
-		public TestReadRunnable(XMemcachedClient mc, int start,
+		public TestReadRunnable(MemcachedClient mc, int start,
 				CountDownLatch cdl, int repeat) {
 			super();
 			this.mc = mc;
@@ -99,18 +101,19 @@ public class PerformanceTest2 {
 
 			int cpuCount = Runtime.getRuntime().availableProcessors();
 
-			int thread = 10;
+			int thread = 100;
 
-			int repeat = 100;
 
-			XMemcachedClientBuilder builder = new XMemcachedClientBuilder(
-					AddrUtil.getAddresses("192.168.207.101:12000"));
-			builder.getConfiguration().setReadThreadCount(0);
-			XMemcachedClient mc = builder.build();
+			int repeat = 1000;
+
+			MemcachedClientBuilder builder = new XMemcachedClientBuilder(
+					AddrUtil.getAddresses("localhost:12000"));
+			//builder.getConfiguration().setReadThreadCount(0);
+			MemcachedClient mc = builder.build();
 			testWrite(cpuCount, thread, repeat, mc);
 			testRead(cpuCount, thread, repeat, mc);
-			mc.flushAll(10000); // delete all
-			System.out.println(mc.stats("192.168.207.101:12000"));
+			//mc.flushAll(10000); // delete all
+			//System.out.println(mc.stats("192.168.207.101:12000"));
 			mc.shutdown();
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -118,7 +121,7 @@ public class PerformanceTest2 {
 	}
 
 	private static void testRead(int size, int thread, int repeat,
-			XMemcachedClient mc) {
+			MemcachedClient mc) {
 		CountDownLatch cdl;
 		long t;
 		long all;
@@ -146,7 +149,7 @@ public class PerformanceTest2 {
 	}
 
 	private static void testWrite(int size, int thread, int repeat,
-			XMemcachedClient mc) {
+			MemcachedClient mc) {
 		CountDownLatch cdl = new CountDownLatch(thread);
 		long t = System.currentTimeMillis();
 		for (int i = 0; i < thread; i++) {

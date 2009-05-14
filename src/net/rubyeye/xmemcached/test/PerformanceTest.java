@@ -2,7 +2,8 @@ package net.rubyeye.xmemcached.test;
 
 import java.util.concurrent.CountDownLatch;
 
-import net.rubyeye.xmemcached.XMemcachedClient;
+import net.rubyeye.xmemcached.MemcachedClient;
+import net.rubyeye.xmemcached.MemcachedClientBuilder;
 import net.rubyeye.xmemcached.XMemcachedClientBuilder;
 import net.rubyeye.xmemcached.buffer.CachedBufferAllocator;
 import net.rubyeye.xmemcached.impl.KetamaMemcachedSessionLocator;
@@ -18,14 +19,14 @@ public class PerformanceTest {
 	 */
 	static class TestWriteRunnable implements Runnable {
 
-		private XMemcachedClient mc;
+		private MemcachedClient mc;
 		private CountDownLatch cd;
 		int repeat;
 		int start;
 		int keySize;
 		int valueSize;
 
-		public TestWriteRunnable(XMemcachedClient mc, int start,
+		public TestWriteRunnable(MemcachedClient mc, int start,
 				CountDownLatch cdl, int repeat, int keySize, int valueSize) {
 			super();
 			this.mc = mc;
@@ -78,7 +79,7 @@ public class PerformanceTest {
 	 */
 	static class TestReadRunnable implements Runnable {
 
-		private XMemcachedClient mc;
+		private MemcachedClient mc;
 		private CountDownLatch cd;
 		int repeat;
 		int start;
@@ -86,7 +87,7 @@ public class PerformanceTest {
 		int keySize;
 		int valueSize;
 
-		public TestReadRunnable(XMemcachedClient mc, int start,
+		public TestReadRunnable(MemcachedClient mc, int start,
 				CountDownLatch cdl, int repeat, int keySize, int valueSize) {
 			super();
 			this.mc = mc;
@@ -140,7 +141,7 @@ public class PerformanceTest {
 	 */
 	static class TestDeleteRunnable implements Runnable {
 
-		private XMemcachedClient mc;
+		private MemcachedClient mc;
 		private CountDownLatch cd;
 		int repeat;
 		int start;
@@ -148,7 +149,7 @@ public class PerformanceTest {
 		int keySize;
 		int valueSize;
 
-		public TestDeleteRunnable(XMemcachedClient mc, int start,
+		public TestDeleteRunnable(MemcachedClient mc, int start,
 				CountDownLatch cdl, int repeat, int keySize, int valueSize) {
 			super();
 			this.mc = mc;
@@ -197,9 +198,9 @@ public class PerformanceTest {
 		try {
 			int size = Runtime.getRuntime().availableProcessors();
 
-			XMemcachedClientBuilder builder = new XMemcachedClientBuilder(
+			MemcachedClientBuilder builder = new XMemcachedClientBuilder(
 					AddrUtil.getAddresses(args[4]));
-			XMemcachedClient mc = builder.build();
+			MemcachedClient mc = builder.build();
 			// mc.setOptimizeMergeBuffer(false);
 			// 分别测试写、读、删除
 			testWrite(thread, size, repeat, keySize, valueSize, mc);
@@ -213,7 +214,7 @@ public class PerformanceTest {
 	}
 
 	private static void testDelete(int thread, int size, int repeat,
-			int keySize, int valueSize, XMemcachedClient mc) {
+			int keySize, int valueSize, MemcachedClient mc) {
 		CountDownLatch cdl;
 		long t;
 		long all;
@@ -239,7 +240,7 @@ public class PerformanceTest {
 	}
 
 	private static void testRead(int thread, int size, int repeat, int keySize,
-			int valueSize, XMemcachedClient mc) {
+			int valueSize, MemcachedClient mc) {
 		CountDownLatch cdl = new CountDownLatch(thread);
 		long t = System.nanoTime();
 		for (int i = 0; i < thread; i++) {
@@ -261,7 +262,7 @@ public class PerformanceTest {
 	}
 
 	private static void testWrite(int thread, int size, int repeat,
-			int keySize, int valueSize, XMemcachedClient mc) {
+			int keySize, int valueSize, MemcachedClient mc) {
 		CountDownLatch cdl = new CountDownLatch(thread);
 		long start = System.nanoTime();
 		for (int i = 0; i < thread; i++) {

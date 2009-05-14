@@ -19,6 +19,7 @@ import java.util.Set;
 import java.util.concurrent.TimeoutException;
 
 import net.rubyeye.xmemcached.HashAlgorithm;
+import net.rubyeye.xmemcached.MemcachedClient;
 import net.rubyeye.xmemcached.XMemcachedClient;
 import net.rubyeye.xmemcached.exception.MemcachedException;
 import net.rubyeye.xmemcached.impl.KetamaMemcachedSessionLocator;
@@ -40,7 +41,7 @@ public class CacheHitRateTest {
 		// 替换这个HashAlgorithm进行测试
 		HashAlgorithm hashAlg = HashAlgorithm.KETAMA_HASH;
 
-		XMemcachedClient client = new XMemcachedClient(
+		MemcachedClient client = new XMemcachedClient(
 				new KetamaMemcachedSessionLocator(hashAlg));
 		client.addServer(ip, 12000);
 		client.addServer(ip, 12001);
@@ -80,7 +81,7 @@ public class CacheHitRateTest {
 				+ (System.currentTimeMillis() - start));
 	}
 
-	private static void printHitRate(XMemcachedClient client, Set<String> keys)
+	private static void printHitRate(MemcachedClient client, Set<String> keys)
 			throws TimeoutException, InterruptedException,MemcachedException {
 		int total = 0;
 		int hits = 0;
@@ -98,7 +99,7 @@ public class CacheHitRateTest {
 	 * @param client
 	 * @throws Exception
 	 */
-	public static Set<String> init(XMemcachedClient client) throws Exception {
+	public static Set<String> init(MemcachedClient client) throws Exception {
 		BufferedReader reader = new BufferedReader(ResourcesUtils
 				.getResourceAsReader("golden_compass.txt"));
 		String line = null;

@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeoutException;
 
+import net.rubyeye.xmemcached.MemcachedClient;
 import net.rubyeye.xmemcached.XMemcachedClient;
 import net.rubyeye.xmemcached.exception.MemcachedException;
 import net.rubyeye.xmemcached.impl.KetamaMemcachedSessionLocator;
@@ -18,7 +19,7 @@ public class MultiServerExample {
 			/**
 			 * 采用一致性哈希算法
 			 */
-			XMemcachedClient client = new XMemcachedClient(
+			MemcachedClient client = new XMemcachedClient(
 					new KetamaMemcachedSessionLocator());
 			client.addServer(ip, 12000);
 			client.addServer(ip, 12001);

@@ -3,11 +3,12 @@ package net.rubyeye.xmemcached.test;
 import java.io.IOException;
 import java.util.concurrent.TimeoutException;
 
+import net.rubyeye.xmemcached.MemcachedClient;
 import net.rubyeye.xmemcached.XMemcachedClient;
 import net.rubyeye.xmemcached.exception.MemcachedException;
 
 public class ExceptionTest {
-	static XMemcachedClient client;
+	static MemcachedClient client;
 
 	public static void main(String args[]) {
 		initClient();

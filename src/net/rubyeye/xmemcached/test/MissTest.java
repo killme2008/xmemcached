@@ -1,10 +1,11 @@
 package net.rubyeye.xmemcached.test;
 
+import net.rubyeye.xmemcached.MemcachedClient;
 import net.rubyeye.xmemcached.XMemcachedClient;
 
 public class MissTest {
 	public static void main(String[] args) throws Exception {
-		XMemcachedClient mc = new XMemcachedClient();
+		MemcachedClient mc = new XMemcachedClient();
 		mc.addServer("192.168.207.101", 12000);
 		for (int i = 0; i < 10000; i++)
 			mc.delete(String.valueOf(i));

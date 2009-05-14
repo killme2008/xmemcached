@@ -13,6 +13,8 @@ package net.rubyeye.xmemcached;
 
 import java.nio.ByteBuffer;
 
+import net.rubyeye.xmemcached.impl.MemcachedTCPSession;
+
 /**
  * memcached协议解析接口
  *

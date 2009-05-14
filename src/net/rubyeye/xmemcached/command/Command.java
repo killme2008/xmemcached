@@ -21,9 +21,9 @@ import net.rubyeye.xmemcached.transcoders.Transcoder;
 
 /**
  * memcached命令类
- * 
+ *
  * @author Administrator
- * 
+ *
  */
 public class Command {
 
@@ -42,9 +42,9 @@ public class Command {
 
 	/**
 	 * 命令类型
-	 * 
+	 *
 	 * @author dennis
-	 * 
+	 *
 	 */
 	public enum CommandType {
 

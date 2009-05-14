@@ -34,6 +34,9 @@ import net.rubyeye.xmemcached.buffer.SimpleBufferAllocator;
 import net.rubyeye.xmemcached.command.Command;
 import net.rubyeye.xmemcached.exception.MemcachedException;
 import net.rubyeye.xmemcached.impl.ArrayMemcachedSessionLocator;
+import net.rubyeye.xmemcached.impl.MemcachedConnector;
+import net.rubyeye.xmemcached.impl.MemcachedHandler;
+import net.rubyeye.xmemcached.impl.MemcachedTCPSession;
 import net.rubyeye.xmemcached.monitor.XMemcachedMbeanServer;
 import net.rubyeye.xmemcached.transcoders.CachedData;
 import net.rubyeye.xmemcached.transcoders.SerializingTranscoder;
@@ -50,36 +53,8 @@ import com.google.code.yanf4j.nio.Session;
  * @author dennis(killme2008@gmail.com)
  * 
  */
-public final class XMemcachedClient implements XMemcachedClientMBean {
+public final class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient {
 
-	/**
-	 * 默认的读buffer线程数
-	 */
-	public static final int DEFAULT_READ_THREAD_COUNT = 0;
-	/**
-	 * 默认的连接超时,1分钟
-	 */
-	public static final int DEFAULT_CONNECT_TIMEOUT = 60000;
-	/**
-	 * 默认的socket发送缓冲区大小，16K
-	 */
-	public static final int DEFAULT_TCP_SEND_BUFF_SIZE = 16 * 1024;
-	/**
-	 * 默认启用Nagle算法
-	 */
-	public static final boolean DEFAULT_TCP_NO_DELAY = false;
-	/**
-	 * 默认的session内的缓冲区大小，32K
-	 */
-	public static final int DEFAULT_SESSION_READ_BUFF_SIZE = 32 * 1024;
-	/**
-	 * 默认的Socket接收缓冲区大小，16K
-	 */
-	public static final int DEFAULT_TCP_RECV_BUFF_SIZE = 16 * 1024;
-	/**
-	 * 默认的操作超时时间，1秒
-	 */
-	public static final long DEFAULT_OP_TIMEOUT = 1000;
 	private static final Log log = LogFactory.getLog(XMemcachedClient.class);
 	private MemcachedSessionLocator sessionLocator;
 	private volatile boolean shutdown;
@@ -89,10 +64,8 @@ public final class XMemcachedClient implements XMemcachedClientMBean {
 	private MemcachedHandler memcachedHandler;
 	private long connectTimeout = DEFAULT_CONNECT_TIMEOUT; // 连接超时
 
-	/**
-	 * 设置合并系数，这一参数影响get优化和合并缓存区优化，这个系数决定最多的合并command数，默认是150
-	 * 
-	 * @param mergeFactor
+	/* (non-Javadoc)
+	 * @see net.rubyeye.xmemcached.MemcachedClient#setMergeFactor(int)
 	 */
 	public final void setMergeFactor(final int mergeFactor) {
 		if (mergeFactor < 0) {
@@ -101,19 +74,15 @@ public final class XMemcachedClient implements XMemcachedClientMBean {
 		this.connector.setMergeFactor(mergeFactor);
 	}
 
-	/**
-	 * 获取连接超时，单位毫秒,默认一分钟
-	 * 
-	 * @param connectTimeout
+	/* (non-Javadoc)
+	 * @see net.rubyeye.xmemcached.MemcachedClient#getConnectTimeout()
 	 */
 	public long getConnectTimeout() {
 		return connectTimeout;
 	}
 
-	/**
-	 * 设置连接超时,单位毫秒，默认一分钟
-	 * 
-	 * @param connectTimeout
+	/* (non-Javadoc)
+	 * @see net.rubyeye.xmemcached.MemcachedClient#setConnectTimeout(long)
 	 */
 	public void setConnectTimeout(long connectTimeout) {
 		if (connectTimeout < 0)
@@ -121,38 +90,29 @@ public final class XMemcachedClient implements XMemcachedClientMBean {
 		this.connectTimeout = connectTimeout;
 	}
 
-	/**
-	 * 返回连接管理器
-	 * 
-	 * @return
+	/* (non-Javadoc)
+	 * @see net.rubyeye.xmemcached.MemcachedClient#getConnector()
 	 */
 	public final MemcachedConnector getConnector() {
 		return connector;
 	}
 
-	/**
-	 * 设置是否启用get优化，xmemcached会将连续的get操作尽可能合并成一个getMulti操作，默认开启
-	 * 
-	 * @param optimiezeGet
+	/* (non-Javadoc)
+	 * @see net.rubyeye.xmemcached.MemcachedClient#setOptimiezeGet(boolean)
 	 */
 	public final void setOptimiezeGet(final boolean optimiezeGet) {
 		this.connector.setOptimiezeGet(optimiezeGet);
 	}
 
-	/**
-	 * 是否启用缓存区合并优化，xmemcached会尽可能将连续的命令合并起来，以形成一个socket.getSendBufferSize()
-	 * 大小的packet发出，默认开启
-	 * 
-	 * @param optimizeMergeBuffer
+	/* (non-Javadoc)
+	 * @see net.rubyeye.xmemcached.MemcachedClient#setOptimizeMergeBuffer(boolean)
 	 */
 	public final void setOptimizeMergeBuffer(final boolean optimizeMergeBuffer) {
 		this.connector.setOptimizeMergeBuffer(optimizeMergeBuffer);
 	}
 
-	/**
-	 * 是否已经关闭xmemcached客户端
-	 * 
-	 * @return
+	/* (non-Javadoc)
+	 * @see net.rubyeye.xmemcached.MemcachedClient#isShutdown()
 	 */
 	public final boolean isShutdown() {
 		return shutdown;
@@ -204,13 +164,8 @@ public final class XMemcachedClient implements XMemcachedClientMBean {
 		}
 	}
 
-	/**
-	 * 添加memcached server，调用线程将阻塞，直接到连接成功或者失败
-	 * 
-	 * @param server
-	 *            IP地址
-	 * @param port
-	 *            端口
+	/* (non-Javadoc)
+	 * @see net.rubyeye.xmemcached.MemcachedClient#addServer(java.lang.String, int)
 	 */
 	public final void addServer(final String server, final int port)
 			throws IOException {
@@ -218,11 +173,8 @@ public final class XMemcachedClient implements XMemcachedClientMBean {
 		connect(new InetSocketAddress(server, port));
 	}
 
-	/**
-	 * 添加memcached server，调用线程将阻塞，直接到连接成功或者失败
-	 * 
-	 * @param inetSocketAddress
-	 *            memcached服务器地址
+	/* (non-Javadoc)
+	 * @see net.rubyeye.xmemcached.MemcachedClient#addServer(java.net.InetSocketAddress)
 	 */
 	public final void addServer(final InetSocketAddress inetSocketAddress)
 			throws IOException {
@@ -232,11 +184,8 @@ public final class XMemcachedClient implements XMemcachedClientMBean {
 		connect(inetSocketAddress);
 	}
 
-	/**
-	 * 添加memcached server
-	 * 
-	 * @param host
-	 *            形式如[host1]:[port1] [host2]:[port2] ...形式的服务器列表字符串
+	/* (non-Javadoc)
+	 * @see net.rubyeye.xmemcached.MemcachedClient#addServer(java.lang.String)
 	 */
 	public final void addServer(String hostList) throws IOException {
 		List<InetSocketAddress> addresses = AddrUtil.getAddresses(hostList);
@@ -247,8 +196,8 @@ public final class XMemcachedClient implements XMemcachedClientMBean {
 		}
 	}
 
-	/**
-	 * 返回当前服务器列表描述字符串
+	/* (non-Javadoc)
+	 * @see net.rubyeye.xmemcached.MemcachedClient#getServersDescription()
 	 */
 	@Override
 	public final List<String> getServersDescription() {
@@ -261,11 +210,8 @@ public final class XMemcachedClient implements XMemcachedClientMBean {
 		return result;
 	}
 
-	/**
-	 * 移除memcached server
-	 * 
-	 * @param host
-	 *            形式如[host1]:[port1] [host2]:[port2] ...形式的服务器列表字符串
+	/* (non-Javadoc)
+	 * @see net.rubyeye.xmemcached.MemcachedClient#removeServer(java.lang.String)
 	 */
 	public final void removeServer(String hostList) {
 		List<InetSocketAddress> addresses = AddrUtil.getAddresses(hostList);
@@ -403,11 +349,8 @@ public final class XMemcachedClient implements XMemcachedClientMBean {
 							+ this.getClass().getSimpleName());
 	}
 
-	/**
-	 * 设置IoBuffer分配器，默认采用SimpleBufferAllocator
-	 * 
-	 * @param bufferAllocator
-	 * @return
+	/* (non-Javadoc)
+	 * @see net.rubyeye.xmemcached.MemcachedClient#setBufferAllocator(net.rubyeye.xmemcached.buffer.BufferAllocator)
 	 */
 	public final void setBufferAllocator(final BufferAllocator bufferAllocator) {
 		CommandFactory.setBufferAllocator(bufferAllocator);
@@ -542,20 +485,8 @@ public final class XMemcachedClient implements XMemcachedClientMBean {
 		}
 	}
 
-	/**
-	 * 获取key对应的缓存项
-	 * 
-	 * @param <T>
-	 * @param key
-	 *            关键字key
-	 * @param timeout
-	 *            操作的超时时间，单位毫秒，超过此时间没有响应就抛出TimeoutException
-	 * @param transcoder
-	 *            数据项的序列化转换器，如果为null就默认使用内部的转换器负责判断类型并反序列化
-	 * @return
-	 * @throws TimeoutException
-	 * @throws InterruptedException
-	 * @throws MemcachedException
+	/* (non-Javadoc)
+	 * @see net.rubyeye.xmemcached.MemcachedClient#get(java.lang.String, long, net.rubyeye.xmemcached.transcoders.Transcoder)
 	 */
 	@SuppressWarnings("unchecked")
 	public final <T> T get(final String key, final long timeout,
@@ -565,17 +496,26 @@ public final class XMemcachedClient implements XMemcachedClientMBean {
 				Command.CommandType.GET_ONE, transcoder);
 	}
 
+	/* (non-Javadoc)
+	 * @see net.rubyeye.xmemcached.MemcachedClient#get(java.lang.String, long)
+	 */
 	@SuppressWarnings("unchecked")
 	public final Object get(final String key, final long timeout)
 			throws TimeoutException, InterruptedException, MemcachedException {
 		return get(key, timeout, this.transcoder);
 	}
 
+	/* (non-Javadoc)
+	 * @see net.rubyeye.xmemcached.MemcachedClient#get(java.lang.String, net.rubyeye.xmemcached.transcoders.Transcoder)
+	 */
 	public final <T> T get(final String key, final Transcoder<T> transcoder)
 			throws TimeoutException, InterruptedException, MemcachedException {
 		return get(key, DEFAULT_OP_TIMEOUT, transcoder);
 	}
 
+	/* (non-Javadoc)
+	 * @see net.rubyeye.xmemcached.MemcachedClient#get(java.lang.String)
+	 */
 	public final Object get(final String key) throws TimeoutException,
 			InterruptedException, MemcachedException {
 		return get(key, DEFAULT_OP_TIMEOUT);
@@ -590,20 +530,8 @@ public final class XMemcachedClient implements XMemcachedClientMBean {
 		return fetch0(key, keyBytes, cmdBytes, cmdType, timeout, transcoder);
 	}
 
-	/**
-	 * 类似get,但是gets将返回缓存项的cas值，可用于cas操作，参见cas方法
-	 * 
-	 * @param <T>
-	 * @param key
-	 *            关键字
-	 * @param timeout
-	 *            操作的超时时间
-	 * @param transcoder
-	 *            数据项的反序列化转换器
-	 * @return GetsResponse 返回GetsResponse对象
-	 * @throws TimeoutException
-	 * @throws InterruptedException
-	 * @throws MemcachedException
+	/* (non-Javadoc)
+	 * @see net.rubyeye.xmemcached.MemcachedClient#gets(java.lang.String, long, net.rubyeye.xmemcached.transcoders.Transcoder)
 	 */
 	@SuppressWarnings("unchecked")
 	public final <T> GetsResponse<T> gets(final String key, final long timeout,
@@ -613,17 +541,26 @@ public final class XMemcachedClient implements XMemcachedClientMBean {
 				Command.CommandType.GETS_ONE, transcoder);
 	}
 
+	/* (non-Javadoc)
+	 * @see net.rubyeye.xmemcached.MemcachedClient#gets(java.lang.String)
+	 */
 	public final <T> GetsResponse<T> gets(final String key)
 			throws TimeoutException, InterruptedException, MemcachedException {
 		return gets(key, DEFAULT_OP_TIMEOUT);
 	}
 
+	/* (non-Javadoc)
+	 * @see net.rubyeye.xmemcached.MemcachedClient#gets(java.lang.String, long)
+	 */
 	@SuppressWarnings("unchecked")
 	public final <T> GetsResponse<T> gets(final String key, final long timeout)
 			throws TimeoutException, InterruptedException, MemcachedException {
 		return gets(key, timeout, this.transcoder);
 	}
 
+	/* (non-Javadoc)
+	 * @see net.rubyeye.xmemcached.MemcachedClient#gets(java.lang.String, net.rubyeye.xmemcached.transcoders.Transcoder)
+	 */
 	@SuppressWarnings("unchecked")
 	public final <T> GetsResponse<T> gets(final String key,
 			final Transcoder transcoder) throws TimeoutException,
@@ -631,20 +568,8 @@ public final class XMemcachedClient implements XMemcachedClientMBean {
 		return gets(key, DEFAULT_OP_TIMEOUT, transcoder);
 	}
 
-	/**
-	 * memcached的getMulti操作，批量获取一批key对应的数据项
-	 * 
-	 * @param <T>
-	 * @param keyCollections
-	 *            关键字集合
-	 * @param timeout
-	 *            操作超时时间
-	 * @param transcoder
-	 *            数据项的反序列化转换器
-	 * @return map对象，map中是缓存中存在着的数据项，如果不存在将不会在map中出现
-	 * @throws TimeoutException
-	 * @throws InterruptedException
-	 * @throws MemcachedException
+	/* (non-Javadoc)
+	 * @see net.rubyeye.xmemcached.MemcachedClient#get(java.util.Collection, long, net.rubyeye.xmemcached.transcoders.Transcoder)
 	 */
 	public final <T> Map<String, T> get(
 			final Collection<String> keyCollections, final long timeout,
@@ -654,6 +579,9 @@ public final class XMemcachedClient implements XMemcachedClientMBean {
 				Command.CommandType.GET_MANY, transcoder);
 	}
 
+	/* (non-Javadoc)
+	 * @see net.rubyeye.xmemcached.MemcachedClient#get(java.util.Collection, net.rubyeye.xmemcached.transcoders.Transcoder)
+	 */
 	public final <T> Map<String, T> get(
 			final Collection<String> keyCollections,
 			final Transcoder<T> transcoder) throws TimeoutException,
@@ -666,6 +594,9 @@ public final class XMemcachedClient implements XMemcachedClientMBean {
 				CommandFactory.GET, Command.CommandType.GET_MANY, transcoder);
 	}
 
+	/* (non-Javadoc)
+	 * @see net.rubyeye.xmemcached.MemcachedClient#get(java.util.Collection)
+	 */
 	public final <T> Map<String, T> get(final Collection<String> keyCollections)
 			throws TimeoutException, InterruptedException, MemcachedException {
 		// 超时时间加倍
@@ -675,6 +606,9 @@ public final class XMemcachedClient implements XMemcachedClientMBean {
 		return get(keyCollections, lazy * DEFAULT_OP_TIMEOUT);
 	}
 
+	/* (non-Javadoc)
+	 * @see net.rubyeye.xmemcached.MemcachedClient#get(java.util.Collection, long)
+	 */
 	@SuppressWarnings("unchecked")
 	public final <T> Map<String, T> get(
 			final Collection<String> keyCollections, final long timeout)
@@ -682,17 +616,8 @@ public final class XMemcachedClient implements XMemcachedClientMBean {
 		return (Map<String, T>) get(keyCollections, timeout, this.transcoder);
 	}
 
-	/**
-	 * 类似getMulti，但是返回数据项的cas值，返回的map中value存储的是GetsResponse对象
-	 * 
-	 * @param <T>
-	 * @param keyCollections
-	 * @param timeout
-	 * @param transcoder
-	 * @return
-	 * @throws TimeoutException
-	 * @throws InterruptedException
-	 * @throws MemcachedException
+	/* (non-Javadoc)
+	 * @see net.rubyeye.xmemcached.MemcachedClient#gets(java.util.Collection, long, net.rubyeye.xmemcached.transcoders.Transcoder)
 	 */
 	@SuppressWarnings("unchecked")
 	public final <T> Map<String, GetsResponse<T>> gets(
@@ -704,6 +629,9 @@ public final class XMemcachedClient implements XMemcachedClientMBean {
 				transcoder);
 	}
 
+	/* (non-Javadoc)
+	 * @see net.rubyeye.xmemcached.MemcachedClient#gets(java.util.Collection)
+	 */
 	public final <T> Map<String, GetsResponse<T>> gets(
 			final Collection<String> keyCollections) throws TimeoutException,
 			InterruptedException, MemcachedException {
@@ -714,6 +642,9 @@ public final class XMemcachedClient implements XMemcachedClientMBean {
 		return gets(keyCollections, lazy * DEFAULT_OP_TIMEOUT);
 	}
 
+	/* (non-Javadoc)
+	 * @see net.rubyeye.xmemcached.MemcachedClient#gets(java.util.Collection, long)
+	 */
 	@SuppressWarnings("unchecked")
 	public final <T> Map<String, GetsResponse<T>> gets(
 			final Collection<String> keyCollections, final long timeout)
@@ -721,6 +652,9 @@ public final class XMemcachedClient implements XMemcachedClientMBean {
 		return gets(keyCollections, timeout, this.transcoder);
 	}
 
+	/* (non-Javadoc)
+	 * @see net.rubyeye.xmemcached.MemcachedClient#gets(java.util.Collection, net.rubyeye.xmemcached.transcoders.Transcoder)
+	 */
 	public final <T> Map<String, GetsResponse<T>> gets(
 			final Collection<String> keyCollections,
 			final Transcoder<T> transcoder) throws TimeoutException,
@@ -799,27 +733,8 @@ public final class XMemcachedClient implements XMemcachedClientMBean {
 		return command;
 	}
 
-	/**
-	 * 设置key对应的项为value，无论key是否已经存在
-	 * 
-	 * @param <T>
-	 * @param key
-	 *            缓存关键字
-	 * @param exp
-	 *            缓存的超时时间
-	 * @param value
-	 *            缓存的值对象
-	 * @param transcoder
-	 *            对象的序列化转换器
-	 * @param timeout
-	 *            操作的超时时间，单位是毫秒
-	 * @return 成功返回true，否则返回false
-	 * @throws TimeoutException
-	 *             操作超时抛出此异常
-	 * @throws InterruptedException
-	 *             操作被中断
-	 * @throws MemcachedException
-	 *             memcached异常，可能是客户端或者memcached server返回的错误
+	/* (non-Javadoc)
+	 * @see net.rubyeye.xmemcached.MemcachedClient#set(java.lang.String, int, T, net.rubyeye.xmemcached.transcoders.Transcoder, long)
 	 */
 	public final <T> boolean set(final String key, final int exp,
 			final T value, final Transcoder<T> transcoder, final long timeout)
@@ -828,11 +743,17 @@ public final class XMemcachedClient implements XMemcachedClientMBean {
 				"set", timeout, -1, transcoder);
 	}
 
+	/* (non-Javadoc)
+	 * @see net.rubyeye.xmemcached.MemcachedClient#set(java.lang.String, int, java.lang.Object)
+	 */
 	public final boolean set(final String key, final int exp, final Object value)
 			throws TimeoutException, InterruptedException, MemcachedException {
 		return set(key, exp, value, DEFAULT_OP_TIMEOUT);
 	}
 
+	/* (non-Javadoc)
+	 * @see net.rubyeye.xmemcached.MemcachedClient#set(java.lang.String, int, java.lang.Object, long)
+	 */
 	@SuppressWarnings("unchecked")
 	public final boolean set(final String key, final int exp,
 			final Object value, final long timeout) throws TimeoutException,
@@ -840,32 +761,17 @@ public final class XMemcachedClient implements XMemcachedClientMBean {
 		return set(key, exp, value, this.transcoder, timeout);
 	}
 
+	/* (non-Javadoc)
+	 * @see net.rubyeye.xmemcached.MemcachedClient#set(java.lang.String, int, T, net.rubyeye.xmemcached.transcoders.Transcoder)
+	 */
 	public final <T> boolean set(final String key, final int exp,
 			final T value, final Transcoder<T> transcoder)
 			throws TimeoutException, InterruptedException, MemcachedException {
 		return set(key, exp, value, transcoder, DEFAULT_OP_TIMEOUT);
 	}
 
-	/**
-	 *添加key-value缓存项，仅在key不存在的情况下才能添加成功
-	 * 
-	 * @param <T>
-	 * @param key
-	 * @param exp
-	 *            缓存的超时时间，0为永不过期（memcached默认为一个月）
-	 * @param value
-	 *            缓存的值对象
-	 * @param transcoder
-	 *            值对象的转换器
-	 * @param timeout
-	 *            操作的超时时间，单位毫秒
-	 * @return 成功返回true，否则返回false
-	 * @throws TimeoutException
-	 *             操作超时抛出此异常
-	 * @throws InterruptedException
-	 *             操作被中断
-	 * @throws MemcachedException
-	 *             memcached异常，可能是客户端或者memcached server返回的错误
+	/* (non-Javadoc)
+	 * @see net.rubyeye.xmemcached.MemcachedClient#add(java.lang.String, int, T, net.rubyeye.xmemcached.transcoders.Transcoder, long)
 	 */
 	public final <T> boolean add(final String key, final int exp,
 			final T value, final Transcoder<T> transcoder, final long timeout)
@@ -874,11 +780,17 @@ public final class XMemcachedClient implements XMemcachedClientMBean {
 				"add", timeout, -1, transcoder);
 	}
 
+	/* (non-Javadoc)
+	 * @see net.rubyeye.xmemcached.MemcachedClient#add(java.lang.String, int, java.lang.Object)
+	 */
 	public final boolean add(final String key, final int exp, final Object value)
 			throws TimeoutException, InterruptedException, MemcachedException {
 		return add(key, exp, value, DEFAULT_OP_TIMEOUT);
 	}
 
+	/* (non-Javadoc)
+	 * @see net.rubyeye.xmemcached.MemcachedClient#add(java.lang.String, int, java.lang.Object, long)
+	 */
 	@SuppressWarnings("unchecked")
 	public final boolean add(final String key, final int exp,
 			final Object value, final long timeout) throws TimeoutException,
@@ -886,29 +798,17 @@ public final class XMemcachedClient implements XMemcachedClientMBean {
 		return add(key, exp, value, this.transcoder, timeout);
 	}
 
+	/* (non-Javadoc)
+	 * @see net.rubyeye.xmemcached.MemcachedClient#add(java.lang.String, int, T, net.rubyeye.xmemcached.transcoders.Transcoder)
+	 */
 	public final <T> boolean add(final String key, final int exp,
 			final T value, final Transcoder<T> transcoder)
 			throws TimeoutException, InterruptedException, MemcachedException {
 		return add(key, exp, value, transcoder, DEFAULT_OP_TIMEOUT);
 	}
 
-	/**
-	 * 替代key对应的值，当且仅当key对应的缓存项存在的时候可以替换
-	 * 
-	 * @param <T>
-	 * @param key
-	 * @param exp
-	 *            缓存的超时时间
-	 * @param value
-	 *            值对象
-	 * @param transcoder
-	 *            值对象的转换器
-	 * @param timeout
-	 *            操作的超时时间,单位毫秒
-	 * @return 如果key不存在返回false，如果替代成功返回true
-	 * @throws TimeoutException
-	 * @throws InterruptedException
-	 * @throws MemcachedException
+	/* (non-Javadoc)
+	 * @see net.rubyeye.xmemcached.MemcachedClient#replace(java.lang.String, int, T, net.rubyeye.xmemcached.transcoders.Transcoder, long)
 	 */
 	public final <T> boolean replace(final String key, final int exp,
 			final T value, final Transcoder<T> transcoder, final long timeout)
@@ -917,12 +817,18 @@ public final class XMemcachedClient implements XMemcachedClientMBean {
 				"replace", timeout, -1, transcoder);
 	}
 
+	/* (non-Javadoc)
+	 * @see net.rubyeye.xmemcached.MemcachedClient#replace(java.lang.String, int, java.lang.Object)
+	 */
 	public final boolean replace(final String key, final int exp,
 			final Object value) throws TimeoutException, InterruptedException,
 			MemcachedException {
 		return replace(key, exp, value, DEFAULT_OP_TIMEOUT);
 	}
 
+	/* (non-Javadoc)
+	 * @see net.rubyeye.xmemcached.MemcachedClient#replace(java.lang.String, int, java.lang.Object, long)
+	 */
 	@SuppressWarnings("unchecked")
 	public final boolean replace(final String key, final int exp,
 			final Object value, final long timeout) throws TimeoutException,
@@ -930,27 +836,26 @@ public final class XMemcachedClient implements XMemcachedClientMBean {
 		return replace(key, exp, value, this.transcoder, timeout);
 	}
 
+	/* (non-Javadoc)
+	 * @see net.rubyeye.xmemcached.MemcachedClient#replace(java.lang.String, int, T, net.rubyeye.xmemcached.transcoders.Transcoder)
+	 */
 	public final <T> boolean replace(final String key, final int exp,
 			final T value, final Transcoder<T> transcoder)
 			throws TimeoutException, InterruptedException, MemcachedException {
 		return replace(key, exp, value, transcoder, DEFAULT_OP_TIMEOUT);
 	}
 
-	/**
-	 * 将value添加到key对应的缓存项后面连接起来，这一操作仅对String有意义。
-	 * 
-	 * @param key
-	 * @param value
-	 * @return
-	 * @throws TimeoutException
-	 * @throws InterruptedException
-	 * @throws MemcachedException
+	/* (non-Javadoc)
+	 * @see net.rubyeye.xmemcached.MemcachedClient#append(java.lang.String, java.lang.Object)
 	 */
 	public final boolean append(final String key, final Object value)
 			throws TimeoutException, InterruptedException, MemcachedException {
 		return append(key, value, DEFAULT_OP_TIMEOUT);
 	}
 
+	/* (non-Javadoc)
+	 * @see net.rubyeye.xmemcached.MemcachedClient#append(java.lang.String, java.lang.Object, long)
+	 */
 	@SuppressWarnings("unchecked")
 	public final boolean append(final String key, final Object value,
 			final long timeout) throws TimeoutException, InterruptedException,
@@ -960,21 +865,17 @@ public final class XMemcachedClient implements XMemcachedClientMBean {
 				"append", timeout, -1, this.transcoder);
 	}
 
-	/**
-	 * 类似append，是将value附加到key对应的缓存项前面，这一操作仅对String有实际意义
-	 * 
-	 * @param key
-	 * @param value
-	 * @return
-	 * @throws TimeoutException
-	 * @throws InterruptedException
-	 * @throws MemcachedException
+	/* (non-Javadoc)
+	 * @see net.rubyeye.xmemcached.MemcachedClient#prepend(java.lang.String, java.lang.Object)
 	 */
 	public final boolean prepend(final String key, final Object value)
 			throws TimeoutException, InterruptedException, MemcachedException {
 		return prepend(key, value, DEFAULT_OP_TIMEOUT);
 	}
 
+	/* (non-Javadoc)
+	 * @see net.rubyeye.xmemcached.MemcachedClient#prepend(java.lang.String, java.lang.Object, long)
+	 */
 	@SuppressWarnings("unchecked")
 	public final boolean prepend(final String key, final Object value,
 			final long timeout) throws TimeoutException, InterruptedException,
@@ -983,26 +884,17 @@ public final class XMemcachedClient implements XMemcachedClientMBean {
 				"prepend", timeout, -1, this.transcoder);
 	}
 
+	/* (non-Javadoc)
+	 * @see net.rubyeye.xmemcached.MemcachedClient#cas(java.lang.String, int, java.lang.Object, long)
+	 */
 	public final boolean cas(final String key, final int exp,
 			final Object value, final long cas) throws TimeoutException,
 			InterruptedException, MemcachedException {
 		return cas(key, exp, value, DEFAULT_OP_TIMEOUT, cas);
 	}
 
-	/**
-	 * cas原子替换key对应的value，当且仅当cas值相等的时候替换成功
-	 * 
-	 * @param <T>
-	 * @param key
-	 * @param exp
-	 * @param value
-	 * @param transcoder
-	 * @param timeout
-	 * @param cas
-	 * @return
-	 * @throws TimeoutException
-	 * @throws InterruptedException
-	 * @throws MemcachedException
+	/* (non-Javadoc)
+	 * @see net.rubyeye.xmemcached.MemcachedClient#cas(java.lang.String, int, T, net.rubyeye.xmemcached.transcoders.Transcoder, long, long)
 	 */
 	public final <T> boolean cas(final String key, final int exp,
 			final T value, final Transcoder<T> transcoder, final long timeout,
@@ -1012,6 +904,9 @@ public final class XMemcachedClient implements XMemcachedClientMBean {
 				"cas", timeout, cas, transcoder);
 	}
 
+	/* (non-Javadoc)
+	 * @see net.rubyeye.xmemcached.MemcachedClient#cas(java.lang.String, int, java.lang.Object, long, long)
+	 */
 	@SuppressWarnings("unchecked")
 	public final boolean cas(final String key, final int exp,
 			final Object value, final long timeout, final long cas)
@@ -1019,6 +914,9 @@ public final class XMemcachedClient implements XMemcachedClientMBean {
 		return cas(key, exp, value, this.transcoder, timeout, cas);
 	}
 
+	/* (non-Javadoc)
+	 * @see net.rubyeye.xmemcached.MemcachedClient#cas(java.lang.String, int, T, net.rubyeye.xmemcached.transcoders.Transcoder, long)
+	 */
 	public final <T> boolean cas(final String key, final int exp,
 			final T value, final Transcoder<T> transcoder, final long cas)
 			throws TimeoutException, InterruptedException, MemcachedException {
@@ -1059,21 +957,8 @@ public final class XMemcachedClient implements XMemcachedClientMBean {
 		return true;
 	}
 
-	/**
-	 * 原子替换key对应的value值，当且仅当cas值相等时替换成功，具体使用参见wiki
-	 * 
-	 * @param <T>
-	 * @param key
-	 * @param exp
-	 *            缓存数据项的超时时间
-	 * @param operation
-	 *            CASOperation对象，包装cas操作
-	 * @param transcoder
-	 *            对象转换器
-	 * @return
-	 * @throws TimeoutException
-	 * @throws InterruptedException
-	 * @throws MemcachedException
+	/* (non-Javadoc)
+	 * @see net.rubyeye.xmemcached.MemcachedClient#cas(java.lang.String, int, net.rubyeye.xmemcached.CASOperation, net.rubyeye.xmemcached.transcoders.Transcoder)
 	 */
 	public final <T> boolean cas(final String key, final int exp,
 			final CASOperation<T> operation, final Transcoder<T> transcoder)
@@ -1083,22 +968,8 @@ public final class XMemcachedClient implements XMemcachedClientMBean {
 		return cas0(key, exp, result, operation, transcoder, keyBytes);
 	}
 
-	/**
-	 * 原子替换key对应的value值，当且仅当cas值相等时替换成功
-	 * 
-	 * @param <T>
-	 * @param key
-	 * @param exp
-	 *            缓存数据项的超时时间
-	 * @param getsReponse
-	 *            gets返回的结果
-	 * @param operation
-	 *            CASOperation操作
-	 * @param transcoder
-	 * @return
-	 * @throws TimeoutException
-	 * @throws InterruptedException
-	 * @throws MemcachedException
+	/* (non-Javadoc)
+	 * @see net.rubyeye.xmemcached.MemcachedClient#cas(java.lang.String, int, net.rubyeye.xmemcached.GetsResponse, net.rubyeye.xmemcached.CASOperation, net.rubyeye.xmemcached.transcoders.Transcoder)
 	 */
 	public final <T> boolean cas(final String key, final int exp,
 			GetsResponse<T> getsReponse, final CASOperation<T> operation,
@@ -1108,6 +979,9 @@ public final class XMemcachedClient implements XMemcachedClientMBean {
 		return cas0(key, exp, getsReponse, operation, transcoder, keyBytes);
 	}
 
+	/* (non-Javadoc)
+	 * @see net.rubyeye.xmemcached.MemcachedClient#cas(java.lang.String, int, net.rubyeye.xmemcached.GetsResponse, net.rubyeye.xmemcached.CASOperation)
+	 */
 	@SuppressWarnings("unchecked")
 	public final <T> boolean cas(final String key, final int exp,
 			GetsResponse<T> getsReponse, final CASOperation<T> operation)
@@ -1115,12 +989,18 @@ public final class XMemcachedClient implements XMemcachedClientMBean {
 		return cas(key, exp, getsReponse, operation, this.transcoder);
 	}
 
+	/* (non-Javadoc)
+	 * @see net.rubyeye.xmemcached.MemcachedClient#cas(java.lang.String, net.rubyeye.xmemcached.GetsResponse, net.rubyeye.xmemcached.CASOperation)
+	 */
 	public final <T> boolean cas(final String key, GetsResponse<T> getsReponse,
 			final CASOperation<T> operation) throws TimeoutException,
 			InterruptedException, MemcachedException {
 		return cas(key, 0, getsReponse, operation);
 	}
 
+	/* (non-Javadoc)
+	 * @see net.rubyeye.xmemcached.MemcachedClient#cas(java.lang.String, int, net.rubyeye.xmemcached.CASOperation)
+	 */
 	@SuppressWarnings("unchecked")
 	public final <T> boolean cas(final String key, final int exp,
 			final CASOperation<T> operation) throws TimeoutException,
@@ -1128,23 +1008,17 @@ public final class XMemcachedClient implements XMemcachedClientMBean {
 		return cas(key, exp, operation, this.transcoder);
 	}
 
+	/* (non-Javadoc)
+	 * @see net.rubyeye.xmemcached.MemcachedClient#cas(java.lang.String, net.rubyeye.xmemcached.CASOperation)
+	 */
 	public final <T> boolean cas(final String key,
 			final CASOperation<T> operation) throws TimeoutException,
 			InterruptedException, MemcachedException {
 		return cas(key, 0, operation);
 	}
 
-	/**
-	 * 从缓存中移除key对应的数据项,memcached移除数据项，如果指定了time，那么将放入一个delete
-	 * queue，直到时间到达才真正移除，在此段时间内，add、replace同一个key的操作将失败
-	 * 
-	 * @param key
-	 * @param time
-	 *            单位为秒，客户端希望memcached server拒绝接受相同key的add,replace操作的时间
-	 * @return
-	 * @throws TimeoutException
-	 * @throws InterruptedException
-	 * @throws MemcachedException
+	/* (non-Javadoc)
+	 * @see net.rubyeye.xmemcached.MemcachedClient#delete(java.lang.String, int)
 	 */
 	public final boolean delete(final String key, final int time)
 			throws TimeoutException, InterruptedException, MemcachedException {
@@ -1172,14 +1046,8 @@ public final class XMemcachedClient implements XMemcachedClientMBean {
 		}
 	}
 
-	/**
-	 * 获取memcached版本，此方法在多个节点的情况下将按照"version"字符串的hash值查找对应的连接并发送version协议，
-	 * 也就说此方法仅返回某个节点的memcached版本，如果要查询特定节点的memcached版本，请参考stats方法
-	 * 
-	 * @return 版本号字符串
-	 * @throws TimeoutException
-	 * @throws InterruptedException
-	 * @throws MemcachedException
+	/* (non-Javadoc)
+	 * @see net.rubyeye.xmemcached.MemcachedClient#version()
 	 */
 	public final String version() throws TimeoutException,
 			InterruptedException, MemcachedException {
@@ -1197,58 +1065,32 @@ public final class XMemcachedClient implements XMemcachedClientMBean {
 		return (String) command.getResult();
 	}
 
-	/**
-	 * 递增key对应的value
-	 * 
-	 * @param key
-	 * @param num
-	 *            增加的幅度
-	 * @return
-	 * @throws TimeoutException
-	 * @throws InterruptedException
-	 * @throws MemcachedException
+	/* (non-Javadoc)
+	 * @see net.rubyeye.xmemcached.MemcachedClient#incr(java.lang.String, int)
 	 */
 	public final int incr(final String key, final int num)
 			throws TimeoutException, InterruptedException, MemcachedException {
 		return sendIncrOrDecrCommand(key, num, Command.CommandType.INCR, "incr");
 	}
 
-	/**
-	 * 递减key对应的value
-	 * 
-	 * @param key
-	 * @param num
-	 *            递减的幅度
-	 * @return
-	 * @throws TimeoutException
-	 * @throws InterruptedException
-	 * @throws MemcachedException
+	/* (non-Javadoc)
+	 * @see net.rubyeye.xmemcached.MemcachedClient#decr(java.lang.String, int)
 	 */
 	public final int decr(final String key, final int num)
 			throws TimeoutException, InterruptedException, MemcachedException {
 		return sendIncrOrDecrCommand(key, num, Command.CommandType.DECR, "decr");
 	}
 
-	/**
-	 * 使cache中所有的数据项失效，如果是连接多个节点的memcached，那么所有的memcached中的数据项都将失效
-	 * 
-	 * @throws TimeoutException
-	 * @throws InterruptedException
-	 * @throws MemcachedException
+	/* (non-Javadoc)
+	 * @see net.rubyeye.xmemcached.MemcachedClient#flushAll()
 	 */
 	public final void flushAll() throws TimeoutException, InterruptedException,
 			MemcachedException {
 		flushAll(DEFAULT_OP_TIMEOUT);
 	}
 
-	/**
-	 * 使cache中所有的数据项失效,如果是连接多个节点的memcached，那么所有的memcached中的数据项都将失效
-	 * 
-	 * @param timeout
-	 *            操作超时时间
-	 * @throws TimeoutException
-	 * @throws InterruptedException
-	 * @throws MemcachedException
+	/* (non-Javadoc)
+	 * @see net.rubyeye.xmemcached.MemcachedClient#flushAll(long)
 	 */
 	public final void flushAll(long timeout) throws TimeoutException,
 			InterruptedException, MemcachedException {
@@ -1267,16 +1109,8 @@ public final class XMemcachedClient implements XMemcachedClientMBean {
 		}
 	}
 
-	/**
-	 * 使指定memcached节点的数据项失效
-	 * 
-	 * @param host
-	 *            memcached节点host ip:port的形式
-	 * @param timeout
-	 *            操作超时时间
-	 * @throws TimeoutException
-	 * @throws InterruptedException
-	 * @throws MemcachedException
+	/* (non-Javadoc)
+	 * @see net.rubyeye.xmemcached.MemcachedClient#flushAll(java.lang.String, long)
 	 */
 	public final void flushAll(String host, long timeout)
 			throws TimeoutException, InterruptedException, MemcachedException {
@@ -1284,11 +1118,17 @@ public final class XMemcachedClient implements XMemcachedClientMBean {
 		flushAll(address, timeout);
 	}
 
+	/* (non-Javadoc)
+	 * @see net.rubyeye.xmemcached.MemcachedClient#flushAll(java.net.InetSocketAddress)
+	 */
 	public final void flushAll(InetSocketAddress address)
 			throws MemcachedException, InterruptedException, TimeoutException {
 		flushAll(address, DEFAULT_OP_TIMEOUT);
 	}
 
+	/* (non-Javadoc)
+	 * @see net.rubyeye.xmemcached.MemcachedClient#flushAll(java.net.InetSocketAddress, long)
+	 */
 	public final void flushAll(InetSocketAddress address, long timeout)
 			throws MemcachedException, InterruptedException, TimeoutException {
 		if (address == null)
@@ -1309,31 +1149,16 @@ public final class XMemcachedClient implements XMemcachedClientMBean {
 		}
 	}
 
-	/**
-	 * 使指定memcached节点的数据项失效
-	 * 
-	 * @param host
-	 *            memcached节点host ip:port的形式
-	 * @throws TimeoutException
-	 * @throws InterruptedException
-	 * @throws MemcachedException
+	/* (non-Javadoc)
+	 * @see net.rubyeye.xmemcached.MemcachedClient#flushAll(java.lang.String)
 	 */
 	public final void flushAll(String host) throws TimeoutException,
 			InterruptedException, MemcachedException {
 		flushAll(host, DEFAULT_OP_TIMEOUT);
 	}
 
-	/**
-	 * 查看指定节点的memcached server统计信息
-	 * 
-	 * @param host
-	 *            memcached节点host ip:port的形式
-	 * @param timeout
-	 *            操作超时
-	 * @return
-	 * @throws TimeoutException
-	 * @throws InterruptedException
-	 * @throws MemcachedException
+	/* (non-Javadoc)
+	 * @see net.rubyeye.xmemcached.MemcachedClient#stats(java.lang.String, long)
 	 */
 	public final Map<String, String> stats(String host, long timeout)
 			throws TimeoutException, InterruptedException, MemcachedException {
@@ -1341,27 +1166,24 @@ public final class XMemcachedClient implements XMemcachedClientMBean {
 		return stats(address, timeout);
 	}
 
+	/* (non-Javadoc)
+	 * @see net.rubyeye.xmemcached.MemcachedClient#stats(java.lang.String)
+	 */
 	public final Map<String, String> stats(String host)
 			throws TimeoutException, InterruptedException, MemcachedException {
 		return stats(host, DEFAULT_OP_TIMEOUT);
 	}
 
+	/* (non-Javadoc)
+	 * @see net.rubyeye.xmemcached.MemcachedClient#stats(java.net.InetSocketAddress)
+	 */
 	public final Map<String, String> stats(InetSocketAddress address)
 			throws MemcachedException, InterruptedException, TimeoutException {
 		return stats(address, DEFAULT_OP_TIMEOUT);
 	}
 
-	/**
-	 * 查看特定节点的memcached server统计信息
-	 * 
-	 * @param address
-	 *            节点地址
-	 * @param timeout
-	 *            操作超时
-	 * @return
-	 * @throws MemcachedException
-	 * @throws InterruptedException
-	 * @throws TimeoutException
+	/* (non-Javadoc)
+	 * @see net.rubyeye.xmemcached.MemcachedClient#stats(java.net.InetSocketAddress, long)
 	 */
 	public final Map<String, String> stats(InetSocketAddress address,
 			long timeout) throws MemcachedException, InterruptedException,
@@ -1387,6 +1209,9 @@ public final class XMemcachedClient implements XMemcachedClientMBean {
 		return result;
 	}
 
+	/* (non-Javadoc)
+	 * @see net.rubyeye.xmemcached.MemcachedClient#shutdown()
+	 */
 	public final void shutdown() throws IOException {
 		if (this.shutdown) {
 			return;
@@ -1421,25 +1246,24 @@ public final class XMemcachedClient implements XMemcachedClientMBean {
 		}
 	}
 
+	/* (non-Javadoc)
+	 * @see net.rubyeye.xmemcached.MemcachedClient#delete(java.lang.String)
+	 */
 	public final boolean delete(final String key) throws TimeoutException,
 			InterruptedException, MemcachedException {
 		return delete(key, 0);
 	}
 
-	/**
-	 * 返回默认的序列化转换器，默认使用SerializingTranscoder
-	 * 
-	 * @return
+	/* (non-Javadoc)
+	 * @see net.rubyeye.xmemcached.MemcachedClient#getTranscoder()
 	 */
 	@SuppressWarnings("unchecked")
 	public final Transcoder getTranscoder() {
 		return transcoder;
 	}
 
-	/**
-	 * 设置默认的序列化转换器，在调用xmemcached各种方法时，如果没有指定转换器，将使用此默认转换器
-	 * 
-	 * @param transcoder
+	/* (non-Javadoc)
+	 * @see net.rubyeye.xmemcached.MemcachedClient#setTranscoder(net.rubyeye.xmemcached.transcoders.Transcoder)
 	 */
 	@SuppressWarnings("unchecked")
 	public final void setTranscoder(final Transcoder transcoder) {

@@ -21,6 +21,8 @@ import java.io.Serializable;
 
 import net.rubyeye.xmemcached.CASOperation;
 import net.rubyeye.xmemcached.GetsResponse;
+import net.rubyeye.xmemcached.MemcachedClient;
+import net.rubyeye.xmemcached.MemcachedClientBuilder;
 import net.rubyeye.xmemcached.XMemcachedClient;
 import net.rubyeye.xmemcached.XMemcachedClientBuilder;
 import net.rubyeye.xmemcached.exception.MemcachedException;
@@ -54,9 +56,9 @@ public class Example {
 	public static void main(String[] args) {
 		try {
 
-			XMemcachedClientBuilder builder = new XMemcachedClientBuilder(
+			MemcachedClientBuilder builder = new XMemcachedClientBuilder(
 					AddrUtil.getAddresses("192.168.207.101:12000"));
-			XMemcachedClient client = builder.build();
+			MemcachedClient client = builder.build();
 			if (!client.set("hello", 0, "dennis")) {
 				System.err.println("set error");
 			}
@@ -201,7 +203,7 @@ public class Example {
 			// 查看统计信息
 			System.out.println(client.stats("192.168.207.101:12000", 1000)); // 查看统计信息
 			client.shutdown();
-			
+
 		} catch (IOException e) {
 			e.printStackTrace();
 		} catch (TimeoutException e) {
