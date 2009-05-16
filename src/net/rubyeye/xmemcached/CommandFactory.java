@@ -1,7 +1,7 @@
 package net.rubyeye.xmemcached;
 
 import java.nio.ByteBuffer;
-import java.util.List;
+import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 
@@ -15,10 +15,10 @@ import net.rubyeye.xmemcached.transcoders.Transcoder;
 import net.rubyeye.xmemcached.utils.ByteUtils;
 
 /**
- * command工厂类，创建command
- * 
+ * Command Factory for creating commands.
+ *
  * @author dennis
- * 
+ *
  */
 public final class CommandFactory {
 
@@ -34,7 +34,7 @@ public final class CommandFactory {
 
 	/**
 	 * 创建delete命令
-	 * 
+	 *
 	 * @param key
 	 * @param time
 	 * @return
@@ -56,7 +56,7 @@ public final class CommandFactory {
 
 	/**
 	 * 创建version command
-	 * 
+	 *
 	 * @return
 	 */
 	public static final Command createVersionCommand() {
@@ -70,7 +70,7 @@ public final class CommandFactory {
 
 	/**
 	 * create flush_all command
-	 * 
+	 *
 	 * @return
 	 */
 	public static final Command createFlushAllCommand() {
@@ -83,7 +83,7 @@ public final class CommandFactory {
 
 	/**
 	 * create flush_all command
-	 * 
+	 *
 	 * @return
 	 */
 	public static final Command createStatsCommand() {
@@ -95,7 +95,7 @@ public final class CommandFactory {
 
 	/**
 	 * 创建存储命令，如set,add,replace,append,prepend,cas
-	 * 
+	 *
 	 * @param key
 	 * @param exp
 	 * @param value
@@ -141,7 +141,7 @@ public final class CommandFactory {
 
 	/**
 	 *创建get,gets命令
-	 * 
+	 *
 	 * @param key
 	 * @param keyBytes
 	 * @param cmdBytes
@@ -165,7 +165,7 @@ public final class CommandFactory {
 
 	/**
 	 * 创建批量获取 command
-	 * 
+	 *
 	 * @param <T>
 	 * @param keys
 	 * @param latch
@@ -175,10 +175,10 @@ public final class CommandFactory {
 	 * @param transcoder
 	 * @return
 	 */
-	public static final <T> Command createGetMultiCommand(List<String> keys,
-			CountDownLatch latch, Map<String, T> result, byte[] cmdBytes,
+	public static final <T> Command createGetMultiCommand(Collection<String> keys,
+			CountDownLatch latch, Collection<Map<String, CachedData>> result, byte[] cmdBytes,
 			Command.CommandType cmdType, Transcoder<T> transcoder) {
-		final Command command = new Command(keys.get(0), cmdType, latch);
+		final Command command = new Command("getMultiCommand", cmdType, latch);
 		command.setResult(result); // 共用一个result map
 		command.setTranscoder(transcoder);
 		StringBuilder sb = new StringBuilder(keys.size() * 5);

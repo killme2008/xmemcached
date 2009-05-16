@@ -177,13 +177,13 @@ public interface MemcachedClient {
 			final Transcoder<T> transcoder) throws TimeoutException,
 			InterruptedException, MemcachedException;
 
-	public abstract Object get(final String key, final long timeout)
+	public abstract <T> T get(final String key, final long timeout)
 			throws TimeoutException, InterruptedException, MemcachedException;
 
 	public abstract <T> T get(final String key, final Transcoder<T> transcoder)
 			throws TimeoutException, InterruptedException, MemcachedException;
 
-	public abstract Object get(final String key) throws TimeoutException,
+	public abstract <T> T get(final String key) throws TimeoutException,
 			InterruptedException, MemcachedException;
 
 	/**
@@ -502,7 +502,7 @@ public interface MemcachedClient {
 			throws TimeoutException, InterruptedException, MemcachedException;
 
 	public abstract <T> boolean cas(final String key,
-			GetsResponse<T> getsReponse, final CASOperation<T> operation)
+			GetsResponse<T> getsResponse, final CASOperation<T> operation)
 			throws TimeoutException, InterruptedException, MemcachedException;
 
 	public abstract <T> boolean cas(final String key, final int exp,

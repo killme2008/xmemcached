@@ -12,14 +12,12 @@
 package net.rubyeye.xmemcached.impl;
 
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import net.rubyeye.xmemcached.CommandFactory;
-import net.rubyeye.xmemcached.GetsResponse;
 import net.rubyeye.xmemcached.MemcachedClient;
 import net.rubyeye.xmemcached.MemcachedProtocolHandler;
 import net.rubyeye.xmemcached.command.Command;
@@ -526,33 +524,16 @@ public class MemcachedHandler extends HandlerAdapter<Command> implements
 	}
 
 	@SuppressWarnings("unchecked")
-	private final void processGetManyCommand(Session session,
-			Map<String, CachedData> values, Command executingCmd) {
+	private final void processGetManyCommand(final Session session,
+			final Map<String, CachedData> values, final Command executingCmd) {
 		// 合并结果
 		if (executingCmd.getCommandType() == Command.CommandType.GET_MANY) {
 			statistics(CommandType.GET_MANY);
-			Map result = (Map) executingCmd.getResult();
-			Iterator<Map.Entry<String, CachedData>> it = values.entrySet()
-					.iterator();
-			while (it.hasNext()) {
-				Map.Entry<String, CachedData> item = it.next();
-				result.put(item.getKey(), executingCmd.getTranscoder().decode(
-						item.getValue()));
-			}
-
 		} else {
 			statistics(CommandType.GETS_MANY);
-			Map result = (Map) executingCmd.getResult();
-			Iterator<Map.Entry<String, CachedData>> it = values.entrySet()
-					.iterator();
-			while (it.hasNext()) {
-				Map.Entry<String, CachedData> item = it.next();
-				GetsResponse getsResult = new GetsResponse(item.getValue()
-						.getCas(), executingCmd.getTranscoder().decode(
-						item.getValue()));
-				result.put(item.getKey(), getsResult);
-			}
 		}
+		List<Map> result = (List<Map>) executingCmd.getResult();
+		result.add(values);
 		executingCmd.countDownLatch();
 	}
 
