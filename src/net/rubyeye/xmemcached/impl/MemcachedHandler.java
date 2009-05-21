@@ -14,6 +14,8 @@ package net.rubyeye.xmemcached.impl;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -41,9 +43,9 @@ import com.google.code.yanf4j.util.ShiftAndByteBufferMatcher;
 
 /**
  * Decode commands from buffer,then dispatch commands.
- *
+ * 
  * @author dennis
- *
+ * 
  */
 public class MemcachedHandler extends HandlerAdapter<Command> implements
 		MemcachedProtocolHandler {
@@ -60,7 +62,7 @@ public class MemcachedHandler extends HandlerAdapter<Command> implements
 
 	/**
 	 * 返回boolean值并唤醒
-	 *
+	 * 
 	 * @param result
 	 * @return
 	 */
@@ -90,9 +92,9 @@ public class MemcachedHandler extends HandlerAdapter<Command> implements
 
 	/**
 	 * 解析状态
-	 *
+	 * 
 	 * @author dennis
-	 *
+	 * 
 	 */
 	enum ParseStatus {
 
@@ -177,7 +179,7 @@ public class MemcachedHandler extends HandlerAdapter<Command> implements
 
 	/**
 	 * 处理统计消息
-	 *
+	 * 
 	 * @param session
 	 * @param buffer
 	 * @return
@@ -204,9 +206,11 @@ public class MemcachedHandler extends HandlerAdapter<Command> implements
 		return false;
 	}
 
+	static final Pattern SPACE_SPLIT_PATTERN = Pattern.compile("\\s");
+
 	/**
 	 * 解析get协议response
-	 *
+	 * 
 	 * @param buffer
 	 * @param origPos
 	 * @param origLimit
@@ -241,7 +245,8 @@ public class MemcachedHandler extends HandlerAdapter<Command> implements
 				session.resetStatus();
 				return true;
 			} else if (session.currentLine.startsWith("VALUE")) {
-				String[] items = session.currentLine.split(" ");
+				String[] items = SPACE_SPLIT_PATTERN.split(session.currentLine,
+						5);
 				int flag = Integer.parseInt(items[2]);
 				int dataLen = Integer.parseInt(items[3]);
 				// 不够数据，返回
@@ -272,7 +277,7 @@ public class MemcachedHandler extends HandlerAdapter<Command> implements
 
 	/**
 	 * 解析get协议返回空
-	 *
+	 * 
 	 * @return
 	 */
 	private final boolean parseEndCommand(MemcachedTCPSession session) {
@@ -307,7 +312,7 @@ public class MemcachedHandler extends HandlerAdapter<Command> implements
 
 	/**
 	 * 解析错误response
-	 *
+	 * 
 	 * @return
 	 */
 	private static final boolean parseException(MemcachedTCPSession session) {
@@ -324,7 +329,7 @@ public class MemcachedHandler extends HandlerAdapter<Command> implements
 
 	/**
 	 * 解析错误response
-	 *
+	 * 
 	 * @return
 	 */
 	private final boolean parseClientException(MemcachedTCPSession session) {
@@ -345,7 +350,7 @@ public class MemcachedHandler extends HandlerAdapter<Command> implements
 
 	/**
 	 * 解析错误response
-	 *
+	 * 
 	 * @return
 	 */
 	private final boolean parseServerException(MemcachedTCPSession session) {
@@ -366,7 +371,7 @@ public class MemcachedHandler extends HandlerAdapter<Command> implements
 
 	/**
 	 * 解析version协议response
-	 *
+	 * 
 	 * @return
 	 */
 	private final boolean parseVersionCommand(MemcachedTCPSession session) {
@@ -386,7 +391,7 @@ public class MemcachedHandler extends HandlerAdapter<Command> implements
 
 	/**
 	 * 解析incr,decr协议response
-	 *
+	 * 
 	 * @return
 	 */
 	private final boolean parseIncrDecrCommand(MemcachedTCPSession session) {
@@ -408,7 +413,7 @@ public class MemcachedHandler extends HandlerAdapter<Command> implements
 
 	/**
 	 * 获取下一行
-	 *
+	 * 
 	 * @param buffer
 	 */
 	protected static final void nextLine(MemcachedTCPSession session,
@@ -476,7 +481,7 @@ public class MemcachedHandler extends HandlerAdapter<Command> implements
 
 	/**
 	 * auto reconect to memcached server
-	 *
+	 * 
 	 * @param session
 	 */
 	protected void reconnect(Session session) {
@@ -501,7 +506,7 @@ public class MemcachedHandler extends HandlerAdapter<Command> implements
 					statistics(CommandType.GET_HIT);
 				else
 					statistics(CommandType.GET_MSS);
-				executingCmd.setResult(data); //设置CachedData返回，transcoder.decode
+				executingCmd.setResult(data); // 设置CachedData返回，transcoder.decode
 				// ()放到用户线程
 
 				executingCmd.countDownLatch();
