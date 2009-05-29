@@ -2,10 +2,10 @@ package net.rubyeye.xmemcached.impl;
 
 
 /**
- * OptimiezerMBean,用于jmx控制
- * 
+ * OptimiezerMBean,used for changing the optimizer's factor
+ *
  * @author dennis
- * 
+ *
  */
 public interface OptimiezerMBean {
 	public int getMergeFactor();
@@ -20,5 +20,5 @@ public interface OptimiezerMBean {
 
 	public void setOptimiezeMergeBuffer(boolean optimiezeMergeBuffer);
 
-	
+
 }

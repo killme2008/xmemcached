@@ -26,11 +26,11 @@ import net.rubyeye.xmemcached.impl.KetamaMemcachedSessionLocator;
 import com.google.code.yanf4j.util.ResourcesUtils;
 
 /**
- * 测试节点的添加和删除对缓存命中率的影响
+ * Count words from an artical("Golden Compass"),and store result to memcached.
+ * Then remove or add memcached server,calculate the cache hit rate for
+ * different hash strategy.
  * 
- * 从一篇英文文章中做单词频率统计，以单词为key，统计的次数为value,存储在10个节点上 添加两个节点后测试，查看各个节点的命中率变化。
- * 
- * @author Administrator
+ * @author dennis
  * 
  */
 public class CacheHitRateTest {
@@ -38,7 +38,7 @@ public class CacheHitRateTest {
 	public static void main(String[] args) throws Exception {
 		String ip = "192.168.222.100";
 
-		// 替换这个HashAlgorithm进行测试
+		// Replace this hashAlg with other HashAlgorithm
 		HashAlgorithm hashAlg = HashAlgorithm.KETAMA_HASH;
 
 		MemcachedClient client = new XMemcachedClient(
@@ -53,16 +53,17 @@ public class CacheHitRateTest {
 		client.addServer(ip, 12007);
 		client.addServer(ip, 12008);
 		client.addServer(ip, 12009);
-		//初始化数据
+		// Count words,store result to memcached
 		Set<String> keys = init(client);
+		// Test different HashAlgorithm's performance
 		testHashPerfromance(keys, HashAlgorithm.CRC32_HASH);
 		testHashPerfromance(keys, HashAlgorithm.KETAMA_HASH);
 		testHashPerfromance(keys, HashAlgorithm.FNV1_32_HASH);
 		testHashPerfromance(keys, HashAlgorithm.NATIVE_HASH);
 		testHashPerfromance(keys, HashAlgorithm.MYSQL_HASH);
-		// 此时应该是100%
+		// It must be 100%
 		printHitRate(client, keys);
-		// 添加两个节点后，查看命中率
+		// Add two server,calculate the cache hit rate now
 		client.addServer(ip, 12010);
 		client.addServer(ip, 12011);
 		printHitRate(client, keys);
@@ -82,7 +83,7 @@ public class CacheHitRateTest {
 	}
 
 	private static void printHitRate(MemcachedClient client, Set<String> keys)
-			throws TimeoutException, InterruptedException,MemcachedException {
+			throws TimeoutException, InterruptedException, MemcachedException {
 		int total = 0;
 		int hits = 0;
 		for (String key : keys) {

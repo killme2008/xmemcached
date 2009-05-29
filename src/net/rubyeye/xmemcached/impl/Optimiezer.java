@@ -24,6 +24,8 @@ import net.rubyeye.xmemcached.utils.ByteUtils;
 import net.rubyeye.xmemcached.utils.Deque;
 
 /**
+ * Memcached command optimizer,merge single-get comands to multi-get
+ * command,merge ByteBuffers to fit the socket's sendBufferSize etc.
  *
  * @author dennis
  */
@@ -258,9 +260,9 @@ public class Optimiezer implements OptimiezerMBean, MemcachedOptimiezer {
 			final StringBuilder key) {
 		byte[] keyBytes = ByteUtils.getBytes(key.toString());
 		final IoBuffer buffer = bufferAllocator
-				.allocate(CommandFactory.GET.length
-						+ CommandFactory.CRLF.length + 1 + keyBytes.length);
-		ByteUtils.setArguments(buffer, CommandFactory.GET, keyBytes);
+				.allocate(TextCommandFactory.GET.length
+						+ TextCommandFactory.CRLF.length + 1 + keyBytes.length);
+		ByteUtils.setArguments(buffer, TextCommandFactory.GET, keyBytes);
 		buffer.flip();
 		Command cmd = new Command(key.toString(), Command.CommandType.GET_ONE,
 				null) {

@@ -14,9 +14,9 @@ package net.rubyeye.xmemcached;
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
@@ -26,6 +26,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.io.IOException;
 
+import net.rubyeye.xmemcached.codec.text.MemcachedTextCodecFactory;
 import net.rubyeye.xmemcached.command.Command.CommandType;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -50,9 +51,9 @@ import com.google.code.yanf4j.nio.Session;
 
 /**
  * XMemcached客户端API核心类，通过此类的实例与memcached交互。
- * 
+ *
  * @author dennis(killme2008@gmail.com)
- * 
+ *
  */
 public final class XMemcachedClient implements XMemcachedClientMBean,
 		MemcachedClient {
@@ -68,7 +69,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see net.rubyeye.xmemcached.MemcachedClient#setMergeFactor(int)
 	 */
 	public final void setMergeFactor(final int mergeFactor) {
@@ -80,7 +81,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see net.rubyeye.xmemcached.MemcachedClient#getConnectTimeout()
 	 */
 	public long getConnectTimeout() {
@@ -89,7 +90,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see net.rubyeye.xmemcached.MemcachedClient#setConnectTimeout(long)
 	 */
 	public void setConnectTimeout(long connectTimeout) {
@@ -100,7 +101,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see net.rubyeye.xmemcached.MemcachedClient#getConnector()
 	 */
 	public final MemcachedConnector getConnector() {
@@ -109,7 +110,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see net.rubyeye.xmemcached.MemcachedClient#setOptimiezeGet(boolean)
 	 */
 	public final void setOptimiezeGet(final boolean optimiezeGet) {
@@ -118,7 +119,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see
 	 * net.rubyeye.xmemcached.MemcachedClient#setOptimizeMergeBuffer(boolean)
 	 */
@@ -128,7 +129,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see net.rubyeye.xmemcached.MemcachedClient#isShutdown()
 	 */
 	public final boolean isShutdown() {
@@ -140,7 +141,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 			final byte[] keyBytes, final Transcoder<T> transcoder)
 			throws MemcachedException, TimeoutException, InterruptedException {
 		GetsResponse<T> result = (GetsResponse<T>) fetch0(key, keyBytes,
-				CommandFactory.GETS, Command.CommandType.GETS_ONE,
+				TextCommandFactory.GETS, Command.CommandType.GETS_ONE,
 				DEFAULT_OP_TIMEOUT, transcoder);
 		return result;
 	}
@@ -155,7 +156,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 
 	/**
 	 * XMemcached构造函数
-	 * 
+	 *
 	 * @param server
 	 *            服务器IP
 	 * @param port
@@ -183,7 +184,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see net.rubyeye.xmemcached.MemcachedClient#addServer(java.lang.String,
 	 * int)
 	 */
@@ -195,7 +196,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see
 	 * net.rubyeye.xmemcached.MemcachedClient#addServer(java.net.InetSocketAddress
 	 * )
@@ -210,7 +211,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see net.rubyeye.xmemcached.MemcachedClient#addServer(java.lang.String)
 	 */
 	public final void addServer(String hostList) throws IOException {
@@ -224,7 +225,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see net.rubyeye.xmemcached.MemcachedClient#getServersDescription()
 	 */
 	@Override
@@ -240,7 +241,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see
 	 * net.rubyeye.xmemcached.MemcachedClient#removeServer(java.lang.String)
 	 */
@@ -314,7 +315,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 			final long timeout, Transcoder<T> transcoder)
 			throws InterruptedException, TimeoutException, MemcachedException,
 			MemcachedException {
-		final Command command = CommandFactory.createGetCommand(key, keyBytes,
+		final Command command = TextCommandFactory.createGetCommand(key, keyBytes,
 				cmdBytes, cmdType);
 		if (!sendCommand(command)) {
 			throw new MemcachedException("send command fail");
@@ -360,18 +361,18 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 		if (configuration == null) {
 			configuration = getDefaultConfiguration();
 		}
-		CommandFactory.setBufferAllocator(allocator);
+		TextCommandFactory.setBufferAllocator(allocator);
 		this.shutdown = true;
 		this.transcoder = new SerializingTranscoder();
 		this.sessionLocator = locator;
 		this.connector = new MemcachedConnector(configuration, sessionLocator,
 				allocator);
 		this.connector.setSendBufferSize(DEFAULT_TCP_SEND_BUFF_SIZE);
-		this.memcachedHandler = new MemcachedHandler(this.transcoder, this);
+		this.memcachedHandler = new MemcachedHandler(this);
 		this.connector.setHandler(memcachedHandler);
-		this.connector.setMemcachedProtocolHandler(memcachedHandler);
+		//set codec factory,default use memcached text protocol
+		this.connector.setCodecFactory(new MemcachedTextCodecFactory(this.transcoder));
 	}
-
 	private final void registerMBean() {
 		if (this.shutdown)
 			XMemcachedMbeanServer.getInstance().registMBean(
@@ -382,18 +383,18 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see
 	 * net.rubyeye.xmemcached.MemcachedClient#setBufferAllocator(net.rubyeye
 	 * .xmemcached.buffer.BufferAllocator)
 	 */
 	public final void setBufferAllocator(final BufferAllocator bufferAllocator) {
-		CommandFactory.setBufferAllocator(bufferAllocator);
+		TextCommandFactory.setBufferAllocator(bufferAllocator);
 	}
 
 	/**
 	 * XMemcached构造函数
-	 * 
+	 *
 	 * @param configuration
 	 *            yanf4j网络参数配置
 	 * @throws IOException
@@ -407,7 +408,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 
 	/**
 	 * XMemcached构造函数
-	 * 
+	 *
 	 * @param configuration
 	 *            yanf4j网络参数配置
 	 * @param allocator
@@ -422,7 +423,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 
 	/**
 	 * XMemcached构造函数
-	 * 
+	 *
 	 * @param configuration
 	 *            yanf4j网络参数配置
 	 * @param allocator
@@ -439,7 +440,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 
 	/**
 	 * 返回默认yanf4j网络参数配置
-	 * 
+	 *
 	 * @return
 	 */
 	public static final Configuration getDefaultConfiguration() {
@@ -453,7 +454,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 
 	/**
 	 * XMemcached构造函数
-	 * 
+	 *
 	 * @param inetSocketAddress
 	 *            服务器IP地址
 	 * @throws IOException
@@ -522,7 +523,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see net.rubyeye.xmemcached.MemcachedClient#get(java.lang.String, long,
 	 * net.rubyeye.xmemcached.transcoders.Transcoder)
 	 */
@@ -530,13 +531,13 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 	public final <T> T get(final String key, final long timeout,
 			final Transcoder<T> transcoder) throws TimeoutException,
 			InterruptedException, MemcachedException {
-		return (T) get0(key, timeout, CommandFactory.GET,
+		return (T) get0(key, timeout, TextCommandFactory.GET,
 				Command.CommandType.GET_ONE, transcoder);
 	}
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see net.rubyeye.xmemcached.MemcachedClient#get(java.lang.String, long)
 	 */
 	@SuppressWarnings("unchecked")
@@ -547,7 +548,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see net.rubyeye.xmemcached.MemcachedClient#get(java.lang.String,
 	 * net.rubyeye.xmemcached.transcoders.Transcoder)
 	 */
@@ -558,7 +559,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see net.rubyeye.xmemcached.MemcachedClient#get(java.lang.String)
 	 */
 	@SuppressWarnings("unchecked")
@@ -578,7 +579,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see net.rubyeye.xmemcached.MemcachedClient#gets(java.lang.String, long,
 	 * net.rubyeye.xmemcached.transcoders.Transcoder)
 	 */
@@ -586,13 +587,13 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 	public final <T> GetsResponse<T> gets(final String key, final long timeout,
 			final Transcoder<T> transcoder) throws TimeoutException,
 			InterruptedException, MemcachedException {
-		return (GetsResponse<T>) get0(key, timeout, CommandFactory.GETS,
+		return (GetsResponse<T>) get0(key, timeout, TextCommandFactory.GETS,
 				Command.CommandType.GETS_ONE, transcoder);
 	}
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see net.rubyeye.xmemcached.MemcachedClient#gets(java.lang.String)
 	 */
 	public final <T> GetsResponse<T> gets(final String key)
@@ -602,7 +603,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see net.rubyeye.xmemcached.MemcachedClient#gets(java.lang.String, long)
 	 */
 	@SuppressWarnings("unchecked")
@@ -613,7 +614,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see net.rubyeye.xmemcached.MemcachedClient#gets(java.lang.String,
 	 * net.rubyeye.xmemcached.transcoders.Transcoder)
 	 */
@@ -626,7 +627,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see net.rubyeye.xmemcached.MemcachedClient#get(java.util.Collection,
 	 * long, net.rubyeye.xmemcached.transcoders.Transcoder)
 	 */
@@ -634,13 +635,13 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 			final Collection<String> keyCollections, final long timeout,
 			final Transcoder<T> transcoder) throws TimeoutException,
 			InterruptedException, MemcachedException {
-		return getMulti0(keyCollections, timeout, CommandFactory.GET,
+		return getMulti0(keyCollections, timeout, TextCommandFactory.GET,
 				Command.CommandType.GET_MANY, transcoder);
 	}
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see net.rubyeye.xmemcached.MemcachedClient#get(java.util.Collection,
 	 * net.rubyeye.xmemcached.transcoders.Transcoder)
 	 */
@@ -649,12 +650,12 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 			final Transcoder<T> transcoder) throws TimeoutException,
 			InterruptedException, MemcachedException {
 		return getMulti0(keyCollections, DEFAULT_OP_TIMEOUT,
-				CommandFactory.GET, Command.CommandType.GET_MANY, transcoder);
+				TextCommandFactory.GET, Command.CommandType.GET_MANY, transcoder);
 	}
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see net.rubyeye.xmemcached.MemcachedClient#get(java.util.Collection)
 	 */
 	public final <T> Map<String, T> get(final Collection<String> keyCollections)
@@ -664,7 +665,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see net.rubyeye.xmemcached.MemcachedClient#get(java.util.Collection,
 	 * long)
 	 */
@@ -677,7 +678,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see net.rubyeye.xmemcached.MemcachedClient#gets(java.util.Collection,
 	 * long, net.rubyeye.xmemcached.transcoders.Transcoder)
 	 */
@@ -687,13 +688,13 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 			final Transcoder<T> transcoder) throws TimeoutException,
 			InterruptedException, MemcachedException {
 		return (Map<String, GetsResponse<T>>) getMulti0(keyCollections,
-				timeout, CommandFactory.GETS, Command.CommandType.GETS_MANY,
+				timeout, TextCommandFactory.GETS, Command.CommandType.GETS_MANY,
 				transcoder);
 	}
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see net.rubyeye.xmemcached.MemcachedClient#gets(java.util.Collection)
 	 */
 	public final <T> Map<String, GetsResponse<T>> gets(
@@ -704,7 +705,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see net.rubyeye.xmemcached.MemcachedClient#gets(java.util.Collection,
 	 * long)
 	 */
@@ -717,7 +718,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see net.rubyeye.xmemcached.MemcachedClient#gets(java.util.Collection,
 	 * net.rubyeye.xmemcached.transcoders.Transcoder)
 	 */
@@ -738,8 +739,8 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 		}
 		final CountDownLatch latch;
 		final List<Command> commands;
-		final List<Map<String, CachedData>> returnValues = new ArrayList<Map<String, CachedData>>(
-				connector.getSessionSet().size());
+		final List<Map<String, CachedData>> returnValues = Collections.synchronizedList(new ArrayList<Map<String, CachedData>>(
+				connector.getSessionSet().size()));
 		if (this.connector.getSessionSet().size() <= 1) {
 			commands = new ArrayList<Command>(1);
 			latch = new CountDownLatch(1);
@@ -803,7 +804,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 
 	/**
 	 * 对key按照hash值进行分类，发送到不同节点
-	 * 
+	 *
 	 * @param keyCollections
 	 * @return
 	 */
@@ -814,7 +815,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 		for (String key : keyCollections) {
 			Session index = this.sessionLocator.getSessionByKey(key);
 			if (!catalogMap.containsKey(index)) {
-				List<String> tmpKeys = new LinkedList<String>();
+				List<String> tmpKeys = new ArrayList<String>(100);
 				tmpKeys.add(key);
 				catalogMap.put(index, tmpKeys);
 			} else {
@@ -832,7 +833,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 			final byte[] cmdBytes, final Command.CommandType cmdType,
 			final Transcoder<T> transcoder) throws InterruptedException,
 			TimeoutException, MemcachedException {
-		final Command command = CommandFactory.createGetMultiCommand(keys,
+		final Command command = TextCommandFactory.createGetMultiCommand(keys,
 				latch, result, cmdBytes, cmdType, transcoder);
 		if (!sendCommand(command)) {
 			throw new MemcachedException("send command fail");
@@ -842,7 +843,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see net.rubyeye.xmemcached.MemcachedClient#set(java.lang.String, int, T,
 	 * net.rubyeye.xmemcached.transcoders.Transcoder, long)
 	 */
@@ -855,7 +856,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see net.rubyeye.xmemcached.MemcachedClient#set(java.lang.String, int,
 	 * java.lang.Object)
 	 */
@@ -866,7 +867,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see net.rubyeye.xmemcached.MemcachedClient#set(java.lang.String, int,
 	 * java.lang.Object, long)
 	 */
@@ -879,7 +880,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see net.rubyeye.xmemcached.MemcachedClient#set(java.lang.String, int, T,
 	 * net.rubyeye.xmemcached.transcoders.Transcoder)
 	 */
@@ -891,7 +892,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see net.rubyeye.xmemcached.MemcachedClient#add(java.lang.String, int, T,
 	 * net.rubyeye.xmemcached.transcoders.Transcoder, long)
 	 */
@@ -904,7 +905,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see net.rubyeye.xmemcached.MemcachedClient#add(java.lang.String, int,
 	 * java.lang.Object)
 	 */
@@ -915,7 +916,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see net.rubyeye.xmemcached.MemcachedClient#add(java.lang.String, int,
 	 * java.lang.Object, long)
 	 */
@@ -928,7 +929,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see net.rubyeye.xmemcached.MemcachedClient#add(java.lang.String, int, T,
 	 * net.rubyeye.xmemcached.transcoders.Transcoder)
 	 */
@@ -940,7 +941,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see net.rubyeye.xmemcached.MemcachedClient#replace(java.lang.String,
 	 * int, T, net.rubyeye.xmemcached.transcoders.Transcoder, long)
 	 */
@@ -953,7 +954,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see net.rubyeye.xmemcached.MemcachedClient#replace(java.lang.String,
 	 * int, java.lang.Object)
 	 */
@@ -965,7 +966,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see net.rubyeye.xmemcached.MemcachedClient#replace(java.lang.String,
 	 * int, java.lang.Object, long)
 	 */
@@ -978,7 +979,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see net.rubyeye.xmemcached.MemcachedClient#replace(java.lang.String,
 	 * int, T, net.rubyeye.xmemcached.transcoders.Transcoder)
 	 */
@@ -990,7 +991,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see net.rubyeye.xmemcached.MemcachedClient#append(java.lang.String,
 	 * java.lang.Object)
 	 */
@@ -1001,7 +1002,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see net.rubyeye.xmemcached.MemcachedClient#append(java.lang.String,
 	 * java.lang.Object, long)
 	 */
@@ -1016,7 +1017,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see net.rubyeye.xmemcached.MemcachedClient#prepend(java.lang.String,
 	 * java.lang.Object)
 	 */
@@ -1027,7 +1028,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see net.rubyeye.xmemcached.MemcachedClient#prepend(java.lang.String,
 	 * java.lang.Object, long)
 	 */
@@ -1041,7 +1042,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see net.rubyeye.xmemcached.MemcachedClient#cas(java.lang.String, int,
 	 * java.lang.Object, long)
 	 */
@@ -1053,7 +1054,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see net.rubyeye.xmemcached.MemcachedClient#cas(java.lang.String, int, T,
 	 * net.rubyeye.xmemcached.transcoders.Transcoder, long, long)
 	 */
@@ -1067,7 +1068,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see net.rubyeye.xmemcached.MemcachedClient#cas(java.lang.String, int,
 	 * java.lang.Object, long, long)
 	 */
@@ -1080,7 +1081,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see net.rubyeye.xmemcached.MemcachedClient#cas(java.lang.String, int, T,
 	 * net.rubyeye.xmemcached.transcoders.Transcoder, long)
 	 */
@@ -1126,7 +1127,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see net.rubyeye.xmemcached.MemcachedClient#cas(java.lang.String, int,
 	 * net.rubyeye.xmemcached.CASOperation,
 	 * net.rubyeye.xmemcached.transcoders.Transcoder)
@@ -1141,7 +1142,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see net.rubyeye.xmemcached.MemcachedClient#cas(java.lang.String, int,
 	 * net.rubyeye.xmemcached.GetsResponse, net.rubyeye.xmemcached.CASOperation,
 	 * net.rubyeye.xmemcached.transcoders.Transcoder)
@@ -1156,7 +1157,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see net.rubyeye.xmemcached.MemcachedClient#cas(java.lang.String, int,
 	 * net.rubyeye.xmemcached.GetsResponse, net.rubyeye.xmemcached.CASOperation)
 	 */
@@ -1169,7 +1170,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see net.rubyeye.xmemcached.MemcachedClient#cas(java.lang.String,
 	 * net.rubyeye.xmemcached.GetsResponse, net.rubyeye.xmemcached.CASOperation)
 	 */
@@ -1181,7 +1182,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see net.rubyeye.xmemcached.MemcachedClient#cas(java.lang.String, int,
 	 * net.rubyeye.xmemcached.CASOperation)
 	 */
@@ -1194,7 +1195,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see net.rubyeye.xmemcached.MemcachedClient#cas(java.lang.String,
 	 * net.rubyeye.xmemcached.CASOperation)
 	 */
@@ -1206,14 +1207,14 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see net.rubyeye.xmemcached.MemcachedClient#delete(java.lang.String, int)
 	 */
 	public final boolean delete(final String key, final int time)
 			throws TimeoutException, InterruptedException, MemcachedException {
 		final byte[] keyBytes = ByteUtils.getBytes(key);
 		ByteUtils.checkKey(keyBytes);
-		final Command command = CommandFactory.createDeleteCommand(key,
+		final Command command = TextCommandFactory.createDeleteCommand(key,
 				keyBytes, time);
 		if (!sendCommand(command)) {
 			throw new MemcachedException("send command fail");
@@ -1237,12 +1238,12 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see net.rubyeye.xmemcached.MemcachedClient#version()
 	 */
 	public final String version() throws TimeoutException,
 			InterruptedException, MemcachedException {
-		final Command command = CommandFactory.createVersionCommand();
+		final Command command = TextCommandFactory.createVersionCommand();
 		if (!sendCommand(command)) {
 			throw new MemcachedException("send command fail");
 		}
@@ -1258,7 +1259,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see net.rubyeye.xmemcached.MemcachedClient#incr(java.lang.String, int)
 	 */
 	public final int incr(final String key, final int num)
@@ -1268,7 +1269,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see net.rubyeye.xmemcached.MemcachedClient#decr(java.lang.String, int)
 	 */
 	public final int decr(final String key, final int num)
@@ -1278,7 +1279,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see net.rubyeye.xmemcached.MemcachedClient#flushAll()
 	 */
 	public final void flushAll() throws TimeoutException, InterruptedException,
@@ -1288,7 +1289,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see net.rubyeye.xmemcached.MemcachedClient#flushAll(long)
 	 */
 	public final void flushAll(long timeout) throws TimeoutException,
@@ -1297,7 +1298,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 		CountDownLatch latch = new CountDownLatch(sessions.size());
 		for (Session session : sessions) {
 			if (session != null && !session.isClosed()) {
-				Command command = CommandFactory.createFlushAllCommand();
+				Command command = TextCommandFactory.createFlushAllCommand();
 				command.setLatch(latch);
 				session.send(command);
 			} else
@@ -1310,7 +1311,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see net.rubyeye.xmemcached.MemcachedClient#flushAll(java.lang.String,
 	 * long)
 	 */
@@ -1322,7 +1323,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see
 	 * net.rubyeye.xmemcached.MemcachedClient#flushAll(java.net.InetSocketAddress
 	 * )
@@ -1334,7 +1335,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see
 	 * net.rubyeye.xmemcached.MemcachedClient#flushAll(java.net.InetSocketAddress
 	 * , long)
@@ -1350,7 +1351,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 			throw new MemcachedException("could not find session for "
 					+ address.getHostName() + ":" + address.getPort()
 					+ ",maybe it have not been connected");
-		Command command = CommandFactory.createFlushAllCommand();
+		Command command = TextCommandFactory.createFlushAllCommand();
 		command.setLatch(latch);
 		if (!session.send(command))
 			throw new MemcachedException("send command fail");
@@ -1361,7 +1362,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see net.rubyeye.xmemcached.MemcachedClient#flushAll(java.lang.String)
 	 */
 	public final void flushAll(String host) throws TimeoutException,
@@ -1371,7 +1372,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see net.rubyeye.xmemcached.MemcachedClient#stats(java.lang.String, long)
 	 */
 	public final Map<String, String> stats(String host, long timeout)
@@ -1382,7 +1383,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see net.rubyeye.xmemcached.MemcachedClient#stats(java.lang.String)
 	 */
 	public final Map<String, String> stats(String host)
@@ -1392,7 +1393,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see
 	 * net.rubyeye.xmemcached.MemcachedClient#stats(java.net.InetSocketAddress)
 	 */
@@ -1403,7 +1404,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see
 	 * net.rubyeye.xmemcached.MemcachedClient#stats(java.net.InetSocketAddress,
 	 * long)
@@ -1421,7 +1422,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 					+ address.getHostName() + ":" + address.getPort()
 					+ ",maybe it have not been connected");
 		Map<String, String> result = new HashMap<String, String>();
-		Command command = CommandFactory.createStatsCommand();
+		Command command = TextCommandFactory.createStatsCommand();
 		command.setResult(result);
 		command.setLatch(latch);
 		if (!session.send(command))
@@ -1434,7 +1435,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see net.rubyeye.xmemcached.MemcachedClient#shutdown()
 	 */
 	public final void shutdown() throws IOException {
@@ -1451,7 +1452,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 			throws InterruptedException, TimeoutException, MemcachedException {
 		final byte[] keyBytes = ByteUtils.getBytes(key);
 		ByteUtils.checkKey(keyBytes);
-		final Command command = CommandFactory.createIncrDecrCommand(key,
+		final Command command = TextCommandFactory.createIncrDecrCommand(key,
 				keyBytes, num, cmdType, cmd);
 		if (!sendCommand(command)) {
 			throw new MemcachedException("send command fail");
@@ -1474,7 +1475,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see net.rubyeye.xmemcached.MemcachedClient#delete(java.lang.String)
 	 */
 	public final boolean delete(final String key) throws TimeoutException,
@@ -1484,7 +1485,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see net.rubyeye.xmemcached.MemcachedClient#getTranscoder()
 	 */
 	@SuppressWarnings("unchecked")
@@ -1494,7 +1495,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see
 	 * net.rubyeye.xmemcached.MemcachedClient#setTranscoder(net.rubyeye.xmemcached
 	 * .transcoders.Transcoder)
@@ -1502,7 +1503,6 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 	@SuppressWarnings("unchecked")
 	public final void setTranscoder(final Transcoder transcoder) {
 		this.transcoder = transcoder;
-		this.memcachedHandler.setTranscoder(transcoder);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -1522,7 +1522,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 		if (transcoder == null) {
 			transcoder = this.transcoder;
 		}
-		final Command command = CommandFactory.createStoreCommand(key,
+		final Command command = TextCommandFactory.createStoreCommand(key,
 				keyBytes, exp, value, cmdType, cmd, cas, transcoder);
 
 		if (!sendCommand(command)) {

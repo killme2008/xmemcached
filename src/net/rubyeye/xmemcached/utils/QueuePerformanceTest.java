@@ -12,6 +12,7 @@ import java.util.LinkedList;
  *
  * @author dennis
  */
+@SuppressWarnings("unchecked")
 public class QueuePerformanceTest {
 
     static final int COUNT = 100000;

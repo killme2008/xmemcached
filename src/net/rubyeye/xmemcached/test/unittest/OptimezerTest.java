@@ -7,7 +7,7 @@ import java.util.concurrent.BlockingQueue;
 
 import com.google.code.yanf4j.util.Queue;
 
-import net.rubyeye.xmemcached.CommandFactory;
+import net.rubyeye.xmemcached.TextCommandFactory;
 import net.rubyeye.xmemcached.buffer.SimpleBufferAllocator;
 import net.rubyeye.xmemcached.command.Command;
 import net.rubyeye.xmemcached.impl.Optimiezer;
@@ -31,8 +31,8 @@ public class OptimezerTest extends TestCase {
 		writeQueue = new SimpleDeque();
 		executingCmds = new SimpleBlockingQueue<Command>();
 		for (int i = 0; i < 10; i++)
-			writeQueue.add(CommandFactory.createGetCommand(String.valueOf(i),
-					String.valueOf(i).getBytes(), CommandFactory.GET,
+			writeQueue.add(TextCommandFactory.createGetCommand(String.valueOf(i),
+					String.valueOf(i).getBytes(), TextCommandFactory.GET,
 					Command.CommandType.GET_ONE));
 		currentCmd = (Command) writeQueue.peek();
 	}
@@ -103,12 +103,12 @@ public class OptimezerTest extends TestCase {
 		writeQueue.clear();
 		// send five get operation,include current command
 		for (int i = 0; i < 5; i++)
-			writeQueue.add(CommandFactory.createGetCommand(String.valueOf(i),
-					String.valueOf(i).getBytes(), CommandFactory.GET,
+			writeQueue.add(TextCommandFactory.createGetCommand(String.valueOf(i),
+					String.valueOf(i).getBytes(), TextCommandFactory.GET,
 					Command.CommandType.GET_ONE));
 		// send five delete operation
 		for (int i = 5; i < 10; i++)
-			writeQueue.add(CommandFactory.createDeleteCommand(
+			writeQueue.add(TextCommandFactory.createDeleteCommand(
 					String.valueOf(i), String.valueOf(i).getBytes(), 0));
 		// merge five get commands at most
 		Command optimiezeCommand = optimiezer.optimiezeGet(writeQueue,
@@ -178,7 +178,7 @@ public class OptimezerTest extends TestCase {
 
 	public void testOptimieze() {
 		for (int i = 0; i < 10; i++)
-			writeQueue.add(CommandFactory.createDeleteCommand(
+			writeQueue.add(TextCommandFactory.createDeleteCommand(
 					String.valueOf(i), String.valueOf(i).getBytes(), 0));
 		Command optimiezeCommand = optimiezer.optimieze(currentCmd, writeQueue,
 				executingCmds, 16 * 1024);

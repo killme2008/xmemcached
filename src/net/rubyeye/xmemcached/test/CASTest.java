@@ -66,9 +66,10 @@ public class CASTest {
 	public static void main(String[] args) throws Exception {
 		if (args.length < 2) {
 			System.err.println("Usage:java CASTest [threadNum] [server]");
+		    System.exit(1);
 		}
 		int NUM = Integer.parseInt(args[0]);
-		XMemcachedClient mc = new XMemcachedClient(AddrUtil.getAddress(args[1]));
+		XMemcachedClient mc = new XMemcachedClient(AddrUtil.getAddresses(args[1]));
 		// 设置初始值为0
 		mc.set("a", 0, 0);
 		CountDownLatch cdl = new CountDownLatch(NUM);

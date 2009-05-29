@@ -11,7 +11,7 @@ import net.rubyeye.xmemcached.utils.AddrUtil;
 
 public class PerformanceTest2 {
 	static Map<String, NameClass> map2 = new HashMap<String, NameClass>();
-	static final int ELEMENT_NUM = 100;
+	static final int ELEMENT_NUM = 50;
 	static {
 		for (int i = 0; i < ELEMENT_NUM; i++)
 			map2.put(String.valueOf(i), new NameClass(String.valueOf(i), String
@@ -99,21 +99,25 @@ public class PerformanceTest2 {
 	static public void main(String[] args) {
 		try {
 
+			if (args.length < 3) {
+				System.err
+						.println("Useage:java Performance2 [threads] [repeats][servers]");
+				System.exit(1);
+			}
 			int cpuCount = Runtime.getRuntime().availableProcessors();
 
-			int thread = 100;
+			int thread = Integer.parseInt(args[0]);
 
-
-			int repeat = 1000;
+			int repeat = Integer.parseInt(args[1]);
 
 			MemcachedClientBuilder builder = new XMemcachedClientBuilder(
-					AddrUtil.getAddresses("localhost:12000"));
-			//builder.getConfiguration().setReadThreadCount(0);
+					AddrUtil.getAddresses(args[2]));
+			// builder.getConfiguration().setReadThreadCount(0);
 			MemcachedClient mc = builder.build();
 			testWrite(cpuCount, thread, repeat, mc);
 			testRead(cpuCount, thread, repeat, mc);
-			//mc.flushAll(10000); // delete all
-			//System.out.println(mc.stats("192.168.207.101:12000"));
+			// mc.flushAll(10000); // delete all
+			// System.out.println(mc.stats("192.168.207.101:12000"));
 			mc.shutdown();
 		} catch (Exception e) {
 			e.printStackTrace();

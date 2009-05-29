@@ -13,6 +13,7 @@ package net.rubyeye.xmemcached.impl;
 
 import com.google.code.yanf4j.config.Configuration;
 import com.google.code.yanf4j.nio.Session;
+import com.google.code.yanf4j.nio.WriteMessage;
 import com.google.code.yanf4j.nio.impl.SessionConfig;
 import com.google.code.yanf4j.nio.impl.SocketChannelController;
 import com.google.code.yanf4j.nio.util.EventType;
@@ -37,7 +38,6 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import net.rubyeye.xmemcached.MemcachedClient;
 import net.rubyeye.xmemcached.MemcachedOptimiezer;
-import net.rubyeye.xmemcached.MemcachedProtocolHandler;
 import net.rubyeye.xmemcached.MemcachedSessionLocator;
 import net.rubyeye.xmemcached.buffer.BufferAllocator;
 import net.rubyeye.xmemcached.command.Command;
@@ -279,7 +279,6 @@ public class MemcachedConnector extends SocketChannelController {
 	}
 
 	private int sendBufferSize = 0;
-	protected MemcachedProtocolHandler memcachedProtocolHandler;
 	private MemcachedTCPSession session;
 
 	public int getSendBufferSize() {
@@ -394,15 +393,6 @@ public class MemcachedConnector extends SocketChannelController {
 		return this.sessionMap.get(addr);
 	}
 
-	public void setMemcachedProtocolHandler(
-			MemcachedProtocolHandler memcachedProtocolHandler) {
-		this.memcachedProtocolHandler = memcachedProtocolHandler;
-	}
-
-	public MemcachedProtocolHandler getMemcachedProtocolHandler() {
-		return this.memcachedProtocolHandler;
-	}
-
 	public MemcachedConnector(Configuration configuration,
 			MemcachedSessionLocator locator, BufferAllocator allocator) {
 		super(configuration, null);
@@ -417,8 +407,8 @@ public class MemcachedConnector extends SocketChannelController {
 	/**
 	 * use dequeue
 	 */
-	protected Queue<Session.WriteMessage> buildQueue() {
-		return new SimpleDeque<Session.WriteMessage>(500);
+	protected Queue<WriteMessage> buildQueue() {
+		return new SimpleDeque<WriteMessage>(500);
 	}
 
 	public void setMergeFactor(int mergeFactor) {
@@ -426,13 +416,12 @@ public class MemcachedConnector extends SocketChannelController {
 	}
 
 	protected Session buildSession(SocketChannel sc, SelectionKey selectionKey) {
-		Queue<Session.WriteMessage> queue = buildQueue();
+		Queue<WriteMessage> queue = buildQueue();
 		final SessionConfig sessionCofig = buildSessionConfig(sc, selectionKey,
 				queue);
 		session = new MemcachedTCPSession(sessionCofig, configuration
 				.getSessionReadBufferSize(), this.optimiezer, this
 				.getReadThreadCount());
-		session.setMemcachedProtocolHandler(this.getMemcachedProtocolHandler());
 		return session;
 	}
 

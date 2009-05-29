@@ -21,10 +21,10 @@ import net.rubyeye.xmemcached.HashAlgorithm;
 import net.rubyeye.xmemcached.MemcachedSessionLocator;
 
 /**
- * 基于余数的分布查找
- * 
+ * Session locator base on hash(key) mod sessions.size().Standard hash strategy
+ *
  * @author dennis
- * 
+ *
  */
 public class ArrayMemcachedSessionLocator implements MemcachedSessionLocator {
 

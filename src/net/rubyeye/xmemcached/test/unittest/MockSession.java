@@ -19,16 +19,44 @@ public class MockSession implements Session {
 		this.port = port;
 	}
 
+
+
+
 	@Override
-	public void attach(Object obj) {
+	public void clearAttributes() {
+		// TODO Auto-generated method stub
 
 	}
 
-	@Override
-	public Object attachment() {
 
+
+
+	@Override
+	public Object getAttribute(String key) {
+		// TODO Auto-generated method stub
 		return null;
 	}
+
+
+
+
+	@Override
+	public void removeAttribute(String key) {
+		// TODO Auto-generated method stub
+
+	}
+
+
+
+
+	@Override
+	public void setAttribute(String key, Object value) {
+		// TODO Auto-generated method stub
+
+	}
+
+
+
 
 	@Override
 	public void close() {

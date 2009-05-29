@@ -9,9 +9,7 @@ import net.rubyeye.xmemcached.buffer.BufferAllocator;
 import net.rubyeye.xmemcached.buffer.IoBuffer;
 import net.rubyeye.xmemcached.buffer.SimpleBufferAllocator;
 import net.rubyeye.xmemcached.buffer.SimpleIoBuffer;
-import net.rubyeye.xmemcached.command.AbstractCommand;
 import net.rubyeye.xmemcached.command.Command;
-import net.rubyeye.xmemcached.command.CommandType;
 import net.rubyeye.xmemcached.transcoders.CachedData;
 import net.rubyeye.xmemcached.transcoders.Transcoder;
 import net.rubyeye.xmemcached.utils.ByteUtils;
@@ -22,7 +20,7 @@ import net.rubyeye.xmemcached.utils.ByteUtils;
  * @author dennis
  *
  */
-public final class CommandFactory {
+public final class TextCommandFactory {
 
 	private static BufferAllocator bufferAllocator = new SimpleBufferAllocator();
 
@@ -46,12 +44,12 @@ public final class CommandFactory {
 		final CountDownLatch latch = new CountDownLatch(1);
 		byte[] timeBytes = ByteUtils.getBytes(String.valueOf(time));
 		final IoBuffer buffer = bufferAllocator
-				.allocate(CommandFactory.DELETE.length + 2 + keyBytes.length
-						+ timeBytes.length + CommandFactory.CRLF.length);
-		ByteUtils.setArguments(buffer, CommandFactory.DELETE, keyBytes,
+				.allocate(TextCommandFactory.DELETE.length + 2 + keyBytes.length
+						+ timeBytes.length + TextCommandFactory.CRLF.length);
+		ByteUtils.setArguments(buffer, TextCommandFactory.DELETE, keyBytes,
 				timeBytes);
 		buffer.flip();
-		Command command = new AbstractCommand(key, CommandType.DELETE, latch);
+		Command command = new Command(key, Command.CommandType.DELETE, latch);
 		command.setIoBuffer(buffer);
 		return command;
 	}
@@ -64,7 +62,7 @@ public final class CommandFactory {
 	public static final Command createVersionCommand() {
 		final CountDownLatch latch = new CountDownLatch(1);
 		final IoBuffer buffer = new SimpleIoBuffer(VERSION.slice());
-		Command command = new AbstractCommand("version", CommandType.VERSION,
+		Command command = new Command("version", Command.CommandType.VERSION,
 				latch);
 		command.setIoBuffer(buffer);
 		return command;
@@ -77,8 +75,8 @@ public final class CommandFactory {
 	 */
 	public static final Command createFlushAllCommand() {
 		final IoBuffer buffer = new SimpleIoBuffer(FLUSH_ALL.slice());
-		Command command = new AbstractCommand("flush_all",
-				CommandType.FLUSH_ALL, null);
+		Command command = new Command("flush_all",
+				Command.CommandType.FLUSH_ALL, null);
 		command.setIoBuffer(buffer);
 		return command;
 	}
@@ -90,7 +88,7 @@ public final class CommandFactory {
 	 */
 	public static final Command createStatsCommand() {
 		final IoBuffer buffer = new SimpleIoBuffer(STATS.slice());
-		Command command = new AbstractCommand("stats", CommandType.STATS, null);
+		Command command = new Command("stats", Command.CommandType.STATS, null);
 		command.setIoBuffer(buffer);
 		return command;
 	}
@@ -111,7 +109,7 @@ public final class CommandFactory {
 	@SuppressWarnings("unchecked")
 	public static final Command createStoreCommand(final String key,
 			final byte[] keyBytes, final int exp, final Object value,
-			CommandType cmdType, final String cmd, long cas,
+			Command.CommandType cmdType, final String cmd, long cas,
 			Transcoder transcoder) {
 		final CountDownLatch latch = new CountDownLatch(1);
 		final CachedData data = transcoder.encode(value);
@@ -122,12 +120,12 @@ public final class CommandFactory {
 		byte[] casBytes = ByteUtils.getBytes(String.valueOf(cas));
 		int size = cmd.length() + 1 + keyBytes.length + 1 + flagBytes.length
 				+ 1 + expBytes.length + 1 + data.getData().length + 2
-				* CommandFactory.CRLF.length + dataLenBytes.length;
-		if (cmdType == CommandType.CAS) {
+				* TextCommandFactory.CRLF.length + dataLenBytes.length;
+		if (cmdType == Command.CommandType.CAS) {
 			size += 1 + casBytes.length;
 		}
 		final IoBuffer buffer = bufferAllocator.allocate(size);
-		if (cmdType == CommandType.CAS) {
+		if (cmdType == Command.CommandType.CAS) {
 			ByteUtils.setArguments(buffer, cmd, keyBytes, flagBytes, expBytes,
 					dataLenBytes, casBytes);
 		} else {
@@ -136,7 +134,7 @@ public final class CommandFactory {
 		}
 		ByteUtils.setArguments(buffer, data.getData());
 		buffer.flip();
-		Command command = new AbstractCommand(key, cmdType, latch);
+		Command command = new Command(key, cmdType, latch);
 		command.setIoBuffer(buffer);
 		return command;
 	}
@@ -154,13 +152,13 @@ public final class CommandFactory {
 	 */
 	public static final Command createGetCommand(final String key,
 			final byte[] keyBytes, final byte[] cmdBytes,
-			final CommandType cmdType) {
+			final Command.CommandType cmdType) {
 		final CountDownLatch latch = new CountDownLatch(1);
 		final IoBuffer buffer = bufferAllocator.allocate(cmdBytes.length
-				+ CommandFactory.CRLF.length + 1 + keyBytes.length);
+				+ TextCommandFactory.CRLF.length + 1 + keyBytes.length);
 		ByteUtils.setArguments(buffer, cmdBytes, keyBytes);
 		buffer.flip();
-		Command command = new AbstractCommand(key, cmdType, latch);
+		Command command = new Command(key, cmdType, latch);
 		command.setIoBuffer(buffer);
 		return command;
 	}
@@ -180,8 +178,8 @@ public final class CommandFactory {
 	public static final <T> Command createGetMultiCommand(
 			Collection<String> keys, CountDownLatch latch,
 			Collection<Map<String, CachedData>> result, byte[] cmdBytes,
-			CommandType cmdType, Transcoder<T> transcoder) {
-		final Command command = new AbstractCommand("getMultiCommand", cmdType,
+			Command.CommandType cmdType, Transcoder<T> transcoder) {
+		final Command command = new Command(keys.iterator().next(), cmdType,
 				latch);
 		command.setResult(result); // 共用一个result map
 		command.setTranscoder(transcoder);
@@ -194,7 +192,7 @@ public final class CommandFactory {
 		byte[] keyBytes = ByteUtils.getBytes(gatherKey.substring(0, gatherKey
 				.length() - 1));
 		final IoBuffer buffer = bufferAllocator.allocate(cmdBytes.length
-				+ CommandFactory.CRLF.length + 1 + keyBytes.length);
+				+ TextCommandFactory.CRLF.length + 1 + keyBytes.length);
 		ByteUtils.setArguments(buffer, cmdBytes, keyBytes);
 		buffer.flip();
 		command.setIoBuffer(buffer);
@@ -202,16 +200,16 @@ public final class CommandFactory {
 	}
 
 	public static final Command createIncrDecrCommand(final String key,
-			final byte[] keyBytes, final int num, CommandType cmdType,
+			final byte[] keyBytes, final int num, Command.CommandType cmdType,
 			final String cmd) {
 		final CountDownLatch latch = new CountDownLatch(1);
 		byte[] numBytes = ByteUtils.getBytes(String.valueOf(num));
 		byte[] cmdBytes = ByteUtils.getBytes(cmd);
 		final IoBuffer buffer = bufferAllocator.allocate(cmd.length() + 2
-				+ key.length() + numBytes.length + CommandFactory.CRLF.length);
+				+ key.length() + numBytes.length + TextCommandFactory.CRLF.length);
 		ByteUtils.setArguments(buffer, cmdBytes, keyBytes, numBytes);
 		buffer.flip();
-		Command command = new AbstractCommand(key, cmdType, latch);
+		Command command = new Command(key, cmdType, latch);
 		command.setIoBuffer(buffer);
 		return command;
 	}

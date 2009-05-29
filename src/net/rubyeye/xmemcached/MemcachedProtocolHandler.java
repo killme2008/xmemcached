@@ -16,12 +16,14 @@ import java.nio.ByteBuffer;
 import net.rubyeye.xmemcached.impl.MemcachedTCPSession;
 
 /**
- * memcached协议解析接口
+ * memcached protocol decoder interface It will be remove in 1.20
  *
  * @author dennis
  */
+@Deprecated
 public interface MemcachedProtocolHandler {
 
-	public boolean onReceive(final MemcachedTCPSession session,final ByteBuffer buffer);
+	public boolean onReceive(final MemcachedTCPSession session,
+			final ByteBuffer buffer);
 
 }

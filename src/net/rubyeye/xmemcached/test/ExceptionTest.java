@@ -84,7 +84,8 @@ public class ExceptionTest {
 	private static void initClient() {
 		try {
 			client = new XMemcachedClient();
-			client.addServer("192.168.207.101", 12000);
+			client.addServer("localhost", 12000);
+			client.addServer("localhost", 12001);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

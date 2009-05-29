@@ -9,9 +9,10 @@ import java.util.concurrent.*;
 import net.rubyeye.xmemcached.MemcachedClient;
 import net.rubyeye.xmemcached.XMemcachedClient;
 import net.rubyeye.xmemcached.impl.KetamaMemcachedSessionLocator;
+import net.rubyeye.xmemcached.utils.AddrUtil;
 
 class TestThread implements Runnable {
-	private static final int ELEMENT_NUM = 50;
+	private static final int ELEMENT_NUM = 100;
 	MemcachedClient xmemcachedClient;
 	CyclicBarrier barrier;
 
@@ -93,16 +94,18 @@ class TestThread implements Runnable {
 }
 
 public class XMemcachedClientThreadSafeTest {
-	static int num = 500;
-
 	public static void main(String args[]) throws Exception {
+
+		if (args.length < 2) {
+			System.err
+					.println("Useage:java XMemcachedClientThreadSafeTest [threads] [servers]");
+			System.exit(1);
+		}
+		int num = Integer.parseInt(args[0]);
 		CyclicBarrier barrier = new CyclicBarrier(num + 1);
-		String ip = "localhost";
-		MemcachedClient client = new XMemcachedClient(
-				);
-		client.addServer(ip, 12000);
-		// client.addServer(ip, 12002);
-		// client.addServer(ip, 12003);
+		MemcachedClient client = new XMemcachedClient(AddrUtil
+				.getAddresses(args[1]));
+
 		for (int i = 0; i < num; i++)
 			new Thread(new TestThread(i, client, barrier)).start();
 		long start = System.currentTimeMillis();

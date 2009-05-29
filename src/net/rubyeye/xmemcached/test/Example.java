@@ -23,7 +23,6 @@ import net.rubyeye.xmemcached.CASOperation;
 import net.rubyeye.xmemcached.GetsResponse;
 import net.rubyeye.xmemcached.MemcachedClient;
 import net.rubyeye.xmemcached.MemcachedClientBuilder;
-import net.rubyeye.xmemcached.XMemcachedClient;
 import net.rubyeye.xmemcached.XMemcachedClientBuilder;
 import net.rubyeye.xmemcached.exception.MemcachedException;
 import net.rubyeye.xmemcached.transcoders.IntegerTranscoder;
@@ -56,8 +55,13 @@ public class Example {
 	public static void main(String[] args) {
 		try {
 
+			if(args.length<1){
+				System.err.println("Useage:java Example [servers]");
+				System.exit(1);
+			}
+			
 			MemcachedClientBuilder builder = new XMemcachedClientBuilder(
-					AddrUtil.getAddresses("192.168.207.101:12000"));
+					AddrUtil.getAddresses(args[0]));
 			MemcachedClient client = builder.build();
 			if (!client.set("hello", 0, "dennis")) {
 				System.err.println("set error");
@@ -201,7 +205,7 @@ public class Example {
 			System.out.println(client.gets(keys).get("a").getValue());
 			client.flushAll(); // 使所有数据项失效
 			// 查看统计信息
-			System.out.println(client.stats("192.168.207.101:12000", 1000)); // 查看统计信息
+			System.out.println(client.stats(args[0], 1000)); // 查看统计信息
 			client.shutdown();
 
 		} catch (IOException e) {

@@ -188,7 +188,7 @@ public class PerformanceTest {
 	static public void main(String[] args) {
 		if (args.length < 3) {
 			System.out
-					.println("Usage:[program name] threads totalTimes servers");
+					.println("Usage:[program name] threads totalTimes keySize valueSize servers");
 			System.exit(1);
 		}
 		int thread = Integer.parseInt(args[0]); // 线程数

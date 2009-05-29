@@ -3,7 +3,7 @@ package net.rubyeye.xmemcached.test.unittest;
 import java.util.ArrayList;
 import java.util.List;
 
-import net.rubyeye.xmemcached.CommandFactory;
+import net.rubyeye.xmemcached.TextCommandFactory;
 import net.rubyeye.xmemcached.command.Command;
 import net.rubyeye.xmemcached.transcoders.StringTranscoder;
 import net.rubyeye.xmemcached.transcoders.Transcoder;
@@ -15,7 +15,7 @@ public class CommandFactoryTest extends TestCase {
 		String key = "test";
 		byte[] keyBytes = ByteUtils.getBytes(key);
 		int time = 10;
-		Command deleteCmd = CommandFactory.createDeleteCommand("test",
+		Command deleteCmd = TextCommandFactory.createDeleteCommand("test",
 				keyBytes, time);
 		assertEquals(Command.CommandType.DELETE, deleteCmd.getCommandType());
 		String commandStr = new String(deleteCmd.getIoBuffer().getByteBuffer()
@@ -27,7 +27,7 @@ public class CommandFactoryTest extends TestCase {
 	}
 
 	public void testCreateVersionCommand() {
-		Command versionCmd = CommandFactory.createVersionCommand();
+		Command versionCmd = TextCommandFactory.createVersionCommand();
 		String commandStr = new String(versionCmd.getIoBuffer().getByteBuffer()
 				.array());
 		assertEquals("version\r\n", commandStr);
@@ -40,7 +40,7 @@ public class CommandFactoryTest extends TestCase {
 		byte[] keyBytes = ByteUtils.getBytes(key);
 		int exp = 0;
 		Transcoder transcoder = new StringTranscoder();
-		Command storeCmd = CommandFactory.createStoreCommand(key, keyBytes,
+		Command storeCmd = TextCommandFactory.createStoreCommand(key, keyBytes,
 				exp, value, Command.CommandType.SET, "set", -1, transcoder);
 
 		assertEquals(Command.CommandType.SET, storeCmd.getCommandType());
@@ -55,8 +55,8 @@ public class CommandFactoryTest extends TestCase {
 	public void testCreateGetCommand() {
 		String key = "test";
 		byte[] keyBytes = ByteUtils.getBytes(key);
-		Command getCmd = CommandFactory.createGetCommand(key, keyBytes,
-				CommandFactory.GET, Command.CommandType.GET_ONE);
+		Command getCmd = TextCommandFactory.createGetCommand(key, keyBytes,
+				TextCommandFactory.GET, Command.CommandType.GET_ONE);
 		assertEquals(Command.CommandType.GET_ONE, getCmd.getCommandType());
 		String commandStr = new String(getCmd.getIoBuffer().getByteBuffer()
 				.array());
@@ -69,7 +69,7 @@ public class CommandFactoryTest extends TestCase {
 		String key = "test";
 		byte[] keyBytes = ByteUtils.getBytes(key);
 		int num = 10;
-		Command inCr = CommandFactory.createIncrDecrCommand(key, keyBytes, num,
+		Command inCr = TextCommandFactory.createIncrDecrCommand(key, keyBytes, num,
 				Command.CommandType.INCR, "incr");
 		assertEquals(Command.CommandType.INCR, inCr.getCommandType());
 		String commandStr = new String(inCr.getIoBuffer().getByteBuffer()
@@ -87,8 +87,8 @@ public class CommandFactoryTest extends TestCase {
 		keys.add("c");
 		keys.add("a");
 
-		Command cmd = CommandFactory.createGetMultiCommand(keys, null, null,
-				CommandFactory.GET, Command.CommandType.GET_MANY, null);
+		Command cmd = TextCommandFactory.createGetMultiCommand(keys, null, null,
+				TextCommandFactory.GET, Command.CommandType.GET_MANY, null);
 		assertEquals(Command.CommandType.GET_MANY, cmd.getCommandType());
 		String commandStr = new String(cmd.getIoBuffer().getByteBuffer()
 				.array());

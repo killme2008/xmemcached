@@ -12,8 +12,11 @@
 package net.rubyeye.xmemcached.command;
 
 import java.io.UnsupportedEncodingException;
+import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
+
+import com.google.code.yanf4j.nio.WriteMessage;
 
 import net.rubyeye.xmemcached.buffer.IoBuffer;
 import net.rubyeye.xmemcached.transcoders.CachedData;
@@ -25,7 +28,22 @@ import net.rubyeye.xmemcached.transcoders.Transcoder;
  * @author Administrator
  *
  */
-public class Command {
+public class Command implements WriteMessage {
+
+	@Override
+	public Object getMessage() {
+		return this;
+	}
+
+	@Override
+	public ByteBuffer getWriteBuffer() {
+		return getIoBuffer().getByteBuffer();
+	}
+
+	@Override
+	public void setWriteBuffer(ByteBuffer buffers) {
+		throw new UnsupportedOperationException();
+	}
 
 	private Object key; // 关键字
 	private volatile Object result = null; // memcached返回结果
@@ -165,9 +183,11 @@ public class Command {
 	}
 
 	public final void countDownLatch() {
-		this.latch.countDown();
-		if (this.latch.getCount() == 0)
-			this.status = OperationStatus.DONE;
+		if (this.latch != null) {
+			this.latch.countDown();
+			if (this.latch.getCount() == 0)
+				this.status = OperationStatus.DONE;
+		}
 	}
 
 	public final CommandType getCommandType() {

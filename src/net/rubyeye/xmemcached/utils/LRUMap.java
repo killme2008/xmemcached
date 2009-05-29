@@ -1,6 +1,13 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
+/**
+ *Copyright [2009-2010] [dennis zhuang(killme2008@gmail.com)]
+ *Licensed under the Apache License, Version 2.0 (the "License");
+ *you may not use this file except in compliance with the License.
+ *You may obtain a copy of the License at
+ *             http://www.apache.org/licenses/LICENSE-2.0
+ *Unless required by applicable law or agreed to in writing,
+ *software distributed under the License is distributed on an "AS IS" BASIS,
+ *WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ *either express or implied. See the License for the specific language governing permissions and limitations under the License
  */
 package net.rubyeye.xmemcached.utils;
 
@@ -8,22 +15,26 @@ import java.util.LinkedHashMap;
 import java.util.Map.Entry;
 
 /**
- *
+ * LRUMap
  * @author dennis
  */
 public class LRUMap<K, V> extends LinkedHashMap<K, V> {
 
-    private int maxSize;
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -439905940956406406L;
+	private int maxSize;
 
-    public LRUMap(int maxSize) {
-        if (maxSize <= 0) {
-            throw new IllegalArgumentException();
-        }
-        this.maxSize = maxSize;
-    }
+	public LRUMap(int maxSize) {
+		if (maxSize <= 0) {
+			throw new IllegalArgumentException();
+		}
+		this.maxSize = maxSize;
+	}
 
-    @Override
-    protected boolean removeEldestEntry(Entry<K, V> eldest) {
-        return this.size() > this.maxSize;
-    }
+	@Override
+	protected boolean removeEldestEntry(Entry<K, V> eldest) {
+		return this.size() > this.maxSize;
+	}
 }

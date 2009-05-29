@@ -13,7 +13,7 @@ package net.rubyeye.xmemcached.utils;
 
 import java.io.UnsupportedEncodingException;
 
-import net.rubyeye.xmemcached.CommandFactory;
+import net.rubyeye.xmemcached.TextCommandFactory;
 import net.rubyeye.xmemcached.buffer.IoBuffer;
 
 public final class ByteUtils {
@@ -43,7 +43,7 @@ public final class ByteUtils {
             if (wasFirst) {
                 wasFirst = false;
             } else {
-                bb.put(CommandFactory.SPACE);
+                bb.put(TextCommandFactory.SPACE);
             }
             if (o instanceof byte[]) {
                 bb.put((byte[]) o);
@@ -51,7 +51,7 @@ public final class ByteUtils {
                 bb.put(getBytes(String.valueOf(o)));
             }
         }
-        bb.put(CommandFactory.CRLF);
+        bb.put(TextCommandFactory.CRLF);
     }
 
     public static final void checkKey(final byte[] keyBytes) {
