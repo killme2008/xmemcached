@@ -33,7 +33,7 @@ import com.google.code.yanf4j.util.ShiftAndByteBufferMatcher;
 @SuppressWarnings("unchecked")
 public class MemcachedTextDecoder implements Decoder<Command> {
 
-	protected static final Log log = LogFactory
+	private static final Log log = LogFactory
 			.getLog(MemcachedTextDecoder.class);
 
 	public static final String PARSE_STATUS_ATTR = "parse_status";
@@ -53,7 +53,7 @@ public class MemcachedTextDecoder implements Decoder<Command> {
 	private static final ByteBuffer SPLIT = ByteBuffer
 			.wrap(TextCommandFactory.SPLIT.getBytes());
 
-	private StatisticsHandler statisticsHandler;
+	private final StatisticsHandler statisticsHandler;
 
 	/**
 	 * shift-and algorithm for ByteBuffer's match
@@ -72,7 +72,7 @@ public class MemcachedTextDecoder implements Decoder<Command> {
 		}
 
 		/**
-		 * 测试表明采用 Shift-And算法匹配 >BM算法匹配效率 > 朴素匹配 > KMP匹配， 如果你有更好的建议，请email给我
+		 * 测试表明采用 Shift-And算法匹配 >BM算法匹配效率 > 朴素匹配 > KMP匹配， 如果你有更好的建议，请email给我(killme2008@gmail.com)
 		 */
 		int index = SPLIT_MATCHER.matchFirst(buffer);
 		// int index = ByteBufferUtils.indexOf(buffer, SPLIT);
@@ -330,8 +330,7 @@ public class MemcachedTextDecoder implements Decoder<Command> {
 					statistics(CommandType.GET_HIT);
 				else
 					statistics(CommandType.GET_MSS);
-				executingCmd.setResult(data); //设置CachedData返回，transcoder.decode
-				// ()放到用户线程
+				executingCmd.setResult(data);
 			}
 		} else {
 			// merge get
@@ -381,8 +380,7 @@ public class MemcachedTextDecoder implements Decoder<Command> {
 			statistics(Command.CommandType.GET_MSS);
 		else
 			statistics(cmdType);
-		int mergCount = executingCmd.getMergeCount();
-		if (mergCount > 0) {
+		if (executingCmd.getMergeCount() > 0) {
 			// merge get
 			List<Command> mergeCommands = executingCmd.getMergeCommands();
 			for (Command nextCommand : mergeCommands) {

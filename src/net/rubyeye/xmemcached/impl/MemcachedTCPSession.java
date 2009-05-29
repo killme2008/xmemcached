@@ -37,9 +37,12 @@ import net.rubyeye.xmemcached.utils.SimpleBlockingQueue;
  */
 public class MemcachedTCPSession extends DefaultTCPSession {
 
-	protected BlockingQueue<Command> executingCmds; // comands which are already
+	/**
+	 * Command which are already sent
+	 */
+	protected BlockingQueue<Command> executingCmds;
 
-	private SocketAddress remoteSocketAddress;
+	private SocketAddress remoteSocketAddress; // prevent channel is closed
 	private int sendBufferSize;
 	private MemcachedOptimiezer optimiezer;
 	private volatile boolean allowReconnect;
@@ -78,6 +81,9 @@ public class MemcachedTCPSession extends DefaultTCPSession {
 			return null;
 		}
 		if (currentCommand.getStatus() == OperationStatus.SENDING) {
+			/**
+			 * optimieze commands
+			 */
 			currentCommand = this.optimiezer.optimieze(currentCommand,
 					this.writeQueue, this.executingCmds, this.sendBufferSize);
 		}
@@ -85,10 +91,9 @@ public class MemcachedTCPSession extends DefaultTCPSession {
 		return currentCommand;
 	}
 
-
 	@Override
 	protected final WriteMessage wrapMessage(Object msg) {
-		return (WriteMessage)msg;
+		return (WriteMessage) msg;
 	}
 
 	/**
@@ -105,7 +110,7 @@ public class MemcachedTCPSession extends DefaultTCPSession {
 	 *
 	 * @return
 	 */
-	public Command pollCurrentExecutingCommand() {
+	public final Command pollCurrentExecutingCommand() {
 		try {
 			Command cmd = executingCmds.take();
 			if (cmd != null) {
@@ -125,7 +130,7 @@ public class MemcachedTCPSession extends DefaultTCPSession {
 	 *
 	 * @return
 	 */
-	public Command peekCurrentExecutingCommand() {
+	public final Command peekCurrentExecutingCommand() {
 		Command cmd = executingCmds.peek();
 		if (cmd == null)
 			throw new NoSuchElementException();

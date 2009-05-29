@@ -7,7 +7,12 @@ import java.util.List;
 
 import net.rubyeye.xmemcached.buffer.BufferAllocator;
 import net.rubyeye.xmemcached.buffer.SimpleBufferAllocator;
+import net.rubyeye.xmemcached.codec.MemcachedCodecFactory;
+import net.rubyeye.xmemcached.codec.text.MemcachedTextCodecFactory;
+import net.rubyeye.xmemcached.command.Command;
 import net.rubyeye.xmemcached.impl.ArrayMemcachedSessionLocator;
+import net.rubyeye.xmemcached.transcoders.SerializingTranscoder;
+import net.rubyeye.xmemcached.transcoders.Transcoder;
 
 /**
  * Builder pattern.Configure XmemcachedClient's options,then build it
@@ -22,6 +27,33 @@ public class XMemcachedClientBuilder implements MemcachedClientBuilder {
 	private Configuration configuration = XMemcachedClient
 			.getDefaultConfiguration();
 	private List<InetSocketAddress> addressList;
+
+	private @SuppressWarnings("unchecked")
+	Transcoder transcoder = new SerializingTranscoder();
+
+	private MemcachedCodecFactory<Command> codecFactory = new MemcachedTextCodecFactory(
+			this.transcoder);
+
+	/**
+	 * return the memcached protocol codec factory,default is
+	 * MemcachedTextCodecFactory
+	 *
+	 * @return
+	 */
+	public MemcachedCodecFactory<Command> getCodecFactory() {
+		return codecFactory;
+	}
+
+	/**
+	 * Set the memcached protocol codec factory,Default is
+	 * MemcachedTextCodecFactory
+	 *
+	 * @param codecFactory
+	 */
+	public void setCodecFactory(MemcachedCodecFactory<Command> codecFactory) {
+		this.codecFactory = codecFactory;
+		this.codecFactory.setTranscoder(this.transcoder);
+	}
 
 	public XMemcachedClientBuilder(List<InetSocketAddress> addressList) {
 		this.addressList = addressList;
@@ -98,6 +130,19 @@ public class XMemcachedClientBuilder implements MemcachedClientBuilder {
 	 */
 	public MemcachedClient build() throws IOException {
 		return new XMemcachedClient(this.sessionLocator, this.bufferAllocator,
-				this.configuration, this.addressList);
+				this.configuration, this.codecFactory, this.transcoder,
+				this.addressList);
 	}
+
+	@SuppressWarnings("unchecked")
+	public Transcoder getTranscoder() {
+		return transcoder;
+	}
+
+	@SuppressWarnings("unchecked")
+	public void setTranscoder(Transcoder transcoder) {
+		this.transcoder = transcoder;
+		this.codecFactory.setTranscoder(transcoder);
+	}
+
 }

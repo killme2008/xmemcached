@@ -35,7 +35,7 @@ public class Optimiezer implements OptimiezerMBean, MemcachedOptimiezer {
 	private int mergeFactor = DEFAULT_MERGE_FACTOR; // default merge factor;
 	private boolean optimiezeGet = true;
 	private boolean optimiezeMergeBuffer = true;
-	BufferAllocator bufferAllocator;
+	private BufferAllocator bufferAllocator;
 	private static final Log log = LogFactory.getLog(Optimiezer.class);
 
 	public Optimiezer() {

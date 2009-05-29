@@ -15,7 +15,7 @@ import net.rubyeye.xmemcached.transcoders.Transcoder;
 import net.rubyeye.xmemcached.utils.ByteUtils;
 
 /**
- * Command Factory for creating commands.
+ * Command Factory for creating text protocol commands.
  *
  * @author dennis
  *

@@ -50,8 +50,8 @@ public class MemcachedHandler extends HandlerAdapter {
 		cmd.countDownLatch();
 	}
 
-	protected MemcachedClient client;
-	protected static final Log log = LogFactory.getLog(MemcachedHandler.class);
+	private final MemcachedClient client;
+	private static final Log log = LogFactory.getLog(MemcachedHandler.class);
 
 	/**
 	 * put command which have been sent to queue
@@ -93,6 +93,8 @@ public class MemcachedHandler extends HandlerAdapter {
 	 */
 	protected void reconnect(Session session) {
 		if (!this.client.isShutdown()) {
+			log.debug("Add reconnectRequest to connector "
+					+ session.getRemoteSocketAddress());
 			this.client.getConnector().addToWatingQueue(
 					new MemcachedConnector.ReconnectRequest(session
 							.getRemoteSocketAddress(), 0));

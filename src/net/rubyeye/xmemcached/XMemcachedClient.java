@@ -26,6 +26,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.io.IOException;
 
+import net.rubyeye.xmemcached.codec.MemcachedCodecFactory;
 import net.rubyeye.xmemcached.codec.text.MemcachedTextCodecFactory;
 import net.rubyeye.xmemcached.command.Command.CommandType;
 import org.apache.commons.logging.Log;
@@ -168,7 +169,8 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 		super();
 		checkServerPort(server, port);
 		buildConnector(new ArrayMemcachedSessionLocator(),
-				new SimpleBufferAllocator(), getDefaultConfiguration());
+				new SimpleBufferAllocator(), getDefaultConfiguration(),
+				new MemcachedTextCodecFactory(), new SerializingTranscoder());
 		start0();
 		connect(new InetSocketAddress(server, port));
 	}
@@ -315,8 +317,8 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 			final long timeout, Transcoder<T> transcoder)
 			throws InterruptedException, TimeoutException, MemcachedException,
 			MemcachedException {
-		final Command command = TextCommandFactory.createGetCommand(key, keyBytes,
-				cmdBytes, cmdType);
+		final Command command = TextCommandFactory.createGetCommand(key,
+				keyBytes, cmdBytes, cmdType);
 		if (!sendCommand(command)) {
 			throw new MemcachedException("send command fail");
 		}
@@ -350,7 +352,8 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 	}
 
 	private void buildConnector(MemcachedSessionLocator locator,
-			BufferAllocator allocator, Configuration configuration) {
+			BufferAllocator allocator, Configuration configuration,
+			MemcachedCodecFactory<Command> codecFactory, Transcoder transcoder) {
 		if (locator == null) {
 			locator = new ArrayMemcachedSessionLocator();
 
@@ -361,18 +364,23 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 		if (configuration == null) {
 			configuration = getDefaultConfiguration();
 		}
+		if (transcoder == null)
+			transcoder = new SerializingTranscoder();
 		TextCommandFactory.setBufferAllocator(allocator);
 		this.shutdown = true;
-		this.transcoder = new SerializingTranscoder();
+		this.transcoder = transcoder;
 		this.sessionLocator = locator;
 		this.connector = new MemcachedConnector(configuration, sessionLocator,
 				allocator);
 		this.connector.setSendBufferSize(DEFAULT_TCP_SEND_BUFF_SIZE);
 		this.memcachedHandler = new MemcachedHandler(this);
 		this.connector.setHandler(memcachedHandler);
-		//set codec factory,default use memcached text protocol
-		this.connector.setCodecFactory(new MemcachedTextCodecFactory(this.transcoder));
+		// set codec factory,default use memcached text protocol
+		if (codecFactory == null)
+			codecFactory = new MemcachedTextCodecFactory(this.transcoder);
+		this.connector.setCodecFactory(codecFactory);
 	}
+
 	private final void registerMBean() {
 		if (this.shutdown)
 			XMemcachedMbeanServer.getInstance().registMBean(
@@ -466,7 +474,8 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 			throw new IllegalArgumentException();
 		}
 		buildConnector(new ArrayMemcachedSessionLocator(),
-				new SimpleBufferAllocator(), getDefaultConfiguration());
+				new SimpleBufferAllocator(), getDefaultConfiguration(),
+				new MemcachedTextCodecFactory(), new SerializingTranscoder());
 		start0();
 		connect(inetSocketAddress);
 	}
@@ -474,7 +483,8 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 	public XMemcachedClient() throws IOException {
 		super();
 		buildConnector(new ArrayMemcachedSessionLocator(),
-				new SimpleBufferAllocator(), getDefaultConfiguration());
+				new SimpleBufferAllocator(), getDefaultConfiguration(),
+				new MemcachedTextCodecFactory(), new SerializingTranscoder());
 		start0();
 	}
 
@@ -482,24 +492,48 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 		this(locator, new SimpleBufferAllocator(), getDefaultConfiguration());
 	}
 
+	@SuppressWarnings("unchecked")
 	public XMemcachedClient(MemcachedSessionLocator locator,
-			BufferAllocator allocator, Configuration conf) throws IOException {
+			BufferAllocator allocator, Configuration conf,
+			MemcachedCodecFactory<Command> codecFactory, Transcoder transcoder)
+			throws IOException {
 		super();
-		buildConnector(locator, allocator, conf);
+		buildConnector(locator, allocator, conf, codecFactory, transcoder);
 		start0();
 	}
 
 	public XMemcachedClient(MemcachedSessionLocator locator,
 			BufferAllocator allocator, Configuration conf,
+			MemcachedCodecFactory<Command> codecFactory) throws IOException {
+		this(locator, allocator, conf, codecFactory,
+				new SerializingTranscoder());
+	}
+
+	public XMemcachedClient(MemcachedSessionLocator locator,
+			BufferAllocator allocator, Configuration conf) throws IOException {
+		this(locator, allocator, conf, new MemcachedTextCodecFactory(),
+				new SerializingTranscoder());
+	}
+
+	public XMemcachedClient(MemcachedSessionLocator locator,
+			BufferAllocator allocator, Configuration conf,
+			MemcachedCodecFactory<Command> codecFactory, Transcoder transcoder,
 			List<InetSocketAddress> addressList) throws IOException {
 		super();
-		buildConnector(locator, allocator, conf);
+		buildConnector(locator, allocator, conf, codecFactory, transcoder);
 		start0();
 		if (addressList != null) {
 			for (InetSocketAddress inetSocketAddress : addressList) {
 				connect(inetSocketAddress);
 			}
 		}
+	}
+
+	public XMemcachedClient(MemcachedSessionLocator locator,
+			BufferAllocator allocator, Configuration conf,
+			List<InetSocketAddress> addressList) throws IOException {
+		this(locator, allocator, conf, new MemcachedTextCodecFactory(),
+				new SerializingTranscoder(), addressList);
 	}
 
 	public XMemcachedClient(BufferAllocator allocator) throws IOException {
@@ -514,7 +548,8 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 		if (addressList == null || addressList.isEmpty())
 			throw new IllegalArgumentException("Empty address list");
 		buildConnector(new ArrayMemcachedSessionLocator(),
-				new SimpleBufferAllocator(), getDefaultConfiguration());
+				new SimpleBufferAllocator(), getDefaultConfiguration(),
+				new MemcachedTextCodecFactory(), new SerializingTranscoder());
 		start0();
 		for (InetSocketAddress inetSocketAddress : addressList) {
 			connect(inetSocketAddress);
@@ -650,7 +685,8 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 			final Transcoder<T> transcoder) throws TimeoutException,
 			InterruptedException, MemcachedException {
 		return getMulti0(keyCollections, DEFAULT_OP_TIMEOUT,
-				TextCommandFactory.GET, Command.CommandType.GET_MANY, transcoder);
+				TextCommandFactory.GET, Command.CommandType.GET_MANY,
+				transcoder);
 	}
 
 	/*
@@ -688,8 +724,8 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 			final Transcoder<T> transcoder) throws TimeoutException,
 			InterruptedException, MemcachedException {
 		return (Map<String, GetsResponse<T>>) getMulti0(keyCollections,
-				timeout, TextCommandFactory.GETS, Command.CommandType.GETS_MANY,
-				transcoder);
+				timeout, TextCommandFactory.GETS,
+				Command.CommandType.GETS_MANY, transcoder);
 	}
 
 	/*
@@ -739,8 +775,9 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 		}
 		final CountDownLatch latch;
 		final List<Command> commands;
-		final List<Map<String, CachedData>> returnValues = Collections.synchronizedList(new ArrayList<Map<String, CachedData>>(
-				connector.getSessionSet().size()));
+		final List<Map<String, CachedData>> returnValues = Collections
+				.synchronizedList(new ArrayList<Map<String, CachedData>>(
+						connector.getSessionSet().size()));
 		if (this.connector.getSessionSet().size() <= 1) {
 			commands = new ArrayList<Command>(1);
 			latch = new CountDownLatch(1);

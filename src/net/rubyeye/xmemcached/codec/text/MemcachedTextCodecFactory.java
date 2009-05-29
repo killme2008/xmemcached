@@ -1,5 +1,6 @@
 package net.rubyeye.xmemcached.codec.text;
 
+import net.rubyeye.xmemcached.codec.MemcachedCodecFactory;
 import net.rubyeye.xmemcached.command.Command;
 import net.rubyeye.xmemcached.monitor.StatisticsHandler;
 import net.rubyeye.xmemcached.transcoders.Transcoder;
@@ -13,25 +14,26 @@ import com.google.code.yanf4j.nio.CodecFactory;
  *
  */
 @SuppressWarnings("unchecked")
-public class MemcachedTextCodecFactory implements CodecFactory<Command> {
-
-	private Transcoder transcoder;
+public class MemcachedTextCodecFactory extends MemcachedCodecFactory<Command> {
 
 	private MemcachedTextEncoder encoder;
 
 	private MemcachedTextDecoder decoder;
 
-	public Transcoder getTranscoder() {
-		return transcoder;
+	public MemcachedTextCodecFactory() {
+		super();
+		this.encoder = new MemcachedTextEncoder();
+		this.decoder = new MemcachedTextDecoder(new StatisticsHandler(),
+				this.transcoder);
 	}
 
 	public void setTranscoder(Transcoder transcoder) {
-		this.transcoder = transcoder;
+		super.setTranscoder(transcoder);
 		this.decoder.setTranscoder(transcoder);
 	}
 
 	public MemcachedTextCodecFactory(Transcoder transcoder) {
-		this.transcoder = transcoder;
+		super(transcoder);
 		this.encoder = new MemcachedTextEncoder();
 		this.decoder = new MemcachedTextDecoder(new StatisticsHandler(),
 				this.transcoder);

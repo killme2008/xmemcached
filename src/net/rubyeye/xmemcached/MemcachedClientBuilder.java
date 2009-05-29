@@ -3,6 +3,9 @@ package net.rubyeye.xmemcached;
 import java.io.IOException;
 
 import net.rubyeye.xmemcached.buffer.BufferAllocator;
+import net.rubyeye.xmemcached.codec.MemcachedCodecFactory;
+import net.rubyeye.xmemcached.command.Command;
+import net.rubyeye.xmemcached.transcoders.Transcoder;
 
 import com.google.code.yanf4j.config.Configuration;
 
@@ -62,5 +65,27 @@ public interface MemcachedClientBuilder {
 	 * @throws IOException
 	 */
 	public abstract MemcachedClient build() throws IOException;
+
+	/**
+	 * return the memcached protocol codec factory,default is
+	 * MemcachedTextCodecFactory
+	 *
+	 * @return
+	 */
+	public MemcachedCodecFactory<Command> getCodecFactory();
+
+	/**
+	 * Set the memcached protocol codec factory,Default is
+	 * MemcachedTextCodecFactory
+	 *
+	 * @param codecFactory
+	 */
+	public void setCodecFactory(MemcachedCodecFactory<Command> codecFactory);
+
+	@SuppressWarnings("unchecked")
+	public Transcoder getTranscoder();
+
+	@SuppressWarnings("unchecked")
+	public void setTranscoder(Transcoder transcoder);
 
 }

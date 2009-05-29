@@ -281,11 +281,11 @@ public class MemcachedConnector extends SocketChannelController {
 	private int sendBufferSize = 0;
 	private MemcachedTCPSession session;
 
-	public int getSendBufferSize() {
+	public final int getSendBufferSize() {
 		return sendBufferSize;
 	}
 
-	public void setSendBufferSize(int sendBufferSize) {
+	public final void setSendBufferSize(int sendBufferSize) {
 		this.sendBufferSize = sendBufferSize;
 	}
 

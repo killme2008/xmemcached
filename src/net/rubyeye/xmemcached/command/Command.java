@@ -19,7 +19,6 @@ import java.util.concurrent.CountDownLatch;
 import com.google.code.yanf4j.nio.WriteMessage;
 
 import net.rubyeye.xmemcached.buffer.IoBuffer;
-import net.rubyeye.xmemcached.transcoders.CachedData;
 import net.rubyeye.xmemcached.transcoders.Transcoder;
 
 /**
@@ -31,12 +30,12 @@ import net.rubyeye.xmemcached.transcoders.Transcoder;
 public class Command implements WriteMessage {
 
 	@Override
-	public Object getMessage() {
+	public final Object getMessage() {
 		return this;
 	}
 
 	@Override
-	public ByteBuffer getWriteBuffer() {
+	public final ByteBuffer getWriteBuffer() {
 		return getIoBuffer().getByteBuffer();
 	}
 
@@ -54,7 +53,6 @@ public class Command implements WriteMessage {
 	private volatile boolean cancel = false;
 	private volatile OperationStatus status = null;
 	private int mergeCount = -1;
-	private CachedData storedData;
 	@SuppressWarnings("unchecked")
 	private Transcoder transcoder;
 
@@ -197,13 +195,4 @@ public class Command implements WriteMessage {
 	public final void setLatch(CountDownLatch latch) {
 		this.latch = latch;
 	}
-
-	public CachedData getStoredData() {
-		return storedData;
-	}
-
-	public void setStoredData(CachedData storedData) {
-		this.storedData = storedData;
-	}
-
 }
