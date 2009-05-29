@@ -350,7 +350,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 			this.shutdown = false;
 		}
 	}
-
+    @SuppressWarnings("unchecked")
 	private void buildConnector(MemcachedSessionLocator locator,
 			BufferAllocator allocator, Configuration configuration,
 			MemcachedCodecFactory<Command> codecFactory, Transcoder transcoder) {
@@ -515,6 +515,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 				new SerializingTranscoder());
 	}
 
+	@SuppressWarnings("unchecked")
 	public XMemcachedClient(MemcachedSessionLocator locator,
 			BufferAllocator allocator, Configuration conf,
 			MemcachedCodecFactory<Command> codecFactory, Transcoder transcoder,
