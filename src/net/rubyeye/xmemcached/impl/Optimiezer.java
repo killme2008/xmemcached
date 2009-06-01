@@ -18,6 +18,7 @@ import org.apache.commons.logging.LogFactory;
 import net.rubyeye.xmemcached.buffer.BufferAllocator;
 import net.rubyeye.xmemcached.buffer.IoBuffer;
 import net.rubyeye.xmemcached.command.Command;
+import net.rubyeye.xmemcached.command.CommandType;
 import net.rubyeye.xmemcached.command.OperationStatus;
 import net.rubyeye.xmemcached.monitor.XMemcachedMbeanServer;
 import net.rubyeye.xmemcached.utils.ByteUtils;
@@ -129,7 +130,7 @@ public class Optimiezer implements OptimiezerMBean, MemcachedOptimiezer {
 	@SuppressWarnings("unchecked")
 	public final Command optimiezeGet(final Queue writeQueue,
 			final BlockingQueue<Command> executingCmds, Command optimiezeCommand) {
-		if (optimiezeCommand.getCommandType() == Command.CommandType.GET_ONE) {
+		if (optimiezeCommand.getCommandType() == CommandType.GET_ONE) {
 			// 优化get操作
 			if (optimiezeGet) {
 				writeQueue.remove();
@@ -172,7 +173,7 @@ public class Optimiezer implements OptimiezerMBean, MemcachedOptimiezer {
 
 			writeQueue.remove();
 			// if it is get_one command,try to merge get commands
-			if (nextCmd.getCommandType() == Command.CommandType.GET_ONE
+			if (nextCmd.getCommandType() == CommandType.GET_ONE
 					&& optimiezeGet)
 				nextCmd = mergeGetCommands(nextCmd, writeQueue, executingCmds);
 
@@ -235,7 +236,7 @@ public class Optimiezer implements OptimiezerMBean, MemcachedOptimiezer {
 				writeQueue.remove();
 				continue;
 			}
-			if (nextCmd.getCommandType() == Command.CommandType.GET_ONE) {
+			if (nextCmd.getCommandType() == CommandType.GET_ONE) {
 				if (mergeCommands == null) { // lazy initialize
 					mergeCommands = new ArrayList<Command>(mergeFactor / 2);
 					mergeCommands.add(currentCmd);
@@ -264,7 +265,7 @@ public class Optimiezer implements OptimiezerMBean, MemcachedOptimiezer {
 						+ TextCommandFactory.CRLF.length + 1 + keyBytes.length);
 		ByteUtils.setArguments(buffer, TextCommandFactory.GET, keyBytes);
 		buffer.flip();
-		Command cmd = new Command(key.toString(), Command.CommandType.GET_ONE,
+		Command cmd = new Command(key.toString(), CommandType.GET_ONE,
 				null) {
 
 			public List<Command> getMergeCommands() {

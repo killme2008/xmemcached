@@ -10,6 +10,7 @@ import com.google.code.yanf4j.util.Queue;
 import net.rubyeye.xmemcached.TextCommandFactory;
 import net.rubyeye.xmemcached.buffer.SimpleBufferAllocator;
 import net.rubyeye.xmemcached.command.Command;
+import net.rubyeye.xmemcached.command.CommandType;
 import net.rubyeye.xmemcached.impl.Optimiezer;
 import net.rubyeye.xmemcached.utils.SimpleBlockingQueue;
 import net.rubyeye.xmemcached.utils.SimpleDeque;
@@ -33,7 +34,7 @@ public class OptimezerTest extends TestCase {
 		for (int i = 0; i < 10; i++)
 			writeQueue.add(TextCommandFactory.createGetCommand(String.valueOf(i),
 					String.valueOf(i).getBytes(), TextCommandFactory.GET,
-					Command.CommandType.GET_ONE));
+					CommandType.GET_ONE));
 		currentCmd = (Command) writeQueue.peek();
 	}
 
@@ -46,7 +47,7 @@ public class OptimezerTest extends TestCase {
 		assertEquals(10, optimiezeCommand.getMergeCount());
 		assertEquals(1, writeQueue.size());
 		assertSame(optimiezeCommand, writeQueue.peek());
-		assertSame(Command.CommandType.GET_ONE, optimiezeCommand
+		assertSame(CommandType.GET_ONE, optimiezeCommand
 				.getCommandType());
 		assertEquals(10, optimiezeCommand.getMergeCount());
 		assertEquals("get 0 1 2 3 4 5 6 7 8 9\r\n", new String(optimiezeCommand
@@ -59,7 +60,7 @@ public class OptimezerTest extends TestCase {
 				executingCmds, currentCmd);
 
 		assertEquals(5, optimiezeCommand.getMergeCommands().size());
-		assertSame(Command.CommandType.GET_ONE, optimiezeCommand
+		assertSame(CommandType.GET_ONE, optimiezeCommand
 				.getCommandType());
 		assertEquals(5, optimiezeCommand.getMergeCount());
 		assertEquals("get 0 1 2 3 4\r\n", new String(optimiezeCommand
@@ -73,7 +74,7 @@ public class OptimezerTest extends TestCase {
 				executingCmds, currentCmd);
 
 		assertNull(optimiezeCommand.getMergeCommands());
-		assertSame(Command.CommandType.GET_ONE, optimiezeCommand
+		assertSame(CommandType.GET_ONE, optimiezeCommand
 				.getCommandType());
 		assertNull(optimiezeCommand.getMergeCommands());
 		assertEquals(-1, optimiezeCommand.getMergeCount());
@@ -89,7 +90,7 @@ public class OptimezerTest extends TestCase {
 				executingCmds, currentCmd);
 
 		assertNull(optimiezeCommand.getMergeCommands());
-		assertSame(Command.CommandType.GET_ONE, optimiezeCommand
+		assertSame(CommandType.GET_ONE, optimiezeCommand
 				.getCommandType());
 		assertNull(optimiezeCommand.getMergeCommands());
 		assertEquals(-1, optimiezeCommand.getMergeCount());
@@ -105,7 +106,7 @@ public class OptimezerTest extends TestCase {
 		for (int i = 0; i < 5; i++)
 			writeQueue.add(TextCommandFactory.createGetCommand(String.valueOf(i),
 					String.valueOf(i).getBytes(), TextCommandFactory.GET,
-					Command.CommandType.GET_ONE));
+					CommandType.GET_ONE));
 		// send five delete operation
 		for (int i = 5; i < 10; i++)
 			writeQueue.add(TextCommandFactory.createDeleteCommand(
@@ -115,7 +116,7 @@ public class OptimezerTest extends TestCase {
 				executingCmds, currentCmd);
 
 		assertEquals(5, optimiezeCommand.getMergeCommands().size());
-		assertSame(Command.CommandType.GET_ONE, optimiezeCommand
+		assertSame(CommandType.GET_ONE, optimiezeCommand
 				.getCommandType());
 		assertEquals(5, optimiezeCommand.getMergeCount());
 		assertEquals("get 0 1 2 3 4\r\n", new String(optimiezeCommand
@@ -145,7 +146,7 @@ public class OptimezerTest extends TestCase {
 		assertNotSame(currentCmd, optimiezeCommand);
 		ByteBuffer mergeBuffer = optimiezeCommand.getIoBuffer().getByteBuffer();
 		assertEquals(1, writeQueue.size()); // remain six commands
-		assertSame(Command.CommandType.GET_ONE,((Command)writeQueue.peek()).getCommandType());
+		assertSame(CommandType.GET_ONE,((Command)writeQueue.peek()).getCommandType());
 		assertEquals("get 0\r\nget 1 2 3 4 5 6 7 8 9\r\n", new String(
 				mergeBuffer.array())); // current command at last
 	}

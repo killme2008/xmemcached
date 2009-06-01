@@ -2,9 +2,9 @@ package net.rubyeye.xmemcached.command;
 
 /**
  * 命令类型
- *
+ * 
  * @author dennis
- *
+ * 
  */
 public enum CommandType {
 

@@ -23,9 +23,9 @@ import net.rubyeye.xmemcached.transcoders.Transcoder;
 
 /**
  * memcached命令类
- *
+ * 
  * @author Administrator
- *
+ * 
  */
 public class Command implements WriteMessage {
 
@@ -44,28 +44,17 @@ public class Command implements WriteMessage {
 		throw new UnsupportedOperationException();
 	}
 
-	private Object key; // 关键字
-	private volatile Object result = null; // memcached返回结果
+	private Object key;
+	private volatile Object result;
 	private CountDownLatch latch;
 	private CommandType commandType;
-	private Exception exception; // 执行异常
+	private Exception exception;
 	private IoBuffer ioBuffer;
-	private volatile boolean cancel = false;
-	private volatile OperationStatus status = null;
+	private volatile boolean cancel;
+	private volatile OperationStatus status;
 	private int mergeCount = -1;
 	@SuppressWarnings("unchecked")
 	private Transcoder transcoder;
-
-	/**
-	 * 命令类型
-	 *
-	 * @author dennis
-	 *
-	 */
-	public enum CommandType {
-
-		STATS, FLUSH_ALL, GET_ONE, GET_MANY, SET, REPLACE, ADD, EXCEPTION, DELETE, VERSION, INCR, DECR, GETS_ONE, GETS_MANY, CAS, APPEND, PREPEND, GET_HIT, GET_MSS;
-	}
 
 	public void setCommandType(final CommandType commandType) {
 		this.commandType = commandType;

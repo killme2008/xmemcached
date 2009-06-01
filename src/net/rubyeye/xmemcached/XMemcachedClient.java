@@ -28,13 +28,13 @@ import java.io.IOException;
 
 import net.rubyeye.xmemcached.codec.MemcachedCodecFactory;
 import net.rubyeye.xmemcached.codec.text.MemcachedTextCodecFactory;
-import net.rubyeye.xmemcached.command.Command.CommandType;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import net.rubyeye.xmemcached.buffer.BufferAllocator;
 import net.rubyeye.xmemcached.buffer.SimpleBufferAllocator;
 import net.rubyeye.xmemcached.command.Command;
+import net.rubyeye.xmemcached.command.CommandType;
 import net.rubyeye.xmemcached.exception.MemcachedException;
 import net.rubyeye.xmemcached.impl.ArrayMemcachedSessionLocator;
 import net.rubyeye.xmemcached.impl.MemcachedConnector;
@@ -142,7 +142,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 			final byte[] keyBytes, final Transcoder<T> transcoder)
 			throws MemcachedException, TimeoutException, InterruptedException {
 		GetsResponse<T> result = (GetsResponse<T>) fetch0(key, keyBytes,
-				TextCommandFactory.GETS, Command.CommandType.GETS_ONE,
+				TextCommandFactory.GETS, CommandType.GETS_ONE,
 				DEFAULT_OP_TIMEOUT, transcoder);
 		return result;
 	}
@@ -332,7 +332,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 		if (transcoder == null) {
 			transcoder = this.transcoder;
 		}
-		if (cmdType == Command.CommandType.GETS_ONE) {
+		if (cmdType == CommandType.GETS_ONE) {
 			return new GetsResponse<T>(data.getCas(), transcoder.decode(data));
 		} else {
 			return transcoder.decode(data);
@@ -568,7 +568,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 			final Transcoder<T> transcoder) throws TimeoutException,
 			InterruptedException, MemcachedException {
 		return (T) get0(key, timeout, TextCommandFactory.GET,
-				Command.CommandType.GET_ONE, transcoder);
+				CommandType.GET_ONE, transcoder);
 	}
 
 	/*
@@ -605,7 +605,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 	}
 
 	private <T> Object get0(final String key, final long timeout,
-			final byte[] cmdBytes, final Command.CommandType cmdType,
+			final byte[] cmdBytes, final CommandType cmdType,
 			final Transcoder<T> transcoder) throws TimeoutException,
 			InterruptedException, MemcachedException {
 		byte[] keyBytes = ByteUtils.getBytes(key);
@@ -624,7 +624,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 			final Transcoder<T> transcoder) throws TimeoutException,
 			InterruptedException, MemcachedException {
 		return (GetsResponse<T>) get0(key, timeout, TextCommandFactory.GETS,
-				Command.CommandType.GETS_ONE, transcoder);
+				CommandType.GETS_ONE, transcoder);
 	}
 
 	/*
@@ -672,7 +672,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 			final Transcoder<T> transcoder) throws TimeoutException,
 			InterruptedException, MemcachedException {
 		return getMulti0(keyCollections, timeout, TextCommandFactory.GET,
-				Command.CommandType.GET_MANY, transcoder);
+				CommandType.GET_MANY, transcoder);
 	}
 
 	/*
@@ -686,7 +686,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 			final Transcoder<T> transcoder) throws TimeoutException,
 			InterruptedException, MemcachedException {
 		return getMulti0(keyCollections, DEFAULT_OP_TIMEOUT,
-				TextCommandFactory.GET, Command.CommandType.GET_MANY,
+				TextCommandFactory.GET, CommandType.GET_MANY,
 				transcoder);
 	}
 
@@ -726,7 +726,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 			InterruptedException, MemcachedException {
 		return (Map<String, GetsResponse<T>>) getMulti0(keyCollections,
 				timeout, TextCommandFactory.GETS,
-				Command.CommandType.GETS_MANY, transcoder);
+				CommandType.GETS_MANY, transcoder);
 	}
 
 	/*
@@ -768,7 +768,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 
 	private final <T> Map<String, T> getMulti0(
 			final Collection<String> keyCollections, final long timeout,
-			final byte[] cmdBytes, final Command.CommandType cmdType,
+			final byte[] cmdBytes, final CommandType cmdType,
 			final Transcoder<T> transcoder) throws TimeoutException,
 			InterruptedException, MemcachedException {
 		if (keyCollections == null || keyCollections.size() == 0) {
@@ -809,11 +809,11 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 
 	@SuppressWarnings("unchecked")
 	private final <T> Map<String, T> reduceResult(
-			final Command.CommandType cmdType, final Transcoder<T> transcoder,
+			final CommandType cmdType, final Transcoder<T> transcoder,
 			final List<Map<String, CachedData>> returnValues) {
 		final Map<String, T> result = new HashMap<String, T>(returnValues
 				.size());
-		if (cmdType == Command.CommandType.GET_MANY) {
+		if (cmdType == CommandType.GET_MANY) {
 			for (Map<String, CachedData> map : returnValues) {
 				Iterator<Map.Entry<String, CachedData>> it = map.entrySet()
 						.iterator();
@@ -868,7 +868,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 	private final <T> Command sendGetMultiCommand(
 			final Collection<String> keys, final CountDownLatch latch,
 			final Collection<Map<String, CachedData>> result,
-			final byte[] cmdBytes, final Command.CommandType cmdType,
+			final byte[] cmdBytes, final CommandType cmdType,
 			final Transcoder<T> transcoder) throws InterruptedException,
 			TimeoutException, MemcachedException {
 		final Command command = TextCommandFactory.createGetMultiCommand(keys,
@@ -888,7 +888,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 	public final <T> boolean set(final String key, final int exp,
 			final T value, final Transcoder<T> transcoder, final long timeout)
 			throws TimeoutException, InterruptedException, MemcachedException {
-		return sendStoreCommand(key, exp, value, Command.CommandType.SET,
+		return sendStoreCommand(key, exp, value, CommandType.SET,
 				"set", timeout, -1, transcoder);
 	}
 
@@ -937,7 +937,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 	public final <T> boolean add(final String key, final int exp,
 			final T value, final Transcoder<T> transcoder, final long timeout)
 			throws TimeoutException, InterruptedException, MemcachedException {
-		return sendStoreCommand(key, exp, value, Command.CommandType.SET,
+		return sendStoreCommand(key, exp, value, CommandType.SET,
 				"add", timeout, -1, transcoder);
 	}
 
@@ -986,7 +986,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 	public final <T> boolean replace(final String key, final int exp,
 			final T value, final Transcoder<T> transcoder, final long timeout)
 			throws TimeoutException, InterruptedException, MemcachedException {
-		return sendStoreCommand(key, exp, value, Command.CommandType.SET,
+		return sendStoreCommand(key, exp, value, CommandType.SET,
 				"replace", timeout, -1, transcoder);
 	}
 
@@ -1049,7 +1049,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 			final long timeout) throws TimeoutException, InterruptedException,
 			MemcachedException {
 
-		return sendStoreCommand(key, 0, value, Command.CommandType.APPEND,
+		return sendStoreCommand(key, 0, value, CommandType.APPEND,
 				"append", timeout, -1, this.transcoder);
 	}
 
@@ -1074,7 +1074,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 	public final boolean prepend(final String key, final Object value,
 			final long timeout) throws TimeoutException, InterruptedException,
 			MemcachedException {
-		return sendStoreCommand(key, 0, value, Command.CommandType.PREPEND,
+		return sendStoreCommand(key, 0, value, CommandType.PREPEND,
 				"prepend", timeout, -1, this.transcoder);
 	}
 
@@ -1100,7 +1100,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 			final T value, final Transcoder<T> transcoder, final long timeout,
 			final long cas) throws TimeoutException, InterruptedException,
 			MemcachedException {
-		return sendStoreCommand(key, exp, value, Command.CommandType.CAS,
+		return sendStoreCommand(key, exp, value, CommandType.CAS,
 				"cas", timeout, cas, transcoder);
 	}
 
@@ -1148,7 +1148,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 		while (tryCount < operation.getMaxTries()
 				&& result != null
 				&& !sendStoreCommand(key, exp, operation.getNewValue(result
-						.getCas(), result.getValue()), Command.CommandType.CAS,
+						.getCas(), result.getValue()), CommandType.CAS,
 						"cas", DEFAULT_OP_TIMEOUT, result.getCas(), transcoder)) {
 			tryCount++;
 			result = gets0(key, keyBytes, transcoder);
@@ -1302,7 +1302,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 	 */
 	public final int incr(final String key, final int num)
 			throws TimeoutException, InterruptedException, MemcachedException {
-		return sendIncrOrDecrCommand(key, num, Command.CommandType.INCR, "incr");
+		return sendIncrOrDecrCommand(key, num, CommandType.INCR, "incr");
 	}
 
 	/*
@@ -1312,7 +1312,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 	 */
 	public final int decr(final String key, final int num)
 			throws TimeoutException, InterruptedException, MemcachedException {
-		return sendIncrOrDecrCommand(key, num, Command.CommandType.DECR, "decr");
+		return sendIncrOrDecrCommand(key, num, CommandType.DECR, "decr");
 	}
 
 	/*
@@ -1486,7 +1486,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 	}
 
 	private final int sendIncrOrDecrCommand(final String key, final int num,
-			final Command.CommandType cmdType, final String cmd)
+			final CommandType cmdType, final String cmd)
 			throws InterruptedException, TimeoutException, MemcachedException {
 		final byte[] keyBytes = ByteUtils.getBytes(key);
 		ByteUtils.checkKey(keyBytes);
@@ -1545,7 +1545,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 
 	@SuppressWarnings("unchecked")
 	private <T> boolean sendStoreCommand(final String key, final int exp,
-			final T value, final Command.CommandType cmdType, final String cmd,
+			final T value, final CommandType cmdType, final String cmd,
 			final long timeout, final long cas, Transcoder<T> transcoder)
 			throws InterruptedException, TimeoutException, MemcachedException {
 		byte[] keyBytes = ByteUtils.getBytes(key);

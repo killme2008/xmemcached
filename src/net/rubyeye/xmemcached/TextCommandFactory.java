@@ -10,6 +10,7 @@ import net.rubyeye.xmemcached.buffer.IoBuffer;
 import net.rubyeye.xmemcached.buffer.SimpleBufferAllocator;
 import net.rubyeye.xmemcached.buffer.SimpleIoBuffer;
 import net.rubyeye.xmemcached.command.Command;
+import net.rubyeye.xmemcached.command.CommandType;
 import net.rubyeye.xmemcached.transcoders.CachedData;
 import net.rubyeye.xmemcached.transcoders.Transcoder;
 import net.rubyeye.xmemcached.utils.ByteUtils;
@@ -49,7 +50,7 @@ public final class TextCommandFactory {
 		ByteUtils.setArguments(buffer, TextCommandFactory.DELETE, keyBytes,
 				timeBytes);
 		buffer.flip();
-		Command command = new Command(key, Command.CommandType.DELETE, latch);
+		Command command = new Command(key, CommandType.DELETE, latch);
 		command.setIoBuffer(buffer);
 		return command;
 	}
@@ -62,7 +63,7 @@ public final class TextCommandFactory {
 	public static final Command createVersionCommand() {
 		final CountDownLatch latch = new CountDownLatch(1);
 		final IoBuffer buffer = new SimpleIoBuffer(VERSION.slice());
-		Command command = new Command("version", Command.CommandType.VERSION,
+		Command command = new Command("version", CommandType.VERSION,
 				latch);
 		command.setIoBuffer(buffer);
 		return command;
@@ -76,7 +77,7 @@ public final class TextCommandFactory {
 	public static final Command createFlushAllCommand() {
 		final IoBuffer buffer = new SimpleIoBuffer(FLUSH_ALL.slice());
 		Command command = new Command("flush_all",
-				Command.CommandType.FLUSH_ALL, null);
+				CommandType.FLUSH_ALL, null);
 		command.setIoBuffer(buffer);
 		return command;
 	}
@@ -88,7 +89,7 @@ public final class TextCommandFactory {
 	 */
 	public static final Command createStatsCommand() {
 		final IoBuffer buffer = new SimpleIoBuffer(STATS.slice());
-		Command command = new Command("stats", Command.CommandType.STATS, null);
+		Command command = new Command("stats", CommandType.STATS, null);
 		command.setIoBuffer(buffer);
 		return command;
 	}
@@ -109,7 +110,7 @@ public final class TextCommandFactory {
 	@SuppressWarnings("unchecked")
 	public static final Command createStoreCommand(final String key,
 			final byte[] keyBytes, final int exp, final Object value,
-			Command.CommandType cmdType, final String cmd, long cas,
+			CommandType cmdType, final String cmd, long cas,
 			Transcoder transcoder) {
 		final CountDownLatch latch = new CountDownLatch(1);
 		final CachedData data = transcoder.encode(value);
@@ -121,11 +122,11 @@ public final class TextCommandFactory {
 		int size = cmd.length() + 1 + keyBytes.length + 1 + flagBytes.length
 				+ 1 + expBytes.length + 1 + data.getData().length + 2
 				* TextCommandFactory.CRLF.length + dataLenBytes.length;
-		if (cmdType == Command.CommandType.CAS) {
+		if (cmdType == CommandType.CAS) {
 			size += 1 + casBytes.length;
 		}
 		final IoBuffer buffer = bufferAllocator.allocate(size);
-		if (cmdType == Command.CommandType.CAS) {
+		if (cmdType == CommandType.CAS) {
 			ByteUtils.setArguments(buffer, cmd, keyBytes, flagBytes, expBytes,
 					dataLenBytes, casBytes);
 		} else {
@@ -152,7 +153,7 @@ public final class TextCommandFactory {
 	 */
 	public static final Command createGetCommand(final String key,
 			final byte[] keyBytes, final byte[] cmdBytes,
-			final Command.CommandType cmdType) {
+			final CommandType cmdType) {
 		final CountDownLatch latch = new CountDownLatch(1);
 		final IoBuffer buffer = bufferAllocator.allocate(cmdBytes.length
 				+ TextCommandFactory.CRLF.length + 1 + keyBytes.length);
@@ -178,7 +179,7 @@ public final class TextCommandFactory {
 	public static final <T> Command createGetMultiCommand(
 			Collection<String> keys, CountDownLatch latch,
 			Collection<Map<String, CachedData>> result, byte[] cmdBytes,
-			Command.CommandType cmdType, Transcoder<T> transcoder) {
+			CommandType cmdType, Transcoder<T> transcoder) {
 		final Command command = new Command(keys.iterator().next(), cmdType,
 				latch);
 		command.setResult(result); // 共用一个result map
@@ -200,7 +201,7 @@ public final class TextCommandFactory {
 	}
 
 	public static final Command createIncrDecrCommand(final String key,
-			final byte[] keyBytes, final int num, Command.CommandType cmdType,
+			final byte[] keyBytes, final int num, CommandType cmdType,
 			final String cmd) {
 		final CountDownLatch latch = new CountDownLatch(1);
 		byte[] numBytes = ByteUtils.getBytes(String.valueOf(num));

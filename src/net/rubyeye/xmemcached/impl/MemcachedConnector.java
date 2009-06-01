@@ -46,16 +46,16 @@ import net.rubyeye.xmemcached.utils.SimpleDeque;
 
 /**
  * Connected session manager
- *
+ * 
  * @author dennis
  */
 public class MemcachedConnector extends SocketChannelController {
 
 	/**
 	 * Auto reconnect request
-	 *
+	 * 
 	 * @author dennis
-	 *
+	 * 
 	 */
 	public static class ReconnectRequest {
 
@@ -149,6 +149,18 @@ public class MemcachedConnector extends SocketChannelController {
 		private Lock lock = new ReentrantLock();
 		private Condition notDone = lock.newCondition();
 		private volatile Exception exception;
+		private InetSocketAddress inetSocketAddress;
+
+		
+		
+		public ConnectFuture(InetSocketAddress inetSocketAddress) {
+			super();
+			this.inetSocketAddress = inetSocketAddress;
+		}
+
+		public final InetSocketAddress getInetSocketAddress() {
+			return inetSocketAddress;
+		}
 
 		public boolean isConnected() {
 			lock.lock();
@@ -304,7 +316,9 @@ public class MemcachedConnector extends SocketChannelController {
 		}
 		try {
 			if (!((SocketChannel) (key.channel())).finishConnect()) {
-				future.setException(new IOException("Connect Fail"));
+				future.setException(new IOException("Connect to "
+						+ future.getInetSocketAddress().getHostName() + ":"
+						+ future.getInetSocketAddress().getPort() + " fail"));
 			} else {
 				addSession(createSession(key, (SocketChannel) (key.channel())));
 				future.setConnected(true);
@@ -312,7 +326,9 @@ public class MemcachedConnector extends SocketChannelController {
 		} catch (Exception e) {
 			e.printStackTrace();
 			future.setException(e);
-			throw new IOException(e);
+			throw new IOException("Connect to "
+					+ future.getInetSocketAddress().getHostName() + ":"
+					+ future.getInetSocketAddress().getPort() + " fail", e);
 		}
 	}
 
@@ -346,7 +362,7 @@ public class MemcachedConnector extends SocketChannelController {
 		if (this.sendBufferSize > 0) {
 			socketChannel.socket().setSendBufferSize(this.sendBufferSize);
 		}
-		ConnectFuture future = new ConnectFuture();
+		ConnectFuture future = new ConnectFuture(address);
 		if (!socketChannel.connect(address)) {
 			this.reactor.registerChannel(socketChannel,
 					SelectionKey.OP_CONNECT, future);
@@ -385,7 +401,7 @@ public class MemcachedConnector extends SocketChannelController {
 
 	/**
 	 * get session through InetSocketAddress
-	 *
+	 * 
 	 * @param addr
 	 * @return
 	 */

@@ -12,7 +12,7 @@ import org.apache.commons.logging.LogFactory;
 
 import net.rubyeye.xmemcached.TextCommandFactory;
 import net.rubyeye.xmemcached.command.Command;
-import net.rubyeye.xmemcached.command.Command.CommandType;
+import net.rubyeye.xmemcached.command.CommandType;
 import net.rubyeye.xmemcached.exception.MemcachedClientException;
 import net.rubyeye.xmemcached.exception.MemcachedServerException;
 import net.rubyeye.xmemcached.exception.UnknownCommandException;
@@ -99,12 +99,12 @@ public class MemcachedTextDecoder implements Decoder<Command> {
 	 * @return
 	 */
 	private final Command notifyBoolean(MemcachedTCPSession session,
-			Boolean result, Command.CommandType expectedCmdType,
-			Command.CommandType... otherExpectedCmdType) {
+			Boolean result, CommandType expectedCmdType,
+			CommandType... otherExpectedCmdType) {
 		final Command executingCmd = session.pollCurrentExecutingCommand();
 		boolean isExpected = (executingCmd.getCommandType() == expectedCmdType);
 		if (!isExpected) {
-			for (Command.CommandType cmdType : otherExpectedCmdType) {
+			for (CommandType cmdType : otherExpectedCmdType) {
 				if (cmdType == executingCmd.getCommandType()) {
 					isExpected = true;
 					break;
@@ -141,30 +141,30 @@ public class MemcachedTextDecoder implements Decoder<Command> {
 					session.setAttribute(PARSE_STATUS_ATTR, ParseStatus.GET);
 				} else if (currentLine.equals("STORED")) {
 					return notifyBoolean(session, Boolean.TRUE,
-							Command.CommandType.SET, Command.CommandType.CAS,
-							Command.CommandType.ADD,
-							Command.CommandType.REPLACE,
-							Command.CommandType.APPEND,
-							Command.CommandType.PREPEND);
+							CommandType.SET, CommandType.CAS,
+							CommandType.ADD,
+							CommandType.REPLACE,
+							CommandType.APPEND,
+							CommandType.PREPEND);
 				} else if (currentLine.equals("DELETED")) {
 					return notifyBoolean(session, Boolean.TRUE,
-							Command.CommandType.DELETE);
+							CommandType.DELETE);
 				} else if (currentLine.equals("END")) {
 					return parseEndCommand(session);
 				} else if (currentLine.equals("EXISTS")) {
 					return notifyBoolean(session, Boolean.FALSE,
-							Command.CommandType.CAS);
+							CommandType.CAS);
 				} else if (currentLine.equals("NOT_STORED")) {
 					return notifyBoolean(session, Boolean.FALSE,
-							Command.CommandType.SET, Command.CommandType.ADD,
-							Command.CommandType.REPLACE,
-							Command.CommandType.APPEND,
-							Command.CommandType.PREPEND);
+							CommandType.SET, CommandType.ADD,
+							CommandType.REPLACE,
+							CommandType.APPEND,
+							CommandType.PREPEND);
 				} else if (currentLine.equals("NOT_FOUND")) {
 					return notifyBoolean(session, Boolean.FALSE,
-							Command.CommandType.DELETE,
-							Command.CommandType.CAS, Command.CommandType.INCR,
-							Command.CommandType.DECR);
+							CommandType.DELETE,
+							CommandType.CAS, CommandType.INCR,
+							CommandType.DECR);
 				} else if (currentLine.equals("ERROR")) {
 					return parseException(session);
 				} else if (currentLine.startsWith("CLIENT_ERROR")) {
@@ -175,7 +175,7 @@ public class MemcachedTextDecoder implements Decoder<Command> {
 					return parseVersionCommand(session, currentLine);
 				} else if (currentLine.equals("OK")) {
 					return notifyBoolean(session, true,
-							Command.CommandType.FLUSH_ALL);
+							CommandType.FLUSH_ALL);
 				} else if (currentLine.startsWith("STAT")) {
 					session.setAttribute(PARSE_STATUS_ATTR, ParseStatus.STATS);
 				} else {
@@ -252,14 +252,14 @@ public class MemcachedTextDecoder implements Decoder<Command> {
 					session.close();
 					return null;
 				}
-				if (executingCommand.getCommandType() == Command.CommandType.GET_MANY
-						|| executingCommand.getCommandType() == Command.CommandType.GETS_MANY) {
+				if (executingCommand.getCommandType() == CommandType.GET_MANY
+						|| executingCommand.getCommandType() == CommandType.GETS_MANY) {
 					processGetManyCommand(session,
 							(Map<String, CachedData>) session
 									.getAttribute(CURRENT_GET_VALUES),
 							executingCommand);
-				} else if (executingCommand.getCommandType() == Command.CommandType.GET_ONE
-						|| executingCommand.getCommandType() == Command.CommandType.GETS_ONE) {
+				} else if (executingCommand.getCommandType() == CommandType.GET_ONE
+						|| executingCommand.getCommandType() == CommandType.GETS_ONE) {
 					processGetOneCommand(session,
 							(Map<String, CachedData>) session
 									.getAttribute(CURRENT_GET_VALUES),
@@ -352,7 +352,7 @@ public class MemcachedTextDecoder implements Decoder<Command> {
 	private final void processGetManyCommand(final Session session,
 			final Map<String, CachedData> values, final Command executingCmd) {
 		// 合并结果
-		if (executingCmd.getCommandType() == Command.CommandType.GET_MANY) {
+		if (executingCmd.getCommandType() == CommandType.GET_MANY) {
 			statistics(CommandType.GET_MANY);
 		} else {
 			statistics(CommandType.GETS_MANY);
@@ -368,16 +368,16 @@ public class MemcachedTextDecoder implements Decoder<Command> {
 	 */
 	private final Command parseEndCommand(MemcachedTCPSession session) {
 		Command executingCmd = session.pollCurrentExecutingCommand();
-		Command.CommandType cmdType = executingCmd.getCommandType();
-		if (cmdType != Command.CommandType.GET_ONE
-				&& cmdType != Command.CommandType.GETS_ONE
-				&& cmdType != Command.CommandType.GET_MANY
-				&& cmdType != Command.CommandType.GETS_MANY) {
+		CommandType cmdType = executingCmd.getCommandType();
+		if (cmdType != CommandType.GET_ONE
+				&& cmdType != CommandType.GETS_ONE
+				&& cmdType != CommandType.GET_MANY
+				&& cmdType != CommandType.GETS_MANY) {
 			session.close();
 			return null;
 		}
-		if (executingCmd.getCommandType() == Command.CommandType.GET_ONE)
-			statistics(Command.CommandType.GET_MSS);
+		if (executingCmd.getCommandType() == CommandType.GET_ONE)
+			statistics(CommandType.GET_MSS);
 		else
 			statistics(cmdType);
 		if (executingCmd.getMergeCount() > 0) {
@@ -419,8 +419,8 @@ public class MemcachedTextDecoder implements Decoder<Command> {
 		final String error = index > 0 ? currentLine.substring(index + 1)
 				: "unknown client error";
 		Command executingCmd = session.pollCurrentExecutingCommand();
-		if (executingCmd.getCommandType() == Command.CommandType.GET_ONE)
-			statistics(Command.CommandType.GET_MSS);
+		if (executingCmd.getCommandType() == CommandType.GET_ONE)
+			statistics(CommandType.GET_MSS);
 		final MemcachedClientException exception = new MemcachedClientException(
 				error + ",command:" + executingCmd.toString());
 		executingCmd.setException(exception);
@@ -439,8 +439,8 @@ public class MemcachedTextDecoder implements Decoder<Command> {
 		final String error = index > 0 ? currentLine.substring(index + 1)
 				: "unknown server error";
 		Command executingCmd = session.pollCurrentExecutingCommand();
-		if (executingCmd.getCommandType() == Command.CommandType.GET_ONE)
-			statistics(Command.CommandType.GET_MSS);
+		if (executingCmd.getCommandType() == CommandType.GET_ONE)
+			statistics(CommandType.GET_MSS);
 		final MemcachedServerException exception = new MemcachedServerException(
 				error + ",command:" + executingCmd.toString());
 		executingCmd.setException(exception);
@@ -459,7 +459,7 @@ public class MemcachedTextDecoder implements Decoder<Command> {
 		String[] items = currentLine.split(" ");
 		final String version = items.length > 1 ? items[1] : "unknown version";
 		Command executingCmd = session.pollCurrentExecutingCommand();
-		if (executingCmd.getCommandType() != Command.CommandType.VERSION) {
+		if (executingCmd.getCommandType() != CommandType.VERSION) {
 			session.close();
 			return null;
 		}
@@ -479,8 +479,8 @@ public class MemcachedTextDecoder implements Decoder<Command> {
 		final Integer result = Integer.parseInt(currentLine);
 		Command executingCmd = session.pollCurrentExecutingCommand();
 		statistics(executingCmd.getCommandType());
-		if (executingCmd.getCommandType() != Command.CommandType.INCR
-				&& executingCmd.getCommandType() != Command.CommandType.DECR) {
+		if (executingCmd.getCommandType() != CommandType.INCR
+				&& executingCmd.getCommandType() != CommandType.DECR) {
 			session.close();
 			return null;
 		}
@@ -491,7 +491,7 @@ public class MemcachedTextDecoder implements Decoder<Command> {
 
 	}
 
-	private final void statistics(Command.CommandType cmdType) {
+	private final void statistics(CommandType cmdType) {
 		this.statisticsHandler.statistics(cmdType);
 	}
 
