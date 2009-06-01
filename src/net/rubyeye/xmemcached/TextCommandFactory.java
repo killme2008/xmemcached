@@ -1,5 +1,6 @@
 package net.rubyeye.xmemcached;
 
+import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.util.Collection;
 import java.util.Map;
@@ -11,15 +12,21 @@ import net.rubyeye.xmemcached.buffer.SimpleBufferAllocator;
 import net.rubyeye.xmemcached.buffer.SimpleIoBuffer;
 import net.rubyeye.xmemcached.command.Command;
 import net.rubyeye.xmemcached.command.CommandType;
+import net.rubyeye.xmemcached.command.VersionCommand;
+import net.rubyeye.xmemcached.command.text.TextDeleteCommand;
+import net.rubyeye.xmemcached.command.text.TextFlushAllCommand;
+import net.rubyeye.xmemcached.command.text.TextStatsCommand;
+import net.rubyeye.xmemcached.command.text.TextVersionCommand;
+import net.rubyeye.xmemcached.test.MockCommand;
 import net.rubyeye.xmemcached.transcoders.CachedData;
 import net.rubyeye.xmemcached.transcoders.Transcoder;
 import net.rubyeye.xmemcached.utils.ByteUtils;
 
 /**
  * Command Factory for creating text protocol commands.
- *
+ * 
  * @author dennis
- *
+ * 
  */
 public final class TextCommandFactory {
 
@@ -35,68 +42,46 @@ public final class TextCommandFactory {
 
 	/**
 	 * 创建delete命令
-	 *
+	 * 
 	 * @param key
 	 * @param time
 	 * @return
 	 */
 	public static final Command createDeleteCommand(final String key,
 			final byte[] keyBytes, final int time) {
-		final CountDownLatch latch = new CountDownLatch(1);
-		byte[] timeBytes = ByteUtils.getBytes(String.valueOf(time));
-		final IoBuffer buffer = bufferAllocator
-				.allocate(TextCommandFactory.DELETE.length + 2 + keyBytes.length
-						+ timeBytes.length + TextCommandFactory.CRLF.length);
-		ByteUtils.setArguments(buffer, TextCommandFactory.DELETE, keyBytes,
-				timeBytes);
-		buffer.flip();
-		Command command = new Command(key, CommandType.DELETE, latch);
-		command.setIoBuffer(buffer);
-		return command;
+		return new TextDeleteCommand(key, keyBytes, time, new CountDownLatch(1));
 	}
 
 	/**
 	 * 创建version command
-	 *
+	 * 
 	 * @return
 	 */
 	public static final Command createVersionCommand() {
-		final CountDownLatch latch = new CountDownLatch(1);
-		final IoBuffer buffer = new SimpleIoBuffer(VERSION.slice());
-		Command command = new Command("version", CommandType.VERSION,
-				latch);
-		command.setIoBuffer(buffer);
-		return command;
+		return new TextVersionCommand(new CountDownLatch(1));
 	}
 
 	/**
 	 * create flush_all command
-	 *
+	 * 
 	 * @return
 	 */
-	public static final Command createFlushAllCommand() {
-		final IoBuffer buffer = new SimpleIoBuffer(FLUSH_ALL.slice());
-		Command command = new Command("flush_all",
-				CommandType.FLUSH_ALL, null);
-		command.setIoBuffer(buffer);
-		return command;
+	public static final Command createFlushAllCommand(CountDownLatch latch) {
+		return new TextFlushAllCommand(latch);
 	}
 
 	/**
 	 * create flush_all command
-	 *
+	 * 
 	 * @return
 	 */
-	public static final Command createStatsCommand() {
-		final IoBuffer buffer = new SimpleIoBuffer(STATS.slice());
-		Command command = new Command("stats", CommandType.STATS, null);
-		command.setIoBuffer(buffer);
-		return command;
+	public static final Command createStatsCommand(InetSocketAddress server,CountDownLatch latch) {
+		return new TextStatsCommand(server,latch);
 	}
 
 	/**
 	 * 创建存储命令，如set,add,replace,append,prepend,cas
-	 *
+	 * 
 	 * @param key
 	 * @param exp
 	 * @param value
@@ -135,14 +120,14 @@ public final class TextCommandFactory {
 		}
 		ByteUtils.setArguments(buffer, data.getData());
 		buffer.flip();
-		Command command = new Command(key, cmdType, latch);
+		Command command = new MockCommand(key, cmdType, latch);
 		command.setIoBuffer(buffer);
 		return command;
 	}
 
 	/**
 	 *创建get,gets命令
-	 *
+	 * 
 	 * @param key
 	 * @param keyBytes
 	 * @param cmdBytes
@@ -159,14 +144,14 @@ public final class TextCommandFactory {
 				+ TextCommandFactory.CRLF.length + 1 + keyBytes.length);
 		ByteUtils.setArguments(buffer, cmdBytes, keyBytes);
 		buffer.flip();
-		Command command = new Command(key, cmdType, latch);
+		Command command = new MockCommand(key, cmdType, latch);
 		command.setIoBuffer(buffer);
 		return command;
 	}
 
 	/**
 	 * 创建批量获取 command
-	 *
+	 * 
 	 * @param <T>
 	 * @param keys
 	 * @param latch
@@ -180,8 +165,8 @@ public final class TextCommandFactory {
 			Collection<String> keys, CountDownLatch latch,
 			Collection<Map<String, CachedData>> result, byte[] cmdBytes,
 			CommandType cmdType, Transcoder<T> transcoder) {
-		final Command command = new Command(keys.iterator().next(), cmdType,
-				latch);
+		final Command command = new MockCommand(keys.iterator().next(),
+				cmdType, latch);
 		command.setResult(result); // 共用一个result map
 		command.setTranscoder(transcoder);
 		StringBuilder sb = new StringBuilder(keys.size() * 5);
@@ -207,10 +192,11 @@ public final class TextCommandFactory {
 		byte[] numBytes = ByteUtils.getBytes(String.valueOf(num));
 		byte[] cmdBytes = ByteUtils.getBytes(cmd);
 		final IoBuffer buffer = bufferAllocator.allocate(cmd.length() + 2
-				+ key.length() + numBytes.length + TextCommandFactory.CRLF.length);
+				+ key.length() + numBytes.length
+				+ TextCommandFactory.CRLF.length);
 		ByteUtils.setArguments(buffer, cmdBytes, keyBytes, numBytes);
 		buffer.flip();
-		Command command = new Command(key, cmdType, latch);
+		Command command = new MockCommand(key, cmdType, latch);
 		command.setIoBuffer(buffer);
 		return command;
 	}
@@ -220,11 +206,6 @@ public final class TextCommandFactory {
 	public static final byte[] GETS = { 'g', 'e', 't', 's' };
 	public static final byte[] DELETE = { 'd', 'e', 'l', 'e', 't', 'e' };
 	public static final byte SPACE = ' ';
-	public static final ByteBuffer STATS = ByteBuffer.wrap("stats\r\n"
-			.getBytes());
-	public static final ByteBuffer FLUSH_ALL = ByteBuffer.wrap("flush_all\r\n"
-			.getBytes());
-	public static final ByteBuffer VERSION = ByteBuffer.wrap("version\r\n"
-			.getBytes());
+
 	public static final String SPLIT = "\r\n";
 }

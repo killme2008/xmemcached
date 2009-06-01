@@ -36,6 +36,7 @@ import net.rubyeye.xmemcached.buffer.BufferAllocator;
 import net.rubyeye.xmemcached.buffer.SimpleBufferAllocator;
 import net.rubyeye.xmemcached.command.Command;
 import net.rubyeye.xmemcached.command.CommandType;
+import net.rubyeye.xmemcached.command.StatsCommand;
 import net.rubyeye.xmemcached.exception.MemcachedException;
 import net.rubyeye.xmemcached.impl.ArrayMemcachedSessionLocator;
 import net.rubyeye.xmemcached.impl.MemcachedConnector;
@@ -1337,8 +1338,8 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 		CountDownLatch latch = new CountDownLatch(sessions.size());
 		for (Session session : sessions) {
 			if (session != null && !session.isClosed()) {
-				Command command = TextCommandFactory.createFlushAllCommand();
-				command.setLatch(latch);
+				Command command = TextCommandFactory
+						.createFlushAllCommand(latch);
 				session.send(command);
 			} else
 				latch.countDown();
@@ -1390,8 +1391,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 			throw new MemcachedException("could not find session for "
 					+ address.getHostName() + ":" + address.getPort()
 					+ ",maybe it have not been connected");
-		Command command = TextCommandFactory.createFlushAllCommand();
-		command.setLatch(latch);
+		Command command = TextCommandFactory.createFlushAllCommand(latch);
 		if (!session.send(command))
 			throw new MemcachedException("send command fail");
 		if (!latch.await(timeout, TimeUnit.MILLISECONDS)) {
@@ -1448,6 +1448,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 	 * net.rubyeye.xmemcached.MemcachedClient#stats(java.net.InetSocketAddress,
 	 * long)
 	 */
+	@SuppressWarnings("unchecked")
 	public final Map<String, String> stats(InetSocketAddress address,
 			long timeout) throws MemcachedException, InterruptedException,
 			TimeoutException {
@@ -1460,43 +1461,43 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 			throw new MemcachedException("could not find session for "
 					+ address.getHostName() + ":" + address.getPort()
 					+ ",maybe it have not been connected");
-		Map<String, String> result = new HashMap<String, String>();
-		Command command = TextCommandFactory.createStatsCommand();
-		command.setResult(result);
-		command.setLatch(latch);
+		Command command = TextCommandFactory.createStatsCommand(address,latch);
 		if (!session.send(command))
 			throw new MemcachedException("send command fail");
 		if (!latch.await(timeout, TimeUnit.MILLISECONDS)) {
 			throw new TimeoutException("Timed out waiting for operation");
 		}
-		return result;
+		return (Map<String, String>) command.getResult();
 	}
 
 	@Override
-	public Map<String, Map<String, String>> stats() throws MemcachedException,
+	public Map<InetSocketAddress, Map<String, String>> stats() throws MemcachedException,
 			InterruptedException, TimeoutException {
 		return stats(DEFAULT_OP_TIMEOUT);
 	}
 
 	@Override
-	public Map<String, Map<String, String>> stats(long timeout)
+	@SuppressWarnings("unchecked")
+	public Map<InetSocketAddress, Map<String, String>> stats(long timeout)
 			throws MemcachedException, InterruptedException, TimeoutException {
 		final Set<Session> sessionSet = this.connector.getSessionSet();
-		Map<String, Map<String, String>> collectResult = new HashMap<String, Map<String, String>>();
-
+		Map<InetSocketAddress, Map<String, String>> collectResult = new HashMap<InetSocketAddress, Map<String, String>>();
+		final CountDownLatch latch = new CountDownLatch(sessionSet.size());
+		List<Command> commands = new ArrayList<Command>(sessionSet.size());
 		for (Session session : sessionSet) {
-			final CountDownLatch latch = new CountDownLatch(1);
-			Map<String, String> result = new HashMap<String, String>();
-			Command command = TextCommandFactory.createStatsCommand();
-			command.setResult(result);
-			command.setLatch(latch);
+			Command command = TextCommandFactory.createStatsCommand(session.getRemoteSocketAddress(),latch);
 			if (!session.send(command))
 				throw new MemcachedException("send command fail");
-			if (!latch.await(timeout, TimeUnit.MILLISECONDS)) {
-				throw new TimeoutException("Timed out waiting for operation");
-			}
-			collectResult.put(session.getRemoteSocketAddress().getHostName()
-					+ ":" + session.getRemoteSocketAddress().getPort(), result);
+			commands.add(command);
+
+		}
+		if (!latch.await(timeout, TimeUnit.MILLISECONDS)) {
+			throw new TimeoutException("Timed out waiting for operation");
+		}
+		for (Command command : commands) {
+			checkException(command);
+			collectResult.put(((StatsCommand)command).getServer(),
+					(Map<String, String>) command.getResult());
 		}
 		return collectResult;
 	}

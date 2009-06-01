@@ -127,6 +127,7 @@ public class XMemcachedClientTest extends TestCase {
 		assertEquals("dennis", memcachedClient.get("name"));
 		assertTrue(memcachedClient.delete("name"));
 		assertNull(memcachedClient.get("name"));
+		assertFalse(memcachedClient.delete("not_exists"));
 
 		memcachedClient.set("name", 0, "dennis");
 		assertEquals("dennis", memcachedClient.get("name"));
@@ -173,6 +174,11 @@ public class XMemcachedClientTest extends TestCase {
 		assertNotNull(memcachedClient.version());
 		System.out.println(memcachedClient.version());
 
+	}
+	
+	public void testStats() throws Exception {
+		assertTrue(memcachedClient.stats().size()>0);
+		System.out.println(memcachedClient.stats());
 	}
 
 	public void testFlushAll() throws Exception {

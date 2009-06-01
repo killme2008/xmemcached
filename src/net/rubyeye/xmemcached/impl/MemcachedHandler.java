@@ -15,7 +15,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import net.rubyeye.xmemcached.MemcachedClient;
-import net.rubyeye.xmemcached.codec.text.MemcachedTextDecoder;
 import net.rubyeye.xmemcached.codec.text.ParseStatus;
 import net.rubyeye.xmemcached.command.Command;
 import net.rubyeye.xmemcached.command.OperationStatus;
@@ -37,7 +36,7 @@ public class MemcachedHandler extends HandlerAdapter {
 	 */
 	@Override
 	public final void onSessionCreated(Session session) {
-		session.setAttribute(MemcachedTextDecoder.PARSE_STATUS_ATTR,
+		session.setAttribute(MemcachedTCPSession.PARSE_STATUS_ATTR,
 				ParseStatus.NULL);
 	}
 

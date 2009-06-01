@@ -18,7 +18,10 @@ import java.util.concurrent.CountDownLatch;
 
 import com.google.code.yanf4j.nio.WriteMessage;
 
+import net.rubyeye.xmemcached.buffer.BufferAllocator;
 import net.rubyeye.xmemcached.buffer.IoBuffer;
+import net.rubyeye.xmemcached.exception.MemcachedDecodeException;
+import net.rubyeye.xmemcached.impl.MemcachedTCPSession;
 import net.rubyeye.xmemcached.transcoders.Transcoder;
 
 /**
@@ -27,7 +30,7 @@ import net.rubyeye.xmemcached.transcoders.Transcoder;
  * @author Administrator
  * 
  */
-public class Command implements WriteMessage {
+public abstract class Command implements WriteMessage {
 
 	@Override
 	public final Object getMessage() {
@@ -44,17 +47,26 @@ public class Command implements WriteMessage {
 		throw new UnsupportedOperationException();
 	}
 
-	private Object key;
-	private volatile Object result;
-	private CountDownLatch latch;
-	private CommandType commandType;
-	private Exception exception;
-	private IoBuffer ioBuffer;
-	private volatile boolean cancel;
-	private volatile OperationStatus status;
-	private int mergeCount = -1;
+	protected String key;
+	protected byte[] keyBytes;
+	protected volatile Object result;
+	protected CountDownLatch latch;
+	protected CommandType commandType;
+	protected Exception exception;
+	protected IoBuffer ioBuffer;
+	protected volatile boolean cancel;
+	protected volatile OperationStatus status;
+	protected int mergeCount = -1;
 	@SuppressWarnings("unchecked")
-	private Transcoder transcoder;
+	protected Transcoder transcoder;
+
+	public final byte[] getKeyBytes() {
+		return keyBytes;
+	}
+
+	public final void setKeyBytes(byte[] keyBytes) {
+		this.keyBytes = keyBytes;
+	}
 
 	public void setCommandType(final CommandType commandType) {
 		this.commandType = commandType;
@@ -83,6 +95,14 @@ public class Command implements WriteMessage {
 		this.status = OperationStatus.SENDING;
 	}
 
+	public Command(String key, byte[] keyBytes, CountDownLatch latch) {
+		super();
+		this.key = key;
+		this.keyBytes = keyBytes;
+		this.status = OperationStatus.SENDING;
+		this.latch = latch;
+	}
+
 	public Command(final CommandType cmdType) {
 		this.commandType = cmdType;
 		this.status = OperationStatus.SENDING;
@@ -94,7 +114,8 @@ public class Command implements WriteMessage {
 		this.status = OperationStatus.SENDING;
 	}
 
-	public Command(Object key, CommandType commandType, CountDownLatch latch) {
+	public Command(final String key, final CommandType commandType,
+			final CountDownLatch latch) {
 		super();
 		this.key = key;
 		this.commandType = commandType;
@@ -126,11 +147,11 @@ public class Command implements WriteMessage {
 		this.exception = throwable;
 	}
 
-	public final Object getKey() {
+	public final String getKey() {
 		return key;
 	}
 
-	public final void setKey(Object key) {
+	public final void setKey(String key) {
 		this.key = key;
 	}
 
@@ -183,5 +204,20 @@ public class Command implements WriteMessage {
 
 	public final void setLatch(CountDownLatch latch) {
 		this.latch = latch;
+	}
+
+	public abstract void encode(BufferAllocator bufferAllocator);
+
+	public abstract boolean decode(MemcachedTCPSession session,
+			ByteBuffer buffer);
+
+	protected final void decodeError(String msg, Throwable e) {
+		throw new MemcachedDecodeException(
+				msg == null ? "decode error,session will be closed" : msg, e);
+	}
+
+	protected final void decodeError() {
+		throw new MemcachedDecodeException(
+				"decode error,session will be closed");
 	}
 }

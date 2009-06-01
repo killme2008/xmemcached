@@ -27,7 +27,7 @@ import net.rubyeye.xmemcached.utils.Deque;
 /**
  * Memcached command optimizer,merge single-get comands to multi-get
  * command,merge ByteBuffers to fit the socket's sendBufferSize etc.
- *
+ * 
  * @author dennis
  */
 public class Optimiezer implements OptimiezerMBean, MemcachedOptimiezer {
@@ -99,7 +99,7 @@ public class Optimiezer implements OptimiezerMBean, MemcachedOptimiezer {
 
 	/**
 	 *merge buffers to fit socket's send buffer size
-	 *
+	 * 
 	 * @param currentCommand
 	 * @return
 	 * @throws InterruptedException
@@ -121,7 +121,7 @@ public class Optimiezer implements OptimiezerMBean, MemcachedOptimiezer {
 
 	/**
 	 * Merge get operation to multi-get operation
-	 *
+	 * 
 	 * @param currentCmd
 	 * @param mergeCommands
 	 * @return
@@ -173,8 +173,7 @@ public class Optimiezer implements OptimiezerMBean, MemcachedOptimiezer {
 
 			writeQueue.remove();
 			// if it is get_one command,try to merge get commands
-			if (nextCmd.getCommandType() == CommandType.GET_ONE
-					&& optimiezeGet)
+			if (nextCmd.getCommandType() == CommandType.GET_ONE && optimiezeGet)
 				nextCmd = mergeGetCommands(nextCmd, writeQueue, executingCmds);
 
 			commands.add(nextCmd);
@@ -265,8 +264,18 @@ public class Optimiezer implements OptimiezerMBean, MemcachedOptimiezer {
 						+ TextCommandFactory.CRLF.length + 1 + keyBytes.length);
 		ByteUtils.setArguments(buffer, TextCommandFactory.GET, keyBytes);
 		buffer.flip();
-		Command cmd = new Command(key.toString(), CommandType.GET_ONE,
-				null) {
+		Command cmd = new Command(key.toString(), CommandType.GET_ONE, null) {
+			@Override
+			public boolean decode(MemcachedTCPSession session, ByteBuffer buffer) {
+				// TODO Auto-generated method stub
+				return false;
+			}
+
+			@Override
+			public void encode(BufferAllocator bufferAllocator) {
+				// TODO Auto-generated method stub
+
+			}
 
 			public List<Command> getMergeCommands() {
 				return mergeCommands;

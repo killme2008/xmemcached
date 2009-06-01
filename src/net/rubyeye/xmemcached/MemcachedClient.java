@@ -668,10 +668,10 @@ public interface MemcachedClient {
 	 * @throws InterruptedException
 	 * @throws TimeoutException
 	 */
-	public abstract Map<String, Map<String, String>> stats(long timeout)
+	public abstract Map<InetSocketAddress, Map<String, String>> stats(long timeout)
 			throws MemcachedException, InterruptedException, TimeoutException;
 	
-	public abstract Map<String, Map<String, String>> stats()
+	public abstract Map<InetSocketAddress, Map<String, String>> stats()
 	throws MemcachedException, InterruptedException, TimeoutException;
 
 	public abstract void shutdown() throws IOException;

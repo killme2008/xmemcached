@@ -178,9 +178,12 @@ public class OptimezerTest extends TestCase {
 	}
 
 	public void testOptimieze() {
-		for (int i = 0; i < 10; i++)
-			writeQueue.add(TextCommandFactory.createDeleteCommand(
-					String.valueOf(i), String.valueOf(i).getBytes(), 0));
+		for (int i = 0; i < 10; i++) {
+			Command deleteCommand = TextCommandFactory.createDeleteCommand(
+					String.valueOf(i), String.valueOf(i).getBytes(), 0);
+			deleteCommand.encode(new SimpleBufferAllocator());
+			writeQueue.add(deleteCommand);
+		}
 		Command optimiezeCommand = optimiezer.optimieze(currentCmd, writeQueue,
 				executingCmds, 16 * 1024);
 		ByteBuffer mergeBuffer = optimiezeCommand.getIoBuffer().getByteBuffer();

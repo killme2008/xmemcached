@@ -18,21 +18,23 @@ import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.net.SocketException;
 import java.nio.channels.SocketChannel;
+import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
 import net.rubyeye.xmemcached.MemcachedOptimiezer;
-import net.rubyeye.xmemcached.codec.text.MemcachedTextDecoder;
+import net.rubyeye.xmemcached.buffer.SimpleBufferAllocator;
 import net.rubyeye.xmemcached.codec.text.ParseStatus;
 import net.rubyeye.xmemcached.command.Command;
 import net.rubyeye.xmemcached.command.OperationStatus;
 
+import net.rubyeye.xmemcached.transcoders.CachedData;
 import net.rubyeye.xmemcached.utils.SimpleBlockingQueue;
 
 /**
  * Connected session for a memcached server
- *
+ * 
  * @author dennis
  */
 public class MemcachedTCPSession extends DefaultTCPSession {
@@ -46,6 +48,14 @@ public class MemcachedTCPSession extends DefaultTCPSession {
 	private int sendBufferSize;
 	private MemcachedOptimiezer optimiezer;
 	private volatile boolean allowReconnect;
+
+	public static final String CURRENT_GET_KEY = "current_key";
+
+	public static final String CURRENT_GET_VALUES = "current_values";
+
+	public static final String CURRENT_LINE_ATTR = "current_line";
+
+	public static final String PARSE_STATUS_ATTR = "parse_status";
 
 	public MemcachedTCPSession(SessionConfig sessionConfig,
 			int readRecvBufferSize, MemcachedOptimiezer optimiezer,
@@ -93,6 +103,7 @@ public class MemcachedTCPSession extends DefaultTCPSession {
 
 	@Override
 	protected final WriteMessage wrapMessage(Object msg) {
+		((Command) msg).encode(new SimpleBufferAllocator());
 		return (WriteMessage) msg;
 	}
 
@@ -100,14 +111,14 @@ public class MemcachedTCPSession extends DefaultTCPSession {
 	 * reset the session's status,set current line to null
 	 */
 	public final void resetStatus() {
-		this.setAttribute(MemcachedTextDecoder.PARSE_STATUS_ATTR,
+		this.setAttribute(MemcachedTCPSession.PARSE_STATUS_ATTR,
 				ParseStatus.NULL);
-		this.removeAttribute(MemcachedTextDecoder.CURRENT_LINE_ATTR);
+		removeCurrentLine();
 	}
 
 	/**
 	 * get current command from queue
-	 *
+	 * 
 	 * @return
 	 */
 	public final Command pollCurrentExecutingCommand() {
@@ -127,7 +138,7 @@ public class MemcachedTCPSession extends DefaultTCPSession {
 
 	/**
 	 * peek current command from queue
-	 *
+	 * 
 	 * @return
 	 */
 	public final Command peekCurrentExecutingCommand() {
@@ -139,7 +150,7 @@ public class MemcachedTCPSession extends DefaultTCPSession {
 
 	/**
 	 * is allow auto recconect if closed?
-	 *
+	 * 
 	 * @return
 	 */
 	public boolean isAllowReconnect() {
@@ -148,6 +159,34 @@ public class MemcachedTCPSession extends DefaultTCPSession {
 
 	public void setAllowReconnect(boolean reconnected) {
 		this.allowReconnect = reconnected;
+	}
+
+	public final ParseStatus getCurrentStatus() {
+		return (ParseStatus) getAttribute(MemcachedTCPSession.PARSE_STATUS_ATTR);
+	}
+
+	public final String getCurrentLine() {
+		return (String) getAttribute(MemcachedTCPSession.CURRENT_LINE_ATTR);
+	}
+
+	public final void removeCurrentLine() {
+		removeAttribute(MemcachedTCPSession.CURRENT_LINE_ATTR);
+	}
+
+	public final void removeCurrentKey() {
+		removeAttribute(MemcachedTCPSession.CURRENT_GET_KEY);
+	}
+
+	public final Map<String, CachedData> getCurrentParseGetValues() {
+		return (Map<String, CachedData>) getAttribute(MemcachedTCPSession.CURRENT_GET_VALUES);
+	}
+
+	public final void removeCurrentParseGetValues() {
+		removeAttribute(MemcachedTCPSession.CURRENT_GET_VALUES);
+	}
+
+	public final String getCurrentKey() {
+		return (String) getAttribute(MemcachedTCPSession.CURRENT_GET_KEY);
 	}
 
 }

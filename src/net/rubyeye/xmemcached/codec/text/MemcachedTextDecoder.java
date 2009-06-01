@@ -25,21 +25,18 @@ import com.google.code.yanf4j.nio.Session;
 import com.google.code.yanf4j.nio.CodecFactory.Decoder;
 import com.google.code.yanf4j.util.ByteBufferMatcher;
 import com.google.code.yanf4j.util.ShiftAndByteBufferMatcher;
+
 /**
  * Memcached text protocol decoder
+ * 
  * @author dennis
- *
+ * 
  */
 @SuppressWarnings("unchecked")
 public class MemcachedTextDecoder implements Decoder<Command> {
 
 	private static final Log log = LogFactory
 			.getLog(MemcachedTextDecoder.class);
-
-	public static final String PARSE_STATUS_ATTR = "parse_status";
-	public static final String CURRENT_LINE_ATTR = "current_line";
-	public static final String CURRENT_GET_VALUES = "current_values";
-	public static final String CURRENT_GET_KEY = "current_key";
 
 	public MemcachedTextDecoder(StatisticsHandler statisticsHandler,
 			Transcoder transcoder) {
@@ -63,16 +60,18 @@ public class MemcachedTextDecoder implements Decoder<Command> {
 
 	/**
 	 * 获取下一行
-	 *
+	 * 
 	 * @param buffer
 	 */
-	private static final void nextLine(Session session, ByteBuffer buffer) {
-		if (session.getAttribute(CURRENT_LINE_ATTR) != null) {
-			return;
+	public static final String nextLine(Session session, ByteBuffer buffer) {
+		if (session.getAttribute(MemcachedTCPSession.CURRENT_LINE_ATTR) != null) {
+			return (String) session
+					.getAttribute(MemcachedTCPSession.CURRENT_LINE_ATTR);
 		}
 
 		/**
-		 * 测试表明采用 Shift-And算法匹配 >BM算法匹配效率 > 朴素匹配 > KMP匹配， 如果你有更好的建议，请email给我(killme2008@gmail.com)
+		 * 测试表明采用 Shift-And算法匹配 >BM算法匹配效率 > 朴素匹配 > KMP匹配，
+		 * 如果你有更好的建议，请email给我(killme2008@gmail.com)
 		 */
 		int index = SPLIT_MATCHER.matchFirst(buffer);
 		// int index = ByteBufferUtils.indexOf(buffer, SPLIT);
@@ -84,17 +83,23 @@ public class MemcachedTextDecoder implements Decoder<Command> {
 			buffer.limit(limit);
 			buffer.position(index + SPLIT.remaining());
 			try {
-				session.setAttribute(CURRENT_LINE_ATTR, new String(bytes,
-						"utf-8"));
+				String line = new String(bytes, "utf-8");
+				session.setAttribute(MemcachedTCPSession.CURRENT_LINE_ATTR,
+						line);
+				return line;
 			} catch (UnsupportedEncodingException e) {
+				log.error(e, e);
+
 			}
 
 		}
+		return null;
+
 	}
 
 	/**
 	 * 返回boolean值并唤醒
-	 *
+	 * 
 	 * @param result
 	 * @return
 	 */
@@ -124,27 +129,28 @@ public class MemcachedTextDecoder implements Decoder<Command> {
 	@Override
 	public Command decode(ByteBuffer buffer, Session origSession) {
 		MemcachedTCPSession session = (MemcachedTCPSession) origSession;
+		if (session.peekCurrentExecutingCommand().decode(session, buffer)) {
+			return session.pollCurrentExecutingCommand();
+		}
 		LABEL: while (true) {
-			ParseStatus status = (ParseStatus) session
-					.getAttribute(PARSE_STATUS_ATTR);
+			ParseStatus status = (ParseStatus) session.getCurrentStatus();
 			switch (status) {
 			case NULL:
 				nextLine(session, buffer);
-				if (session.getAttribute(CURRENT_LINE_ATTR) == null) {
+				if (session.getCurrentLine() == null) {
 					return null;
 				}
-				String currentLine = (String) session
-						.getAttribute(CURRENT_LINE_ATTR);
+				String currentLine = session.getCurrentLine();
 				if (currentLine.startsWith("VALUE")) {
-					session.setAttribute(CURRENT_GET_VALUES,
+					session.setAttribute(
+							MemcachedTCPSession.CURRENT_GET_VALUES,
 							new HashMap<String, CachedData>());
-					session.setAttribute(PARSE_STATUS_ATTR, ParseStatus.GET);
+					session.setAttribute(MemcachedTCPSession.PARSE_STATUS_ATTR,
+							ParseStatus.GET);
 				} else if (currentLine.equals("STORED")) {
 					return notifyBoolean(session, Boolean.TRUE,
-							CommandType.SET, CommandType.CAS,
-							CommandType.ADD,
-							CommandType.REPLACE,
-							CommandType.APPEND,
+							CommandType.SET, CommandType.CAS, CommandType.ADD,
+							CommandType.REPLACE, CommandType.APPEND,
 							CommandType.PREPEND);
 				} else if (currentLine.equals("DELETED")) {
 					return notifyBoolean(session, Boolean.TRUE,
@@ -157,14 +163,12 @@ public class MemcachedTextDecoder implements Decoder<Command> {
 				} else if (currentLine.equals("NOT_STORED")) {
 					return notifyBoolean(session, Boolean.FALSE,
 							CommandType.SET, CommandType.ADD,
-							CommandType.REPLACE,
-							CommandType.APPEND,
+							CommandType.REPLACE, CommandType.APPEND,
 							CommandType.PREPEND);
 				} else if (currentLine.equals("NOT_FOUND")) {
 					return notifyBoolean(session, Boolean.FALSE,
-							CommandType.DELETE,
-							CommandType.CAS, CommandType.INCR,
-							CommandType.DECR);
+							CommandType.DELETE, CommandType.CAS,
+							CommandType.INCR, CommandType.DECR);
 				} else if (currentLine.equals("ERROR")) {
 					return parseException(session);
 				} else if (currentLine.startsWith("CLIENT_ERROR")) {
@@ -174,19 +178,19 @@ public class MemcachedTextDecoder implements Decoder<Command> {
 				} else if (currentLine.startsWith("VERSION ")) {
 					return parseVersionCommand(session, currentLine);
 				} else if (currentLine.equals("OK")) {
-					return notifyBoolean(session, true,
-							CommandType.FLUSH_ALL);
+					return notifyBoolean(session, true, CommandType.FLUSH_ALL);
 				} else if (currentLine.startsWith("STAT")) {
-					session.setAttribute(PARSE_STATUS_ATTR, ParseStatus.STATS);
+					session.setAttribute(MemcachedTCPSession.PARSE_STATUS_ATTR,
+							ParseStatus.STATS);
 				} else {
 					return parseIncrDecrCommand(session, currentLine);
 				}
-				if (session.getAttribute(PARSE_STATUS_ATTR) != ParseStatus.NULL) {
+				if (session.getCurrentStatus() != ParseStatus.NULL) {
 					continue LABEL;
 				} else {
 					log.error("unknow response:" + currentLine);
 					throw new IllegalStateException("unknown response:"
-							+ session.getAttribute(CURRENT_LINE_ATTR));
+							+ session.getCurrentLine());
 				}
 			case GET:
 				return parseGet(session, buffer);
@@ -201,7 +205,7 @@ public class MemcachedTextDecoder implements Decoder<Command> {
 
 	/**
 	 * 处理统计消息
-	 *
+	 * 
 	 * @param session
 	 * @param buffer
 	 * @return
@@ -209,7 +213,7 @@ public class MemcachedTextDecoder implements Decoder<Command> {
 	private final Command parseStatsCommand(final MemcachedTCPSession session,
 			final ByteBuffer buffer) {
 		String line = null;
-		while ((line = (String) session.getAttribute(CURRENT_LINE_ATTR)) != null) {
+		while ((line = session.getCurrentLine()) != null) {
 			if (line.equals("END")) { // 到消息结尾
 				Command executingCommand = session
 						.pollCurrentExecutingCommand();
@@ -220,7 +224,7 @@ public class MemcachedTextDecoder implements Decoder<Command> {
 			Command executingCommand = session.peekCurrentExecutingCommand();
 			((Map<String, String>) executingCommand.getResult()).put(items[1],
 					items[2]);
-			session.removeAttribute(CURRENT_LINE_ATTR);
+			session.removeCurrentLine();
 			nextLine(session, buffer);
 		}
 		return null;
@@ -230,7 +234,7 @@ public class MemcachedTextDecoder implements Decoder<Command> {
 
 	/**
 	 * 解析get协议response
-	 *
+	 * 
 	 * @param buffer
 	 * @param origPos
 	 * @param origLimit
@@ -240,8 +244,7 @@ public class MemcachedTextDecoder implements Decoder<Command> {
 			ByteBuffer buffer) {
 		while (true) {
 			nextLine(session, buffer);
-			String currentLine = (String) session
-					.getAttribute(CURRENT_LINE_ATTR);
+			String currentLine = session.getCurrentLine();
 			if (currentLine == null) {
 				return null;
 			}
@@ -254,31 +257,28 @@ public class MemcachedTextDecoder implements Decoder<Command> {
 				}
 				if (executingCommand.getCommandType() == CommandType.GET_MANY
 						|| executingCommand.getCommandType() == CommandType.GETS_MANY) {
-					processGetManyCommand(session,
-							(Map<String, CachedData>) session
-									.getAttribute(CURRENT_GET_VALUES),
-							executingCommand);
+					processGetManyCommand(session, session
+							.getCurrentParseGetValues(), executingCommand);
 				} else if (executingCommand.getCommandType() == CommandType.GET_ONE
 						|| executingCommand.getCommandType() == CommandType.GETS_ONE) {
-					processGetOneCommand(session,
-							(Map<String, CachedData>) session
-									.getAttribute(CURRENT_GET_VALUES),
-							executingCommand);
+					processGetOneCommand(session, session
+							.getCurrentParseGetValues(), executingCommand);
 				} else {
 					session.close();
 					return null;
 				}
-				session.removeAttribute(CURRENT_GET_VALUES);
-				session.removeAttribute(CURRENT_GET_KEY);
+				session.removeCurrentParseGetValues();
+				session.removeCurrentKey();
 				session.resetStatus();
 				return executingCommand;
 			} else if (currentLine.startsWith("VALUE")) {
-				if (session.getAttribute(CURRENT_GET_KEY) == null) {
+				if (session.getCurrentKey() == null) {
 					StringTokenizer stringTokenizer = new StringTokenizer(
 							currentLine, " ");
 					stringTokenizer.nextToken();
 					String currentKey = stringTokenizer.nextToken();
-					session.setAttribute(CURRENT_GET_KEY, currentKey);
+					session.setAttribute(MemcachedTCPSession.CURRENT_GET_KEY,
+							currentKey);
 
 					int flag = Integer.parseInt(stringTokenizer.nextToken());
 					int dataLen = Integer.parseInt(stringTokenizer.nextToken());
@@ -288,14 +288,11 @@ public class MemcachedTextDecoder implements Decoder<Command> {
 						value.setCas(Long
 								.parseLong(stringTokenizer.nextToken()));
 					}
-					((Map<String, CachedData>) (session
-							.getAttribute(CURRENT_GET_VALUES))).put(currentKey,
-							value);
+					session.getCurrentParseGetValues().put(currentKey, value);
 				}
 
-				CachedData value = ((Map<String, CachedData>) (session
-						.getAttribute(CURRENT_GET_VALUES)))
-						.get((String) session.getAttribute(CURRENT_GET_KEY));
+				CachedData value = session.getCurrentParseGetValues().get(
+						session.getCurrentKey());
 				// 不够数据，返回
 				if (buffer.remaining() < value.getDataLen() + 2) {
 					return null;
@@ -305,8 +302,8 @@ public class MemcachedTextDecoder implements Decoder<Command> {
 				buffer.get(data);
 				value.setData(data);
 				buffer.position(buffer.position() + SPLIT.remaining());
-				session.removeAttribute(CURRENT_LINE_ATTR);
-				session.removeAttribute(CURRENT_GET_KEY);
+				session.removeCurrentLine();
+				session.removeCurrentKey();
 			} else {
 				session.close();
 				return null;
@@ -363,14 +360,13 @@ public class MemcachedTextDecoder implements Decoder<Command> {
 
 	/**
 	 * 解析get协议返回空
-	 *
+	 * 
 	 * @return
 	 */
 	private final Command parseEndCommand(MemcachedTCPSession session) {
 		Command executingCmd = session.pollCurrentExecutingCommand();
 		CommandType cmdType = executingCmd.getCommandType();
-		if (cmdType != CommandType.GET_ONE
-				&& cmdType != CommandType.GETS_ONE
+		if (cmdType != CommandType.GET_ONE && cmdType != CommandType.GETS_ONE
 				&& cmdType != CommandType.GET_MANY
 				&& cmdType != CommandType.GETS_MANY) {
 			session.close();
@@ -395,7 +391,7 @@ public class MemcachedTextDecoder implements Decoder<Command> {
 
 	/**
 	 * 解析错误response
-	 *
+	 * 
 	 * @return
 	 */
 	private static final Command parseException(MemcachedTCPSession session) {
@@ -410,7 +406,7 @@ public class MemcachedTextDecoder implements Decoder<Command> {
 
 	/**
 	 * 解析错误response
-	 *
+	 * 
 	 * @return
 	 */
 	private final Command parseClientException(MemcachedTCPSession session,
@@ -430,7 +426,7 @@ public class MemcachedTextDecoder implements Decoder<Command> {
 
 	/**
 	 * 解析错误response
-	 *
+	 * 
 	 * @return
 	 */
 	private final Command parseServerException(MemcachedTCPSession session,
@@ -451,7 +447,7 @@ public class MemcachedTextDecoder implements Decoder<Command> {
 
 	/**
 	 * 解析version协议response
-	 *
+	 * 
 	 * @return
 	 */
 	private final Command parseVersionCommand(MemcachedTCPSession session,
@@ -471,7 +467,7 @@ public class MemcachedTextDecoder implements Decoder<Command> {
 
 	/**
 	 * 解析incr,decr协议response
-	 *
+	 * 
 	 * @return
 	 */
 	private final Command parseIncrDecrCommand(MemcachedTCPSession session,
