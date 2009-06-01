@@ -658,6 +658,21 @@ public interface MemcachedClient {
 	public abstract Map<String, String> stats(InetSocketAddress address,
 			long timeout) throws MemcachedException, InterruptedException,
 			TimeoutException;
+	
+	/**
+	 * Get stats from all memcached servers
+	 * 
+	 * @param timeout
+	 * @return server->item->value map
+	 * @throws MemcachedException
+	 * @throws InterruptedException
+	 * @throws TimeoutException
+	 */
+	public abstract Map<String, Map<String, String>> stats(long timeout)
+			throws MemcachedException, InterruptedException, TimeoutException;
+	
+	public abstract Map<String, Map<String, String>> stats()
+	throws MemcachedException, InterruptedException, TimeoutException;
 
 	public abstract void shutdown() throws IOException;
 
