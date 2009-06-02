@@ -151,8 +151,6 @@ public class MemcachedConnector extends SocketChannelController {
 		private volatile Exception exception;
 		private InetSocketAddress inetSocketAddress;
 
-		
-		
 		public ConnectFuture(InetSocketAddress inetSocketAddress) {
 			super();
 			this.inetSocketAddress = inetSocketAddress;
@@ -438,15 +436,19 @@ public class MemcachedConnector extends SocketChannelController {
 		session = new MemcachedTCPSession(sessionCofig, configuration
 				.getSessionReadBufferSize(), this.optimiezer, this
 				.getReadThreadCount());
+		session.setBufferAllocator(bufferAllocator);
 		return session;
 	}
 
-	public BufferAllocator getByteBufferAllocator() {
+	public BufferAllocator getBufferAllocator() {
 		return bufferAllocator;
 	}
 
-	public void setByteBufferAllocator(BufferAllocator allocator) {
+	public void setBufferAllocator(BufferAllocator allocator) {
 		this.bufferAllocator = allocator;
+		for (Session session : getSessionSet()) {
+			((MemcachedTCPSession) session).setBufferAllocator(allocator);
+		}
 	}
 
 	public Collection<InetSocketAddress> getServerAddresses() {

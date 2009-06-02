@@ -24,8 +24,7 @@ public class XMemcachedClientBuilder implements MemcachedClientBuilder {
 	private Configuration configuration = XMemcachedClient
 			.getDefaultConfiguration();
 	private List<InetSocketAddress> addressList;
-	private CommandFactory commandFactory = new TextCommandFactory(
-			this.bufferAllocator);
+	private CommandFactory commandFactory = new TextCommandFactory();
 
 	public final CommandFactory getCommandFactory() {
 		return commandFactory;
@@ -84,7 +83,6 @@ public class XMemcachedClientBuilder implements MemcachedClientBuilder {
 	 */
 	public void setBufferAllocator(BufferAllocator bufferAllocator) {
 		this.bufferAllocator = bufferAllocator;
-		this.commandFactory.setBufferAllocator(bufferAllocator);
 	}
 
 	/*
@@ -114,7 +112,8 @@ public class XMemcachedClientBuilder implements MemcachedClientBuilder {
 	 */
 	public MemcachedClient build() throws IOException {
 		return new XMemcachedClient(this.sessionLocator, this.bufferAllocator,
-				this.configuration,this.commandFactory, this.transcoder, this.addressList);
+				this.configuration, this.commandFactory, this.transcoder,
+				this.addressList);
 	}
 
 	@SuppressWarnings("unchecked")

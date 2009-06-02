@@ -22,7 +22,7 @@ public class TextCommandFactoryTest extends TestCase {
 	@Override
 	protected void setUp() throws Exception {
 		this.commandFactory = new TextCommandFactory(
-				new SimpleBufferAllocator());
+				);
 	}
 
 	public void testCreateDeleteCommand() {

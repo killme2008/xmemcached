@@ -23,7 +23,7 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
 import net.rubyeye.xmemcached.MemcachedOptimiezer;
-import net.rubyeye.xmemcached.buffer.SimpleBufferAllocator;
+import net.rubyeye.xmemcached.buffer.BufferAllocator;
 import net.rubyeye.xmemcached.command.Command;
 import net.rubyeye.xmemcached.command.OperationStatus;
 
@@ -98,9 +98,19 @@ public class MemcachedTCPSession extends DefaultTCPSession {
 		return currentCommand;
 	}
 
+	private BufferAllocator bufferAllocator;
+
+	public final BufferAllocator getBufferAllocator() {
+		return bufferAllocator;
+	}
+
+	public final void setBufferAllocator(BufferAllocator bufferAllocator) {
+		this.bufferAllocator = bufferAllocator;
+	}
+
 	@Override
 	protected final WriteMessage wrapMessage(Object msg) {
-		((Command) msg).encode(new SimpleBufferAllocator());
+		((Command) msg).encode(this.bufferAllocator);
 		return (WriteMessage) msg;
 	}
 

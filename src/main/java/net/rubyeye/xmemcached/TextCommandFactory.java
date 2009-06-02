@@ -3,9 +3,6 @@ package net.rubyeye.xmemcached;
 import java.net.InetSocketAddress;
 import java.util.Collection;
 import java.util.concurrent.CountDownLatch;
-
-import net.rubyeye.xmemcached.buffer.BufferAllocator;
-import net.rubyeye.xmemcached.buffer.SimpleBufferAllocator;
 import net.rubyeye.xmemcached.command.Command;
 import net.rubyeye.xmemcached.command.CommandType;
 import net.rubyeye.xmemcached.command.text.TextCASCommand;
@@ -27,27 +24,6 @@ import net.rubyeye.xmemcached.utils.ByteUtils;
  * 
  */
 public final class TextCommandFactory implements CommandFactory {
-
-	private BufferAllocator bufferAllocator = new SimpleBufferAllocator();
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.rubyeye.xmemcached.CommandFactory#setBufferAllocator(net.rubyeye.
-	 * xmemcached.buffer.BufferAllocator)
-	 */
-	public synchronized final void setBufferAllocator(BufferAllocator allocator) {
-		BufferAllocator oldAllocator = bufferAllocator;
-		bufferAllocator = allocator;
-		if (oldAllocator != null) {
-			oldAllocator.dispose();
-		}
-	}
-
-	public TextCommandFactory(BufferAllocator bufferAllocator) {
-		this.bufferAllocator = bufferAllocator;
-	}
 
 	/*
 	 * (non-Javadoc)

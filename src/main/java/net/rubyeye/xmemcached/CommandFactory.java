@@ -3,15 +3,11 @@ package net.rubyeye.xmemcached;
 import java.net.InetSocketAddress;
 import java.util.Collection;
 import java.util.concurrent.CountDownLatch;
-
-import net.rubyeye.xmemcached.buffer.BufferAllocator;
 import net.rubyeye.xmemcached.command.Command;
 import net.rubyeye.xmemcached.command.CommandType;
 import net.rubyeye.xmemcached.transcoders.Transcoder;
 
 public interface CommandFactory {
-
-	public abstract void setBufferAllocator(BufferAllocator allocator);
 
 	/**
 	 * 创建delete命令
