@@ -2,8 +2,6 @@ package net.rubyeye.xmemcached.test.unittest;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-
 import com.google.code.yanf4j.nio.Session;
 
 import net.rubyeye.xmemcached.HashAlgorithm;

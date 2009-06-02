@@ -15,7 +15,7 @@ public class AllTests {
 				"Test for net.rubyeye.xmemcached.test.unittest");
 		// $JUnit-BEGIN$
 		suite.addTestSuite(OptimezerTest.class);
-		suite.addTestSuite(CommandFactoryTest.class);
+		suite.addTestSuite(TextCommandFactoryTest.class);
 		suite.addTestSuite(AddrUtilTest.class);
 		suite.addTestSuite(SessionLocatorTest.class);
 		try {

@@ -4,10 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import java.util.concurrent.TimeoutException;
-
 import com.google.code.yanf4j.util.ResourcesUtils;
-
 import net.rubyeye.xmemcached.CASOperation;
 import net.rubyeye.xmemcached.GetsResponse;
 import net.rubyeye.xmemcached.MemcachedClient;
@@ -109,7 +106,17 @@ public class XMemcachedClientTest extends TestCase {
 		assertEquals("zhuang", memcachedClient.get("name", 2000));
 		Thread.sleep(2000);
 		assertNull(memcachedClient.get("zhuang"));
-
+		
+		//append,prepend
+		assertTrue(memcachedClient.set("name",0, "dennis"));
+		assertTrue(memcachedClient.append("name","hello "));
+		assertEquals("hello dennis",memcachedClient.get("name"));
+		assertTrue(memcachedClient.prepend("name", " zhuang"));
+		assertEquals("hello dennis zhuang",memcachedClient.get("name"));
+		memcachedClient.delete("name");
+		assertFalse(memcachedClient.append("name","hello "));
+		assertFalse(memcachedClient.prepend("name", " zhuang"));
+		
 		// store list
 		List<String> list = new ArrayList<String>();
 		for (int i = 0; i < 100; i++)
@@ -137,6 +144,10 @@ public class XMemcachedClientTest extends TestCase {
 		// add,replace fail
 		assertFalse(memcachedClient.add("name", 0, "zhuang"));
 		assertFalse(memcachedClient.replace("name", 0, "zhuang"));
+		Thread.sleep(2000);
+		//add,replace success
+		assertTrue(memcachedClient.add("name", 0, "zhuang"));
+		assertTrue(memcachedClient.replace("name", 0, "zhuang"));
 	}
 
 	//

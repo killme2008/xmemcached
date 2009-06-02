@@ -44,22 +44,35 @@ public class AddrUtil {
 		return addrs;
 	}
 
-	public static InetSocketAddress getAddress(String host) {
-		if (host == null) {
+	/**
+	 * Get one InetSocketAddress.This method is deprecated,replace with
+	 * getOneAddress
+	 * 
+	 * @param server
+	 * @return
+	 */
+	@Deprecated
+	public static InetSocketAddress getAddress(String server) {
+		return getOneAddress(server);
+	}
+
+	public static InetSocketAddress getOneAddress(String server) {
+		if (server == null) {
 			throw new NullPointerException("Null host");
 		}
-		if (host.trim().equals("")) {
-			throw new IllegalArgumentException("No hosts in:  ``" + host + "''");
+		if (server.trim().equals("")) {
+			throw new IllegalArgumentException("No hosts in:  ``" + server
+					+ "''");
 		}
 
-		int finalColon = host.lastIndexOf(':');
+		int finalColon = server.lastIndexOf(':');
 		if (finalColon < 1) {
-			throw new IllegalArgumentException("Invalid server ``" + host
-					+ "'' in list:  " + host);
+			throw new IllegalArgumentException("Invalid server ``" + server
+					+ "'' in list:  " + server);
 
 		}
-		String hostPart = host.substring(0, finalColon);
-		String portNum = host.substring(finalColon + 1);
+		String hostPart = server.substring(0, finalColon);
+		String portNum = server.substring(finalColon + 1);
 		return new InetSocketAddress(hostPart, Integer.parseInt(portNum));
 	}
 }

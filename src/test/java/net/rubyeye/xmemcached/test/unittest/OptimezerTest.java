@@ -1,8 +1,6 @@
 package net.rubyeye.xmemcached.test.unittest;
 
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.BlockingQueue;
 
 import com.google.code.yanf4j.util.Queue;

@@ -189,4 +189,15 @@ public class MockSession implements Session {
 		return 0;
 	}
 
+
+
+
+	@Override
+	public long getScheduleWritenBytes() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+	
+	
+
 }

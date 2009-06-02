@@ -14,7 +14,7 @@ import net.rubyeye.xmemcached.transcoders.Transcoder;
 import net.rubyeye.xmemcached.utils.ByteUtils;
 import junit.framework.TestCase;
 
-public class CommandFactoryTest extends TestCase {
+public class TextCommandFactoryTest extends TestCase {
 	static final BufferAllocator bufferAllocator = new SimpleBufferAllocator();
 
 	private CommandFactory commandFactory;
