@@ -17,6 +17,7 @@ public class TextStatsCommand extends StatsCommand {
 		this.result = new HashMap<String, String>();
 
 	}
+	private boolean wasFirst=true;
 
 	@Override
 	@SuppressWarnings("unchecked")
@@ -24,9 +25,10 @@ public class TextStatsCommand extends StatsCommand {
 		String line = null;
 		while ((line = MemcachedTextDecoder.nextLine(session, buffer)) != null) {
 			if (line != null) {
-				if (line.equals("END")) { // 到消息结尾
+				if (!wasFirst&&line.equals("END")) { // 到消息结尾
 					return done(session);
 				} else if (line.startsWith("STAT")) {
+					wasFirst=false;
 					String[] items = line.split(" ");
 					((Map<String, String>) getResult()).put(items[1], items[2]);
 				} else

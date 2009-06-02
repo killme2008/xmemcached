@@ -29,7 +29,7 @@ public class TextIncrDecrCommand extends IncrDecrCommand {
 		if (line != null) {
 			if (line.equals("NOT_FOUND")) {
 				setException(new MemcachedException(
-						"The key's value is not found for increament or decrement"));
+						"The key's value is not found for increase or decrease"));
 				countDownLatch();
 				return true;
 			} else {

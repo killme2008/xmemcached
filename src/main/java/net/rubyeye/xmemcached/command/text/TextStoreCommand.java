@@ -14,14 +14,12 @@ import net.rubyeye.xmemcached.transcoders.Transcoder;
 import net.rubyeye.xmemcached.utils.ByteUtils;
 
 public class TextStoreCommand extends StoreCommand {
-	private String cmdStr;
 
 	@SuppressWarnings("unchecked")
 	public TextStoreCommand(String key, byte[] keyBytes, CommandType cmdType,
 			CountDownLatch latch, int exp, long cas, Object value,
-			Transcoder transcoder, String cmdStr) {
+			Transcoder transcoder) {
 		super(key, keyBytes, cmdType, latch, exp, cas, value, transcoder);
-		this.cmdStr = cmdStr;
 	}
 
 	@Override
@@ -51,6 +49,7 @@ public class TextStoreCommand extends StoreCommand {
 		byte[] dataLenBytes = ByteUtils.getBytes(String
 				.valueOf(data.getData().length));
 		byte[] casBytes = ByteUtils.getBytes(String.valueOf(cas));
+		String cmdStr = this.commandType.name().toLowerCase();
 		int size = cmdStr.length() + 1 + keyBytes.length + 1 + flagBytes.length
 				+ 1 + expBytes.length + 1 + data.getData().length + 2
 				* Constants.CRLF.length + dataLenBytes.length;

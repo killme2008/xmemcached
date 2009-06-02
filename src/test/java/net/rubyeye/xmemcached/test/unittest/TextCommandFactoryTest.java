@@ -56,8 +56,7 @@ public class TextCommandFactoryTest extends TestCase {
 		byte[] keyBytes = ByteUtils.getBytes(key);
 		int exp = 0;
 		Transcoder transcoder = new StringTranscoder();
-		Command storeCmd = commandFactory.createStoreCommand(key, keyBytes,
-				exp, value, CommandType.SET, "set", -1, transcoder);
+		Command storeCmd = commandFactory.createSetCommand(key, keyBytes, exp, value, transcoder);
 		storeCmd.encode(new SimpleBufferAllocator());
 		assertEquals(CommandType.SET, storeCmd.getCommandType());
 		String commandStr = new String(storeCmd.getIoBuffer().getByteBuffer()

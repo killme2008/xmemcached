@@ -5,13 +5,14 @@ import java.util.Collection;
 import java.util.concurrent.CountDownLatch;
 import net.rubyeye.xmemcached.command.Command;
 import net.rubyeye.xmemcached.command.CommandType;
+import net.rubyeye.xmemcached.command.text.TextCASCommand;
 import net.rubyeye.xmemcached.transcoders.Transcoder;
 
 public interface CommandFactory {
 
 	/**
 	 * 创建delete命令
-	 * 
+	 *
 	 * @param key
 	 * @param time
 	 * @return
@@ -21,48 +22,29 @@ public interface CommandFactory {
 
 	/**
 	 * 创建version command
-	 * 
+	 *
 	 * @return
 	 */
 	public abstract Command createVersionCommand();
 
 	/**
 	 * create flush_all command
-	 * 
+	 *
 	 * @return
 	 */
 	public abstract Command createFlushAllCommand(CountDownLatch latch);
 
 	/**
 	 * create flush_all command
-	 * 
+	 *
 	 * @return
 	 */
 	public abstract Command createStatsCommand(InetSocketAddress server,
 			CountDownLatch latch);
 
 	/**
-	 * 创建存储命令，如set,add,replace,append,prepend,cas
-	 * 
-	 * @param key
-	 * @param exp
-	 * @param value
-	 * @param cmdType
-	 * @param cmd
-	 * @param cas
-	 *            cas值，仅对cas协议有效，其他都默认为-1
-	 * @param transcoder
-	 * @return
-	 */
-	@SuppressWarnings("unchecked")
-	public abstract Command createStoreCommand(final String key,
-			final byte[] keyBytes, final int exp, final Object value,
-			CommandType cmdType, final String cmd, long cas,
-			Transcoder transcoder);
-
-	/**
 	 *创建get,gets命令
-	 * 
+	 *
 	 * @param key
 	 * @param keyBytes
 	 * @param cmdBytes
@@ -76,7 +58,7 @@ public interface CommandFactory {
 
 	/**
 	 * 创建批量获取 command
-	 * 
+	 *
 	 * @param <T>
 	 * @param keys
 	 * @param latch
@@ -91,5 +73,29 @@ public interface CommandFactory {
 
 	public abstract Command createIncrDecrCommand(final String key,
 			final byte[] keyBytes, final int num, CommandType cmdType);
+
+	@SuppressWarnings("unchecked")
+	public Command createCASCommand(final String key, final byte[] keyBytes, final int exp,
+			final Object value, long cas, Transcoder transcoder);
+
+	@SuppressWarnings("unchecked")
+	public Command createSetCommand(final String key, final byte[] keyBytes, final int exp,
+			final Object value, Transcoder transcoder);
+
+	@SuppressWarnings("unchecked")
+	public Command createAddCommand(final String key, final byte[] keyBytes, final int exp,
+			final Object value, Transcoder transcoder);
+
+	@SuppressWarnings("unchecked")
+	public Command createReplaceCommand(final String key, final byte[] keyBytes, final int exp,
+			final Object value, Transcoder transcoder);
+
+	@SuppressWarnings("unchecked")
+	public Command createAppendCommand(final String key, final byte[] keyBytes, final Object value,
+			Transcoder transcoder);
+
+	@SuppressWarnings("unchecked")
+	public Command createPrependCommand(final String key, final byte[] keyBytes, final Object value,
+			Transcoder transcoder);
 
 }
