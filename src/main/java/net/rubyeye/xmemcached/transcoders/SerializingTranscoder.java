@@ -12,21 +12,27 @@ public class SerializingTranscoder extends BaseSerializingTranscoder
 	implements Transcoder<Object> {
 
 	private final int maxSize;
+	
+	
+
+	public final int getMaxSize() {
+		return maxSize;
+	}
 
 	// General flags
-	static final int SERIALIZED=1;
-	static final int COMPRESSED=2;
+	public static final int SERIALIZED=1;
+	public static final int COMPRESSED=2;
 
 	// Special flags for specially handled types.
-	private static final int SPECIAL_MASK=0xff00;
-	static final int SPECIAL_BOOLEAN=(1<<8);
-	static final int SPECIAL_INT=(2<<8);
-	static final int SPECIAL_LONG=(3<<8);
-	static final int SPECIAL_DATE=(4<<8);
-	static final int SPECIAL_BYTE=(5<<8);
-	static final int SPECIAL_FLOAT=(6<<8);
-	static final int SPECIAL_DOUBLE=(7<<8);
-	static final int SPECIAL_BYTEARRAY=(8<<8);
+	public  static final int SPECIAL_MASK=0xff00;
+	public static final int SPECIAL_BOOLEAN=(1<<8);
+	public static final int SPECIAL_INT=(2<<8);
+	public static final int SPECIAL_LONG=(3<<8);
+	public static final int SPECIAL_DATE=(4<<8);
+	public static final int SPECIAL_BYTE=(5<<8);
+	public static final int SPECIAL_FLOAT=(6<<8);
+	public static final int SPECIAL_DOUBLE=(7<<8);
+	public static final int SPECIAL_BYTEARRAY=(8<<8);
 
 	private final TranscoderUtils tu=new TranscoderUtils(true);
 

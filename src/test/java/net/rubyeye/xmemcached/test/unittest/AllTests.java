@@ -8,6 +8,7 @@ import net.rubyeye.xmemcached.test.unittest.commands.text.TextCommandsAllTests;
 import net.rubyeye.xmemcached.test.unittest.impl.OptimezerTest;
 import net.rubyeye.xmemcached.test.unittest.impl.SessionLocatorTest;
 import net.rubyeye.xmemcached.test.unittest.monitor.StatisticsHandlerUnitTest;
+import net.rubyeye.xmemcached.test.unittest.transcoder.TranscoderAllTests;
 import net.rubyeye.xmemcached.test.unittest.utils.AddrUtilTest;
 
 import com.google.code.yanf4j.util.ResourcesUtils;
@@ -26,6 +27,7 @@ public class AllTests {
 		suite.addTestSuite(AddrUtilTest.class);
 		suite.addTestSuite(SessionLocatorTest.class);
 		suite.addTest(TextCommandsAllTests.suite());
+		suite.addTest(TranscoderAllTests.suite());
 		suite.addTestSuite(StatisticsHandlerUnitTest.class);
 		try {
 			Properties properties = ResourcesUtils
