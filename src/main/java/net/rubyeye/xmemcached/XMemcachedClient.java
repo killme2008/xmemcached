@@ -1154,7 +1154,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 		while (tryCount < operation.getMaxTries()
 				&& result != null
 				&& !sendStoreCommand(commandFactory.createCASCommand(key,
-						keyBytes, exp, result.getValue(), result.getCas(),
+						keyBytes, exp, operation.getNewValue( result.getCas(),  result.getValue()), result.getCas(),
 						transcoder), DEFAULT_OP_TIMEOUT)) {
 			tryCount++;
 			result = gets0(key, keyBytes, transcoder);

@@ -54,8 +54,9 @@ public abstract class TextGetCommand extends Command {
 						int dataLen = Integer.parseInt(stringTokenizer
 								.nextToken());
 						// maybe gets,it have cas value
-						CachedData value = new CachedData(flag, null, dataLen,
-								-1);
+						CachedData value = new CachedData(flag,
+								new byte[dataLen], dataLen, -1);
+						value.setSize(0); // current size is zero
 						if (stringTokenizer.hasMoreTokens()) {
 							value.setCas(Long.parseLong(stringTokenizer
 									.nextToken()));
@@ -65,20 +66,30 @@ public abstract class TextGetCommand extends Command {
 
 					CachedData value = this.returnValues
 							.get(this.currentReturnKey);
-					// 不够数据，返回
-					if (buffer.remaining() < value.getDataLen() + 2) {
+					int remaining = buffer.remaining();
+					if (remaining == 0) {
 						return false;
 					}
+					// 不够数据，返回
+					if (remaining < value.getCapacity() + 2 - value.getSize()) {
 
-					byte[] data = new byte[value.getDataLen()];
-					buffer.get(data);
-					value.setData(data);
+						value.fillData(buffer, remaining);
+						return false;
+					} else {
+						value.fillData(buffer, value.getCapacity()
+								- value.getSize());
+					}
+
+					// byte[] data = new byte[value.getCapacity()];
+					// buffer.get(data);
+					// value.setData(data);
 					buffer.position(buffer.position()
 							+ MemcachedTextDecoder.SPLIT.remaining());
 					this.currentReturnKey = null;
 					this.currentLine = null;
 				} else {
-					decodeError(currentLine, null);
+					this.currentLine = null;
+					decodeError();
 				}
 			} else
 				return false;

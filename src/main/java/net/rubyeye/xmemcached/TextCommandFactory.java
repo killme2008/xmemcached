@@ -8,7 +8,7 @@ import net.rubyeye.xmemcached.command.CommandType;
 import net.rubyeye.xmemcached.command.text.TextCASCommand;
 import net.rubyeye.xmemcached.command.text.TextDeleteCommand;
 import net.rubyeye.xmemcached.command.text.TextFlushAllCommand;
-import net.rubyeye.xmemcached.command.text.TextGetManyCommand;
+import net.rubyeye.xmemcached.command.text.TextGetMultiCommand;
 import net.rubyeye.xmemcached.command.text.TextGetOneCommand;
 import net.rubyeye.xmemcached.command.text.TextIncrDecrCommand;
 import net.rubyeye.xmemcached.command.text.TextStatsCommand;
@@ -162,7 +162,7 @@ public final class TextCommandFactory implements CommandFactory {
 		String gatherKey = sb.toString();
 		byte[] keyBytes = ByteUtils.getBytes(gatherKey.substring(0, gatherKey
 				.length() - 1));
-		return new TextGetManyCommand(keys.iterator().next(), keyBytes,
+		return new TextGetMultiCommand(keys.iterator().next(), keyBytes,
 				cmdType, latch, transcoder);
 	}
 

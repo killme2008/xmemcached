@@ -24,7 +24,7 @@ public class XMemcachedClientTest extends TestCase {
 		MemcachedClientBuilder builder = new XMemcachedClientBuilder(AddrUtil
 				.getAddresses(properties.getProperty("test.memcached.servers")));
 		memcachedClient = builder.build();
-		memcachedClient.flushAll();
+		memcachedClient.flushAll(5000);
 	}
 
 	public void testGet() throws Exception {
@@ -109,13 +109,13 @@ public class XMemcachedClientTest extends TestCase {
 		
 		//append,prepend
 		assertTrue(memcachedClient.set("name",0, "dennis"));
-		assertTrue(memcachedClient.append("name","hello "));
+		assertTrue(memcachedClient.prepend("name","hello "));
 		assertEquals("hello dennis",memcachedClient.get("name"));
-		assertTrue(memcachedClient.prepend("name", " zhuang"));
+		assertTrue(memcachedClient.append("name", " zhuang"));
 		assertEquals("hello dennis zhuang",memcachedClient.get("name"));
 		memcachedClient.delete("name");
-		assertFalse(memcachedClient.append("name","hello "));
-		assertFalse(memcachedClient.prepend("name", " zhuang"));
+		assertFalse(memcachedClient.prepend("name","hello "));
+		assertFalse(memcachedClient.append("name", " zhuang"));
 		
 		// store list
 		List<String> list = new ArrayList<String>();
@@ -215,7 +215,7 @@ public class XMemcachedClientTest extends TestCase {
 			fail();
 		} catch (MemcachedException e) {
 			assertEquals(
-					"net.rubyeye.xmemcached.exception.MemcachedException: The key's value is not found for increament or decrement",
+					"net.rubyeye.xmemcached.exception.MemcachedException: The key's value is not found for increase or decrease",
 					e.getMessage());
 		}
 		assertTrue(memcachedClient.set("a", 0, "1"));
@@ -229,7 +229,7 @@ public class XMemcachedClientTest extends TestCase {
 			fail();
 		} catch (MemcachedException e) {
 			assertEquals(
-					"net.rubyeye.xmemcached.exception.MemcachedException: The key's value is not found for increament or decrement",
+					"net.rubyeye.xmemcached.exception.MemcachedException: The key's value is not found for increase or decrease",
 					e.getMessage());
 		}
 		assertTrue(memcachedClient.set("a", 0, "100"));

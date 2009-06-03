@@ -15,6 +15,8 @@ public class TextCommandsAllTests {
 		suite.addTestSuite(TextStoreCommandUnitTest.class);
 		suite.addTestSuite(TextFlushAllCommandUnitTest.class);
 		suite.addTestSuite(TextDeleteCommandUnitTest.class);
+		suite.addTestSuite(TextGetOneCommandUnitTest.class);
+		suite.addTestSuite(TextGetMultiCommandUnitTest.class);
 		//$JUnit-END$
 		return suite;
 	}

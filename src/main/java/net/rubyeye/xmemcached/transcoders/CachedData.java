@@ -2,6 +2,7 @@
 
 package net.rubyeye.xmemcached.transcoders;
 
+import java.nio.ByteBuffer;
 import java.util.Arrays;
 
 /**
@@ -17,14 +18,36 @@ public final class CachedData {
 	private int flags;
 	private byte[] data;
 	private long cas;
-	private int dataLen;
+	private int capacity;
+	
+	private int size = 0;
 
-	public final int getDataLen() {
-		return dataLen;
+	public final int getSize() {
+		return size;
 	}
 
-	public final void setDataLen(int dataLen) {
-		this.dataLen = dataLen;
+	public final void fillData(ByteBuffer buffer, int offset, int length) {
+		buffer.get(this.data, offset, length);
+		this.size += length;
+	}
+	
+	public final void fillData(ByteBuffer buffer,int length) {
+		buffer.get(this.data, this.size, length);
+		this.size += length;
+	}
+
+	public final int getCapacity() {
+		return capacity;
+	}
+	
+	
+
+	public final void setSize(int size) {
+		this.size = size;
+	}
+
+	public final void setCapacity(int dataLen) {
+		this.capacity = dataLen;
 	}
 
 	public static final int getMAX_SIZE() {
@@ -36,7 +59,7 @@ public final class CachedData {
 	}
 
 	public final void setData(byte[] data) {
-		if (data.length > this.dataLen)
+		if (data.length > this.capacity)
 			throw new IllegalArgumentException(
 					"Cannot cache data larger than 1MB (you tried to cache a "
 							+ data.length + " byte object)");
@@ -63,7 +86,8 @@ public final class CachedData {
 	 */
 	public CachedData(int f, byte[] d, int dataLen, long casId) {
 		super();
-		this.dataLen = dataLen;
+		this.capacity = dataLen;
+		this.size = d!=null?d.length:0;
 		if (d != null && d.length > dataLen) {
 			throw new IllegalArgumentException(
 					"Cannot cache data larger than 1MB (you tried to cache a "
