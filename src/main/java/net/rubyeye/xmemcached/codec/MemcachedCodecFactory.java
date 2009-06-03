@@ -3,7 +3,6 @@ package net.rubyeye.xmemcached.codec;
 import com.google.code.yanf4j.nio.CodecFactory;
 
 import net.rubyeye.xmemcached.command.Command;
-import net.rubyeye.xmemcached.monitor.StatisticsHandler;
 
 /**
  * Memcached protocol codec factory
@@ -21,14 +20,14 @@ public class MemcachedCodecFactory implements CodecFactory<Command> {
 	public MemcachedCodecFactory() {
 		super();
 		this.encoder = new MemcachedTextEncoder();
-		this.decoder = new MemcachedTextDecoder(new StatisticsHandler());
+		this.decoder = new MemcachedTextDecoder();
 	}
 
 	/**
 	 * return the memcached protocol decoder
 	 */
 	@Override
-	public CodecFactory.Decoder<Command> getDecoder() {
+	public final CodecFactory.Decoder<Command> getDecoder() {
 		return this.decoder;
 
 	}
@@ -37,7 +36,7 @@ public class MemcachedCodecFactory implements CodecFactory<Command> {
 	 * return the memcached protocol encoder
 	 */
 	@Override
-	public CodecFactory.Encoder<Command> getEncoder() {
+	public final CodecFactory.Encoder<Command> getEncoder() {
 		return this.encoder;
 	}
 }

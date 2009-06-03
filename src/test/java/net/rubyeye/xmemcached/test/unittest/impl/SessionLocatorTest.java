@@ -1,4 +1,4 @@
-package net.rubyeye.xmemcached.test.unittest;
+package net.rubyeye.xmemcached.test.unittest.impl;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -8,6 +8,7 @@ import net.rubyeye.xmemcached.HashAlgorithm;
 import net.rubyeye.xmemcached.MemcachedSessionLocator;
 import net.rubyeye.xmemcached.impl.ArrayMemcachedSessionLocator;
 import net.rubyeye.xmemcached.impl.KetamaMemcachedSessionLocator;
+import net.rubyeye.xmemcached.test.unittest.MockSession;
 import junit.framework.TestCase;
 
 public class SessionLocatorTest extends TestCase {

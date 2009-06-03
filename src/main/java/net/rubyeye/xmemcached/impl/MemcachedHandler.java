@@ -16,7 +16,11 @@ import org.apache.commons.logging.LogFactory;
 
 import net.rubyeye.xmemcached.MemcachedClient;
 import net.rubyeye.xmemcached.command.Command;
+import net.rubyeye.xmemcached.command.CommandType;
 import net.rubyeye.xmemcached.command.OperationStatus;
+import net.rubyeye.xmemcached.command.text.TextGetCommand;
+import net.rubyeye.xmemcached.command.text.TextGetOneCommand;
+import net.rubyeye.xmemcached.monitor.StatisticsHandler;
 
 import com.google.code.yanf4j.nio.Session;
 import com.google.code.yanf4j.nio.impl.HandlerAdapter;
@@ -24,20 +28,33 @@ import com.google.code.yanf4j.nio.impl.HandlerAdapter;
 /**
  * Memcached Session Handler,used for dispatching commands and session's
  * lifecycle management
- *
+ * 
  * @author dennis
- *
+ * 
  */
 public class MemcachedHandler extends HandlerAdapter {
 
-	
+	private final StatisticsHandler statisticsHandler;
+
 	/**
 	 * On receive message from memcached server
 	 */
 	@Override
 	public final void onReceive(final Session session, final Object msg) {
-		// Command cmd = (Command) msg;
-		// cmd.countDownLatch();
+		Command command = (Command) msg;
+		if (command.getMergeCount() > 0) {
+			int size = ((TextGetCommand) command).getReturnValues().size();
+			statisticsHandler.statistics(CommandType.GET_HIT, size);
+			statisticsHandler.statistics(CommandType.GET_MISS, command
+					.getMergeCount()
+					- size);
+		} else if (command instanceof TextGetOneCommand) {
+			if (command.getResult() != null) {
+				statisticsHandler.statistics(CommandType.GET_HIT);
+			} else
+				statisticsHandler.statistics(CommandType.GET_MISS);
+		} else
+			statisticsHandler.statistics(command.getCommandType());
 	}
 
 	private final MemcachedClient client;
@@ -78,7 +95,7 @@ public class MemcachedHandler extends HandlerAdapter {
 
 	/**
 	 * Auto reconect to memcached server
-	 *
+	 * 
 	 * @param session
 	 */
 	protected void reconnect(Session session) {
@@ -94,6 +111,7 @@ public class MemcachedHandler extends HandlerAdapter {
 	public MemcachedHandler(MemcachedClient client) {
 		super();
 		this.client = client;
+		this.statisticsHandler = new StatisticsHandler();
 	}
 
 }

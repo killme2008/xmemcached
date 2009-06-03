@@ -33,7 +33,7 @@ public class StatisticsHandler implements StatisticsHandlerMBean {
 			map.put(CommandType.INCR, new AtomicLong());
 			map.put(CommandType.DECR, new AtomicLong());
 			map.put(CommandType.GET_HIT, new AtomicLong());
-			map.put(CommandType.GET_MSS, new AtomicLong());
+			map.put(CommandType.GET_MISS, new AtomicLong());
 			map.put(CommandType.GET_MANY, new AtomicLong());
 			map.put(CommandType.GETS_MANY, new AtomicLong());
 			this.counterMap = map;
@@ -46,8 +46,13 @@ public class StatisticsHandler implements StatisticsHandlerMBean {
 	}
 
 	public final void statistics(CommandType cmdType) {
-		if (this.statistics)
+		if (this.statistics&&this.counterMap.get(cmdType)!=null)
 			this.counterMap.get(cmdType).incrementAndGet();
+	}
+	
+	public final void statistics(CommandType cmdType,int count) {
+		if (this.statistics&&this.counterMap.get(cmdType)!=null)
+			this.counterMap.get(cmdType).addAndGet(count);
 	}
 
 	@Override
@@ -84,7 +89,7 @@ public class StatisticsHandler implements StatisticsHandlerMBean {
 
 	@Override
 	public long getGetMissCount() {
-		return counterMap.get(CommandType.GET_MSS).get();
+		return counterMap.get(CommandType.GET_MISS).get();
 	}
 
 	@Override

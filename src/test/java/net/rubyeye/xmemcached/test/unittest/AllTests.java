@@ -3,7 +3,12 @@ package net.rubyeye.xmemcached.test.unittest;
 import java.io.IOException;
 import java.util.Properties;
 
+import net.rubyeye.xmemcached.test.unittest.commands.factory.TextCommandFactoryTest;
 import net.rubyeye.xmemcached.test.unittest.commands.text.TextCommandsAllTests;
+import net.rubyeye.xmemcached.test.unittest.impl.OptimezerTest;
+import net.rubyeye.xmemcached.test.unittest.impl.SessionLocatorTest;
+import net.rubyeye.xmemcached.test.unittest.monitor.StatisticsHandlerUnitTest;
+import net.rubyeye.xmemcached.test.unittest.utils.AddrUtilTest;
 
 import com.google.code.yanf4j.util.ResourcesUtils;
 
@@ -21,6 +26,7 @@ public class AllTests {
 		suite.addTestSuite(AddrUtilTest.class);
 		suite.addTestSuite(SessionLocatorTest.class);
 		suite.addTest(TextCommandsAllTests.suite());
+		suite.addTestSuite(StatisticsHandlerUnitTest.class);
 		try {
 			Properties properties = ResourcesUtils
 					.getResourceAsProperties("test.properties");

@@ -1,4 +1,4 @@
-package net.rubyeye.xmemcached.test.unittest;
+package net.rubyeye.xmemcached.test.unittest.impl;
 
 import java.nio.ByteBuffer;
 import java.util.concurrent.BlockingQueue;

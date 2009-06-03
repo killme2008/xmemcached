@@ -1,4 +1,4 @@
-package net.rubyeye.xmemcached.test.unittest;
+package net.rubyeye.xmemcached.test.unittest.commands.factory;
 
 import java.util.ArrayList;
 import java.util.List;

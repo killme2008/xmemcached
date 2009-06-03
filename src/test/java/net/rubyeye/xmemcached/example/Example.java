@@ -9,7 +9,7 @@
  *WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
  *either express or implied. See the License for the specific language governing permissions and limitations under the License
  */
-package net.rubyeye.xmemcached.test;
+package net.rubyeye.xmemcached.example;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -55,11 +55,11 @@ public class Example {
 	public static void main(String[] args) {
 		try {
 
-			if(args.length<1){
+			if (args.length < 1) {
 				System.err.println("Useage:java Example [servers]");
 				System.exit(1);
 			}
-			
+
 			MemcachedClientBuilder builder = new XMemcachedClientBuilder(
 					AddrUtil.getAddresses(args[0]));
 			MemcachedClient client = builder.build();
@@ -205,7 +205,7 @@ public class Example {
 			System.out.println(client.gets(keys).get("a").getValue());
 			client.flushAll(); // 使所有数据项失效
 			// 查看统计信息
-			System.out.println(client.stats(args[0], 1000)); // 查看统计信息
+			System.out.println(client.stats()); // 查看统计信息
 			client.shutdown();
 
 		} catch (IOException e) {

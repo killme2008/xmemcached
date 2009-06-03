@@ -144,7 +144,7 @@ public class XMemcachedClientTest extends TestCase {
 		// add,replace fail
 		assertFalse(memcachedClient.add("name", 0, "zhuang"));
 		assertFalse(memcachedClient.replace("name", 0, "zhuang"));
-		Thread.sleep(2000);
+		Thread.sleep(3000);
 		//add,replace success
 		assertTrue(memcachedClient.add("name", 0, "zhuang"));
 		assertTrue(memcachedClient.replace("name", 0, "zhuang"));

@@ -95,6 +95,20 @@ public abstract class TextGetCommand extends Command {
 				return false;
 		}
 	}
+	
+	
+
+	public final Map<String, CachedData> getReturnValues() {
+		return returnValues;
+	}
+
+
+
+	public final void setReturnValues(Map<String, CachedData> returnValues) {
+		this.returnValues = returnValues;
+	}
+
+
 
 	public abstract void dispatch();
 

@@ -1,4 +1,4 @@
-package net.rubyeye.xmemcached.test.unittest;
+package net.rubyeye.xmemcached.test.unittest.utils;
 
 import java.net.InetSocketAddress;
 import java.util.List;

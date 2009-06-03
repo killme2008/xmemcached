@@ -7,10 +7,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import net.rubyeye.xmemcached.command.Command;
-import net.rubyeye.xmemcached.command.CommandType;
 import net.rubyeye.xmemcached.impl.MemcachedTCPSession;
 import net.rubyeye.xmemcached.monitor.Constants;
-import net.rubyeye.xmemcached.monitor.StatisticsHandler;
 import com.google.code.yanf4j.nio.Session;
 import com.google.code.yanf4j.nio.CodecFactory.Decoder;
 import com.google.code.yanf4j.util.ByteBufferMatcher;
@@ -27,14 +25,12 @@ public class MemcachedTextDecoder implements Decoder<Command> {
 	private static final Log log = LogFactory
 			.getLog(MemcachedTextDecoder.class);
 
-	public MemcachedTextDecoder(StatisticsHandler statisticsHandler) {
+	public MemcachedTextDecoder() {
 		super();
-		this.statisticsHandler = statisticsHandler;
 	}
 
 	public static final ByteBuffer SPLIT = ByteBuffer.wrap(Constants.CRLF);
 
-	private final StatisticsHandler statisticsHandler;
 
 	/**
 	 * shift-and algorithm for ByteBuffer's match
@@ -90,9 +86,5 @@ public class MemcachedTextDecoder implements Decoder<Command> {
 		} else
 			return null;
 
-	}
-
-	private final void statistics(CommandType cmdType) {
-		this.statisticsHandler.statistics(cmdType);
 	}
 }
