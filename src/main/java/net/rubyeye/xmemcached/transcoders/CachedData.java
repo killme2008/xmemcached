@@ -19,7 +19,7 @@ public final class CachedData {
 	private byte[] data;
 	private long cas;
 	private int capacity;
-	
+
 	private int size = 0;
 
 	public final int getSize() {
@@ -30,7 +30,7 @@ public final class CachedData {
 		buffer.get(this.data, offset, length);
 		this.size += length;
 	}
-	
+
 	public final void fillData(ByteBuffer buffer,int length) {
 		buffer.get(this.data, this.size, length);
 		this.size += length;
@@ -39,8 +39,6 @@ public final class CachedData {
 	public final int getCapacity() {
 		return capacity;
 	}
-	
-	
 
 	public final void setSize(int size) {
 		this.size = size;
@@ -87,7 +85,7 @@ public final class CachedData {
 	public CachedData(int f, byte[] d, int dataLen, long casId) {
 		super();
 		this.capacity = dataLen;
-		this.size = d!=null?d.length:0;
+		this.size = d != null ? d.length : 0;
 		if (d != null && d.length > dataLen) {
 			throw new IllegalArgumentException(
 					"Cannot cache data larger than 1MB (you tried to cache a "

@@ -67,15 +67,15 @@ public abstract class TextGetCommand extends Command {
 					CachedData value = this.returnValues
 							.get(this.currentReturnKey);
 					int remaining = buffer.remaining();
-					if (remaining == 0) {
-						return false;
-					}
+					int remainingCapacity = value.getCapacity()
+							- value.getSize();
 					// 不够数据，返回
-					if (remaining < value.getCapacity() + 2 - value.getSize()) {
-
-						value.fillData(buffer, remaining);
+					if (remaining < remainingCapacity + 2) {
+						int length = remaining > remainingCapacity ? remainingCapacity
+								: remaining;
+						value.fillData(buffer, length);
 						return false;
-					} else {
+					} else if (remainingCapacity > 0) {
 						value.fillData(buffer, value.getCapacity()
 								- value.getSize());
 					}
@@ -95,20 +95,14 @@ public abstract class TextGetCommand extends Command {
 				return false;
 		}
 	}
-	
-	
 
 	public final Map<String, CachedData> getReturnValues() {
 		return returnValues;
 	}
 
-
-
 	public final void setReturnValues(Map<String, CachedData> returnValues) {
 		this.returnValues = returnValues;
 	}
-
-
 
 	public abstract void dispatch();
 

@@ -41,9 +41,14 @@ public class TextGetOneCommandUnitTest extends BaseTextCommandUnitTest {
 		assertFalse(command.decode(null, ByteBuffer
 				.wrap("VALUE test 0 2\r\n10\r\n".getBytes())));
 		assertNull(command.getResult());
-		checkDecodeValidLine(command, "VALUE test 0 2\r\n10\r\nEND\r\n");
+		
+		assertFalse(command.decode(null, ByteBuffer.wrap("VALUE test 0 4\r\n1".getBytes())));
+		assertFalse(command.decode(null, ByteBuffer.wrap("0".getBytes())));
+		assertFalse(command.decode(null, ByteBuffer.wrap("0".getBytes())));
+		assertFalse(command.decode(null, ByteBuffer.wrap("0".getBytes())));
+		checkDecodeValidLine(command, "\r\nEND\r\n");
 
-		assertEquals("10", new String(((CachedData) command.getResult())
+		assertEquals("1000", new String(((CachedData) command.getResult())
 				.getData()));
 	}
 

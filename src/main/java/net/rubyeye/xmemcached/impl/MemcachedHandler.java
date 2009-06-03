@@ -69,6 +69,16 @@ public class MemcachedHandler extends HandlerAdapter {
 		command.setStatus(OperationStatus.SENT);
 		((MemcachedTCPSession) session).addCommand(command);
 	}
+	
+	
+
+	@Override
+	public void onException(Session session, Throwable t) {
+		super.onException(session, t);
+		t.printStackTrace();
+	}
+
+
 
 	/**
 	 * On session started
