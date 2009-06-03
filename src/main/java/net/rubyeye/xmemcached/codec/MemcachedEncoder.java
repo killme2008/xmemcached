@@ -7,11 +7,11 @@ import net.rubyeye.xmemcached.command.Command;
 import com.google.code.yanf4j.nio.Session;
 import com.google.code.yanf4j.nio.CodecFactory.Encoder;
 /**
- * memcached text protocol encoder
+ * memcached protocol encoder
  * @author dennis
  *
  */
-public class MemcachedTextEncoder implements Encoder<Command> {
+public class MemcachedEncoder implements Encoder<Command> {
 
 	@Override
 	public ByteBuffer encode(Command message, Session session) {

@@ -15,17 +15,17 @@ import com.google.code.yanf4j.util.ByteBufferMatcher;
 import com.google.code.yanf4j.util.ShiftAndByteBufferMatcher;
 
 /**
- * Memcached text protocol decoder
+ * Memcached protocol decoder
  * 
  * @author dennis
  * 
  */
-public class MemcachedTextDecoder implements Decoder<Command> {
+public class MemcachedDecoder implements Decoder<Command> {
 
 	private static final Log log = LogFactory
-			.getLog(MemcachedTextDecoder.class);
+			.getLog(MemcachedDecoder.class);
 
-	public MemcachedTextDecoder() {
+	public MemcachedDecoder() {
 		super();
 	}
 

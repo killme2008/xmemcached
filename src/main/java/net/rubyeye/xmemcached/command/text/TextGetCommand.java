@@ -7,7 +7,7 @@ import java.util.StringTokenizer;
 import java.util.concurrent.CountDownLatch;
 
 import net.rubyeye.xmemcached.buffer.BufferAllocator;
-import net.rubyeye.xmemcached.codec.MemcachedTextDecoder;
+import net.rubyeye.xmemcached.codec.MemcachedDecoder;
 import net.rubyeye.xmemcached.command.Command;
 import net.rubyeye.xmemcached.command.CommandType;
 import net.rubyeye.xmemcached.impl.MemcachedTCPSession;
@@ -34,7 +34,7 @@ public abstract class TextGetCommand extends Command {
 	public final boolean decode(MemcachedTCPSession session, ByteBuffer buffer) {
 		while (true) {
 			if (currentLine == null)
-				currentLine = MemcachedTextDecoder.nextLine(session, buffer);
+				currentLine = MemcachedDecoder.nextLine(session, buffer);
 			if (currentLine != null) {
 				if (currentLine.equals("END")) {
 					dispatch();
@@ -84,7 +84,7 @@ public abstract class TextGetCommand extends Command {
 					// buffer.get(data);
 					// value.setData(data);
 					buffer.position(buffer.position()
-							+ MemcachedTextDecoder.SPLIT.remaining());
+							+ MemcachedDecoder.SPLIT.remaining());
 					this.currentReturnKey = null;
 					this.currentLine = null;
 				} else {

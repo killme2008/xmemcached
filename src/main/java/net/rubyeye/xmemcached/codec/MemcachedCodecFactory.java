@@ -13,14 +13,14 @@ import net.rubyeye.xmemcached.command.Command;
  */
 public class MemcachedCodecFactory implements CodecFactory<Command> {
 
-	private MemcachedTextEncoder encoder;
+	private MemcachedEncoder encoder;
 
-	private MemcachedTextDecoder decoder;
+	private MemcachedDecoder decoder;
 
 	public MemcachedCodecFactory() {
 		super();
-		this.encoder = new MemcachedTextEncoder();
-		this.decoder = new MemcachedTextDecoder();
+		this.encoder = new MemcachedEncoder();
+		this.decoder = new MemcachedDecoder();
 	}
 
 	/**

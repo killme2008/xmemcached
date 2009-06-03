@@ -4,7 +4,7 @@ import java.nio.ByteBuffer;
 import java.util.concurrent.CountDownLatch;
 
 import net.rubyeye.xmemcached.buffer.BufferAllocator;
-import net.rubyeye.xmemcached.codec.MemcachedTextDecoder;
+import net.rubyeye.xmemcached.codec.MemcachedDecoder;
 import net.rubyeye.xmemcached.command.CommandType;
 import net.rubyeye.xmemcached.command.StoreCommand;
 import net.rubyeye.xmemcached.impl.MemcachedTCPSession;
@@ -24,7 +24,7 @@ public class TextStoreCommand extends StoreCommand {
 
 	@Override
 	public boolean decode(MemcachedTCPSession session, ByteBuffer buffer) {
-		String line = MemcachedTextDecoder.nextLine(session, buffer);
+		String line = MemcachedDecoder.nextLine(session, buffer);
 		if (line != null) {
 			if (line.equals("STORED")) {
 				setResult(Boolean.TRUE);

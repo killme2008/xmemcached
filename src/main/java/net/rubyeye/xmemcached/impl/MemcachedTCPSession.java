@@ -59,14 +59,16 @@ public class MemcachedTCPSession extends DefaultTCPSession {
 			int readThreadCount) {
 		super(sessionConfig, readRecvBufferSize, -1);
 		this.optimiezer = optimiezer;
-		remoteSocketAddress = ((SocketChannel) this.selectableChannel).socket()
-				.getRemoteSocketAddress();
-		this.allowReconnect = true;
-		try {
-			this.sendBufferSize = ((SocketChannel) this.selectableChannel)
-					.socket().getSendBufferSize();
-		} catch (SocketException e) {
-			this.sendBufferSize = 8 * 1024;
+		if (this.selectableChannel != null) {
+			remoteSocketAddress = ((SocketChannel) this.selectableChannel)
+					.socket().getRemoteSocketAddress();
+			this.allowReconnect = true;
+			try {
+				this.sendBufferSize = ((SocketChannel) this.selectableChannel)
+						.socket().getSendBufferSize();
+			} catch (SocketException e) {
+				this.sendBufferSize = 8 * 1024;
+			}
 		}
 		if (readThreadCount > 0) {
 			this.executingCmds = new ArrayBlockingQueue<Command>(16 * 1024);
@@ -157,5 +159,9 @@ public class MemcachedTCPSession extends DefaultTCPSession {
 
 	public void setAllowReconnect(boolean reconnected) {
 		this.allowReconnect = reconnected;
+	}
+
+	public final void addCommand(Command command) {
+		executingCmds.add(command);
 	}
 }
