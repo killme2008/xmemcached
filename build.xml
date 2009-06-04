@@ -6,7 +6,7 @@
 			<include name="*.jar" />
 		</fileset>
 	</path>
-	<target name="init" description="初始化">
+	<target name="init" description="initialize">
 		<delete dir="${build.classes}">
 		</delete>
 		<delete dir="${build.dist}">
@@ -20,7 +20,9 @@
 	<target name="compile" depends="init">
 		<javac encoding="utf-8" classpathref="classpath" debuglevel="line,source" target="1.6" srcdir="${src}" destdir="${build.classes}" debug="true" verbose="false" source="1.6">
 		</javac>
-		<copyfile dest="${build.dist}/license.txt" src="${src}/license.txt" />
+		<copyfile dest="${build.dist}/license.txt" src="${resources}/license.txt" />
+		<copyfile dest="${build.dist}/README" src="${basedir}/README" />
+		<copyfile dest="${build.dist}/Changelog.txt" src="${basedir}/Changelog.txt" />
 	</target>
 	<target name="jar" depends="compile">
 		<jar destfile="${build.dist}/${ant.project.name}-${project.version}.jar" basedir="${build.classes}">
@@ -52,7 +54,10 @@
 			<include name="**/*.xml" />
 			<include name="**/*.properties" />
 			<include name="**/*.txt" />
+			<include name="**/README" />
+			<include name="**/Changelog.txt" />
 			<include name="**/lib/*" />
+			<exclude name="**/target/*"/>
 		</tar>
 	</target>
 </project>

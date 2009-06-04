@@ -1,26 +1,51 @@
-==introduction==
+=======================Introduction==========================
 xmemcached
-  It's a java client api for memcached,It is implemented in java nio.
+  XMemcached is a high performance, easy to use blocking multithreaded memcached client in java.
+  It's nio based (using my nio framework :yanf4j), and was carefully tuned to get top performance. 
 
 homepage:  http://code.google.com/p/xmemcached/
 downloads; http://code.google.com/p/xmemcached/downloads/list 
 wiki :     http://code.google.com/p/xmemcached/w/list
 author : dennis zhuang(killme2008@gmail.com)
-==example==
 
-#new a XMemcachedClient instance
-XMemcachedClient client = new XMemcachedClient();
+=============================================================
+FAQ
+1.How to build project by maven?
 
-#add memcached server
+Please install lib/yanf4j-0.61-SNAPSHOT.jar to local repository,groupId and artifactId both are yanf4j.
+install lib/spy-2.4.jar to local repository,groupId and artifactId both are spy.
 
-client.addServer("localhost", 12001);
-client.addServer("localhost", 12003);
+Then type command "mvn package" to build the project.
 
-..add other servers...
+
+2.How to run unit tests?
+
+The test.properties file under the src/test/resources folder is used for setting memcached test server.
+Please set test.memcached.servers property,Then run the AllTests class with jvm option "-ea".
+
+
+3.How to build project by ant?
+
+You must edit the build.xml,include junit.jar into classpath,then
+type command "ant build-package" to build project.
+
+======================Example==================================
+
+#New a XMemcachedClient instance
+
+ XMemcachedClientBuilder builder = new XMemcachedClientBuilder(
+           AddrUtil.getAddresses("localhost:11211"));
+ XMemcachedClient client=builder.build();
+
+#add or remove memcached server dynamically 
+
+client.addServer("localhost:12001 localhost:12002");
+client.removeServer("localhost:12001 localhost:12002");
+
 
 #get operation
 
-String name = (String) client.get("test");
+String name =client.get("test");
 
 #set add replace append prepend gets
 
@@ -31,6 +56,7 @@ client.prepend("hello", 0, "hello ");
 GetsResponse response=client.gets("hello");
 long cas=response.getCas();
 Obejct value=response.getValue();
+
 #incr decr
 client.set("a",0,"1");
 client.incr("a",4); 
@@ -51,11 +77,24 @@ client.cas("a", 0, new CASOperation() {
 
 });
 
-# get server version
-memcached.version();
+#flush_all
+client.flushAll();
+
+#stats
+Map<InetSocketAddress,Map<String,String>> result=client.getStats();
+
+# get server versions
+Map<InetSocketAddress,String> version=memcached.getVersions();
 
 #bulk get
 List<String> keys = new ArrayList<String>();
 keys.add("hello");
 keys.add("test");
 Map<String, Object> map = client.get(keys);
+
+#Enable jmx support
+java -Dxmemcached.jmx.enable=true [YourApp]
+
+Access MBean through service:jmx:rmi:///jndi/rmi://[host]:7077/xmemcachedServer 
+
+More information see wiki pages please.

@@ -529,14 +529,13 @@ public interface MemcachedClient {
 			throws TimeoutException, InterruptedException, MemcachedException;
 
 	/**
-	 * 获取memcached版本，此方法在多个节点的情况下将按照"version"字符串的hash值查找对应的连接并发送version协议，
-	 * 也就说此方法仅返回某个节点的memcached版本，如果要查询特定节点的memcached版本，请参考stats方法
-	 *
+	 * This method will be removed in 1.20,Please use getVersions() instead.
 	 * @return 版本号字符串
 	 * @throws TimeoutException
 	 * @throws InterruptedException
 	 * @throws MemcachedException
 	 */
+	@Deprecated
 	public abstract String version() throws TimeoutException,
 			InterruptedException, MemcachedException;
 
@@ -623,7 +622,8 @@ public interface MemcachedClient {
 			InterruptedException, MemcachedException;
 
 	/**
-	 * 查看指定节点的memcached server统计信息
+	 * Deprecated.This method will be removed in 1.20.</br>
+	 * Please use stats(InetSocketAddress address) instead.
 	 *
 	 * @param host
 	 *            memcached节点host ip:port的形式
@@ -634,9 +634,20 @@ public interface MemcachedClient {
 	 * @throws InterruptedException
 	 * @throws MemcachedException
 	 */
+	@Deprecated
 	public abstract Map<String, String> stats(String host, long timeout)
 			throws TimeoutException, InterruptedException, MemcachedException;
 
+	/**
+	 * Deprecated.This method will be removed in 1.20.</br>
+	 * Please use stats(InetSocketAddress address) instead.
+	 * @param host
+	 * @return
+	 * @throws TimeoutException
+	 * @throws InterruptedException
+	 * @throws MemcachedException
+	 */
+	@Deprecated
 	public abstract Map<String, String> stats(String host)
 			throws TimeoutException, InterruptedException, MemcachedException;
 

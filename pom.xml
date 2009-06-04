@@ -5,12 +5,10 @@
 	<groupId>xmemcached</groupId>
 	<artifactId>xmemcached</artifactId>
 	<packaging>jar</packaging>
-	<version>1.10-rc1</version>
+	<version>1.11</version>
 	<name>xmemcached</name>
 	<url>http://maven.apache.org</url>
 	<build>
-		<sourceDirectory>src</sourceDirectory>
-		<outputDirectory>target/classes</outputDirectory>
 		<plugins>
 			<plugin>
 				<artifactId>maven-compiler-plugin </artifactId>
@@ -42,7 +40,7 @@
 		<dependency>
 			<groupId>yanf4j</groupId>
 			<artifactId>yanf4j</artifactId>
-			<version>0.60-SNAPSHOT</version>
+			<version>0.61-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>spy</groupId>

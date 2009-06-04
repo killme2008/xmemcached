@@ -12,6 +12,7 @@ import java.util.List;
  *
  * @author dennis
  */
+@Deprecated
 public class ArrayIoBuffer implements IoBuffer {
 
     public ByteBuffer[] byteBuffers;

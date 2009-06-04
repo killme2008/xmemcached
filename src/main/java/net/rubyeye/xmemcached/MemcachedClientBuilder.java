@@ -64,10 +64,26 @@ public interface MemcachedClientBuilder {
 	 */
 	public abstract MemcachedClient build() throws IOException;
 
+	/**
+	 * Set xmemcached's transcoder,it is used for seriailizing
+	 * @return
+	 */
 	@SuppressWarnings("unchecked")
 	public Transcoder getTranscoder();
 
 	@SuppressWarnings("unchecked")
 	public void setTranscoder(Transcoder transcoder);
+
+	/**
+	 * get xmemcached's command factory
+	 * @return
+	 */
+	public CommandFactory getCommandFactory();
+
+	/**
+	 * set xmemcached's command factory.Default is TextCommandFactory,which implements memcached text protocol.
+	 * @param commandFactory
+	 */
+	public void setCommandFactory(CommandFactory commandFactory);
 
 }

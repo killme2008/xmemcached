@@ -1,0 +1,52 @@
+
+-----------------------------------------
+2009-05-22
+--------xmemcached 1.10-Released----------
+1.Improve multi-get operation's performance,It's as fast as spymemcached.It will continue on.
+2.Refactoring:
+   Move classes such as MemcachedTCPSession,MemcachedHandler,MemcachedConnector etc. from package net.rubyeye.xmemcached to  net.rubyeye.xmemcached.impl
+   Introduce interfaces: MemcachedClient,MemcachedClientBuilder
+3.More Unit tests 
+4.Move 1.10 from svn trunk to branches/xmemcached-1.10 
+
+-------------------End--------------------- 
+
+*******************************************
+
+2009-06-07
+--------xmemcached 1.11-Released-----------
+1.Migrate yanf4j to 0.61
+2.Add many unit tests.Refactoring for a good Structure,It is ready to introduce 
+  the memcached binary protocol support.
+3.Deprecated some classes and interfaces.Include:
+  net.rubyeye.xmemcached.MemcachedProtocolHandler
+  net.rubyeye.xmemcached.buffer.ArrayIoBuffer
+  
+4.Deprecated some methods.Includes:
+                     Deprecated                                                Instead
+                     
+    net.rubyeye.xmemcached.utils.AddrUtil.getAddress(String server) =====> getOneAddress(server)
+    net.rubyeye.xmemcached.MemcachedClient.version()                =====>  getVersions()       
+    net.rubyeye.xmemcached.MemcachedClientMemcachedClient.stats(String host, long timeout)
+    net.rubyeye.xmemcached.MemcachedClientMemcachedClient.stats(String host)
+5.Add some new methods.Includes:  
+      net.rubyeye.xmemcached.MemcachedClientBuilder.getCommandFactory  => CommandFactory getter/setter
+      net.rubyeye.xmemcached.MemcachedClientBuilder.setCommandFactory  
+      net.rubyeye.xmemcached.MemcachedClientBuilder.setTranscoder      => Transcoder getter/setter
+      net.rubyeye.xmemcached.MemcachedClientBuilder.getTranscoder
+      net.rubyeye.xmemcached.MemcachedClient.getVersions()   => get all connected memcached servers's versions
+      net.rubyeye.xmemcached.MemcachedClient.getStats()      => get all connected memcached servers's stats.
+      net.rubyeye.xmemcached.MemcachedClient.getStatsByItem(String item)      => get all connected memcached servers's special item stats.
+      net.rubyeye.xmemcached.MemcachedClient.setOpTime()     => set the default operation timeout
+      net.rubyeye.xmemcached.MemcachedClient.getOpTime()     => get the default operation timeout
+      net.rubyeye.xmemcached.utils.AddrUtil.getOneAddress    => get a InetSocketAddress from string
+6.Add some new classes.Includes
+      net.rubyeye.xmemcached.codec.MemcachedCodecFactory     => Implements yanf4j CodecFactory
+                                   MemcachedDecoder
+                                   MemcachedEncoder          => decode/encode commands
+      net.rubyeye.xmemcached.command.text.*
+      net.rubyeye.xmemcached.command.*                       => Commmands implemented memcached text protocol   
+7.Change CommandFactory from class to interface,TextCommandFactory implement it for creating text protocol based commands.
+      
+                                  
+-------------------End--------------------- 
