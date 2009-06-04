@@ -2,7 +2,6 @@ package net.rubyeye.memcached.benchmark.xmemcached;
 
 import java.util.Properties;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.atomic.AtomicLong;
 
 import com.google.code.yanf4j.util.ResourcesUtils;
@@ -23,7 +22,7 @@ public class Xmemcached implements Constants {
 		String servers = (String) properties.get("servers");
 		MemcachedClient memcachedClient = new XMemcachedClient(AddrUtil
 				.getAddresses(servers));
-
+		System.out.println("Xmemcached startup");
 		warmUp(memcachedClient);
 
 		for (int i = 0; i < THREADS.length; i++) {
@@ -47,20 +46,20 @@ public class Xmemcached implements Constants {
 			int threads, int repeats, boolean print) throws Exception {
 		memcachedClient.flushAll();
 		AtomicLong miss = new AtomicLong(0);
+		AtomicLong fail = new AtomicLong(0);
 		CountDownLatch countDownLatch = new CountDownLatch(threads);
 		long start = System.nanoTime();
 		for (int i = 0; i < threads; i++) {
 			new ReadWriteThread(memcachedClient, repeats, countDownLatch, i
-					* repeats, length,miss).start();
+					* repeats, length, miss, fail).start();
 		}
 		countDownLatch.await();
 		if (print) {
 			long duration = System.nanoTime() - start;
 			long total = repeats * threads;
-			System.out.println("Xmemcached done,threads=" + threads
-					+ ",repeats=" + repeats + ",valueLength=" + length
-					+ ",tps=" + total * 1000000000 / duration + ",miss="
-					+ miss.get());
+			System.out.println("threads=" + threads + ",repeats=" + repeats
+					+ ",valueLength=" + length + ",tps=" + total * 1000000000
+					/ duration + ",miss=" + miss.get() + ",fail=" + fail.get());
 		}
 	}
 }

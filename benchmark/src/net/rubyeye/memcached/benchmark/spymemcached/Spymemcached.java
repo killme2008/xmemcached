@@ -8,6 +8,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import net.rubyeye.memcached.benchmark.Constants;
 import net.spy.memcached.AddrUtil;
 import net.spy.memcached.MemcachedClient;
+import net.spy.memcached.transcoders.SerializingTranscoder;
 
 import com.google.code.yanf4j.util.ResourcesUtils;
 
@@ -23,7 +24,7 @@ public class Spymemcached implements Constants {
 		String servers = (String) properties.get("servers");
 		MemcachedClient memcachedClient = new MemcachedClient(AddrUtil
 				.getAddresses(servers));
-
+		System.out.println("Spymemcached startup");
 		warmUp(memcachedClient);
 
 		for (int i = 0; i < THREADS.length; i++) {
@@ -48,19 +49,20 @@ public class Spymemcached implements Constants {
 		memcachedClient.flush();
 		CountDownLatch latch = new CountDownLatch(threads);
 		AtomicLong miss = new AtomicLong(0);
+		AtomicLong fail = new AtomicLong(0);
 		long start = System.nanoTime();
 		for (int i = 0; i < threads; i++) {
 			new ReadWriteThread(memcachedClient, repeats, latch, i * repeats,
-					length,miss).start();
+					length, miss,fail).start();
 		}
 		latch.await();
 		if (print) {
 			long duration = System.nanoTime() - start;
 			long total = repeats * threads;
-			System.out.println("Spymemcached done,threads=" + threads
+			System.out.println("threads=" + threads
 					+ ",repeats=" + repeats + ",valueLength=" + length
 					+ ",tps=" + total * 1000000000 / duration + ",miss="
-					+ miss.get());
+					+ miss.get()+",fail="+fail.get());
 		}
 	}
 }

@@ -21,15 +21,18 @@ public class ReadWriteThread extends Thread {
 	int length;
 
 	AtomicLong miss;
+	
+	AtomicLong fail;
 
 	public ReadWriteThread(MemCachedClient memcachedClient, int repeats,
-			CountDownLatch latch, int offset, int length, AtomicLong miss) {
+			CountDownLatch latch, int offset, int length, AtomicLong miss,AtomicLong fail) {
 		super();
 		this.memcachedClient = memcachedClient;
 		this.repeats = repeats;
 		this.latch = latch;
 		this.offset = offset;
 		this.length = length;
+		this.fail=fail;
 		this.miss = miss;
 	}
 
@@ -37,27 +40,28 @@ public class ReadWriteThread extends Thread {
 		int writeTimes = (int) (this.repeats * Constants.WRITE_RATE);
 		try {
 			int writeMax = offset + writeTimes;
+			int readTimes = this.repeats - writeTimes;
 			for (int i = offset; i <= writeMax; i++) {
 				String s = StringGenerator.generate(i, length);
-				if (!memcachedClient.set(String.valueOf(i), s, 0)) {
+				if (!memcachedClient.set(String.valueOf(i), s)) {
 					System.err.println("set error");
 					System.exit(1);
 				}
 			}
-			for (int i = 0; i < repeats - writeTimes; i++) {
-				int newOffset = i + offset;
-				int n = (newOffset > writeMax) ? (newOffset % writeTimes + offset)
-						: newOffset;
-				String s = StringGenerator.generate(n, length);
-				String result = (String) this.memcachedClient.get(String
-						.valueOf(n));
+			int total = 0;
+			for (int i = offset; i <= writeMax; i++) {
+				total++;
+				if (total > readTimes)
+					break;
+				String s = StringGenerator.generate(i, length);
+				String result = (String)this.memcachedClient.get(String.valueOf(i));
 				if (result != null && !s.equals(result)) {
 					System.err.println("get error,expected " + s + ",actual "
 							+ result);
-					System.exit(1);
-				} else
-					this.miss.incrementAndGet();
-
+					fail.incrementAndGet();
+				} else {
+					miss.incrementAndGet();
+				}
 			}
 			latch.countDown();
 		} catch (Exception e) {

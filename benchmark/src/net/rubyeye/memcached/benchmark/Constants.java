@@ -11,5 +11,5 @@ public interface Constants {
 			64, 128, 256, 512, 1024, 4096, 8192, 16 * 1024 };
 	public static final double WRITE_RATE = 0.3;
 	final int BASE_REPEATS = 10000;
-	final long OP_TIMEOUT=5000;
+	final long OP_TIMEOUT = 3000;
 }

@@ -2,7 +2,6 @@ package net.rubyeye.memcached.benchmark.java_memcached;
 
 import java.util.Properties;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.apache.log4j.BasicConfigurator;
@@ -27,8 +26,11 @@ public class JavaMemCached implements Constants {
 		BasicConfigurator.configure();
 		SockIOPool pool = SockIOPool.getInstance();
 		pool.setServers(servers.split(" "));
-		MemCachedClient memcachedClient = new MemCachedClient();
+		pool.initialize();
 
+		MemCachedClient memcachedClient = new MemCachedClient();
+		memcachedClient.setCompressThreshold(16 * 1024);
+		System.out.println("Java MemCached startup");
 		warmUp(memcachedClient);
 
 		for (int i = 0; i < THREADS.length; i++) {
@@ -52,19 +54,19 @@ public class JavaMemCached implements Constants {
 		memcachedClient.flushAll();
 		CountDownLatch latch = new CountDownLatch(threads);
 		AtomicLong miss = new AtomicLong(0);
+		AtomicLong fail = new AtomicLong(0);
 		long start = System.nanoTime();
 		for (int i = 0; i < threads; i++) {
 			new ReadWriteThread(memcachedClient, repeats, latch, i * repeats,
-					length, miss).start();
+					length, miss, fail).start();
 		}
 		latch.await();
 		if (print) {
 			long duration = System.nanoTime() - start;
 			long total = repeats * threads;
-			System.out.println("Spymemcached done,threads=" + threads
-					+ ",repeats=" + repeats + ",valueLength=" + length
-					+ ",tps=" + total * 1000000000 / duration + ",miss="
-					+ miss.get());
+			System.out.println("threads=" + threads + ",repeats=" + repeats
+					+ ",valueLength=" + length + ",tps=" + total * 1000000000
+					/ duration + ",miss=" + miss.get() + ",fail=" + fail.get());
 		}
 	}
 }
