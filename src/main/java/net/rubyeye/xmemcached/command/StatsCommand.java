@@ -8,21 +8,22 @@ public abstract class StatsCommand extends Command {
 	public static final ByteBuffer STATS = ByteBuffer.wrap("stats\r\n"
 			.getBytes());
 	protected InetSocketAddress server;
-	// TODO provide stats item
-	protected String item;
+	protected String itemName;
 
-	public String getItem() {
-		return item;
+	public String getItemName() {
+		return itemName;
 	}
 
-	public void setItem(String item) {
-		this.item = item;
+	public void setItemName(String item) {
+		this.itemName = item;
 	}
 
-	public StatsCommand(InetSocketAddress server, final CountDownLatch latch) {
+	public StatsCommand(InetSocketAddress server, final CountDownLatch latch,
+			String itemName) {
 		super("stats", (byte[]) null, latch);
 		this.commandType = CommandType.STATS;
 		this.server = server;
+		this.itemName = itemName;
 	}
 
 	public final InetSocketAddress getServer() {

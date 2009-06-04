@@ -33,8 +33,6 @@ public class TextIncrDecrCommand extends IncrDecrCommand {
 				countDownLatch();
 				return true;
 			} else {
-				// TODO add statistics
-				// statistics(executingCmd.getCommandType());
 				setResult(Integer.parseInt(line));
 				countDownLatch();
 				return true;

@@ -186,12 +186,17 @@ public class XMemcachedClientTest extends TestCase {
 	public void testVersion() throws Exception {
 		assertNotNull(memcachedClient.version());
 		System.out.println(memcachedClient.version());
+		assertTrue(memcachedClient.getVersions(5000).size()>0);
+		System.out.println(memcachedClient.getVersions());
 
 	}
 
 	public void testStats() throws Exception {
-		assertTrue(memcachedClient.stats().size() > 0);
-		System.out.println(memcachedClient.stats());
+		assertTrue(memcachedClient.getStats().size() > 0);
+		System.out.println(memcachedClient.getStats());
+		memcachedClient.set("a", 0, 1);
+		assertTrue(memcachedClient.getStatsByItem("items").size() > 0);
+		System.out.println(memcachedClient.getStatsByItem("items"));
 	}
 
 	public void testFlushAll() throws Exception {

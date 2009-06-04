@@ -1,5 +1,6 @@
 package net.rubyeye.xmemcached.command.text;
 
+import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.util.concurrent.CountDownLatch;
 
@@ -10,8 +11,8 @@ import net.rubyeye.xmemcached.impl.MemcachedTCPSession;
 
 public class TextVersionCommand extends VersionCommand {
 
-	public TextVersionCommand(CountDownLatch latch) {
-		super(latch);
+	public TextVersionCommand(InetSocketAddress server,CountDownLatch latch) {
+		super(server,latch);
 
 	}
 

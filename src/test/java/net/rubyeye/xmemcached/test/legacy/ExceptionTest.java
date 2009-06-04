@@ -1,4 +1,4 @@
-package net.rubyeye.xmemcached.test;
+package net.rubyeye.xmemcached.test.legacy;
 
 import java.io.IOException;
 import java.util.concurrent.TimeoutException;

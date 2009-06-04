@@ -34,17 +34,4 @@ public interface XMemcachedClientMBean {
 	 */
 	public List<String> getServersDescription();
 
-	/**
-	 * get operation timeout setting
-	 * 
-	 * @return
-	 */
-	public long getOpTimeout();
-
-	/**
-	 * set operation timeout,default is one second.
-	 * @param opTimeout
-	 */
-	public void setOpTimeout(long opTimeout);
-
 }

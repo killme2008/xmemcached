@@ -7,16 +7,18 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeoutException;
 
+
 import net.rubyeye.xmemcached.buffer.BufferAllocator;
+
 import net.rubyeye.xmemcached.exception.MemcachedException;
 import net.rubyeye.xmemcached.impl.MemcachedConnector;
 import net.rubyeye.xmemcached.transcoders.Transcoder;
 
 /**
  * The memcached client's interface
- *
+ * 
  * @author dennis
- *
+ * 
  */
 public interface MemcachedClient {
 
@@ -50,33 +52,33 @@ public interface MemcachedClient {
 	 * Default operation timeout,if the operation is not returned in 1
 	 * second,throw TimeoutException
 	 */
-	public static final long DEFAULT_OP_TIMEOUT=1000L;
-	
+	public static final long DEFAULT_OP_TIMEOUT = 1000L;
+
 	/**
 	 * Set the merge factor,this factor determins how many 'get' commands would
 	 * be merge to one multi-get command.default is 150
-	 *
+	 * 
 	 * @param mergeFactor
 	 */
 	public abstract void setMergeFactor(final int mergeFactor);
 
 	/**
 	 * Get the connect timeout
-	 *
+	 * 
 	 * @param connectTimeout
 	 */
 	public abstract long getConnectTimeout();
 
 	/**
 	 * Set the connect timeout,default is 1 minutes
-	 *
+	 * 
 	 * @param connectTimeout
 	 */
 	public abstract void setConnectTimeout(long connectTimeout);
 
 	/**
 	 * return the session manager
-	 *
+	 * 
 	 * @return
 	 */
 	public abstract MemcachedConnector getConnector();
@@ -85,7 +87,7 @@ public interface MemcachedClient {
 	 * Enable/Disable merge many get commands to one multi-get command.true is
 	 * to enable it,false is to disable it.Default is true.Recommend users to
 	 * enable it.
-	 *
+	 * 
 	 * @param optimiezeGet
 	 */
 	public abstract void setOptimiezeGet(final boolean optimiezeGet);
@@ -93,7 +95,7 @@ public interface MemcachedClient {
 	/**
 	 * Enable/Disable merge many command's buffers to one big buffer fit
 	 * socket's send buffer size.Default is true.Recommend true.
-	 *
+	 * 
 	 * @param optimizeMergeBuffer
 	 */
 	public abstract void setOptimizeMergeBuffer(
@@ -107,7 +109,7 @@ public interface MemcachedClient {
 	/**
 	 * Aadd a memcached server,the thread call this method will be blocked until
 	 * the connecting operations completed(success or fail)
-	 *
+	 * 
 	 * @param server
 	 *            host string
 	 * @param port
@@ -119,7 +121,7 @@ public interface MemcachedClient {
 	/**
 	 * Add a memcached server,the thread call this method will be blocked until
 	 * the connecting operations completed(success or fail)
-	 *
+	 * 
 	 * @param inetSocketAddress
 	 *            memcached server's socket address
 	 */
@@ -129,7 +131,7 @@ public interface MemcachedClient {
 	/**
 	 * Add many memcached servers.You can call this method through JMX or
 	 * program
-	 *
+	 * 
 	 * @param host
 	 *            String like [host1]:[port1] [host2]:[port2] ...
 	 */
@@ -142,7 +144,7 @@ public interface MemcachedClient {
 
 	/**
 	 * Remove many memcached server
-	 *
+	 * 
 	 * @param host
 	 *            String like [host1]:[port1] [host2]:[port2] ...
 	 */
@@ -150,7 +152,7 @@ public interface MemcachedClient {
 
 	/**
 	 * Set the nio's ByteBuffer Allocator,use SimpleBufferAllocator by default.
-	 *
+	 * 
 	 * @param bufferAllocator
 	 * @return
 	 */
@@ -159,7 +161,7 @@ public interface MemcachedClient {
 
 	/**
 	 * Get value by key
-	 *
+	 * 
 	 * @param <T>
 	 * @param key
 	 *            Key
@@ -188,7 +190,7 @@ public interface MemcachedClient {
 
 	/**
 	 * 类似get,但是gets将返回缓存项的cas值，可用于cas操作，参见cas方法
-	 *
+	 * 
 	 * @param <T>
 	 * @param key
 	 *            关键字
@@ -219,7 +221,7 @@ public interface MemcachedClient {
 
 	/**
 	 * memcached的getMulti操作，批量获取一批key对应的数据项
-	 *
+	 * 
 	 * @param <T>
 	 * @param keyCollections
 	 *            关键字集合
@@ -252,7 +254,7 @@ public interface MemcachedClient {
 
 	/**
 	 * 类似getMulti，但是返回数据项的cas值，返回的map中value存储的是GetsResponse对象
-	 *
+	 * 
 	 * @param <T>
 	 * @param keyCollections
 	 * @param timeout
@@ -282,7 +284,7 @@ public interface MemcachedClient {
 
 	/**
 	 * 设置key对应的项为value，无论key是否已经存在
-	 *
+	 * 
 	 * @param <T>
 	 * @param key
 	 *            缓存关键字
@@ -320,7 +322,7 @@ public interface MemcachedClient {
 
 	/**
 	 *添加key-value缓存项，仅在key不存在的情况下才能添加成功
-	 *
+	 * 
 	 * @param <T>
 	 * @param key
 	 * @param exp
@@ -357,7 +359,7 @@ public interface MemcachedClient {
 
 	/**
 	 * 替代key对应的值，当且仅当key对应的缓存项存在的时候可以替换
-	 *
+	 * 
 	 * @param <T>
 	 * @param key
 	 * @param exp
@@ -391,7 +393,7 @@ public interface MemcachedClient {
 
 	/**
 	 * 将value添加到key对应的缓存项后面连接起来，这一操作仅对String有意义。
-	 *
+	 * 
 	 * @param key
 	 * @param value
 	 * @return
@@ -408,7 +410,7 @@ public interface MemcachedClient {
 
 	/**
 	 * 类似append，是将value附加到key对应的缓存项前面，这一操作仅对String有实际意义
-	 *
+	 * 
 	 * @param key
 	 * @param value
 	 * @return
@@ -429,7 +431,7 @@ public interface MemcachedClient {
 
 	/**
 	 * cas原子替换key对应的value，当且仅当cas值相等的时候替换成功
-	 *
+	 * 
 	 * @param <T>
 	 * @param key
 	 * @param exp
@@ -457,7 +459,7 @@ public interface MemcachedClient {
 
 	/**
 	 * 原子替换key对应的value值，当且仅当cas值相等时替换成功，具体使用参见wiki
-	 *
+	 * 
 	 * @param <T>
 	 * @param key
 	 * @param exp
@@ -477,7 +479,7 @@ public interface MemcachedClient {
 
 	/**
 	 * 原子替换key对应的value值，当且仅当cas值相等时替换成功
-	 *
+	 * 
 	 * @param <T>
 	 * @param key
 	 * @param exp
@@ -516,7 +518,7 @@ public interface MemcachedClient {
 	/**
 	 * 从缓存中移除key对应的数据项,memcached移除数据项，如果指定了time，那么将放入一个delete
 	 * queue，直到时间到达才真正移除，在此段时间内，add、replace同一个key的操作将失败
-	 *
+	 * 
 	 * @param key
 	 * @param time
 	 *            单位为秒，客户端希望memcached server拒绝接受相同key的add,replace操作的时间
@@ -530,6 +532,7 @@ public interface MemcachedClient {
 
 	/**
 	 * This method will be removed in 1.20,Please use getVersions() instead.
+	 * 
 	 * @return 版本号字符串
 	 * @throws TimeoutException
 	 * @throws InterruptedException
@@ -540,8 +543,19 @@ public interface MemcachedClient {
 			InterruptedException, MemcachedException;
 
 	/**
+	 * Get all connected memcached servers's versions.
+	 * 
+	 * @return
+	 * @throws TimeoutException
+	 * @throws InterruptedException
+	 * @throws MemcachedException
+	 */
+	public Map<InetSocketAddress, String> getVersions()
+			throws TimeoutException, InterruptedException, MemcachedException;
+
+	/**
 	 * 递增key对应的value
-	 *
+	 * 
 	 * @param key
 	 * @param num
 	 *            增加的幅度
@@ -555,7 +569,7 @@ public interface MemcachedClient {
 
 	/**
 	 * 递减key对应的value
-	 *
+	 * 
 	 * @param key
 	 * @param num
 	 *            递减的幅度
@@ -569,7 +583,7 @@ public interface MemcachedClient {
 
 	/**
 	 * 使cache中所有的数据项失效，如果是连接多个节点的memcached，那么所有的memcached中的数据项都将失效
-	 *
+	 * 
 	 * @throws TimeoutException
 	 * @throws InterruptedException
 	 * @throws MemcachedException
@@ -579,7 +593,7 @@ public interface MemcachedClient {
 
 	/**
 	 * 使cache中所有的数据项失效,如果是连接多个节点的memcached，那么所有的memcached中的数据项都将失效
-	 *
+	 * 
 	 * @param timeout
 	 *            操作超时时间
 	 * @throws TimeoutException
@@ -591,7 +605,7 @@ public interface MemcachedClient {
 
 	/**
 	 * 使指定memcached节点的数据项失效
-	 *
+	 * 
 	 * @param host
 	 *            memcached节点host ip:port的形式
 	 * @param timeout
@@ -611,7 +625,7 @@ public interface MemcachedClient {
 
 	/**
 	 * 使指定memcached节点的数据项失效
-	 *
+	 * 
 	 * @param host
 	 *            memcached节点host ip:port的形式
 	 * @throws TimeoutException
@@ -622,9 +636,9 @@ public interface MemcachedClient {
 			InterruptedException, MemcachedException;
 
 	/**
-	 * Deprecated.This method will be removed in 1.20.</br>
-	 * Please use stats(InetSocketAddress address) instead.
-	 *
+	 * Deprecated.This method will be removed in 1.20.</br> Please use
+	 * stats(InetSocketAddress address) instead.
+	 * 
 	 * @param host
 	 *            memcached节点host ip:port的形式
 	 * @param timeout
@@ -639,8 +653,9 @@ public interface MemcachedClient {
 			throws TimeoutException, InterruptedException, MemcachedException;
 
 	/**
-	 * Deprecated.This method will be removed in 1.20.</br>
-	 * Please use stats(InetSocketAddress address) instead.
+	 * Deprecated.This method will be removed in 1.20.</br> Please use
+	 * stats(InetSocketAddress address) instead.
+	 * 
 	 * @param host
 	 * @return
 	 * @throws TimeoutException
@@ -656,7 +671,7 @@ public interface MemcachedClient {
 
 	/**
 	 * 查看特定节点的memcached server统计信息
-	 *
+	 * 
 	 * @param address
 	 *            节点地址
 	 * @param timeout
@@ -669,7 +684,7 @@ public interface MemcachedClient {
 	public abstract Map<String, String> stats(InetSocketAddress address,
 			long timeout) throws MemcachedException, InterruptedException,
 			TimeoutException;
-	
+
 	/**
 	 * Get stats from all memcached servers
 	 * 
@@ -679,11 +694,22 @@ public interface MemcachedClient {
 	 * @throws InterruptedException
 	 * @throws TimeoutException
 	 */
-	public abstract Map<InetSocketAddress, Map<String, String>> stats(long timeout)
+	public abstract Map<InetSocketAddress, Map<String, String>> getStats(
+			long timeout) throws MemcachedException, InterruptedException,
+			TimeoutException;
+
+	public abstract Map<InetSocketAddress, Map<String, String>> getStats()
 			throws MemcachedException, InterruptedException, TimeoutException;
-	
-	public abstract Map<InetSocketAddress, Map<String, String>> stats()
-	throws MemcachedException, InterruptedException, TimeoutException;
+
+	/**
+	 * Get special item stats. "stats items" for example
+	 * 
+	 * @param item
+	 * @return
+	 */
+	public Map<InetSocketAddress, Map<String, String>> getStatsByItem(
+			String itemName) throws MemcachedException, InterruptedException,
+			TimeoutException;;
 
 	public abstract void shutdown() throws IOException;
 
@@ -692,7 +718,7 @@ public interface MemcachedClient {
 
 	/**
 	 * 返回默认的序列化转换器，默认使用SerializingTranscoder
-	 *
+	 * 
 	 * @return
 	 */
 	@SuppressWarnings("unchecked")
@@ -700,10 +726,30 @@ public interface MemcachedClient {
 
 	/**
 	 * 设置默认的序列化转换器，在调用xmemcached各种方法时，如果没有指定转换器，将使用此默认转换器
-	 *
+	 * 
 	 * @param transcoder
 	 */
 	@SuppressWarnings("unchecked")
 	public abstract void setTranscoder(final Transcoder transcoder);
 
+	public Map<InetSocketAddress, Map<String, String>> getStatsByItem(
+			String itemName, long timeout) throws MemcachedException,
+			InterruptedException, TimeoutException;
+
+	/**
+	 * get operation timeout setting
+	 * 
+	 * @return
+	 */
+	public long getOpTimeout();
+
+	/**
+	 * set operation timeout,default is one second.
+	 * 
+	 * @param opTimeout
+	 */
+	public void setOpTimeout(long opTimeout);
+
+	public Map<InetSocketAddress, String> getVersions(long timeout) throws TimeoutException,
+			InterruptedException, MemcachedException;
 }

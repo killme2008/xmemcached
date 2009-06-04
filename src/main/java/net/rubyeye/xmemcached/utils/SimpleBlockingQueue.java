@@ -49,8 +49,7 @@ public class SimpleBlockingQueue<T> implements BlockingQueue<T> {
 
 	@Override
 	public boolean containsAll(Collection<?> c) {
-		// TODO Auto-generated method stub
-		return false;
+		throw new UnsupportedOperationException();
 	}
 
 	@Override

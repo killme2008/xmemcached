@@ -34,6 +34,7 @@ import net.rubyeye.xmemcached.codec.MemcachedCodecFactory;
 import net.rubyeye.xmemcached.command.Command;
 import net.rubyeye.xmemcached.command.CommandType;
 import net.rubyeye.xmemcached.command.StatsCommand;
+import net.rubyeye.xmemcached.command.VersionCommand;
 import net.rubyeye.xmemcached.exception.MemcachedException;
 import net.rubyeye.xmemcached.impl.ArrayMemcachedSessionLocator;
 import net.rubyeye.xmemcached.impl.MemcachedConnector;
@@ -112,10 +113,11 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 
 	/**
 	 * set operation timeout,default is one second.
+	 * 
 	 * @param opTimeout
 	 */
 	public final void setOpTimeout(long opTimeout) {
-		if(opTimeout<0)
+		if (opTimeout < 0)
 			throw new IllegalArgumentException("opTimeout<0");
 		this.opTimeout = opTimeout;
 	}
@@ -1295,8 +1297,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 		return (Boolean) command.getResult();
 	}
 
-	private void checkException(final Command command)
-			throws MemcachedException {
+	void checkException(final Command command) throws MemcachedException {
 		if (command.getException() != null) {
 			throw new MemcachedException(command.getException());
 		}
@@ -1309,7 +1310,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 	 */
 	public final String version() throws TimeoutException,
 			InterruptedException, MemcachedException {
-		final Command command = commandFactory.createVersionCommand();
+		final Command command = commandFactory.createVersionCommand(new CountDownLatch(1),null);
 		if (!sendCommand(command)) {
 			throw new MemcachedException("send command fail");
 		}
@@ -1486,7 +1487,8 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 			throw new MemcachedException("could not find session for "
 					+ address.getHostName() + ":" + address.getPort()
 					+ ",maybe it have not been connected");
-		Command command = commandFactory.createStatsCommand(address, latch);
+		Command command = commandFactory.createStatsCommand(address, latch,
+				null);
 		if (!session.send(command))
 			throw new MemcachedException("send command fail");
 		if (!latch.await(timeout, TimeUnit.MILLISECONDS)) {
@@ -1496,22 +1498,31 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 	}
 
 	@Override
-	public Map<InetSocketAddress, Map<String, String>> stats()
+	public final Map<InetSocketAddress, Map<String, String>> getStats()
 			throws MemcachedException, InterruptedException, TimeoutException {
-		return stats(opTimeout);
+		return getStats(opTimeout);
 	}
 
 	@Override
+	public final Map<InetSocketAddress, Map<String, String>> getStatsByItem(
+			String itemName) throws MemcachedException, InterruptedException,
+			TimeoutException {
+		return getStatsByItem(itemName, this.opTimeout);
+	}
+
 	@SuppressWarnings("unchecked")
-	public Map<InetSocketAddress, Map<String, String>> stats(long timeout)
-			throws MemcachedException, InterruptedException, TimeoutException {
+	public final Map<InetSocketAddress, Map<String, String>> getStatsByItem(
+			String itemName, long timeout) throws MemcachedException,
+			InterruptedException, TimeoutException {
 		final Set<Session> sessionSet = this.connector.getSessionSet();
-		Map<InetSocketAddress, Map<String, String>> collectResult = new HashMap<InetSocketAddress, Map<String, String>>();
+		final Map<InetSocketAddress, Map<String, String>> collectResult = new HashMap<InetSocketAddress, Map<String, String>>();
+		if(sessionSet.size()==0)
+			return collectResult;
 		final CountDownLatch latch = new CountDownLatch(sessionSet.size());
 		List<Command> commands = new ArrayList<Command>(sessionSet.size());
 		for (Session session : sessionSet) {
 			Command command = commandFactory.createStatsCommand(session
-					.getRemoteSocketAddress(), latch);
+					.getRemoteSocketAddress(), latch, itemName);
 			if (!session.send(command))
 				throw new MemcachedException("send command fail");
 			commands.add(command);
@@ -1526,6 +1537,46 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 					(Map<String, String>) command.getResult());
 		}
 		return collectResult;
+	}
+	
+
+	@Override
+	public final Map<InetSocketAddress, String> getVersions()
+			throws TimeoutException, InterruptedException, MemcachedException {
+		return getVersions(this.opTimeout);
+	}
+
+	public final Map<InetSocketAddress, String> getVersions(long timeout)
+			throws TimeoutException, InterruptedException, MemcachedException {
+		final Set<Session> sessionSet = this.connector.getSessionSet();
+		Map<InetSocketAddress, String> collectResult = new HashMap<InetSocketAddress, String>();
+		if(sessionSet.size()==0)
+			return collectResult;
+		final CountDownLatch latch = new CountDownLatch(sessionSet.size());
+		List<Command> commands = new ArrayList<Command>(sessionSet.size());
+		for (Session session : sessionSet) {
+			Command command = commandFactory.createVersionCommand(latch,session
+					.getRemoteSocketAddress());
+			if (!session.send(command))
+				throw new MemcachedException("send command fail");
+			commands.add(command);
+
+		}
+		if (!latch.await(timeout, TimeUnit.MILLISECONDS)) {
+			throw new TimeoutException("Timed out waiting for operation");
+		}
+		for (Command command : commands) {
+			checkException(command);
+			collectResult.put(((VersionCommand) command).getServer(),
+					(String) command.getResult());
+		}
+		return collectResult;
+	}
+
+	@Override
+	public Map<InetSocketAddress, Map<String, String>> getStats(long timeout)
+			throws MemcachedException, InterruptedException, TimeoutException {
+		return getStatsByItem(null, timeout);
 	}
 
 	/*

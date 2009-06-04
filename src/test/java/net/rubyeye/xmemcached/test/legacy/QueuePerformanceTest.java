@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package net.rubyeye.xmemcached.test;
+package net.rubyeye.xmemcached.test.legacy;
 
 import com.google.code.yanf4j.util.CircularQueue;
 import java.util.ArrayDeque;

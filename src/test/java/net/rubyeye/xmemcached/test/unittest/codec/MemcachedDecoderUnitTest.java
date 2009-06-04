@@ -1,6 +1,7 @@
 package net.rubyeye.xmemcached.test.unittest.codec;
 
 import java.nio.ByteBuffer;
+import java.util.concurrent.CountDownLatch;
 
 import net.rubyeye.xmemcached.TextCommandFactory;
 import net.rubyeye.xmemcached.codec.MemcachedCodecFactory;
@@ -21,7 +22,7 @@ public class MemcachedDecoderUnitTest extends TestCase {
 		this.decoder = new MemcachedCodecFactory().getDecoder();
 		MemcachedTCPSession session = buildSession();
 		Command versionCommand = new TextCommandFactory()
-				.createVersionCommand();
+				.createVersionCommand(new CountDownLatch(1),null);
 		session.addCommand(versionCommand);
 		Command decodedCommand = this.decoder.decode(ByteBuffer
 				.wrap("VERSION 1.28\r\n".getBytes()), session);

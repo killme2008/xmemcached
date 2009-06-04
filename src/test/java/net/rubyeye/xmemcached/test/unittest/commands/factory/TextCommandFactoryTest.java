@@ -2,6 +2,7 @@ package net.rubyeye.xmemcached.test.unittest.commands.factory;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
 
 import net.rubyeye.xmemcached.CommandFactory;
 import net.rubyeye.xmemcached.TextCommandFactory;
@@ -42,7 +43,7 @@ public class TextCommandFactoryTest extends TestCase {
 	}
 
 	public void testCreateVersionCommand() {
-		Command versionCmd = commandFactory.createVersionCommand();
+		Command versionCmd = commandFactory.createVersionCommand(new CountDownLatch(1),null);
 		versionCmd.encode(bufferAllocator);
 		String commandStr = new String(versionCmd.getIoBuffer().getByteBuffer()
 				.array());

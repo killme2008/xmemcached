@@ -1,4 +1,4 @@
-package net.rubyeye.xmemcached.test;
+package net.rubyeye.xmemcached.test.legacy;
 
 import net.rubyeye.xmemcached.MemcachedClient;
 import net.rubyeye.xmemcached.XMemcachedClient;

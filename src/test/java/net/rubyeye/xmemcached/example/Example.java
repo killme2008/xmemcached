@@ -205,7 +205,7 @@ public class Example {
 			System.out.println(client.gets(keys).get("a").getValue());
 			client.flushAll(); // 使所有数据项失效
 			// 查看统计信息
-			System.out.println(client.stats()); // 查看统计信息
+			System.out.println(client.getStats()); // 查看统计信息
 			client.shutdown();
 
 		} catch (IOException e) {

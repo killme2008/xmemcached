@@ -10,14 +10,16 @@ import net.rubyeye.xmemcached.buffer.BufferAllocator;
 import net.rubyeye.xmemcached.codec.MemcachedDecoder;
 import net.rubyeye.xmemcached.command.StatsCommand;
 import net.rubyeye.xmemcached.impl.MemcachedTCPSession;
+import net.rubyeye.xmemcached.utils.ByteUtils;
 
 public class TextStatsCommand extends StatsCommand {
-	public TextStatsCommand(InetSocketAddress server, CountDownLatch latch) {
-		super(server, latch);
+	public TextStatsCommand(InetSocketAddress server, CountDownLatch latch,
+			String itemName) {
+		super(server, latch, itemName);
 		this.result = new HashMap<String, String>();
 
 	}
-	private boolean wasFirst=true;
+
 
 	@Override
 	@SuppressWarnings("unchecked")
@@ -25,10 +27,9 @@ public class TextStatsCommand extends StatsCommand {
 		String line = null;
 		while ((line = MemcachedDecoder.nextLine(session, buffer)) != null) {
 			if (line != null) {
-				if (!wasFirst&&line.equals("END")) { // 到消息结尾
+				if (line.equals("END")) { // 到消息结尾
 					return done(session);
 				} else if (line.startsWith("STAT")) {
-					wasFirst=false;
 					String[] items = line.split(" ");
 					((Map<String, String>) getResult()).put(items[1], items[2]);
 				} else
@@ -46,7 +47,14 @@ public class TextStatsCommand extends StatsCommand {
 
 	@Override
 	public final void encode(BufferAllocator bufferAllocator) {
-		this.ioBuffer = bufferAllocator.wrap(STATS.slice());
+		if (itemName == null)
+			this.ioBuffer = bufferAllocator.wrap(STATS.slice());
+		else {
+			this.ioBuffer = bufferAllocator
+					.allocate(5 + this.itemName.length() + 3);
+			ByteUtils.setArguments(this.ioBuffer, "stats", this.itemName);
+			this.ioBuffer.flip();
+		}
 	}
 
 }

@@ -42,8 +42,8 @@ public final class TextCommandFactory implements CommandFactory {
 	 *
 	 * @see net.rubyeye.xmemcached.CommandFactory#createVersionCommand()
 	 */
-	public final Command createVersionCommand() {
-		return new TextVersionCommand(new CountDownLatch(1));
+	public final Command createVersionCommand(CountDownLatch latch,InetSocketAddress server) {
+		return new TextVersionCommand(server,latch);
 	}
 
 	/*
@@ -64,8 +64,8 @@ public final class TextCommandFactory implements CommandFactory {
 	 * InetSocketAddress, java.util.concurrent.CountDownLatch)
 	 */
 	public final Command createStatsCommand(InetSocketAddress server,
-			CountDownLatch latch) {
-		return new TextStatsCommand(server, latch);
+			CountDownLatch latch,String itemName) {
+		return new TextStatsCommand(server, latch,itemName);
 	}
 
 	/*

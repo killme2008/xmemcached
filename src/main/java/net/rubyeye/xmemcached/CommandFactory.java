@@ -24,7 +24,7 @@ public interface CommandFactory {
 	 *
 	 * @return
 	 */
-	public abstract Command createVersionCommand();
+	public abstract Command createVersionCommand(CountDownLatch latch,InetSocketAddress server);
 
 	/**
 	 * create flush_all command
@@ -39,7 +39,7 @@ public interface CommandFactory {
 	 * @return
 	 */
 	public abstract Command createStatsCommand(InetSocketAddress server,
-			CountDownLatch latch);
+			CountDownLatch latch,String itemName);
 
 	/**
 	 *创建get,gets命令

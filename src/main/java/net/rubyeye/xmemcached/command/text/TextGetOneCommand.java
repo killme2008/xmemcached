@@ -26,11 +26,6 @@ public class TextGetOneCommand extends TextGetCommand {
 			} else {
 
 				CachedData data = this.returnValues.get(this.getKey());
-				// TODO add statistics
-				// if (data != null)
-				// statistics(CommandType.GET_HIT);
-				// else
-				// statistics(CommandType.GET_MSS);
 				setResult(data);
 				this.countDownLatch();
 			}
@@ -41,11 +36,6 @@ public class TextGetOneCommand extends TextGetCommand {
 			for (Command nextCommand : mergeCommands) {
 				CachedData data = this.returnValues.get(nextCommand.getKey());
 				nextCommand.setResult(data);
-				// TODO add statistics
-				// if (data != null)
-				// statistics(CommandType.GET_HIT);
-				// else
-				// statistics(CommandType.GET_MSS);
 				nextCommand.countDownLatch();
 			}
 		}
