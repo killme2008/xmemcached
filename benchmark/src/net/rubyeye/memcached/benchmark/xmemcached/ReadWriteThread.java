@@ -34,17 +34,20 @@ public class ReadWriteThread extends Thread {
 	public void run() {
 		int writeTimes = (int) (this.repeats * Constants.WRITE_RATE);
 		try {
-			for (int i = offset; i <= offset + writeTimes; i++) {
+			int writeMax = offset + writeTimes;
+			for (int i = offset; i <= writeMax; i++) {
 				String s = StringGenerator.generate(i, length);
-				if (!memcachedClient.set(String.valueOf(i), 0, s)) {
+				if (!memcachedClient.set(String.valueOf(i), 0, s,Constants.OP_TIMEOUT)) {
 					System.err.println("set error");
 					System.exit(1);
 				}
 			}
 			for (int i = 0; i < repeats - writeTimes; i++) {
-				int n = (i + offset) % writeTimes + offset;
+				int newOffset = i + offset;
+				int n = (newOffset > writeMax) ? (newOffset % writeTimes + offset)
+						: newOffset;
 				String s = StringGenerator.generate(n, length);
-				String result = this.memcachedClient.get(String.valueOf(n));
+				String result = this.memcachedClient.get(String.valueOf(n),Constants.OP_TIMEOUT);
 				if (result != null && !s.equals(result)) {
 					System.err.println("get error,expected " + s + ",actual "
 							+ result);

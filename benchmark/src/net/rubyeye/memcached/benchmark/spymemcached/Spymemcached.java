@@ -29,7 +29,7 @@ public class Spymemcached implements Constants {
 		for (int i = 0; i < THREADS.length; i++) {
 			for (int j = 0; j < BYTES.length; j++) {
 				int t = (int) Math.log(THREADS[i]);
-				int repeats = 100000 * (t <= 0 ? 1 : t);
+				int repeats = BASE_REPEATS * (t <= 0 ? 1 : t);
 				test(memcachedClient, BYTES[j], THREADS[i], repeats, true);
 			}
 		}
