@@ -29,6 +29,7 @@
     net.rubyeye.xmemcached.MemcachedClient.version()                =====>  getVersions()       
     net.rubyeye.xmemcached.MemcachedClientMemcachedClient.stats(String host, long timeout)
     net.rubyeye.xmemcached.MemcachedClientMemcachedClient.stats(String host)
+    
 5.Add some new methods.Includes:  
       net.rubyeye.xmemcached.MemcachedClientBuilder.getCommandFactory  => CommandFactory getter/setter
       net.rubyeye.xmemcached.MemcachedClientBuilder.setCommandFactory  
