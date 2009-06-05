@@ -1,4 +1,4 @@
-package net.rubyeye.memcached.benchmark.java_memcached;
+package net.rubyeye.memcached.benchmark.asfcached;
 
 import java.util.Properties;
 import java.util.concurrent.CountDownLatch;
@@ -8,8 +8,8 @@ import org.apache.log4j.BasicConfigurator;
 
 import net.rubyeye.memcached.benchmark.Constants;
 
-import com.danga.MemCached.MemCachedClient;
-import com.danga.MemCached.SockIOPool;
+import com.alisoft.xplatform.asf.cache.memcached.client.MemCachedClient;
+import com.alisoft.xplatform.asf.cache.memcached.client.SockIOPool;
 import com.google.code.yanf4j.util.ResourcesUtils;
 
 public class JavaMemCached implements Constants {
@@ -30,7 +30,7 @@ public class JavaMemCached implements Constants {
 
 		MemCachedClient memcachedClient = new MemCachedClient();
 		memcachedClient.setCompressThreshold(16 * 1024);
-		System.out.println("Java-MemCached startup");
+		System.out.println("ASF-MemCached startup");
 		warmUp(memcachedClient);
 
 		for (int i = 0; i < THREADS.length; i++) {

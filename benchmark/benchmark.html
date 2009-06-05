@@ -2,7 +2,10 @@
 PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"> 
  
- 
+<!-- 
+  author :dennis zhuang(killme2008@gmail.com)
+  
+ -->
 <html xmlns="http://www.w3.org/1999/xhtml"> 
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/> 
@@ -46,6 +49,7 @@ If you are in a hurry, please scroll down to see the graphs first.
           <li>xmemcached 2.3.1,default configuration</li>
           <li>Java-MemCached 2.0.1,SockIOPool is default configuration,set compress threshold to 16K</li>
           <li>JVM args: -server -Xmx1024m</li>
+          <li>Xmemcached and Spymemcached is nio based.So they have to be set operation timeout,they are both set to 3 seconds.</li>
         </ul> 
       </li> 
     </ul> 
@@ -74,7 +78,7 @@ If you are in a hurry, please scroll down to see the graphs first.
  
 <h2>Test Result</h2> 
  
-<h3>Client and Server on Different Machines (1 Gigabit Ethernet)</h3> 
+<h3>Client and Server on Different Machines</h3> 
  
 <img src="/file-access/default/members/netty/freezone/image/gigabit-128.png"><br><br> 
 <img src="/file-access/default/members/netty/freezone/image/gigabit-1024.png"><br><br> 

@@ -5,6 +5,7 @@ package net.rubyeye.memcached.benchmark.result_analyse;
  * @author dennis
  *
  */
+import java.awt.Font;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -22,7 +23,11 @@ import net.rubyeye.memcached.benchmark.Constants;
 
 import org.jfree.chart.*;
 
+import org.jfree.chart.axis.CategoryAxis;
+import org.jfree.chart.axis.NumberAxis;
+import org.jfree.chart.plot.CategoryPlot;
 import org.jfree.chart.plot.PlotOrientation;
+import org.jfree.chart.title.LegendTitle;
 import org.jfree.chart.title.TextTitle;
 
 import org.jfree.data.category.CategoryDataset;
@@ -34,15 +39,19 @@ import org.jfree.data.general.DatasetUtilities;
  */
 public class ResultAnalyser {
 
+	private static final String DEFAULT_RESULT_IMAGES_DIR = "result/images";
+	private static final String DEFAULT_RESULT_DIR = "result";
+
 	public static void main(String[] args) throws Exception {
-		if (args.length < 2) {
-			System.err
-					.println("Useage:java ResultAnalyser [resultDir] [imageDir]");
-			System.exit(1);
+		String resultDirName = DEFAULT_RESULT_DIR;
+		String resultImagesDirName = DEFAULT_RESULT_IMAGES_DIR;
+		if (args.length > 2) {
+			resultDirName = args[0];
+			resultImagesDirName = args[1];
 		}
 
-		File resultDir = new File(args[0]);
-		File imageDir = new File(args[1]);
+		File resultDir = new File(resultDirName);
+		File imageDir = new File(resultImagesDirName);
 		if (!resultDir.exists() || !resultDir.isDirectory()) {
 			System.err.println("Benchmark result dir is not exist");
 			System.err.println(1);
@@ -51,18 +60,19 @@ public class ResultAnalyser {
 			imageDir.mkdir();
 		}
 
-		Map<String, Map<Integer, List<Double>>> result = parseResult(resultDir);
+		Map<String, Map<Integer, List<Double>>> result1 = parseResultForValueLength(resultDir);
+		Map<String, Map<Integer, List<Double>>> result2 = parseResultForThreads(resultDir);
 
-		drawChart(imageDir, result);
-
+		drawChartByLength(imageDir, result1);
+		drawChartByThreads(imageDir, result2);
 		System.out.println("done");
 
 	}
 
-	private static void drawChart(File imageDir,
+	private static void drawChartByLength(File imageDir,
 			Map<String, Map<Integer, List<Double>>> result) {
-		final String[] rowKeys = result.keySet().toArray(
-				new String[result.keySet().size()]);
+		final String[] rowKeys = getRowKeys(result);
+		StringBuilder sb = getCommonChartTitile(rowKeys);
 		final String[] colKeys = new String[Constants.THREADS.length];
 		for (int i = 0; i < colKeys.length; i++) {
 			colKeys[i] = String.valueOf(Constants.THREADS[i]);
@@ -84,13 +94,68 @@ public class ResultAnalyser {
 				}
 			}
 			CategoryDataset dataset = createDataset(rowKeys, colKeys, data);
-			JFreeChart freeChart = createChart(dataset);
-			saveAsFile(freeChart, imageDir + "/value" + valueLength + ".jpg",
-					651, 400);
+			JFreeChart freeChart = createChart(dataset, "threads", "TPS", sb
+					.toString()
+					+ "(" + valueLength + " Bytes)");
+			saveAsFile(freeChart, imageDir + "/bytes" + valueLength + ".jpg",
+					(int) (500 * 1.6), 500);
 		}
 	}
 
-	private static Map<String, Map<Integer, List<Double>>> parseResult(
+	private static void drawChartByThreads(File imageDir,
+			Map<String, Map<Integer, List<Double>>> result) {
+		final String[] rowKeys = getRowKeys(result);
+		StringBuilder sb = getCommonChartTitile(rowKeys);
+		final String[] colKeys = new String[Constants.BYTES.length];
+		for (int i = 0; i < colKeys.length; i++) {
+			colKeys[i] = String.valueOf(Constants.BYTES[i]);
+		}
+
+		for (int threads : Constants.THREADS) {
+			double[][] data = new double[rowKeys.length][colKeys.length];
+			for (int i = 0; i < rowKeys.length; i++) {
+				final List<Double> list = result.get(rowKeys[i]).get(threads);
+				if (list != null) {
+					for (int j = 0; j < data[i].length; j++) {
+						if (j >= list.size())
+							data[i][j] = 0;
+						else
+							data[i][j] = list.get(j);
+					}
+
+				}
+			}
+			CategoryDataset dataset = createDataset(rowKeys, colKeys, data);
+			JFreeChart freeChart = createChart(dataset, "bytes", "TPS", sb
+					.toString()
+					+ "(" + threads + " Threads)");
+			saveAsFile(freeChart, imageDir + "/threads" + threads + ".jpg",
+					(int) (500 * 1.6), 500);
+		}
+	}
+
+	private static StringBuilder getCommonChartTitile(final String[] rowKeys) {
+		StringBuilder sb = new StringBuilder();
+		boolean wasFirst = true;
+		for (String rowKey : rowKeys) {
+			if (wasFirst) {
+				sb.append(rowKey);
+				wasFirst = false;
+			} else
+				sb.append(" VS. ").append(rowKey);
+
+		}
+		return sb;
+	}
+
+	private static String[] getRowKeys(
+			Map<String, Map<Integer, List<Double>>> result) {
+		final String[] rowKeys = result.keySet().toArray(
+				new String[result.keySet().size()]);
+		return rowKeys;
+	}
+
+	private static Map<String, Map<Integer, List<Double>>> parseResultForValueLength(
 			File resultDir) throws FileNotFoundException, IOException {
 		Map<String, Map<Integer, List<Double>>> result = new HashMap<String, Map<Integer, List<Double>>>();
 		String memcachedClientName = null;
@@ -113,8 +178,45 @@ public class ResultAnalyser {
 						int valueLength = extractVar("valueLength", line);
 						List<Double> tps = length2Tps.get(valueLength);
 						if (tps == null) {
-							tps = new ArrayList<Double>(6);
+							tps = new ArrayList<Double>(
+									Constants.THREADS.length);
 							length2Tps.put(valueLength, tps);
+						}
+						tps.add((double) extractVar("tps", line));
+					}
+				}
+				reader.close();
+			}
+		}
+		return result;
+	}
+
+	private static Map<String, Map<Integer, List<Double>>> parseResultForThreads(
+			File resultDir) throws FileNotFoundException, IOException {
+		Map<String, Map<Integer, List<Double>>> result = new HashMap<String, Map<Integer, List<Double>>>();
+		String memcachedClientName = null;
+		for (File file : resultDir.listFiles()) {
+			if (file.isFile()) {
+				BufferedReader reader = new BufferedReader(new FileReader(file));
+				String line = null;
+				while ((line = reader.readLine()) != null) {
+					if (line.indexOf("startup") > 0) {
+						memcachedClientName = line.split(" ")[0].trim()
+								.toLowerCase();
+						if (result.get(memcachedClientName) == null) {
+							result.put(memcachedClientName,
+									new HashMap<Integer, List<Double>>());
+						}
+
+					} else if (line.startsWith("threads")) {
+
+						Map<Integer, List<Double>> thrads2tps = result
+								.get(memcachedClientName);
+						int threads = extractVar("threads", line);
+						List<Double> tps = thrads2tps.get(threads);
+						if (tps == null) {
+							tps = new ArrayList<Double>(Constants.BYTES.length);
+							thrads2tps.put(threads, tps);
 						}
 						tps.add((double) extractVar("tps", line));
 					}
@@ -160,13 +262,30 @@ public class ResultAnalyser {
 		}
 	}
 
-	public static JFreeChart createChart(CategoryDataset categoryDataset) {
+	public static JFreeChart createChart(CategoryDataset categoryDataset,
+			String rowName, String colName, String chartTitle) {
 
-		JFreeChart jfreechart = ChartFactory.createLineChart(
-				"Xmemcached VS. Spymemcached", "threads", "TPS",
-				categoryDataset, PlotOrientation.VERTICAL, true, false, // tooltips
+		JFreeChart jfreechart = ChartFactory.createLineChart(chartTitle,
+				rowName, colName, categoryDataset, PlotOrientation.VERTICAL,
+				true, false, // tooltips
 				false); // URLs
-		TextTitle title = new TextTitle("Xmemcached VS. Spymemcached");
+
+		LegendTitle legend = jfreechart.getLegend();
+
+		legend.setItemFont(new Font("Dotum", Font.BOLD, 16));
+
+		CategoryPlot plot = (CategoryPlot) jfreechart.getPlot();
+
+		CategoryAxis cateaxis = plot.getDomainAxis();
+
+		cateaxis.setLabelFont(new Font("Dotum", Font.BOLD, 16));
+
+		cateaxis.setTickLabelFont(new Font("Dotum", Font.BOLD, 16));
+
+		NumberAxis numaxis = (NumberAxis) plot.getRangeAxis();
+
+		numaxis.setLabelFont(new Font("Dotum", Font.BOLD, 16));
+		TextTitle title = new TextTitle(chartTitle);
 		jfreechart.setTitle(title);
 
 		return jfreechart;
