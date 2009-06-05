@@ -4,12 +4,17 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+
 import com.google.code.yanf4j.util.ResourcesUtils;
 import net.rubyeye.xmemcached.CASOperation;
 import net.rubyeye.xmemcached.GetsResponse;
 import net.rubyeye.xmemcached.MemcachedClient;
 import net.rubyeye.xmemcached.MemcachedClientBuilder;
+import net.rubyeye.xmemcached.XMemcachedClient;
 import net.rubyeye.xmemcached.XMemcachedClientBuilder;
+import net.rubyeye.xmemcached.command.CommandType;
 import net.rubyeye.xmemcached.exception.MemcachedException;
 import net.rubyeye.xmemcached.transcoders.StringTranscoder;
 import net.rubyeye.xmemcached.utils.AddrUtil;
@@ -23,6 +28,7 @@ public class XMemcachedClientTest extends TestCase {
 				.getResourceAsProperties("test.properties");
 		MemcachedClientBuilder builder = new XMemcachedClientBuilder(AddrUtil
 				.getAddresses(properties.getProperty("test.memcached.servers")));
+		builder.getConfiguration().setStatisticsServer(true);
 		memcachedClient = builder.build();
 		memcachedClient.flushAll(5000);
 	}
@@ -34,7 +40,8 @@ public class XMemcachedClientTest extends TestCase {
 
 		}
 		memcachedClient.set("name", 1, "dennis", new StringTranscoder(), 1000);
-		assertEquals("dennis", memcachedClient.get("name",new StringTranscoder()));
+		assertEquals("dennis", memcachedClient.get("name",
+				new StringTranscoder()));
 		Thread.sleep(2000);
 		// expire
 		assertNull(memcachedClient.get("name"));
@@ -106,17 +113,17 @@ public class XMemcachedClientTest extends TestCase {
 		assertEquals("zhuang", memcachedClient.get("name", 2000));
 		Thread.sleep(2000);
 		assertNull(memcachedClient.get("zhuang"));
-		
-		//append,prepend
-		assertTrue(memcachedClient.set("name",0, "dennis"));
-		assertTrue(memcachedClient.prepend("name","hello "));
-		assertEquals("hello dennis",memcachedClient.get("name"));
+
+		// append,prepend
+		assertTrue(memcachedClient.set("name", 0, "dennis"));
+		assertTrue(memcachedClient.prepend("name", "hello "));
+		assertEquals("hello dennis", memcachedClient.get("name"));
 		assertTrue(memcachedClient.append("name", " zhuang"));
-		assertEquals("hello dennis zhuang",memcachedClient.get("name"));
+		assertEquals("hello dennis zhuang", memcachedClient.get("name"));
 		memcachedClient.delete("name");
-		assertFalse(memcachedClient.prepend("name","hello "));
+		assertFalse(memcachedClient.prepend("name", "hello "));
 		assertFalse(memcachedClient.append("name", " zhuang"));
-		
+
 		// store list
 		List<String> list = new ArrayList<String>();
 		for (int i = 0; i < 100; i++)
@@ -145,7 +152,7 @@ public class XMemcachedClientTest extends TestCase {
 		assertFalse(memcachedClient.add("name", 0, "zhuang"));
 		assertFalse(memcachedClient.replace("name", 0, "zhuang"));
 		Thread.sleep(3000);
-		//add,replace success
+		// add,replace success
 		assertTrue(memcachedClient.add("name", 0, "zhuang"));
 		assertTrue(memcachedClient.replace("name", 0, "zhuang"));
 	}
@@ -186,7 +193,7 @@ public class XMemcachedClientTest extends TestCase {
 	public void testVersion() throws Exception {
 		assertNotNull(memcachedClient.version());
 		System.out.println(memcachedClient.version());
-		assertTrue(memcachedClient.getVersions(5000).size()>0);
+		assertTrue(memcachedClient.getVersions(5000).size() > 0);
 		System.out.println(memcachedClient.getVersions());
 
 	}
@@ -270,7 +277,63 @@ public class XMemcachedClientTest extends TestCase {
 		assertEquals("dennis", memcachedClient.get("name"));
 	}
 
+	public void testAutoReconnect() throws Exception {
+		final String key = "name";
+		memcachedClient.set(key, 0, "dennis");
+		assertEquals("dennis", memcachedClient.get(key));
+		CountDownLatch latch = new CountDownLatch(1);
+		int currentServerCount = memcachedClient.getAvaliableServers().size();
+		MockErrorTextGetOneCommand errorCommand = new MockErrorTextGetOneCommand(
+				key, key.getBytes(), CommandType.GET_ONE, latch);
+		this.memcachedClient.getConnector().send(errorCommand);
+		latch.await(XMemcachedClient.DEFAULT_OP_TIMEOUT, TimeUnit.MILLISECONDS);
+		assertTrue(errorCommand.isDecoded());
+		// wait for reconnecting
+		Thread.sleep(2000);
+		assertEquals(currentServerCount, memcachedClient.getAvaliableServers()
+				.size());
+		// It works
+		assertEquals("dennis", memcachedClient.get(key));
+	}
+
+	public void testOperationDecodeTimeOut() throws Exception {
+		memcachedClient.set("name", 0, "dennis");
+		assertEquals("dennis", memcachedClient.get("name"));
+		CountDownLatch latch = new CountDownLatch(1);
+		MockDecodeTimeoutTextGetOneCommand errorCommand = new MockDecodeTimeoutTextGetOneCommand(
+				"name", "name".getBytes(), CommandType.GET_ONE, latch, 1000);
+		this.memcachedClient.getConnector().send(errorCommand);
+		// wait 100 milliseconds,the operation will be timeout
+		latch.await(100, TimeUnit.MILLISECONDS);
+		assertNull(errorCommand.getResult());
+		Thread.sleep(1000);
+		// It works.
+		assertNotNull(errorCommand.getResult());
+		assertEquals("dennis", memcachedClient.get("name"));
+	}
+	public void TESTOPERATIONENCODETIMEOUT() throws Exception {
+		memcachedClient.set("name", 0, "dennis");
+		assertEquals("dennis", memcachedClient.get("name"));
+		long writeMessageCount=memcachedClient.getConnector().getStatistics().getWriteMessageCount();
+		CountDownLatch latch = new CountDownLatch(1);
+		MockEncodeTimeoutTextGetOneCommand errorCommand = new MockEncodeTimeoutTextGetOneCommand(
+				"name", "name".getBytes(), CommandType.GET_ONE, latch, 1000);
+		this.memcachedClient.getConnector().send(errorCommand);
+		//Force write thread to encode command
+		errorCommand.setIoBuffer(null);
+		// wait 100 milliseconds,the operation will be timeout
+		if(!latch.await(100, TimeUnit.MILLISECONDS)){
+			errorCommand.cancel();
+		}
+		Thread.sleep(1000);
+		// It is not written to channel,because it is canceled.
+		assertEquals(writeMessageCount, memcachedClient.getConnector().getStatistics().getWriteMessageCount());
+		//It works
+		assertEquals("dennis", memcachedClient.get("name"));
+	}
+
 	public void tearDown() throws Exception {
 		this.memcachedClient.shutdown();
 	}
+
 }

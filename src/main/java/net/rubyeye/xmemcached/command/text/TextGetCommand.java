@@ -107,7 +107,7 @@ public abstract class TextGetCommand extends Command {
 	public abstract void dispatch();
 
 	@Override
-	public final void encode(BufferAllocator bufferAllocator) {
+	public void encode(BufferAllocator bufferAllocator) {
 		byte[] cmdBytes = (this.commandType == CommandType.GET_ONE
 				|| this.commandType == CommandType.GET_MANY ? GET : GETS);
 		this.ioBuffer = bufferAllocator.allocate(cmdBytes.length

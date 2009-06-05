@@ -26,9 +26,9 @@ import net.rubyeye.xmemcached.transcoders.Transcoder;
 
 /**
  * memcached命令类
- * 
+ *
  * @author Administrator
- * 
+ *
  */
 public abstract class Command implements WriteMessage {
 

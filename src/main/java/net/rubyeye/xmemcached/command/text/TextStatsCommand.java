@@ -20,22 +20,18 @@ public class TextStatsCommand extends StatsCommand {
 
 	}
 
-
 	@Override
 	@SuppressWarnings("unchecked")
 	public final boolean decode(MemcachedTCPSession session, ByteBuffer buffer) {
 		String line = null;
 		while ((line = MemcachedDecoder.nextLine(session, buffer)) != null) {
-			if (line != null) {
-				if (line.equals("END")) { // 到消息结尾
-					return done(session);
-				} else if (line.startsWith("STAT")) {
-					String[] items = line.split(" ");
-					((Map<String, String>) getResult()).put(items[1], items[2]);
-				} else
-					decodeError();
+			if (line.equals("END")) { // 到消息结尾
+				return done(session);
+			} else if (line.startsWith("STAT")) {
+				String[] items = line.split(" ");
+				((Map<String, String>) getResult()).put(items[1], items[2]);
 			} else
-				return false;
+				decodeError();
 		}
 		return false;
 	}

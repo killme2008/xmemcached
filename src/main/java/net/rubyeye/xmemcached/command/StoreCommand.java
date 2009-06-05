@@ -8,8 +8,6 @@ public abstract class StoreCommand extends Command {
 	protected int exp;
 	protected long cas;
 	protected Object value;
-	@SuppressWarnings("unchecked")
-	protected Transcoder transcoder;
 
 	@SuppressWarnings("unchecked")
 	public StoreCommand(String key, byte[] keyBytes, CommandType cmdType,

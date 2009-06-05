@@ -15,7 +15,7 @@ public class TextGetOneCommand extends TextGetCommand {
 	}
 
 	@Override
-	public final void dispatch() {
+	public void dispatch() {
 		if (mergeCount < 0) {
 			// single get
 			if (this.returnValues.get(this.getKey()) == null) {

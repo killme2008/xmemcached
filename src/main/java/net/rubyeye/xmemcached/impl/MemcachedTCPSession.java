@@ -31,7 +31,7 @@ import net.rubyeye.xmemcached.utils.SimpleBlockingQueue;
 
 /**
  * Connected session for a memcached server
- * 
+ *
  * @author dennis
  */
 public class MemcachedTCPSession extends DefaultTCPSession {
@@ -84,7 +84,10 @@ public class MemcachedTCPSession extends DefaultTCPSession {
 	@Override
 	protected WriteMessage preprocessWriteMessage(WriteMessage writeMessage) {
 		Command currentCommand = (Command) writeMessage;
-		// is cancell?
+		//Check if IoBuffer is null
+		if(currentCommand.getIoBuffer()==null)
+			currentCommand.encode(bufferAllocator);
+		//Check if it is canceled.
 		if (currentCommand.isCancel()) {
 			writeQueue.remove();
 			return null;
@@ -118,7 +121,7 @@ public class MemcachedTCPSession extends DefaultTCPSession {
 
 	/**
 	 * get current command from queue
-	 * 
+	 *
 	 * @return
 	 */
 	public final Command pollCurrentExecutingCommand() {
@@ -138,7 +141,7 @@ public class MemcachedTCPSession extends DefaultTCPSession {
 
 	/**
 	 * peek current command from queue
-	 * 
+	 *
 	 * @return
 	 */
 	public final Command peekCurrentExecutingCommand() {
@@ -150,7 +153,7 @@ public class MemcachedTCPSession extends DefaultTCPSession {
 
 	/**
 	 * is allow auto recconect if closed?
-	 * 
+	 *
 	 * @return
 	 */
 	public boolean isAllowReconnect() {
