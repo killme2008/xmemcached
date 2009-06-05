@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeoutException;
 
-
 import net.rubyeye.xmemcached.buffer.BufferAllocator;
 
 import net.rubyeye.xmemcached.exception.MemcachedException;
@@ -750,6 +749,12 @@ public interface MemcachedClient {
 	 */
 	public void setOpTimeout(long opTimeout);
 
-	public Map<InetSocketAddress, String> getVersions(long timeout) throws TimeoutException,
-			InterruptedException, MemcachedException;
+	public Map<InetSocketAddress, String> getVersions(long timeout)
+			throws TimeoutException, InterruptedException, MemcachedException;
+
+	/**
+	 * get avaliable memcached servers's socket address. 
+	 * @return
+	 */
+	public Collection<InetSocketAddress> getAvaliableServers();
 }

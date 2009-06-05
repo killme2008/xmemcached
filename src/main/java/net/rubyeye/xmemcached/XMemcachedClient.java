@@ -14,7 +14,9 @@ package net.rubyeye.xmemcached;
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -51,7 +53,7 @@ import com.google.code.yanf4j.config.Configuration;
 import com.google.code.yanf4j.nio.Session;
 
 /**
- * XMemcached客户端API核心类，通过此类的实例与memcached交互。
+ * Memcached Client for connecting to memcached server and do operations.
  * 
  * @author dennis(killme2008@gmail.com)
  * 
@@ -1310,7 +1312,8 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 	 */
 	public final String version() throws TimeoutException,
 			InterruptedException, MemcachedException {
-		final Command command = commandFactory.createVersionCommand(new CountDownLatch(1),null);
+		final Command command = commandFactory.createVersionCommand(
+				new CountDownLatch(1), null);
 		if (!sendCommand(command)) {
 			throw new MemcachedException("send command fail");
 		}
@@ -1516,7 +1519,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 			InterruptedException, TimeoutException {
 		final Set<Session> sessionSet = this.connector.getSessionSet();
 		final Map<InetSocketAddress, Map<String, String>> collectResult = new HashMap<InetSocketAddress, Map<String, String>>();
-		if(sessionSet.size()==0)
+		if (sessionSet.size() == 0)
 			return collectResult;
 		final CountDownLatch latch = new CountDownLatch(sessionSet.size());
 		List<Command> commands = new ArrayList<Command>(sessionSet.size());
@@ -1538,7 +1541,6 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 		}
 		return collectResult;
 	}
-	
 
 	@Override
 	public final Map<InetSocketAddress, String> getVersions()
@@ -1550,13 +1552,13 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 			throws TimeoutException, InterruptedException, MemcachedException {
 		final Set<Session> sessionSet = this.connector.getSessionSet();
 		Map<InetSocketAddress, String> collectResult = new HashMap<InetSocketAddress, String>();
-		if(sessionSet.size()==0)
+		if (sessionSet.size() == 0)
 			return collectResult;
 		final CountDownLatch latch = new CountDownLatch(sessionSet.size());
 		List<Command> commands = new ArrayList<Command>(sessionSet.size());
 		for (Session session : sessionSet) {
-			Command command = commandFactory.createVersionCommand(latch,session
-					.getRemoteSocketAddress());
+			Command command = commandFactory.createVersionCommand(latch,
+					session.getRemoteSocketAddress());
 			if (!session.send(command))
 				throw new MemcachedException("send command fail");
 			commands.add(command);
@@ -1662,11 +1664,22 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 		return (Boolean) command.getResult();
 	}
 
-	private void latchWait(final Command cmd, final long timeout)
+	private final void latchWait(final Command cmd, final long timeout)
 			throws InterruptedException, TimeoutException {
 		if (!cmd.getLatch().await(timeout, TimeUnit.MILLISECONDS)) {
 			cmd.cancel();
 			throw new TimeoutException("Timed out waiting for operation");
 		}
 	}
+
+	@Override
+	public Collection<InetSocketAddress> getAvaliableServers() {
+		Set<Session> sessionSet = this.connector.getSessionSet();
+		Set<InetSocketAddress> result = new HashSet<InetSocketAddress>();
+		for (Session session : sessionSet) {
+			result.add(session.getRemoteSocketAddress());
+		}
+		return Collections.unmodifiableSet(result);
+	}
+
 }
