@@ -1,0 +1,55 @@
+[WARN ]2009-06-04 16:23:52522 com.google.code.yanf4j.config.Configuration[?] The config file yanf4j.properties is not exist,yanf4j will use the default configuration
+[WARN ]2009-06-04 16:23:52565 com.google.code.yanf4j.nio.impl.AbstractController[?] The Controller started at port 0 ...
+[WARN ]2009-06-04 16:23:52625 com.google.code.yanf4j.nio.impl.AbstractController[?] add session 192.168.207.163:12000
+Xmemcached-1.1.1 startup
+warm up
+threads=1,repeats=10000,valueLength=64,tps=7616,miss=3001,fail=0
+threads=1,repeats=10000,valueLength=128,tps=7414,miss=3001,fail=0
+threads=1,repeats=10000,valueLength=256,tps=7262,miss=3001,fail=0
+threads=1,repeats=10000,valueLength=512,tps=6801,miss=3001,fail=0
+threads=1,repeats=10000,valueLength=1024,tps=5872,miss=3001,fail=0
+threads=1,repeats=10000,valueLength=4096,tps=3854,miss=3001,fail=0
+threads=1,repeats=10000,valueLength=8192,tps=2746,miss=3001,fail=0
+threads=1,repeats=10000,valueLength=16384,tps=1835,miss=3001,fail=0
+threads=10,repeats=20000,valueLength=64,tps=39413,miss=60010,fail=0
+threads=10,repeats=20000,valueLength=128,tps=36475,miss=60010,fail=0
+threads=10,repeats=20000,valueLength=256,tps=33537,miss=60010,fail=0
+threads=10,repeats=20000,valueLength=512,tps=28949,miss=60010,fail=0
+threads=10,repeats=20000,valueLength=1024,tps=24777,miss=60010,fail=0
+threads=10,repeats=20000,valueLength=4096,tps=12764,miss=60010,fail=0
+threads=10,repeats=20000,valueLength=8192,tps=6427,miss=60010,fail=0
+threads=10,repeats=20000,valueLength=16384,tps=2757,miss=60010,fail=0
+threads=50,repeats=30000,valueLength=64,tps=68505,miss=450050,fail=0
+threads=50,repeats=30000,valueLength=128,tps=64768,miss=450050,fail=0
+threads=50,repeats=30000,valueLength=256,tps=49601,miss=450050,fail=0
+threads=50,repeats=30000,valueLength=512,tps=42927,miss=450050,fail=0
+threads=50,repeats=30000,valueLength=1024,tps=28726,miss=450050,fail=0
+threads=50,repeats=30000,valueLength=4096,tps=8422,miss=450050,fail=0
+threads=50,repeats=30000,valueLength=8192,tps=4562,miss=450050,fail=0
+threads=50,repeats=30000,valueLength=16384,tps=2530,miss=450050,fail=0
+threads=100,repeats=40000,valueLength=64,tps=70536,miss=1200100,fail=0
+threads=100,repeats=40000,valueLength=128,tps=63953,miss=1200100,fail=0
+threads=100,repeats=40000,valueLength=256,tps=45643,miss=1200100,fail=0
+threads=100,repeats=40000,valueLength=512,tps=36127,miss=1200100,fail=0
+threads=100,repeats=40000,valueLength=1024,tps=22982,miss=1200100,fail=0
+threads=100,repeats=40000,valueLength=4096,tps=7413,miss=1200100,fail=0
+threads=100,repeats=40000,valueLength=8192,tps=4568,miss=1200100,fail=0
+threads=100,repeats=40000,valueLength=16384,tps=2813,miss=1200100,fail=0
+threads=200,repeats=50000,valueLength=64,tps=65049,miss=3000200,fail=0
+threads=200,repeats=50000,valueLength=128,tps=57305,miss=3000200,fail=0
+threads=200,repeats=50000,valueLength=256,tps=36737,miss=3000200,fail=0
+threads=200,repeats=50000,valueLength=512,tps=29286,miss=3000200,fail=0
+threads=200,repeats=50000,valueLength=1024,tps=18515,miss=3000200,fail=0
+threads=200,repeats=50000,valueLength=4096,tps=7387,miss=3000200,fail=0
+threads=200,repeats=50000,valueLength=8192,tps=5054,miss=3000200,fail=0
+threads=200,repeats=50000,valueLength=16384,tps=3158,miss=3000200,fail=0
+threads=500,repeats=60000,valueLength=64,tps=50314,miss=9000500,fail=0
+threads=500,repeats=60000,valueLength=128,tps=43059,miss=9000500,fail=0
+threads=500,repeats=60000,valueLength=256,tps=26909,miss=9000500,fail=0
+threads=500,repeats=60000,valueLength=512,tps=22571,miss=9000500,fail=0
+threads=500,repeats=60000,valueLength=1024,tps=16777,miss=9000500,fail=0
+threads=500,repeats=60000,valueLength=4096,tps=8099,miss=9000500,fail=0
+threads=500,repeats=60000,valueLength=8192,tps=5377,miss=9000500,fail=0
+threads=500,repeats=60000,valueLength=16384,tps=3312,miss=9000500,fail=0
+[WARN ]2009-06-05 02:34:17823 com.google.code.yanf4j.nio.impl.AbstractController[?] remove session 192.168.207.163:12000
+[WARN ]2009-06-05 02:34:17824 com.google.code.yanf4j.nio.impl.Reactor[?] Stopped reactor
