@@ -20,19 +20,20 @@ import net.rubyeye.xmemcached.transcoders.StringTranscoder;
 import net.rubyeye.xmemcached.utils.AddrUtil;
 import junit.framework.TestCase;
 
-public class XMemcachedClientTest extends TestCase {
+public abstract class XMemcachedClientTest extends TestCase {
 	MemcachedClient memcachedClient;
 	Properties properties;
 
 	public void setUp() throws Exception {
 		properties = ResourcesUtils.getResourceAsProperties("test.properties");
 
-		MemcachedClientBuilder builder = new XMemcachedClientBuilder(AddrUtil
-				.getAddresses(properties.getProperty("test.memcached.servers")));
+		MemcachedClientBuilder builder = createBuilder();
 		builder.getConfiguration().setStatisticsServer(true);
 		memcachedClient = builder.build();
 		memcachedClient.flushAll(5000);
 	}
+
+	public abstract MemcachedClientBuilder createBuilder()throws Exception;
 
 	public void testGet() throws Exception {
 		try {

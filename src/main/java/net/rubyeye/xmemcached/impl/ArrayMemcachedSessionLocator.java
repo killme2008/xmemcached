@@ -22,9 +22,9 @@ import net.rubyeye.xmemcached.MemcachedSessionLocator;
 
 /**
  * Session locator base on hash(key) mod sessions.size().Standard hash strategy
- *
+ * 
  * @author dennis
- *
+ * 
  */
 public class ArrayMemcachedSessionLocator implements MemcachedSessionLocator {
 
@@ -46,6 +46,8 @@ public class ArrayMemcachedSessionLocator implements MemcachedSessionLocator {
 
 	@Override
 	public final Session getSessionByKey(final String key) {
+		if (sessions == null || sessions.size() == 0)
+			return null;
 		List<Session> sessionList = sessions;
 		int size = sessionList.size();
 		if (size == 0) {

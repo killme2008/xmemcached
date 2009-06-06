@@ -41,7 +41,8 @@ public class AllTests {
 			Properties properties = ResourcesUtils
 					.getResourceAsProperties("test.properties");
 			if (properties.get("test.memcached.servers") != null) {
-				suite.addTestSuite(XMemcachedClientTest.class);
+				suite.addTestSuite(StandardHashMemcachedClientTest.class);
+				suite.addTestSuite(ConsistentHashMemcachedClientTest.class);
 			}
 		} catch (IOException e) {
 			System.err

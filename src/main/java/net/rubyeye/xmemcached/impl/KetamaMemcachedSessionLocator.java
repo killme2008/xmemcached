@@ -100,6 +100,8 @@ public class KetamaMemcachedSessionLocator implements MemcachedSessionLocator {
 
 	@Override
 	public final Session getSessionByKey(final String key) {
+		if (ketamaSessions == null || ketamaSessions.size() == 0)
+			return null;
 		long hash = hashAlg.hash(key);
 		Session rv = getSessionByHash(hash);
 		int tries = 0;
@@ -115,7 +117,7 @@ public class KetamaMemcachedSessionLocator implements MemcachedSessionLocator {
 		Long resultHash = hash;
 		if (!sessionMap.containsKey(resultHash)) {
 			resultHash = sessionMap.ceilingKey(resultHash);
-			if (resultHash == null) {
+			if (resultHash == null && sessionMap.size() > 0) {
 				resultHash = sessionMap.firstKey();
 			}
 		}
