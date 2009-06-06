@@ -6,13 +6,14 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import org.apache.log4j.BasicConfigurator;
 
+import net.rubyeye.memcached.BaseTest;
 import net.rubyeye.memcached.benchmark.Constants;
 
 import com.alisoft.xplatform.asf.cache.memcached.client.MemCachedClient;
 import com.alisoft.xplatform.asf.cache.memcached.client.SockIOPool;
 import com.google.code.yanf4j.util.ResourcesUtils;
 
-public class JavaMemCached implements Constants {
+public class JavaMemCached extends BaseTest implements Constants {
 
 	public static void main(String[] args) throws Exception {
 		Properties properties = ResourcesUtils
@@ -55,18 +56,19 @@ public class JavaMemCached implements Constants {
 		CountDownLatch latch = new CountDownLatch(threads);
 		AtomicLong miss = new AtomicLong(0);
 		AtomicLong fail = new AtomicLong(0);
+		AtomicLong hit = new AtomicLong(0);
 		long start = System.nanoTime();
 		for (int i = 0; i < threads; i++) {
 			new ReadWriteThread(memcachedClient, repeats, latch, i * repeats,
-					length, miss, fail).start();
+					length, miss, fail, hit).start();
 		}
 		latch.await();
 		if (print) {
 			long duration = System.nanoTime() - start;
 			long total = repeats * threads;
-			System.out.println("threads=" + threads + ",repeats=" + repeats
-					+ ",valueLength=" + length + ",tps=" + total * 1000000000
-					/ duration + ",miss=" + miss.get() + ",fail=" + fail.get());
+			printResult(length, threads, repeats, miss, fail, hit, duration,
+					total);
 		}
 	}
+
 }
