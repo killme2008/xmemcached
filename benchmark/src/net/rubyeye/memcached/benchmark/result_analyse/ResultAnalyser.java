@@ -5,6 +5,7 @@ package net.rubyeye.memcached.benchmark.result_analyse;
  * @author dennis
  *
  */
+import java.awt.Color;
 import java.awt.Font;
 import java.io.BufferedReader;
 import java.io.File;
@@ -27,6 +28,8 @@ import org.jfree.chart.axis.CategoryAxis;
 import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.plot.CategoryPlot;
 import org.jfree.chart.plot.PlotOrientation;
+import org.jfree.chart.renderer.category.LineAndShapeRenderer;
+import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 import org.jfree.chart.title.LegendTitle;
 import org.jfree.chart.title.TextTitle;
 
@@ -39,6 +42,7 @@ import org.jfree.data.general.DatasetUtilities;
  */
 public class ResultAnalyser {
 
+	private static final int HEIGHT = 600;
 	private static final String DEFAULT_RESULT_IMAGES_DIR = "result/images";
 	private static final String DEFAULT_RESULT_DIR = "result";
 
@@ -94,11 +98,10 @@ public class ResultAnalyser {
 				}
 			}
 			CategoryDataset dataset = createDataset(rowKeys, colKeys, data);
-			JFreeChart freeChart = createChart(dataset, "threads", "TPS", sb
-					.toString()
-					+ "(" + valueLength + " Bytes)");
+			JFreeChart freeChart = createChart(dataset, "Threads", "TPS",
+					"Size=" + valueLength + " Bytes");
 			saveAsFile(freeChart, imageDir + "/bytes" + valueLength + ".jpg",
-					(int) (500 * 1.6), 500);
+					(int) (HEIGHT * 1.6), HEIGHT);
 		}
 	}
 
@@ -126,11 +129,10 @@ public class ResultAnalyser {
 				}
 			}
 			CategoryDataset dataset = createDataset(rowKeys, colKeys, data);
-			JFreeChart freeChart = createChart(dataset, "bytes", "TPS", sb
-					.toString()
-					+ "(" + threads + " Threads)");
+			JFreeChart freeChart = createChart(dataset, "Value Size(bytes)",
+					"TPS", "Threads=" + threads);
 			saveAsFile(freeChart, imageDir + "/threads" + threads + ".jpg",
-					(int) (500 * 1.6), 500);
+					(int) (HEIGHT * 1.6), HEIGHT);
 		}
 	}
 
@@ -276,6 +278,13 @@ public class ResultAnalyser {
 
 		CategoryPlot plot = (CategoryPlot) jfreechart.getPlot();
 
+		LineAndShapeRenderer render = (LineAndShapeRenderer) plot.getRenderer();
+		render.setSeriesPaint(0, Color.RED);
+		render.setSeriesPaint(1, Color.GREEN);
+		render.setSeriesPaint(2, Color.BLUE);
+		render.setShapesFilled(Boolean.TRUE);// 在数据点显示实心的小图标
+		render.setShapesVisible(true);// 设置显示小图标
+
 		CategoryAxis cateaxis = plot.getDomainAxis();
 
 		cateaxis.setLabelFont(new Font("Dotum", Font.BOLD, 16));
@@ -286,6 +295,7 @@ public class ResultAnalyser {
 
 		numaxis.setLabelFont(new Font("Dotum", Font.BOLD, 16));
 		TextTitle title = new TextTitle(chartTitle);
+		title.setFont(new Font("Dotum", Font.BOLD, 16));
 		jfreechart.setTitle(title);
 
 		return jfreechart;
