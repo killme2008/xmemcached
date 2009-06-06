@@ -22,10 +22,11 @@ import junit.framework.TestCase;
 
 public class XMemcachedClientTest extends TestCase {
 	MemcachedClient memcachedClient;
+	Properties properties;
 
 	public void setUp() throws Exception {
-		Properties properties = ResourcesUtils
-				.getResourceAsProperties("test.properties");
+		properties = ResourcesUtils.getResourceAsProperties("test.properties");
+
 		MemcachedClientBuilder builder = new XMemcachedClientBuilder(AddrUtil
 				.getAddresses(properties.getProperty("test.memcached.servers")));
 		builder.getConfiguration().setStatisticsServer(true);
@@ -311,24 +312,56 @@ public class XMemcachedClientTest extends TestCase {
 		assertNotNull(errorCommand.getResult());
 		assertEquals("dennis", memcachedClient.get("name"));
 	}
+
 	public void TESTOPERATIONENCODETIMEOUT() throws Exception {
 		memcachedClient.set("name", 0, "dennis");
 		assertEquals("dennis", memcachedClient.get("name"));
-		long writeMessageCount=memcachedClient.getConnector().getStatistics().getWriteMessageCount();
+		long writeMessageCount = memcachedClient.getConnector().getStatistics()
+				.getWriteMessageCount();
 		CountDownLatch latch = new CountDownLatch(1);
 		MockEncodeTimeoutTextGetOneCommand errorCommand = new MockEncodeTimeoutTextGetOneCommand(
 				"name", "name".getBytes(), CommandType.GET_ONE, latch, 1000);
 		this.memcachedClient.getConnector().send(errorCommand);
-		//Force write thread to encode command
+		// Force write thread to encode command
 		errorCommand.setIoBuffer(null);
 		// wait 100 milliseconds,the operation will be timeout
-		if(!latch.await(100, TimeUnit.MILLISECONDS)){
+		if (!latch.await(100, TimeUnit.MILLISECONDS)) {
 			errorCommand.cancel();
 		}
 		Thread.sleep(1000);
 		// It is not written to channel,because it is canceled.
-		assertEquals(writeMessageCount, memcachedClient.getConnector().getStatistics().getWriteMessageCount());
-		//It works
+		assertEquals(writeMessageCount, memcachedClient.getConnector()
+				.getStatistics().getWriteMessageCount());
+		// It works
+		assertEquals("dennis", memcachedClient.get("name"));
+	}
+
+	public void testRemoveAndAddServer() throws Exception {
+		String servers = properties.getProperty("test.memcached.servers");
+		memcachedClient.set("name", 0, "dennis");
+		assertEquals("dennis", memcachedClient.get("name"));
+		memcachedClient.removeServer(servers);
+
+		synchronized (this) {
+			while (memcachedClient.getAvaliableServers().size() > 0)
+				wait(1000);
+		}
+		assertEquals(0, memcachedClient.getAvaliableServers().size());
+		try {
+			memcachedClient.get("name");
+			fail();
+		} catch (MemcachedException e) {
+			assertEquals("There is no avriable session at this moment", e
+					.getMessage());
+		}
+
+		memcachedClient.addServer(properties
+				.getProperty("test.memcached.servers"));
+		synchronized (this) {
+			while (memcachedClient.getAvaliableServers().size() < AddrUtil
+					.getAddresses(servers).size())
+				wait(1000);
+		}
 		assertEquals("dennis", memcachedClient.get("name"));
 	}
 
