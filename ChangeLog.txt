@@ -1,7 +1,7 @@
 
 -----------------------------------------
 2009-05-22
---------xmemcached 1.10-Released----------
+--------xmemcached 1.1.0-Released----------
 1.Improve multi-get operation's performance,It's as fast as spymemcached.It will continue on.
 2.Refactoring:
    Move classes such as MemcachedTCPSession,MemcachedHandler,MemcachedConnector etc. from package net.rubyeye.xmemcached to  net.rubyeye.xmemcached.impl
@@ -14,7 +14,7 @@
 *******************************************
 
 2009-06-07
---------xmemcached 1.11-Released-----------
+--------xmemcached 1.1.1-Released-----------
 1.Migrate yanf4j to 0.61
 2.Add many unit tests.Refactoring for a good Structure,It is ready to introduce 
   the memcached binary protocol support.
@@ -40,6 +40,7 @@
       net.rubyeye.xmemcached.MemcachedClient.getStatsByItem(String item)      => get all connected memcached servers's special item stats.
       net.rubyeye.xmemcached.MemcachedClient.setOpTime()     => set the default operation timeout
       net.rubyeye.xmemcached.MemcachedClient.getOpTime()     => get the default operation timeout
+      net.rubyeye.xmemcached.MemcachedClient.getAvaliableServers()  => Return avaliable servers
       net.rubyeye.xmemcached.utils.AddrUtil.getOneAddress    => get a InetSocketAddress from string
 6.Add some new classes.Includes
       net.rubyeye.xmemcached.codec.MemcachedCodecFactory     => Implements yanf4j CodecFactory
