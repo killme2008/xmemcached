@@ -1,0 +1,129 @@
+ASF-MemCached startup
+warm up
+threads=1,repeats=10000,valueLength=64,tps=9474,miss=3001,fail=0
+threads=1,repeats=10000,valueLength=128,tps=9473,miss=3001,fail=0
+threads=1,repeats=10000,valueLength=256,tps=9102,miss=3001,fail=0
+threads=1,repeats=10000,valueLength=512,tps=8485,miss=3001,fail=0
+threads=1,repeats=10000,valueLength=1024,tps=6880,miss=3001,fail=0
+threads=1,repeats=10000,valueLength=4096,tps=3990,miss=3001,fail=0
+threads=1,repeats=10000,valueLength=8192,tps=2719,miss=3001,fail=0
+threads=1,repeats=10000,valueLength=16384,tps=1657,miss=3001,fail=0
+threads=10,repeats=20000,valueLength=64,tps=34729,miss=60010,fail=0
+threads=10,repeats=20000,valueLength=128,tps=33110,miss=60010,fail=0
+threads=10,repeats=20000,valueLength=256,tps=28440,miss=60010,fail=0
+threads=10,repeats=20000,valueLength=512,tps=24139,miss=60010,fail=0
+threads=10,repeats=20000,valueLength=1024,tps=20147,miss=60010,fail=0
+threads=10,repeats=20000,valueLength=4096,tps=10870,miss=60010,fail=0
+threads=10,repeats=20000,valueLength=8192,tps=6045,miss=60010,fail=0
+threads=10,repeats=20000,valueLength=16384,tps=2955,miss=60010,fail=0
+threads=50,repeats=30000,valueLength=64,tps=31188,miss=450050,fail=0
+threads=50,repeats=30000,valueLength=128,tps=31084,miss=450050,fail=0
+threads=50,repeats=30000,valueLength=256,tps=26126,miss=450050,fail=0
+threads=50,repeats=30000,valueLength=512,tps=24614,miss=450050,fail=0
+threads=50,repeats=30000,valueLength=1024,tps=19312,miss=450050,fail=0
+threads=50,repeats=30000,valueLength=4096,tps=8781,miss=450050,fail=0
+threads=50,repeats=30000,valueLength=8192,tps=4921,miss=450050,fail=0
+[ERROR] ++++ failed to close SockIO obj from deadPool
+0 [MaintThread] ERROR com.alisoft.xplatform.asf.cache.memcached.client.SockIOPool  - ++++ failed to close SockIO obj from deadPool
+[ERROR] ++++ socket or its streams already null in trueClose call
+java.io.IOException: ++++ socket or its streams already null in trueClose call
+	at com.alisoft.xplatform.asf.cache.memcached.client.SockIOPool$SockIO.trueClose(SockIOPool.java:2282)
+	at com.alisoft.xplatform.asf.cache.memcached.client.SockIOPool.selfMaint(SockIOPool.java:1420)
+	at com.alisoft.xplatform.asf.cache.memcached.client.SockIOPool$MaintThread.run(SockIOPool.java:1989)
+104 [MaintThread] ERROR com.alisoft.xplatform.asf.cache.memcached.client.SockIOPool  - ++++ socket or its streams already null in trueClose call
+java.io.IOException: ++++ socket or its streams already null in trueClose call
+	at com.alisoft.xplatform.asf.cache.memcached.client.SockIOPool$SockIO.trueClose(SockIOPool.java:2282)
+	at com.alisoft.xplatform.asf.cache.memcached.client.SockIOPool.selfMaint(SockIOPool.java:1420)
+	at com.alisoft.xplatform.asf.cache.memcached.client.SockIOPool$MaintThread.run(SockIOPool.java:1989)
+[ERROR] ++++ failed to close SockIO obj from deadPool
+60181 [MaintThread] ERROR com.alisoft.xplatform.asf.cache.memcached.client.SockIOPool  - ++++ failed to close SockIO obj from deadPool
+[ERROR] ++++ socket or its streams already null in trueClose call
+java.io.IOException: ++++ socket or its streams already null in trueClose call
+	at com.alisoft.xplatform.asf.cache.memcached.client.SockIOPool$SockIO.trueClose(SockIOPool.java:2282)
+	at com.alisoft.xplatform.asf.cache.memcached.client.SockIOPool.selfMaint(SockIOPool.java:1420)
+	at com.alisoft.xplatform.asf.cache.memcached.client.SockIOPool$MaintThread.run(SockIOPool.java:1989)
+60181 [MaintThread] ERROR com.alisoft.xplatform.asf.cache.memcached.client.SockIOPool  - ++++ socket or its streams already null in trueClose call
+java.io.IOException: ++++ socket or its streams already null in trueClose call
+	at com.alisoft.xplatform.asf.cache.memcached.client.SockIOPool$SockIO.trueClose(SockIOPool.java:2282)
+	at com.alisoft.xplatform.asf.cache.memcached.client.SockIOPool.selfMaint(SockIOPool.java:1420)
+	at com.alisoft.xplatform.asf.cache.memcached.client.SockIOPool$MaintThread.run(SockIOPool.java:1989)
+threads=50,repeats=30000,valueLength=16384,tps=2575,miss=450050,fail=0
+threads=100,repeats=40000,valueLength=64,tps=29764,miss=1200100,fail=0
+threads=100,repeats=40000,valueLength=128,tps=29050,miss=1200100,fail=0
+[ERROR] ++++ failed to close SockIO obj from deadPool
+660705 [MaintThread] ERROR com.alisoft.xplatform.asf.cache.memcached.client.SockIOPool  - ++++ failed to close SockIO obj from deadPool
+[ERROR] ++++ socket or its streams already null in trueClose call
+java.io.IOException: ++++ socket or its streams already null in trueClose call
+	at com.alisoft.xplatform.asf.cache.memcached.client.SockIOPool$SockIO.trueClose(SockIOPool.java:2282)
+	at com.alisoft.xplatform.asf.cache.memcached.client.SockIOPool.selfMaint(SockIOPool.java:1420)
+	at com.alisoft.xplatform.asf.cache.memcached.client.SockIOPool$MaintThread.run(SockIOPool.java:1989)
+660706 [MaintThread] ERROR com.alisoft.xplatform.asf.cache.memcached.client.SockIOPool  - ++++ socket or its streams already null in trueClose call
+java.io.IOException: ++++ socket or its streams already null in trueClose call
+	at com.alisoft.xplatform.asf.cache.memcached.client.SockIOPool$SockIO.trueClose(SockIOPool.java:2282)
+	at com.alisoft.xplatform.asf.cache.memcached.client.SockIOPool.selfMaint(SockIOPool.java:1420)
+	at com.alisoft.xplatform.asf.cache.memcached.client.SockIOPool$MaintThread.run(SockIOPool.java:1989)
+threads=100,repeats=40000,valueLength=256,tps=22448,miss=1200100,fail=0
+threads=100,repeats=40000,valueLength=512,tps=21717,miss=1200100,fail=0
+threads=100,repeats=40000,valueLength=1024,tps=16639,miss=1200100,fail=0
+[ERROR] ++++ failed to close SockIO obj from deadPool
+1561432 [MaintThread] ERROR com.alisoft.xplatform.asf.cache.memcached.client.SockIOPool  - ++++ failed to close SockIO obj from deadPool
+[ERROR] ++++ socket or its streams already null in trueClose call
+java.io.IOException: ++++ socket or its streams already null in trueClose call
+	at com.alisoft.xplatform.asf.cache.memcached.client.SockIOPool$SockIO.trueClose(SockIOPool.java:2282)
+	at com.alisoft.xplatform.asf.cache.memcached.client.SockIOPool.selfMaint(SockIOPool.java:1420)
+	at com.alisoft.xplatform.asf.cache.memcached.client.SockIOPool$MaintThread.run(SockIOPool.java:1989)
+1561432 [MaintThread] ERROR com.alisoft.xplatform.asf.cache.memcached.client.SockIOPool  - ++++ socket or its streams already null in trueClose call
+java.io.IOException: ++++ socket or its streams already null in trueClose call
+	at com.alisoft.xplatform.asf.cache.memcached.client.SockIOPool$SockIO.trueClose(SockIOPool.java:2282)
+	at com.alisoft.xplatform.asf.cache.memcached.client.SockIOPool.selfMaint(SockIOPool.java:1420)
+	at com.alisoft.xplatform.asf.cache.memcached.client.SockIOPool$MaintThread.run(SockIOPool.java:1989)
+[ERROR] ++++ failed to close SockIO obj from deadPool
+1621588 [MaintThread] ERROR com.alisoft.xplatform.asf.cache.memcached.client.SockIOPool  - ++++ failed to close SockIO obj from deadPool
+[ERROR] ++++ socket or its streams already null in trueClose call
+java.io.IOException: ++++ socket or its streams already null in trueClose call
+	at com.alisoft.xplatform.asf.cache.memcached.client.SockIOPool$SockIO.trueClose(SockIOPool.java:2282)
+	at com.alisoft.xplatform.asf.cache.memcached.client.SockIOPool.selfMaint(SockIOPool.java:1420)
+	at com.alisoft.xplatform.asf.cache.memcached.client.SockIOPool$MaintThread.run(SockIOPool.java:1989)
+1621589 [MaintThread] ERROR com.alisoft.xplatform.asf.cache.memcached.client.SockIOPool  - ++++ socket or its streams already null in trueClose call
+java.io.IOException: ++++ socket or its streams already null in trueClose call
+	at com.alisoft.xplatform.asf.cache.memcached.client.SockIOPool$SockIO.trueClose(SockIOPool.java:2282)
+	at com.alisoft.xplatform.asf.cache.memcached.client.SockIOPool.selfMaint(SockIOPool.java:1420)
+	at com.alisoft.xplatform.asf.cache.memcached.client.SockIOPool$MaintThread.run(SockIOPool.java:1989)
+threads=100,repeats=40000,valueLength=4096,tps=7428,miss=1200100,fail=0
+[ERROR] ++++ failed to close SockIO obj from deadPool
+1981908 [MaintThread] ERROR com.alisoft.xplatform.asf.cache.memcached.client.SockIOPool  - ++++ failed to close SockIO obj from deadPool
+[ERROR] ++++ socket or its streams already null in trueClose call
+java.io.IOException: ++++ socket or its streams already null in trueClose call
+	at com.alisoft.xplatform.asf.cache.memcached.client.SockIOPool$SockIO.trueClose(SockIOPool.java:2282)
+	at com.alisoft.xplatform.asf.cache.memcached.client.SockIOPool.selfMaint(SockIOPool.java:1420)
+	at com.alisoft.xplatform.asf.cache.memcached.client.SockIOPool$MaintThread.run(SockIOPool.java:1989)
+1981908 [MaintThread] ERROR com.alisoft.xplatform.asf.cache.memcached.client.SockIOPool  - ++++ socket or its streams already null in trueClose call
+java.io.IOException: ++++ socket or its streams already null in trueClose call
+	at com.alisoft.xplatform.asf.cache.memcached.client.SockIOPool$SockIO.trueClose(SockIOPool.java:2282)
+	at com.alisoft.xplatform.asf.cache.memcached.client.SockIOPool.selfMaint(SockIOPool.java:1420)
+	at com.alisoft.xplatform.asf.cache.memcached.client.SockIOPool$MaintThread.run(SockIOPool.java:1989)
+threads=100,repeats=40000,valueLength=8192,tps=4520,miss=1200100,fail=0
+[ERROR] ++++ failed to close SockIO obj from deadPool
+3604481 [MaintThread] ERROR com.alisoft.xplatform.asf.cache.memcached.client.SockIOPool  - ++++ failed to close SockIO obj from deadPool
+[ERROR] ++++ socket or its streams already null in trueClose call
+java.io.IOException: ++++ socket or its streams already null in trueClose call
+	at com.alisoft.xplatform.asf.cache.memcached.client.SockIOPool$SockIO.trueClose(SockIOPool.java:2282)
+	at com.alisoft.xplatform.asf.cache.memcached.client.SockIOPool.selfMaint(SockIOPool.java:1420)
+	at com.alisoft.xplatform.asf.cache.memcached.client.SockIOPool$MaintThread.run(SockIOPool.java:1989)
+3604481 [MaintThread] ERROR com.alisoft.xplatform.asf.cache.memcached.client.SockIOPool  - ++++ socket or its streams already null in trueClose call
+java.io.IOException: ++++ socket or its streams already null in trueClose call
+	at com.alisoft.xplatform.asf.cache.memcached.client.SockIOPool$SockIO.trueClose(SockIOPool.java:2282)
+	at com.alisoft.xplatform.asf.cache.memcached.client.SockIOPool.selfMaint(SockIOPool.java:1420)
+	at com.alisoft.xplatform.asf.cache.memcached.client.SockIOPool$MaintThread.run(SockIOPool.java:1989)
+threads=100,repeats=40000,valueLength=16384,tps=2611,miss=1200100,fail=0
+threads=200,repeats=50000,valueLength=64,tps=29219,miss=3000200,fail=0
+threads=200,repeats=50000,valueLength=128,tps=27694,miss=3000200,fail=0
+threads=200,repeats=50000,valueLength=256,tps=20754,miss=3000200,fail=0
+
+java.lang.NullPointerException
+        at com.alisoft.xplatform.asf.cache.memcached.client.SockIOPool.isFreeSocket(SockIOPool.java:968)
+        at com.alisoft.xplatform.asf.cache.memcached.client.SockIOPool.getConnection(SockIOPool.java:930)
+        at com.alisoft.xplatform.asf.cache.memcached.client.SockIOPool.getSock(SockIOPool.java:740)
+        at com.alisoft.xplatform.asf.cache.memcached.client.MemCachedClient.set(MemCachedClient.java:695)
+        at com.alisoft.xplatform.asf.cache.memcached.client.MemCachedClient.set(MemCachedClient.java:513)
+        at net.rubyeye.memcached.benchmark.asfcached.ReadWriteThread.run(ReadWriteThread.java:45)
