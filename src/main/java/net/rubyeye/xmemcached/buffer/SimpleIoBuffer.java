@@ -12,6 +12,7 @@
 package net.rubyeye.xmemcached.buffer;
 
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 
 public class SimpleIoBuffer implements IoBuffer {
 
@@ -106,4 +107,11 @@ public class SimpleIoBuffer implements IoBuffer {
     public final void position(int pos) {
         this.origBuffer.position(pos);
     }
+
+	@Override
+	public void order(ByteOrder byteOrder) {
+		this.origBuffer.order(byteOrder);	
+	}
+    
+    
 }

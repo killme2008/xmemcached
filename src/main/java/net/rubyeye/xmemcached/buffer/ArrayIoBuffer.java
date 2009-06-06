@@ -5,6 +5,7 @@
 package net.rubyeye.xmemcached.buffer;
 
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.util.Arrays;
 import java.util.List;
 
@@ -180,4 +181,15 @@ public class ArrayIoBuffer implements IoBuffer {
             }
         }
     }
+
+	@Override
+	public void order(ByteOrder byteOrder) {
+		 for (ByteBuffer buffer : byteBuffers) {
+	            if (buffer != null) {
+	                buffer.order(byteOrder);
+	            }
+	        }
+		
+	}
+    
 }

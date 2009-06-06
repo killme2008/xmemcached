@@ -12,6 +12,7 @@
 package net.rubyeye.xmemcached.buffer;
 
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Queue;
@@ -146,6 +147,15 @@ public class CachedBufferAllocator implements BufferAllocator {
 			this.ownerThread = Thread.currentThread();
 			this.origBuffer = origBuffer;
 		}
+		
+		
+
+		@Override
+		public void order(ByteOrder byteOrder) {
+			this.origBuffer.order(byteOrder);			
+		}
+
+
 
 		@Override
 		public final void free() {

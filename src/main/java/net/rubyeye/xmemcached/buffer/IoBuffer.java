@@ -12,6 +12,7 @@
 package net.rubyeye.xmemcached.buffer;
 
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 
 /**
  * ByteBuffer封装类
@@ -53,4 +54,6 @@ public interface IoBuffer {
     int remaining();
 
     void reset();
+    
+    void order(ByteOrder byteOrder);
 }
