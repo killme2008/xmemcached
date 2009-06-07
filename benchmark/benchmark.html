@@ -57,13 +57,11 @@ retrive data from memcachd concurrently,write 30% and read 70%.</p>
 		    <li>JVM Version: Sun JDK 1.6.0_07 </li>
 		    <li>All clients use memcached text protocol.
 			<li>xmemcached 1.1.1,default configuration</li>
-			<li>xmemcached 1.10,default configuration</li>
-			<li>xmemcached 2.3.1,default configuration</li>
-			<li>memcache-client-forjava 2.5.1,SockIOPool is default configuration,set
+			<li>Spymemcached 2.3.1,default configuration</li>
+			<li>memcache-client-forjava 2.5.1 and Java-Memcached 2.0.1,SockIOPool is default configuration,set
 			compress threshold to 16K</li>
 			<li>JVM args: -server -Xmx1024m</li>
-			<li>Xmemcached and Spymemcached is nio based.So they have to be
-			set operation timeout,they are both set to 3 seconds.</li>
+			<li>Xmemcached and Spymemcached is nio based.So they have to set operation timeout,both are set to 3 seconds.</li>
 		</ul>
 		</li>
 	</ul>
