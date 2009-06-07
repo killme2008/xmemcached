@@ -281,7 +281,8 @@ public class ResultAnalyser {
 		LineAndShapeRenderer render = (LineAndShapeRenderer) plot.getRenderer();
 		render.setSeriesPaint(0, Color.RED);
 		render.setSeriesPaint(1, Color.GREEN);
-		render.setSeriesPaint(2, Color.BLUE);
+		render.setSeriesPaint(2, Color.YELLOW);
+		render.setSeriesPaint(3, Color.BLUE);
 		render.setShapesFilled(Boolean.TRUE);// 在数据点显示实心的小图标
 		render.setShapesVisible(true);// 设置显示小图标
 
