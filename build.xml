@@ -31,6 +31,8 @@
 		<tar tarfile="${build.dist}/${ant.project.name}-bin-${project.version}-with-dependences.tar.gz" basedir="." compression="gzip">
 			<include name="**/lib/*" />
 			<include name="**/dist/*" />
+			<exclude name="target/" />
+			<exclude name="benchmark/" />
 		</tar>
 	</target>
 	<target name="build-doc">
@@ -57,7 +59,8 @@
 			<include name="**/README" />
 			<include name="**/Changelog.txt" />
 			<include name="**/lib/*" />
-			<exclude name="**/target/*"/>
+			<exclude name="target/" />
+			<exclude name="benchmark/" />
 		</tar>
 	</target>
 </project>
