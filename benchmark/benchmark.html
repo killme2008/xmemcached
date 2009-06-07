@@ -21,10 +21,10 @@ URL:
 <a href="http://xmemcached.googlecode.com/svn/trunk/benchmark/benchmark.html">http://xmemcached.googlecode.com/svn/trunk/benchmark/benchmark.html</a>
 
 <p style="text-align: justify;">There are several memcached client
-for java,include <a href="http://code.google.com/p/spymemcached">spymemcached</a>, &nbsp;<a
-	href="http://code.google.com/p/memcache-client-forjava/">memcached-client-forjava(A optimiezed Java-MemCached)</a> and <a
-	href="http://code.google.com/p/xmemcached/">xmemcached</a> etc. The
-performance numbers of the 3 open source memcached client are presented
+for java,include <a href="http://code.google.com/p/spymemcached">spymemcached</a>, &nbsp;<a href="http://www.whalin.com/memcached/">Java-MemCached</a> , <a
+	href="http://code.google.com/p/xmemcached/">Xmemcached</a> and <a
+	href="http://code.google.com/p/memcache-client-forjava/">memcached-client-forjava(A optimiezed Java-MemCached)</a> etc. The
+performance numbers of the 4 open source memcached client are presented
 here to help you make choice.</p>
 
 <h2>Where's the Graph?</h2>
@@ -39,8 +39,7 @@ machine</p>
 
 <p style="text-align: justify;">A java client connect to memcached
 server,then start numbers of threads to repeat themself to store and
-retrive data from memcachd concurrently,write 30% and read 70%,ensure
-hit rate reach 70%</p>
+retrive data from memcachd concurrently,write 30% and read 70%.</p>
 
 <h2>Test Environment</h2>
 
@@ -50,7 +49,7 @@ hit rate reach 70%</p>
 		<li>Memcached Server
 		<ul>
 			<li>Version is 1.2.8,default install configuration.</li>
-			<li>Start with option "-p 12000 -m 4096"</li>
+			<li>Start with option "-p 12000 -m 8192"</li>
 		</ul>
 		</li>
 		<li>Java Client
