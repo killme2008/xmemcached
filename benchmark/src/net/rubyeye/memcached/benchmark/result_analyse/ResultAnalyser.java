@@ -307,7 +307,6 @@ public class ResultAnalyser {
 	 */
 	public static CategoryDataset createDataset(String[] rowKeys,
 			String[] colKeys, double[][] data) {
-
 		return DatasetUtilities.createCategoryDataset(rowKeys, colKeys, data);
 	}
 }

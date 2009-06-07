@@ -39,7 +39,9 @@ machine</p>
 
 <p style="text-align: justify;">A java client connect to memcached
 server,then start numbers of threads to repeat themself to store and
-retrive data from memcachd concurrently,write 30% and read 70%.</p>
+retrive data from memcachd concurrently,write 25% and read 75%,ensure average hit rate above 90%.<br/>
+I can't test more threads,because of memcached's evictions cut down the hit rate.I will make a new test for morn than one memcached servers to solve this problem.
+</p>
 
 <h2>Test Environment</h2>
 
@@ -113,10 +115,6 @@ retrive data from memcachd concurrently,write 30% and read 70%.</p>
 <img src="result/images/bytes8192.jpg" /> <br>
 <br><br>
 <br>
-<img src="result/images/bytes16384.jpg" /> <br>
-<br><br>
-<br>
-<br>
 <p><h4>Part2 Compare by value size</h4> 
 <img src="result/images/threads1.jpg" /> <br>
 <br><br>
@@ -127,13 +125,8 @@ retrive data from memcachd concurrently,write 30% and read 70%.</p>
 <img src="result/images/threads50.jpg" /> <br>
 <br><br>
 <br>
-<img src="result/images/threads100.jpg" /> <br>< 
+<img src="result/images/threads100.jpg" /> <br>
 <br><br>
-<br>
-<img src="result/images/threads200.jpg" /> <br>
-<br><br>
-<br>
-<img src="result/images/threads500.jpg" /> <br><br><br>
 <br>
 <h2>Running the Tests by Yourself</h2>
 

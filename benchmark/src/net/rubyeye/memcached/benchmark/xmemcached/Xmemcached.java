@@ -1,18 +1,17 @@
 package net.rubyeye.memcached.benchmark.xmemcached;
 
 import java.util.Properties;
-import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.atomic.AtomicLong;
 
 import com.google.code.yanf4j.util.ResourcesUtils;
 
 import net.rubyeye.memcached.BaseTest;
-import net.rubyeye.memcached.benchmark.Constants;
 import net.rubyeye.xmemcached.MemcachedClient;
 import net.rubyeye.xmemcached.XMemcachedClient;
 import net.rubyeye.xmemcached.utils.AddrUtil;
 
-public class Xmemcached extends BaseTest implements Constants {
+public class Xmemcached extends BaseTest{
 	public static void main(String[] args) throws Exception {
 		Properties properties = ResourcesUtils
 				.getResourceAsProperties("memcached.properties");
@@ -28,8 +27,7 @@ public class Xmemcached extends BaseTest implements Constants {
 
 		for (int i = 0; i < THREADS.length; i++) {
 			for (int j = 0; j < BYTES.length; j++) {
-				int t = (int) Math.log(THREADS[i]);
-				int repeats = BASE_REPEATS * (t <= 0 ? 1 : t);
+				int repeats = getReapts(i);
 				test(memcachedClient, BYTES[j], THREADS[i], repeats, true);
 			}
 		}
@@ -49,13 +47,15 @@ public class Xmemcached extends BaseTest implements Constants {
 		AtomicLong miss = new AtomicLong(0);
 		AtomicLong fail = new AtomicLong(0);
 		AtomicLong hit = new AtomicLong(0);
-		CountDownLatch countDownLatch = new CountDownLatch(threads);
-		long start = System.nanoTime();
+		CyclicBarrier barrier = new CyclicBarrier(threads + 1);
+
 		for (int i = 0; i < threads; i++) {
-			new ReadWriteThread(memcachedClient, repeats, countDownLatch, i
-					* repeats, length, miss, fail, hit).start();
+			new ReadWriteThread(memcachedClient, repeats, barrier, i * repeats,
+					length, miss, fail, hit).start();
 		}
-		countDownLatch.await();
+		barrier.await();
+		long start = System.nanoTime();
+		barrier.await();
 		if (print) {
 			long duration = System.nanoTime() - start;
 			long total = repeats * threads;

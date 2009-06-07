@@ -1,7 +1,7 @@
 package net.rubyeye.memcached.benchmark.asfcached;
 
 import java.util.Properties;
-import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.apache.log4j.BasicConfigurator;
@@ -13,7 +13,7 @@ import com.alisoft.xplatform.asf.cache.memcached.client.MemCachedClient;
 import com.alisoft.xplatform.asf.cache.memcached.client.SockIOPool;
 import com.google.code.yanf4j.util.ResourcesUtils;
 
-public class JavaMemCached extends BaseTest implements Constants {
+public class AsfMemCached extends BaseTest implements Constants {
 
 	public static void main(String[] args) throws Exception {
 		Properties properties = ResourcesUtils
@@ -36,8 +36,7 @@ public class JavaMemCached extends BaseTest implements Constants {
 
 		for (int i = 0; i < THREADS.length; i++) {
 			for (int j = 0; j < BYTES.length; j++) {
-				int t = (int) Math.log(THREADS[i]);
-				int repeats = BASE_REPEATS * (t <= 0 ? 1 : t);
+				int repeats = getReapts(i);
 				test(memcachedClient, BYTES[j], THREADS[i], repeats, true);
 			}
 		}
@@ -53,16 +52,18 @@ public class JavaMemCached extends BaseTest implements Constants {
 	public static void test(MemCachedClient memcachedClient, int length,
 			int threads, int repeats, boolean print) throws Exception {
 		memcachedClient.flushAll();
-		CountDownLatch latch = new CountDownLatch(threads);
 		AtomicLong miss = new AtomicLong(0);
 		AtomicLong fail = new AtomicLong(0);
 		AtomicLong hit = new AtomicLong(0);
-		long start = System.nanoTime();
+		CyclicBarrier barrier = new CyclicBarrier(threads + 1);
+
 		for (int i = 0; i < threads; i++) {
-			new ReadWriteThread(memcachedClient, repeats, latch, i * repeats,
+			new ReadWriteThread(memcachedClient, repeats, barrier, i * repeats,
 					length, miss, fail, hit).start();
 		}
-		latch.await();
+		barrier.await();
+		long start = System.nanoTime();
+		barrier.await();
 		if (print) {
 			long duration = System.nanoTime() - start;
 			long total = repeats * threads;

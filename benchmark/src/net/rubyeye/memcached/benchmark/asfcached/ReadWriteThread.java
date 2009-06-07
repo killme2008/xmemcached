@@ -1,6 +1,6 @@
 package net.rubyeye.memcached.benchmark.asfcached;
 
-import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.atomic.AtomicLong;
 
 import com.alisoft.xplatform.asf.cache.memcached.client.MemCachedClient;
@@ -11,9 +11,9 @@ public class ReadWriteThread extends BaseReadWriteThread {
 	MemCachedClient memcachedClient;
 
 	public ReadWriteThread(MemCachedClient memcachedClient, int repeats,
-			CountDownLatch latch, int offset, int length, AtomicLong miss,
+			CyclicBarrier barrier, int offset, int length, AtomicLong miss,
 			AtomicLong fail, AtomicLong hit) {
-		super(repeats, latch, offset, length, miss, fail, hit);
+		super(repeats, barrier, offset, length, miss, fail, hit);
 		this.memcachedClient = memcachedClient;
 	}
 

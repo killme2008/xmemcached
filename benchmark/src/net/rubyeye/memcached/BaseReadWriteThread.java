@@ -1,6 +1,6 @@
 package net.rubyeye.memcached;
 
-import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.atomic.AtomicLong;
 
 import net.rubyeye.memcached.benchmark.Constants;
@@ -9,18 +9,18 @@ import net.rubyeye.memcached.benchmark.StringGenerator;
 public abstract class BaseReadWriteThread extends Thread {
 
 	protected int repeats;
-	protected CountDownLatch latch;
+	protected CyclicBarrier barrier;
 	protected int offset;
 	protected int length;
 	protected AtomicLong miss;
 	protected AtomicLong fail;
 	protected AtomicLong hit;
 
-	public BaseReadWriteThread(int repeats, CountDownLatch latch, int offset,
+	public BaseReadWriteThread(int repeats, CyclicBarrier barrier, int offset,
 			int length, AtomicLong miss, AtomicLong fail, AtomicLong hit) {
 		super();
 		this.repeats = repeats;
-		this.latch = latch;
+		this.barrier = barrier;
 		this.offset = offset;
 		this.length = length;
 		this.miss = miss;
@@ -33,10 +33,11 @@ public abstract class BaseReadWriteThread extends Thread {
 	public abstract String get(int n) throws Exception;
 
 	public void run() {
+
 		int writeTimes = (int) (this.repeats * Constants.WRITE_RATE);
 		try {
+			barrier.await();
 			int writeMax = offset + writeTimes;
-			int readTimes = this.repeats - writeTimes;
 			for (int i = offset; i <= writeMax; i++) {
 				String s = StringGenerator.generate(i, length);
 				if (!set(i, s)) {
@@ -44,23 +45,27 @@ public abstract class BaseReadWriteThread extends Thread {
 					System.exit(1);
 				}
 			}
-			for (int i = 0; i <= readTimes; i++) {
-				int n = (i+offset) > writeMax ? ((i+offset) % writeMax) : (i+offset);
-				String s = StringGenerator.generate(n, length);
-				String result = get(n);
-				if (result != null && !s.equals(result)) {
-					System.err.println("get error,expected " + s + ",actual "
-							+ result);
-					fail.incrementAndGet();
-				} else if (result == null) {
-					miss.incrementAndGet();
-				} else if (result != null && result.equals(s)) {
-					hit.incrementAndGet();
-				} 
+			int countMax = (int) ((1 - Constants.WRITE_RATE) / Constants.WRITE_RATE);
+			for (int count = 0; count < countMax; count++) {
+				for (int i = offset; i <= writeMax; i++) {
+					String s = StringGenerator.generate(i, length);
+					String result = get(i);
+					if (result != null && !s.equals(result)) {
+						System.err.println("get error,expected " + s
+								+ ",actual " + result);
+						fail.incrementAndGet();
+					} else if (result == null) {
+						miss.incrementAndGet();
+					} else if (result != null && result.equals(s)) {
+						hit.incrementAndGet();
+					}
+				}
 			}
-			latch.countDown();
+
+			barrier.await();
 		} catch (Exception e) {
 			e.printStackTrace();
+
 		}
 	}
 
