@@ -21,18 +21,19 @@ public class MemcachedDecoderUnitTest extends TestCase {
 	public void testDecode() {
 		this.decoder = new MemcachedCodecFactory().getDecoder();
 		MemcachedTCPSession session = buildSession();
-		Command versionCommand = new TextCommandFactory()
-				.createVersionCommand(new CountDownLatch(1),null);
+		Command versionCommand = new TextCommandFactory().createVersionCommand(
+				new CountDownLatch(1), null);
 		session.addCommand(versionCommand);
 		Command decodedCommand = this.decoder.decode(ByteBuffer
 				.wrap("VERSION 1.28\r\n".getBytes()), session);
 		assertSame(decodedCommand, versionCommand);
-		assertEquals("1.28",decodedCommand.getResult());
+		assertEquals("1.28", decodedCommand.getResult());
 	}
 
 	public MemcachedTCPSession buildSession() {
-		SessionConfig sessionConfig = new SessionConfig(null, null,  new HandlerAdapter(),null,
-				new ByteBufferCodecFactory(), null, null, true);
-		return new MemcachedTCPSession(sessionConfig, 16 * 1024, null, 0);
+		SessionConfig sessionConfig = new SessionConfig(null, null,
+				new HandlerAdapter(), null, new ByteBufferCodecFactory(), null,
+				null, true);
+		return new MemcachedTCPSession(sessionConfig, 16 * 1024, null, 0, 1);
 	}
 }

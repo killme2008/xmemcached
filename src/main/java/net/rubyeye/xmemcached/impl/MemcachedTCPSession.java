@@ -31,7 +31,7 @@ import net.rubyeye.xmemcached.utils.SimpleBlockingQueue;
 
 /**
  * Connected session for a memcached server
- *
+ * 
  * @author dennis
  */
 public class MemcachedTCPSession extends DefaultTCPSession {
@@ -40,6 +40,8 @@ public class MemcachedTCPSession extends DefaultTCPSession {
 	 * Command which are already sent
 	 */
 	protected BlockingQueue<Command> executingCmds;
+
+	private int weight;
 
 	private SocketAddress remoteSocketAddress; // prevent channel is closed
 	private int sendBufferSize;
@@ -54,11 +56,20 @@ public class MemcachedTCPSession extends DefaultTCPSession {
 
 	public static final String PARSE_STATUS_ATTR = "parse_status";
 
+	public final int getWeight() {
+		return weight;
+	}
+
+	public final void setWeight(int weight) {
+		this.weight = weight;
+	}
+
 	public MemcachedTCPSession(SessionConfig sessionConfig,
 			int readRecvBufferSize, MemcachedOptimiezer optimiezer,
-			int readThreadCount) {
+			int readThreadCount, int weight) {
 		super(sessionConfig, readRecvBufferSize, -1);
 		this.optimiezer = optimiezer;
+		this.weight = weight;
 		if (this.selectableChannel != null) {
 			remoteSocketAddress = ((SocketChannel) this.selectableChannel)
 					.socket().getRemoteSocketAddress();
@@ -84,10 +95,10 @@ public class MemcachedTCPSession extends DefaultTCPSession {
 	@Override
 	protected WriteMessage preprocessWriteMessage(WriteMessage writeMessage) {
 		Command currentCommand = (Command) writeMessage;
-		//Check if IoBuffer is null
-		if(currentCommand.getIoBuffer()==null)
+		// Check if IoBuffer is null
+		if (currentCommand.getIoBuffer() == null)
 			currentCommand.encode(bufferAllocator);
-		//Check if it is canceled.
+		// Check if it is canceled.
 		if (currentCommand.isCancel()) {
 			writeQueue.remove();
 			return null;
@@ -121,7 +132,7 @@ public class MemcachedTCPSession extends DefaultTCPSession {
 
 	/**
 	 * get current command from queue
-	 *
+	 * 
 	 * @return
 	 */
 	public final Command pollCurrentExecutingCommand() {
@@ -141,7 +152,7 @@ public class MemcachedTCPSession extends DefaultTCPSession {
 
 	/**
 	 * peek current command from queue
-	 *
+	 * 
 	 * @return
 	 */
 	public final Command peekCurrentExecutingCommand() {
@@ -153,7 +164,7 @@ public class MemcachedTCPSession extends DefaultTCPSession {
 
 	/**
 	 * is allow auto recconect if closed?
-	 *
+	 * 
 	 * @return
 	 */
 	public boolean isAllowReconnect() {

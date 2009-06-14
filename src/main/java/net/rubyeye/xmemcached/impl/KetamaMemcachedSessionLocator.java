@@ -74,10 +74,14 @@ public class KetamaMemcachedSessionLocator implements MemcachedSessionLocator {
 		for (Session session : list) {
 			String sockStr = String.valueOf(session.getRemoteSocketAddress());
 			/**
-			 * 按照spy作者的说法，这里是对KETAMA_HASH做特殊处理，为了复用chunk，具体我并不明白，暂时直接拷贝
+			 * 每个节点复制160*weight次，并分配到环上
 			 */
+			int numReps = NUM_REPS;
+			if (session instanceof MemcachedTCPSession) {
+				numReps *= ((MemcachedTCPSession) session).getWeight();
+			}
 			if (alg == HashAlgorithm.KETAMA_HASH) {
-				for (int i = 0; i < NUM_REPS / 4; i++) {
+				for (int i = 0; i < numReps / 4; i++) {
 					byte[] digest = HashAlgorithm.computeMd5(sockStr + "-" + i);
 					for (int h = 0; h < 4; h++) {
 						long k = ((long) (digest[3 + h * 4] & 0xFF) << 24)
@@ -89,7 +93,7 @@ public class KetamaMemcachedSessionLocator implements MemcachedSessionLocator {
 
 				}
 			} else {
-				for (int i = 0; i < NUM_REPS; i++) {
+				for (int i = 0; i < numReps; i++) {
 					sessionMap.put(alg.hash(sockStr + "-" + i), session);
 				}
 			}

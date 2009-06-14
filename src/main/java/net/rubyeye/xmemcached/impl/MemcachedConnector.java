@@ -51,24 +51,6 @@ import net.rubyeye.xmemcached.utils.SimpleDeque;
  */
 public class MemcachedConnector extends SocketChannelController {
 
-	/**
-	 * Auto reconnect request
-	 * 
-	 * @author dennis
-	 * 
-	 */
-	public static class ReconnectRequest {
-
-		InetSocketAddress address;
-		int tries;
-
-		public ReconnectRequest(InetSocketAddress address, int tries) {
-			super();
-			this.address = address;
-			this.tries = tries; // 记录重连次数
-		}
-	}
-
 	private final BlockingQueue<ReconnectRequest> waitingQueue = new LinkedBlockingQueue<ReconnectRequest>();
 	private BufferAllocator bufferAllocator;
 	private SessionMonitor sessionMonitor;
@@ -83,18 +65,19 @@ public class MemcachedConnector extends SocketChannelController {
 
 				try {
 					ReconnectRequest request = waitingQueue.take();
-					InetSocketAddress address = request.address;
+					InetSocketAddress address = request.getAddress();
 					boolean connected = false;
 					int tries = 0;
 					while (tries < 3) {
-						Future<Boolean> future = connect(address);
+						Future<Boolean> future = connect(address, request
+								.getWeight());
 						tries++;
-						request.tries++;
+						request.setTries(request.getTries() + 1);
 						try {
 							log.warn("try to reconnect to "
 									+ address.getHostName() + ":"
 									+ address.getPort() + " for "
-									+ request.tries + " times");
+									+ request.getTries() + " times");
 							if (!future.isDone()
 									&& !future
 											.get(
@@ -143,6 +126,7 @@ public class MemcachedConnector extends SocketChannelController {
 
 	static class ConnectFuture implements Future<Boolean> {
 
+		private int weight;
 		private boolean connected = false;
 		private boolean done = false;
 		private boolean cancel = false;
@@ -151,13 +135,22 @@ public class MemcachedConnector extends SocketChannelController {
 		private volatile Exception exception;
 		private InetSocketAddress inetSocketAddress;
 
-		public ConnectFuture(InetSocketAddress inetSocketAddress) {
+		public ConnectFuture(InetSocketAddress inetSocketAddress, int weight) {
 			super();
 			this.inetSocketAddress = inetSocketAddress;
+			this.weight = weight;
 		}
 
 		public final InetSocketAddress getInetSocketAddress() {
 			return inetSocketAddress;
+		}
+
+		public final int getWeight() {
+			return weight;
+		}
+
+		public final void setWeight(int weight) {
+			this.weight = weight;
 		}
 
 		public boolean isConnected() {
@@ -318,7 +311,9 @@ public class MemcachedConnector extends SocketChannelController {
 						+ future.getInetSocketAddress().getHostName() + ":"
 						+ future.getInetSocketAddress().getPort() + " fail"));
 			} else {
-				addSession(createSession(key, (SocketChannel) (key.channel())));
+				key.attach(null);
+				addSession(createSession(key, (SocketChannel) (key.channel()),
+						future.getWeight()));
 				future.setConnected(true);
 			}
 		} catch (Exception e) {
@@ -331,7 +326,8 @@ public class MemcachedConnector extends SocketChannelController {
 	}
 
 	protected MemcachedTCPSession createSession(SelectionKey key,
-			SocketChannel socketChannel) {
+			SocketChannel socketChannel, int weight) {
+		key.attach(weight);
 		MemcachedTCPSession session = (MemcachedTCPSession) buildSession(
 				socketChannel, key);
 		session.onEvent(EventType.ENABLE_READ, selector);
@@ -345,7 +341,7 @@ public class MemcachedConnector extends SocketChannelController {
 		this.waitingQueue.add(request);
 	}
 
-	public Future<Boolean> connect(InetSocketAddress address)
+	public Future<Boolean> connect(InetSocketAddress address, int weight)
 			throws IOException {
 		SocketChannel socketChannel = SocketChannel.open();
 		socketChannel.configureBlocking(false);
@@ -360,7 +356,7 @@ public class MemcachedConnector extends SocketChannelController {
 		if (this.sendBufferSize > 0) {
 			socketChannel.socket().setSendBufferSize(this.sendBufferSize);
 		}
-		ConnectFuture future = new ConnectFuture(address);
+		ConnectFuture future = new ConnectFuture(address,weight);
 		if (!socketChannel.connect(address)) {
 			this.reactor.registerChannel(socketChannel,
 					SelectionKey.OP_CONNECT, future);
@@ -368,7 +364,7 @@ public class MemcachedConnector extends SocketChannelController {
 		} else {
 			SelectionKey selectionKey = socketChannel
 					.register(this.selector, 0);
-			addSession(createSession(selectionKey, socketChannel));
+			addSession(createSession(selectionKey, socketChannel, weight));
 			future.setConnected(true);
 		}
 		return future;
@@ -433,9 +429,11 @@ public class MemcachedConnector extends SocketChannelController {
 		Queue<WriteMessage> queue = buildQueue();
 		final SessionConfig sessionCofig = buildSessionConfig(sc, selectionKey,
 				queue);
+		int weight = selectionKey.attachment() == null ? 1
+				: (Integer) selectionKey.attachment();
 		session = new MemcachedTCPSession(sessionCofig, configuration
 				.getSessionReadBufferSize(), this.optimiezer, this
-				.getReadThreadCount());
+				.getReadThreadCount(), weight);
 		session.setBufferAllocator(bufferAllocator);
 		return session;
 	}

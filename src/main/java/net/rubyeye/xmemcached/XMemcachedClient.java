@@ -42,6 +42,7 @@ import net.rubyeye.xmemcached.impl.ArrayMemcachedSessionLocator;
 import net.rubyeye.xmemcached.impl.MemcachedConnector;
 import net.rubyeye.xmemcached.impl.MemcachedHandler;
 import net.rubyeye.xmemcached.impl.MemcachedTCPSession;
+import net.rubyeye.xmemcached.impl.ReconnectRequest;
 import net.rubyeye.xmemcached.monitor.XMemcachedMbeanServer;
 import net.rubyeye.xmemcached.transcoders.CachedData;
 import net.rubyeye.xmemcached.transcoders.SerializingTranscoder;
@@ -179,7 +180,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 	}
 
 	/**
-	 * XMemcached构造函数
+	 * XMemcached constructor,default weight is 1
 	 * 
 	 * @param server
 	 *            服务器IP
@@ -189,13 +190,31 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 	 */
 	public XMemcachedClient(final String server, final int port)
 			throws IOException {
+		this(server, port, 1);
+	}
+
+	/**
+	 * XMemcached constructor
+	 * 
+	 * @param server
+	 *            server host
+	 * @param port
+	 *            server port
+	 * @param weight
+	 *            server weight
+	 * @throws IOException
+	 */
+	public XMemcachedClient(final String server, final int port, int weight)
+			throws IOException {
 		super();
+		if (weight <= 0)
+			throw new IllegalArgumentException("weight<=0");
 		checkServerPort(server, port);
 		buildConnector(new ArrayMemcachedSessionLocator(),
 				new SimpleBufferAllocator(), getDefaultConfiguration(),
 				new TextCommandFactory(), new SerializingTranscoder());
 		start0();
-		connect(new InetSocketAddress(server, port));
+		connect(new InetSocketAddress(server, port), weight);
 	}
 
 	private void checkServerPort(String server, int port) {
@@ -215,8 +234,23 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 	 */
 	public final void addServer(final String server, final int port)
 			throws IOException {
+		addServer(server, port, 1);
+	}
+
+	/**
+	 * add a memcached server to MemcachedClient
+	 * 
+	 * @param server
+	 * @param port
+	 * @param weight
+	 * @throws IOException
+	 */
+	public final void addServer(final String server, final int port, int weight)
+			throws IOException {
+		if (weight <= 0)
+			throw new IllegalArgumentException("weight<=0");
 		checkServerPort(server, port);
-		connect(new InetSocketAddress(server, port));
+		connect(new InetSocketAddress(server, port), weight);
 	}
 
 	/*
@@ -228,10 +262,17 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 	 */
 	public final void addServer(final InetSocketAddress inetSocketAddress)
 			throws IOException {
+		addServer(inetSocketAddress, 1);
+	}
+
+	public final void addServer(final InetSocketAddress inetSocketAddress,
+			int weight) throws IOException {
 		if (inetSocketAddress == null) {
-			throw new IllegalArgumentException();
+			throw new IllegalArgumentException("Null InetSocketAddress");
 		}
-		connect(inetSocketAddress);
+		if (weight <= 0)
+			throw new IllegalArgumentException("weight<=0");
+		connect(inetSocketAddress, weight);
 	}
 
 	/*
@@ -243,9 +284,21 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 		List<InetSocketAddress> addresses = AddrUtil.getAddresses(hostList);
 		if (addresses != null && addresses.size() > 0) {
 			for (InetSocketAddress address : addresses) {
-				connector.connect(address);
+				connector.connect(address, 1);
 			}
 		}
+	}
+
+	@Override
+	public void addOneServerWithWeight(String server, int weight)
+			throws IOException {
+		InetSocketAddress address = AddrUtil.getOneAddress(server);
+		if (address == null)
+			throw new IllegalArgumentException("Null Server");
+		if (weight <= 0)
+			throw new IllegalArgumentException("weight<=0");
+		connector.connect(address, weight);
+
 	}
 
 	/*
@@ -286,13 +339,13 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 		}
 	}
 
-	private void connect(final InetSocketAddress inetSocketAddress)
+	private void connect(final InetSocketAddress inetSocketAddress, int weight)
 			throws IOException {
 		Future<Boolean> future = null;
 		boolean connected = false;
 		Throwable throwable = null;
 		try {
-			future = this.connector.connect(inetSocketAddress);
+			future = this.connector.connect(inetSocketAddress, weight);
 
 			if (!future.isDone()
 					&& !future.get(this.connectTimeout, TimeUnit.MILLISECONDS)) {
@@ -326,9 +379,8 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 					+ inetSocketAddress.getPort() + " error", e);
 		}
 		if (!connected) {
-			this.connector
-					.addToWatingQueue(new MemcachedConnector.ReconnectRequest(
-							inetSocketAddress, 0));
+			this.connector.addToWatingQueue(new ReconnectRequest(
+					inetSocketAddress, 0, weight));
 			throw new IOException(throwable);
 
 		}
@@ -483,23 +535,31 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 	}
 
 	/**
-	 * XMemcached构造函数
+	 * XMemcached Constructor.
 	 * 
 	 * @param inetSocketAddress
-	 *            服务器IP地址
+	 * @param weight
 	 * @throws IOException
 	 */
-	public XMemcachedClient(final InetSocketAddress inetSocketAddress)
-			throws IOException {
+	public XMemcachedClient(final InetSocketAddress inetSocketAddress,
+			int weight) throws IOException {
 		super();
 		if (inetSocketAddress == null) {
-			throw new IllegalArgumentException();
+			throw new IllegalArgumentException("Null InetSocketAddress");
+
 		}
+		if (weight <= 0)
+			throw new IllegalArgumentException("weight<=0");
 		buildConnector(new ArrayMemcachedSessionLocator(),
 				new SimpleBufferAllocator(), getDefaultConfiguration(),
 				new TextCommandFactory(), new SerializingTranscoder());
 		start0();
-		connect(inetSocketAddress);
+		connect(inetSocketAddress, weight);
+	}
+
+	public XMemcachedClient(final InetSocketAddress inetSocketAddress)
+			throws IOException {
+		this(inetSocketAddress, 1);
 	}
 
 	public XMemcachedClient() throws IOException {
@@ -537,6 +597,17 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 				new SerializingTranscoder());
 	}
 
+	/**
+	 * XMemcachedClient constructor.Every server's weight is one by default.
+	 * 
+	 * @param locator
+	 * @param allocator
+	 * @param conf
+	 * @param commandFactory
+	 * @param transcoder
+	 * @param addressList
+	 * @throws IOException
+	 */
 	@SuppressWarnings("unchecked")
 	public XMemcachedClient(MemcachedSessionLocator locator,
 			BufferAllocator allocator, Configuration conf,
@@ -548,7 +619,52 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 		start0();
 		if (addressList != null) {
 			for (InetSocketAddress inetSocketAddress : addressList) {
-				connect(inetSocketAddress);
+				connect(inetSocketAddress, 1);
+			}
+		}
+	}
+
+	/**
+	 * XMemcachedClient constructor.
+	 * 
+	 * @param locator
+	 * @param allocator
+	 * @param conf
+	 * @param commandFactory
+	 * @param transcoder
+	 * @param addressList
+	 * @param weights
+	 *            weight array for address list
+	 * @throws IOException
+	 */
+	@SuppressWarnings("unchecked")
+	public XMemcachedClient(MemcachedSessionLocator locator,
+			BufferAllocator allocator, Configuration conf,
+			CommandFactory commandFactory, Transcoder transcoder,
+			List<InetSocketAddress> addressList, int[] weights)
+			throws IOException {
+		super();
+		if ((weights == null && addressList != null))
+			throw new IllegalArgumentException("Null weights");
+		if (weights != null && addressList == null)
+			throw new IllegalArgumentException("Null addressList");
+
+		if (weights != null) {
+			for (int weight : weights) {
+				if (weight <= 0)
+					throw new IllegalArgumentException("Some weights<=0");
+			}
+		}
+		if (weights != null && addressList != null
+				&& weights.length != addressList.size())
+			throw new IllegalArgumentException(
+					"weights.length!=addressList.size()");
+		optimiezeSetReadThreadCount(conf, addressList);
+		buildConnector(locator, allocator, conf, commandFactory, transcoder);
+		start0();
+		if (addressList != null && weights != null) {
+			for (int i = 0; i < weights.length; i++) {
+				connect(addressList.get(i), weights[i]);
 			}
 		}
 	}
@@ -585,6 +701,12 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 
 	}
 
+	/**
+	 * XMemcached Constructor.Every server's weight is one by default.
+	 * 
+	 * @param addressList
+	 * @throws IOException
+	 */
 	public XMemcachedClient(List<InetSocketAddress> addressList)
 			throws IOException {
 		super();
@@ -596,7 +718,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 				new TextCommandFactory(), new SerializingTranscoder());
 		start0();
 		for (InetSocketAddress inetSocketAddress : addressList) {
-			connect(inetSocketAddress);
+			connect(inetSocketAddress, 1);
 		}
 	}
 

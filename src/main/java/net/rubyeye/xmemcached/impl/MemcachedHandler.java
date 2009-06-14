@@ -69,16 +69,12 @@ public class MemcachedHandler extends HandlerAdapter {
 		command.setStatus(OperationStatus.SENT);
 		((MemcachedTCPSession) session).addCommand(command);
 	}
-	
-	
 
 	@Override
 	public void onException(Session session, Throwable t) {
 		super.onException(session, t);
 		t.printStackTrace();
 	}
-
-
 
 	/**
 	 * On session started
@@ -112,8 +108,8 @@ public class MemcachedHandler extends HandlerAdapter {
 			log.debug("Add reconnectRequest to connector "
 					+ session.getRemoteSocketAddress());
 			this.client.getConnector().addToWatingQueue(
-					new MemcachedConnector.ReconnectRequest(session
-							.getRemoteSocketAddress(), 0));
+					new ReconnectRequest(session.getRemoteSocketAddress(), 0,
+							((MemcachedTCPSession) session).getWeight()));
 		}
 	}
 

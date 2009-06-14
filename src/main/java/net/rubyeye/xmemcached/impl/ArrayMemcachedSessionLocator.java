@@ -75,7 +75,18 @@ public class ArrayMemcachedSessionLocator implements MemcachedSessionLocator {
 
 	@Override
 	public final void updateSessions(final Collection<Session> list) {
-		sessions = new ArrayList<Session>(list);
-
+		Collection<Session> copySessions = list;
+		List<Session> newSessions = new ArrayList<Session>(
+				copySessions.size() * 2);
+		for (Session session : copySessions) {
+			if (session instanceof MemcachedTCPSession) {
+				int weight = ((MemcachedTCPSession) session).getWeight();
+				for (int i = 0; i < weight; i++) {
+					newSessions.add(session);
+				}
+			} else
+				newSessions.add(session);
+		}
+		this.sessions = newSessions;
 	}
 }

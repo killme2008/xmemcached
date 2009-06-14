@@ -1,5 +1,6 @@
 package net.rubyeye.xmemcached.test.unittest;
 
+import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -12,10 +13,9 @@ import net.rubyeye.xmemcached.CASOperation;
 import net.rubyeye.xmemcached.GetsResponse;
 import net.rubyeye.xmemcached.MemcachedClient;
 import net.rubyeye.xmemcached.MemcachedClientBuilder;
-import net.rubyeye.xmemcached.XMemcachedClient;
-import net.rubyeye.xmemcached.XMemcachedClientBuilder;
 import net.rubyeye.xmemcached.command.CommandType;
 import net.rubyeye.xmemcached.exception.MemcachedException;
+import net.rubyeye.xmemcached.impl.ReconnectRequest;
 import net.rubyeye.xmemcached.transcoders.StringTranscoder;
 import net.rubyeye.xmemcached.utils.AddrUtil;
 import junit.framework.TestCase;
@@ -33,7 +33,10 @@ public abstract class XMemcachedClientTest extends TestCase {
 		memcachedClient.flushAll(5000);
 	}
 
-	public abstract MemcachedClientBuilder createBuilder()throws Exception;
+	public abstract MemcachedClientBuilder createBuilder() throws Exception;
+
+	public abstract MemcachedClientBuilder createWeightedBuilder()
+			throws Exception;
 
 	public void testGet() throws Exception {
 		try {
@@ -288,7 +291,7 @@ public abstract class XMemcachedClientTest extends TestCase {
 		MockErrorTextGetOneCommand errorCommand = new MockErrorTextGetOneCommand(
 				key, key.getBytes(), CommandType.GET_ONE, latch);
 		this.memcachedClient.getConnector().send(errorCommand);
-		latch.await(XMemcachedClient.DEFAULT_OP_TIMEOUT, TimeUnit.MILLISECONDS);
+		latch.await(MemcachedClient.DEFAULT_OP_TIMEOUT, TimeUnit.MILLISECONDS);
 		assertTrue(errorCommand.isDecoded());
 		// wait for reconnecting
 		Thread.sleep(2000);
@@ -364,6 +367,44 @@ public abstract class XMemcachedClientTest extends TestCase {
 				wait(1000);
 		}
 		assertEquals("dennis", memcachedClient.get("name"));
+	}
+
+	public void testWeightedServers() throws Exception {
+		// shutdown current client
+		this.memcachedClient.shutdown();
+
+		MemcachedClientBuilder builder = createWeightedBuilder();
+		builder.getConfiguration().setStatisticsServer(true);
+		memcachedClient = builder.build();
+		memcachedClient.flushAll(5000);
+
+		Map<InetSocketAddress, Map<String, String>> oldStats = memcachedClient
+				.getStats();
+
+		for (int i = 0; i < 1000; i++) {
+			memcachedClient.set(String.valueOf(i), 0, i);
+		}
+		for (int i = 0; i < 1000; i++) {
+			assertEquals(i, memcachedClient.get(String.valueOf(i)));
+		}
+
+		List<ReconnectRequest> connectRequests = AddrUtil
+				.getAddressesWithWeight(properties
+						.getProperty("test.memcached.weighted.servers"));
+		Map<InetSocketAddress, Map<String, String>> newStats = memcachedClient
+				.getStats();
+		for (ReconnectRequest reconnectRequest : connectRequests) {
+			int oldSets = Integer.parseInt(oldStats.get(
+					reconnectRequest.getAddress()).get("cmd_set"));
+			int newSets = Integer.parseInt(newStats.get(
+					reconnectRequest.getAddress()).get("cmd_set"));
+			System.out.println("sets:" + (newSets - oldSets));
+			int oldGets = Integer.parseInt(oldStats.get(
+					reconnectRequest.getAddress()).get("cmd_get"));
+			int newGets = Integer.parseInt(newStats.get(
+					reconnectRequest.getAddress()).get("cmd_get"));
+			System.out.println("gets:" + (newGets - oldGets));
+		}
 	}
 
 	public void tearDown() throws Exception {

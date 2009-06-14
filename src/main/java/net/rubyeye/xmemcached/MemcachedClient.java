@@ -757,4 +757,17 @@ public interface MemcachedClient {
 	 * @return
 	 */
 	public Collection<InetSocketAddress> getAvaliableServers();
+
+	/**
+	 * add a memcached server to MemcachedClient
+	 * 
+	 * @param server
+	 * @param port
+	 * @param weight
+	 * @throws IOException
+	 */
+	public void addServer(final String server, final int port, int weight)
+			throws IOException;
+
+	public void addServer(final InetSocketAddress inetSocketAddress, int weight) throws IOException;
 }

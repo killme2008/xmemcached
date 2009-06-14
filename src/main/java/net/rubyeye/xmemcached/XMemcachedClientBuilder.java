@@ -3,11 +3,13 @@ package net.rubyeye.xmemcached;
 import com.google.code.yanf4j.config.Configuration;
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.util.ArrayList;
 import java.util.List;
 
 import net.rubyeye.xmemcached.buffer.BufferAllocator;
 import net.rubyeye.xmemcached.buffer.SimpleBufferAllocator;
 import net.rubyeye.xmemcached.impl.ArrayMemcachedSessionLocator;
+import net.rubyeye.xmemcached.impl.ReconnectRequest;
 import net.rubyeye.xmemcached.transcoders.SerializingTranscoder;
 import net.rubyeye.xmemcached.transcoders.Transcoder;
 
@@ -24,6 +26,9 @@ public class XMemcachedClientBuilder implements MemcachedClientBuilder {
 	private Configuration configuration = XMemcachedClient
 			.getDefaultConfiguration();
 	private List<InetSocketAddress> addressList;
+
+	private List<ReconnectRequest> connectRequestList;
+
 	private CommandFactory commandFactory = new TextCommandFactory();
 
 	public final CommandFactory getCommandFactory() {
@@ -39,6 +44,19 @@ public class XMemcachedClientBuilder implements MemcachedClientBuilder {
 
 	public XMemcachedClientBuilder(List<InetSocketAddress> addressList) {
 		this.addressList = addressList;
+	}
+
+	/**
+	 * Create a XMemcachedClientBuilder,enable weighted server.
+	 * 
+	 * @param connectRequestList
+	 * @return
+	 */
+	public static XMemcachedClientBuilder newMemcachedClientBuilder(
+			List<ReconnectRequest> connectRequestList) {
+		XMemcachedClientBuilder builder = new XMemcachedClientBuilder();
+		builder.connectRequestList = connectRequestList;
+		return builder;
 	}
 
 	public XMemcachedClientBuilder() {
@@ -111,9 +129,25 @@ public class XMemcachedClientBuilder implements MemcachedClientBuilder {
 	 * @see net.rubyeye.xmemcached.MemcachedClientBuilder#build()
 	 */
 	public MemcachedClient build() throws IOException {
-		return new XMemcachedClient(this.sessionLocator, this.bufferAllocator,
-				this.configuration, this.commandFactory, this.transcoder,
-				this.addressList);
+		if (this.connectRequestList == null)
+			return new XMemcachedClient(this.sessionLocator,
+					this.bufferAllocator, this.configuration,
+					this.commandFactory, this.transcoder, this.addressList);
+		else {
+			List<InetSocketAddress> list = new ArrayList<InetSocketAddress>(
+					this.connectRequestList.size());
+			int[] weights = new int[this.connectRequestList.size()];
+			for (int i = 0; i < weights.length; i++) {
+				ReconnectRequest reconnectRequest = this.connectRequestList
+						.get(i);
+				list.add(reconnectRequest.getAddress());
+				weights[i] = reconnectRequest.getWeight();
+			}
+			return new XMemcachedClient(this.sessionLocator,
+					this.bufferAllocator, this.configuration,
+					this.commandFactory, this.transcoder,list,
+					weights);
+		}
 	}
 
 	@SuppressWarnings("unchecked")
