@@ -55,8 +55,8 @@
 				<artifactId>maven-javadoc-plugin</artifactId>
 				<configuration>
 					<encoding>utf-8</encoding>
+					<charset>utf-8</charset>
 					<excludePackageNames>net.rubyeye.xmemcached.test</excludePackageNames>
-
 				</configuration>
 			</plugin>
 		</plugins>

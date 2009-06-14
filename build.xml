@@ -36,7 +36,7 @@
 		</tar>
 	</target>
 	<target name="build-doc">
-		<javadoc destdir="${doc}" encoding="UTF-8" docencoding="UTF-8">
+		<javadoc destdir="${doc}" encoding="UTF-8" docencoding="UTF-8" charset="utf-8">
 			<packageset dir="${src}">
 				<exclude name="**/*test*" />
 			</packageset>
