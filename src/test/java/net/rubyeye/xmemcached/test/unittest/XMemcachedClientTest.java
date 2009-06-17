@@ -1,5 +1,6 @@
 package net.rubyeye.xmemcached.test.unittest;
 
+import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.List;
@@ -7,6 +8,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import junit.framework.TestCase;
 import net.rubyeye.xmemcached.CASOperation;
@@ -26,6 +28,11 @@ public abstract class XMemcachedClientTest extends TestCase {
 
 	@Override
 	public void setUp() throws Exception {
+		createClients();
+	}
+
+	protected void createClients() throws IOException, Exception,
+			TimeoutException, InterruptedException, MemcachedException {
 		properties = ResourcesUtils.getResourceAsProperties("test.properties");
 
 		MemcachedClientBuilder builder = createBuilder();

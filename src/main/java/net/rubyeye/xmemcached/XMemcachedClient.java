@@ -11,6 +11,7 @@
  */
 package net.rubyeye.xmemcached;
 
+import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -26,9 +27,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-import java.io.IOException;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 import net.rubyeye.xmemcached.buffer.BufferAllocator;
 import net.rubyeye.xmemcached.buffer.SimpleBufferAllocator;
@@ -49,6 +47,9 @@ import net.rubyeye.xmemcached.transcoders.SerializingTranscoder;
 import net.rubyeye.xmemcached.transcoders.Transcoder;
 import net.rubyeye.xmemcached.utils.AddrUtil;
 import net.rubyeye.xmemcached.utils.ByteUtils;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import com.google.code.yanf4j.config.Configuration;
 import com.google.code.yanf4j.nio.Session;
@@ -644,7 +645,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 			List<InetSocketAddress> addressList, int[] weights)
 			throws IOException {
 		super();
-		if ((weights == null && addressList != null))
+		if (weights == null && addressList != null)
 			throw new IllegalArgumentException("Null weights");
 		if (weights != null && addressList == null)
 			throw new IllegalArgumentException("Null addressList");
@@ -656,14 +657,14 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 			}
 		}
 		if (weights != null && addressList != null
-				&& weights.length != addressList.size())
+				&& weights.length < addressList.size())
 			throw new IllegalArgumentException(
-					"weights.length!=addressList.size()");
+					"weights.length is less than addressList.size()");
 		optimiezeSetReadThreadCount(conf, addressList);
 		buildConnector(locator, allocator, conf, commandFactory, transcoder);
 		start0();
 		if (addressList != null && weights != null) {
-			for (int i = 0; i < weights.length; i++) {
+			for (int i = 0; i < addressList.size(); i++) {
 				connect(addressList.get(i), weights[i]);
 			}
 		}
@@ -674,9 +675,8 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 		if (addressList.size() > 1 && isLinuxPlatform()
 				&& conf.getReadThreadCount() == DEFAULT_READ_THREAD_COUNT) {
 			int cpus = Runtime.getRuntime().availableProcessors();
-			conf
-					.setReadThreadCount(addressList.size() > (cpus + 1) ? (cpus + 1)
-							: addressList.size());
+			conf.setReadThreadCount(addressList.size() > cpus + 1 ? cpus + 1
+					: addressList.size());
 		}
 	}
 
@@ -872,7 +872,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 	public final <T> Map<String, T> get(
 			final Collection<String> keyCollections, final long timeout)
 			throws TimeoutException, InterruptedException, MemcachedException {
-		return (Map<String, T>) get(keyCollections, timeout, this.transcoder);
+		return get(keyCollections, timeout, this.transcoder);
 	}
 
 	/*
