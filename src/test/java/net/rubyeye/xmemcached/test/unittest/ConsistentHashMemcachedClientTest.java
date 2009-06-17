@@ -1,5 +1,8 @@
 package net.rubyeye.xmemcached.test.unittest;
 
+import java.net.InetSocketAddress;
+import java.util.List;
+
 import net.rubyeye.xmemcached.MemcachedClientBuilder;
 import net.rubyeye.xmemcached.XMemcachedClientBuilder;
 import net.rubyeye.xmemcached.impl.KetamaMemcachedSessionLocator;
@@ -17,10 +20,14 @@ public class ConsistentHashMemcachedClientTest extends XMemcachedClientTest {
 
 	@Override
 	public MemcachedClientBuilder createWeightedBuilder() throws Exception {
-		MemcachedClientBuilder builder = XMemcachedClientBuilder
-				.newMemcachedClientBuilder(AddrUtil
-						.getAddressesWithWeight(properties
-								.getProperty("test.memcached.weighted.servers")));
+		List<InetSocketAddress> addressList = AddrUtil.getAddresses(properties
+				.getProperty("test.memcached.servers"));
+		int[] weights = new int[addressList.size()];
+		for (int i = 0; i < weights.length; i++) {
+			weights[i] = i + 1;
+		}
+		MemcachedClientBuilder builder = new XMemcachedClientBuilder(
+				addressList, weights);
 		builder.setSessionLocator(new KetamaMemcachedSessionLocator());
 		return builder;
 	}

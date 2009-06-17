@@ -1,17 +1,16 @@
 package net.rubyeye.xmemcached;
 
-import com.google.code.yanf4j.config.Configuration;
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.util.ArrayList;
 import java.util.List;
 
 import net.rubyeye.xmemcached.buffer.BufferAllocator;
 import net.rubyeye.xmemcached.buffer.SimpleBufferAllocator;
 import net.rubyeye.xmemcached.impl.ArrayMemcachedSessionLocator;
-import net.rubyeye.xmemcached.impl.ReconnectRequest;
 import net.rubyeye.xmemcached.transcoders.SerializingTranscoder;
 import net.rubyeye.xmemcached.transcoders.Transcoder;
+
+import com.google.code.yanf4j.config.Configuration;
 
 /**
  * Builder pattern.Configure XmemcachedClient's options,then build it
@@ -25,9 +24,9 @@ public class XMemcachedClientBuilder implements MemcachedClientBuilder {
 	private BufferAllocator bufferAllocator = new SimpleBufferAllocator();
 	private Configuration configuration = XMemcachedClient
 			.getDefaultConfiguration();
-	private List<InetSocketAddress> addressList;
+	private final List<InetSocketAddress> addressList;
 
-	private List<ReconnectRequest> connectRequestList;
+	private int[] weights;
 
 	private CommandFactory commandFactory = new TextCommandFactory();
 
@@ -46,17 +45,10 @@ public class XMemcachedClientBuilder implements MemcachedClientBuilder {
 		this.addressList = addressList;
 	}
 
-	/**
-	 * Create a XMemcachedClientBuilder,enable weighted server.
-	 * 
-	 * @param connectRequestList
-	 * @return
-	 */
-	public static XMemcachedClientBuilder newMemcachedClientBuilder(
-			List<ReconnectRequest> connectRequestList) {
-		XMemcachedClientBuilder builder = new XMemcachedClientBuilder();
-		builder.connectRequestList = connectRequestList;
-		return builder;
+	public XMemcachedClientBuilder(List<InetSocketAddress> addressList,
+			int[] weights) {
+		this.addressList = addressList;
+		this.weights = weights;
 	}
 
 	public XMemcachedClientBuilder() {
@@ -129,23 +121,19 @@ public class XMemcachedClientBuilder implements MemcachedClientBuilder {
 	 * @see net.rubyeye.xmemcached.MemcachedClientBuilder#build()
 	 */
 	public MemcachedClient build() throws IOException {
-		if (this.connectRequestList == null)
+		if (this.weights == null)
 			return new XMemcachedClient(this.sessionLocator,
 					this.bufferAllocator, this.configuration,
 					this.commandFactory, this.transcoder, this.addressList);
 		else {
-			List<InetSocketAddress> list = new ArrayList<InetSocketAddress>(
-					this.connectRequestList.size());
-			int[] weights = new int[this.connectRequestList.size()];
-			for (int i = 0; i < weights.length; i++) {
-				ReconnectRequest reconnectRequest = this.connectRequestList
-						.get(i);
-				list.add(reconnectRequest.getAddress());
-				weights[i] = reconnectRequest.getWeight();
-			}
+			if (this.addressList == null)
+				throw new IllegalArgumentException("Null Address List");
+			if (this.addressList.size() > this.weights.length)
+				throw new IllegalArgumentException(
+						"Weights Array's length is less than server's number");
 			return new XMemcachedClient(this.sessionLocator,
 					this.bufferAllocator, this.configuration,
-					this.commandFactory, this.transcoder,list,
+					this.commandFactory, this.transcoder, this.addressList,
 					weights);
 		}
 	}

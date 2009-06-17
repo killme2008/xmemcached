@@ -8,22 +8,23 @@ import java.util.Properties;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
-import com.google.code.yanf4j.util.ResourcesUtils;
+import junit.framework.TestCase;
 import net.rubyeye.xmemcached.CASOperation;
 import net.rubyeye.xmemcached.GetsResponse;
 import net.rubyeye.xmemcached.MemcachedClient;
 import net.rubyeye.xmemcached.MemcachedClientBuilder;
 import net.rubyeye.xmemcached.command.CommandType;
 import net.rubyeye.xmemcached.exception.MemcachedException;
-import net.rubyeye.xmemcached.impl.ReconnectRequest;
 import net.rubyeye.xmemcached.transcoders.StringTranscoder;
 import net.rubyeye.xmemcached.utils.AddrUtil;
-import junit.framework.TestCase;
+
+import com.google.code.yanf4j.util.ResourcesUtils;
 
 public abstract class XMemcachedClientTest extends TestCase {
 	MemcachedClient memcachedClient;
 	Properties properties;
 
+	@Override
 	public void setUp() throws Exception {
 		properties = ResourcesUtils.getResourceAsProperties("test.properties");
 
@@ -388,25 +389,25 @@ public abstract class XMemcachedClientTest extends TestCase {
 			assertEquals(i, memcachedClient.get(String.valueOf(i)));
 		}
 
-		List<ReconnectRequest> connectRequests = AddrUtil
-				.getAddressesWithWeight(properties
-						.getProperty("test.memcached.weighted.servers"));
+		List<InetSocketAddress> addressList = AddrUtil.getAddresses(properties
+				.getProperty("test.memcached.servers"));
 		Map<InetSocketAddress, Map<String, String>> newStats = memcachedClient
 				.getStats();
-		for (ReconnectRequest reconnectRequest : connectRequests) {
-			int oldSets = Integer.parseInt(oldStats.get(
-					reconnectRequest.getAddress()).get("cmd_set"));
-			int newSets = Integer.parseInt(newStats.get(
-					reconnectRequest.getAddress()).get("cmd_set"));
+		for (InetSocketAddress address : addressList) {
+			int oldSets = Integer
+					.parseInt(oldStats.get(address).get("cmd_set"));
+			int newSets = Integer
+					.parseInt(newStats.get(address).get("cmd_set"));
 			System.out.println("sets:" + (newSets - oldSets));
-			int oldGets = Integer.parseInt(oldStats.get(
-					reconnectRequest.getAddress()).get("cmd_get"));
-			int newGets = Integer.parseInt(newStats.get(
-					reconnectRequest.getAddress()).get("cmd_get"));
+			int oldGets = Integer
+					.parseInt(oldStats.get(address).get("cmd_get"));
+			int newGets = Integer
+					.parseInt(newStats.get(address).get("cmd_get"));
 			System.out.println("gets:" + (newGets - oldGets));
 		}
 	}
 
+	@Override
 	public void tearDown() throws Exception {
 		this.memcachedClient.shutdown();
 	}

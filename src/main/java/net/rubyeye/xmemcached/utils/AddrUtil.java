@@ -4,8 +4,6 @@ import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.List;
 
-import net.rubyeye.xmemcached.impl.ReconnectRequest;
-
 /**
  * Convenience utilities for simplifying common address parsing.
  */
@@ -75,38 +73,5 @@ public class AddrUtil {
 		String hostPart = server.substring(0, finalColon);
 		String portNum = server.substring(finalColon + 1);
 		return new InetSocketAddress(hostPart, Integer.parseInt(portNum));
-	}
-
-	/**
-	 * Split a string in the form of "host:port host2:port:weight" into a List
-	 * of ReconnectRequest instances suitable for instantiating a
-	 * MemcachedClient.
-	 * 
-	 * Note that colon-delimited IPv6 is not supported.
-	 */
-	public static List<ReconnectRequest> getAddressesWithWeight(String s) {
-		if (s == null) {
-			throw new NullPointerException("Null host list");
-		}
-		if (s.trim().equals("")) {
-			throw new IllegalArgumentException("No hosts in list:  ``" + s
-					+ "''");
-		}
-		ArrayList<ReconnectRequest> addrs = new ArrayList<ReconnectRequest>();
-
-		for (String hoststuff : s.split(" ")) {
-			String[] items = hoststuff.split("\\s*:\\s*");
-			if (items.length < 2)
-				throw new IllegalArgumentException("Invalid server ``"
-						+ hoststuff + "'' in list:  " + s);
-			String hostPart = items[0].trim();
-			String portNum = items[1].trim();
-			int weight = items.length == 3 ? Integer.parseInt(items[2].trim())
-					: 1;
-			addrs.add(new ReconnectRequest(new InetSocketAddress(hostPart,
-					Integer.parseInt(portNum)), 0, weight));
-		}
-		assert !addrs.isEmpty() : "No addrs found";
-		return addrs;
 	}
 }
