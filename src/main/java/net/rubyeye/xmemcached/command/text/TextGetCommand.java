@@ -88,8 +88,10 @@ public abstract class TextGetCommand extends Command {
 					this.currentReturnKey = null;
 					this.currentLine = null;
 				} else {
+					String line = currentLine;
 					this.currentLine = null;
-					decodeError();
+					decodeError(line);
+
 				}
 			} else
 				return false;

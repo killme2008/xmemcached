@@ -26,7 +26,7 @@ public class TextVersionCommand extends VersionCommand {
 				countDownLatch();
 				return true;
 			} else
-				decodeError();
+				decodeError(line);
 		}
 		return false;
 	}

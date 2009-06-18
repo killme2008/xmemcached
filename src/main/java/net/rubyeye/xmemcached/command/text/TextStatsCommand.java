@@ -31,7 +31,7 @@ public class TextStatsCommand extends StatsCommand {
 				String[] items = line.split(" ");
 				((Map<String, String>) getResult()).put(items[1], items[2]);
 			} else
-				decodeError();
+				decodeError(line);
 		}
 		return false;
 	}

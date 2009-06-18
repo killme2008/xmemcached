@@ -15,15 +15,15 @@ public class BaseTextCommandUnitTest extends TestCase {
 	protected CommandFactory commandFactory;
 	protected BufferAllocator bufferAllocator;
 
-	public void setUp(){
-		this.bufferAllocator=new SimpleBufferAllocator();
-		this.commandFactory=new TextCommandFactory();
+	public void setUp() {
+		this.bufferAllocator = new SimpleBufferAllocator();
+		this.commandFactory = new TextCommandFactory();
 	}
 
 	protected void checkDecodeNullAndNotLineByteBuffer(Command command) {
 		assertFalse(command.decode(null, null));
-	    assertFalse(command.decode(null, ByteBuffer.allocate(0)));
-	    assertFalse(command.decode(null, ByteBuffer.wrap("test".getBytes())));
+		assertFalse(command.decode(null, ByteBuffer.allocate(0)));
+		assertFalse(command.decode(null, ByteBuffer.wrap("test".getBytes())));
 	}
 
 	protected void checkDecodeInvalidLine(Command command, String invalidLine) {
@@ -32,7 +32,9 @@ public class BaseTextCommandUnitTest extends TestCase {
 			command.decode(null, ByteBuffer.wrap(invalidLine.getBytes()));
 			fail();
 		} catch (MemcachedDecodeException e) {
-			assertEquals(DECODE_ERROR_SESSION_WILL_BE_CLOSED, e.getMessage());
+			assertTrue(true);
+			 assertEquals(DECODE_ERROR_SESSION_WILL_BE_CLOSED + ",line="
+					+ invalidLine.replace("\r\n", ""), e.getMessage());
 		}
 	}
 
@@ -41,7 +43,7 @@ public class BaseTextCommandUnitTest extends TestCase {
 	}
 
 	protected void checkByteBufferEquals(Command command, String line) {
-		assertEquals(ByteBuffer.wrap(line.getBytes()), command
-				.getIoBuffer().getByteBuffer());
+		assertEquals(ByteBuffer.wrap(line.getBytes()), command.getIoBuffer()
+				.getByteBuffer());
 	}
 }

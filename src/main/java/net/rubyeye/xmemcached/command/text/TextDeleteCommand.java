@@ -32,7 +32,7 @@ public class TextDeleteCommand extends DeleteCommand {
 				countDownLatch();
 				return true;
 			} else
-				decodeError();
+				decodeError(line);
 		}
 		return false;
 	}

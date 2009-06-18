@@ -24,7 +24,7 @@ public class TextFlushAllCommand extends FlushAllCommand {
 				countDownLatch();
 				return true;
 			} else
-				decodeError();
+				decodeError(line);
 		}
 		return false;
 	}
