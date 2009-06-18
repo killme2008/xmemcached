@@ -67,7 +67,9 @@ public class MemcachedHandler extends HandlerAdapter {
 	public final void onMessageSent(Session session, Object msg) {
 		Command command = (Command) msg;
 		command.setStatus(OperationStatus.SENT);
-		((MemcachedTCPSession) session).addCommand(command);
+		// It is no noreply
+		if (!command.isNoreply())
+			((MemcachedTCPSession) session).addCommand(command);
 	}
 
 	@Override

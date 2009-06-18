@@ -19,36 +19,37 @@ import net.rubyeye.xmemcached.utils.ByteUtils;
 
 /**
  * Command Factory for creating text protocol commands.
- *
+ * 
  * @author dennis
- *
+ * 
  */
 public final class TextCommandFactory implements CommandFactory {
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see
 	 * net.rubyeye.xmemcached.CommandFactory#createDeleteCommand(java.lang.String
 	 * , byte[], int)
 	 */
 	public final Command createDeleteCommand(final String key,
-			final byte[] keyBytes, final int time) {
-		return new TextDeleteCommand(key, keyBytes, time, new CountDownLatch(1));
+			final byte[] keyBytes, final int time,boolean noreply) {
+		return new TextDeleteCommand(key, keyBytes, time, new CountDownLatch(1),noreply);
 	}
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see net.rubyeye.xmemcached.CommandFactory#createVersionCommand()
 	 */
-	public final Command createVersionCommand(CountDownLatch latch,InetSocketAddress server) {
-		return new TextVersionCommand(server,latch);
+	public final Command createVersionCommand(CountDownLatch latch,
+			InetSocketAddress server) {
+		return new TextVersionCommand(server, latch);
 	}
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see
 	 * net.rubyeye.xmemcached.CommandFactory#createFlushAllCommand(java.util
 	 * .concurrent.CountDownLatch)
@@ -59,18 +60,18 @@ public final class TextCommandFactory implements CommandFactory {
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @seenet.rubyeye.xmemcached.CommandFactory#createStatsCommand(java.net.
 	 * InetSocketAddress, java.util.concurrent.CountDownLatch)
 	 */
 	public final Command createStatsCommand(InetSocketAddress server,
-			CountDownLatch latch,String itemName) {
-		return new TextStatsCommand(server, latch,itemName);
+			CountDownLatch latch, String itemName) {
+		return new TextStatsCommand(server, latch, itemName);
 	}
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see
 	 * net.rubyeye.xmemcached.CommandFactory#createStoreCommand(java.lang.String
 	 * , byte[], int, java.lang.Object,
@@ -80,59 +81,62 @@ public final class TextCommandFactory implements CommandFactory {
 	@SuppressWarnings("unchecked")
 	public final Command createCASCommand(final String key,
 			final byte[] keyBytes, final int exp, final Object value, long cas,
-			Transcoder transcoder) {
+			boolean noreply, Transcoder transcoder) {
 		return new TextCASCommand(key, keyBytes, CommandType.CAS,
-				new CountDownLatch(1), exp, cas, value, transcoder);
+				new CountDownLatch(1), exp, cas, value, noreply, transcoder);
 	}
 
 	@SuppressWarnings("unchecked")
 	public final Command createSetCommand(final String key,
-			final byte[] keyBytes, final int exp, final Object value,
+			final byte[] keyBytes, final int exp, final Object value,boolean noreply,
 			Transcoder transcoder) {
-		return createStoreCommand(key, keyBytes, exp, value, CommandType.SET,
+		return createStoreCommand(key, keyBytes, exp, value, CommandType.SET,noreply,
 				transcoder);
 	}
 
 	@SuppressWarnings("unchecked")
 	public final Command createAddCommand(final String key,
-			final byte[] keyBytes, final int exp, final Object value,
+			final byte[] keyBytes, final int exp, final Object value,boolean noreply,
 			Transcoder transcoder) {
-		return createStoreCommand(key, keyBytes, exp, value, CommandType.ADD,
+		return createStoreCommand(key, keyBytes, exp, value, CommandType.ADD,noreply,
 				transcoder);
 	}
 
 	@SuppressWarnings("unchecked")
 	public final Command createReplaceCommand(final String key,
 			final byte[] keyBytes, final int exp, final Object value,
-			Transcoder transcoder) {
+			boolean noreply, Transcoder transcoder) {
 		return createStoreCommand(key, keyBytes, exp, value,
-				CommandType.REPLACE, transcoder);
+				CommandType.REPLACE, noreply, transcoder);
 	}
 
 	@SuppressWarnings("unchecked")
 	public final Command createAppendCommand(final String key,
-			final byte[] keyBytes, final Object value, Transcoder transcoder) {
-		return createStoreCommand(key, keyBytes, 0, value,
-				CommandType.APPEND, transcoder);
+			final byte[] keyBytes, final Object value, boolean noreply,
+			Transcoder transcoder) {
+		return createStoreCommand(key, keyBytes, 0, value, CommandType.APPEND,
+				noreply, transcoder);
 	}
 
 	@SuppressWarnings("unchecked")
 	public final Command createPrependCommand(final String key,
-			final byte[] keyBytes, final Object value, Transcoder transcoder) {
-		return createStoreCommand(key, keyBytes, 0, value,
-				CommandType.PREPEND, transcoder);
+			final byte[] keyBytes, final Object value, boolean noreply,
+			Transcoder transcoder) {
+		return createStoreCommand(key, keyBytes, 0, value, CommandType.PREPEND,
+				noreply, transcoder);
 	}
 
 	@SuppressWarnings("unchecked")
-	final Command createStoreCommand(String key, byte[] keyBytes,
-			int exp, Object value, CommandType cmdType, Transcoder transcoder) {
-		return new TextStoreCommand(key, keyBytes, cmdType,
-				new CountDownLatch(1), exp, -1, value, transcoder);
+	final Command createStoreCommand(String key, byte[] keyBytes, int exp,
+			Object value, CommandType cmdType, boolean noreply,
+			Transcoder transcoder) {
+		return new TextStoreCommand(key, keyBytes, cmdType, new CountDownLatch(
+				1), exp, -1, value, noreply, transcoder);
 	}
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see
 	 * net.rubyeye.xmemcached.CommandFactory#createGetCommand(java.lang.String,
 	 * byte[], net.rubyeye.xmemcached.command.CommandType)
@@ -145,7 +149,7 @@ public final class TextCommandFactory implements CommandFactory {
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see
 	 * net.rubyeye.xmemcached.CommandFactory#createGetMultiCommand(java.util
 	 * .Collection, java.util.concurrent.CountDownLatch,
@@ -168,7 +172,7 @@ public final class TextCommandFactory implements CommandFactory {
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see
 	 * net.rubyeye.xmemcached.CommandFactory#createIncrDecrCommand(java.lang
 	 * .String, byte[], int, net.rubyeye.xmemcached.command.CommandType)

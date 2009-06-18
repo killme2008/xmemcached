@@ -88,8 +88,7 @@ public class XMemcachedClientFactoryBean implements FactoryBean {
 		checkAttribute();
 		List<InetSocketAddress> serverList = getServerList();
 		int[] weightsArray = getWeightsArray(serverList);
-		MemcachedClientBuilder builder;
-		builder = newBuilder(serverList, weightsArray);
+		MemcachedClientBuilder builder = newBuilder(serverList, weightsArray);
 		configBuilder(builder);
 		return builder.build();
 	}

@@ -110,6 +110,8 @@ public class Optimiezer implements OptimiezerMBean, MemcachedOptimiezer {
 	public final Command optimiezeMergeBuffer(Command optimiezeCommand,
 			final Queue writeQueue, final BlockingQueue<Command> executingCmds,
 			int sendBufferSize) {
+		if (log.isDebugEnabled())
+			log.debug("Optimieze merge buffer:" + optimiezeCommand.toString());
 		if (optimiezeMergeBuffer
 				&& optimiezeCommand.getIoBuffer().getByteBuffer().remaining() < sendBufferSize) {
 			writeQueue.remove();
@@ -195,7 +197,7 @@ public class Optimiezer implements OptimiezerMBean, MemcachedOptimiezer {
 			IoBuffer gatherBuffer = this.bufferAllocator.allocate(totalBytes);
 			for (Command command : commands) {
 				gatherBuffer.put(command.getIoBuffer().getByteBuffer());
-				if (command != lastCommand)
+				if (command != lastCommand && !command.isNoreply())
 					executingCmds.add(command);
 			}
 			// arrayBuffer.gathering(gatherBuffer);
@@ -242,6 +244,8 @@ public class Optimiezer implements OptimiezerMBean, MemcachedOptimiezer {
 					mergeCommands = new ArrayList<Command>(mergeFactor / 2);
 					mergeCommands.add(currentCmd);
 				}
+				if (log.isDebugEnabled())
+					log.debug("Merge get command:" + nextCmd.toString());
 				nextCmd.setStatus(OperationStatus.WRITING);
 				mergeCommands.add((Command) writeQueue.remove());
 				key.append(" ").append((String) nextCmd.getKey());
@@ -253,7 +257,9 @@ public class Optimiezer implements OptimiezerMBean, MemcachedOptimiezer {
 		if (mergeCount == 1) {
 			return currentCmd;
 		} else {
-			log.debug("merge optimieze:merge " + mergeCount + " get command");
+			if (log.isDebugEnabled())
+				log.debug("Merge optimieze:merge " + mergeCount
+						+ " get commands");
 			return newMergedCommand(mergeCommands, key);
 		}
 	}
@@ -261,9 +267,8 @@ public class Optimiezer implements OptimiezerMBean, MemcachedOptimiezer {
 	private Command newMergedCommand(final List<Command> mergeCommands,
 			final StringBuilder key) {
 		byte[] keyBytes = ByteUtils.getBytes(key.toString());
-		final IoBuffer buffer = bufferAllocator
-				.allocate(Constants.GET.length
-						+ Constants.CRLF.length + 1 + keyBytes.length);
+		final IoBuffer buffer = bufferAllocator.allocate(Constants.GET.length
+				+ Constants.CRLF.length + 1 + keyBytes.length);
 		ByteUtils.setArguments(buffer, Constants.GET, keyBytes);
 		buffer.flip();
 		Command cmd = new TextGetOneCommand(key.toString(), keyBytes,

@@ -111,7 +111,7 @@ public class OptimezerTest extends TestCase {
 		// send five delete operation
 		for (int i = 5; i < 10; i++)
 			writeQueue.add(commandFactory.createDeleteCommand(
-					String.valueOf(i), String.valueOf(i).getBytes(), 0));
+					String.valueOf(i), String.valueOf(i).getBytes(), 0,false));
 		// merge five get commands at most
 		Command optimiezeCommand = optimiezer.optimiezeGet(writeQueue,
 				executingCmds, currentCmd);
@@ -182,7 +182,7 @@ public class OptimezerTest extends TestCase {
 	public void testOptimieze() {
 		for (int i = 0; i < 10; i++) {
 			Command deleteCommand = commandFactory.createDeleteCommand(String
-					.valueOf(i), String.valueOf(i).getBytes(), 0);
+					.valueOf(i), String.valueOf(i).getBytes(), 0,false);
 			deleteCommand.encode(new SimpleBufferAllocator());
 			writeQueue.add(deleteCommand);
 		}

@@ -18,8 +18,9 @@ public class TextStoreCommand extends StoreCommand {
 	@SuppressWarnings("unchecked")
 	public TextStoreCommand(String key, byte[] keyBytes, CommandType cmdType,
 			CountDownLatch latch, int exp, long cas, Object value,
-			Transcoder transcoder) {
-		super(key, keyBytes, cmdType, latch, exp, cas, value, transcoder);
+			boolean noreply, Transcoder transcoder) {
+		super(key, keyBytes, cmdType, latch, exp, cas, value, noreply,
+				transcoder);
 	}
 
 	@Override
@@ -35,7 +36,7 @@ public class TextStoreCommand extends StoreCommand {
 				countDownLatch();
 				return true;
 			} else
-				decodeError();
+				decodeError(line);
 		}
 		return false;
 	}
@@ -56,15 +57,29 @@ public class TextStoreCommand extends StoreCommand {
 		if (this.commandType == CommandType.CAS) {
 			size += 1 + casBytes.length;
 		}
-		this.ioBuffer = bufferAllocator.allocate(size);
+		if (isNoreply())
+			this.ioBuffer = bufferAllocator.allocate(size + 1
+					+ Constants.NO_REPLY.length());
+		else
+			this.ioBuffer = bufferAllocator.allocate(size);
 		if (this.commandType == CommandType.CAS) {
-			ByteUtils.setArguments(this.ioBuffer, cmdStr, keyBytes, flagBytes,
-					expBytes, dataLenBytes, casBytes);
+			if (isNoreply())
+				ByteUtils.setArguments(this.ioBuffer, cmdStr, keyBytes,
+						flagBytes, expBytes, dataLenBytes, casBytes,
+						Constants.NO_REPLY);
+			else
+				ByteUtils.setArguments(this.ioBuffer, cmdStr, keyBytes,
+						flagBytes, expBytes, dataLenBytes, casBytes);
 		} else {
-			ByteUtils.setArguments(this.ioBuffer, cmdStr, keyBytes, flagBytes,
-					expBytes, dataLenBytes);
+			if (isNoreply())
+				ByteUtils.setArguments(this.ioBuffer, cmdStr, keyBytes,
+						flagBytes, expBytes, dataLenBytes, Constants.NO_REPLY);
+			else
+				ByteUtils.setArguments(this.ioBuffer, cmdStr, keyBytes,
+						flagBytes, expBytes, dataLenBytes);
 		}
 		ByteUtils.setArguments(this.ioBuffer, data.getData());
+
 		this.ioBuffer.flip();
 	}
 

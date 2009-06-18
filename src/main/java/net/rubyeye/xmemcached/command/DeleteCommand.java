@@ -6,10 +6,11 @@ public abstract class DeleteCommand extends Command {
 
 	protected int time;
 
-	public DeleteCommand(String key, byte[] keyBytes, int time,final CountDownLatch latch) {
+	public DeleteCommand(String key, byte[] keyBytes, int time,final CountDownLatch latch,boolean noreply) {
 		super(key, keyBytes,latch);
 		this.commandType = CommandType.DELETE;
 		this.time = time;
+		this.noreply=noreply;
 	}
 
 	public final int getTime() {

@@ -28,4 +28,5 @@ public class Constants {
 	public static final byte SPACE = ' ';
 
 	public static final int MAX_SESSION_READ_BUFFER_SIZE = 768 * 1024;
+	public static final String NO_REPLY = "noreply".intern();
 }

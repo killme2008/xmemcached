@@ -31,7 +31,7 @@ public class TextCommandFactoryTest extends TestCase {
 		byte[] keyBytes = ByteUtils.getBytes(key);
 		int time = 10;
 		Command deleteCmd = commandFactory.createDeleteCommand("test",
-				keyBytes, time);
+				keyBytes, time,false);
 		deleteCmd.encode(bufferAllocator);
 		assertEquals(CommandType.DELETE, deleteCmd.getCommandType());
 		String commandStr = new String(deleteCmd.getIoBuffer().getByteBuffer()
@@ -57,8 +57,9 @@ public class TextCommandFactoryTest extends TestCase {
 		byte[] keyBytes = ByteUtils.getBytes(key);
 		int exp = 0;
 		Transcoder transcoder = new StringTranscoder();
-		Command storeCmd = commandFactory.createSetCommand(key, keyBytes, exp, value, transcoder);
+		Command storeCmd = commandFactory.createSetCommand(key, keyBytes, exp, value,false, transcoder);
 		storeCmd.encode(new SimpleBufferAllocator());
+		assertFalse(storeCmd.isNoreply());
 		assertEquals(CommandType.SET, storeCmd.getCommandType());
 		String commandStr = new String(storeCmd.getIoBuffer().getByteBuffer()
 				.array());

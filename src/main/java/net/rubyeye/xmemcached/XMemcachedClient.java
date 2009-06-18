@@ -1045,7 +1045,27 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 			throws TimeoutException, InterruptedException, MemcachedException {
 		byte[] keyBytes = checkStoreArguments(key, exp, value);
 		return sendStoreCommand(this.commandFactory.createSetCommand(key,
-				keyBytes, exp, value, transcoder), timeout);
+				keyBytes, exp, value, false, transcoder), timeout);
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public void setWithNoReply(String key, int exp, Object value)
+			throws InterruptedException, MemcachedException {
+		setWithNoReply(key, exp, value, this.transcoder);
+	}
+
+	@Override
+	public <T> void setWithNoReply(String key, int exp, T value,
+			Transcoder<T> transcoder) throws InterruptedException,
+			MemcachedException {
+		byte[] keyBytes = checkStoreArguments(key, exp, value);
+		try {
+			sendStoreCommand(this.commandFactory.createSetCommand(key,
+					keyBytes, exp, value, true, transcoder), this.opTimeout);
+		} catch (TimeoutException e) {
+			throw new MemcachedException(e);
+		}
 	}
 
 	private final <T> byte[] checkStoreArguments(final String key,
@@ -1109,7 +1129,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 			throws TimeoutException, InterruptedException, MemcachedException {
 		byte[] keyBytes = checkStoreArguments(key, exp, value);
 		return sendStoreCommand(this.commandFactory.createAddCommand(key,
-				keyBytes, exp, value, transcoder), timeout);
+				keyBytes, exp, value, false, transcoder), timeout);
 	}
 
 	/*
@@ -1148,6 +1168,50 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 		return add(key, exp, value, transcoder, opTimeout);
 	}
 
+	@Override
+	@SuppressWarnings("unchecked")
+	public void addWithNoReply(String key, int exp, Object value)
+			throws InterruptedException, MemcachedException {
+		addWithNoReply(key, exp, value, this.transcoder);
+
+	}
+
+	@Override
+	public <T> void addWithNoReply(String key, int exp, T value,
+			Transcoder<T> transcoder) throws InterruptedException,
+			MemcachedException {
+		byte[] keyBytes = checkStoreArguments(key, exp, value);
+		try {
+			sendStoreCommand(this.commandFactory.createAddCommand(key,
+					keyBytes, exp, value, true, transcoder), this.opTimeout);
+		} catch (TimeoutException e) {
+			throw new MemcachedException(e);
+		}
+
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public void replaceWithNoReply(String key, int exp, Object value)
+			throws InterruptedException, MemcachedException {
+		replaceWithNoReply(key, exp, value, this.transcoder);
+
+	}
+
+	@Override
+	public <T> void replaceWithNoReply(String key, int exp, T value,
+			Transcoder<T> transcoder) throws InterruptedException,
+			MemcachedException {
+		byte[] keyBytes = checkStoreArguments(key, exp, value);
+		try {
+			sendStoreCommand(this.commandFactory.createReplaceCommand(key,
+					keyBytes, exp, value, true, transcoder), this.opTimeout);
+		} catch (TimeoutException e) {
+			throw new MemcachedException(e);
+		}
+
+	}
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -1159,7 +1223,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 			throws TimeoutException, InterruptedException, MemcachedException {
 		byte[] keyBytes = checkStoreArguments(key, exp, value);
 		return sendStoreCommand(this.commandFactory.createReplaceCommand(key,
-				keyBytes, exp, value, transcoder), timeout);
+				keyBytes, exp, value, false, transcoder), timeout);
 	}
 
 	/*
@@ -1221,7 +1285,20 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 			MemcachedException {
 		byte[] keyBytes = checkStoreArguments(key, 0, value);
 		return sendStoreCommand(this.commandFactory.createAppendCommand(key,
-				keyBytes, value, transcoder), timeout);
+				keyBytes, value, false, transcoder), timeout);
+	}
+
+	@Override
+	public void appendWithNoReply(String key, Object value)
+			throws InterruptedException, MemcachedException {
+		byte[] keyBytes = checkStoreArguments(key, 0, value);
+		try {
+			sendStoreCommand(this.commandFactory.createAppendCommand(key,
+					keyBytes, value, true, transcoder), this.opTimeout);
+		} catch (TimeoutException e) {
+			throw new MemcachedException(e);
+		}
+
 	}
 
 	/*
@@ -1246,7 +1323,19 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 			MemcachedException {
 		byte[] keyBytes = checkStoreArguments(key, 0, value);
 		return sendStoreCommand(this.commandFactory.createPrependCommand(key,
-				keyBytes, value, transcoder), timeout);
+				keyBytes, value, false, transcoder), timeout);
+	}
+
+	@Override
+	public void prependWithNoReply(String key, Object value)
+			throws InterruptedException, MemcachedException {
+		byte[] keyBytes = checkStoreArguments(key, 0, value);
+		try {
+			sendStoreCommand(this.commandFactory.createPrependCommand(key,
+					keyBytes, value, true, transcoder), this.opTimeout);
+		} catch (TimeoutException e) {
+			throw new MemcachedException(e);
+		}
 	}
 
 	/*
@@ -1273,7 +1362,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 			MemcachedException {
 		byte[] keyBytes = checkStoreArguments(key, 0, value);
 		return sendStoreCommand(this.commandFactory.createCASCommand(key,
-				keyBytes, exp, value, cas, transcoder), timeout);
+				keyBytes, exp, value, cas, false, transcoder), timeout);
 	}
 
 	/*
@@ -1303,7 +1392,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 
 	private final <T> boolean cas0(final String key, final int exp,
 			GetsResponse<T> getsResponse, final CASOperation<T> operation,
-			final Transcoder<T> transcoder, byte[] keyBytes)
+			final Transcoder<T> transcoder, byte[] keyBytes, boolean noreply)
 			throws TimeoutException, InterruptedException, MemcachedException {
 		if (operation == null) {
 			throw new IllegalArgumentException("CASOperation could not be null");
@@ -1319,18 +1408,17 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 		}
 		while (tryCount < operation.getMaxTries()
 				&& result != null
-				&& !sendStoreCommand(commandFactory
-						.createCASCommand(key, keyBytes, exp,
-								operation.getNewValue(result.getCas(), result
-										.getValue()), result.getCas(),
-								transcoder), opTimeout)) {
+				&& !sendStoreCommand(commandFactory.createCASCommand(key,
+						keyBytes, exp, operation.getNewValue(result.getCas(),
+								result.getValue()), result.getCas(), noreply,
+						transcoder), opTimeout)) {
 			tryCount++;
 			result = gets0(key, keyBytes, transcoder);
 			if (result == null) {
 				throw new MemcachedException(
 						"could not gets the value for Key=" + key);
 			}
-			if (tryCount >= operation.getMaxTries()) {
+			if (tryCount > operation.getMaxTries()) {
 				throw new TimeoutException("CAS try times is greater than max");
 			}
 		}
@@ -1349,7 +1437,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 			throws TimeoutException, InterruptedException, MemcachedException {
 		byte[] keyBytes = ByteUtils.getBytes(key);
 		GetsResponse<T> result = gets0(key, keyBytes, transcoder);
-		return cas0(key, exp, result, operation, transcoder, keyBytes);
+		return cas0(key, exp, result, operation, transcoder, keyBytes, false);
 	}
 
 	/*
@@ -1364,7 +1452,8 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 			final Transcoder<T> transcoder) throws TimeoutException,
 			InterruptedException, MemcachedException {
 		byte[] keyBytes = ByteUtils.getBytes(key);
-		return cas0(key, exp, getsReponse, operation, transcoder, keyBytes);
+		return cas0(key, exp, getsReponse, operation, transcoder, keyBytes,
+				false);
 	}
 
 	/*
@@ -1377,7 +1466,43 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 	public final <T> boolean cas(final String key, final int exp,
 			GetsResponse<T> getsReponse, final CASOperation<T> operation)
 			throws TimeoutException, InterruptedException, MemcachedException {
+
 		return cas(key, exp, getsReponse, operation, this.transcoder);
+	}
+
+	@Override
+	public <T> void casWithNoReply(String key, CASOperation<T> operation)
+			throws TimeoutException, InterruptedException, MemcachedException {
+		casWithNoReply(key, 0, operation);
+	}
+
+	@Override
+	public <T> void casWithNoReply(String key, GetsResponse<T> getsResponse,
+			CASOperation<T> operation) throws TimeoutException,
+			InterruptedException, MemcachedException {
+		casWithNoReply(key, 0, getsResponse, operation);
+
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public <T> void casWithNoReply(String key, int exp,
+			CASOperation<T> operation) throws TimeoutException,
+			InterruptedException, MemcachedException {
+		byte[] keyBytes = ByteUtils.getBytes(key);
+		GetsResponse<T> result = gets0(key, keyBytes, transcoder);
+		casWithNoReply(key, exp, result, operation);
+
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public <T> void casWithNoReply(String key, int exp,
+			GetsResponse<T> getsReponse, CASOperation<T> operation)
+			throws TimeoutException, InterruptedException, MemcachedException {
+		byte[] keyBytes = ByteUtils.getBytes(key);
+		cas0(key, exp, getsReponse, operation, transcoder, keyBytes, true);
+
 	}
 
 	/*
@@ -1424,20 +1549,50 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 	 */
 	public final boolean delete(final String key, final int time)
 			throws TimeoutException, InterruptedException, MemcachedException {
+		return delete0(key, time, false);
+	}
+
+	/**
+	 * Delete key's data item from memcached.This method doesn't wait for reply
+	 * 
+	 * @param key
+	 * @param time
+	 * @throws InterruptedException
+	 * @throws MemcachedException
+	 */
+	public final void deleteWithNoReply(final String key, final int time)
+			throws InterruptedException, MemcachedException {
+		try {
+			delete0(key, time, true);
+		} catch (TimeoutException e) {
+			throw new MemcachedException(e);
+		}
+	}
+
+	public final void deleteWithNoReply(final String key)
+			throws InterruptedException, MemcachedException {
+		deleteWithNoReply(key, 0);
+	}
+
+	private boolean delete0(final String key, final int time, boolean noreply)
+			throws MemcachedException, InterruptedException, TimeoutException {
 		final byte[] keyBytes = ByteUtils.getBytes(key);
 		ByteUtils.checkKey(keyBytes);
 		final Command command = commandFactory.createDeleteCommand(key,
-				keyBytes, time);
+				keyBytes, time, noreply);
 		if (!sendCommand(command)) {
 			throw new MemcachedException("send command fail");
 		}
-		latchWait(command, opTimeout);
-		command.getIoBuffer().free();
-		checkException(command);
-		if (command.getResult() == null) {
-			throw new MemcachedException(
-					"Operation fail,may be caused by networking or timeout");
-		}
+		if (!command.isNoreply()) {
+			latchWait(command, opTimeout);
+			command.getIoBuffer().free();
+			checkException(command);
+			if (command.getResult() == null) {
+				throw new MemcachedException(
+						"Operation fail,may be caused by networking or timeout");
+			}
+		} else
+			return false;
 		return (Boolean) command.getResult();
 	}
 
@@ -1805,13 +1960,16 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 		if (!sendCommand(command)) {
 			throw new MemcachedException("send command fail");
 		}
-		latchWait(command, timeout);
-		command.getIoBuffer().free();
-		checkException(command);
-		if (command.getResult() == null) {
-			throw new MemcachedException(
-					"Operation fail,may be caused by networking or timeout");
-		}
+		if (!command.isNoreply()) {
+			latchWait(command, timeout);
+			command.getIoBuffer().free();
+			checkException(command);
+			if (command.getResult() == null) {
+				throw new MemcachedException(
+						"Operation fail,may be caused by networking or timeout");
+			}
+		} else
+			return false;
 		return (Boolean) command.getResult();
 	}
 

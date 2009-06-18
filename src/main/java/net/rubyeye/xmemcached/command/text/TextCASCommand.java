@@ -13,8 +13,9 @@ public class TextCASCommand extends TextStoreCommand {
 	@SuppressWarnings("unchecked")
 	public TextCASCommand(String key, byte[] keyBytes, CommandType cmdType,
 			CountDownLatch latch, int exp, long cas, Object value,
-			Transcoder transcoder) {
-		super(key, keyBytes, cmdType, latch, exp, cas, value, transcoder);
+			boolean noreply, Transcoder transcoder) {
+		super(key, keyBytes, cmdType, latch, exp, cas, value, noreply,
+				transcoder);
 	}
 
 	@Override

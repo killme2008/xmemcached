@@ -122,20 +122,22 @@ public abstract class XMemcachedClientTest extends TestCase {
 		assertTrue(memcachedClient.set("name", 0, "dennis"));
 		assertEquals("dennis", memcachedClient.get("name", 2000));
 
-		assertTrue(memcachedClient.set("name", 1, "zhuang"));
+		assertTrue(memcachedClient.set("name", 1, "zhuang",
+				new StringTranscoder()));
 		assertEquals("zhuang", memcachedClient.get("name", 2000));
 		Thread.sleep(2000);
 		assertNull(memcachedClient.get("zhuang"));
 
 		// append,prepend
-		assertTrue(memcachedClient.set("name", 0, "dennis"));
+		assertTrue(memcachedClient.set("name", 0, "dennis",
+				new StringTranscoder(), 1000));
 		assertTrue(memcachedClient.prepend("name", "hello "));
 		assertEquals("hello dennis", memcachedClient.get("name"));
 		assertTrue(memcachedClient.append("name", " zhuang"));
 		assertEquals("hello dennis zhuang", memcachedClient.get("name"));
 		memcachedClient.delete("name");
-		assertFalse(memcachedClient.prepend("name", "hello "));
-		assertFalse(memcachedClient.append("name", " zhuang"));
+		assertFalse(memcachedClient.prepend("name", "hello ", 2000));
+		assertFalse(memcachedClient.append("name", " zhuang", 2000));
 
 		// store list
 		List<String> list = new ArrayList<String>();
@@ -150,6 +152,78 @@ public abstract class XMemcachedClientTest extends TestCase {
 		}
 	}
 
+	public void testStoreNoReply() throws Exception {
+		memcachedClient.setWithNoReply("name", 1, "dennis",
+				new StringTranscoder());
+		assertEquals("dennis", memcachedClient.get("name"));
+		Thread.sleep(2000);
+		assertNull(memcachedClient.get("name"));
+
+		memcachedClient.setWithNoReply("name", 0, "dennis",
+				new StringTranscoder());
+		memcachedClient.appendWithNoReply("name", " zhuang");
+		memcachedClient.prependWithNoReply("name", "hello ");
+		assertEquals("hello dennis zhuang", memcachedClient.get("name"));
+
+		memcachedClient.addWithNoReply("name", 0, "test",
+				new StringTranscoder());
+		assertEquals("hello dennis zhuang", memcachedClient.get("name"));
+		memcachedClient.replaceWithNoReply("name", 0, "test",
+				new StringTranscoder());
+		assertEquals("test", memcachedClient.get("name"));
+
+		memcachedClient.setWithNoReply("a", 0, 1);
+		GetsResponse<Integer> getsResponse = memcachedClient.gets("a");
+		memcachedClient.casWithNoReply("a", 0, getsResponse,
+				new CASOperation<Integer>() {
+
+					@Override
+					public int getMaxTries() {
+						return 1;
+					}
+
+					@Override
+					public Integer getNewValue(long currentCAS,
+							Integer currentValue) {
+						return currentValue + 1;
+					}
+
+				});
+		assertEquals(2, memcachedClient.get("a"));
+		// repeat onece,it is not effected
+		memcachedClient.casWithNoReply("a", getsResponse,
+				new CASOperation<Integer>() {
+
+					@Override
+					public int getMaxTries() {
+						return 1;
+					}
+
+					@Override
+					public Integer getNewValue(long currentCAS,
+							Integer currentValue) {
+						return currentValue + 1;
+					}
+
+				});
+		assertEquals(2, memcachedClient.get("a"));
+
+		memcachedClient.casWithNoReply("a", new CASOperation<Integer>() {
+
+			@Override
+			public int getMaxTries() {
+				return 1;
+			}
+
+			@Override
+			public Integer getNewValue(long currentCAS, Integer currentValue) {
+				return currentValue + 1;
+			}
+
+		});
+		assertEquals(3, memcachedClient.get("a"));
+	}
+
 	public void testDelete() throws Exception {
 		assertTrue(memcachedClient.set("name", 0, "dennis"));
 		assertEquals("dennis", memcachedClient.get("name"));
@@ -160,6 +234,26 @@ public abstract class XMemcachedClientTest extends TestCase {
 		memcachedClient.set("name", 0, "dennis");
 		assertEquals("dennis", memcachedClient.get("name"));
 		assertTrue(memcachedClient.delete("name", 2));
+		assertNull(memcachedClient.get("name"));
+		// add,replace fail
+		assertFalse(memcachedClient.add("name", 0, "zhuang"));
+		assertFalse(memcachedClient.replace("name", 0, "zhuang"));
+		Thread.sleep(3000);
+		// add,replace success
+		assertTrue(memcachedClient.add("name", 0, "zhuang"));
+		assertTrue(memcachedClient.replace("name", 0, "zhuang"));
+	}
+	
+	public void testDeleteWithNoReply() throws Exception {
+		assertTrue(memcachedClient.set("name", 0, "dennis"));
+		assertEquals("dennis", memcachedClient.get("name"));
+		memcachedClient.deleteWithNoReply("name");
+		assertNull(memcachedClient.get("name"));
+		memcachedClient.deleteWithNoReply("not_exists");
+
+		memcachedClient.set("name", 0, "dennis");
+		assertEquals("dennis", memcachedClient.get("name"));
+		memcachedClient.deleteWithNoReply("name", 2);
 		assertNull(memcachedClient.get("name"));
 		// add,replace fail
 		assertFalse(memcachedClient.add("name", 0, "zhuang"));
@@ -192,12 +286,12 @@ public abstract class XMemcachedClientTest extends TestCase {
 		GetsResponse<String> getsResponse = memcachedClient.gets("name");
 		assertEquals("dennis", getsResponse.getValue());
 		long oldCas = getsResponse.getCas();
-		getsResponse = memcachedClient.gets("name");
+		getsResponse = memcachedClient.gets("name",2000,new StringTranscoder());
 		assertEquals("dennis", getsResponse.getValue());
 		assertEquals(oldCas, getsResponse.getCas());
 
 		memcachedClient.set("name", 0, "zhuang");
-		getsResponse = memcachedClient.gets("name");
+		getsResponse = memcachedClient.gets("name",2000);
 		assertEquals("zhuang", getsResponse.getValue());
 		assertFalse(oldCas == getsResponse.getCas());
 
@@ -374,6 +468,7 @@ public abstract class XMemcachedClientTest extends TestCase {
 					.getAddresses(servers).size())
 				wait(1000);
 		}
+		Thread.sleep(5000);
 		assertEquals("dennis", memcachedClient.get("name"));
 	}
 

@@ -127,6 +127,8 @@ public class MemcachedTCPSession extends DefaultTCPSession {
 	@Override
 	protected final WriteMessage wrapMessage(Object msg) {
 		((Command) msg).encode(this.bufferAllocator);
+		if (log.isDebugEnabled())
+			log.debug("After encoding" + ((Command) msg).toString());
 		return (WriteMessage) msg;
 	}
 

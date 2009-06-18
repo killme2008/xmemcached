@@ -7,7 +7,7 @@ import net.rubyeye.xmemcached.command.Command;
 public class TextDeleteCommandUnitTest extends BaseTextCommandUnitTest {
 	public void testEncode() {
 		Command command = this.commandFactory.createDeleteCommand("test",
-				"test".getBytes(), 10);
+				"test".getBytes(), 10,false);
 		assertNull(command.getIoBuffer());
 		command.encode(bufferAllocator);
 		checkByteBufferEquals(command, "delete test 10\r\n");
@@ -15,7 +15,7 @@ public class TextDeleteCommandUnitTest extends BaseTextCommandUnitTest {
 
 	public void testDecode() {
 		Command command = this.commandFactory.createDeleteCommand("test",
-				"test".getBytes(), 10);
+				"test".getBytes(), 10,false);
 		checkDecodeNullAndNotLineByteBuffer(command);
 		checkDecodeInvalidLine(command, "STORED\r\n");
 		checkDecodeInvalidLine(command, "NOT_STORED\r\n");

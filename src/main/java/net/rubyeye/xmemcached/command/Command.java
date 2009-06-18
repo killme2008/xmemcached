@@ -26,9 +26,9 @@ import net.rubyeye.xmemcached.transcoders.Transcoder;
 
 /**
  * memcached命令类
- *
+ * 
  * @author Administrator
- *
+ * 
  */
 public abstract class Command implements WriteMessage {
 
@@ -59,6 +59,7 @@ public abstract class Command implements WriteMessage {
 	protected int mergeCount = -1;
 	@SuppressWarnings("unchecked")
 	protected Transcoder transcoder;
+	protected boolean noreply;
 
 	public final byte[] getKeyBytes() {
 		return keyBytes;
@@ -229,5 +230,18 @@ public abstract class Command implements WriteMessage {
 	protected final void decodeError() {
 		throw new MemcachedDecodeException(
 				"decode error,session will be closed");
+	}
+
+	protected final void decodeError(String line) {
+		throw new MemcachedDecodeException(
+				"decode error,session will be closed,line=" + line);
+	}
+
+	public final boolean isNoreply() {
+		return noreply;
+	}
+
+	public final void setNoreply(boolean noreply) {
+		this.noreply = noreply;
 	}
 }

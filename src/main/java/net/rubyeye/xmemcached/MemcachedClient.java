@@ -188,16 +188,17 @@ public interface MemcachedClient {
 			InterruptedException, MemcachedException;
 
 	/**
-	 * 类似get,但是gets将返回缓存项的cas值，可用于cas操作，参见cas方法
+	 * Just like get,But it return a GetsResponse,include cas value for cas
+	 * update.
 	 * 
 	 * @param <T>
 	 * @param key
-	 *            关键字
+	 *            key
 	 * @param timeout
-	 *            操作的超时时间
+	 *            operation timeout
 	 * @param transcoder
-	 *            数据项的反序列化转换器
-	 * @return GetsResponse 返回GetsResponse对象
+	 * 
+	 * @return GetsResponse
 	 * @throws TimeoutException
 	 * @throws InterruptedException
 	 * @throws MemcachedException
@@ -282,26 +283,23 @@ public interface MemcachedClient {
 			InterruptedException, MemcachedException;
 
 	/**
-	 * 设置key对应的项为value，无论key是否已经存在
+	 * Store key-value item to memcached
 	 * 
 	 * @param <T>
 	 * @param key
-	 *            缓存关键字
+	 *            stored key
 	 * @param exp
-	 *            缓存的超时时间
+	 *            expire time
 	 * @param value
-	 *            缓存的值对象
+	 *            stored data
 	 * @param transcoder
-	 *            对象的序列化转换器
+	 *            transocder
 	 * @param timeout
-	 *            操作的超时时间，单位是毫秒
-	 * @return 成功返回true，否则返回false
+	 *            operation timeout,in milliseconds
+	 * @return boolean result
 	 * @throws TimeoutException
-	 *             操作超时抛出此异常
 	 * @throws InterruptedException
-	 *             操作被中断
 	 * @throws MemcachedException
-	 *             memcached异常，可能是客户端或者memcached server返回的错误
 	 */
 	public abstract <T> boolean set(final String key, final int exp,
 			final T value, final Transcoder<T> transcoder, final long timeout)
@@ -320,25 +318,42 @@ public interface MemcachedClient {
 			throws TimeoutException, InterruptedException, MemcachedException;
 
 	/**
-	 *添加key-value缓存项，仅在key不存在的情况下才能添加成功
+	 * Store key-value item to memcached,doesn't wait for reply
+	 * 
+	 * @param <T>
+	 * @param key
+	 *            stored key
+	 * @param exp
+	 *            expire time
+	 * @param value
+	 *            stored data
+	 * @param transcoder
+	 *            transocder
+	 * @throws TimeoutException
+	 * @throws InterruptedException
+	 * @throws MemcachedException
+	 */
+	public abstract void setWithNoReply(final String key, final int exp,
+			final Object value) throws InterruptedException, MemcachedException;
+
+	public abstract <T> void setWithNoReply(final String key, final int exp,
+			final T value, final Transcoder<T> transcoder)
+			throws InterruptedException, MemcachedException;
+
+	/**
+	 * Add key-value item to memcached, success only when the key is not exists
+	 * in memcached.
 	 * 
 	 * @param <T>
 	 * @param key
 	 * @param exp
-	 *            缓存的超时时间，0为永不过期（memcached默认为一个月）
 	 * @param value
-	 *            缓存的值对象
 	 * @param transcoder
-	 *            值对象的转换器
 	 * @param timeout
-	 *            操作的超时时间，单位毫秒
-	 * @return 成功返回true，否则返回false
+	 * @return boolean result
 	 * @throws TimeoutException
-	 *             操作超时抛出此异常
 	 * @throws InterruptedException
-	 *             操作被中断
 	 * @throws MemcachedException
-	 *             memcached异常，可能是客户端或者memcached server返回的错误
 	 */
 	public abstract <T> boolean add(final String key, final int exp,
 			final T value, final Transcoder<T> transcoder, final long timeout)
@@ -357,58 +372,130 @@ public interface MemcachedClient {
 			throws TimeoutException, InterruptedException, MemcachedException;
 
 	/**
-	 * 替代key对应的值，当且仅当key对应的缓存项存在的时候可以替换
+	 * Add key-value item to memcached, success only when the key is not exists
+	 * in memcached.This method doesn't wait for reply.
 	 * 
 	 * @param <T>
 	 * @param key
 	 * @param exp
-	 *            缓存的超时时间
 	 * @param value
-	 *            值对象
 	 * @param transcoder
-	 *            值对象的转换器
-	 * @param timeout
-	 *            操作的超时时间,单位毫秒
-	 * @return 如果key不存在返回false，如果替代成功返回true
-	 * @throws TimeoutException
-	 * @throws InterruptedException
-	 * @throws MemcachedException
-	 */
-	public abstract <T> boolean replace(final String key, final int exp,
-			final T value, final Transcoder<T> transcoder, final long timeout)
-			throws TimeoutException, InterruptedException, MemcachedException;
-
-	public abstract boolean replace(final String key, final int exp,
-			final Object value) throws TimeoutException, InterruptedException,
-			MemcachedException;
-
-	public abstract boolean replace(final String key, final int exp,
-			final Object value, final long timeout) throws TimeoutException,
-			InterruptedException, MemcachedException;
-
-	public abstract <T> boolean replace(final String key, final int exp,
-			final T value, final Transcoder<T> transcoder)
-			throws TimeoutException, InterruptedException, MemcachedException;
-
-	/**
-	 * 将value添加到key对应的缓存项后面连接起来，这一操作仅对String有意义。
-	 * 
-	 * @param key
-	 * @param value
 	 * @return
 	 * @throws TimeoutException
 	 * @throws InterruptedException
 	 * @throws MemcachedException
 	 */
+
+	public abstract void addWithNoReply(final String key, final int exp,
+			final Object value) throws InterruptedException, MemcachedException;
+
+	public abstract <T> void addWithNoReply(final String key, final int exp,
+			final T value, final Transcoder<T> transcoder)
+			throws InterruptedException, MemcachedException;
+
+	/**
+	 * Replace the key's data item in memcached,success only when the key's data
+	 * item is exists in memcached.This method will wait for reply from server.
+	 * 
+	 * @param <T>
+	 * @param key
+	 * @param exp
+	 * @param value
+	 * @param transcoder
+	 * @param timeout
+	 * @return boolean result
+	 * @throws TimeoutException
+	 * @throws InterruptedException
+	 * @throws MemcachedException
+	 */
+	public abstract <T> boolean replace(final String key, final int exp,
+			final T value, final Transcoder<T> transcoder, final long timeout)
+			throws TimeoutException, InterruptedException, MemcachedException;
+
+	public abstract boolean replace(final String key, final int exp,
+			final Object value) throws TimeoutException, InterruptedException,
+			MemcachedException;
+
+	public abstract boolean replace(final String key, final int exp,
+			final Object value, final long timeout) throws TimeoutException,
+			InterruptedException, MemcachedException;
+
+	public abstract <T> boolean replace(final String key, final int exp,
+			final T value, final Transcoder<T> transcoder)
+			throws TimeoutException, InterruptedException, MemcachedException;
+
+	/**
+	 * Replace the key's data item in memcached,success only when the key's data
+	 * item is exists in memcached.This method doesn't wait for reply from
+	 * server.
+	 * 
+	 * @param <T>
+	 * @param key
+	 * @param exp
+	 * @param value
+	 * @param transcoder
+	 * @throws TimeoutException
+	 * @throws InterruptedException
+	 * @throws MemcachedException
+	 */
+	public abstract void replaceWithNoReply(final String key, final int exp,
+			final Object value) throws InterruptedException, MemcachedException;
+
+	public abstract <T> void replaceWithNoReply(final String key,
+			final int exp, final T value, final Transcoder<T> transcoder)
+			throws InterruptedException, MemcachedException;
+
 	public abstract boolean append(final String key, final Object value)
 			throws TimeoutException, InterruptedException, MemcachedException;
 
+	/**
+	 * Append value to key's data item,this method will wait for reply
+	 * 
+	 * @param key
+	 * @param value
+	 * @param timeout
+	 * @return boolean result
+	 * @throws TimeoutException
+	 * @throws InterruptedException
+	 * @throws MemcachedException
+	 */
 	public abstract boolean append(final String key, final Object value,
 			final long timeout) throws TimeoutException, InterruptedException,
 			MemcachedException;
 
 	/**
-	 * 类似append，是将value附加到key对应的缓存项前面，这一操作仅对String有实际意义
+	 * Append value to key's data item,this method doesn't wait for reply.
+	 * 
+	 * @param key
+	 * @param value
+	 * @throws TimeoutException
+	 * @throws InterruptedException
+	 * @throws MemcachedException
+	 */
+	public abstract void appendWithNoReply(final String key, final Object value)
+			throws InterruptedException, MemcachedException;
+
+	public abstract boolean prepend(final String key, final Object value)
+			throws TimeoutException, InterruptedException, MemcachedException;
+
+	/**
+	 * Prepend value to key's data item in memcached.This method doesn't wait
+	 * for reply.
+	 * 
+	 * @param key
+	 * @param value
+	 * @return boolean result
+	 * @throws TimeoutException
+	 * @throws InterruptedException
+	 * @throws MemcachedException
+	 */
+	public abstract boolean prepend(final String key, final Object value,
+			final long timeout) throws TimeoutException, InterruptedException,
+			MemcachedException;
+
+	/**
+	 * Prepend value to key's data item in memcached.This method doesn't wait
+	 * for reply.
 	 * 
 	 * @param key
 	 * @param value
@@ -417,19 +504,16 @@ public interface MemcachedClient {
 	 * @throws InterruptedException
 	 * @throws MemcachedException
 	 */
-	public abstract boolean prepend(final String key, final Object value)
-			throws TimeoutException, InterruptedException, MemcachedException;
-
-	public abstract boolean prepend(final String key, final Object value,
-			final long timeout) throws TimeoutException, InterruptedException,
-			MemcachedException;
+	public abstract void prependWithNoReply(final String key, final Object value)
+			throws InterruptedException, MemcachedException;
 
 	public abstract boolean cas(final String key, final int exp,
 			final Object value, final long cas) throws TimeoutException,
 			InterruptedException, MemcachedException;
 
 	/**
-	 * cas原子替换key对应的value，当且仅当cas值相等的时候替换成功
+	 *Cas is a check and set operation which means "store this data but only if
+	 * no one else has updated since I last fetched it."
 	 * 
 	 * @param <T>
 	 * @param key
@@ -457,7 +541,8 @@ public interface MemcachedClient {
 			throws TimeoutException, InterruptedException, MemcachedException;
 
 	/**
-	 * 原子替换key对应的value值，当且仅当cas值相等时替换成功，具体使用参见wiki
+	 *Cas is a check and set operation which means "store this data but only if
+	 * no one else has updated since I last fetched it."
 	 * 
 	 * @param <T>
 	 * @param key
@@ -477,16 +562,17 @@ public interface MemcachedClient {
 			throws TimeoutException, InterruptedException, MemcachedException;
 
 	/**
-	 * 原子替换key对应的value值，当且仅当cas值相等时替换成功
+	 *cas is a check and set operation which means "store this data but only if
+	 * no one else has updated since I last fetched it."
 	 * 
 	 * @param <T>
 	 * @param key
 	 * @param exp
-	 *            缓存数据项的超时时间
+	 *            data item expire time
 	 * @param getsReponse
-	 *            gets返回的结果
+	 *            gets method's result
 	 * @param operation
-	 *            CASOperation操作
+	 *            CASOperation
 	 * @param transcoder
 	 * @return
 	 * @throws TimeoutException
@@ -515,14 +601,46 @@ public interface MemcachedClient {
 			InterruptedException, MemcachedException;
 
 	/**
-	 * 从缓存中移除key对应的数据项,memcached移除数据项，如果指定了time，那么将放入一个delete
-	 * queue，直到时间到达才真正移除，在此段时间内，add、replace同一个key的操作将失败
+	 * 
+	 * @param <T>
+	 * @param key
+	 * @param getsResponse
+	 * @param operation
+	 * @return
+	 * @throws TimeoutException
+	 * @throws InterruptedException
+	 * @throws MemcachedException
+	 */
+	public abstract <T> void casWithNoReply(final String key,
+			GetsResponse<T> getsResponse, final CASOperation<T> operation)
+			throws TimeoutException, InterruptedException, MemcachedException;
+
+	public abstract <T> void casWithNoReply(final String key, final int exp,
+			GetsResponse<T> getsReponse, final CASOperation<T> operation)
+			throws TimeoutException, InterruptedException, MemcachedException;
+
+	public abstract <T> void casWithNoReply(final String key, final int exp,
+			final CASOperation<T> operation) throws TimeoutException,
+			InterruptedException, MemcachedException;
+
+	public abstract <T> void casWithNoReply(final String key,
+			final CASOperation<T> operation) throws TimeoutException,
+			InterruptedException, MemcachedException;
+
+	/**
+	 * Delete key's data item from memcached.It it is not exists,return
+	 * false.</br> time is the amount of time in seconds (or Unix time
+	 * until</br> which) the client wishes the server to refuse "add" and
+	 * "replace"</br> commands with this key. For this amount of item, the item
+	 * is put into a</br> delete queue, which means that it won't possible to
+	 * retrieve it by the</br> "get" command, but "add" and "replace" command
+	 * with this key will also</br> fail (the "set" command will succeed,
+	 * however). After the time passes,</br> the item is finally deleted from
+	 * server memory.
+	 * 
 	 * 
 	 * @param key
 	 * @param time
-	 *            单位为秒，客户端希望memcached server拒绝接受相同key的add,replace操作的时间
-	 * @return
-	 * @throws TimeoutException
 	 * @throws InterruptedException
 	 * @throws MemcachedException
 	 */
@@ -581,7 +699,7 @@ public interface MemcachedClient {
 			throws TimeoutException, InterruptedException, MemcachedException;
 
 	/**
-	 * 使cache中所有的数据项失效，如果是连接多个节点的memcached，那么所有的memcached中的数据项都将失效
+	 *  Make All connected memcached's data item invalid
 	 * 
 	 * @throws TimeoutException
 	 * @throws InterruptedException
@@ -591,10 +709,10 @@ public interface MemcachedClient {
 			InterruptedException, MemcachedException;
 
 	/**
-	 * 使cache中所有的数据项失效,如果是连接多个节点的memcached，那么所有的memcached中的数据项都将失效
+	 * Make All connected memcached's data item invalid
 	 * 
 	 * @param timeout
-	 *            操作超时时间
+	 *            operation timeout
 	 * @throws TimeoutException
 	 * @throws InterruptedException
 	 * @throws MemcachedException
@@ -603,12 +721,12 @@ public interface MemcachedClient {
 			InterruptedException, MemcachedException;
 
 	/**
-	 * 使指定memcached节点的数据项失效
+	 * Make a memcached's data item invalid
 	 * 
 	 * @param host
-	 *            memcached节点host ip:port的形式
+	 *            String in form of "host ip:port"
 	 * @param timeout
-	 *            操作超时时间
+	 *            operation timeout
 	 * @throws TimeoutException
 	 * @throws InterruptedException
 	 * @throws MemcachedException
@@ -716,7 +834,7 @@ public interface MemcachedClient {
 			InterruptedException, MemcachedException;
 
 	/**
-	 * 返回默认的序列化转换器，默认使用SerializingTranscoder
+	 * return default transcoder,default is SerializingTranscoder
 	 * 
 	 * @return
 	 */
@@ -724,7 +842,7 @@ public interface MemcachedClient {
 	public abstract Transcoder getTranscoder();
 
 	/**
-	 * 设置默认的序列化转换器，在调用xmemcached各种方法时，如果没有指定转换器，将使用此默认转换器
+	 * set transcoder
 	 * 
 	 * @param transcoder
 	 */
@@ -753,7 +871,8 @@ public interface MemcachedClient {
 			throws TimeoutException, InterruptedException, MemcachedException;
 
 	/**
-	 * get avaliable memcached servers's socket address. 
+	 * get avaliable memcached servers's socket address.
+	 * 
 	 * @return
 	 */
 	public Collection<InetSocketAddress> getAvaliableServers();
@@ -769,5 +888,20 @@ public interface MemcachedClient {
 	public void addServer(final String server, final int port, int weight)
 			throws IOException;
 
-	public void addServer(final InetSocketAddress inetSocketAddress, int weight) throws IOException;
+	public void addServer(final InetSocketAddress inetSocketAddress, int weight)
+			throws IOException;
+
+	/**
+	 * Delete key's data item from memcached.This method doesn't wait for reply
+	 * 
+	 * @param key
+	 * @param time
+	 * @throws InterruptedException
+	 * @throws MemcachedException
+	 */
+	public void deleteWithNoReply(final String key, final int time)
+			throws InterruptedException, MemcachedException;
+
+	public void deleteWithNoReply(final String key)
+			throws InterruptedException, MemcachedException;
 }

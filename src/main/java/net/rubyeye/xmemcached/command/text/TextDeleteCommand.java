@@ -15,8 +15,8 @@ public class TextDeleteCommand extends DeleteCommand {
 	public static final byte[] DELETE = { 'd', 'e', 'l', 'e', 't', 'e' };
 
 	public TextDeleteCommand(String key, byte[] keyBytes, int time,
-			final CountDownLatch latch) {
-		super(key, keyBytes, time, latch);
+			final CountDownLatch latch, boolean noreply) {
+		super(key, keyBytes, time, latch, noreply);
 	}
 
 	@Override
@@ -40,12 +40,17 @@ public class TextDeleteCommand extends DeleteCommand {
 	@Override
 	public final void encode(BufferAllocator bufferAllocator) {
 		byte[] timeBytes = ByteUtils.getBytes(String.valueOf(time));
-		this.ioBuffer = bufferAllocator
-				.allocate(TextDeleteCommand.DELETE.length + 2
-						+ keyBytes.length + timeBytes.length
-						+ Constants.CRLF.length);
-		ByteUtils.setArguments(this.ioBuffer, TextDeleteCommand.DELETE,
-				keyBytes, timeBytes);
+		int capacity = TextDeleteCommand.DELETE.length + 2 + keyBytes.length
+				+ timeBytes.length + Constants.CRLF.length;
+		if (isNoreply())
+			capacity += 1 + Constants.NO_REPLY.length();
+		this.ioBuffer = bufferAllocator.allocate(capacity);
+		if (isNoreply())
+			ByteUtils.setArguments(this.ioBuffer, TextDeleteCommand.DELETE,
+					keyBytes, timeBytes, Constants.NO_REPLY);
+		else
+			ByteUtils.setArguments(this.ioBuffer, TextDeleteCommand.DELETE,
+					keyBytes, timeBytes);
 		this.ioBuffer.flip();
 	}
 

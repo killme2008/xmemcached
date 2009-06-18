@@ -8,15 +8,15 @@ public abstract class StoreCommand extends Command {
 	protected int exp;
 	protected long cas;
 	protected Object value;
-
 	@SuppressWarnings("unchecked")
 	public StoreCommand(String key, byte[] keyBytes, CommandType cmdType,
 			CountDownLatch latch, int exp, long cas, Object value,
-			Transcoder transcoder) {
+			boolean noreply, Transcoder transcoder) {
 		super(key, keyBytes, cmdType, latch);
 		this.exp = exp;
 		this.cas = cas;
 		this.value = value;
+		this.noreply = noreply;
 		this.transcoder = transcoder;
 	}
 
