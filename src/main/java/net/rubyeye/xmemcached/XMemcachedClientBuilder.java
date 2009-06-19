@@ -2,6 +2,7 @@ package net.rubyeye.xmemcached;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.util.ArrayList;
 import java.util.List;
 
 import net.rubyeye.xmemcached.buffer.BufferAllocator;
@@ -24,7 +25,7 @@ public class XMemcachedClientBuilder implements MemcachedClientBuilder {
 	private BufferAllocator bufferAllocator = new SimpleBufferAllocator();
 	private Configuration configuration = XMemcachedClient
 			.getDefaultConfiguration();
-	private final List<InetSocketAddress> addressList;
+	private final List<InetSocketAddress> addressList = new ArrayList<InetSocketAddress>();
 
 	private int[] weights;
 
@@ -72,6 +73,8 @@ public class XMemcachedClientBuilder implements MemcachedClientBuilder {
 	 * .xmemcached.MemcachedSessionLocator)
 	 */
 	public void setSessionLocator(MemcachedSessionLocator sessionLocator) {
+		if (sessionLocator == null)
+			throw new IllegalArgumentException("Null SessionLocator");
 		this.sessionLocator = sessionLocator;
 	}
 
@@ -92,6 +95,8 @@ public class XMemcachedClientBuilder implements MemcachedClientBuilder {
 	 * rubyeye.xmemcached.buffer.BufferAllocator)
 	 */
 	public void setBufferAllocator(BufferAllocator bufferAllocator) {
+		if (bufferAllocator == null)
+			throw new IllegalArgumentException("Null bufferAllocator");
 		this.bufferAllocator = bufferAllocator;
 	}
 
@@ -145,6 +150,8 @@ public class XMemcachedClientBuilder implements MemcachedClientBuilder {
 
 	@SuppressWarnings("unchecked")
 	public void setTranscoder(Transcoder transcoder) {
+		if (transcoder == null)
+			throw new IllegalArgumentException("Null Transcoder");
 		this.transcoder = transcoder;
 	}
 

@@ -618,8 +618,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 			CommandFactory commandFactory, Transcoder transcoder,
 			List<InetSocketAddress> addressList) throws IOException {
 		super();
-		if (addressList != null)
-			optimiezeSetReadThreadCount(conf, addressList);
+		optimiezeSetReadThreadCount(conf, addressList);
 		buildConnector(locator, allocator, conf, commandFactory, transcoder);
 		start0();
 		if (addressList != null) {
@@ -664,9 +663,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 				&& weights.length < addressList.size())
 			throw new IllegalArgumentException(
 					"weights.length is less than addressList.size()");
-		if (addressList != null
-				&& conf.getReadThreadCount() == DEFAULT_READ_THREAD_COUNT)
-			optimiezeSetReadThreadCount(conf, addressList);
+		optimiezeSetReadThreadCount(conf, addressList);
 		buildConnector(locator, allocator, conf, commandFactory, transcoder);
 		start0();
 		if (addressList != null && weights != null) {
@@ -678,11 +675,14 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 
 	private final void optimiezeSetReadThreadCount(Configuration conf,
 			List<InetSocketAddress> addressList) {
-		if (isLinuxPlatform() && addressList.size() > 1
-				&& conf.getReadThreadCount() == DEFAULT_READ_THREAD_COUNT) {
-			int cpus = Runtime.getRuntime().availableProcessors();
-			conf.setReadThreadCount(addressList.size() > cpus + 1 ? cpus + 1
-					: addressList.size());
+		if (conf != null && addressList != null) {
+			if (isLinuxPlatform() && addressList.size() > 1
+					&& conf.getReadThreadCount() == DEFAULT_READ_THREAD_COUNT) {
+				int cpus = Runtime.getRuntime().availableProcessors();
+				conf
+						.setReadThreadCount(addressList.size() > cpus + 1 ? cpus + 1
+								: addressList.size());
+			}
 		}
 	}
 
