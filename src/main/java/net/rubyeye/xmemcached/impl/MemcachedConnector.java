@@ -56,8 +56,6 @@ public class MemcachedConnector extends SocketChannelController {
 	private SessionMonitor sessionMonitor;
 	private MemcachedOptimiezer optimiezer;
 
-	public static final long CHECK_RECONNECT_INTERVAL = 10000L;
-
 	class SessionMonitor extends Thread {
 
 		public void run() {
@@ -74,7 +72,7 @@ public class MemcachedConnector extends SocketChannelController {
 						tries++;
 						request.setTries(request.getTries() + 1);
 						try {
-							log.warn("try to reconnect to "
+							log.warn("Try to reconnect to "
 									+ address.getHostName() + ":"
 									+ address.getPort() + " for "
 									+ request.getTries() + " times");
@@ -102,12 +100,11 @@ public class MemcachedConnector extends SocketChannelController {
 								+ address.getPort() + " fail");
 						// add to tail
 						waitingQueue.add(request);
-						Thread.sleep(CHECK_RECONNECT_INTERVAL);
 					}
-				} catch (IOException e) {
-					log.error("monitor connect error", e);
 				} catch (InterruptedException e) {
 					Thread.currentThread().interrupt();
+				} catch (Exception e) {
+					log.error("SessionMonitor connect error", e);
 				}
 			}
 		}
@@ -356,7 +353,7 @@ public class MemcachedConnector extends SocketChannelController {
 		if (this.sendBufferSize > 0) {
 			socketChannel.socket().setSendBufferSize(this.sendBufferSize);
 		}
-		ConnectFuture future = new ConnectFuture(address,weight);
+		ConnectFuture future = new ConnectFuture(address, weight);
 		if (!socketChannel.connect(address)) {
 			this.reactor.registerChannel(socketChannel,
 					SelectionKey.OP_CONNECT, future);

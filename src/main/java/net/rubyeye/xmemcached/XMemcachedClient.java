@@ -379,11 +379,14 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 			log.error("connect to " + inetSocketAddress.getHostName() + ":"
 					+ inetSocketAddress.getPort() + " error", e);
 		}
+		// If it is not connected,it will be added to waiting queue for
+		// reconnecting.
 		if (!connected) {
 			this.connector.addToWatingQueue(new ReconnectRequest(
 					inetSocketAddress, 0, weight));
-			throw new IOException(throwable);
-
+			log.error("Connect to " + inetSocketAddress.getHostName() + ":"
+					+ inetSocketAddress.getPort() + " fail", throwable);
+			// throw new IOException(throwable);
 		}
 	}
 
