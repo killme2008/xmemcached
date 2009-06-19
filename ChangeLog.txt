@@ -34,7 +34,7 @@ Add some new methods in MemcachedClient,include:
 setWithNoReply,addWithNoReply,replaceWithNoReply,appendWithNoReply,prependWithNoReply,casWithNoReply
 deleteWithNoReply,incr(decr)WithNoReply,flushAllWithNoReply,setLoggingLevelVerbosityWithNoReply
 
-5.bug fixed. Issue 35 etc.
+5.bug fixed. Issue 35,Issue 36 etc.
 
 --------------------End--------------------------
 

@@ -158,10 +158,7 @@ public class MemcachedTCPSession extends DefaultTCPSession {
 	 * @return
 	 */
 	public final Command peekCurrentExecutingCommand() {
-		Command cmd = executingCmds.peek();
-		if (cmd == null)
-			throw new NoSuchElementException();
-		return cmd;
+		return executingCmds.peek();
 	}
 
 	/**

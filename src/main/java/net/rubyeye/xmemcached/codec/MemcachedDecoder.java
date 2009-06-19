@@ -22,15 +22,13 @@ import com.google.code.yanf4j.util.ShiftAndByteBufferMatcher;
  */
 public class MemcachedDecoder implements Decoder<Command> {
 
-	private static final Log log = LogFactory
-			.getLog(MemcachedDecoder.class);
+	private static final Log log = LogFactory.getLog(MemcachedDecoder.class);
 
 	public MemcachedDecoder() {
 		super();
 	}
 
 	public static final ByteBuffer SPLIT = ByteBuffer.wrap(Constants.CRLF);
-
 
 	/**
 	 * shift-and algorithm for ByteBuffer's match
@@ -81,6 +79,8 @@ public class MemcachedDecoder implements Decoder<Command> {
 	@Override
 	public Command decode(ByteBuffer buffer, Session origSession) {
 		MemcachedTCPSession session = (MemcachedTCPSession) origSession;
+		if (session.peekCurrentExecutingCommand() == null)
+			return null;
 		if (session.peekCurrentExecutingCommand().decode(session, buffer)) {
 			return session.pollCurrentExecutingCommand();
 		} else

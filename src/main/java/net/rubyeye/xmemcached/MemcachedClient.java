@@ -24,7 +24,7 @@ public interface MemcachedClient {
 	/**
 	 * Default thread number for reading nio's receive buffer and dispatch
 	 * commands.Recommend users to set it equal or less to the memcached
-	 * server's number on linux platform,keep default on windows.
+	 * server's number on linux platform,keep default on windows.Default is 0.
 	 */
 	public static final int DEFAULT_READ_THREAD_COUNT = 0;
 	/**
@@ -36,9 +36,9 @@ public interface MemcachedClient {
 	 */
 	public static final int DEFAULT_TCP_SEND_BUFF_SIZE = 16 * 1024;
 	/**
-	 * Disable Nagle algorithm by default
+	 * Enable Nagle algorithm by default
 	 */
-	public static final boolean DEFAULT_TCP_NO_DELAY = true;
+	public static final boolean DEFAULT_TCP_NO_DELAY = false;
 	/**
 	 * Default session read buffer size,32K
 	 */
@@ -971,7 +971,8 @@ public interface MemcachedClient {
 	 * will wait for reply.
 	 * 
 	 * @param address
-	 * @param level logging level
+	 * @param level
+	 *            logging level
 	 * @throws TimeoutException
 	 * @throws InterruptedException
 	 * @throws MemcachedException
@@ -983,8 +984,10 @@ public interface MemcachedClient {
 	 * Set the verbosity level of the memcached's logging output.This method
 	 * doesn't wait for reply from server
 	 * 
-	 * @param address memcached server address
-	 * @param level  logging level
+	 * @param address
+	 *            memcached server address
+	 * @param level
+	 *            logging level
 	 * @throws InterruptedException
 	 * @throws MemcachedException
 	 */

@@ -5,7 +5,6 @@ import java.util.Collection;
 import java.util.concurrent.CountDownLatch;
 import net.rubyeye.xmemcached.command.Command;
 import net.rubyeye.xmemcached.command.CommandType;
-import net.rubyeye.xmemcached.command.text.TextVerbosityCommand;
 import net.rubyeye.xmemcached.transcoders.Transcoder;
 
 public interface CommandFactory {

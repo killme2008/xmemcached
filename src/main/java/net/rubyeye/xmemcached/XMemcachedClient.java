@@ -663,7 +663,8 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 				&& weights.length < addressList.size())
 			throw new IllegalArgumentException(
 					"weights.length is less than addressList.size()");
-		if (addressList != null)
+		if (addressList != null
+				&& conf.getReadThreadCount() == DEFAULT_READ_THREAD_COUNT)
 			optimiezeSetReadThreadCount(conf, addressList);
 		buildConnector(locator, allocator, conf, commandFactory, transcoder);
 		start0();
