@@ -1732,6 +1732,44 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 		}
 	}
 
+	@Override
+	public void setLoggingLevelVerbosity(InetSocketAddress address, int level)
+			throws TimeoutException, InterruptedException, MemcachedException {
+		setMemcachedLoggingLevel(address, level, false);
+
+	}
+
+	private void setMemcachedLoggingLevel(InetSocketAddress address, int level,
+			boolean noreply) throws MemcachedException, InterruptedException,
+			TimeoutException {
+		if (address == null)
+			throw new IllegalArgumentException("Null adderss");
+		CountDownLatch latch = new CountDownLatch(1);
+
+		Session session = this.connector.getSessionByAddress(address);
+		if (session == null)
+			throw new MemcachedException("could not find session for "
+					+ address.getHostName() + ":" + address.getPort()
+					+ ",maybe it have not been connected");
+		Command command = commandFactory.createVerbosityCommand(latch, level,
+				noreply);
+		if (!session.send(command))
+			throw new MemcachedException("send command fail");
+		if (!noreply)
+			latchWait(command, this.opTimeout);
+	}
+
+	@Override
+	public void setLoggingLevelVerbosityWithNoReply(InetSocketAddress address,
+			int level) throws InterruptedException, MemcachedException {
+		try {
+			setMemcachedLoggingLevel(address, level, true);
+		} catch (TimeoutException e) {
+			throw new MemcachedException(e);
+		}
+
+	}
+
 	/*
 	 * (non-Javadoc)
 	 * 

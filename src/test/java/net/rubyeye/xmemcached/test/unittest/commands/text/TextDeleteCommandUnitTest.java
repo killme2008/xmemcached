@@ -1,6 +1,5 @@
 package net.rubyeye.xmemcached.test.unittest.commands.text;
 
-import java.nio.ByteBuffer;
 
 import net.rubyeye.xmemcached.command.Command;
 
@@ -11,6 +10,12 @@ public class TextDeleteCommandUnitTest extends BaseTextCommandUnitTest {
 		assertNull(command.getIoBuffer());
 		command.encode(bufferAllocator);
 		checkByteBufferEquals(command, "delete test 10\r\n");
+		
+		 command = this.commandFactory.createDeleteCommand("test",
+					"test".getBytes(), 10,true);
+			assertNull(command.getIoBuffer());
+			command.encode(bufferAllocator);
+			checkByteBufferEquals(command, "delete test 10 noreply\r\n");
 	}
 
 	public void testDecode() {

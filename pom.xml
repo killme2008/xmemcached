@@ -5,7 +5,7 @@
 	<groupId>xmemcached</groupId>
 	<artifactId>xmemcached</artifactId>
 	<packaging>jar</packaging>
-	<version>1.1.1</version>
+	<version>1.1.2</version>
 	<name>xmemcached</name>
 	<url>http://maven.apache.org</url>
 	<build>
@@ -36,6 +36,7 @@
 			<groupId>log4j</groupId>
 			<artifactId>log4j</artifactId>
 			<version>1.2.15</version>
+			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework</groupId>
@@ -47,11 +48,6 @@
 			<groupId>yanf4j</groupId>
 			<artifactId>yanf4j</artifactId>
 			<version>0.61-SNAPSHOT</version>
-		</dependency>
-		<dependency>
-			<groupId>spy</groupId>
-			<artifactId>spy</artifactId>
-			<version>2.4</version>
 		</dependency>
 	</dependencies>
 	<reporting>

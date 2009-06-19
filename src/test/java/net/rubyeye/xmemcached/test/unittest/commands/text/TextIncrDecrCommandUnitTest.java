@@ -13,6 +13,13 @@ public class TextIncrDecrCommandUnitTest extends BaseTextCommandUnitTest {
 		command.encode(bufferAllocator);
 
 		checkByteBufferEquals(command, "incr test 10\r\n");
+		
+		command = this.commandFactory.createIncrDecrCommand("test",
+				"test".getBytes(), 10, CommandType.INCR,true);
+		assertNull(command.getIoBuffer());
+		command.encode(bufferAllocator);
+
+		checkByteBufferEquals(command, "incr test 10 noreply\r\n");
 	}
 
 	public void testEncodeDecr() {
@@ -22,6 +29,13 @@ public class TextIncrDecrCommandUnitTest extends BaseTextCommandUnitTest {
 		command.encode(bufferAllocator);
 
 		checkByteBufferEquals(command, "decr test 10\r\n");
+		
+		command = this.commandFactory.createIncrDecrCommand("test",
+				"test".getBytes(), 10, CommandType.DECR,true);
+		assertNull(command.getIoBuffer());
+		command.encode(bufferAllocator);
+
+		checkByteBufferEquals(command, "decr test 10 noreply\r\n");
 	}
 
 	public void testDecode() {

@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.concurrent.CountDownLatch;
 import net.rubyeye.xmemcached.command.Command;
 import net.rubyeye.xmemcached.command.CommandType;
+import net.rubyeye.xmemcached.command.text.TextVerbosityCommand;
 import net.rubyeye.xmemcached.transcoders.Transcoder;
 
 public interface CommandFactory {
@@ -104,5 +105,14 @@ public interface CommandFactory {
 	public Command createPrependCommand(final String key,
 			final byte[] keyBytes, final Object value, boolean noreply,
 			Transcoder transcoder);
+
+	/**
+	 * Create verbosity command
+	 * @param latch
+	 * @param level
+	 * @param noreply
+	 * @return
+	 */
+	public Command createVerbosityCommand(CountDownLatch latch, int level, boolean noreply);
 
 }

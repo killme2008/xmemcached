@@ -25,6 +25,7 @@ public class StandardHashMemcachedClientTest extends XMemcachedClientTest {
 		for (int i = 0; i < weights.length; i++) {
 			weights[i] = i + 1;
 		}
+
 		MemcachedClientBuilder builder = new XMemcachedClientBuilder(
 				addressList, weights);
 		builder.setSessionLocator(new KetamaMemcachedSessionLocator());

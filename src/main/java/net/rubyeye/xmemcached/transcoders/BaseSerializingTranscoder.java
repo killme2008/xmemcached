@@ -9,14 +9,14 @@ import java.io.UnsupportedEncodingException;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
-import net.spy.SpyObject;
-import net.spy.util.CloseUtil;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 /**
  * Base class for any transcoders that may want to work with serialized or
  * compressed data.
  */
-public abstract class BaseSerializingTranscoder extends SpyObject {
+public abstract class BaseSerializingTranscoder {
 
 	/**
 	 * Default compression threshold value.
@@ -25,19 +25,21 @@ public abstract class BaseSerializingTranscoder extends SpyObject {
 
 	public static final String DEFAULT_CHARSET = "UTF-8";
 
-	protected int compressionThreshold=DEFAULT_COMPRESSION_THRESHOLD;
-	protected String charset=DEFAULT_CHARSET;
-
+	protected int compressionThreshold = DEFAULT_COMPRESSION_THRESHOLD;
+	protected String charset = DEFAULT_CHARSET;
+	protected static final Log log = LogFactory
+			.getLog(BaseSerializingTranscoder.class);
 
 	/**
-	 * Set the compression threshold to the given number of bytes.  This
+	 * Set the compression threshold to the given number of bytes. This
 	 * transcoder will attempt to compress any data being stored that's larger
 	 * than this.
-	 *
-	 * @param to the number of bytes
+	 * 
+	 * @param to
+	 *            the number of bytes
 	 */
 	public void setCompressionThreshold(int to) {
-		compressionThreshold=to;
+		compressionThreshold = to;
 	}
 
 	/**
@@ -50,25 +52,25 @@ public abstract class BaseSerializingTranscoder extends SpyObject {
 		} catch (UnsupportedEncodingException e) {
 			throw new RuntimeException(e);
 		}
-		charset=to;
+		charset = to;
 	}
 
 	/**
 	 * Get the bytes representing the given serialized object.
 	 */
 	protected byte[] serialize(Object o) {
-		if(o == null) {
+		if (o == null) {
 			throw new NullPointerException("Can't serialize null");
 		}
-		byte[] rv=null;
+		byte[] rv = null;
 		try {
-			ByteArrayOutputStream bos=new ByteArrayOutputStream();
-			ObjectOutputStream os=new ObjectOutputStream(bos);
+			ByteArrayOutputStream bos = new ByteArrayOutputStream();
+			ObjectOutputStream os = new ObjectOutputStream(bos);
 			os.writeObject(o);
 			os.close();
 			bos.close();
-			rv=bos.toByteArray();
-		} catch(IOException e) {
+			rv = bos.toByteArray();
+		} catch (IOException e) {
 			throw new IllegalArgumentException("Non-serializable object", e);
 		}
 		return rv;
@@ -78,21 +80,22 @@ public abstract class BaseSerializingTranscoder extends SpyObject {
 	 * Get the object represented by the given serialized bytes.
 	 */
 	protected Object deserialize(byte[] in) {
-		Object rv=null;
+		Object rv = null;
 		try {
-			if(in != null) {
-				ByteArrayInputStream bis=new ByteArrayInputStream(in);
-				ObjectInputStream is=new ObjectInputStream(bis);
-				rv=is.readObject();
+			if (in != null) {
+				ByteArrayInputStream bis = new ByteArrayInputStream(in);
+				ObjectInputStream is = new ObjectInputStream(bis);
+				rv = is.readObject();
 				is.close();
 				bis.close();
 			}
-		} catch(IOException e) {
-			getLogger().warn("Caught IOException decoding %d bytes of data",
-					in.length, e);
+		} catch (IOException e) {
+			log.error("Caught IOException decoding " + in.length
+					+ " bytes of data", e);
 		} catch (ClassNotFoundException e) {
-			getLogger().warn("Caught CNFE decoding %d bytes of data",
-					in.length, e);
+			log
+					.error("Caught CNFE decoding " + in.length
+							+ " bytes of data", e);
 		}
 		return rv;
 	}
@@ -101,46 +104,56 @@ public abstract class BaseSerializingTranscoder extends SpyObject {
 	 * Compress the given array of bytes.
 	 */
 	public static final byte[] compress(byte[] in) {
-		if(in == null) {
+		if (in == null) {
 			throw new NullPointerException("Can't compress null");
 		}
-		ByteArrayOutputStream bos=new ByteArrayOutputStream();
-		GZIPOutputStream gz=null;
+		ByteArrayOutputStream bos = new ByteArrayOutputStream();
+		GZIPOutputStream gz = null;
 		try {
 			gz = new GZIPOutputStream(bos);
 			gz.write(in);
 		} catch (IOException e) {
 			throw new RuntimeException("IO exception compressing data", e);
 		} finally {
-			CloseUtil.close(gz);
-			CloseUtil.close(bos);
+			if (gz != null)
+				try {
+					gz.close();
+				} catch (IOException e) {
+					log.error("Close GZIPOutputStream error", e);
+				}
+			if (bos != null)
+				try {
+					bos.close();
+				} catch (IOException e) {
+					log.error("Close ByteArrayOutputStream error", e);
+				}
 		}
-		byte[] rv=bos.toByteArray();
-		//getLogger().debug("Compressed %d bytes to %d", in.length, rv.length);
+		byte[] rv = bos.toByteArray();
+		// log.debug("Compressed %d bytes to %d", in.length, rv.length);
 		return rv;
 	}
 
 	/**
 	 * Decompress the given array of bytes.
-	 *
+	 * 
 	 * @return null if the bytes cannot be decompressed
 	 */
 	protected byte[] decompress(byte[] in) {
-		ByteArrayOutputStream bos=null;
-		if(in != null) {
-			ByteArrayInputStream bis=new ByteArrayInputStream(in);
-			bos=new ByteArrayOutputStream();
+		ByteArrayOutputStream bos = null;
+		if (in != null) {
+			ByteArrayInputStream bis = new ByteArrayInputStream(in);
+			bos = new ByteArrayOutputStream();
 			GZIPInputStream gis;
 			try {
 				gis = new GZIPInputStream(bis);
 
-				byte[] buf=new byte[8192];
-				int r=-1;
-				while((r=gis.read(buf)) > 0) {
+				byte[] buf = new byte[8192];
+				int r = -1;
+				while ((r = gis.read(buf)) > 0) {
 					bos.write(buf, 0, r);
 				}
 			} catch (IOException e) {
-				getLogger().warn("Failed to decompress data", e);
+				log.error("Failed to decompress data", e);
 				bos = null;
 			}
 		}
@@ -151,10 +164,10 @@ public abstract class BaseSerializingTranscoder extends SpyObject {
 	 * Decode the string with the current character set.
 	 */
 	protected String decodeString(byte[] data) {
-		String rv=null;
+		String rv = null;
 		try {
-			if(data != null) {
-				rv=new String(data, charset);
+			if (data != null) {
+				rv = new String(data, charset);
 			}
 		} catch (UnsupportedEncodingException e) {
 			throw new RuntimeException(e);
@@ -166,9 +179,9 @@ public abstract class BaseSerializingTranscoder extends SpyObject {
 	 * Encode a string into the current character set.
 	 */
 	protected byte[] encodeString(String in) {
-		byte[] rv=null;
+		byte[] rv = null;
 		try {
-			rv=in.getBytes(charset);
+			rv = in.getBytes(charset);
 		} catch (UnsupportedEncodingException e) {
 			throw new RuntimeException(e);
 		}

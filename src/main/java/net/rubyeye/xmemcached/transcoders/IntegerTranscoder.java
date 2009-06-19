@@ -2,13 +2,10 @@
 
 package net.rubyeye.xmemcached.transcoders;
 
-import net.spy.SpyObject;
-
-
 /**
  * Transcoder that serializes and unserializes longs.
  */
-public final class IntegerTranscoder extends SpyObject
+public final class IntegerTranscoder 
 	implements Transcoder<Integer> {
 
 	private static final int flags = SerializingTranscoder.SPECIAL_INT;

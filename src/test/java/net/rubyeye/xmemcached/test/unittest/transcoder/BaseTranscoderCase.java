@@ -9,7 +9,6 @@ import junit.framework.TestCase;
 
 import net.rubyeye.xmemcached.transcoders.CachedData;
 import net.rubyeye.xmemcached.transcoders.Transcoder;
-import net.spy.test.BaseMockCase;
 
 
 

@@ -1,3 +1,4 @@
+<?xml version="1.0"?>
 <project basedir="." name="xmemcached" default="build-package">
 	<property file="build.properties" />
 	<path id="classpath">

@@ -13,6 +13,7 @@ import net.rubyeye.xmemcached.command.text.TextGetOneCommand;
 import net.rubyeye.xmemcached.command.text.TextIncrDecrCommand;
 import net.rubyeye.xmemcached.command.text.TextStatsCommand;
 import net.rubyeye.xmemcached.command.text.TextStoreCommand;
+import net.rubyeye.xmemcached.command.text.TextVerbosityCommand;
 import net.rubyeye.xmemcached.command.text.TextVersionCommand;
 import net.rubyeye.xmemcached.transcoders.Transcoder;
 import net.rubyeye.xmemcached.utils.ByteUtils;
@@ -55,8 +56,21 @@ public final class TextCommandFactory implements CommandFactory {
 	 * net.rubyeye.xmemcached.CommandFactory#createFlushAllCommand(java.util
 	 * .concurrent.CountDownLatch)
 	 */
-	public final Command createFlushAllCommand(CountDownLatch latch,int delay,boolean noreply) {
-		return new TextFlushAllCommand(latch,delay,noreply);
+	public final Command createFlushAllCommand(CountDownLatch latch, int delay,
+			boolean noreply) {
+		return new TextFlushAllCommand(latch, delay, noreply);
+	}
+
+	/**
+	 * Create verbosity command
+	 * @param latch
+	 * @param level
+	 * @param noreply
+	 * @return
+	 */
+	public final Command createVerbosityCommand(CountDownLatch latch,
+			int level, boolean noreply) {
+		return new TextVerbosityCommand(latch, level, noreply);
 	}
 
 	/*

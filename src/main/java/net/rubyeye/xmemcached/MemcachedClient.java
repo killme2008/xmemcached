@@ -965,4 +965,29 @@ public interface MemcachedClient {
 	 */
 	public void decrWithNoReply(final String key, final int num)
 			throws InterruptedException, MemcachedException;
+
+	/**
+	 * Set the verbosity level of the memcached's logging output.This method
+	 * will wait for reply.
+	 * 
+	 * @param address
+	 * @param level logging level
+	 * @throws TimeoutException
+	 * @throws InterruptedException
+	 * @throws MemcachedException
+	 */
+	public void setLoggingLevelVerbosity(InetSocketAddress address, int level)
+			throws TimeoutException, InterruptedException, MemcachedException;
+
+	/**
+	 * Set the verbosity level of the memcached's logging output.This method
+	 * doesn't wait for reply from server
+	 * 
+	 * @param address memcached server address
+	 * @param level  logging level
+	 * @throws InterruptedException
+	 * @throws MemcachedException
+	 */
+	public void setLoggingLevelVerbosityWithNoReply(InetSocketAddress address,
+			int level) throws InterruptedException, MemcachedException;
 }

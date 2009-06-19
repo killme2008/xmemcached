@@ -4,6 +4,7 @@ import net.rubyeye.xmemcached.command.Command;
 import net.rubyeye.xmemcached.transcoders.StringTranscoder;
 import net.rubyeye.xmemcached.transcoders.Transcoder;
 
+@SuppressWarnings("unchecked")
 public class TextStoreCommandUnitTest extends BaseTextCommandUnitTest {
 	static final String key = "test";
 	static final String value = "10";
@@ -17,6 +18,10 @@ public class TextStoreCommandUnitTest extends BaseTextCommandUnitTest {
 		assertNull(command.getIoBuffer());
 		command.encode(bufferAllocator);
 		checkByteBufferEquals(command, "cas test 0 0 2 999\r\n10\r\n");
+		command = this.commandFactory.createCASCommand(key, key.getBytes(),
+				exp, value, cas, true, transcoder);
+		command.encode(bufferAllocator);
+		checkByteBufferEquals(command, "cas test 0 0 2 999 noreply\r\n10\r\n");
 	}
 
 	public void testSetEncode() {
@@ -25,6 +30,10 @@ public class TextStoreCommandUnitTest extends BaseTextCommandUnitTest {
 		assertNull(command.getIoBuffer());
 		command.encode(bufferAllocator);
 		checkByteBufferEquals(command, "set test 0 0 2\r\n10\r\n");
+		 command = this.commandFactory.createSetCommand(key, key
+					.getBytes(), exp, value, true, transcoder);
+			command.encode(bufferAllocator);
+			checkByteBufferEquals(command, "set test 0 0 2 noreply\r\n10\r\n");
 	}
 
 	public void testAddEncode() {
@@ -33,6 +42,12 @@ public class TextStoreCommandUnitTest extends BaseTextCommandUnitTest {
 		assertNull(command.getIoBuffer());
 		command.encode(bufferAllocator);
 		checkByteBufferEquals(command, "add test 0 0 2\r\n10\r\n");
+		
+		command = this.commandFactory.createAddCommand(key, key
+				.getBytes(), exp, value, true, transcoder);
+		assertNull(command.getIoBuffer());
+		command.encode(bufferAllocator);
+		checkByteBufferEquals(command, "add test 0 0 2 noreply\r\n10\r\n");
 	}
 
 	public void testReplaceEncode() {
@@ -41,6 +56,12 @@ public class TextStoreCommandUnitTest extends BaseTextCommandUnitTest {
 		assertNull(command.getIoBuffer());
 		command.encode(bufferAllocator);
 		checkByteBufferEquals(command, "replace test 0 0 2\r\n10\r\n");
+		
+		command = this.commandFactory.createReplaceCommand(key, key
+				.getBytes(), exp, value, true, transcoder);
+		assertNull(command.getIoBuffer());
+		command.encode(bufferAllocator);
+		checkByteBufferEquals(command, "replace test 0 0 2 noreply\r\n10\r\n");
 	}
 
 	public void testAppendEncode() {
@@ -49,6 +70,12 @@ public class TextStoreCommandUnitTest extends BaseTextCommandUnitTest {
 		assertNull(command.getIoBuffer());
 		command.encode(bufferAllocator);
 		checkByteBufferEquals(command, "append test 0 0 2\r\n10\r\n");
+		
+		command = this.commandFactory.createAppendCommand(key, key
+				.getBytes(), value, true, transcoder);
+		assertNull(command.getIoBuffer());
+		command.encode(bufferAllocator);
+		checkByteBufferEquals(command, "append test 0 0 2 noreply\r\n10\r\n");
 	}
 
 	public void testPrependEncode() {
@@ -57,6 +84,12 @@ public class TextStoreCommandUnitTest extends BaseTextCommandUnitTest {
 		assertNull(command.getIoBuffer());
 		command.encode(bufferAllocator);
 		checkByteBufferEquals(command, "prepend test 0 0 2\r\n10\r\n");
+		
+		command = this.commandFactory.createPrependCommand(key, key
+				.getBytes(), value, true, transcoder);
+		assertNull(command.getIoBuffer());
+		command.encode(bufferAllocator);
+		checkByteBufferEquals(command, "prepend test 0 0 2 noreply\r\n10\r\n");
 	}
 
 	public void testCASDecode() {

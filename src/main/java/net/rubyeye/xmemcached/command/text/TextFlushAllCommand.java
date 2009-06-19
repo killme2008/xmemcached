@@ -34,11 +34,11 @@ public class TextFlushAllCommand extends FlushAllCommand {
 	@Override
 	public final void encode(BufferAllocator bufferAllocator) {
 		if (isNoreply()) {
-			this.ioBuffer = bufferAllocator.allocate(FLUSH_ALL.capacity() + 1
+			this.ioBuffer = bufferAllocator.allocate("flush_all".length() + 1
 					+ Constants.NO_REPLY.length() + 2);
-			ByteUtils.setArguments(this.ioBuffer,"flush_all",
+			ByteUtils.setArguments(this.ioBuffer, "flush_all",
 					Constants.NO_REPLY);
-			
+
 			this.ioBuffer.flip();
 		} else
 			this.ioBuffer = bufferAllocator.wrap(FLUSH_ALL.slice());

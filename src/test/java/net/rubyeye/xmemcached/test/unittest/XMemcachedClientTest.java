@@ -329,6 +329,14 @@ public abstract class XMemcachedClientTest extends TestCase {
 		assertTrue(result.isEmpty());
 	}
 
+	public void testSetLoggingLevelVerbosity() throws Exception {
+		memcachedClient.setLoggingLevelVerbosity(AddrUtil.getAddresses(
+				properties.getProperty("test.memcached.servers")).get(0), 2);
+		memcachedClient.setLoggingLevelVerbosityWithNoReply(AddrUtil
+				.getAddresses(properties.getProperty("test.memcached.servers"))
+				.get(0), 3);
+	}
+
 	public void testFlushAllWithNoReply() throws Exception {
 		for (int i = 0; i < 50; i++)
 			assertTrue(memcachedClient.add(String.valueOf(i), 0, i));
@@ -340,7 +348,7 @@ public abstract class XMemcachedClientTest extends TestCase {
 		for (int i = 0; i < 50; i++)
 			assertEquals((Integer) i, result.get(String.valueOf(i)));
 		memcachedClient.flushAllWithNoReply();
-		result = memcachedClient.get(keys,5000);
+		result = memcachedClient.get(keys, 5000);
 		assertTrue(result.isEmpty());
 	}
 
