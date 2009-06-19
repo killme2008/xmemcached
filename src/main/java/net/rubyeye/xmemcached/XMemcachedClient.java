@@ -525,7 +525,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 	}
 
 	/**
-	 * 返回默认yanf4j网络参数配置
+	 * Get default network configration for xmemcached.
 	 * 
 	 * @return
 	 */
@@ -663,7 +663,8 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 				&& weights.length < addressList.size())
 			throw new IllegalArgumentException(
 					"weights.length is less than addressList.size()");
-		optimiezeSetReadThreadCount(conf, addressList);
+		if (addressList != null)
+			optimiezeSetReadThreadCount(conf, addressList);
 		buildConnector(locator, allocator, conf, commandFactory, transcoder);
 		start0();
 		if (addressList != null && weights != null) {
@@ -1634,7 +1635,25 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 	 */
 	public final int incr(final String key, final int num)
 			throws TimeoutException, InterruptedException, MemcachedException {
-		return sendIncrOrDecrCommand(key, num, CommandType.INCR);
+		return sendIncrOrDecrCommand(key, num, CommandType.INCR, false);
+	}
+
+	public final void incrWithNoReply(final String key, final int num)
+			throws InterruptedException, MemcachedException {
+		try {
+			sendIncrOrDecrCommand(key, num, CommandType.INCR, true);
+		} catch (TimeoutException e) {
+			throw new MemcachedException(e);
+		}
+	}
+
+	public final void decrWithNoReply(final String key, final int num)
+			throws InterruptedException, MemcachedException {
+		try {
+			sendIncrOrDecrCommand(key, num, CommandType.DECR, true);
+		} catch (TimeoutException e) {
+			throw new MemcachedException(e);
+		}
 	}
 
 	/*
@@ -1644,7 +1663,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 	 */
 	public final int decr(final String key, final int num)
 			throws TimeoutException, InterruptedException, MemcachedException {
-		return sendIncrOrDecrCommand(key, num, CommandType.DECR);
+		return sendIncrOrDecrCommand(key, num, CommandType.DECR, false);
 	}
 
 	/*
@@ -1657,6 +1676,26 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 		flushAll(opTimeout);
 	}
 
+	@Override
+	public void flushAllWithNoReply() throws InterruptedException,
+			MemcachedException {
+		try {
+			flushAllMemcachedServers(this.opTimeout, true);
+		} catch (TimeoutException e) {
+			throw new MemcachedException(e);
+		}
+	}
+
+	@Override
+	public void flushAllWithNoReply(InetSocketAddress address)
+			throws MemcachedException, InterruptedException {
+		try {
+			flushSpecialMemcachedServer(address, this.opTimeout, true);
+		} catch (TimeoutException e) {
+			throw new MemcachedException(e);
+		}
+	}
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -1664,12 +1703,18 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 	 */
 	public final void flushAll(long timeout) throws TimeoutException,
 			InterruptedException, MemcachedException {
+		flushAllMemcachedServers(timeout, false);
+	}
+
+	private void flushAllMemcachedServers(long timeout, boolean noreply)
+			throws MemcachedException, InterruptedException, TimeoutException {
 		final Collection<Session> sessions = this.connector.getSessionSet();
 		CountDownLatch latch = new CountDownLatch(sessions.size());
 		List<Command> commands = new ArrayList<Command>(sessions.size());
 		for (Session session : sessions) {
 			if (session != null && !session.isClosed()) {
-				Command command = commandFactory.createFlushAllCommand(latch);
+				Command command = commandFactory.createFlushAllCommand(latch,
+						0, noreply);
 				if (session.send(command))
 					commands.add(command);
 				else
@@ -1677,11 +1722,13 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 			} else
 				latch.countDown();
 		}
-		if (!latch.await(timeout, TimeUnit.MILLISECONDS)) {
-			for (Command cmd : commands) {
-				cmd.cancel();
+		if (!noreply) {
+			if (!latch.await(timeout, TimeUnit.MILLISECONDS)) {
+				for (Command cmd : commands) {
+					cmd.cancel();
+				}
+				throw new TimeoutException("Timed out waiting for operation");
 			}
-			throw new TimeoutException("Timed out waiting for operation");
 		}
 	}
 
@@ -1691,6 +1738,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 	 * @see net.rubyeye.xmemcached.MemcachedClient#flushAll(java.lang.String,
 	 * long)
 	 */
+	@Deprecated
 	public final void flushAll(String server, long timeout)
 			throws TimeoutException, InterruptedException, MemcachedException {
 		InetSocketAddress address = AddrUtil.getOneAddress(server);
@@ -1718,6 +1766,12 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 	 */
 	public final void flushAll(InetSocketAddress address, long timeout)
 			throws MemcachedException, InterruptedException, TimeoutException {
+		flushSpecialMemcachedServer(address, timeout, false);
+	}
+
+	private void flushSpecialMemcachedServer(InetSocketAddress address,
+			long timeout, boolean noreply) throws MemcachedException,
+			InterruptedException, TimeoutException {
 		if (address == null)
 			throw new IllegalArgumentException("Null adderss");
 		CountDownLatch latch = new CountDownLatch(1);
@@ -1727,10 +1781,12 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 			throw new MemcachedException("could not find session for "
 					+ address.getHostName() + ":" + address.getPort()
 					+ ",maybe it have not been connected");
-		Command command = commandFactory.createFlushAllCommand(latch);
+		Command command = commandFactory.createFlushAllCommand(latch, 0,
+				noreply);
 		if (!session.send(command))
 			throw new MemcachedException("send command fail");
-		latchWait(command, timeout);
+		if (!noreply)
+			latchWait(command, timeout);
 	}
 
 	/*
@@ -1904,25 +1960,27 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 		XMemcachedMbeanServer.getInstance().shutdown();
 	}
 
-	private final int sendIncrOrDecrCommand(final String key, final int num,
-			final CommandType cmdType) throws InterruptedException,
-			TimeoutException, MemcachedException {
+	private int sendIncrOrDecrCommand(final String key, final int num,
+			final CommandType cmdType, boolean noreply)
+			throws InterruptedException, TimeoutException, MemcachedException {
 		final byte[] keyBytes = ByteUtils.getBytes(key);
 		ByteUtils.checkKey(keyBytes);
 		final Command command = commandFactory.createIncrDecrCommand(key,
-				keyBytes, num, cmdType);
+				keyBytes, num, cmdType, noreply);
 		if (!sendCommand(command)) {
 			throw new MemcachedException("send command fail");
 		}
-		latchWait(command, opTimeout);
-		command.getIoBuffer().free();
-		checkException(command);
-		if (command.getResult() == null) {
-			throw new MemcachedException(
-					"Operation fail,may be caused by networking or timeout");
-		}
-		return (Integer) command.getResult();
-
+		if (!command.isNoreply()) {
+			latchWait(command, opTimeout);
+			command.getIoBuffer().free();
+			checkException(command);
+			if (command.getResult() == null) {
+				throw new MemcachedException(
+						"Operation fail,may be caused by networking or timeout");
+			}
+			return (Integer) command.getResult();
+		} else
+			return -1;
 	}
 
 	/*
@@ -1976,7 +2034,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 		return (Boolean) command.getResult();
 	}
 
-	private final void latchWait(final Command cmd, final long timeout)
+	private void latchWait(final Command cmd, final long timeout)
 			throws InterruptedException, TimeoutException {
 		if (!cmd.getLatch().await(timeout, TimeUnit.MILLISECONDS)) {
 			cmd.cancel();
@@ -1985,7 +2043,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 	}
 
 	@Override
-	public Collection<InetSocketAddress> getAvaliableServers() {
+	public final Collection<InetSocketAddress> getAvaliableServers() {
 		Set<Session> sessionSet = this.connector.getSessionSet();
 		Set<InetSocketAddress> result = new HashSet<InetSocketAddress>();
 		for (Session session : sessionSet) {

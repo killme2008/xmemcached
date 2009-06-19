@@ -17,7 +17,7 @@ public interface CommandFactory {
 	 * @return
 	 */
 	public abstract Command createDeleteCommand(final String key,
-			final byte[] keyBytes, final int time,boolean noreply);
+			final byte[] keyBytes, final int time, boolean noreply);
 
 	/**
 	 * 创建version command
@@ -32,7 +32,8 @@ public interface CommandFactory {
 	 * 
 	 * @return
 	 */
-	public abstract Command createFlushAllCommand(CountDownLatch latch);
+	public abstract Command createFlushAllCommand(CountDownLatch latch,
+			int delay, boolean noreply);
 
 	/**
 	 * create flush_all command
@@ -72,7 +73,8 @@ public interface CommandFactory {
 			CountDownLatch latch, CommandType cmdType, Transcoder<T> transcoder);
 
 	public abstract Command createIncrDecrCommand(final String key,
-			final byte[] keyBytes, final int num, CommandType cmdType);
+			final byte[] keyBytes, final int num, CommandType cmdType,
+			boolean noreply);
 
 	@SuppressWarnings("unchecked")
 	public Command createCASCommand(final String key, final byte[] keyBytes,

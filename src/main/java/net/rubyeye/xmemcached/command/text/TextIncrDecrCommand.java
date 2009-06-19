@@ -18,8 +18,10 @@ public class TextIncrDecrCommand extends IncrDecrCommand {
 	public static final byte[] DECR = { 'd', 'e', 'c', 'r' };
 
 	public TextIncrDecrCommand(String key, byte[] keyBytes,
-			CommandType cmdType, CountDownLatch latch, int increment) {
+			CommandType cmdType, CountDownLatch latch, int increment,
+			boolean noreply) {
 		super(key, keyBytes, cmdType, latch, increment);
+		this.noreply = noreply;
 
 	}
 
@@ -46,10 +48,16 @@ public class TextIncrDecrCommand extends IncrDecrCommand {
 		byte[] numBytes = ByteUtils.getBytes(String
 				.valueOf(this.getIncrement()));
 		byte[] cmdBytes = this.commandType == CommandType.INCR ? INCR : DECR;
-		this.ioBuffer = bufferAllocator.allocate(cmdBytes.length + 2
-				+ key.length() + numBytes.length
-				+ Constants.CRLF.length);
-		ByteUtils.setArguments(this.ioBuffer, cmdBytes, keyBytes, numBytes);
+		int capacity = cmdBytes.length + 2 + key.length() + numBytes.length
+				+ Constants.CRLF.length;
+		if (isNoreply())
+			capacity += 1 + Constants.NO_REPLY.length();
+		this.ioBuffer = bufferAllocator.allocate(capacity);
+		if (isNoreply())
+			ByteUtils.setArguments(this.ioBuffer, cmdBytes, keyBytes, numBytes,
+					Constants.NO_REPLY);
+		else
+			ByteUtils.setArguments(this.ioBuffer, cmdBytes, keyBytes, numBytes);
 		this.ioBuffer.flip();
 
 	}

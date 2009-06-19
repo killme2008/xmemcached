@@ -12,15 +12,18 @@ import net.rubyeye.xmemcached.test.unittest.impl.SessionLocatorTest;
 import net.rubyeye.xmemcached.test.unittest.monitor.StatisticsHandlerUnitTest;
 import net.rubyeye.xmemcached.test.unittest.transcoder.TranscoderAllTests;
 import net.rubyeye.xmemcached.test.unittest.utils.AddrUtilTest;
+import net.rubyeye.xmemcached.test.unittest.utils.XMemcachedClientFactoryBeanUnitTest;
 
 import com.google.code.yanf4j.util.ResourcesUtils;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
+
 /**
  * Run this test suite with jvm args "-ea"
+ * 
  * @author dennis
- *
+ * 
  */
 public class AllTests {
 
@@ -37,6 +40,7 @@ public class AllTests {
 		suite.addTestSuite(StatisticsHandlerUnitTest.class);
 		suite.addTestSuite(MemcachedDecoderUnitTest.class);
 		suite.addTestSuite(MemcachedEncoderUnitTest.class);
+		suite.addTestSuite(XMemcachedClientFactoryBeanUnitTest.class);
 		try {
 			Properties properties = ResourcesUtils
 					.getResourceAsProperties("test.properties");

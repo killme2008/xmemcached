@@ -33,8 +33,9 @@ public final class TextCommandFactory implements CommandFactory {
 	 * , byte[], int)
 	 */
 	public final Command createDeleteCommand(final String key,
-			final byte[] keyBytes, final int time,boolean noreply) {
-		return new TextDeleteCommand(key, keyBytes, time, new CountDownLatch(1),noreply);
+			final byte[] keyBytes, final int time, boolean noreply) {
+		return new TextDeleteCommand(key, keyBytes, time,
+				new CountDownLatch(1), noreply);
 	}
 
 	/*
@@ -54,8 +55,8 @@ public final class TextCommandFactory implements CommandFactory {
 	 * net.rubyeye.xmemcached.CommandFactory#createFlushAllCommand(java.util
 	 * .concurrent.CountDownLatch)
 	 */
-	public final Command createFlushAllCommand(CountDownLatch latch) {
-		return new TextFlushAllCommand(latch);
+	public final Command createFlushAllCommand(CountDownLatch latch,int delay,boolean noreply) {
+		return new TextFlushAllCommand(latch,delay,noreply);
 	}
 
 	/*
@@ -88,18 +89,18 @@ public final class TextCommandFactory implements CommandFactory {
 
 	@SuppressWarnings("unchecked")
 	public final Command createSetCommand(final String key,
-			final byte[] keyBytes, final int exp, final Object value,boolean noreply,
-			Transcoder transcoder) {
-		return createStoreCommand(key, keyBytes, exp, value, CommandType.SET,noreply,
-				transcoder);
+			final byte[] keyBytes, final int exp, final Object value,
+			boolean noreply, Transcoder transcoder) {
+		return createStoreCommand(key, keyBytes, exp, value, CommandType.SET,
+				noreply, transcoder);
 	}
 
 	@SuppressWarnings("unchecked")
 	public final Command createAddCommand(final String key,
-			final byte[] keyBytes, final int exp, final Object value,boolean noreply,
-			Transcoder transcoder) {
-		return createStoreCommand(key, keyBytes, exp, value, CommandType.ADD,noreply,
-				transcoder);
+			final byte[] keyBytes, final int exp, final Object value,
+			boolean noreply, Transcoder transcoder) {
+		return createStoreCommand(key, keyBytes, exp, value, CommandType.ADD,
+				noreply, transcoder);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -178,8 +179,9 @@ public final class TextCommandFactory implements CommandFactory {
 	 * .String, byte[], int, net.rubyeye.xmemcached.command.CommandType)
 	 */
 	public final Command createIncrDecrCommand(final String key,
-			final byte[] keyBytes, final int num, CommandType cmdType) {
+			final byte[] keyBytes, final int num, CommandType cmdType,
+			boolean noreply) {
 		return new TextIncrDecrCommand(key, keyBytes, cmdType,
-				new CountDownLatch(1), num);
+				new CountDownLatch(1), num, noreply);
 	}
 }

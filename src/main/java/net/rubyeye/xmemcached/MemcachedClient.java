@@ -36,9 +36,9 @@ public interface MemcachedClient {
 	 */
 	public static final int DEFAULT_TCP_SEND_BUFF_SIZE = 16 * 1024;
 	/**
-	 * Enable Nagle algorithm by default
+	 * Disable Nagle algorithm by default
 	 */
-	public static final boolean DEFAULT_TCP_NO_DELAY = false;
+	public static final boolean DEFAULT_TCP_NO_DELAY = true;
 	/**
 	 * Default session read buffer size,32K
 	 */
@@ -650,7 +650,7 @@ public interface MemcachedClient {
 	/**
 	 * This method will be removed in 1.20,Please use getVersions() instead.
 	 * 
-	 * @return 版本号字符串
+	 * @return version string
 	 * @throws TimeoutException
 	 * @throws InterruptedException
 	 * @throws MemcachedException
@@ -671,13 +671,18 @@ public interface MemcachedClient {
 			throws TimeoutException, InterruptedException, MemcachedException;
 
 	/**
-	 * 递增key对应的value
+	 * "incr" are used to change data for some item in-place, incrementing it.
+	 * The data for the item is treated as decimal representation of a 64-bit
+	 * unsigned integer. If the current data value does not conform to such a
+	 * representation, the commands behave as if the value were 0. Also, the
+	 * item must already exist for incr to work; these commands won't pretend
+	 * that a non-existent key exists with value 0; instead, it will fail.This
+	 * method doesn't wait for reply.
 	 * 
+	 * @return the new value of the item's data, after the increment operation
+	 *         was carried out.
 	 * @param key
 	 * @param num
-	 *            增加的幅度
-	 * @return
-	 * @throws TimeoutException
 	 * @throws InterruptedException
 	 * @throws MemcachedException
 	 */
@@ -685,13 +690,18 @@ public interface MemcachedClient {
 			throws TimeoutException, InterruptedException, MemcachedException;
 
 	/**
-	 * 递减key对应的value
+	 * "decr" are used to change data for some item in-place, decrementing it.
+	 * The data for the item is treated as decimal representation of a 64-bit
+	 * unsigned integer. If the current data value does not conform to such a
+	 * representation, the commands behave as if the value were 0. Also, the
+	 * item must already exist for decr to work; these commands won't pretend
+	 * that a non-existent key exists with value 0; instead, it will fail.This
+	 * method doesn't wait for reply.
 	 * 
+	 * @return the new value of the item's data, after the decrement operation
+	 *         was carried out.
 	 * @param key
 	 * @param num
-	 *            递减的幅度
-	 * @return
-	 * @throws TimeoutException
 	 * @throws InterruptedException
 	 * @throws MemcachedException
 	 */
@@ -699,7 +709,7 @@ public interface MemcachedClient {
 			throws TimeoutException, InterruptedException, MemcachedException;
 
 	/**
-	 *  Make All connected memcached's data item invalid
+	 * Make All connected memcached's data item invalid
 	 * 
 	 * @throws TimeoutException
 	 * @throws InterruptedException
@@ -707,6 +717,9 @@ public interface MemcachedClient {
 	 */
 	public abstract void flushAll() throws TimeoutException,
 			InterruptedException, MemcachedException;
+
+	public abstract void flushAllWithNoReply() throws InterruptedException,
+			MemcachedException;
 
 	/**
 	 * Make All connected memcached's data item invalid
@@ -721,21 +734,35 @@ public interface MemcachedClient {
 			InterruptedException, MemcachedException;
 
 	/**
-	 * Make a memcached's data item invalid
+	 * Invalidate all existing items immediately.This method is Deprecated,use
+	 * flushAll(InetSocketAddress address, long timeout) instead.
 	 * 
-	 * @param host
-	 *            String in form of "host ip:port"
+	 * @param server
+	 * @param timeout
+	 * @throws TimeoutException
+	 * @throws InterruptedException
+	 * @throws MemcachedException
+	 */
+	@Deprecated
+	public abstract void flushAll(String server, long timeout)
+			throws TimeoutException, InterruptedException, MemcachedException;
+
+	/**
+	 * Invalidate all existing items immediately
+	 * 
+	 * @param address
+	 *            Target memcached server
 	 * @param timeout
 	 *            operation timeout
 	 * @throws TimeoutException
 	 * @throws InterruptedException
 	 * @throws MemcachedException
 	 */
-	public abstract void flushAll(String host, long timeout)
-			throws TimeoutException, InterruptedException, MemcachedException;
-
 	public abstract void flushAll(InetSocketAddress address)
 			throws MemcachedException, InterruptedException, TimeoutException;
+
+	public abstract void flushAllWithNoReply(InetSocketAddress address)
+			throws MemcachedException, InterruptedException;
 
 	public abstract void flushAll(InetSocketAddress address, long timeout)
 			throws MemcachedException, InterruptedException, TimeoutException;
@@ -903,5 +930,39 @@ public interface MemcachedClient {
 			throws InterruptedException, MemcachedException;
 
 	public void deleteWithNoReply(final String key)
+			throws InterruptedException, MemcachedException;
+
+	/**
+	 * "incr" are used to change data for some item in-place, incrementing it.
+	 * The data for the item is treated as decimal representation of a 64-bit
+	 * unsigned integer. If the current data value does not conform to such a
+	 * representation, the commands behave as if the value were 0. Also, the
+	 * item must already exist for incr to work; these commands won't pretend
+	 * that a non-existent key exists with value 0; instead, it will fail.This
+	 * method doesn't wait for reply.
+	 * 
+	 * @param key
+	 * @param num
+	 * @throws InterruptedException
+	 * @throws MemcachedException
+	 */
+	public void incrWithNoReply(final String key, final int num)
+			throws InterruptedException, MemcachedException;
+
+	/**
+	 * "decr" are used to change data for some item in-place, decrementing it.
+	 * The data for the item is treated as decimal representation of a 64-bit
+	 * unsigned integer. If the current data value does not conform to such a
+	 * representation, the commands behave as if the value were 0. Also, the
+	 * item must already exist for decr to work; these commands won't pretend
+	 * that a non-existent key exists with value 0; instead, it will fail.This
+	 * method doesn't wait for reply.
+	 * 
+	 * @param key
+	 * @param num
+	 * @throws InterruptedException
+	 * @throws MemcachedException
+	 */
+	public void decrWithNoReply(final String key, final int num)
 			throws InterruptedException, MemcachedException;
 }
