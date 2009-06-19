@@ -688,7 +688,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 
 	private final boolean isLinuxPlatform() {
 		String osName = System.getProperty("os.name");
-		if (osName != null && osName.toLowerCase().indexOf("linux") > 0)
+		if (osName != null && osName.toLowerCase().indexOf("linux") >= 0)
 			return true;
 		else
 			return false;
