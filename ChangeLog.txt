@@ -36,6 +36,10 @@ deleteWithNoReply,incr(decr)WithNoReply,flushAllWithNoReply,setLoggingLevelVerbo
 
 5.bug fixed. Issue 35,Issue 36,Issue 37 etc.
 
+6.Improve session monitor.When session is closed by exception or network error,
+monitor will reconnect to the session until success.
+The older version set the interval between reconnecting is 10 seconds,now set it to 0 seconds.
+
 --------------------End--------------------------
 
 ******************************************************************

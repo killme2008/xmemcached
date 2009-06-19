@@ -15,6 +15,8 @@ import net.rubyeye.xmemcached.CASOperation;
 import net.rubyeye.xmemcached.GetsResponse;
 import net.rubyeye.xmemcached.MemcachedClient;
 import net.rubyeye.xmemcached.MemcachedClientBuilder;
+import net.rubyeye.xmemcached.XMemcachedClient;
+import net.rubyeye.xmemcached.XMemcachedClientBuilder;
 import net.rubyeye.xmemcached.command.CommandType;
 import net.rubyeye.xmemcached.exception.MemcachedException;
 import net.rubyeye.xmemcached.transcoders.StringTranscoder;
@@ -29,6 +31,19 @@ public abstract class XMemcachedClientTest extends TestCase {
 	@Override
 	public void setUp() throws Exception {
 		createClients();
+	}
+
+	public void testCreateClientWithEmptyServers() throws Exception {
+		MemcachedClient client = new XMemcachedClient();
+		assertFalse(client.isShutdown());
+		client.shutdown();
+		assertTrue(client.isShutdown());
+
+		MemcachedClientBuilder builder = new XMemcachedClientBuilder();
+		client = builder.build();
+		assertFalse(client.isShutdown());
+		client.shutdown();
+		assertTrue(client.isShutdown());
 	}
 
 	protected void createClients() throws IOException, Exception,
