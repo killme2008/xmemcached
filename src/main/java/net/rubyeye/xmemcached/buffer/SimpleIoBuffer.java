@@ -16,102 +16,110 @@ import java.nio.ByteOrder;
 
 public class SimpleIoBuffer implements IoBuffer {
 
-    protected ByteBuffer origBuffer;
+	protected ByteBuffer origBuffer;
 
-    public SimpleIoBuffer(ByteBuffer origBuffer) {
-        this.origBuffer = origBuffer;
-    }
+	public SimpleIoBuffer(ByteBuffer origBuffer) {
+		this.origBuffer = origBuffer;
+	}
 
-    @Override
-    public final void free() {
-        this.origBuffer = null;
-    }
+	@Override
+	public final void free() {
+		this.origBuffer = null;
+	}
 
-    @Override
-    public final ByteBuffer[] getByteBuffers() {
-        return new ByteBuffer[]{
-                    this.origBuffer};
-    }
+	@Override
+	public final ByteBuffer[] getByteBuffers() {
+		return new ByteBuffer[] { this.origBuffer };
+	}
 
-    @Override
-    public final void put(byte[] bytes) {
-        this.origBuffer.put(bytes);
-    }
+	@Override
+	public final void put(byte[] bytes) {
+		this.origBuffer.put(bytes);
+	}
 
-    @Override
-    public final int capacity() {
-        return this.origBuffer.capacity();
-    }
+	@Override
+	public final int capacity() {
+		return this.origBuffer.capacity();
+	}
 
-    @Override
-    public final void clear() {
-        this.origBuffer.clear();
-    }
+	@Override
+	public final void clear() {
+		this.origBuffer.clear();
+	}
 
-    @Override
-    public final void reset() {
-        origBuffer.reset();
-    }
+	@Override
+	public final void reset() {
+		origBuffer.reset();
+	}
 
-    @Override
-    public final int remaining() {
-        return origBuffer.remaining();
-    }
+	@Override
+	public final int remaining() {
+		return origBuffer.remaining();
+	}
 
-    @Override
-    public final int position() {
-        return origBuffer.position();
-    }
+	@Override
+	public final int position() {
+		return origBuffer.position();
+	}
 
-    @Override
-    public final void mark() {
-        origBuffer.mark();
-    }
+	@Override
+	public final void mark() {
+		origBuffer.mark();
+	}
 
-    @Override
-    public final int limit() {
-        return origBuffer.limit();
-    }
+	@Override
+	public final int limit() {
+		return origBuffer.limit();
+	}
 
-    @Override
-    public final boolean hasRemaining() {
-        return origBuffer.hasRemaining();
-    }
+	@Override
+	public final boolean hasRemaining() {
+		return origBuffer.hasRemaining();
+	}
 
-    @Override
-    public final void flip() {
-        this.origBuffer.flip();
-    }
+	@Override
+	public final void flip() {
+		this.origBuffer.flip();
+	}
 
-    @Override
-    public final void put(byte b) {
-        this.origBuffer.put(b);
-    }
+	@Override
+	public final void put(byte b) {
+		this.origBuffer.put(b);
+	}
 
-    @Override
-    public final void put(ByteBuffer buff) {
-        this.origBuffer.put(buff);
-    }
+	@Override
+	public final void put(ByteBuffer buff) {
+		this.origBuffer.put(buff);
+	}
 
-    @Override
-    public final ByteBuffer getByteBuffer() {
-        return this.origBuffer;
-    }
+	@Override
+	public final ByteBuffer getByteBuffer() {
+		return this.origBuffer;
+	}
 
-    @Override
-    public final void limit(int limit) {
-        this.origBuffer.limit(limit);
-    }
+	@Override
+	public final void limit(int limit) {
+		this.origBuffer.limit(limit);
+	}
 
-    @Override
-    public final void position(int pos) {
-        this.origBuffer.position(pos);
-    }
+	@Override
+	public final void position(int pos) {
+		this.origBuffer.position(pos);
+	}
 
 	@Override
 	public void order(ByteOrder byteOrder) {
-		this.origBuffer.order(byteOrder);	
+		this.origBuffer.order(byteOrder);
 	}
-    
-    
+
+	@Override
+	public boolean isDirect() {
+		return this.origBuffer.isDirect();
+	}
+
+	@Override
+	public ByteOrder order() {
+		return this.origBuffer.order();
+	}
+
 }

@@ -3,6 +3,7 @@ package net.rubyeye.xmemcached.test.unittest;
 import java.io.IOException;
 import java.util.Properties;
 
+import net.rubyeye.xmemcached.test.unittest.buffer.BufferAllocatorTestSuite;
 import net.rubyeye.xmemcached.test.unittest.codec.MemcachedDecoderUnitTest;
 import net.rubyeye.xmemcached.test.unittest.codec.MemcachedEncoderUnitTest;
 import net.rubyeye.xmemcached.test.unittest.commands.factory.TextCommandFactoryTest;
@@ -10,6 +11,7 @@ import net.rubyeye.xmemcached.test.unittest.commands.text.TextCommandsAllTests;
 import net.rubyeye.xmemcached.test.unittest.impl.OptimezerTest;
 import net.rubyeye.xmemcached.test.unittest.impl.SessionLocatorTest;
 import net.rubyeye.xmemcached.test.unittest.monitor.StatisticsHandlerUnitTest;
+import net.rubyeye.xmemcached.test.unittest.monitor.XMemcachedMBeanServerUnitTest;
 import net.rubyeye.xmemcached.test.unittest.transcoder.TranscoderAllTests;
 import net.rubyeye.xmemcached.test.unittest.utils.AddrUtilTest;
 import net.rubyeye.xmemcached.test.unittest.utils.XMemcachedClientFactoryBeanUnitTest;
@@ -40,7 +42,9 @@ public class AllTests {
 		suite.addTestSuite(StatisticsHandlerUnitTest.class);
 		suite.addTestSuite(MemcachedDecoderUnitTest.class);
 		suite.addTestSuite(MemcachedEncoderUnitTest.class);
+		suite.addTest(BufferAllocatorTestSuite.suite());
 		suite.addTestSuite(XMemcachedClientFactoryBeanUnitTest.class);
+		suite.addTestSuite(XMemcachedMBeanServerUnitTest.class);
 		try {
 			Properties properties = ResourcesUtils
 					.getResourceAsProperties("test.properties");

@@ -67,7 +67,7 @@ public class AddrUtil {
 		int finalColon = server.lastIndexOf(':');
 		if (finalColon < 1) {
 			throw new IllegalArgumentException("Invalid server ``" + server
-					+ "'' in list:  " + server);
+					+ "''");
 
 		}
 		String hostPart = server.substring(0, finalColon);

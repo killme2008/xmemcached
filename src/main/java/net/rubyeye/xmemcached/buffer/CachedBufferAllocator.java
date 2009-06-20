@@ -33,6 +33,8 @@ public class CachedBufferAllocator implements BufferAllocator {
 	private final int maxPoolSize;
 	private final int maxCachedBufferSize;
 	private final ThreadLocal<Map<Integer, Queue<CachedIoBuffer>>> heapBuffers;
+	private final IoBuffer EMPTY_IO_BUFFER = new CachedBufferAllocator.CachedIoBuffer(
+			ByteBuffer.allocate(0));
 
 	/**
 	 * Creates a new instance with the default parameters ({@literal
@@ -100,6 +102,8 @@ public class CachedBufferAllocator implements BufferAllocator {
 	}
 
 	public final IoBuffer allocate(int requestedCapacity) {
+		if (requestedCapacity == 0)
+			return EMPTY_IO_BUFFER;
 		// 圆整requestedCapacity到2的x次方
 		int actualCapacity = ByteUtils.normalizeCapacity(requestedCapacity);
 		IoBuffer buf;
@@ -147,15 +151,21 @@ public class CachedBufferAllocator implements BufferAllocator {
 			this.ownerThread = Thread.currentThread();
 			this.origBuffer = origBuffer;
 		}
-		
-		
+
+		@Override
+		public ByteOrder order() {
+			return this.origBuffer.order();
+		}
+
+		@Override
+		public boolean isDirect() {
+			return this.origBuffer.isDirect();
+		}
 
 		@Override
 		public void order(ByteOrder byteOrder) {
-			this.origBuffer.order(byteOrder);			
+			this.origBuffer.order(byteOrder);
 		}
-
-
 
 		@Override
 		public final void free() {
@@ -175,6 +185,7 @@ public class CachedBufferAllocator implements BufferAllocator {
 			if (maxPoolSize == 0 || pool.size() < maxPoolSize) {
 				pool.offer(new CachedIoBuffer(origBuffer));
 			}
+			this.origBuffer = null;
 
 		}
 

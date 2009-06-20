@@ -141,7 +141,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 	 * @see net.rubyeye.xmemcached.MemcachedClient#setOptimiezeGet(boolean)
 	 */
 	public final void setOptimiezeGet(final boolean optimiezeGet) {
-		this.connector.setOptimiezeGet(optimiezeGet);
+		this.connector.setOptimizeGet(optimiezeGet);
 	}
 
 	/*
@@ -310,12 +310,22 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 	@Override
 	public final List<String> getServersDescription() {
 		final List<String> result = new ArrayList<String>();
-		for (InetSocketAddress socketAddress : this.connector
-				.getServerAddresses()) {
+		for (Session session : this.connector.getSessionSet()) {
+			InetSocketAddress socketAddress = session.getRemoteSocketAddress();
+			int weight = ((MemcachedTCPSession) session).getWeight();
 			result.add(socketAddress.getHostName() + ":"
-					+ socketAddress.getPort());
+					+ socketAddress.getPort() + "(weight=" + weight + ")");
 		}
 		return result;
+	}
+
+	public final void setServerWeight(String server, int weight) {
+		InetSocketAddress socketAddress = AddrUtil.getOneAddress(server);
+		Session session = this.connector.getSessionByAddress(socketAddress);
+		if (session == null)
+			throw new IllegalArgumentException("There is no server " + server);
+		((MemcachedTCPSession) session).setWeight(weight);
+		this.connector.updateSessions();
 	}
 
 	/*
@@ -465,6 +475,11 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 					this,
 					this.getClass().getPackage().getName() + ":type="
 							+ this.getClass().getSimpleName());
+	}
+
+	@Override
+	public void setOptimizeGet(boolean optimizeGet) {
+		setOptimiezeGet(optimizeGet);
 	}
 
 	/*

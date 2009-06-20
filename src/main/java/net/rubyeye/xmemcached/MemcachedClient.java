@@ -84,12 +84,23 @@ public interface MemcachedClient {
 
 	/**
 	 * Enable/Disable merge many get commands to one multi-get command.true is
-	 * to enable it,false is to disable it.Default is true.Recommend users to
-	 * enable it.
+	 * </br> to enable it,false is to disable it.Default is true.Recommend users
+	 * to</br> enable it."setOptimiezeGet" is a spell mistake,rename to
+	 * "setOptimizeGet",use "setOptimizeGet" instead.
 	 * 
 	 * @param optimiezeGet
 	 */
+	@Deprecated
 	public abstract void setOptimiezeGet(final boolean optimiezeGet);
+
+	/**
+	 * Enable/Disable merge many get commands to one multi-get command.true is
+	 * to enable it,false is to disable it.Default is true.Recommend users to
+	 * enable it.
+	 * 
+	 * @param optimizeGet
+	 */
+	public abstract void setOptimizeGet(final boolean optimizeGet);
 
 	/**
 	 * Enable/Disable merge many command's buffers to one big buffer fit

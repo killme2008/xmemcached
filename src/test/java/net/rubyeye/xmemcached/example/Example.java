@@ -206,6 +206,8 @@ public class Example {
 			client.flushAll(); // 使所有数据项失效
 			// 查看统计信息
 			System.out.println(client.getStats()); // 查看统计信息
+			
+			Thread.sleep(300000000);
 			client.shutdown();
 
 		} catch (IOException e) {

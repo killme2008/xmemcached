@@ -41,7 +41,7 @@ public class MemcachedTCPSession extends DefaultTCPSession {
 	 */
 	protected BlockingQueue<Command> executingCmds;
 
-	private int weight;
+	private volatile int weight;
 
 	private SocketAddress remoteSocketAddress; // prevent channel is closed
 	private int sendBufferSize;

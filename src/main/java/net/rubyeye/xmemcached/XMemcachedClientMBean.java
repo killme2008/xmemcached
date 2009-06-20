@@ -3,6 +3,7 @@ package net.rubyeye.xmemcached;
 import java.io.IOException;
 import java.util.List;
 
+
 /**
  * XMemcachedClientMBean.It is used for JMX to add/remove memcached server.
  * 
@@ -42,8 +43,16 @@ public interface XMemcachedClientMBean {
 	 * Get all connected memcached servers
 	 * 
 	 * @return a list of string,every string is in the form of
-	 *         "[host1]:[port1] [host2]:[port2]"
+	 *         "[host1]:[port1](weight=num1) [host2]:[port2](weight=num1)"
 	 */
 	public List<String> getServersDescription();
+
+	/**
+	 * Set a memcached server's weight
+	 * 
+	 * @param server
+	 * @param weight
+	 */
+	public void setServerWeight(String server, int weight);
 
 }

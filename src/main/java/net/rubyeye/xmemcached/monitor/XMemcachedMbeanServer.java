@@ -39,6 +39,13 @@ public final class XMemcachedMbeanServer {
 	private JMXConnectorServer connectorServer;
 
 	private XMemcachedMbeanServer() {
+		initialize();
+	}
+
+	private void initialize() {
+		if (mbserver != null && connectorServer != null
+				&& connectorServer.isActive())
+			return;
 		// 创建MBServer
 		String hostName = null;
 		try {
@@ -112,7 +119,30 @@ public final class XMemcachedMbeanServer {
 		}
 	}
 
+	public boolean isRegistered(String name) {
+		try {
+			return mbserver != null
+					&& mbserver.isRegistered(new ObjectName(name));
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	public boolean isActive() {
+		return mbserver != null && connectorServer != null
+				&& this.connectorServer.isActive();
+	}
+
+	public int getMBeanCount() {
+		if (mbserver != null)
+			return mbserver.getMBeanCount();
+		else
+			return 0;
+	}
+
 	public void registMBean(Object o, String name) {
+		if (isRegistered(name))
+			return;
 		// 注册MBean
 		if (mbserver != null) {
 			try {

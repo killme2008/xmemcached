@@ -16,44 +16,49 @@ import java.nio.ByteOrder;
 
 /**
  * ByteBuffer封装类
+ * 
  * @author dennis
- *
+ * 
  */
 public interface IoBuffer {
 
-    int capacity();
+	int capacity();
 
-    void clear();
+	void clear();
 
-    void flip();
+	void flip();
 
-    void free();
+	void free();
 
-    ByteBuffer getByteBuffer();
+	ByteBuffer getByteBuffer();
 
-    ByteBuffer[] getByteBuffers();
+	ByteBuffer[] getByteBuffers();
 
-    boolean hasRemaining();
+	boolean hasRemaining();
 
-    int limit();
+	int limit();
 
-    void limit(int limit);
+	void limit(int limit);
 
-    void mark();
+	void mark();
 
-    int position();
+	int position();
 
-    void position(int pos);
+	void position(int pos);
 
-    void put(ByteBuffer buff);
+	void put(ByteBuffer buff);
 
-    void put(byte b);
+	void put(byte b);
 
-    void put(byte[] bytes);
+	void put(byte[] bytes);
 
-    int remaining();
+	int remaining();
 
-    void reset();
-    
-    void order(ByteOrder byteOrder);
+	void reset();
+
+	boolean isDirect();
+
+	void order(ByteOrder byteOrder);
+
+	ByteOrder order();
 }

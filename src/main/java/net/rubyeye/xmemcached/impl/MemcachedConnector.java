@@ -110,7 +110,7 @@ public class MemcachedConnector extends SocketChannelController {
 		}
 	}
 
-	public void setOptimiezeGet(boolean optimiezeGet) {
+	public void setOptimizeGet(boolean optimiezeGet) {
 		((OptimizerMBean) this.optimiezer).setOptimizeGet(optimiezeGet);
 	}
 
@@ -267,6 +267,10 @@ public class MemcachedConnector extends SocketChannelController {
 				.getRemoteSocketAddress(), session);
 		if (oldSession != null)
 			oldSession.close();
+		updateSessions();
+	}
+
+	public final void updateSessions() {
 		this.sessionLocator.updateSessions(sessionMap.values());
 	}
 
@@ -275,7 +279,7 @@ public class MemcachedConnector extends SocketChannelController {
 				+ session.getRemoteSocketAddress().getHostName() + ":"
 				+ session.getRemoteSocketAddress().getPort());
 		this.sessionMap.remove(session.getRemoteSocketAddress());
-		this.sessionLocator.updateSessions(sessionMap.values());
+		updateSessions();
 	}
 
 	private int sendBufferSize = 0;
@@ -404,7 +408,7 @@ public class MemcachedConnector extends SocketChannelController {
 			MemcachedSessionLocator locator, BufferAllocator allocator) {
 		super(configuration, null);
 		this.sessionLocator = locator;
-		this.sessionLocator.updateSessions(this.sessionMap.values());
+		updateSessions();
 		this.sessionMonitor = new SessionMonitor();
 		this.bufferAllocator = allocator;
 		this.optimiezer = new Optimizer();

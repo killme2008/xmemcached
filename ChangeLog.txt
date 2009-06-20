@@ -34,11 +34,22 @@ Add some new methods in MemcachedClient,include:
 setWithNoReply,addWithNoReply,replaceWithNoReply,appendWithNoReply,prependWithNoReply,casWithNoReply
 deleteWithNoReply,incr(decr)WithNoReply,flushAllWithNoReply,setLoggingLevelVerbosityWithNoReply
 
-5.bug fixed. Issue 35,Issue 36,Issue 37 etc.
+5.Bug fixed. Issue 35,Issue 36,Issue 37,Issue 38 etc.
 
 6.Improve session monitor.When session is closed by exception or network error,
 monitor will reconnect to the session until success.
 The older version set the interval between reconnecting is 10 seconds,now set it to 0 seconds.
+
+7.Improve JMX supports.Add a new method to XMemcachedClientMBean:
+     /**
+	 * Set a memcached server's weight
+	 * 
+	 * @param server
+	 * @param weight
+	 */
+	public void setServerWeight(String server, int weight);
+	
+Change the getServersDescription method's result,add weight to description.
 
 --------------------End--------------------------
 
