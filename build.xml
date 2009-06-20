@@ -6,6 +6,10 @@
 		<fileset dir="${build.lib}">
 			<include name="*.jar" />
 		</fileset>
+		<!-- need spring core-->
+		<fileset dir="${build.provided.lib}">
+			<include name="*.jar" />
+		</fileset>
 	</path>
 	<target name="init" description="initialize">
 		<delete dir="${build.classes}">

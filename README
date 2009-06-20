@@ -24,7 +24,7 @@ Please set test.memcached.servers property,Then run the AllTests class with jvm 
 
 3.How to build project by ant?
 
-You must edit the build.xml,include junit.jar into classpath,then
+Set property build.provided.lib in build.properties to a file path which include spring framework's core jar,then
 type command "ant build-package" to build project.
 
 ======================Example==================================
