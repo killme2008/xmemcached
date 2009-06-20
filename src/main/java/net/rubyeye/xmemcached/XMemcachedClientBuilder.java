@@ -25,7 +25,7 @@ public class XMemcachedClientBuilder implements MemcachedClientBuilder {
 	private BufferAllocator bufferAllocator = new SimpleBufferAllocator();
 	private Configuration configuration = XMemcachedClient
 			.getDefaultConfiguration();
-	private final List<InetSocketAddress> addressList = new ArrayList<InetSocketAddress>();
+	private List<InetSocketAddress> addressList = new ArrayList<InetSocketAddress>();
 
 	private int[] weights;
 
