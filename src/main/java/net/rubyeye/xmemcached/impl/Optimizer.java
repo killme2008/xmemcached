@@ -32,16 +32,16 @@ import net.rubyeye.xmemcached.utils.Deque;
  * 
  * @author dennis
  */
-public class Optimiezer implements OptimiezerMBean, MemcachedOptimiezer {
+public class Optimizer implements OptimizerMBean, MemcachedOptimizer {
 
 	public static final int DEFAULT_MERGE_FACTOR = 150;
 	private int mergeFactor = DEFAULT_MERGE_FACTOR; // default merge factor;
 	private boolean optimiezeGet = true;
 	private boolean optimiezeMergeBuffer = true;
 	private BufferAllocator bufferAllocator;
-	private static final Log log = LogFactory.getLog(Optimiezer.class);
+	private static final Log log = LogFactory.getLog(Optimizer.class);
 
-	public Optimiezer() {
+	public Optimizer() {
 		XMemcachedMbeanServer.getInstance().registMBean(
 				this,
 				this.getClass().getPackage().getName() + ":type="
@@ -67,28 +67,28 @@ public class Optimiezer implements OptimiezerMBean, MemcachedOptimiezer {
 
 	}
 
-	public boolean isOptimiezeGet() {
+	public boolean isOptimizeGet() {
 		return optimiezeGet;
 	}
 
-	public void setOptimiezeGet(boolean optimiezeGet) {
+	public void setOptimizeGet(boolean optimiezeGet) {
 		log.warn(optimiezeGet ? "Enable merge get commands"
 				: "Disable merge get commands");
 		this.optimiezeGet = optimiezeGet;
 	}
 
-	public boolean isOptimiezeMergeBuffer() {
+	public boolean isOptimizeMergeBuffer() {
 		return optimiezeMergeBuffer;
 	}
 
-	public void setOptimiezeMergeBuffer(boolean optimiezeMergeBuffer) {
+	public void setOptimizeMergeBuffer(boolean optimiezeMergeBuffer) {
 		log.warn(optimiezeMergeBuffer ? "Enable merge buffers"
 				: "Disable merge buffers");
 		this.optimiezeMergeBuffer = optimiezeMergeBuffer;
 	}
 
 	@SuppressWarnings("unchecked")
-	public Command optimieze(final Command currentCommand,
+	public Command optimize(final Command currentCommand,
 			final Queue writeQueue, final BlockingQueue<Command> executingCmds,
 			int sendBufferSize) {
 		Command optimiezeCommand = currentCommand;

@@ -10,14 +10,14 @@ import net.rubyeye.xmemcached.TextCommandFactory;
 import net.rubyeye.xmemcached.buffer.SimpleBufferAllocator;
 import net.rubyeye.xmemcached.command.Command;
 import net.rubyeye.xmemcached.command.CommandType;
-import net.rubyeye.xmemcached.impl.Optimiezer;
+import net.rubyeye.xmemcached.impl.Optimizer;
 import net.rubyeye.xmemcached.utils.SimpleBlockingQueue;
 import net.rubyeye.xmemcached.utils.SimpleDeque;
 import junit.framework.TestCase;
 
 @SuppressWarnings("unchecked")
 public class OptimezerTest extends TestCase {
-	Optimiezer optimiezer;
+	Optimizer optimiezer;
 
 	Queue writeQueue;
 	BlockingQueue<Command> executingCmds;
@@ -28,7 +28,7 @@ public class OptimezerTest extends TestCase {
 
 	@Override
 	protected void setUp() throws Exception {
-		optimiezer = new Optimiezer();
+		optimiezer = new Optimizer();
 		this.commandFactory = new TextCommandFactory();
 		optimiezer.setBufferAllocator(new SimpleBufferAllocator());
 		writeQueue = new SimpleDeque();
@@ -88,7 +88,7 @@ public class OptimezerTest extends TestCase {
 	}
 
 	public void testDisableMergeGet() {
-		optimiezer.setOptimiezeGet(false); // disable merge get
+		optimiezer.setOptimizeGet(false); // disable merge get
 		Command optimiezeCommand = optimiezer.optimiezeGet(writeQueue,
 				executingCmds, currentCmd);
 		optimiezeCommand.encode(new SimpleBufferAllocator());
@@ -186,7 +186,7 @@ public class OptimezerTest extends TestCase {
 			deleteCommand.encode(new SimpleBufferAllocator());
 			writeQueue.add(deleteCommand);
 		}
-		Command optimiezeCommand = optimiezer.optimieze(currentCmd, writeQueue,
+		Command optimiezeCommand = optimiezer.optimize(currentCmd, writeQueue,
 				executingCmds, 16 * 1024);
 		ByteBuffer mergeBuffer = optimiezeCommand.getIoBuffer().getByteBuffer();
 		StringBuilder sb = new StringBuilder("get ");

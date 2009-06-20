@@ -22,7 +22,7 @@ import java.util.NoSuchElementException;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
-import net.rubyeye.xmemcached.MemcachedOptimiezer;
+import net.rubyeye.xmemcached.MemcachedOptimizer;
 import net.rubyeye.xmemcached.buffer.BufferAllocator;
 import net.rubyeye.xmemcached.command.Command;
 import net.rubyeye.xmemcached.command.OperationStatus;
@@ -45,7 +45,7 @@ public class MemcachedTCPSession extends DefaultTCPSession {
 
 	private SocketAddress remoteSocketAddress; // prevent channel is closed
 	private int sendBufferSize;
-	private MemcachedOptimiezer optimiezer;
+	private MemcachedOptimizer optimiezer;
 	private volatile boolean allowReconnect;
 
 	public static final String CURRENT_GET_KEY = "current_key";
@@ -65,7 +65,7 @@ public class MemcachedTCPSession extends DefaultTCPSession {
 	}
 
 	public MemcachedTCPSession(SessionConfig sessionConfig,
-			int readRecvBufferSize, MemcachedOptimiezer optimiezer,
+			int readRecvBufferSize, MemcachedOptimizer optimiezer,
 			int readThreadCount, int weight) {
 		super(sessionConfig, readRecvBufferSize, -1);
 		this.optimiezer = optimiezer;
@@ -107,7 +107,7 @@ public class MemcachedTCPSession extends DefaultTCPSession {
 			/**
 			 * optimieze commands
 			 */
-			currentCommand = this.optimiezer.optimieze(currentCommand,
+			currentCommand = this.optimiezer.optimize(currentCommand,
 					this.writeQueue, this.executingCmds, this.sendBufferSize);
 		}
 		currentCommand.setStatus(OperationStatus.WRITING);

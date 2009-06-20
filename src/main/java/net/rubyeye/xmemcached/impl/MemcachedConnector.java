@@ -37,7 +37,7 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 import net.rubyeye.xmemcached.MemcachedClient;
-import net.rubyeye.xmemcached.MemcachedOptimiezer;
+import net.rubyeye.xmemcached.MemcachedOptimizer;
 import net.rubyeye.xmemcached.MemcachedSessionLocator;
 import net.rubyeye.xmemcached.buffer.BufferAllocator;
 import net.rubyeye.xmemcached.command.Command;
@@ -54,7 +54,7 @@ public class MemcachedConnector extends SocketChannelController {
 	private final BlockingQueue<ReconnectRequest> waitingQueue = new LinkedBlockingQueue<ReconnectRequest>();
 	private BufferAllocator bufferAllocator;
 	private SessionMonitor sessionMonitor;
-	private MemcachedOptimiezer optimiezer;
+	private MemcachedOptimizer optimiezer;
 
 	class SessionMonitor extends Thread {
 
@@ -111,12 +111,12 @@ public class MemcachedConnector extends SocketChannelController {
 	}
 
 	public void setOptimiezeGet(boolean optimiezeGet) {
-		((OptimiezerMBean) this.optimiezer).setOptimiezeGet(optimiezeGet);
+		((OptimizerMBean) this.optimiezer).setOptimizeGet(optimiezeGet);
 	}
 
 	public void setOptimizeMergeBuffer(boolean optimizeMergeBuffer) {
-		((OptimiezerMBean) this.optimiezer)
-				.setOptimiezeMergeBuffer(optimizeMergeBuffer);
+		((OptimizerMBean) this.optimiezer)
+				.setOptimizeMergeBuffer(optimizeMergeBuffer);
 	}
 
 	protected MemcachedSessionLocator sessionLocator;
@@ -407,7 +407,7 @@ public class MemcachedConnector extends SocketChannelController {
 		this.sessionLocator.updateSessions(this.sessionMap.values());
 		this.sessionMonitor = new SessionMonitor();
 		this.bufferAllocator = allocator;
-		this.optimiezer = new Optimiezer();
+		this.optimiezer = new Optimizer();
 		this.optimiezer.setBufferAllocator(this.bufferAllocator);
 	}
 
@@ -419,7 +419,7 @@ public class MemcachedConnector extends SocketChannelController {
 	}
 
 	public void setMergeFactor(int mergeFactor) {
-		((OptimiezerMBean) this.optimiezer).setMergeFactor(mergeFactor);
+		((OptimizerMBean) this.optimiezer).setMergeFactor(mergeFactor);
 	}
 
 	protected Session buildSession(SocketChannel sc, SelectionKey selectionKey) {

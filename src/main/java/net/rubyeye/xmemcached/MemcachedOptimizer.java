@@ -16,9 +16,9 @@ import net.rubyeye.xmemcached.command.Command;
  * 
  * @author dennis
  */
-public interface MemcachedOptimiezer {
+public interface MemcachedOptimizer {
 	@SuppressWarnings("unchecked")
-	Command optimieze(final Command currentCommand, final Queue writeQueue,
+	Command optimize(final Command currentCommand, final Queue writeQueue,
 			final BlockingQueue<Command> executingCmds, int sendBufferSize);
 
 	public void setBufferAllocator(BufferAllocator bufferAllocator);
