@@ -1004,4 +1004,26 @@ public interface MemcachedClient {
 	 */
 	public void setLoggingLevelVerbosityWithNoReply(InetSocketAddress address,
 			int level) throws InterruptedException, MemcachedException;
+
+	/**
+	 * Add a memcached client listener
+	 * 
+	 * @param listener
+	 */
+	public void addStateListener(
+			MemcachedClientStateListener listener);
+
+	/**
+	 * Remove a memcached client listener
+	 * 
+	 * @param listener
+	 */
+	public void removeStateListener(MemcachedClientStateListener listener);
+
+	/**
+	 * Get all current state listeners
+	 * 
+	 * @return
+	 */
+	public Collection<MemcachedClientStateListener> getStateListeners();
 }

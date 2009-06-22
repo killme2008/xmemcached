@@ -1,6 +1,7 @@
 package net.rubyeye.xmemcached;
 
 import java.io.IOException;
+import java.util.List;
 
 import net.rubyeye.xmemcached.buffer.BufferAllocator;
 import net.rubyeye.xmemcached.transcoders.Transcoder;
@@ -80,6 +81,28 @@ public interface MemcachedClientBuilder {
 	 * @return
 	 */
 	public CommandFactory getCommandFactory();
+
+	/**
+	 * Add a state listener
+	 * 
+	 * @param stateListener
+	 */
+	public void addStateListener(MemcachedClientStateListener stateListener);
+
+	/**
+	 * Remove a state listener
+	 * 
+	 * @param stateListener
+	 */
+	public void removeStateListener(MemcachedClientStateListener stateListener);
+
+	/**
+	 * Set state listeners,replace current list
+	 * 
+	 * @param stateListeners
+	 */
+	public void setStateListeners(
+			List<MemcachedClientStateListener> stateListeners);
 
 	/**
 	 * set xmemcached's command factory.Default is TextCommandFactory,which

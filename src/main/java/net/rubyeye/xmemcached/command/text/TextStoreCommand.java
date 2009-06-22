@@ -36,7 +36,7 @@ public class TextStoreCommand extends StoreCommand {
 				countDownLatch();
 				return true;
 			} else
-				decodeError(line);
+				return decodeError(line);
 		}
 		return false;
 	}

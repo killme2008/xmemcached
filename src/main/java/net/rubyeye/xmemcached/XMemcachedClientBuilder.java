@@ -29,6 +29,26 @@ public class XMemcachedClientBuilder implements MemcachedClientBuilder {
 
 	private int[] weights;
 
+	private List<MemcachedClientStateListener> stateListeners = new ArrayList<MemcachedClientStateListener>();
+
+	@Override
+	public void addStateListener(MemcachedClientStateListener stateListener) {
+		this.stateListeners.add(stateListener);
+	}
+
+	@Override
+	public void removeStateListener(MemcachedClientStateListener stateListener) {
+		this.stateListeners.remove(stateListener);
+	}
+
+	@Override
+	public void setStateListeners(
+			List<MemcachedClientStateListener> stateListeners) {
+		if (stateListeners == null)
+			throw new IllegalArgumentException("Null state listeners");
+		this.stateListeners = stateListeners;
+	}
+
 	private CommandFactory commandFactory = new TextCommandFactory();
 
 	public final CommandFactory getCommandFactory() {
@@ -129,7 +149,8 @@ public class XMemcachedClientBuilder implements MemcachedClientBuilder {
 		if (this.weights == null)
 			return new XMemcachedClient(this.sessionLocator,
 					this.bufferAllocator, this.configuration,
-					this.commandFactory, this.transcoder, this.addressList);
+					this.commandFactory, this.transcoder, this.addressList,
+					this.stateListeners);
 		else {
 			if (this.addressList == null)
 				throw new IllegalArgumentException("Null Address List");
@@ -139,7 +160,7 @@ public class XMemcachedClientBuilder implements MemcachedClientBuilder {
 			return new XMemcachedClient(this.sessionLocator,
 					this.bufferAllocator, this.configuration,
 					this.commandFactory, this.transcoder, this.addressList,
-					weights);
+					weights, this.stateListeners);
 		}
 	}
 

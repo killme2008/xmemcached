@@ -22,6 +22,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -37,6 +38,7 @@ import net.rubyeye.xmemcached.command.StatsCommand;
 import net.rubyeye.xmemcached.command.VersionCommand;
 import net.rubyeye.xmemcached.exception.MemcachedException;
 import net.rubyeye.xmemcached.impl.ArrayMemcachedSessionLocator;
+import net.rubyeye.xmemcached.impl.MemcachedClientStateListenerAdapter;
 import net.rubyeye.xmemcached.impl.MemcachedConnector;
 import net.rubyeye.xmemcached.impl.MemcachedHandler;
 import net.rubyeye.xmemcached.impl.MemcachedTCPSession;
@@ -73,6 +75,8 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 	private CommandFactory commandFactory;
 	private long opTimeout = DEFAULT_OP_TIMEOUT;
 	private long connectTimeout = DEFAULT_CONNECT_TIMEOUT; // 连接超时
+
+	private CopyOnWriteArrayList<MemcachedClientStateListenerAdapter> stateListenerAdapters = new CopyOnWriteArrayList<MemcachedClientStateListenerAdapter>();
 
 	/*
 	 * (non-Javadoc)
@@ -635,6 +639,41 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 		super();
 		optimiezeSetReadThreadCount(conf, addressList);
 		buildConnector(locator, allocator, conf, commandFactory, transcoder);
+		if (addressList != null) {
+			for (InetSocketAddress inetSocketAddress : addressList) {
+				connect(inetSocketAddress, 1);
+			}
+		}
+		start0();
+	}
+
+	/**
+	 * XMemcachedClient constructor.Every server's weight is one by default.
+	 * 
+	 * @param locator
+	 * @param allocator
+	 * @param conf
+	 * @param commandFactory
+	 * @param transcoder
+	 * @param addressList
+	 * @param stateListeners
+	 * @throws IOException
+	 */
+	@SuppressWarnings("unchecked")
+	public XMemcachedClient(MemcachedSessionLocator locator,
+			BufferAllocator allocator, Configuration conf,
+			CommandFactory commandFactory, Transcoder transcoder,
+			List<InetSocketAddress> addressList,
+			List<MemcachedClientStateListener> stateListeners)
+			throws IOException {
+		super();
+		optimiezeSetReadThreadCount(conf, addressList);
+		buildConnector(locator, allocator, conf, commandFactory, transcoder);
+		if (stateListeners != null) {
+			for (MemcachedClientStateListener stateListener : stateListeners) {
+				addStateListener(stateListener);
+			}
+		}
 		start0();
 		if (addressList != null) {
 			for (InetSocketAddress inetSocketAddress : addressList) {
@@ -662,6 +701,31 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 			CommandFactory commandFactory, Transcoder transcoder,
 			List<InetSocketAddress> addressList, int[] weights)
 			throws IOException {
+		this(locator, allocator, conf, commandFactory, transcoder, addressList,
+				weights, null);
+	}
+
+	/**
+	 * XMemcachedClient constructor.
+	 * 
+	 * @param locator
+	 * @param allocator
+	 * @param conf
+	 * @param commandFactory
+	 * @param transcoder
+	 * @param addressList
+	 * @param weights
+	 * @param stateListeners
+	 *            weight array for address list
+	 * @throws IOException
+	 */
+	@SuppressWarnings("unchecked")
+	public XMemcachedClient(MemcachedSessionLocator locator,
+			BufferAllocator allocator, Configuration conf,
+			CommandFactory commandFactory, Transcoder transcoder,
+			List<InetSocketAddress> addressList, int[] weights,
+			List<MemcachedClientStateListener> stateListeners)
+			throws IOException {
 		super();
 		if (weights == null && addressList != null)
 			throw new IllegalArgumentException("Null weights");
@@ -680,6 +744,11 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 					"weights.length is less than addressList.size()");
 		optimiezeSetReadThreadCount(conf, addressList);
 		buildConnector(locator, allocator, conf, commandFactory, transcoder);
+		if (stateListeners != null) {
+			for (MemcachedClientStateListener stateListener : stateListeners) {
+				addStateListener(stateListener);
+			}
+		}
 		start0();
 		if (addressList != null && weights != null) {
 			for (int i = 0; i < addressList.size(); i++) {
@@ -2107,4 +2176,31 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 		return Collections.unmodifiableSet(result);
 	}
 
+	@Override
+	public void addStateListener(MemcachedClientStateListener listener) {
+		MemcachedClientStateListenerAdapter adapter = new MemcachedClientStateListenerAdapter(
+				listener, this);
+		this.stateListenerAdapters.add(adapter);
+		this.connector.addStateListener(adapter);
+	}
+
+	@Override
+	public Collection<MemcachedClientStateListener> getStateListeners() {
+		final List<MemcachedClientStateListener> result = new ArrayList<MemcachedClientStateListener>(
+				this.stateListenerAdapters.size());
+		for (MemcachedClientStateListenerAdapter adapter : stateListenerAdapters) {
+			result.add(adapter.getMemcachedClientStateListener());
+		}
+		return result;
+	}
+
+	@Override
+	public void removeStateListener(MemcachedClientStateListener listener) {
+		for (MemcachedClientStateListenerAdapter adapter : stateListenerAdapters) {
+			if (adapter.getMemcachedClientStateListener().equals(listener)) {
+				this.stateListenerAdapters.remove(adapter);
+				this.connector.removeStateListener(adapter);
+			}
+		}
+	}
 }

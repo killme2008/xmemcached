@@ -29,7 +29,7 @@ public class TextVerbosityCommand extends VerbosityCommand {
 				countDownLatch();
 				return true;
 			} else
-				decodeError(line);
+				return decodeError(line);
 		}
 		return false;
 	}

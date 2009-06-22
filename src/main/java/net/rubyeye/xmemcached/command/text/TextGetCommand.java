@@ -90,7 +90,7 @@ public abstract class TextGetCommand extends Command {
 				} else {
 					String line = currentLine;
 					this.currentLine = null;
-					decodeError(line);
+					return decodeError(line);
 
 				}
 			} else

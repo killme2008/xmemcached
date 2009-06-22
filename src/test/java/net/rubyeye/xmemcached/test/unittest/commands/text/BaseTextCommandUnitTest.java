@@ -37,6 +37,10 @@ public class BaseTextCommandUnitTest extends TestCase {
 					+ invalidLine.replace("\r\n", ""), e.getMessage());
 		}
 	}
+	
+	public void testDecodeError(){
+		
+	}
 
 	protected void checkDecodeValidLine(Command command, String validLine) {
 		assertTrue(command.decode(null, ByteBuffer.wrap(validLine.getBytes())));

@@ -15,6 +15,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import net.rubyeye.xmemcached.MemcachedClient;
+import net.rubyeye.xmemcached.MemcachedClientStateListener;
 import net.rubyeye.xmemcached.command.Command;
 import net.rubyeye.xmemcached.command.CommandType;
 import net.rubyeye.xmemcached.command.OperationStatus;
@@ -83,11 +84,11 @@ public class MemcachedHandler extends HandlerAdapter {
 	 */
 	@Override
 	public void onSessionStarted(Session session) {
-		// 启用阻塞读写，因为memcached通常跑在局域网内，网络状况良好，采用阻塞读写效率更好
-		// session.setUseBlockingWrite(true);
-
-		// use blocking read in LAN
 		session.setUseBlockingRead(true);
+		for (MemcachedClientStateListener listener : this.client
+				.getStateListeners()) {
+			listener.onConnected(this.client, session.getRemoteSocketAddress());
+		}
 	}
 
 	/**
@@ -98,6 +99,11 @@ public class MemcachedHandler extends HandlerAdapter {
 		this.client.getConnector().removeSession((MemcachedTCPSession) session);
 		if (((MemcachedTCPSession) session).isAllowReconnect())
 			reconnect(session);
+		for (MemcachedClientStateListener listener : this.client
+				.getStateListeners()) {
+			listener.onDisconnected(this.client, session
+					.getRemoteSocketAddress());
+		}
 	}
 
 	/**

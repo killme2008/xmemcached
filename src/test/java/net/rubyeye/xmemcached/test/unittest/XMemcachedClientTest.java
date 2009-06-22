@@ -2,6 +2,7 @@ package net.rubyeye.xmemcached.test.unittest;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -17,8 +18,14 @@ import net.rubyeye.xmemcached.MemcachedClient;
 import net.rubyeye.xmemcached.MemcachedClientBuilder;
 import net.rubyeye.xmemcached.XMemcachedClient;
 import net.rubyeye.xmemcached.XMemcachedClientBuilder;
+import net.rubyeye.xmemcached.buffer.BufferAllocator;
+import net.rubyeye.xmemcached.codec.MemcachedCodecFactory;
+import net.rubyeye.xmemcached.codec.MemcachedDecoder;
+import net.rubyeye.xmemcached.command.Command;
 import net.rubyeye.xmemcached.command.CommandType;
 import net.rubyeye.xmemcached.exception.MemcachedException;
+import net.rubyeye.xmemcached.exception.UnknownCommandException;
+import net.rubyeye.xmemcached.impl.MemcachedTCPSession;
 import net.rubyeye.xmemcached.transcoders.StringTranscoder;
 import net.rubyeye.xmemcached.utils.AddrUtil;
 
@@ -565,6 +572,34 @@ public abstract class XMemcachedClientTest extends TestCase {
 					.parseInt(newStats.get(address).get("cmd_get"));
 			System.out.println("gets:" + (newGets - oldGets));
 		}
+	}
+
+	public void testErrorCommand() throws Exception {
+		Command nonexisCmd = new Command() {
+			@Override
+			public boolean decode(MemcachedTCPSession session, ByteBuffer buffer) {
+				return decodeError(MemcachedDecoder.nextLine(session, buffer));
+			}
+
+			@Override
+			public void encode(BufferAllocator bufferAllocator) {
+				this.ioBuffer = bufferAllocator.wrap(ByteBuffer.wrap("test\r\n"
+						.getBytes()));
+			}
+
+		};
+		nonexisCmd.setKey("test");
+		nonexisCmd.setLatch(new CountDownLatch(1));
+		this.memcachedClient.getConnector().send(nonexisCmd);
+		nonexisCmd.getLatch().await();
+
+		assertNotNull(nonexisCmd.getException());
+		assertEquals("Nonexist command", nonexisCmd.getException().getMessage());
+		assertTrue(nonexisCmd.getException() instanceof UnknownCommandException);
+	    
+		
+		memcachedClient.set("name", 0, "dennis");
+		assertEquals("dennis", memcachedClient.get("name"));
 	}
 
 	@Override

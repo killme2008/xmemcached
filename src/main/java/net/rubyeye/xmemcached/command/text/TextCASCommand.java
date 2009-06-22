@@ -31,7 +31,7 @@ public class TextCASCommand extends TextStoreCommand {
 				countDownLatch();
 				return true;
 			} else
-				decodeError(line);
+				return decodeError(line);
 		}
 		return false;
 	}

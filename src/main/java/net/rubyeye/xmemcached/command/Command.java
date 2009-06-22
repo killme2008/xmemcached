@@ -20,7 +20,10 @@ import com.google.code.yanf4j.nio.WriteMessage;
 
 import net.rubyeye.xmemcached.buffer.BufferAllocator;
 import net.rubyeye.xmemcached.buffer.IoBuffer;
+import net.rubyeye.xmemcached.exception.MemcachedClientException;
 import net.rubyeye.xmemcached.exception.MemcachedDecodeException;
+import net.rubyeye.xmemcached.exception.MemcachedServerException;
+import net.rubyeye.xmemcached.exception.UnknownCommandException;
 import net.rubyeye.xmemcached.impl.MemcachedTCPSession;
 import net.rubyeye.xmemcached.transcoders.Transcoder;
 
@@ -232,9 +235,28 @@ public abstract class Command implements WriteMessage {
 				"decode error,session will be closed");
 	}
 
-	protected final void decodeError(String line) {
-		throw new MemcachedDecodeException(
-				"decode error,session will be closed,line=" + line);
+	protected final boolean decodeError(String line) {
+		if (line.equals("ERROR")) {
+			setException(new UnknownCommandException("Nonexist command"));
+			this.countDownLatch();
+			return true;
+		} else if (line.startsWith("CLIENT_ERROR")) {
+			setException(new MemcachedClientException(getErrorMsg(line,
+					"Unknown Client Error")));
+			return true;
+		} else if (line.startsWith("SERVER_ERROR")) {
+			setException(new MemcachedServerException(getErrorMsg(line,
+					"Unknown Server Error")));
+			return true;
+		} else
+			throw new MemcachedDecodeException(
+					"Decode error,session will be closed,line=" + line);
+	}
+
+	private String getErrorMsg(String line, String defaultMsg) {
+		int index = line.indexOf(" ");
+		String errorMsg = index > 0 ? line.substring(index) : defaultMsg;
+		return errorMsg;
 	}
 
 	public final boolean isNoreply() {
