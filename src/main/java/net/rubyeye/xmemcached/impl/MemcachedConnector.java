@@ -17,7 +17,6 @@ import com.google.code.yanf4j.nio.WriteMessage;
 import com.google.code.yanf4j.nio.impl.SessionConfig;
 import com.google.code.yanf4j.nio.impl.SocketChannelController;
 import com.google.code.yanf4j.nio.util.EventType;
-import com.google.code.yanf4j.util.Queue;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -25,6 +24,7 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Queue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
@@ -419,7 +419,7 @@ public class MemcachedConnector extends SocketChannelController {
 	 * use dequeue
 	 */
 	protected Queue<WriteMessage> buildQueue() {
-		return new SimpleDeque<WriteMessage>(500);
+		return new SimpleDeque<WriteMessage>(10000);
 	}
 
 	public void setMergeFactor(int mergeFactor) {

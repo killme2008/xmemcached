@@ -33,7 +33,7 @@ public class MemcachedDecoderUnitTest extends TestCase {
 	public MemcachedTCPSession buildSession() {
 		SessionConfig sessionConfig = new SessionConfig(null, null,
 				new HandlerAdapter(), null, new ByteBufferCodecFactory(), null,
-				null, true);
+				null, null, true);
 		return new MemcachedTCPSession(sessionConfig, 16 * 1024, null, 0, 1);
 	}
 }

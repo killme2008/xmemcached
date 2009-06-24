@@ -639,12 +639,12 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 		super();
 		optimiezeSetReadThreadCount(conf, addressList);
 		buildConnector(locator, allocator, conf, commandFactory, transcoder);
+		start0();
 		if (addressList != null) {
 			for (InetSocketAddress inetSocketAddress : addressList) {
 				connect(inetSocketAddress, 1);
 			}
 		}
-		start0();
 	}
 
 	/**

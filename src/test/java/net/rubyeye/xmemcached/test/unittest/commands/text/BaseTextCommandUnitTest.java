@@ -11,7 +11,7 @@ import net.rubyeye.xmemcached.exception.MemcachedDecodeException;
 import junit.framework.TestCase;
 
 public class BaseTextCommandUnitTest extends TestCase {
-	static final String DECODE_ERROR_SESSION_WILL_BE_CLOSED = "decode error,session will be closed";
+	static final String DECODE_ERROR_SESSION_WILL_BE_CLOSED = "Decode error,session will be closed";
 	protected CommandFactory commandFactory;
 	protected BufferAllocator bufferAllocator;
 

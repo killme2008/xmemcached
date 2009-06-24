@@ -3,7 +3,6 @@ package net.rubyeye.xmemcached.test.unittest;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteOrder;
-import java.nio.channels.FileChannel;
 import java.nio.channels.Selector;
 
 import com.google.code.yanf4j.nio.Session;
@@ -19,17 +18,11 @@ public class MockSession implements Session {
 		this.port = port;
 	}
 
-
-
-
 	@Override
 	public void clearAttributes() {
 		// TODO Auto-generated method stub
 
 	}
-
-
-
 
 	@Override
 	public Object getAttribute(String key) {
@@ -37,26 +30,17 @@ public class MockSession implements Session {
 		return null;
 	}
 
-
-
-
 	@Override
 	public void removeAttribute(String key) {
 		// TODO Auto-generated method stub
 
 	}
 
-
-
-
 	@Override
 	public void setAttribute(String key, Object value) {
 		// TODO Auto-generated method stub
 
 	}
-
-
-
 
 	@Override
 	public void close() {
@@ -128,12 +112,6 @@ public class MockSession implements Session {
 	}
 
 	@Override
-	public boolean send(Object msg, long timeout) throws InterruptedException {
-
-		return false;
-	}
-
-	@Override
 	public boolean send(Object packet) {
 
 		return false;
@@ -176,28 +154,15 @@ public class MockSession implements Session {
 	}
 
 	@Override
-	public long transferFrom(long position, long count, FileChannel source)
-			throws IOException {
-
-		return 0;
-	}
-
-	@Override
-	public long transferTo(long position, long count, FileChannel target)
-			throws IOException {
-
-		return 0;
-	}
-
-
-
-
-	@Override
 	public long getScheduleWritenBytes() {
-		// TODO Auto-generated method stub
 		return 0;
 	}
-	
-	
+
+	public void updateTimeStamp() {
+	}
+
+	public long getLastOperationTimeStamp() {
+		return 0;
+	}
 
 }

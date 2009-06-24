@@ -5,7 +5,7 @@
 
 package net.rubyeye.xmemcached;
 
-import com.google.code.yanf4j.util.Queue;
+import java.util.Queue;
 import java.util.concurrent.BlockingQueue;
 
 import net.rubyeye.xmemcached.buffer.BufferAllocator;
