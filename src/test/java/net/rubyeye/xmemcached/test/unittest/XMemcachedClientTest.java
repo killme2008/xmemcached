@@ -594,7 +594,7 @@ public abstract class XMemcachedClientTest extends TestCase {
 		nonexisCmd.getLatch().await();
 
 		assertNotNull(nonexisCmd.getException());
-		assertEquals("Nonexist command", nonexisCmd.getException().getMessage());
+		assertEquals("Nonexist command,check your memcached version please.", nonexisCmd.getException().getMessage());
 		assertTrue(nonexisCmd.getException() instanceof UnknownCommandException);
 	    
 		

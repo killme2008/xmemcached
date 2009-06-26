@@ -165,4 +165,8 @@ public class MockSession implements Session {
 		return 0;
 	}
 
+	public final boolean isLoopbackConnection() {
+		return false;
+	}
+
 }

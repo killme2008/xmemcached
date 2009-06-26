@@ -554,6 +554,8 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 		configuration.setSessionReadBufferSize(DEFAULT_SESSION_READ_BUFF_SIZE);
 		configuration.setTcpNoDelay(DEFAULT_TCP_NO_DELAY);
 		configuration.setReadThreadCount(DEFAULT_READ_THREAD_COUNT);
+		configuration.setSessionIdleTimeout(0);
+		configuration.setCheckSessionTimeoutInterval(0);
 		return configuration;
 	}
 

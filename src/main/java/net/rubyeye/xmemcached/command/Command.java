@@ -237,7 +237,7 @@ public abstract class Command implements WriteMessage {
 
 	protected final boolean decodeError(String line) {
 		if (line.equals("ERROR")) {
-			setException(new UnknownCommandException("Nonexist command"));
+			setException(new UnknownCommandException("Nonexist command,check your memcached version please."));
 			this.countDownLatch();
 			return true;
 		} else if (line.startsWith("CLIENT_ERROR")) {

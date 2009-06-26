@@ -27,8 +27,6 @@ import net.rubyeye.xmemcached.buffer.BufferAllocator;
 import net.rubyeye.xmemcached.command.Command;
 import net.rubyeye.xmemcached.command.OperationStatus;
 
-import net.rubyeye.xmemcached.utils.SimpleBlockingQueue;
-
 /**
  * Connected session for a memcached server
  * 
@@ -85,7 +83,10 @@ public class MemcachedTCPSession extends DefaultTCPSession {
 	}
 
 	public InetSocketAddress getRemoteSocketAddress() {
-		return (InetSocketAddress) remoteSocketAddress;
+		InetSocketAddress result = super.getRemoteSocketAddress();
+		if (result == null)
+			result = (InetSocketAddress) remoteSocketAddress;
+		return result;
 	}
 
 	@Override
