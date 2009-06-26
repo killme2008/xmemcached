@@ -81,11 +81,7 @@ public class MemcachedTCPSession extends DefaultTCPSession {
 				this.sendBufferSize = 8 * 1024;
 			}
 		}
-		if (readThreadCount > 0) {
-			this.executingCmds = new ArrayBlockingQueue<Command>(16 * 1024);
-		} else {
-			this.executingCmds = new SimpleBlockingQueue<Command>();
-		}
+		this.executingCmds = new ArrayBlockingQueue<Command>(16 * 1024);
 	}
 
 	public InetSocketAddress getRemoteSocketAddress() {

@@ -2162,7 +2162,8 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 			throws InterruptedException, TimeoutException {
 		if (!cmd.getLatch().await(timeout, TimeUnit.MILLISECONDS)) {
 			cmd.cancel();
-			throw new TimeoutException("Timed out waiting for operation");
+			throw new TimeoutException("Timed out(" + timeout
+					+ ") waiting for operation");
 		}
 	}
 
