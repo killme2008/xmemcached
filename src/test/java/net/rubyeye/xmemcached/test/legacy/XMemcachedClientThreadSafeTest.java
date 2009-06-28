@@ -10,7 +10,6 @@ import com.google.code.yanf4j.util.ResourcesUtils;
 
 import net.rubyeye.xmemcached.MemcachedClient;
 import net.rubyeye.xmemcached.MemcachedClientBuilder;
-import net.rubyeye.xmemcached.XMemcachedClient;
 import net.rubyeye.xmemcached.XMemcachedClientBuilder;
 import net.rubyeye.xmemcached.impl.KetamaMemcachedSessionLocator;
 import net.rubyeye.xmemcached.utils.AddrUtil;
@@ -51,7 +50,7 @@ class TestThread implements Runnable {
 			barrier.await();
 			for (int i = 0; i < NUM; i++) {
 				assert (this.xmemcachedClient.set("test_" + number + "_" + i,
-						0, i, 2000));
+						0, i, 5000));
 			}
 			for (int i = 0; i < NUM; i++) {
 				assert ((Integer) this.xmemcachedClient.get("test_" + number
@@ -91,7 +90,8 @@ class TestThread implements Runnable {
 			assert (xmemcachedClient.delete("map2_" + number));
 			barrier.await();
 		} catch (Exception e) {
-			e.printStackTrace();
+			if (!(e instanceof TimeoutException))
+				e.printStackTrace();
 			// System.err.println(this.number + " " + e.getMessage());
 		}
 	}
@@ -101,9 +101,9 @@ public class XMemcachedClientThreadSafeTest {
 	public static void main(String args[]) throws Exception {
 		String servers = ResourcesUtils.getResourceAsProperties(
 				"test.properties").getProperty("test.memcached.servers");
-		int num =1000;
+		int num = 1000;
 		CyclicBarrier barrier = new CyclicBarrier(num + 1);
-		MemcachedClientBuilder builder=new XMemcachedClientBuilder(AddrUtil
+		MemcachedClientBuilder builder = new XMemcachedClientBuilder(AddrUtil
 				.getAddresses(servers));
 		builder.setSessionLocator(new KetamaMemcachedSessionLocator());
 		MemcachedClient client = builder.build();

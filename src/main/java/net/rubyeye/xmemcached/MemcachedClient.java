@@ -32,21 +32,21 @@ public interface MemcachedClient {
 	 */
 	public static final int DEFAULT_CONNECT_TIMEOUT = 60000;
 	/**
-	 * Default socket's send buffer size,16k
+	 * Default socket's send buffer size,8k
 	 */
-	public static final int DEFAULT_TCP_SEND_BUFF_SIZE = 16 * 1024;
+	public static final int DEFAULT_TCP_SEND_BUFF_SIZE = 8 * 1024;
 	/**
-	 * Enable Nagle algorithm by default
+	 * Disable Nagle algorithm by default
 	 */
-	public static final boolean DEFAULT_TCP_NO_DELAY = false;
+	public static final boolean DEFAULT_TCP_NO_DELAY = true;
 	/**
-	 * Default session read buffer size,32K
+	 * Default session read buffer size,16k
 	 */
-	public static final int DEFAULT_SESSION_READ_BUFF_SIZE = 32 * 1024;
+	public static final int DEFAULT_SESSION_READ_BUFF_SIZE = 16 * 1024;
 	/**
-	 * Default socket's receive buffer size,16k
+	 * Default socket's receive buffer size,8k
 	 */
-	public static final int DEFAULT_TCP_RECV_BUFF_SIZE = 16 * 1024;
+	public static final int DEFAULT_TCP_RECV_BUFF_SIZE = 8 * 1024;
 	/**
 	 * Default operation timeout,if the operation is not returned in 1
 	 * second,throw TimeoutException
@@ -1010,8 +1010,7 @@ public interface MemcachedClient {
 	 * 
 	 * @param listener
 	 */
-	public void addStateListener(
-			MemcachedClientStateListener listener);
+	public void addStateListener(MemcachedClientStateListener listener);
 
 	/**
 	 * Remove a memcached client listener
