@@ -23,10 +23,11 @@ public class TextDeleteCommandUnitTest extends BaseTextCommandUnitTest {
 				"test".getBytes(), 10,false);
 		checkDecodeNullAndNotLineByteBuffer(command);
 		checkDecodeInvalidLine(command, "STORED\r\n");
-		checkDecodeInvalidLine(command, "NOT_STORED\r\n");
+		checkDecodeInvalidLine(command, "VALUE test 4 5 1\r\n");
 		checkDecodeInvalidLine(command, "END\r\n");
 		checkDecodeValidLine(command, "NOT_FOUND\r\n");
 		assertFalse((Boolean) command.getResult());
+		command.setResult(null);
 		checkDecodeValidLine(command, "DELETED\r\n");
 		assertTrue((Boolean) command.getResult());
 	}

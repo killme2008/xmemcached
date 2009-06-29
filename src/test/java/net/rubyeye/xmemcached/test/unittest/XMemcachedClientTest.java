@@ -19,7 +19,6 @@ import net.rubyeye.xmemcached.MemcachedClientBuilder;
 import net.rubyeye.xmemcached.XMemcachedClient;
 import net.rubyeye.xmemcached.XMemcachedClientBuilder;
 import net.rubyeye.xmemcached.buffer.BufferAllocator;
-import net.rubyeye.xmemcached.codec.MemcachedDecoder;
 import net.rubyeye.xmemcached.command.Command;
 import net.rubyeye.xmemcached.command.CommandType;
 import net.rubyeye.xmemcached.exception.MemcachedException;
@@ -27,6 +26,7 @@ import net.rubyeye.xmemcached.exception.UnknownCommandException;
 import net.rubyeye.xmemcached.impl.MemcachedTCPSession;
 import net.rubyeye.xmemcached.transcoders.StringTranscoder;
 import net.rubyeye.xmemcached.utils.AddrUtil;
+import net.rubyeye.xmemcached.utils.ByteUtils;
 
 import com.google.code.yanf4j.util.ResourcesUtils;
 
@@ -554,10 +554,10 @@ public abstract class XMemcachedClientTest extends TestCase {
 		Map<InetSocketAddress, Map<String, String>> oldStats = memcachedClient
 				.getStats();
 
-		for (int i = 0; i < 1000; i++) {
+		for (int i = 0; i < 100; i++) {
 			memcachedClient.set(String.valueOf(i), 0, i);
 		}
-		for (int i = 0; i < 1000; i++) {
+		for (int i = 0; i < 100; i++) {
 			assertEquals(i, memcachedClient.get(String.valueOf(i)));
 		}
 
@@ -583,7 +583,7 @@ public abstract class XMemcachedClientTest extends TestCase {
 		Command nonexisCmd = new Command() {
 			@Override
 			public boolean decode(MemcachedTCPSession session, ByteBuffer buffer) {
-				return decodeError(MemcachedDecoder.nextLine(session, buffer));
+				return decodeError(ByteUtils.nextLine(buffer));
 			}
 
 			@Override

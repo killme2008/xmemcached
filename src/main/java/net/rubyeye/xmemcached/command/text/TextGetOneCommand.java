@@ -24,7 +24,6 @@ public class TextGetOneCommand extends TextGetCommand {
 				else
 					this.countDownLatch();
 			} else {
-
 				CachedData data = this.returnValues.get(this.getKey());
 				setResult(data);
 				this.countDownLatch();

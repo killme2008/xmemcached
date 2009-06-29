@@ -33,7 +33,7 @@ import net.rubyeye.xmemcached.utils.ByteUtils;
  */
 public class Optimizer implements OptimizerMBean, MemcachedOptimizer {
 
-	public static final int DEFAULT_MERGE_FACTOR = 150;
+	public static final int DEFAULT_MERGE_FACTOR = 50;
 	private int mergeFactor = DEFAULT_MERGE_FACTOR; // default merge factor;
 	private boolean optimiezeGet = true;
 	private boolean optimiezeMergeBuffer = true;

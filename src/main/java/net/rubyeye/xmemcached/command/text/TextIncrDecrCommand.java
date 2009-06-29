@@ -4,7 +4,6 @@ import java.nio.ByteBuffer;
 import java.util.concurrent.CountDownLatch;
 
 import net.rubyeye.xmemcached.buffer.BufferAllocator;
-import net.rubyeye.xmemcached.codec.MemcachedDecoder;
 import net.rubyeye.xmemcached.command.CommandType;
 import net.rubyeye.xmemcached.command.IncrDecrCommand;
 import net.rubyeye.xmemcached.exception.MemcachedException;
@@ -27,7 +26,7 @@ public class TextIncrDecrCommand extends IncrDecrCommand {
 
 	@Override
 	public final boolean decode(MemcachedTCPSession session, ByteBuffer buffer) {
-		String line = MemcachedDecoder.nextLine(session, buffer);
+		String line = ByteUtils.nextLine(buffer);
 		if (line != null) {
 			if (line.equals("NOT_FOUND")) {
 				setException(new MemcachedException(

@@ -96,15 +96,17 @@ public class TextStoreCommandUnitTest extends BaseTextCommandUnitTest {
 		Command command = this.commandFactory.createCASCommand(key, key
 				.getBytes(), exp, value, cas, false, transcoder);
 		checkDecodeNullAndNotLineByteBuffer(command);
-		checkDecodeInvalidLine(command, "NOT_STROED\r\n");
-		checkDecodeInvalidLine(command, "END\r\n");
+		checkDecodeInvalidLine(command, "VALUE test 4 0 5\r\n");
 		checkDecodeInvalidLine(command, "DELETED\r\n");
 		checkDecodeValidLine(command, "STORED\r\n");
 		assertTrue((Boolean) command.getResult());
+		command.setResult(null);
 		checkDecodeValidLine(command, "EXISTS\r\n");
 		assertFalse((Boolean) command.getResult());
+		command.setResult(null);
 		checkDecodeValidLine(command, "STORED\r\n");
 		assertTrue((Boolean) command.getResult());
+		command.setResult(null);
 		checkDecodeValidLine(command, "NOT_FOUND\r\n");
 		assertFalse((Boolean) command.getResult());
 	}
@@ -113,11 +115,11 @@ public class TextStoreCommandUnitTest extends BaseTextCommandUnitTest {
 		Command command = this.commandFactory.createSetCommand(key, key
 				.getBytes(), exp, value, false, transcoder);
 		checkDecodeNullAndNotLineByteBuffer(command);
-		checkDecodeInvalidLine(command, "NOT_FOUND\r\n");
 		checkDecodeInvalidLine(command, "EXISTS\r\n");
 		checkDecodeInvalidLine(command, "END\r\n");
 		checkDecodeValidLine(command, "STORED\r\n");
 		assertTrue((Boolean) command.getResult());
+		command.setResult(null);
 		checkDecodeValidLine(command, "NOT_STORED\r\n");
 		assertFalse((Boolean) command.getResult());
 	}

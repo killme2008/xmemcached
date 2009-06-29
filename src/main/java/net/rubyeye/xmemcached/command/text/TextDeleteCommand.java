@@ -4,7 +4,6 @@ import java.nio.ByteBuffer;
 import java.util.concurrent.CountDownLatch;
 
 import net.rubyeye.xmemcached.buffer.BufferAllocator;
-import net.rubyeye.xmemcached.codec.MemcachedDecoder;
 import net.rubyeye.xmemcached.command.DeleteCommand;
 import net.rubyeye.xmemcached.impl.MemcachedTCPSession;
 import net.rubyeye.xmemcached.monitor.Constants;
@@ -21,20 +20,30 @@ public class TextDeleteCommand extends DeleteCommand {
 
 	@Override
 	public final boolean decode(MemcachedTCPSession session, ByteBuffer buffer) {
-		String line = MemcachedDecoder.nextLine(session, buffer);
-		if (line != null) {
-			if (line.equals("DELETED")) {
+		if (buffer == null || !buffer.hasRemaining())
+			return false;
+		if (result == null) {
+			byte first = buffer.get(buffer.position());
+			if (first == 'D') {
 				setResult(Boolean.TRUE);
 				countDownLatch();
-				return true;
-			} else if (line.equals("NOT_FOUND")) {
+				// DELETED\r\n
+				return ByteUtils.stepBuffer(buffer, 9);
+			} else if (first == 'N') {
 				setResult(Boolean.FALSE);
 				countDownLatch();
-				return true;
+				// NOT_FOUND\r\n
+				return ByteUtils.stepBuffer(buffer, 11);
 			} else
-				return decodeError(line);
+				return decodeError(session, buffer);
+		} else {
+			Boolean result = (Boolean) this.result;
+			if (result) {
+				return ByteUtils.stepBuffer(buffer, 9);
+			} else {
+				return ByteUtils.stepBuffer(buffer, 11);
+			}
 		}
-		return false;
 	}
 
 	@Override

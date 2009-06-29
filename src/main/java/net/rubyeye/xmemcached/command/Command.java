@@ -16,6 +16,7 @@ import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
+import com.google.code.yanf4j.nio.Session;
 import com.google.code.yanf4j.nio.WriteMessage;
 
 import net.rubyeye.xmemcached.buffer.BufferAllocator;
@@ -26,6 +27,7 @@ import net.rubyeye.xmemcached.exception.MemcachedServerException;
 import net.rubyeye.xmemcached.exception.UnknownCommandException;
 import net.rubyeye.xmemcached.impl.MemcachedTCPSession;
 import net.rubyeye.xmemcached.transcoders.Transcoder;
+import net.rubyeye.xmemcached.utils.ByteUtils;
 
 /**
  * memcached命令类
@@ -237,7 +239,8 @@ public abstract class Command implements WriteMessage {
 
 	protected final boolean decodeError(String line) {
 		if (line.equals("ERROR")) {
-			setException(new UnknownCommandException("Nonexist command,check your memcached version please."));
+			setException(new UnknownCommandException(
+					"Nonexist command,check your memcached version please."));
 			this.countDownLatch();
 			return true;
 		} else if (line.startsWith("CLIENT_ERROR")) {
@@ -251,6 +254,14 @@ public abstract class Command implements WriteMessage {
 		} else
 			throw new MemcachedDecodeException(
 					"Decode error,session will be closed,line=" + line);
+	}
+
+	protected final boolean decodeError(Session session, ByteBuffer buffer) {
+		String line = ByteUtils.nextLine(buffer);
+		if (line == null)
+			return false;
+		else
+			return decodeError(line);
 	}
 
 	private String getErrorMsg(String line, String defaultMsg) {

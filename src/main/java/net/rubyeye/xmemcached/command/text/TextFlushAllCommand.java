@@ -4,7 +4,6 @@ import java.nio.ByteBuffer;
 import java.util.concurrent.CountDownLatch;
 
 import net.rubyeye.xmemcached.buffer.BufferAllocator;
-import net.rubyeye.xmemcached.codec.MemcachedDecoder;
 import net.rubyeye.xmemcached.command.FlushAllCommand;
 import net.rubyeye.xmemcached.impl.MemcachedTCPSession;
 import net.rubyeye.xmemcached.monitor.Constants;
@@ -19,16 +18,20 @@ public class TextFlushAllCommand extends FlushAllCommand {
 
 	@Override
 	public final boolean decode(MemcachedTCPSession session, ByteBuffer buffer) {
-		String line = MemcachedDecoder.nextLine(session, buffer);
-		if (line != null) {
-			if (line.equals("OK")) {
+		if (buffer == null || !buffer.hasRemaining())
+			return false;
+		if (result == null) {
+			byte first = buffer.get(buffer.position());
+			if (first == 'O') {
 				setResult(Boolean.TRUE);
 				countDownLatch();
-				return true;
+				// OK\r\n
+				return ByteUtils.stepBuffer(buffer, 4);
 			} else
-				return decodeError(line);
+				return decodeError(session, buffer);
+		} else {
+			return ByteUtils.stepBuffer(buffer, 4);
 		}
-		return false;
 	}
 
 	@Override

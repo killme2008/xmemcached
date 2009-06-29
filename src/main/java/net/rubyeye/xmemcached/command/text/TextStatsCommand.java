@@ -7,7 +7,6 @@ import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 
 import net.rubyeye.xmemcached.buffer.BufferAllocator;
-import net.rubyeye.xmemcached.codec.MemcachedDecoder;
 import net.rubyeye.xmemcached.command.StatsCommand;
 import net.rubyeye.xmemcached.impl.MemcachedTCPSession;
 import net.rubyeye.xmemcached.utils.ByteUtils;
@@ -24,7 +23,7 @@ public class TextStatsCommand extends StatsCommand {
 	@SuppressWarnings("unchecked")
 	public final boolean decode(MemcachedTCPSession session, ByteBuffer buffer) {
 		String line = null;
-		while ((line = MemcachedDecoder.nextLine(session, buffer)) != null) {
+		while ((line = ByteUtils.nextLine(buffer)) != null) {
 			if (line.equals("END")) { // 到消息结尾
 				return done(session);
 			} else if (line.startsWith("STAT")) {

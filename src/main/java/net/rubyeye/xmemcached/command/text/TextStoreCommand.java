@@ -4,7 +4,6 @@ import java.nio.ByteBuffer;
 import java.util.concurrent.CountDownLatch;
 
 import net.rubyeye.xmemcached.buffer.BufferAllocator;
-import net.rubyeye.xmemcached.codec.MemcachedDecoder;
 import net.rubyeye.xmemcached.command.CommandType;
 import net.rubyeye.xmemcached.command.StoreCommand;
 import net.rubyeye.xmemcached.impl.MemcachedTCPSession;
@@ -25,20 +24,30 @@ public class TextStoreCommand extends StoreCommand {
 
 	@Override
 	public boolean decode(MemcachedTCPSession session, ByteBuffer buffer) {
-		String line = MemcachedDecoder.nextLine(session, buffer);
-		if (line != null) {
-			if (line.equals("STORED")) {
+		if (buffer == null || !buffer.hasRemaining())
+			return false;
+		if (result == null) {
+			byte first = buffer.get(buffer.position());
+			if (first == 'S') {
 				setResult(Boolean.TRUE);
 				countDownLatch();
-				return true;
-			} else if (line.equals("NOT_STORED")) {
+				// STORED\r\n
+				return ByteUtils.stepBuffer(buffer, 8);
+			} else if (first == 'N') {
 				setResult(Boolean.FALSE);
 				countDownLatch();
-				return true;
+				// NOT_STORED\r\n
+				return ByteUtils.stepBuffer(buffer, 12);
 			} else
-				return decodeError(line);
+				return decodeError(session, buffer);
+		} else {
+			Boolean result = (Boolean) this.result;
+			if (result) {
+				return ByteUtils.stepBuffer(buffer, 8);
+			} else {
+				return ByteUtils.stepBuffer(buffer, 12);
+			}
 		}
-		return false;
 	}
 
 	@Override

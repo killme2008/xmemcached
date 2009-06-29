@@ -12,13 +12,16 @@
 package net.rubyeye.xmemcached.utils;
 
 import java.io.UnsupportedEncodingException;
+import java.nio.ByteBuffer;
 
 import net.rubyeye.xmemcached.buffer.IoBuffer;
+import net.rubyeye.xmemcached.codec.MemcachedDecoder;
 import net.rubyeye.xmemcached.monitor.Constants;
 
 public final class ByteUtils {
 
 	public static final String DEFAULT_CHARSET = "utf-8";
+	public static final ByteBuffer SPLIT = ByteBuffer.wrap(Constants.CRLF);
 
 	/**
 	 * 防止创建
@@ -147,5 +150,43 @@ public final class ByteUtils {
 			}
 		}
 		return newCapacity;
+	}
+
+	public static final boolean stepBuffer(ByteBuffer buffer, int remaining) {
+		if (buffer.remaining() >= remaining) {
+			buffer.position(buffer.position() + remaining);
+			return true;
+		} else
+			return false;
+	}
+
+	/**
+	 * 获取下一行
+	 * @param buffer
+	 */
+	public static final String nextLine(ByteBuffer buffer) {
+		/**
+		 * 测试表明采用 Shift-And算法匹配 >BM算法匹配效率 > 朴素匹配 > KMP匹配，
+		 * 如果你有更好的建议，请email给我(killme2008@gmail.com)
+		 */
+		int index = MemcachedDecoder.SPLIT_MATCHER.matchFirst(buffer);
+		if (index >= 0) {
+			int limit = buffer.limit();
+			buffer.limit(index);
+			byte[] bytes = new byte[buffer.remaining()];
+			buffer.get(bytes);
+			buffer.limit(limit);
+			buffer.position(index + ByteUtils.SPLIT.remaining());
+			try {
+				String line = new String(bytes, "utf-8");
+				return line;
+			} catch (UnsupportedEncodingException e) {
+				MemcachedDecoder.log.error(e, e);
+	
+			}
+	
+		}
+		return null;
+	
 	}
 }
