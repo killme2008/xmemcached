@@ -13,11 +13,8 @@ package net.rubyeye.xmemcached.command;
 
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
-import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CountDownLatch;
-
-import com.google.code.yanf4j.nio.Session;
-import com.google.code.yanf4j.nio.WriteMessage;
 
 import net.rubyeye.xmemcached.buffer.BufferAllocator;
 import net.rubyeye.xmemcached.buffer.IoBuffer;
@@ -28,6 +25,9 @@ import net.rubyeye.xmemcached.exception.UnknownCommandException;
 import net.rubyeye.xmemcached.impl.MemcachedTCPSession;
 import net.rubyeye.xmemcached.transcoders.Transcoder;
 import net.rubyeye.xmemcached.utils.ByteUtils;
+
+import com.google.code.yanf4j.nio.Session;
+import com.google.code.yanf4j.nio.WriteMessage;
 
 /**
  * memcached命令类
@@ -151,7 +151,7 @@ public abstract class Command implements WriteMessage {
 		this.ioBuffer = byteBufferWrapper;
 	}
 
-	public List<Command> getMergeCommands() {
+	public Map<Object, Command> getMergeCommands() {
 		return null;
 	}
 
@@ -183,6 +183,7 @@ public abstract class Command implements WriteMessage {
 		return this.ioBuffer;
 	}
 
+	@Override
 	public String toString() {
 		try {
 			return new String(this.ioBuffer.getByteBuffer().array(), "utf-8");

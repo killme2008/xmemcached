@@ -1,6 +1,6 @@
 package net.rubyeye.xmemcached.command.text;
 
-import java.util.List;
+import java.util.Collection;
 import java.util.concurrent.CountDownLatch;
 
 import net.rubyeye.xmemcached.command.Command;
@@ -30,11 +30,12 @@ public class TextGetOneCommand extends TextGetCommand {
 			}
 		} else {
 			// merge get
-			List<Command> mergeCommands = getMergeCommands();
+			Collection<Command> mergeCommands = getMergeCommands().values();
 			getIoBuffer().free();
 			for (Command nextCommand : mergeCommands) {
-				CachedData data = this.returnValues.get(nextCommand.getKey());
-				nextCommand.setResult(data);
+				// CachedData data =
+				// this.returnValues.get(nextCommand.getKey());
+				// nextCommand.setResult(data);
 				nextCommand.countDownLatch();
 			}
 		}

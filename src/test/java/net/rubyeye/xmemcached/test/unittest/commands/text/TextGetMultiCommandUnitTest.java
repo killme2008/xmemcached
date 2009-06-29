@@ -8,9 +8,10 @@ import java.util.concurrent.CountDownLatch;
 
 import net.rubyeye.xmemcached.command.Command;
 import net.rubyeye.xmemcached.command.CommandType;
+import net.rubyeye.xmemcached.command.text.TextGetCommand;
+import net.rubyeye.xmemcached.transcoders.CachedData;
 import net.rubyeye.xmemcached.transcoders.SerializingTranscoder;
 import net.rubyeye.xmemcached.transcoders.Transcoder;
-import net.rubyeye.xmemcached.transcoders.CachedData;
 
 @SuppressWarnings("unchecked")
 public class TextGetMultiCommandUnitTest extends BaseTextCommandUnitTest {
@@ -43,8 +44,9 @@ public class TextGetMultiCommandUnitTest extends BaseTextCommandUnitTest {
 	}
 
 	public void testGetManyDecode() {
-		Command command = this.commandFactory.createGetMultiCommand(keys,
-				new CountDownLatch(1), CommandType.GET_MANY, transcoder);
+		TextGetCommand command = (TextGetCommand) this.commandFactory
+				.createGetMultiCommand(keys, new CountDownLatch(1),
+						CommandType.GET_MANY, transcoder);
 		checkDecodeNullAndNotLineByteBuffer(command);
 		checkDecodeInvalidLine(command, "STORED\r\n");
 		checkDecodeInvalidLine(command, "NOT_FOUND\r\n");
@@ -54,6 +56,7 @@ public class TextGetMultiCommandUnitTest extends BaseTextCommandUnitTest {
 		checkDecodeValidLine(command, "END\r\n");
 		assertEquals(0, ((Map) command.getResult()).size());
 		// data not complelte
+		command.setParseStatus(TextGetCommand.ParseStatus.NULL);
 		assertFalse(command.decode(null, ByteBuffer
 				.wrap("VALUE test1 0 2\r\n10\r\nVALUE test2 0 4\r\n10"
 						.getBytes())));
@@ -62,12 +65,17 @@ public class TextGetMultiCommandUnitTest extends BaseTextCommandUnitTest {
 		checkDecodeValidLine(command, "END\r\n");
 
 		assertEquals(2, ((Map) command.getResult()).size());
-		assertEquals("10", transcoder.decode(((Map<String,CachedData>) command.getResult()).get("test1")));
-		assertEquals("1000",  transcoder.decode(((Map<String,CachedData>) command.getResult()).get("test2")));
+		assertEquals("10", transcoder.decode(((Map<String, CachedData>) command
+				.getResult()).get("test1")));
+		assertEquals("1000", transcoder
+				.decode(((Map<String, CachedData>) command.getResult())
+						.get("test2")));
 	}
+
 	public void testGetsManyDecode() {
-		Command command = this.commandFactory.createGetMultiCommand(keys,
-				new CountDownLatch(1), CommandType.GETS_MANY, transcoder);
+		TextGetCommand command = (TextGetCommand) this.commandFactory
+				.createGetMultiCommand(keys, new CountDownLatch(1),
+						CommandType.GETS_MANY, transcoder);
 		checkDecodeNullAndNotLineByteBuffer(command);
 		checkDecodeInvalidLine(command, "STORED\r\n");
 		checkDecodeInvalidLine(command, "NOT_FOUND\r\n");
@@ -76,6 +84,7 @@ public class TextGetMultiCommandUnitTest extends BaseTextCommandUnitTest {
 
 		checkDecodeValidLine(command, "END\r\n");
 		assertEquals(0, ((Map) command.getResult()).size());
+		command.setParseStatus(TextGetCommand.ParseStatus.NULL);
 		// data not complelte
 		assertFalse(command.decode(null, ByteBuffer
 				.wrap("VALUE test1 0 2 999\r\n10\r\nVALUE test2 0 4 1000\r\n10"
@@ -85,9 +94,14 @@ public class TextGetMultiCommandUnitTest extends BaseTextCommandUnitTest {
 		checkDecodeValidLine(command, "END\r\n");
 
 		assertEquals(2, ((Map) command.getResult()).size());
-		assertEquals((long)999,((Map<String,CachedData>) command.getResult()).get("test1").getCas());
-		assertEquals((long)1000,((Map<String,CachedData>) command.getResult()).get("test2").getCas());
-		assertEquals("10", transcoder.decode(((Map<String,CachedData>) command.getResult()).get("test1")));
-		assertEquals("1000",  transcoder.decode(((Map<String,CachedData>) command.getResult()).get("test2")));
+		assertEquals(999, ((Map<String, CachedData>) command.getResult()).get(
+				"test1").getCas());
+		assertEquals(1000, ((Map<String, CachedData>) command.getResult()).get(
+				"test2").getCas());
+		assertEquals("10", transcoder.decode(((Map<String, CachedData>) command
+				.getResult()).get("test1")));
+		assertEquals("1000", transcoder
+				.decode(((Map<String, CachedData>) command.getResult())
+						.get("test2")));
 	}
 }

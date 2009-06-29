@@ -31,7 +31,7 @@ public final class CachedData {
 		this.size += length;
 	}
 
-	public final void fillData(ByteBuffer buffer,int length) {
+	public final void fillData(ByteBuffer buffer, int length) {
 		buffer.get(this.data, this.size, length);
 		this.size += length;
 	}
@@ -72,6 +72,10 @@ public final class CachedData {
 		return cas;
 	}
 
+	public CachedData() {
+		super();
+	}
+
 	/**
 	 * Get a CachedData instance for the given flags and byte array.
 	 * 
@@ -79,14 +83,14 @@ public final class CachedData {
 	 *            the flags
 	 * @param d
 	 *            the data
-	 * @param dataLen
+	 * @param capacity
 	 *            the maximum allowable size.
 	 */
-	public CachedData(int f, byte[] d, int dataLen, long casId) {
+	public CachedData(int f, byte[] d, int capacity, long casId) {
 		super();
-		this.capacity = dataLen;
+		this.capacity = capacity;
 		this.size = d != null ? d.length : 0;
-		if (d != null && d.length > dataLen) {
+		if (d != null && d.length > capacity) {
 			throw new IllegalArgumentException(
 					"Cannot cache data larger than 1MB (you tried to cache a "
 							+ d.length + " byte object)");
@@ -126,5 +130,10 @@ public final class CachedData {
 	public String toString() {
 		return "{CachedData flags=" + flags + " data=" + Arrays.toString(data)
 				+ "}";
+	}
+
+	public int remainingCapacity() {
+		int remainingCapacity = getCapacity() - getSize();
+		return remainingCapacity;
 	}
 }

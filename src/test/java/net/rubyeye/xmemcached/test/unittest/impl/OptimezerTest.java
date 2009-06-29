@@ -4,8 +4,7 @@ import java.nio.ByteBuffer;
 import java.util.Queue;
 import java.util.concurrent.BlockingQueue;
 
-import com.google.code.yanf4j.util.LinkedTransferQueue;
-
+import junit.framework.TestCase;
 import net.rubyeye.xmemcached.CommandFactory;
 import net.rubyeye.xmemcached.TextCommandFactory;
 import net.rubyeye.xmemcached.buffer.SimpleBufferAllocator;
@@ -13,8 +12,8 @@ import net.rubyeye.xmemcached.command.Command;
 import net.rubyeye.xmemcached.command.CommandType;
 import net.rubyeye.xmemcached.impl.Optimizer;
 import net.rubyeye.xmemcached.utils.SimpleBlockingQueue;
-import net.rubyeye.xmemcached.utils.SimpleDeque;
-import junit.framework.TestCase;
+
+import com.google.code.yanf4j.util.LinkedTransferQueue;
 
 @SuppressWarnings("unchecked")
 public class OptimezerTest extends TestCase {
@@ -117,9 +116,9 @@ public class OptimezerTest extends TestCase {
 		Command optimiezeCommand = optimiezer.optimiezeGet(writeQueue,
 				executingCmds, currentCmd);
 
-		assertEquals(6, optimiezeCommand.getMergeCommands().size());
+		assertEquals(5, optimiezeCommand.getMergeCommands().size());
 		assertSame(CommandType.GET_ONE, optimiezeCommand.getCommandType());
-		assertEquals(6, optimiezeCommand.getMergeCount());
+		assertEquals(5, optimiezeCommand.getMergeCount());
 		assertEquals("get 0 0 1 2 3 4\r\n", new String(optimiezeCommand
 				.getIoBuffer().getByteBuffer().array()));
 		assertEquals(5, writeQueue.size()); // remain five commands
@@ -147,9 +146,8 @@ public class OptimezerTest extends TestCase {
 				writeQueue, executingCmds, 30);
 		assertNotSame(currentCmd, optimiezeCommand);
 		ByteBuffer mergeBuffer = optimiezeCommand.getIoBuffer().getByteBuffer();
-		assertEquals(0, writeQueue.size()); 
-		assertSame(CommandType.GET_ONE, optimiezeCommand
-				.getCommandType());
+		assertEquals(0, writeQueue.size());
+		assertSame(CommandType.GET_ONE, optimiezeCommand.getCommandType());
 		assertEquals("get 0\r\nget 1 2 3 4 5 6 7 8 9\r\n", new String(
 				mergeBuffer.array())); // current command at last
 	}
