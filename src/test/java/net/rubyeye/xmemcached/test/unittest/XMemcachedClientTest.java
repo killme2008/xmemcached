@@ -19,7 +19,6 @@ import net.rubyeye.xmemcached.MemcachedClientBuilder;
 import net.rubyeye.xmemcached.XMemcachedClient;
 import net.rubyeye.xmemcached.XMemcachedClientBuilder;
 import net.rubyeye.xmemcached.buffer.BufferAllocator;
-import net.rubyeye.xmemcached.codec.MemcachedCodecFactory;
 import net.rubyeye.xmemcached.codec.MemcachedDecoder;
 import net.rubyeye.xmemcached.command.Command;
 import net.rubyeye.xmemcached.command.CommandType;
@@ -38,6 +37,9 @@ public abstract class XMemcachedClientTest extends TestCase {
 	@Override
 	public void setUp() throws Exception {
 		createClients();
+		//windows上的memcached实现有问题，除非加上日志显示，否则可能不返回
+		this.memcachedClient.setLoggingLevelVerbosity(new InetSocketAddress(
+				"localhost", 12000), 3);
 	}
 
 	public void testCreateClientWithEmptyServers() throws Exception {
@@ -60,7 +62,7 @@ public abstract class XMemcachedClientTest extends TestCase {
 		MemcachedClientBuilder builder = createBuilder();
 		builder.getConfiguration().setStatisticsServer(true);
 		memcachedClient = builder.build();
-		memcachedClient.flushAll(5000);
+		memcachedClient.flushAllWithNoReply();
 	}
 
 	public abstract MemcachedClientBuilder createBuilder() throws Exception;
@@ -357,6 +359,9 @@ public abstract class XMemcachedClientTest extends TestCase {
 		memcachedClient.setLoggingLevelVerbosityWithNoReply(AddrUtil
 				.getAddresses(properties.getProperty("test.memcached.servers"))
 				.get(0), 3);
+		memcachedClient.setLoggingLevelVerbosityWithNoReply(AddrUtil
+				.getAddresses(properties.getProperty("test.memcached.servers"))
+				.get(0), 0);
 	}
 
 	public void testFlushAllWithNoReply() throws Exception {
@@ -591,13 +596,14 @@ public abstract class XMemcachedClientTest extends TestCase {
 		nonexisCmd.setKey("test");
 		nonexisCmd.setLatch(new CountDownLatch(1));
 		this.memcachedClient.getConnector().send(nonexisCmd);
+		// this.memcachedClient.flushAll();
 		nonexisCmd.getLatch().await();
 
 		assertNotNull(nonexisCmd.getException());
-		assertEquals("Nonexist command,check your memcached version please.", nonexisCmd.getException().getMessage());
+		assertEquals("Nonexist command,check your memcached version please.",
+				nonexisCmd.getException().getMessage());
 		assertTrue(nonexisCmd.getException() instanceof UnknownCommandException);
-	    
-		
+
 		memcachedClient.set("name", 0, "dennis");
 		assertEquals("dennis", memcachedClient.get("name"));
 	}

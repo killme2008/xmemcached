@@ -84,6 +84,8 @@ public class MemcachedHandler extends HandlerAdapter {
 	@Override
 	public void onSessionStarted(Session session) {
 		session.setUseBlockingRead(true);
+		if(session.isLoopbackConnection())
+			session.setUseBlockingWrite(true);
 		for (MemcachedClientStateListener listener : this.client
 				.getStateListeners()) {
 			listener.onConnected(this.client, session.getRemoteSocketAddress());

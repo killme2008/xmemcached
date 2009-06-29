@@ -24,7 +24,6 @@ import net.rubyeye.xmemcached.command.text.TextGetOneCommand;
 import net.rubyeye.xmemcached.monitor.Constants;
 import net.rubyeye.xmemcached.monitor.XMemcachedMbeanServer;
 import net.rubyeye.xmemcached.utils.ByteUtils;
-import net.rubyeye.xmemcached.utils.SimpleDeque;
 
 /**
  * Memcached command optimizer,merge single-get comands to multi-get
@@ -114,11 +113,8 @@ public class Optimizer implements OptimizerMBean, MemcachedOptimizer {
 			log.debug("Optimieze merge buffer:" + optimiezeCommand.toString());
 		if (optimiezeMergeBuffer
 				&& optimiezeCommand.getIoBuffer().getByteBuffer().remaining() < sendBufferSize) {
-			writeQueue.remove();
 			optimiezeCommand = mergeBuffer(optimiezeCommand, writeQueue,
 					executingCmds, sendBufferSize);
-			((SimpleDeque<Command>) writeQueue).addFirst(optimiezeCommand);// 加入队首
-
 		}
 		return optimiezeCommand;
 	}
@@ -137,10 +133,8 @@ public class Optimizer implements OptimizerMBean, MemcachedOptimizer {
 		if (optimiezeCommand.getCommandType() == CommandType.GET_ONE) {
 			// 优化get操作
 			if (optimiezeGet) {
-				writeQueue.remove();
 				optimiezeCommand = mergeGetCommands(optimiezeCommand,
 						writeQueue, executingCmds);
-				((SimpleDeque<Command>) writeQueue).addFirst(optimiezeCommand); // 加入队首
 			}
 		}
 		return optimiezeCommand;

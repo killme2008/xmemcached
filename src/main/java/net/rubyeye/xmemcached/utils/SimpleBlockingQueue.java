@@ -8,11 +8,12 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * 基于ArrayDeque实现的伪BlockingQueue，非线程安全
- *
+ * 
  * @author dennis
- *
+ * 
  * @param <T>
  */
+@Deprecated
 public class SimpleBlockingQueue<T> implements BlockingQueue<T> {
 
 	private ArrayDeque<T> list = new ArrayDeque<T>(500);

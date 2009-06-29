@@ -18,6 +18,7 @@ import com.google.code.yanf4j.util.SimpleQueue;
  * 
  * @author dennis zhuang
  */
+@Deprecated
 public class SimpleDeque<T> extends SimpleQueue<T> {
 
 	public SimpleDeque() {

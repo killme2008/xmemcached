@@ -47,7 +47,7 @@
 		<dependency>
 			<groupId>yanf4j</groupId>
 			<artifactId>yanf4j</artifactId>
-			<version>0.61-SNAPSHOT</version>
+			<version>0.7.0</version>
 		</dependency>
 	</dependencies>
 	<reporting>

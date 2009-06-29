@@ -4,6 +4,8 @@ import java.nio.ByteBuffer;
 import java.util.Queue;
 import java.util.concurrent.BlockingQueue;
 
+import com.google.code.yanf4j.util.LinkedTransferQueue;
+
 import net.rubyeye.xmemcached.CommandFactory;
 import net.rubyeye.xmemcached.TextCommandFactory;
 import net.rubyeye.xmemcached.buffer.SimpleBufferAllocator;
@@ -30,7 +32,7 @@ public class OptimezerTest extends TestCase {
 		optimiezer = new Optimizer();
 		this.commandFactory = new TextCommandFactory();
 		optimiezer.setBufferAllocator(new SimpleBufferAllocator());
-		writeQueue = new SimpleDeque();
+		writeQueue = new LinkedTransferQueue<Command>();
 		executingCmds = new SimpleBlockingQueue<Command>();
 		for (int i = 0; i < 10; i++) {
 			Command cmd = commandFactory.createGetCommand(String.valueOf(i),
@@ -38,7 +40,7 @@ public class OptimezerTest extends TestCase {
 			cmd.encode(new SimpleBufferAllocator());
 			writeQueue.add(cmd);
 		}
-		currentCmd = (Command) writeQueue.peek();
+		currentCmd = (Command) writeQueue.poll();
 		currentCmd.encode(new SimpleBufferAllocator());
 	}
 
@@ -49,8 +51,8 @@ public class OptimezerTest extends TestCase {
 
 		assertEquals(10, optimiezeCommand.getMergeCommands().size());
 		assertEquals(10, optimiezeCommand.getMergeCount());
-		assertEquals(1, writeQueue.size());
-		assertSame(optimiezeCommand, writeQueue.peek());
+		assertEquals(0, writeQueue.size());
+		assertNull(writeQueue.peek());
 		assertSame(CommandType.GET_ONE, optimiezeCommand.getCommandType());
 		assertEquals(10, optimiezeCommand.getMergeCount());
 		assertEquals("get 0 1 2 3 4 5 6 7 8 9\r\n", new String(optimiezeCommand
@@ -67,7 +69,7 @@ public class OptimezerTest extends TestCase {
 		assertEquals(5, optimiezeCommand.getMergeCount());
 		assertEquals("get 0 1 2 3 4\r\n", new String(optimiezeCommand
 				.getIoBuffer().getByteBuffer().array()));
-		assertEquals(6, writeQueue.size()); // remain five commands
+		assertEquals(5, writeQueue.size()); // remain five commands
 	}
 
 	public void testMergeFactorEqualsZero() {
@@ -82,7 +84,7 @@ public class OptimezerTest extends TestCase {
 		assertEquals(-1, optimiezeCommand.getMergeCount());
 		assertEquals("get 0\r\n", new String(optimiezeCommand.getIoBuffer()
 				.getByteBuffer().array()));
-		assertEquals(10, writeQueue.size());
+		assertEquals(9, writeQueue.size());
 		assertSame(currentCmd, optimiezeCommand);
 	}
 
@@ -97,7 +99,7 @@ public class OptimezerTest extends TestCase {
 		assertEquals(-1, optimiezeCommand.getMergeCount());
 		assertEquals("get 0\r\n", new String(optimiezeCommand.getIoBuffer()
 				.getByteBuffer().array()));
-		assertEquals(10, writeQueue.size());
+		assertEquals(9, writeQueue.size());
 		assertSame(currentCmd, optimiezeCommand);
 	}
 
@@ -110,23 +112,22 @@ public class OptimezerTest extends TestCase {
 		// send five delete operation
 		for (int i = 5; i < 10; i++)
 			writeQueue.add(commandFactory.createDeleteCommand(
-					String.valueOf(i), String.valueOf(i).getBytes(), 0,false));
+					String.valueOf(i), String.valueOf(i).getBytes(), 0, false));
 		// merge five get commands at most
 		Command optimiezeCommand = optimiezer.optimiezeGet(writeQueue,
 				executingCmds, currentCmd);
 
-		assertEquals(5, optimiezeCommand.getMergeCommands().size());
+		assertEquals(6, optimiezeCommand.getMergeCommands().size());
 		assertSame(CommandType.GET_ONE, optimiezeCommand.getCommandType());
-		assertEquals(5, optimiezeCommand.getMergeCount());
-		assertEquals("get 0 1 2 3 4\r\n", new String(optimiezeCommand
+		assertEquals(6, optimiezeCommand.getMergeCount());
+		assertEquals("get 0 0 1 2 3 4\r\n", new String(optimiezeCommand
 				.getIoBuffer().getByteBuffer().array()));
-		assertEquals(5 + 1, writeQueue.size()); // remain five commands
+		assertEquals(5, writeQueue.size()); // remain five commands
 
 	}
 
 	public void testMergeGetCommandsWithEmptyWriteQueue() {
 		writeQueue.clear();
-		writeQueue.add(currentCmd);
 		Command optimiezeCommand = optimiezer.optimiezeGet(writeQueue,
 				executingCmds, currentCmd);
 		optimiezeCommand.encode(new SimpleBufferAllocator());
@@ -134,19 +135,20 @@ public class OptimezerTest extends TestCase {
 		assertSame(currentCmd, optimiezeCommand);
 		assertTrue(mergeBuffer.remaining() < 100);
 		assertSame(mergeBuffer, currentCmd.getIoBuffer().getByteBuffer());
-		assertEquals(1, writeQueue.size());
+		assertEquals(0, writeQueue.size());
 		assertEquals(-1, optimiezeCommand.getMergeCount());
 		assertEquals("get 0\r\n", new String(mergeBuffer.array()));
 	}
 
 	public void testMergeLimitBuffer() {
 		// set send buffer size to 30,merge four commands at most
+		optimiezer.setOptimizeMergeBuffer(true);
 		Command optimiezeCommand = optimiezer.optimiezeMergeBuffer(currentCmd,
 				writeQueue, executingCmds, 30);
 		assertNotSame(currentCmd, optimiezeCommand);
 		ByteBuffer mergeBuffer = optimiezeCommand.getIoBuffer().getByteBuffer();
-		assertEquals(1, writeQueue.size()); // remain six commands
-		assertSame(CommandType.GET_ONE, ((Command) writeQueue.peek())
+		assertEquals(0, writeQueue.size()); 
+		assertSame(CommandType.GET_ONE, optimiezeCommand
 				.getCommandType());
 		assertEquals("get 0\r\nget 1 2 3 4 5 6 7 8 9\r\n", new String(
 				mergeBuffer.array())); // current command at last
@@ -154,34 +156,35 @@ public class OptimezerTest extends TestCase {
 
 	public void testMergeAllBuffer() {
 		// merge 10 buffers
+		optimiezer.setOptimizeMergeBuffer(true);
 		Command optimiezeCommand = optimiezer.optimiezeMergeBuffer(currentCmd,
 				writeQueue, executingCmds, 100);
 		ByteBuffer mergeBuffer = optimiezeCommand.getIoBuffer().getByteBuffer();
 		assertNotSame(currentCmd, optimiezeCommand);
 		assertTrue(mergeBuffer.remaining() < 100);
-		assertEquals(1, writeQueue.size());
+		assertEquals(0, writeQueue.size());
 		assertEquals("get 0\r\nget 1 2 3 4 5 6 7 8 9\r\n", new String(
 				mergeBuffer.array())); // current command at last
 	}
 
 	public void testMergeBufferWithEmptyWriteQueue() {
 		writeQueue.clear();
-		writeQueue.add(currentCmd);
 		Command optimiezeCommand = optimiezer.optimiezeMergeBuffer(currentCmd,
 				writeQueue, executingCmds, 100);
 		ByteBuffer mergeBuffer = optimiezeCommand.getIoBuffer().getByteBuffer();
 		assertSame(currentCmd, optimiezeCommand);
 		assertTrue(mergeBuffer.remaining() < 100);
 		assertSame(mergeBuffer, currentCmd.getIoBuffer().getByteBuffer());
-		assertEquals(1, writeQueue.size());
+		assertEquals(0, writeQueue.size());
 		assertEquals("get 0\r\n", new String(mergeBuffer.array()));
 
 	}
 
 	public void testOptimieze() {
+		optimiezer.setOptimizeMergeBuffer(true);
 		for (int i = 0; i < 10; i++) {
 			Command deleteCommand = commandFactory.createDeleteCommand(String
-					.valueOf(i), String.valueOf(i).getBytes(), 0,false);
+					.valueOf(i), String.valueOf(i).getBytes(), 0, false);
 			deleteCommand.encode(new SimpleBufferAllocator());
 			writeQueue.add(deleteCommand);
 		}
@@ -198,7 +201,7 @@ public class OptimezerTest extends TestCase {
 		for (int i = 0; i < 10; i++)
 			sb.append("delete " + String.valueOf(i) + " 0\r\n");
 		assertEquals(sb.toString(), new String(mergeBuffer.array()));
-		assertEquals(1, writeQueue.size());
-		assertSame(optimiezeCommand, writeQueue.peek());
+		assertEquals(0, writeQueue.size());
+		assertNull(writeQueue.peek());
 	}
 }

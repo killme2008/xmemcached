@@ -42,7 +42,6 @@ import net.rubyeye.xmemcached.MemcachedSessionLocator;
 import net.rubyeye.xmemcached.buffer.BufferAllocator;
 import net.rubyeye.xmemcached.command.Command;
 import net.rubyeye.xmemcached.exception.MemcachedException;
-import net.rubyeye.xmemcached.utils.SimpleDeque;
 
 /**
  * Connected session manager
@@ -413,13 +412,7 @@ public class MemcachedConnector extends SocketChannelController {
 		this.bufferAllocator = allocator;
 		this.optimiezer = new Optimizer();
 		this.optimiezer.setBufferAllocator(this.bufferAllocator);
-	}
-
-	/**
-	 * use dequeue
-	 */
-	protected Queue<WriteMessage> buildQueue() {
-		return new SimpleDeque<WriteMessage>(10000);
+		// setDispatchMessageThreadPoolSize(Runtime.getRuntime().availableProcessors());
 	}
 
 	public void setMergeFactor(int mergeFactor) {

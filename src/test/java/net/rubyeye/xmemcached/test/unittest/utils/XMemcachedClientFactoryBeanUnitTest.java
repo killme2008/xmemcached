@@ -1,6 +1,7 @@
 package net.rubyeye.xmemcached.test.unittest.utils;
 
 import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.util.concurrent.TimeoutException;
 
 import junit.framework.TestCase;
@@ -22,6 +23,7 @@ public class XMemcachedClientFactoryBeanUnitTest extends TestCase {
 	public void testSimpleConfig() throws Exception {
 		MemcachedClient memcachedClient = (MemcachedClient) ctx
 				.getBean("memcachedClient1");
+
 		validateClient(memcachedClient);
 	}
 
@@ -34,6 +36,8 @@ public class XMemcachedClientFactoryBeanUnitTest extends TestCase {
 	private void validateClient(MemcachedClient memcachedClient)
 			throws TimeoutException, InterruptedException, MemcachedException,
 			IOException {
+		memcachedClient.setLoggingLevelVerbosity(new InetSocketAddress(
+				"localhost", 12000), 3);
 		assertNotNull(memcachedClient);
 		assertTrue(memcachedClient.getConnector().isStarted());
 		assertFalse(memcachedClient.isShutdown());
