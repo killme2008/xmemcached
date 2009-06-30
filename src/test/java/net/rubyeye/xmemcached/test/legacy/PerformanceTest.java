@@ -39,33 +39,36 @@ public class PerformanceTest {
 		public void run() {
 			try {
 
-				for (int i = 0; i < repeat; i++) {
-					String key = getKey(start + i);
-					if (!mc.set(key, 0, getValue(start + i))) {
+				for (int i = 0; i < this.repeat; i++) {
+					 String key = getKey(this.start + i);
+					 if (!this.mc.set(key, 0, getValue(this.start + i))) {
 						System.err.println("set error");
 						System.exit(1);
 					}
+			//		this.mc.setWithNoReply(key, 0, getValue(this.start + i));
 
 				}
 
 			} catch (Exception e) {
-				//e.printStackTrace();
+				// e.printStackTrace();
 			} finally {
-				cd.countDown();
+				this.cd.countDown();
 			}
 		}
 
 		private final String getKey(int n) {
 			StringBuilder sb = new StringBuilder(String.valueOf(n));
-			while (sb.length() < keySize)
+			while (sb.length() < this.keySize) {
 				sb.append("k");
+			}
 			return sb.toString();
 		}
 
 		private final String getValue(int n) {
 			StringBuilder sb = new StringBuilder(String.valueOf(n));
-			while (sb.length() < valueSize)
+			while (sb.length() < this.valueSize) {
 				sb.append("v");
+			}
 			return sb.toString();
 		}
 	}
@@ -100,25 +103,27 @@ public class PerformanceTest {
 
 		private final String getKey(int n) {
 			StringBuilder sb = new StringBuilder(String.valueOf(n));
-			while (sb.length() < keySize)
+			while (sb.length() < this.keySize) {
 				sb.append("k");
+			}
 			return sb.toString();
 		}
 
 		private final String getValue(int n) {
 			StringBuilder sb = new StringBuilder(String.valueOf(n));
-			while (sb.length() < valueSize)
+			while (sb.length() < this.valueSize) {
 				sb.append("v");
+			}
 			return sb.toString();
 		}
 
 		public void run() {
 			try {
-				for (int i = 0; i < repeat; i++) {
+				for (int i = 0; i < this.repeat; i++) {
 
-					String key = getKey(start + i);
-					String result = (String) mc.get(key, 5000);
-					if (!result.equals(getValue(start + i))) {
+					String key = getKey(this.start + i);
+					String result = (String) this.mc.get(key, 5000);
+					if (!result.equals(getValue(this.start + i))) {
 						System.out.println(key + " " + result);
 						System.err.println("get error");
 						System.exit(1);
@@ -126,9 +131,9 @@ public class PerformanceTest {
 				}
 
 			} catch (Exception e) {
-				e.printStackTrace();
+				// e.printStackTrace();
 			} finally {
-				cd.countDown();
+				this.cd.countDown();
 			}
 		}
 	}
@@ -163,25 +168,27 @@ public class PerformanceTest {
 
 		private final String getKey(int n) {
 			StringBuilder sb = new StringBuilder(String.valueOf(n));
-			while (sb.length() < keySize)
+			while (sb.length() < this.keySize) {
 				sb.append("k");
+			}
 			return sb.toString();
 		}
 
 		public void run() {
 			try {
-				for (int i = 0; i < repeat; i++) {
-					String key = getKey(start + i);
-					if (!mc.delete(key)) {
+				for (int i = 0; i < this.repeat; i++) {
+					String key = getKey(this.start + i);
+					 if (!this.mc.delete(key)) {
 						System.err.println("delete " + key + " error");
 						System.exit(1);
 					}
+					//this.mc.deleteWithNoReply(key);
 				}
 
 			} catch (Exception e) {
 				e.printStackTrace();
 			} finally {
-				cd.countDown();
+				this.cd.countDown();
 			}
 		}
 	}

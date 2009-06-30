@@ -11,7 +11,7 @@ public class TextGetOneCommandUnitTest extends BaseTextCommandUnitTest {
 		Command command = this.commandFactory.createGetCommand("test", "test"
 				.getBytes(), CommandType.GET_ONE);
 		assertNull(command.getIoBuffer());
-		command.encode(bufferAllocator);
+		command.encode(this.bufferAllocator);
 		checkByteBufferEquals(command, "get test\r\n");
 	}
 
@@ -19,7 +19,7 @@ public class TextGetOneCommandUnitTest extends BaseTextCommandUnitTest {
 		Command command = this.commandFactory.createGetCommand("test", "test"
 				.getBytes(), CommandType.GETS_ONE);
 		assertNull(command.getIoBuffer());
-		command.encode(bufferAllocator);
+		command.encode(this.bufferAllocator);
 		checkByteBufferEquals(command, "gets test\r\n");
 	}
 
@@ -41,8 +41,9 @@ public class TextGetOneCommandUnitTest extends BaseTextCommandUnitTest {
 		assertFalse(command.decode(null, ByteBuffer
 				.wrap("VALUE test 0 2\r\n10\r\n".getBytes())));
 		assertNull(command.getResult());
-		
-		assertFalse(command.decode(null, ByteBuffer.wrap("VALUE test 0 4\r\n1".getBytes())));
+
+		assertFalse(command.decode(null, ByteBuffer.wrap("VALUE test 0 4\r\n1"
+				.getBytes())));
 		assertFalse(command.decode(null, ByteBuffer.wrap("0".getBytes())));
 		assertFalse(command.decode(null, ByteBuffer.wrap("0".getBytes())));
 		assertFalse(command.decode(null, ByteBuffer.wrap("0".getBytes())));
@@ -74,6 +75,6 @@ public class TextGetOneCommandUnitTest extends BaseTextCommandUnitTest {
 
 		assertEquals("10", new String(((CachedData) command.getResult())
 				.getData()));
-		assertEquals((long) 999, ((CachedData) command.getResult()).getCas());
+		assertEquals(999, ((CachedData) command.getResult()).getCas());
 	}
 }
