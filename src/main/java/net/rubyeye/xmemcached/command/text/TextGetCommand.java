@@ -3,6 +3,7 @@ package net.rubyeye.xmemcached.command.text;
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 
@@ -20,6 +21,20 @@ public abstract class TextGetCommand extends Command {
 	protected Map<String, CachedData> returnValues;
 	private String currentReturnKey;
 	private int offset;
+	/**
+	 *When MemcachedClient merge get commands,those commans which have the same
+	 * key will be merged into one get command.The result command's
+	 * assocCommands contains all these commands with the same key.
+	 */
+	private List<Command> assocCommands;
+
+	public final List<Command> getAssocCommands() {
+		return this.assocCommands;
+	}
+
+	public final void setAssocCommands(List<Command> assocCommands) {
+		this.assocCommands = assocCommands;
+	}
 
 	public TextGetCommand(String key, byte[] keyBytes, CommandType cmdType,
 			CountDownLatch latch) {
@@ -162,12 +177,21 @@ public abstract class TextGetCommand extends Command {
 
 				Map<Object, Command> mergetCommands = getMergeCommands();
 				if (mergetCommands != null) {
-					final Command command = mergetCommands
+					final TextGetCommand command = (TextGetCommand) mergetCommands
 							.remove(this.currentReturnKey);
 					if (command != null) {
 						command.setResult(value);
 						command.countDownLatch();
 						this.mergeCount--;
+						if (command.getAssocCommands() != null) {
+							for (Command assocCommand : command
+									.getAssocCommands()) {
+								assocCommand.setResult(value);
+								assocCommand.countDownLatch();
+								this.mergeCount--;
+							}
+						}
+
 					}
 				}
 				this.currentReturnKey = null;

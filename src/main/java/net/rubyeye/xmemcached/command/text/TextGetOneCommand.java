@@ -16,13 +16,14 @@ public class TextGetOneCommand extends TextGetCommand {
 
 	@Override
 	public void dispatch() {
-		if (mergeCount < 0) {
+		if (this.mergeCount < 0) {
 			// single get
 			if (this.returnValues.get(this.getKey()) == null) {
-				if (!wasFirst)
+				if (!this.wasFirst) {
 					decodeError();
-				else
+				} else {
 					this.countDownLatch();
+				}
 			} else {
 				CachedData data = this.returnValues.get(this.getKey());
 				setResult(data);
@@ -33,10 +34,14 @@ public class TextGetOneCommand extends TextGetCommand {
 			Collection<Command> mergeCommands = getMergeCommands().values();
 			getIoBuffer().free();
 			for (Command nextCommand : mergeCommands) {
-				// CachedData data =
-				// this.returnValues.get(nextCommand.getKey());
-				// nextCommand.setResult(data);
-				nextCommand.countDownLatch();
+				TextGetCommand textGetCommand = (TextGetCommand) nextCommand;
+				textGetCommand.countDownLatch();
+				if (textGetCommand.getAssocCommands() != null) {
+					for (Command assocCommand : textGetCommand
+							.getAssocCommands()) {
+						assocCommand.countDownLatch();
+					}
+				}
 			}
 		}
 	}

@@ -74,8 +74,8 @@ public class MemcachedHandler extends HandlerAdapter {
 	}
 
 	@Override
-	public void onException(Session session, Throwable t) {
-		log.error(t, t);
+	public void onException(Session session, Throwable throwable) {
+		log.error(throwable, throwable);
 	}
 
 	/**
