@@ -6,7 +6,6 @@
 package net.rubyeye.xmemcached;
 
 import java.util.Queue;
-import java.util.concurrent.BlockingQueue;
 
 import net.rubyeye.xmemcached.buffer.BufferAllocator;
 import net.rubyeye.xmemcached.command.Command;
@@ -19,7 +18,7 @@ import net.rubyeye.xmemcached.command.Command;
 public interface MemcachedOptimizer {
 	@SuppressWarnings("unchecked")
 	Command optimize(final Command currentCommand, final Queue writeQueue,
-			final BlockingQueue<Command> executingCmds, int sendBufferSize);
+			final Queue<Command> executingCmds, int sendBufferSize);
 
 	public void setBufferAllocator(BufferAllocator bufferAllocator);
 }

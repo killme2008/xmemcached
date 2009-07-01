@@ -28,6 +28,7 @@ import net.rubyeye.xmemcached.utils.ByteUtils;
 
 import com.google.code.yanf4j.nio.Session;
 import com.google.code.yanf4j.nio.WriteMessage;
+import com.google.code.yanf4j.nio.util.FutureImpl;
 
 /**
  * memcached命令类
@@ -65,9 +66,10 @@ public abstract class Command implements WriteMessage {
 	@SuppressWarnings("unchecked")
 	protected Transcoder transcoder;
 	protected boolean noreply;
+	protected FutureImpl<Boolean> writeFuture;
 
 	public final byte[] getKeyBytes() {
-		return keyBytes;
+		return this.keyBytes;
 	}
 
 	public final void setKeyBytes(byte[] keyBytes) {
@@ -79,12 +81,12 @@ public abstract class Command implements WriteMessage {
 	}
 
 	public int getMergeCount() {
-		return mergeCount;
+		return this.mergeCount;
 	}
 
 	@SuppressWarnings("unchecked")
 	public Transcoder getTranscoder() {
-		return transcoder;
+		return this.transcoder;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -140,7 +142,7 @@ public abstract class Command implements WriteMessage {
 	}
 
 	public OperationStatus getStatus() {
-		return status;
+		return this.status;
 	}
 
 	public final void setStatus(OperationStatus status) {
@@ -156,7 +158,7 @@ public abstract class Command implements WriteMessage {
 	}
 
 	public Exception getException() {
-		return exception;
+		return this.exception;
 	}
 
 	public void setException(Exception throwable) {
@@ -164,7 +166,7 @@ public abstract class Command implements WriteMessage {
 	}
 
 	public final String getKey() {
-		return key;
+		return this.key;
 	}
 
 	public final void setKey(String key) {
@@ -172,7 +174,7 @@ public abstract class Command implements WriteMessage {
 	}
 
 	public final Object getResult() {
-		return result;
+		return this.result;
 	}
 
 	public final void setResult(Object result) {
@@ -193,7 +195,7 @@ public abstract class Command implements WriteMessage {
 	}
 
 	public boolean isCancel() {
-		return this.status == OperationStatus.SENDING && cancel;
+		return this.status == OperationStatus.SENDING && this.cancel;
 	}
 
 	public final void cancel() {
@@ -204,19 +206,20 @@ public abstract class Command implements WriteMessage {
 	}
 
 	public final CountDownLatch getLatch() {
-		return latch;
+		return this.latch;
 	}
 
 	public final void countDownLatch() {
 		if (this.latch != null) {
 			this.latch.countDown();
-			if (this.latch.getCount() == 0)
+			if (this.latch.getCount() == 0) {
 				this.status = OperationStatus.DONE;
+			}
 		}
 	}
 
 	public final CommandType getCommandType() {
-		return commandType;
+		return this.commandType;
 	}
 
 	public final void setLatch(CountDownLatch latch) {
@@ -252,17 +255,19 @@ public abstract class Command implements WriteMessage {
 			setException(new MemcachedServerException(getErrorMsg(line,
 					"Unknown Server Error")));
 			return true;
-		} else
+		} else {
 			throw new MemcachedDecodeException(
 					"Decode error,session will be closed,line=" + line);
+		}
 	}
 
 	protected final boolean decodeError(Session session, ByteBuffer buffer) {
 		String line = ByteUtils.nextLine(buffer);
-		if (line == null)
+		if (line == null) {
 			return false;
-		else
+		} else {
 			return decodeError(line);
+		}
 	}
 
 	private String getErrorMsg(String line, String defaultMsg) {
@@ -272,10 +277,32 @@ public abstract class Command implements WriteMessage {
 	}
 
 	public final boolean isNoreply() {
-		return noreply;
+		return this.noreply;
 	}
 
 	public final void setNoreply(boolean noreply) {
 		this.noreply = noreply;
 	}
+
+	@Override
+	public FutureImpl<Boolean> getWriteFuture() {
+		return this.writeFuture;
+	}
+	
+	
+
+	public final void setWriteFuture(FutureImpl<Boolean> writeFuture) {
+		this.writeFuture = writeFuture;
+	}
+
+	@Override
+	public final boolean isWriting() {
+		return true;
+	}
+
+	@Override
+	public final void writing() {
+		// do nothing
+	}
+
 }

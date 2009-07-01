@@ -11,21 +11,23 @@
  */
 package net.rubyeye.xmemcached.impl;
 
-import com.google.code.yanf4j.nio.WriteMessage;
-import com.google.code.yanf4j.nio.impl.DefaultTCPSession;
-import com.google.code.yanf4j.nio.impl.SessionConfig;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.net.SocketException;
 import java.nio.channels.SocketChannel;
-import java.util.NoSuchElementException;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingQueue;
+import java.util.Queue;
+import java.util.concurrent.Future;
 
 import net.rubyeye.xmemcached.MemcachedOptimizer;
 import net.rubyeye.xmemcached.buffer.BufferAllocator;
 import net.rubyeye.xmemcached.command.Command;
 import net.rubyeye.xmemcached.command.OperationStatus;
+
+import com.google.code.yanf4j.nio.WriteMessage;
+import com.google.code.yanf4j.nio.impl.DefaultTCPSession;
+import com.google.code.yanf4j.nio.impl.SessionConfig;
+import com.google.code.yanf4j.nio.util.FutureImpl;
+import com.google.code.yanf4j.util.LinkedTransferQueue;
 
 /**
  * Connected session for a memcached server
@@ -37,9 +39,11 @@ public class MemcachedTCPSession extends DefaultTCPSession {
 	/**
 	 * Command which are already sent
 	 */
-	protected BlockingQueue<Command> executingCmds;
+	protected Queue<Command> executingCmds;
 
 	private volatile int weight;
+
+	private final Object empty = new Object();
 
 	private SocketAddress remoteSocketAddress; // prevent channel is closed
 	private int sendBufferSize;
@@ -55,7 +59,7 @@ public class MemcachedTCPSession extends DefaultTCPSession {
 	public static final String PARSE_STATUS_ATTR = "parse_status";
 
 	public final int getWeight() {
-		return weight;
+		return this.weight;
 	}
 
 	public final void setWeight(int weight) {
@@ -69,7 +73,7 @@ public class MemcachedTCPSession extends DefaultTCPSession {
 		this.optimiezer = optimiezer;
 		this.weight = weight;
 		if (this.selectableChannel != null) {
-			remoteSocketAddress = ((SocketChannel) this.selectableChannel)
+			this.remoteSocketAddress = ((SocketChannel) this.selectableChannel)
 					.socket().getRemoteSocketAddress();
 			this.allowReconnect = true;
 			try {
@@ -79,13 +83,15 @@ public class MemcachedTCPSession extends DefaultTCPSession {
 				this.sendBufferSize = 8 * 1024;
 			}
 		}
-		this.executingCmds = new ArrayBlockingQueue<Command>(16 * 1024);
+		this.executingCmds = new LinkedTransferQueue<Command>();
 	}
 
+	@Override
 	public InetSocketAddress getRemoteSocketAddress() {
 		InetSocketAddress result = super.getRemoteSocketAddress();
-		if (result == null)
-			result = (InetSocketAddress) remoteSocketAddress;
+		if (result == null) {
+			result = (InetSocketAddress) this.remoteSocketAddress;
+		}
 		return result;
 	}
 
@@ -93,11 +99,12 @@ public class MemcachedTCPSession extends DefaultTCPSession {
 	protected WriteMessage preprocessWriteMessage(WriteMessage writeMessage) {
 		Command currentCommand = (Command) writeMessage;
 		// Check if IoBuffer is null
-		if (currentCommand.getIoBuffer() == null)
-			currentCommand.encode(bufferAllocator);
+		if (currentCommand.getIoBuffer() == null) {
+			currentCommand.encode(this.bufferAllocator);
+		}
 		// Check if it is canceled.
 		if (currentCommand.isCancel()) {
-			writeQueue.remove();
+			this.writeQueue.remove();
 			return null;
 		}
 		if (currentCommand.getStatus() == OperationStatus.SENDING) {
@@ -114,7 +121,7 @@ public class MemcachedTCPSession extends DefaultTCPSession {
 	private BufferAllocator bufferAllocator;
 
 	public final BufferAllocator getBufferAllocator() {
-		return bufferAllocator;
+		return this.bufferAllocator;
 	}
 
 	public final void setBufferAllocator(BufferAllocator bufferAllocator) {
@@ -122,10 +129,13 @@ public class MemcachedTCPSession extends DefaultTCPSession {
 	}
 
 	@Override
-	protected final WriteMessage wrapMessage(Object msg) {
+	protected final WriteMessage wrapMessage(Object msg,
+			Future<Boolean> writeFuture) {
 		((Command) msg).encode(this.bufferAllocator);
-		if (log.isDebugEnabled())
+		((Command) msg).setWriteFuture((FutureImpl<Boolean>) writeFuture);
+		if (log.isDebugEnabled()) {
 			log.debug("After encoding" + ((Command) msg).toString());
+		}
 		return (WriteMessage) msg;
 	}
 
@@ -135,18 +145,7 @@ public class MemcachedTCPSession extends DefaultTCPSession {
 	 * @return
 	 */
 	public final Command pollCurrentExecutingCommand() {
-		try {
-			Command cmd = executingCmds.take();
-			if (cmd != null) {
-				cmd.setStatus(OperationStatus.PROCESSING);
-			} else {
-				throw new NoSuchElementException();
-			}
-			return cmd;
-		} catch (InterruptedException e) {
-			Thread.currentThread().interrupt();
-		}
-		return null;
+		return this.executingCmds.poll();
 	}
 
 	/**
@@ -155,7 +154,16 @@ public class MemcachedTCPSession extends DefaultTCPSession {
 	 * @return
 	 */
 	public final Command peekCurrentExecutingCommand() {
-		return executingCmds.peek();
+		try {
+			synchronized (this.empty) {
+				while (this.executingCmds.peek() == null) {
+					this.empty.wait(1000);
+				}
+			}
+		} catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
+		}
+		return this.executingCmds.peek();
 	}
 
 	/**
@@ -164,7 +172,7 @@ public class MemcachedTCPSession extends DefaultTCPSession {
 	 * @return
 	 */
 	public boolean isAllowReconnect() {
-		return allowReconnect;
+		return this.allowReconnect;
 	}
 
 	public void setAllowReconnect(boolean reconnected) {
@@ -172,6 +180,9 @@ public class MemcachedTCPSession extends DefaultTCPSession {
 	}
 
 	public final void addCommand(Command command) {
-		executingCmds.add(command);
+		this.executingCmds.add(command);
+		synchronized (this.empty) {
+			this.empty.notifyAll();
+		}
 	}
 }

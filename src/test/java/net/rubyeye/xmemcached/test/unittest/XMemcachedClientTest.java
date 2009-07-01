@@ -37,9 +37,6 @@ public abstract class XMemcachedClientTest extends TestCase {
 	@Override
 	public void setUp() throws Exception {
 		createClients();
-		// windows上的memcached实现有问题，除非加上日志显示，否则可能不返回
-		this.memcachedClient.setLoggingLevelVerbosity(new InetSocketAddress(
-				"localhost", 12000), 3);
 	}
 
 	public void testCreateClientWithEmptyServers() throws Exception {
@@ -62,7 +59,7 @@ public abstract class XMemcachedClientTest extends TestCase {
 		MemcachedClientBuilder builder = createBuilder();
 		builder.getConfiguration().setStatisticsServer(true);
 		this.memcachedClient = builder.build();
-		this.memcachedClient.flushAllWithNoReply();
+		this.memcachedClient.flushAll();
 	}
 
 	public abstract MemcachedClientBuilder createBuilder() throws Exception;
@@ -373,16 +370,16 @@ public abstract class XMemcachedClientTest extends TestCase {
 	}
 
 	public void testFlushAllWithNoReply() throws Exception {
-		for (int i = 0; i < 50; i++) {
+		for (int i = 0; i < 10; i++) {
 			assertTrue(this.memcachedClient.add(String.valueOf(i), 0, i));
 		}
 		List<String> keys = new ArrayList<String>();
-		for (int i = 0; i < 100; i++) {
+		for (int i = 0; i < 20; i++) {
 			keys.add(String.valueOf(i));
 		}
 		Map<String, Integer> result = this.memcachedClient.get(keys);
-		assertEquals(50, result.size());
-		for (int i = 0; i < 50; i++) {
+		assertEquals(10, result.size());
+		for (int i = 0; i < 10; i++) {
 			assertEquals((Integer) i, result.get(String.valueOf(i)));
 		}
 		this.memcachedClient.flushAllWithNoReply();

@@ -16,6 +16,7 @@ import net.rubyeye.xmemcached.transcoders.SerializingTranscoder;
 import net.rubyeye.xmemcached.transcoders.Transcoder;
 import net.rubyeye.xmemcached.utils.SimpleBlockingQueue;
 
+import com.google.code.yanf4j.nio.util.FutureImpl;
 import com.google.code.yanf4j.util.LinkedTransferQueue;
 import com.google.code.yanf4j.util.SimpleQueue;
 
@@ -43,6 +44,7 @@ public class OptimezerTest extends TestCase {
 					CommandType.GET_ONE);
 			cmd.encode(new SimpleBufferAllocator());
 			this.writeQueue.add(cmd);
+			cmd.setWriteFuture(new FutureImpl<Boolean>());
 		}
 		this.currentCmd = (Command) this.writeQueue.poll();
 		this.currentCmd.encode(new SimpleBufferAllocator());
@@ -72,6 +74,7 @@ public class OptimezerTest extends TestCase {
 					CommandType.GET_ONE);
 			cmd.encode(new SimpleBufferAllocator());
 			this.writeQueue.add(cmd);
+			cmd.setWriteFuture(new FutureImpl<Boolean>());
 			localQueue.add(cmd);
 		}
 		Command optimiezeCommand = this.optimiezer.optimiezeGet(
@@ -148,14 +151,18 @@ public class OptimezerTest extends TestCase {
 		this.writeQueue.clear();
 		// send five get operation,include current command
 		for (int i = 0; i < 5; i++) {
-			this.writeQueue.add(this.commandFactory.createGetCommand(String
+			Command cmd = this.commandFactory.createGetCommand(String
 					.valueOf(i), String.valueOf(i).getBytes(),
-					CommandType.GET_ONE));
+					CommandType.GET_ONE);
+			this.writeQueue.add(cmd);
+			cmd.setWriteFuture(new FutureImpl<Boolean>());
 		}
 		// send five delete operation
 		for (int i = 5; i < 10; i++) {
-			this.writeQueue.add(this.commandFactory.createDeleteCommand(String
-					.valueOf(i), String.valueOf(i).getBytes(), 0, false));
+			Command cmd = this.commandFactory.createDeleteCommand(String
+					.valueOf(i), String.valueOf(i).getBytes(), 0, false);
+			this.writeQueue.add(cmd);
+			cmd.setWriteFuture(new FutureImpl<Boolean>());
 		}
 		// merge five get commands at most
 		Command optimiezeCommand = this.optimiezer.optimiezeGet(
@@ -230,6 +237,7 @@ public class OptimezerTest extends TestCase {
 					String.valueOf(i), String.valueOf(i).getBytes(), 0, false);
 			deleteCommand.encode(new SimpleBufferAllocator());
 			this.writeQueue.add(deleteCommand);
+			deleteCommand.setWriteFuture(new FutureImpl<Boolean>());
 		}
 		Command optimiezeCommand = this.optimiezer.optimize(this.currentCmd,
 				this.writeQueue, this.executingCmds, 16 * 1024);

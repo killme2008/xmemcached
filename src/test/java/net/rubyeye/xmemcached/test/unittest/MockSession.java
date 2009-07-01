@@ -1,14 +1,15 @@
 package net.rubyeye.xmemcached.test.unittest;
 
-import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteOrder;
 import java.nio.channels.Selector;
+import java.util.concurrent.Future;
 
 import com.google.code.yanf4j.nio.Session;
 import com.google.code.yanf4j.nio.CodecFactory.Decoder;
 import com.google.code.yanf4j.nio.CodecFactory.Encoder;
 import com.google.code.yanf4j.nio.util.EventType;
+import com.google.code.yanf4j.nio.util.FutureImpl;
 
 public class MockSession implements Session {
 	private boolean closed = false;
@@ -49,7 +50,7 @@ public class MockSession implements Session {
 	}
 
 	@Override
-	public void flush() throws IOException, InterruptedException {
+	public void flush() {
 
 	}
 
@@ -73,7 +74,7 @@ public class MockSession implements Session {
 
 	@Override
 	public InetSocketAddress getRemoteSocketAddress() {
-		return new InetSocketAddress("localhost", port);
+		return new InetSocketAddress("localhost", this.port);
 	}
 
 	@Override
@@ -112,9 +113,9 @@ public class MockSession implements Session {
 	}
 
 	@Override
-	public boolean send(Object packet) {
+	public Future<Boolean> send(Object packet) {
 
-		return false;
+		return new FutureImpl<Boolean>();
 	}
 
 	@Override

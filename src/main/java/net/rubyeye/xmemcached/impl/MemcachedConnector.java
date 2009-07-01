@@ -62,7 +62,8 @@ public class MemcachedConnector extends SocketChannelController {
 			while (!Thread.currentThread().isInterrupted()) {
 
 				try {
-					ReconnectRequest request = MemcachedConnector.this.waitingQueue.take();
+					ReconnectRequest request = MemcachedConnector.this.waitingQueue
+							.take();
 					InetSocketAddress address = request.getAddress();
 					boolean connected = false;
 					int tries = 0;
@@ -385,13 +386,14 @@ public class MemcachedConnector extends SocketChannelController {
 		}
 	}
 
-	public final boolean send(final Command msg) throws MemcachedException {
+	public final void send(final Command msg) throws MemcachedException {
 		Session session = findSessionByKey(msg.getKey());
 		if (session == null) {
 			throw new MemcachedException(
 					"There is no avriable session at this moment");
 		}
-		return session.send(msg);
+
+		session.send(msg);
 	}
 
 	protected final Session findSessionByKey(String key) {

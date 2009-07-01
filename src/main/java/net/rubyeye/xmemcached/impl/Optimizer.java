@@ -10,7 +10,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
-import java.util.concurrent.BlockingQueue;
 
 import net.rubyeye.xmemcached.MemcachedOptimizer;
 import net.rubyeye.xmemcached.buffer.BufferAllocator;
@@ -26,6 +25,8 @@ import net.rubyeye.xmemcached.utils.ByteUtils;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import com.google.code.yanf4j.nio.util.FutureImpl;
 
 /**
  * Memcached command optimizer,merge single-get comands to multi-get
@@ -90,7 +91,7 @@ public class Optimizer implements OptimizerMBean, MemcachedOptimizer {
 
 	@SuppressWarnings("unchecked")
 	public Command optimize(final Command currentCommand,
-			final Queue writeQueue, final BlockingQueue<Command> executingCmds,
+			final Queue writeQueue, final Queue<Command> executingCmds,
 			int sendBufferSize) {
 		Command optimiezeCommand = currentCommand;
 		optimiezeCommand = optimiezeGet(writeQueue, executingCmds,
@@ -109,7 +110,7 @@ public class Optimizer implements OptimizerMBean, MemcachedOptimizer {
 	 */
 	@SuppressWarnings("unchecked")
 	public final Command optimiezeMergeBuffer(Command optimiezeCommand,
-			final Queue writeQueue, final BlockingQueue<Command> executingCmds,
+			final Queue writeQueue, final Queue<Command> executingCmds,
 			int sendBufferSize) {
 		if (log.isDebugEnabled()) {
 			log.debug("Optimieze merge buffer:" + optimiezeCommand.toString());
@@ -132,7 +133,7 @@ public class Optimizer implements OptimizerMBean, MemcachedOptimizer {
 	 */
 	@SuppressWarnings("unchecked")
 	public final Command optimiezeGet(final Queue writeQueue,
-			final BlockingQueue<Command> executingCmds, Command optimiezeCommand) {
+			final Queue<Command> executingCmds, Command optimiezeCommand) {
 		if (optimiezeCommand.getCommandType() == CommandType.GET_ONE
 				|| optimiezeCommand.getCommandType() == CommandType.GETS_ONE) {
 			// 优化get操作
@@ -147,7 +148,7 @@ public class Optimizer implements OptimizerMBean, MemcachedOptimizer {
 
 	@SuppressWarnings("unchecked")
 	private final Command mergeBuffer(final Command firstCommand,
-			final Queue writeQueue, final BlockingQueue<Command> executingCmds,
+			final Queue writeQueue, final Queue<Command> executingCmds,
 			final int sendBufferSize) {
 		Command lastCommand = firstCommand; // 合并的最后一个command
 		Command nextCmd = (Command) writeQueue.peek();
@@ -160,6 +161,7 @@ public class Optimizer implements OptimizerMBean, MemcachedOptimizer {
 				.getByteBuffer();
 		int totalBytes = firstBuffer.remaining();
 		commands.add(firstCommand);
+		boolean wasFirst = true;
 		while (totalBytes + nextCmd.getIoBuffer().getByteBuffer().remaining() <= sendBufferSize) {
 			if (nextCmd.getStatus() == OperationStatus.WRITING) {
 				break;
@@ -176,6 +178,11 @@ public class Optimizer implements OptimizerMBean, MemcachedOptimizer {
 			}
 
 			writeQueue.remove();
+			nextCmd.getWriteFuture().setResult(Boolean.TRUE);
+			if (wasFirst) {
+				wasFirst = false;
+				firstCommand.getWriteFuture().setResult(Boolean.TRUE);
+			}
 			// if it is get_one command,try to merge get commands
 			if ((nextCmd.getCommandType() == CommandType.GET_ONE || nextCmd
 					.getCommandType() == CommandType.GETS_ONE)
@@ -230,7 +237,7 @@ public class Optimizer implements OptimizerMBean, MemcachedOptimizer {
 
 	@SuppressWarnings("unchecked")
 	private final Command mergeGetCommands(final Command currentCmd,
-			final Queue writeQueue, final BlockingQueue<Command> executingCmds,
+			final Queue writeQueue, final Queue<Command> executingCmds,
 			CommandType commandType) {
 		Map<Object, Command> mergeCommands = null;
 		int mergeCount = 1;
@@ -250,6 +257,7 @@ public class Optimizer implements OptimizerMBean, MemcachedOptimizer {
 				if (mergeCommands == null) { // lazy initialize
 					mergeCommands = new HashMap<Object, Command>(
 							this.mergeFactor / 2);
+					currentCmd.getWriteFuture().setResult(Boolean.TRUE);
 					mergeCommands.put(currentCmd.getKey(), currentCmd);
 				}
 				if (log.isDebugEnabled()) {
@@ -257,6 +265,7 @@ public class Optimizer implements OptimizerMBean, MemcachedOptimizer {
 				}
 				nextCmd.setStatus(OperationStatus.WRITING);
 				Command removedCommand = (Command) writeQueue.remove();
+				removedCommand.getWriteFuture().setResult(Boolean.TRUE);
 				// If the key is exists,add the command to associated list.
 				if (mergeCommands.containsKey(removedCommand.getKey())) {
 					final TextGetCommand mergedGetCommand = (TextGetCommand) mergeCommands
@@ -303,6 +312,7 @@ public class Optimizer implements OptimizerMBean, MemcachedOptimizer {
 				return mergeCommands;
 			}
 		};
+		cmd.setWriteFuture(new FutureImpl<Boolean>());
 		cmd.setMergeCount(mergeCount);
 		cmd.setIoBuffer(buffer);
 		return cmd;

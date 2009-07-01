@@ -53,6 +53,12 @@ public interface MemcachedClient {
 	public static final long DEFAULT_OP_TIMEOUT = 1000L;
 
 	/**
+	 * Send command to memcached server timeout,if the send operation is not
+	 * returned in one second,throw TimeoutException
+	 */
+	public static final long SEND_TIMEOUT = 1000L;
+
+	/**
 	 * Set the merge factor,this factor determins how many 'get' commands would
 	 * be merge to one multi-get command.default is 150
 	 * 

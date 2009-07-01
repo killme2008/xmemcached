@@ -2,12 +2,12 @@ package net.rubyeye.xmemcached.codec;
 
 import java.nio.ByteBuffer;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import net.rubyeye.xmemcached.command.Command;
 import net.rubyeye.xmemcached.impl.MemcachedTCPSession;
 import net.rubyeye.xmemcached.utils.ByteUtils;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import com.google.code.yanf4j.nio.Session;
 import com.google.code.yanf4j.nio.CodecFactory.Decoder;
@@ -37,12 +37,11 @@ public class MemcachedDecoder implements Decoder<Command> {
 	@Override
 	public Command decode(ByteBuffer buffer, Session origSession) {
 		MemcachedTCPSession session = (MemcachedTCPSession) origSession;
-		if (session.peekCurrentExecutingCommand() == null)
-			return null;
 		if (session.peekCurrentExecutingCommand().decode(session, buffer)) {
 			return session.pollCurrentExecutingCommand();
-		} else
+		} else {
 			return null;
+		}
 
 	}
 }

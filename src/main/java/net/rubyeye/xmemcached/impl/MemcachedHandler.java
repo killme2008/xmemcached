@@ -11,9 +11,6 @@
  */
 package net.rubyeye.xmemcached.impl;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import net.rubyeye.xmemcached.MemcachedClient;
 import net.rubyeye.xmemcached.MemcachedClientStateListener;
 import net.rubyeye.xmemcached.command.Command;
@@ -22,6 +19,9 @@ import net.rubyeye.xmemcached.command.OperationStatus;
 import net.rubyeye.xmemcached.command.text.TextGetCommand;
 import net.rubyeye.xmemcached.command.text.TextGetOneCommand;
 import net.rubyeye.xmemcached.monitor.StatisticsHandler;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import com.google.code.yanf4j.nio.Session;
 import com.google.code.yanf4j.nio.impl.HandlerAdapter;
@@ -45,17 +45,19 @@ public class MemcachedHandler extends HandlerAdapter {
 		Command command = (Command) msg;
 		if (command.getMergeCount() > 0) {
 			int size = ((TextGetCommand) command).getReturnValues().size();
-			statisticsHandler.statistics(CommandType.GET_HIT, size);
-			statisticsHandler.statistics(CommandType.GET_MISS, command
+			this.statisticsHandler.statistics(CommandType.GET_HIT, size);
+			this.statisticsHandler.statistics(CommandType.GET_MISS, command
 					.getMergeCount()
 					- size);
 		} else if (command instanceof TextGetOneCommand) {
 			if (command.getResult() != null) {
-				statisticsHandler.statistics(CommandType.GET_HIT);
-			} else
-				statisticsHandler.statistics(CommandType.GET_MISS);
-		} else
-			statisticsHandler.statistics(command.getCommandType());
+				this.statisticsHandler.statistics(CommandType.GET_HIT);
+			} else {
+				this.statisticsHandler.statistics(CommandType.GET_MISS);
+			}
+		} else {
+			this.statisticsHandler.statistics(command.getCommandType());
+		}
 	}
 
 	private final MemcachedClient client;
@@ -69,8 +71,9 @@ public class MemcachedHandler extends HandlerAdapter {
 		Command command = (Command) msg;
 		command.setStatus(OperationStatus.SENT);
 		// It is no noreply
-		if (!command.isNoreply())
+		if (!command.isNoreply()) {
 			((MemcachedTCPSession) session).addCommand(command);
+		}
 	}
 
 	@Override
@@ -84,8 +87,9 @@ public class MemcachedHandler extends HandlerAdapter {
 	@Override
 	public void onSessionStarted(Session session) {
 		session.setUseBlockingRead(true);
-		if(session.isLoopbackConnection())
+		if(session.isLoopbackConnection()) {
 			session.setUseBlockingWrite(true);
+		}
 		for (MemcachedClientStateListener listener : this.client
 				.getStateListeners()) {
 			listener.onConnected(this.client, session.getRemoteSocketAddress());
@@ -98,8 +102,9 @@ public class MemcachedHandler extends HandlerAdapter {
 	@Override
 	public final void onSessionClosed(Session session) {
 		this.client.getConnector().removeSession((MemcachedTCPSession) session);
-		if (((MemcachedTCPSession) session).isAllowReconnect())
+		if (((MemcachedTCPSession) session).isAllowReconnect()) {
 			reconnect(session);
+		}
 		for (MemcachedClientStateListener listener : this.client
 				.getStateListeners()) {
 			listener.onDisconnected(this.client, session
