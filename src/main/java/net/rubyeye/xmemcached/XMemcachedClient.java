@@ -1815,7 +1815,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 				Command command = this.commandFactory.createFlushAllCommand(
 						latch, 0, noreply);
 
-				session.send(command);
+				session.write(command);
 			} else {
 				latch.countDown();
 			}
@@ -1853,7 +1853,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 		}
 		Command command = this.commandFactory.createVerbosityCommand(latch,
 				level, noreply);
-		session.send(command);
+		session.write(command);
 		if (!noreply) {
 			latchWait(command, this.opTimeout);
 		}
@@ -1923,7 +1923,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 		}
 		Command command = this.commandFactory.createFlushAllCommand(latch, 0,
 				noreply);
-		session.send(command);
+		session.write(command);
 		if (!noreply) {
 			latchWait(command, timeout);
 		}
@@ -1995,7 +1995,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 		}
 		Command command = this.commandFactory.createStatsCommand(address,
 				latch, null);
-		session.send(command);
+		session.write(command);
 		latchWait(command, timeout);
 		return (Map<String, String>) command.getResult();
 	}
@@ -2028,7 +2028,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 			Command command = this.commandFactory.createStatsCommand(session
 					.getRemoteSocketAddress(), latch, itemName);
 
-			session.send(command);
+			session.write(command);
 			commands.add(command);
 
 		}
@@ -2064,7 +2064,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 		for (Session session : sessionSet) {
 			Command command = this.commandFactory.createVersionCommand(latch,
 					session.getRemoteSocketAddress());
-			session.send(command);
+			session.write(command);
 			commands.add(command);
 
 		}

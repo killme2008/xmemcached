@@ -52,8 +52,8 @@ public class MemcachedConnector extends SocketChannelController {
 
 	private final BlockingQueue<ReconnectRequest> waitingQueue = new LinkedBlockingQueue<ReconnectRequest>();
 	private BufferAllocator bufferAllocator;
-	private SessionMonitor sessionMonitor;
-	private MemcachedOptimizer optimiezer;
+	private final SessionMonitor sessionMonitor;
+	private final MemcachedOptimizer optimiezer;
 
 	class SessionMonitor extends Thread {
 
@@ -128,10 +128,10 @@ public class MemcachedConnector extends SocketChannelController {
 		private boolean connected = false;
 		private boolean done = false;
 		private boolean cancel = false;
-		private Lock lock = new ReentrantLock();
-		private Condition notDone = this.lock.newCondition();
+		private final Lock lock = new ReentrantLock();
+		private final Condition notDone = this.lock.newCondition();
 		private volatile Exception exception;
-		private InetSocketAddress inetSocketAddress;
+		private final InetSocketAddress inetSocketAddress;
 
 		public ConnectFuture(InetSocketAddress inetSocketAddress, int weight) {
 			super();
@@ -312,13 +312,13 @@ public class MemcachedConnector extends SocketChannelController {
 			return;
 		}
 		try {
-			if (!((SocketChannel) (key.channel())).finishConnect()) {
+			if (!((SocketChannel) key.channel()).finishConnect()) {
 				future.setException(new IOException("Connect to "
 						+ future.getInetSocketAddress().getHostName() + ":"
 						+ future.getInetSocketAddress().getPort() + " fail"));
 			} else {
 				key.attach(null);
-				addSession(createSession(key, (SocketChannel) (key.channel()),
+				addSession(createSession(key, (SocketChannel) key.channel(),
 						future.getWeight()));
 				future.setConnected(true);
 			}
@@ -392,8 +392,7 @@ public class MemcachedConnector extends SocketChannelController {
 			throw new MemcachedException(
 					"There is no avriable session at this moment");
 		}
-
-		session.send(msg);
+		session.write(msg);
 	}
 
 	protected final Session findSessionByKey(String key) {
@@ -419,7 +418,8 @@ public class MemcachedConnector extends SocketChannelController {
 		this.bufferAllocator = allocator;
 		this.optimiezer = new Optimizer();
 		this.optimiezer.setBufferAllocator(this.bufferAllocator);
-		// setDispatchMessageThreadPoolSize(Runtime.getRuntime().availableProcessors());
+		// setDispatchMessageThreadPoolSize(Runtime.getRuntime().
+		// availableProcessors());
 	}
 
 	public void setMergeFactor(int mergeFactor) {

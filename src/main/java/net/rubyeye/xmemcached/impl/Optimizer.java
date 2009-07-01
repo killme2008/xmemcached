@@ -178,7 +178,6 @@ public class Optimizer implements OptimizerMBean, MemcachedOptimizer {
 			}
 
 			writeQueue.remove();
-			nextCmd.getWriteFuture().setResult(Boolean.TRUE);
 			if (wasFirst) {
 				wasFirst = false;
 				firstCommand.getWriteFuture().setResult(Boolean.TRUE);
@@ -257,7 +256,6 @@ public class Optimizer implements OptimizerMBean, MemcachedOptimizer {
 				if (mergeCommands == null) { // lazy initialize
 					mergeCommands = new HashMap<Object, Command>(
 							this.mergeFactor / 2);
-					currentCmd.getWriteFuture().setResult(Boolean.TRUE);
 					mergeCommands.put(currentCmd.getKey(), currentCmd);
 				}
 				if (log.isDebugEnabled()) {
@@ -265,7 +263,6 @@ public class Optimizer implements OptimizerMBean, MemcachedOptimizer {
 				}
 				nextCmd.setStatus(OperationStatus.WRITING);
 				Command removedCommand = (Command) writeQueue.remove();
-				removedCommand.getWriteFuture().setResult(Boolean.TRUE);
 				// If the key is exists,add the command to associated list.
 				if (mergeCommands.containsKey(removedCommand.getKey())) {
 					final TextGetCommand mergedGetCommand = (TextGetCommand) mergeCommands

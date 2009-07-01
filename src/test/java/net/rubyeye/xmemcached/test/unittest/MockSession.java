@@ -13,10 +13,16 @@ import com.google.code.yanf4j.nio.util.FutureImpl;
 
 public class MockSession implements Session {
 	private boolean closed = false;
-	private int port;
+	private final int port;
 
 	public MockSession(int port) {
 		this.port = port;
+	}
+
+	@Override
+	public void write(Object packet) {
+		// TODO Auto-generated method stub
+
 	}
 
 	@Override
@@ -113,7 +119,7 @@ public class MockSession implements Session {
 	}
 
 	@Override
-	public Future<Boolean> send(Object packet) {
+	public Future<Boolean> asyncWrite(Object packet) {
 
 		return new FutureImpl<Boolean>();
 	}
