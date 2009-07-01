@@ -15,8 +15,9 @@ import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.net.SocketException;
 import java.nio.channels.SocketChannel;
-import java.util.Queue;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicReference;
 
 import net.rubyeye.xmemcached.MemcachedOptimizer;
 import net.rubyeye.xmemcached.buffer.BufferAllocator;
@@ -39,15 +40,15 @@ public class MemcachedTCPSession extends DefaultTCPSession {
 	/**
 	 * Command which are already sent
 	 */
-	protected Queue<Command> executingCmds;
+	protected BlockingQueue<Command> executingCmds;
 
 	private volatile int weight;
 
-	private final Object empty = new Object();
+	private final AtomicReference<Command> currentCommand = new AtomicReference<Command>();
 
 	private SocketAddress remoteSocketAddress; // prevent channel is closed
 	private int sendBufferSize;
-	private MemcachedOptimizer optimiezer;
+	private final MemcachedOptimizer optimiezer;
 	private volatile boolean allowReconnect;
 
 	public static final String CURRENT_GET_KEY = "current_key";
@@ -144,26 +145,13 @@ public class MemcachedTCPSession extends DefaultTCPSession {
 	 * 
 	 * @return
 	 */
-	public final Command pollCurrentExecutingCommand() {
-		return this.executingCmds.poll();
-	}
-
-	/**
-	 * peek current command from queue
-	 * 
-	 * @return
-	 */
-	public final Command peekCurrentExecutingCommand() {
+	private final Command takeExecutingCommand() {
 		try {
-			synchronized (this.empty) {
-				while (this.executingCmds.peek() == null) {
-					this.empty.wait(1000);
-				}
-			}
+			return this.executingCmds.take();
 		} catch (InterruptedException e) {
 			Thread.currentThread().interrupt();
 		}
-		return this.executingCmds.peek();
+		return null;
 	}
 
 	/**
@@ -180,9 +168,21 @@ public class MemcachedTCPSession extends DefaultTCPSession {
 	}
 
 	public final void addCommand(Command command) {
+		// if (executingCmds.peek() == null)
+		// this.currentCommand.compareAndSet(null, command);
 		this.executingCmds.add(command);
-		synchronized (this.empty) {
-			this.empty.notifyAll();
-		}
+	}
+
+	public final void setCurrentCommand(Command cmd) {
+		this.currentCommand.set(cmd);
+	}
+
+	public final Command getCurrentCommand() {
+		return currentCommand.get();
+	}
+
+	public final void takeCurrentCommand() {
+		final Command command = takeExecutingCommand();
+		setCurrentCommand(command);
 	}
 }

@@ -37,11 +37,20 @@ public class MemcachedDecoder implements Decoder<Command> {
 	@Override
 	public Command decode(ByteBuffer buffer, Session origSession) {
 		MemcachedTCPSession session = (MemcachedTCPSession) origSession;
-		if (session.peekCurrentExecutingCommand().decode(session, buffer)) {
-			return session.pollCurrentExecutingCommand();
+		if (session.getCurrentCommand() != null) {
+			return decode0(buffer, session);
 		} else {
-			return null;
+			session.takeCurrentCommand();
+			return decode0(buffer, session);
 		}
+	}
 
+	private Command decode0(ByteBuffer buffer, MemcachedTCPSession session) {
+		if (session.getCurrentCommand().decode(session, buffer)) {
+			final Command command = session.getCurrentCommand();
+			session.setCurrentCommand(null);
+			return command;
+		}
+		return null;
 	}
 }
