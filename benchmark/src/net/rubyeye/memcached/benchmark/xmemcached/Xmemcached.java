@@ -4,12 +4,12 @@ import java.util.Properties;
 import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.atomic.AtomicLong;
 
-import com.google.code.yanf4j.util.ResourcesUtils;
-
 import net.rubyeye.memcached.BaseTest;
 import net.rubyeye.xmemcached.MemcachedClient;
 import net.rubyeye.xmemcached.XMemcachedClient;
 import net.rubyeye.xmemcached.utils.AddrUtil;
+
+import com.google.code.yanf4j.util.ResourcesUtils;
 
 public class Xmemcached extends BaseTest{
 	public static void main(String[] args) throws Exception {
@@ -43,7 +43,7 @@ public class Xmemcached extends BaseTest{
 
 	public static void test(MemcachedClient memcachedClient, int length,
 			int threads, int repeats, boolean print) throws Exception {
-		memcachedClient.flushAll();
+		memcachedClient.flushAllWithNoReply();
 		AtomicLong miss = new AtomicLong(0);
 		AtomicLong fail = new AtomicLong(0);
 		AtomicLong hit = new AtomicLong(0);

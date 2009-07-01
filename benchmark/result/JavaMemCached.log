@@ -1,26 +1,224 @@
 Java-MemCached startup
 warm up
-threads=1,repeats=20000,valueLength=64,tps=3427,miss=0,fail=0,hit=15003,all=20000,hitRate=1.00
-threads=1,repeats=20000,valueLength=128,tps=3334,miss=0,fail=0,hit=15003,all=20000,hitRate=1.00
-threads=1,repeats=20000,valueLength=512,tps=3208,miss=0,fail=0,hit=15003,all=20000,hitRate=1.00
-threads=1,repeats=20000,valueLength=1024,tps=2826,miss=0,fail=0,hit=15003,all=20000,hitRate=1.00
-threads=1,repeats=20000,valueLength=4096,tps=1929,miss=0,fail=0,hit=15003,all=20000,hitRate=1.00
-threads=1,repeats=20000,valueLength=8192,tps=1384,miss=0,fail=0,hit=15003,all=20000,hitRate=1.00
-threads=10,repeats=20000,valueLength=64,tps=8646,miss=0,fail=0,hit=150030,all=200000,hitRate=1.00
-threads=10,repeats=20000,valueLength=128,tps=8515,miss=0,fail=0,hit=150030,all=200000,hitRate=1.00
-threads=10,repeats=20000,valueLength=512,tps=7607,miss=0,fail=0,hit=150030,all=200000,hitRate=1.00
-threads=10,repeats=20000,valueLength=1024,tps=6674,miss=0,fail=0,hit=150030,all=200000,hitRate=1.00
-threads=10,repeats=20000,valueLength=4096,tps=4008,miss=0,fail=0,hit=150030,all=200000,hitRate=1.00
-threads=10,repeats=20000,valueLength=8192,tps=2449,miss=0,fail=0,hit=150030,all=200000,hitRate=1.00
-threads=50,repeats=20000,valueLength=64,tps=7974,miss=0,fail=0,hit=750150,all=1000000,hitRate=1.00
-threads=50,repeats=20000,valueLength=128,tps=7754,miss=0,fail=0,hit=750150,all=1000000,hitRate=1.00
-threads=50,repeats=20000,valueLength=512,tps=6859,miss=0,fail=0,hit=750150,all=1000000,hitRate=1.00
-threads=50,repeats=20000,valueLength=1024,tps=5903,miss=0,fail=0,hit=750150,all=1000000,hitRate=1.00
-threads=50,repeats=20000,valueLength=4096,tps=3260,miss=0,fail=0,hit=750150,all=1000000,hitRate=1.00
-threads=50,repeats=20000,valueLength=8192,tps=1988,miss=0,fail=0,hit=750150,all=1000000,hitRate=1.00
-threads=100,repeats=20000,valueLength=64,tps=8866,miss=442380,fail=0,hit=1057920,all=2000000,hitRate=0.71
-threads=100,repeats=20000,valueLength=128,tps=7641,miss=135271,fail=0,hit=1365029,all=2000000,hitRate=0.91
-threads=100,repeats=20000,valueLength=512,tps=6705,miss=148345,fail=0,hit=1351955,all=2000000,hitRate=0.90
-threads=100,repeats=20000,valueLength=1024,tps=5685,miss=173706,fail=0,hit=1326594,all=2000000,hitRate=0.88
-threads=100,repeats=20000,valueLength=4096,tps=3103,miss=149940,fail=0,hit=1350360,all=2000000,hitRate=0.90
-threads=100,repeats=20000,valueLength=8192,tps=2075,miss=237396,fail=0,hit=1262904,all=2000000,hitRate=0.84
+threads=1,repeats=20000,valueLength=64,tps=3297,miss=0,fail=0,hit=15003,all=20000,hitRate=1.00
+threads=1,repeats=20000,valueLength=128,tps=3205,miss=0,fail=0,hit=15003,all=20000,hitRate=1.00
+threads=1,repeats=20000,valueLength=512,tps=2895,miss=0,fail=0,hit=15003,all=20000,hitRate=1.00
+threads=1,repeats=20000,valueLength=1024,tps=2478,miss=0,fail=0,hit=15003,all=20000,hitRate=1.00
+threads=1,repeats=20000,valueLength=4096,tps=1558,miss=0,fail=0,hit=15003,all=20000,hitRate=1.00
+threads=1,repeats=20000,valueLength=8192,tps=1012,miss=0,fail=0,hit=15003,all=20000,hitRate=1.00
+threads=10,repeats=20000,valueLength=64,tps=8396,miss=0,fail=0,hit=150030,all=200000,hitRate=1.00
+threads=10,repeats=20000,valueLength=128,tps=8269,miss=0,fail=0,hit=150030,all=200000,hitRate=1.00
+threads=10,repeats=20000,valueLength=512,tps=7434,miss=0,fail=0,hit=150030,all=200000,hitRate=1.00
+threads=10,repeats=20000,valueLength=1024,tps=6369,miss=0,fail=0,hit=150030,all=200000,hitRate=1.00
+threads=10,repeats=20000,valueLength=4096,tps=3811,miss=0,fail=0,hit=150030,all=200000,hitRate=1.00
+threads=10,repeats=20000,valueLength=8192,tps=2276,miss=0,fail=0,hit=150030,all=200000,hitRate=1.00
+threads=50,repeats=20000,valueLength=64,tps=7859,miss=0,fail=0,hit=750150,all=1000000,hitRate=1.00
+threads=50,repeats=20000,valueLength=128,tps=7465,miss=0,fail=0,hit=750150,all=1000000,hitRate=1.00
+threads=50,repeats=20000,valueLength=512,tps=6546,miss=0,fail=0,hit=750150,all=1000000,hitRate=1.00
+threads=50,repeats=20000,valueLength=1024,tps=5744,miss=0,fail=0,hit=750150,all=1000000,hitRate=1.00
+[ERROR] ++++ failed to get SockIO obj for: 192.168.207.101:12000
+0 [Thread-386] ERROR com.danga.MemCached.SockIOPool  - ++++ failed to get SockIO obj for: 192.168.207.101:12000
+[ERROR] 
+java.net.SocketTimeoutException
+	at sun.nio.ch.SocketAdaptor.connect(SocketAdaptor.java:109)
+	at com.danga.MemCached.SockIOPool$SockIO.getSocket(SockIOPool.java:1612)
+	at com.danga.MemCached.SockIOPool$SockIO.<init>(SockIOPool.java:1585)
+	at com.danga.MemCached.SockIOPool.createSocket(SockIOPool.java:782)
+	at com.danga.MemCached.SockIOPool.getConnection(SockIOPool.java:1051)
+	at com.danga.MemCached.SockIOPool.getSock(SockIOPool.java:932)
+	at com.danga.MemCached.MemCachedClient.set(MemCachedClient.java:700)
+	at com.danga.MemCached.MemCachedClient.set(MemCachedClient.java:518)
+	at net.rubyeye.memcached.benchmark.java_memcached.ReadWriteThread.set(ReadWriteThread.java:27)
+	at net.rubyeye.memcached.BaseReadWriteThread.run(BaseReadWriteThread.java:43)
+1 [Thread-386] ERROR com.danga.MemCached.SockIOPool  - 
+java.net.SocketTimeoutException
+	at sun.nio.ch.SocketAdaptor.connect(SocketAdaptor.java:109)
+	at com.danga.MemCached.SockIOPool$SockIO.getSocket(SockIOPool.java:1612)
+	at com.danga.MemCached.SockIOPool$SockIO.<init>(SockIOPool.java:1585)
+	at com.danga.MemCached.SockIOPool.createSocket(SockIOPool.java:782)
+	at com.danga.MemCached.SockIOPool.getConnection(SockIOPool.java:1051)
+	at com.danga.MemCached.SockIOPool.getSock(SockIOPool.java:932)
+	at com.danga.MemCached.MemCachedClient.set(MemCachedClient.java:700)
+	at com.danga.MemCached.MemCachedClient.set(MemCachedClient.java:518)
+	at net.rubyeye.memcached.benchmark.java_memcached.ReadWriteThread.set(ReadWriteThread.java:27)
+	at net.rubyeye.memcached.BaseReadWriteThread.run(BaseReadWriteThread.java:43)
+[ERROR] ++++ failed to get SockIO obj for: 192.168.207.101:12000
+4 [Thread-399] ERROR com.danga.MemCached.SockIOPool  - ++++ failed to get SockIO obj for: 192.168.207.101:12000
+[ERROR] 
+java.net.SocketTimeoutException
+	at sun.nio.ch.SocketAdaptor.connect(SocketAdaptor.java:109)
+	at com.danga.MemCached.SockIOPool$SockIO.getSocket(SockIOPool.java:1612)
+	at com.danga.MemCached.SockIOPool$SockIO.<init>(SockIOPool.java:1585)
+	at com.danga.MemCached.SockIOPool.createSocket(SockIOPool.java:782)
+	at com.danga.MemCached.SockIOPool.getConnection(SockIOPool.java:1051)
+	at com.danga.MemCached.SockIOPool.getSock(SockIOPool.java:932)
+	at com.danga.MemCached.MemCachedClient.set(MemCachedClient.java:700)
+	at com.danga.MemCached.MemCachedClient.set(MemCachedClient.java:518)
+	at net.rubyeye.memcached.benchmark.java_memcached.ReadWriteThread.set(ReadWriteThread.java:27)
+	at net.rubyeye.memcached.BaseReadWriteThread.run(BaseReadWriteThread.java:43)
+11 [Thread-399] ERROR com.danga.MemCached.SockIOPool  - 
+java.net.SocketTimeoutException
+	at sun.nio.ch.SocketAdaptor.connect(SocketAdaptor.java:109)
+	at com.danga.MemCached.SockIOPool$SockIO.getSocket(SockIOPool.java:1612)
+	at com.danga.MemCached.SockIOPool$SockIO.<init>(SockIOPool.java:1585)
+	at com.danga.MemCached.SockIOPool.createSocket(SockIOPool.java:782)
+	at com.danga.MemCached.SockIOPool.getConnection(SockIOPool.java:1051)
+	at com.danga.MemCached.SockIOPool.getSock(SockIOPool.java:932)
+	at com.danga.MemCached.MemCachedClient.set(MemCachedClient.java:700)
+	at com.danga.MemCached.MemCachedClient.set(MemCachedClient.java:518)
+	at net.rubyeye.memcached.benchmark.java_memcached.ReadWriteThread.set(ReadWriteThread.java:27)
+	at net.rubyeye.memcached.BaseReadWriteThread.run(BaseReadWriteThread.java:43)
+[ERROR] ++++ failed to get SockIO obj for: 192.168.207.101:12000
+8 [Thread-404] ERROR com.danga.MemCached.SockIOPool  - ++++ failed to get SockIO obj for: 192.168.207.101:12000
+[ERROR] 
+java.net.SocketTimeoutException
+	at sun.nio.ch.SocketAdaptor.connect(SocketAdaptor.java:109)
+	at com.danga.MemCached.SockIOPool$SockIO.getSocket(SockIOPool.java:1612)
+	at com.danga.MemCached.SockIOPool$SockIO.<init>(SockIOPool.java:1585)
+	at com.danga.MemCached.SockIOPool.createSocket(SockIOPool.java:782)
+	at com.danga.MemCached.SockIOPool.getConnection(SockIOPool.java:1051)
+	at com.danga.MemCached.SockIOPool.getSock(SockIOPool.java:932)
+	at com.danga.MemCached.MemCachedClient.set(MemCachedClient.java:700)
+	at com.danga.MemCached.MemCachedClient.set(MemCachedClient.java:518)
+	at net.rubyeye.memcached.benchmark.java_memcached.ReadWriteThread.set(ReadWriteThread.java:27)
+	at net.rubyeye.memcached.BaseReadWriteThread.run(BaseReadWriteThread.java:43)
+11 [Thread-404] ERROR com.danga.MemCached.SockIOPool  - 
+java.net.SocketTimeoutException
+	at sun.nio.ch.SocketAdaptor.connect(SocketAdaptor.java:109)
+	at com.danga.MemCached.SockIOPool$SockIO.getSocket(SockIOPool.java:1612)
+	at com.danga.MemCached.SockIOPool$SockIO.<init>(SockIOPool.java:1585)
+	at com.danga.MemCached.SockIOPool.createSocket(SockIOPool.java:782)
+	at com.danga.MemCached.SockIOPool.getConnection(SockIOPool.java:1051)
+	at com.danga.MemCached.SockIOPool.getSock(SockIOPool.java:932)
+	at com.danga.MemCached.MemCachedClient.set(MemCachedClient.java:700)
+	at com.danga.MemCached.MemCachedClient.set(MemCachedClient.java:518)
+	at net.rubyeye.memcached.benchmark.java_memcached.ReadWriteThread.set(ReadWriteThread.java:27)
+	at net.rubyeye.memcached.BaseReadWriteThread.run(BaseReadWriteThread.java:43)
+[ERROR] ++++ failed to get SockIO obj for: 192.168.207.101:12000
+7 [Thread-412] ERROR com.danga.MemCached.SockIOPool  - ++++ failed to get SockIO obj for: 192.168.207.101:12000
+[ERROR] 
+java.net.SocketTimeoutException
+	at sun.nio.ch.SocketAdaptor.connect(SocketAdaptor.java:109)
+	at com.danga.MemCached.SockIOPool$SockIO.getSocket(SockIOPool.java:1612)
+	at com.danga.MemCached.SockIOPool$SockIO.<init>(SockIOPool.java:1585)
+	at com.danga.MemCached.SockIOPool.createSocket(SockIOPool.java:782)
+	at com.danga.MemCached.SockIOPool.getConnection(SockIOPool.java:1051)
+	at com.danga.MemCached.SockIOPool.getSock(SockIOPool.java:932)
+	at com.danga.MemCached.MemCachedClient.set(MemCachedClient.java:700)
+	at com.danga.MemCached.MemCachedClient.set(MemCachedClient.java:518)
+	at net.rubyeye.memcached.benchmark.java_memcached.ReadWriteThread.set(ReadWriteThread.java:27)
+	at net.rubyeye.memcached.BaseReadWriteThread.run(BaseReadWriteThread.java:43)
+11 [Thread-412] ERROR com.danga.MemCached.SockIOPool  - 
+java.net.SocketTimeoutException
+	at sun.nio.ch.SocketAdaptor.connect(SocketAdaptor.java:109)
+	at com.danga.MemCached.SockIOPool$SockIO.getSocket(SockIOPool.java:1612)
+	at com.danga.MemCached.SockIOPool$SockIO.<init>(SockIOPool.java:1585)
+	at com.danga.MemCached.SockIOPool.createSocket(SockIOPool.java:782)
+	at com.danga.MemCached.SockIOPool.getConnection(SockIOPool.java:1051)
+	at com.danga.MemCached.SockIOPool.getSock(SockIOPool.java:932)
+	at com.danga.MemCached.MemCachedClient.set(MemCachedClient.java:700)
+	at com.danga.MemCached.MemCachedClient.set(MemCachedClient.java:518)
+	at net.rubyeye.memcached.benchmark.java_memcached.ReadWriteThread.set(ReadWriteThread.java:27)
+	at net.rubyeye.memcached.BaseReadWriteThread.run(BaseReadWriteThread.java:43)
+[ERROR] ++++ failed to get SockIO obj for: 192.168.207.101:12000
+7 [Thread-415] ERROR com.danga.MemCached.SockIOPool  - ++++ failed to get SockIO obj for: 192.168.207.101:12000
+[ERROR] 
+java.net.SocketTimeoutException
+	at sun.nio.ch.SocketAdaptor.connect(SocketAdaptor.java:109)
+	at com.danga.MemCached.SockIOPool$SockIO.getSocket(SockIOPool.java:1612)
+	at com.danga.MemCached.SockIOPool$SockIO.<init>(SockIOPool.java:1585)
+	at com.danga.MemCached.SockIOPool.createSocket(SockIOPool.java:782)
+	at com.danga.MemCached.SockIOPool.getConnection(SockIOPool.java:1051)
+	at com.danga.MemCached.SockIOPool.getSock(SockIOPool.java:932)
+	at com.danga.MemCached.MemCachedClient.set(MemCachedClient.java:700)
+	at com.danga.MemCached.MemCachedClient.set(MemCachedClient.java:518)
+	at net.rubyeye.memcached.benchmark.java_memcached.ReadWriteThread.set(ReadWriteThread.java:27)
+	at net.rubyeye.memcached.BaseReadWriteThread.run(BaseReadWriteThread.java:43)
+12 [Thread-415] ERROR com.danga.MemCached.SockIOPool  - 
+java.net.SocketTimeoutException
+	at sun.nio.ch.SocketAdaptor.connect(SocketAdaptor.java:109)
+	at com.danga.MemCached.SockIOPool$SockIO.getSocket(SockIOPool.java:1612)
+	at com.danga.MemCached.SockIOPool$SockIO.<init>(SockIOPool.java:1585)
+	at com.danga.MemCached.SockIOPool.createSocket(SockIOPool.java:782)
+	at com.danga.MemCached.SockIOPool.getConnection(SockIOPool.java:1051)
+	at com.danga.MemCached.SockIOPool.getSock(SockIOPool.java:932)
+	at com.danga.MemCached.MemCachedClient.set(MemCachedClient.java:700)
+	at com.danga.MemCached.MemCachedClient.set(MemCachedClient.java:518)
+	at net.rubyeye.memcached.benchmark.java_memcached.ReadWriteThread.set(ReadWriteThread.java:27)
+	at net.rubyeye.memcached.BaseReadWriteThread.run(BaseReadWriteThread.java:43)
+[ERROR] ++++ failed to get SockIO obj for: 192.168.207.101:12000
+7 [Thread-393] ERROR com.danga.MemCached.SockIOPool  - ++++ failed to get SockIO obj for: 192.168.207.101:12000
+[ERROR] 
+java.net.SocketTimeoutException
+	at sun.nio.ch.SocketAdaptor.connect(SocketAdaptor.java:109)
+	at com.danga.MemCached.SockIOPool$SockIO.getSocket(SockIOPool.java:1612)
+	at com.danga.MemCached.SockIOPool$SockIO.<init>(SockIOPool.java:1585)
+	at com.danga.MemCached.SockIOPool.createSocket(SockIOPool.java:782)
+	at com.danga.MemCached.SockIOPool.getConnection(SockIOPool.java:1051)
+	at com.danga.MemCached.SockIOPool.getSock(SockIOPool.java:932)
+	at com.danga.MemCached.MemCachedClient.set(MemCachedClient.java:700)
+	at com.danga.MemCached.MemCachedClient.set(MemCachedClient.java:518)
+	at net.rubyeye.memcached.benchmark.java_memcached.ReadWriteThread.set(ReadWriteThread.java:27)
+	at net.rubyeye.memcached.BaseReadWriteThread.run(BaseReadWriteThread.java:43)
+12 [Thread-393] ERROR com.danga.MemCached.SockIOPool  - 
+java.net.SocketTimeoutException
+	at sun.nio.ch.SocketAdaptor.connect(SocketAdaptor.java:109)
+	at com.danga.MemCached.SockIOPool$SockIO.getSocket(SockIOPool.java:1612)
+	at com.danga.MemCached.SockIOPool$SockIO.<init>(SockIOPool.java:1585)
+	at com.danga.MemCached.SockIOPool.createSocket(SockIOPool.java:782)
+	at com.danga.MemCached.SockIOPool.getConnection(SockIOPool.java:1051)
+	at com.danga.MemCached.SockIOPool.getSock(SockIOPool.java:932)
+	at com.danga.MemCached.MemCachedClient.set(MemCachedClient.java:700)
+	at com.danga.MemCached.MemCachedClient.set(MemCachedClient.java:518)
+	at net.rubyeye.memcached.benchmark.java_memcached.ReadWriteThread.set(ReadWriteThread.java:27)
+	at net.rubyeye.memcached.BaseReadWriteThread.run(BaseReadWriteThread.java:43)
+[ERROR] ++++ attempting to write to closed socket
+66 [Thread-401] ERROR com.danga.MemCached.SockIOPool$SockIO  - ++++ attempting to write to closed socket
+[ERROR] ++++ exception thrown while writing bytes to server on set
+67 [Thread-401] ERROR com.danga.MemCached.MemCachedClient  - ++++ exception thrown while writing bytes to server on set
+[ERROR] ++++ attempting to write to closed socket
+java.io.IOException: ++++ attempting to write to closed socket
+	at com.danga.MemCached.SockIOPool$SockIO.write(SockIOPool.java:1867)
+	at com.danga.MemCached.MemCachedClient.set(MemCachedClient.java:817)
+	at com.danga.MemCached.MemCachedClient.set(MemCachedClient.java:518)
+	at net.rubyeye.memcached.benchmark.java_memcached.ReadWriteThread.set(ReadWriteThread.java:27)
+	at net.rubyeye.memcached.BaseReadWriteThread.run(BaseReadWriteThread.java:43)
+67 [Thread-401] ERROR com.danga.MemCached.MemCachedClient  - ++++ attempting to write to closed socket
+java.io.IOException: ++++ attempting to write to closed socket
+	at com.danga.MemCached.SockIOPool$SockIO.write(SockIOPool.java:1867)
+	at com.danga.MemCached.MemCachedClient.set(MemCachedClient.java:817)
+	at com.danga.MemCached.MemCachedClient.set(MemCachedClient.java:518)
+	at net.rubyeye.memcached.benchmark.java_memcached.ReadWriteThread.set(ReadWriteThread.java:27)
+	at net.rubyeye.memcached.BaseReadWriteThread.run(BaseReadWriteThread.java:43)
+[ERROR] ++++ failed to close socket : 
+67 [Thread-401] ERROR com.danga.MemCached.MemCachedClient  - ++++ failed to close socket : 
+java.util.ConcurrentModificationException
+        at java.util.IdentityHashMap$IdentityHashMapIterator.remove(IdentityHashMap.java:729)
+        at com.danga.MemCached.SockIOPool.clearHostFromPool(SockIOPool.java:1131)
+        at com.danga.MemCached.SockIOPool.createSocket(SockIOPool.java:814)
+        at com.danga.MemCached.SockIOPool.getConnection(SockIOPool.java:1051)
+        at com.danga.MemCached.SockIOPool.getSock(SockIOPool.java:932)
+        at com.danga.MemCached.MemCachedClient.set(MemCachedClient.java:700)
+        at com.danga.MemCached.MemCachedClient.set(MemCachedClient.java:518)
+        at net.rubyeye.memcached.benchmark.java_memcached.ReadWriteThread.set(ReadWriteThread.java:27)
+        at net.rubyeye.memcached.BaseReadWriteThread.run(BaseReadWriteThread.java:43)
+java.util.ConcurrentModificationException
+        at java.util.IdentityHashMap$IdentityHashMapIterator.remove(IdentityHashMap.java:729)
+        at com.danga.MemCached.SockIOPool.clearHostFromPool(SockIOPool.java:1131)
+        at com.danga.MemCached.SockIOPool.createSocket(SockIOPool.java:814)
+        at com.danga.MemCached.SockIOPool.getConnection(SockIOPool.java:1051)
+        at com.danga.MemCached.SockIOPool.getSock(SockIOPool.java:932)
+        at com.danga.MemCached.MemCachedClient.set(MemCachedClient.java:700)
+        at com.danga.MemCached.MemCachedClient.set(MemCachedClient.java:518)
+        at net.rubyeye.memcached.benchmark.java_memcached.ReadWriteThread.set(ReadWriteThread.java:27)
+        at net.rubyeye.memcached.BaseReadWriteThread.run(BaseReadWriteThread.java:43)
+java.util.ConcurrentModificationException
+        at java.util.IdentityHashMap$IdentityHashMapIterator.remove(IdentityHashMap.java:729)
+        at com.danga.MemCached.SockIOPool.clearHostFromPool(SockIOPool.java:1131)
+        at com.danga.MemCached.SockIOPool.createSocket(SockIOPool.java:814)
+        at com.danga.MemCached.SockIOPool.getConnection(SockIOPool.java:1051)
+        at com.danga.MemCached.SockIOPool.getSock(SockIOPool.java:932)
+        at com.danga.MemCached.MemCachedClient.set(MemCachedClient.java:700)
+        at com.danga.MemCached.MemCachedClient.set(MemCachedClient.java:518)
+        at net.rubyeye.memcached.benchmark.java_memcached.ReadWriteThread.set(ReadWriteThread.java:27)
+        at net.rubyeye.memcached.BaseReadWriteThread.run(BaseReadWriteThread.java:43)

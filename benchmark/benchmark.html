@@ -15,14 +15,16 @@ PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
 <body>
 <h1>Performance Comparison between Java Memcached Client</h1>
 URL:
-<a href="http://xmemcached.googlecode.com/svn/trunk/benchmark/benchmark.html">http://xmemcached.googlecode.com/svn/trunk/benchmark/benchmark.html</a>
+<a
+	href="http://xmemcached.googlecode.com/svn/trunk/benchmark/benchmark.html">http://xmemcached.googlecode.com/svn/trunk/benchmark/benchmark.html</a>
 
 <p style="text-align: justify;">There are several memcached client
-for java,include <a href="http://code.google.com/p/spymemcached">spymemcached</a>, &nbsp;<a href="http://www.whalin.com/memcached/">Java-MemCached</a> , <a
+for java,include <a href="http://code.google.com/p/spymemcached">spymemcached</a>,
+&nbsp;<a href="http://www.whalin.com/memcached/">Java-MemCached</a> , <a
 	href="http://code.google.com/p/xmemcached/">Xmemcached</a> and <a
-	href="http://code.google.com/p/memcache-client-forjava/">memcached-client-forjava(A optimiezed Java-MemCached)</a> etc. The
-performance numbers of the 4 open source memcached client are presented
-here to help you make choice.</p>
+	href="http://code.google.com/p/memcache-client-forjava/">memcached-client-forjava(A
+optimiezed Java-MemCached)</a> etc. The performance numbers of the 4 open
+source memcached client are presented here to help you make choice.</p>
 
 <h2>Where's the Graph?</h2>
 
@@ -31,13 +33,13 @@ down to see the graphs first.</p>
 
 <h2>Test Scenario</h2>
 
-<p style="text-align: justify;">A memcached server runs on a linux
-machine</p>
+<p style="text-align: justify;">Two memcached server runs on different linux
+machines</p>
 
-<p style="text-align: justify;">A java client connect to memcached
-server,then start numbers of threads to repeat themself to store and
-retrive data from memcachd concurrently,write 25% and read 75%,ensure average hit rate above 90%.<br/>
-I can't test more threads,because of memcached's evictions cut down the hit rate.I will make a new test for morn than one memcached servers to solve this problem.
+<p style="text-align: justify;">A java client connect to two
+memcached servers,then start numbers of threads to repeat themself to
+store and retrive data from these two memcached servers
+concurrently,write 25% and read 75%,ensure average hit rate above 90%.<br />
 </p>
 
 <h2>Test Environment</h2>
@@ -53,24 +55,34 @@ I can't test more threads,because of memcached's evictions cut down the hit rate
 		</li>
 		<li>Java Client
 		<ul>
-		    <li>JVM Version: Sun JDK 1.6.0_07 </li>
-		    <li>All clients use memcached text protocol.
-			<li>xmemcached 1.1.1,default configuration</li>
+			<li>JVM Version: Sun JDK 1.6.0_07</li>
+			<li>All clients use memcached text protocol.
+			<li>xmemcached 1.1.3,default configuration</li>
 			<li>Spymemcached 2.3.1,default configuration</li>
-			<li>memcache-client-forjava 2.5.1 and Java-Memcached 2.0.1,SockIOPool is default configuration,set
-			compress threshold to 16K</li>
+			<li>memcache-client-forjava 2.5.1 and Java-Memcached
+			2.0.1,SockIOPool is default configuration,set compress threshold to
+			16K</li>
 			<li>JVM args: -server -Xmx1024m</li>
-			<li>Xmemcached and Spymemcached is nio based.So they have to set operation timeout,both are set to 3 seconds.</li>
+			<li>Xmemcached and Spymemcached is nio based.So they have to set
+			operation timeout,both are set to 3 seconds.</li>
 		</ul>
 		</li>
 	</ul>
 	</li>
 	<li>Hardware
 	<ul>
-		<li>Server
+		<li>Server1
 		<ul>
 			<li>CPU: 8 x Intel(R) Xeon(R) 2.33GHz</li>
 			<li>O/S: Linux 2.6.9-67.ELsmp (redhat)</li>
+			<li>RAM: 16 GiB</li>
+			<li>NIC: Broadcom NetXtreme Gigabit Ethernet PCI express</li>
+		</ul>
+		</li>
+		<li>Server2
+		<ul>
+			<li>CPU: 4 x Intel(R) Xeon(R) 1.86GHz</li>
+			<li>O/S: Linux 2.6.9-55.ELsmp (redhat)</li>
 			<li>RAM: 16 GiB</li>
 			<li>NIC: Broadcom NetXtreme Gigabit Ethernet PCI express</li>
 		</ul>
@@ -88,43 +100,70 @@ I can't test more threads,because of memcached's evictions cut down the hit rate
 </ul>
 
 <h2>Test Result</h2>
-
+<p style="text-align: justify;">The result which is zero,it is
+because of some exceptions occured on that condition,make the test
+failed.You can find detail at the Subversion repository's <strong>result</strong> folder<br />
+</p>
 <h3>Client and Server on Different Machines</h3>
-<p><h3>Part1 Compare by threads number</h3> 
-<img src="result/images/bytes64.jpg" /> <br>
-<br><br>
-<br>
-<img src="result/images/bytes128.jpg"><br>
-<br><br>
-<br>
-<img src="result/images/bytes512.jpg" /> <br>
-<br><br>
-<br>
-<img src="result/images/bytes1024.jpg" /> <br>< 
-<br><br>
-<br>
-<img src="result/images/bytes4096.jpg" /> <br>
-<br><br>
-<br>
-<img src="result/images/bytes4096.jpg" /> <br>
-<br><br>
-<br>
-<img src="result/images/bytes8192.jpg" /> <br>
-<br><br>
+<p>
+<h3>Part1 Compared by threads number</h3>
+<img src="result/images/bytes64.jpg" />
 <br>
 <br>
-<p><h3>Part2 Compare by value size</h3> 
-<img src="result/images/threads1.jpg" /> <br>
-<br><br>
 <br>
-<img src="result/images/threads10.jpg"><br>
-<br><br>
 <br>
-<img src="result/images/threads50.jpg" /> <br>
-<br><br>
+<img src="result/images/bytes128.jpg">
 <br>
-<img src="result/images/threads100.jpg" /> <br>
-<br><br>
+<br>
+<br>
+<br>
+<img src="result/images/bytes512.jpg" />
+<br>
+<br>
+<br>
+<br>
+<img src="result/images/bytes1024.jpg" />
+<br>< 
+<br>
+<br>
+<br>
+<img src="result/images/bytes4096.jpg" />
+<br>
+<br>
+<br>
+<br>
+<img src="result/images/bytes4096.jpg" />
+<br>
+<br>
+<br>
+<br>
+<img src="result/images/bytes8192.jpg" />
+<br>
+<br>
+<br>
+<br>
+<br>
+<p>
+<h3>Part2 Compared by value size</h3>
+<img src="result/images/threads1.jpg" />
+<br>
+<br>
+<br>
+<br>
+<img src="result/images/threads10.jpg">
+<br>
+<br>
+<br>
+<br>
+<img src="result/images/threads50.jpg" />
+<br>
+<br>
+<br>
+<br>
+<img src="result/images/threads100.jpg" />
+<br>
+<br>
+<br>
 <br>
 <h2>Running the Tests by Yourself</h2>
 
