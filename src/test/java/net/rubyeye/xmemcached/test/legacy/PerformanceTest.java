@@ -121,9 +121,9 @@ public class PerformanceTest {
 			try {
 				for (int i = 0; i < this.repeat; i++) {
 
-					String key = getKey(this.start + i);
+					String key = getKey(10);
 					String result = (String) this.mc.get(key, 5000);
-					if (!result.equals(getValue(this.start + i))) {
+					if (!result.equals(getValue(10))) {
 						System.out.println(key + " " + result);
 						System.err.println("get error");
 						System.exit(1);

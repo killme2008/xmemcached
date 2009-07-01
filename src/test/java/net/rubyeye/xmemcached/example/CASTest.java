@@ -51,10 +51,12 @@ class CASThread extends Thread {
 
 	}
 
+	@Override
 	public void run() {
 		try {
-			if (mc.cas("a", 0, new IncrmentOperation()))
+			if (this.mc.cas("a", 0, new IncrmentOperation())) {
 				this.cd.countDown();
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -75,8 +77,9 @@ public class CASTest {
 		CountDownLatch cdl = new CountDownLatch(NUM);
 		long start = System.currentTimeMillis();
 		// 开NUM个线程递增变量a
-		for (int i = 0; i < NUM; i++)
+		for (int i = 0; i < NUM; i++) {
 			new CASThread(mc, cdl).start();
+		}
 
 		cdl.await();
 		System.out.println("test cas,timed:"

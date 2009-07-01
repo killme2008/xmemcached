@@ -50,12 +50,18 @@ public enum HashAlgorithm {
 	 */
 	KETAMA_HASH,
 
+	/**
+	 * From mysql source
+	 */
 	MYSQL_HASH,
 
 	ELF_HASH,
 
 	RS_HASH,
 
+	/**
+	 * From lua source,it is used for long key
+	 */
 	LUA_HASH;
 
 	private static final long FNV_64_INIT = 0xcbf29ce484222325L;

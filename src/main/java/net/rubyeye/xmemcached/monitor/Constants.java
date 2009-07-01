@@ -25,6 +25,7 @@ public class Constants {
 	public static final String XMEMCACHED_JMX_ENABLE = "xmemcached.jmx.enable";
 	public static final byte[] CRLF = { '\r', '\n' };
 	public static final byte[] GET = { 'g', 'e', 't' };
+	public static final byte[] GETS = { 'g', 'e', 't','s' };
 	public static final byte SPACE = ' ';
 
 	public static final int MAX_SESSION_READ_BUFFER_SIZE = 768 * 1024;

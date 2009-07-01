@@ -35,7 +35,7 @@ import org.apache.commons.logging.LogFactory;
  */
 public class Optimizer implements OptimizerMBean, MemcachedOptimizer {
 
-	public static final int DEFAULT_MERGE_FACTOR = 150;
+	public static final int DEFAULT_MERGE_FACTOR = 200;
 	private int mergeFactor = DEFAULT_MERGE_FACTOR; // default merge factor;
 	private boolean optimiezeGet = true;
 	private boolean optimiezeMergeBuffer = true;
@@ -133,11 +133,13 @@ public class Optimizer implements OptimizerMBean, MemcachedOptimizer {
 	@SuppressWarnings("unchecked")
 	public final Command optimiezeGet(final Queue writeQueue,
 			final BlockingQueue<Command> executingCmds, Command optimiezeCommand) {
-		if (optimiezeCommand.getCommandType() == CommandType.GET_ONE) {
+		if (optimiezeCommand.getCommandType() == CommandType.GET_ONE
+				|| optimiezeCommand.getCommandType() == CommandType.GETS_ONE) {
 			// 优化get操作
 			if (this.optimiezeGet) {
 				optimiezeCommand = mergeGetCommands(optimiezeCommand,
-						writeQueue, executingCmds);
+						writeQueue, executingCmds, optimiezeCommand
+								.getCommandType());
 			}
 		}
 		return optimiezeCommand;
@@ -175,9 +177,11 @@ public class Optimizer implements OptimizerMBean, MemcachedOptimizer {
 
 			writeQueue.remove();
 			// if it is get_one command,try to merge get commands
-			if (nextCmd.getCommandType() == CommandType.GET_ONE
+			if ((nextCmd.getCommandType() == CommandType.GET_ONE || nextCmd
+					.getCommandType() == CommandType.GETS_ONE)
 					&& this.optimiezeGet) {
-				nextCmd = mergeGetCommands(nextCmd, writeQueue, executingCmds);
+				nextCmd = mergeGetCommands(nextCmd, writeQueue, executingCmds,
+						nextCmd.getCommandType());
 			}
 
 			commands.add(nextCmd);
@@ -226,7 +230,8 @@ public class Optimizer implements OptimizerMBean, MemcachedOptimizer {
 
 	@SuppressWarnings("unchecked")
 	private final Command mergeGetCommands(final Command currentCmd,
-			final Queue writeQueue, final BlockingQueue<Command> executingCmds) {
+			final Queue writeQueue, final BlockingQueue<Command> executingCmds,
+			CommandType commandType) {
 		Map<Object, Command> mergeCommands = null;
 		int mergeCount = 1;
 		final StringBuilder key = new StringBuilder();
@@ -241,7 +246,7 @@ public class Optimizer implements OptimizerMBean, MemcachedOptimizer {
 				writeQueue.remove();
 				continue;
 			}
-			if (nextCmd.getCommandType() == CommandType.GET_ONE) {
+			if (nextCmd.getCommandType() == commandType) {
 				if (mergeCommands == null) { // lazy initialize
 					mergeCommands = new HashMap<Object, Command>(
 							this.mergeFactor / 2);
@@ -277,20 +282,22 @@ public class Optimizer implements OptimizerMBean, MemcachedOptimizer {
 				log.debug("Merge optimieze:merge " + mergeCount
 						+ " get commands");
 			}
-			return newMergedCommand(mergeCommands, mergeCount, key);
+			return newMergedCommand(mergeCommands, mergeCount, key, commandType);
 		}
 	}
 
 	private Command newMergedCommand(final Map<Object, Command> mergeCommands,
-			int mergeCount, final StringBuilder key) {
+			int mergeCount, final StringBuilder key,
+			final CommandType commandType) {
 		byte[] keyBytes = ByteUtils.getBytes(key.toString());
-		final IoBuffer buffer = this.bufferAllocator
-				.allocate(Constants.GET.length + Constants.CRLF.length + 1
-						+ keyBytes.length);
-		ByteUtils.setArguments(buffer, Constants.GET, keyBytes);
+		byte[] cmdBytes = commandType == CommandType.GET_ONE ? Constants.GET
+				: Constants.GETS;
+		final IoBuffer buffer = this.bufferAllocator.allocate(cmdBytes.length
+				+ Constants.CRLF.length + 1 + keyBytes.length);
+		ByteUtils.setArguments(buffer, cmdBytes, keyBytes);
 		buffer.flip();
 		Command cmd = new TextGetOneCommand(key.toString(), keyBytes,
-				CommandType.GET_ONE, null) {
+				commandType, null) {
 			@Override
 			public Map<Object, Command> getMergeCommands() {
 				return mergeCommands;
