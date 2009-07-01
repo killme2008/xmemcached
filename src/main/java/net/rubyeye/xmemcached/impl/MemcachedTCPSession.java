@@ -168,8 +168,6 @@ public class MemcachedTCPSession extends DefaultTCPSession {
 	}
 
 	public final void addCommand(Command command) {
-		// if (executingCmds.peek() == null)
-		// this.currentCommand.compareAndSet(null, command);
 		this.executingCmds.add(command);
 	}
 

@@ -76,7 +76,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 	private long opTimeout = DEFAULT_OP_TIMEOUT;
 	private long connectTimeout = DEFAULT_CONNECT_TIMEOUT; // 连接超时
 
-	private CopyOnWriteArrayList<MemcachedClientStateListenerAdapter> stateListenerAdapters = new CopyOnWriteArrayList<MemcachedClientStateListenerAdapter>();
+	private final CopyOnWriteArrayList<MemcachedClientStateListenerAdapter> stateListenerAdapters = new CopyOnWriteArrayList<MemcachedClientStateListenerAdapter>();
 
 	/*
 	 * (non-Javadoc)
@@ -563,8 +563,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 		configuration.setTcpNoDelay(DEFAULT_TCP_NO_DELAY);
 		configuration.setReadThreadCount(DEFAULT_READ_THREAD_COUNT);
 		configuration.setSessionIdleTimeout(0);
-		configuration.setWriteThreadCount(Runtime.getRuntime()
-				.availableProcessors());
+		configuration.setWriteThreadCount(0);
 		configuration.setCheckSessionTimeoutInterval(0);
 		return configuration;
 	}
