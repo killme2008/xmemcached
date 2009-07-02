@@ -180,7 +180,6 @@ public class Optimizer implements OptimizerMBean, MemcachedOptimizer {
 			writeQueue.remove();
 			if (wasFirst) {
 				wasFirst = false;
-				firstCommand.getWriteFuture().setResult(Boolean.TRUE);
 			}
 			// if it is get_one command,try to merge get commands
 			if ((nextCmd.getCommandType() == CommandType.GET_ONE || nextCmd
