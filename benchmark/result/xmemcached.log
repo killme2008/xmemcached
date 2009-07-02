@@ -1,38 +1,35 @@
-[WARN ]2009-06-30 19:05:21942 com.google.code.yanf4j.nio.impl.AbstractController[455] The Controller started at port 0 ...
-[WARN ]2009-06-30 19:05:21998 com.google.code.yanf4j.nio.impl.AbstractController[265] add session 192.168.207.163:12000
-[WARN ]2009-06-30 19:05:2242 com.google.code.yanf4j.nio.impl.AbstractController[265] add session 192.168.207.161:12000
 Xmemcached startup
 warm up
-threads=1,repeats=20000,valueLength=64,tps=4654,miss=0,fail=0,hit=15003,all=20000,hitRate=1.00
-threads=1,repeats=20000,valueLength=128,tps=4372,miss=0,fail=0,hit=15003,all=20000,hitRate=1.00
-threads=1,repeats=20000,valueLength=512,tps=3777,miss=0,fail=0,hit=15003,all=20000,hitRate=1.00
-threads=1,repeats=20000,valueLength=1024,tps=3191,miss=0,fail=0,hit=15003,all=20000,hitRate=1.00
-threads=1,repeats=20000,valueLength=4096,tps=1720,miss=0,fail=0,hit=15003,all=20000,hitRate=1.00
-threads=1,repeats=20000,valueLength=8192,tps=1074,miss=0,fail=0,hit=15003,all=20000,hitRate=1.00
-threads=10,repeats=20000,valueLength=64,tps=21270,miss=0,fail=0,hit=150030,all=200000,hitRate=1.00
-threads=10,repeats=20000,valueLength=128,tps=20341,miss=0,fail=0,hit=150030,all=200000,hitRate=1.00
-threads=10,repeats=20000,valueLength=512,tps=16455,miss=0,fail=0,hit=150030,all=200000,hitRate=1.00
-threads=10,repeats=20000,valueLength=1024,tps=13427,miss=0,fail=0,hit=150030,all=200000,hitRate=1.00
-threads=10,repeats=20000,valueLength=4096,tps=5214,miss=0,fail=0,hit=150030,all=200000,hitRate=1.00
-threads=10,repeats=20000,valueLength=8192,tps=2462,miss=0,fail=0,hit=150030,all=200000,hitRate=1.00
-threads=50,repeats=20000,valueLength=64,tps=34179,miss=0,fail=0,hit=750150,all=1000000,hitRate=1.00
-threads=50,repeats=20000,valueLength=128,tps=31063,miss=0,fail=0,hit=750150,all=1000000,hitRate=1.00
-threads=50,repeats=20000,valueLength=512,tps=20024,miss=0,fail=0,hit=750150,all=1000000,hitRate=1.00
-threads=50,repeats=20000,valueLength=1024,tps=12323,miss=0,fail=0,hit=750150,all=1000000,hitRate=1.00
-threads=50,repeats=20000,valueLength=4096,tps=3893,miss=0,fail=0,hit=750150,all=1000000,hitRate=1.00
-threads=50,repeats=20000,valueLength=8192,tps=2167,miss=0,fail=0,hit=750150,all=1000000,hitRate=1.00
-threads=100,repeats=20000,valueLength=64,tps=34303,miss=0,fail=0,hit=1500300,all=2000000,hitRate=1.00
-threads=100,repeats=20000,valueLength=128,tps=29637,miss=0,fail=0,hit=1500300,all=2000000,hitRate=1.00
-threads=100,repeats=20000,valueLength=512,tps=16073,miss=0,fail=0,hit=1500300,all=2000000,hitRate=1.00
-threads=100,repeats=20000,valueLength=1024,tps=9702,miss=0,fail=0,hit=1500300,all=2000000,hitRate=1.00
-threads=100,repeats=20000,valueLength=4096,tps=3757,miss=0,fail=0,hit=1500300,all=2000000,hitRate=1.00
-threads=100,repeats=20000,valueLength=8192,tps=2255,miss=0,fail=0,hit=1500300,all=2000000,hitRate=1.00
-threads=150,repeats=20000,valueLength=64,tps=35518,miss=0,fail=0,hit=2250450,all=3000000,hitRate=1.00
-threads=150,repeats=20000,valueLength=128,tps=27866,miss=523161,fail=0,hit=1727289,all=3000000,hitRate=0.77
-threads=150,repeats=20000,valueLength=512,tps=14693,miss=741438,fail=0,hit=1509012,all=3000000,hitRate=0.67
-threads=150,repeats=20000,valueLength=1024,tps=9903,miss=749547,fail=0,hit=1500903,all=3000000,hitRate=0.67
-threads=150,repeats=20000,valueLength=4096,tps=4089,miss=749058,fail=0,hit=1501392,all=3000000,hitRate=0.67
-threads=150,repeats=20000,valueLength=8192,tps=2403,miss=749994,fail=0,hit=1500456,all=3000000,hitRate=0.67
-[WARN ]2009-06-30 20:40:43857 com.google.code.yanf4j.nio.impl.AbstractController[281] remove session 192.168.207.161:12000
-[WARN ]2009-06-30 20:40:43857 com.google.code.yanf4j.nio.impl.AbstractController[281] remove session 192.168.207.163:12000
-[WARN ]2009-06-30 20:40:43858 com.google.code.yanf4j.nio.impl.Reactor[231] Stopped reactor
+threads=1,repeats=20000,valueLength=64,tps=4890,miss=0,fail=0,hit=15003,all=20000,hitRate=1.00
+threads=1,repeats=20000,valueLength=128,tps=4762,miss=0,fail=0,hit=15003,all=20000,hitRate=1.00
+threads=1,repeats=20000,valueLength=512,tps=3935,miss=0,fail=0,hit=15003,all=20000,hitRate=1.00
+threads=1,repeats=20000,valueLength=1024,tps=3273,miss=0,fail=0,hit=15003,all=20000,hitRate=1.00
+threads=1,repeats=20000,valueLength=4096,tps=1763,miss=0,fail=0,hit=15003,all=20000,hitRate=1.00
+threads=1,repeats=20000,valueLength=8192,tps=1106,miss=0,fail=0,hit=15003,all=20000,hitRate=1.00
+threads=10,repeats=20000,valueLength=64,tps=21664,miss=0,fail=0,hit=150030,all=200000,hitRate=1.00
+threads=10,repeats=20000,valueLength=128,tps=20869,miss=0,fail=0,hit=150030,all=200000,hitRate=1.00
+threads=10,repeats=20000,valueLength=512,tps=16702,miss=0,fail=0,hit=150030,all=200000,hitRate=1.00
+threads=10,repeats=20000,valueLength=1024,tps=13605,miss=0,fail=0,hit=150030,all=200000,hitRate=1.00
+threads=10,repeats=20000,valueLength=4096,tps=5195,miss=0,fail=0,hit=150030,all=200000,hitRate=1.00
+threads=10,repeats=20000,valueLength=8192,tps=2489,miss=0,fail=0,hit=150030,all=200000,hitRate=1.00
+threads=50,repeats=20000,valueLength=64,tps=33919,miss=0,fail=0,hit=750150,all=1000000,hitRate=1.00
+threads=50,repeats=20000,valueLength=128,tps=30344,miss=0,fail=0,hit=750150,all=1000000,hitRate=1.00
+threads=50,repeats=20000,valueLength=512,tps=20028,miss=0,fail=0,hit=750150,all=1000000,hitRate=1.00
+threads=50,repeats=20000,valueLength=1024,tps=12338,miss=0,fail=0,hit=750150,all=1000000,hitRate=1.00
+threads=50,repeats=20000,valueLength=4096,tps=3797,miss=0,fail=0,hit=750150,all=1000000,hitRate=1.00
+threads=50,repeats=20000,valueLength=8192,tps=2114,miss=0,fail=0,hit=750150,all=1000000,hitRate=1.00
+threads=100,repeats=20000,valueLength=64,tps=34127,miss=0,fail=0,hit=1500300,all=2000000,hitRate=1.00
+threads=100,repeats=20000,valueLength=128,tps=29385,miss=0,fail=0,hit=1500300,all=2000000,hitRate=1.00
+threads=100,repeats=20000,valueLength=512,tps=15962,miss=0,fail=0,hit=1500300,all=2000000,hitRate=1.00
+threads=100,repeats=20000,valueLength=1024,tps=9584,miss=0,fail=0,hit=1500300,all=2000000,hitRate=1.00
+threads=100,repeats=20000,valueLength=4096,tps=3790,miss=0,fail=0,hit=1500300,all=2000000,hitRate=1.00
+threads=100,repeats=20000,valueLength=8192,tps=2335,miss=275736,fail=0,hit=1224564,all=2000000,hitRate=0.82
+threads=150,repeats=20000,valueLength=64,tps=33460,miss=360720,fail=0,hit=1889730,all=3000000,hitRate=0.84
+threads=150,repeats=20000,valueLength=128,tps=28401,miss=708978,fail=0,hit=1541472,all=3000000,hitRate=0.68
+threads=150,repeats=20000,valueLength=512,tps=14870,miss=741498,fail=0,hit=1508952,all=3000000,hitRate=0.67
+threads=150,repeats=20000,valueLength=1024,tps=9799,miss=742029,fail=0,hit=1508421,all=3000000,hitRate=0.67
+threads=150,repeats=20000,valueLength=4096,tps=4211,miss=749466,fail=0,hit=1500984,all=3000000,hitRate=0.67
+threads=150,repeats=20000,valueLength=8192,tps=2636,miss=1025886,fail=0,hit=1224564,all=3000000,hitRate=0.54
+[WARN ]2009-07-02 10:39:22383 com.google.code.yanf4j.nio.impl.AbstractController[282] remove session 192.168.207.101:12000
+[WARN ]2009-07-02 10:39:22384 com.google.code.yanf4j.nio.impl.AbstractController[282] remove session 192.168.207.163:12000
+[WARN ]2009-07-02 10:39:22385 com.google.code.yanf4j.nio.impl.Reactor[231] Stopped reactor

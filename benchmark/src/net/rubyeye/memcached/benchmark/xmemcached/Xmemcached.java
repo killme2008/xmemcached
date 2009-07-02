@@ -43,7 +43,7 @@ public class Xmemcached extends BaseTest{
 
 	public static void test(MemcachedClient memcachedClient, int length,
 			int threads, int repeats, boolean print) throws Exception {
-		memcachedClient.flushAllWithNoReply();
+		memcachedClient.flushAll();
 		AtomicLong miss = new AtomicLong(0);
 		AtomicLong fail = new AtomicLong(0);
 		AtomicLong hit = new AtomicLong(0);
