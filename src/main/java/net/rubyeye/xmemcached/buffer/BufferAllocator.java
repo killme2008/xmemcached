@@ -14,13 +14,14 @@ package net.rubyeye.xmemcached.buffer;
 import java.nio.ByteBuffer;
 
 /**
- * ByteBufferWrapper分配器接口
+ * IoBuffer allocator
+ * 
  * @author dennis(killme2008@gmail.com)
  */
 public interface BufferAllocator {
 	public IoBuffer allocate(int capacity);
-	
+
 	public IoBuffer wrap(ByteBuffer byteBuffer);
-	
+
 	public void dispose();
 }

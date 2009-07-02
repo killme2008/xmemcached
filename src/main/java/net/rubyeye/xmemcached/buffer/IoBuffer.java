@@ -15,7 +15,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
 /**
- * ByteBuffer封装类
+ * ByteBuffer wrapper
  * 
  * @author dennis
  * 

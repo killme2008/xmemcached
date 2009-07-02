@@ -9,6 +9,17 @@
  *WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, 
  *either express or implied. See the License for the specific language governing permissions and limitations under the License
  */
+/**
+ *Copyright [2009-2010] [dennis zhuang(killme2008@gmail.com)]
+ *Licensed under the Apache License, Version 2.0 (the "License");
+ *you may not use this file except in compliance with the License.
+ *You may obtain a copy of the License at
+ *             http://www.apache.org/licenses/LICENSE-2.0
+ *Unless required by applicable law or agreed to in writing,
+ *software distributed under the License is distributed on an "AS IS" BASIS,
+ *WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ *either express or implied. See the License for the specific language governing permissions and limitations under the License
+ */
 package net.rubyeye.xmemcached.buffer;
 
 import java.nio.ByteBuffer;
@@ -18,10 +29,11 @@ import java.util.Map;
 import java.util.Queue;
 
 import net.rubyeye.xmemcached.utils.ByteUtils;
+
 import com.google.code.yanf4j.util.CircularQueue;
 
 /**
- * ThreadLocal范围内的ByteBuffer缓存分配器，来源于mina2.0
+ * Cached IoBuffer allocator,cached buffer in ThreadLocal.
  * 
  * @author dennis
  * 
@@ -77,11 +89,11 @@ public class CachedBufferAllocator implements BufferAllocator {
 	}
 
 	public int getMaxPoolSize() {
-		return maxPoolSize;
+		return this.maxPoolSize;
 	}
 
 	public int getMaxCachedBufferSize() {
-		return maxCachedBufferSize;
+		return this.maxCachedBufferSize;
 	}
 
 	/**
@@ -91,7 +103,7 @@ public class CachedBufferAllocator implements BufferAllocator {
 	 */
 	private Map<Integer, Queue<CachedIoBuffer>> newPoolMap() {
 		Map<Integer, Queue<CachedIoBuffer>> poolMap = new HashMap<Integer, Queue<CachedIoBuffer>>();
-		int poolSize = maxPoolSize == 0 ? DEFAULT_MAX_POOL_SIZE : maxPoolSize;
+		int poolSize = this.maxPoolSize == 0 ? DEFAULT_MAX_POOL_SIZE : this.maxPoolSize;
 		for (int i = 0; i < 31; i++) {
 			poolMap.put(1 << i, new CircularQueue<CachedIoBuffer>(poolSize));
 		}
@@ -102,16 +114,17 @@ public class CachedBufferAllocator implements BufferAllocator {
 	}
 
 	public final IoBuffer allocate(int requestedCapacity) {
-		if (requestedCapacity == 0)
-			return EMPTY_IO_BUFFER;
+		if (requestedCapacity == 0) {
+			return this.EMPTY_IO_BUFFER;
+		}
 		// 圆整requestedCapacity到2的x次方
 		int actualCapacity = ByteUtils.normalizeCapacity(requestedCapacity);
 		IoBuffer buf;
-		if (maxCachedBufferSize != 0 && actualCapacity > maxCachedBufferSize) {
+		if (this.maxCachedBufferSize != 0 && actualCapacity > this.maxCachedBufferSize) {
 			buf = wrap(ByteBuffer.allocate(actualCapacity));
 		} else {
 			Queue<CachedIoBuffer> pool;
-			pool = heapBuffers.get().get(actualCapacity);
+			pool = this.heapBuffers.get().get(actualCapacity);
 			// 从池中取
 			buf = pool.poll();
 			if (buf != null) {
@@ -129,7 +142,7 @@ public class CachedBufferAllocator implements BufferAllocator {
 	}
 
 	public void dispose() {
-		heapBuffers.remove();
+		this.heapBuffers.remove();
 	}
 
 	public static BufferAllocator newInstance() {
@@ -169,21 +182,21 @@ public class CachedBufferAllocator implements BufferAllocator {
 
 		@Override
 		public final void free() {
-			if (origBuffer == null
-					|| origBuffer.capacity() > maxCachedBufferSize
-					|| Thread.currentThread() != ownerThread) {
+			if (this.origBuffer == null
+					|| this.origBuffer.capacity() > CachedBufferAllocator.this.maxCachedBufferSize
+					|| Thread.currentThread() != this.ownerThread) {
 				return;
 			}
 
 			// Add to the cache.
 			Queue<CachedIoBuffer> pool;
-			pool = heapBuffers.get().get(origBuffer.capacity());
+			pool = CachedBufferAllocator.this.heapBuffers.get().get(this.origBuffer.capacity());
 			if (pool == null) {
 				return;
 			}
 			// 防止OOM
-			if (maxPoolSize == 0 || pool.size() < maxPoolSize) {
-				pool.offer(new CachedIoBuffer(origBuffer));
+			if (CachedBufferAllocator.this.maxPoolSize == 0 || pool.size() < CachedBufferAllocator.this.maxPoolSize) {
+				pool.offer(new CachedIoBuffer(this.origBuffer));
 			}
 			this.origBuffer = null;
 
@@ -211,32 +224,32 @@ public class CachedBufferAllocator implements BufferAllocator {
 
 		@Override
 		public final void reset() {
-			origBuffer.reset();
+			this.origBuffer.reset();
 		}
 
 		@Override
 		public final int remaining() {
-			return origBuffer.remaining();
+			return this.origBuffer.remaining();
 		}
 
 		@Override
 		public final int position() {
-			return origBuffer.position();
+			return this.origBuffer.position();
 		}
 
 		@Override
 		public final void mark() {
-			origBuffer.mark();
+			this.origBuffer.mark();
 		}
 
 		@Override
 		public final int limit() {
-			return origBuffer.limit();
+			return this.origBuffer.limit();
 		}
 
 		@Override
 		public final boolean hasRemaining() {
-			return origBuffer.hasRemaining();
+			return this.origBuffer.hasRemaining();
 		}
 
 		@Override

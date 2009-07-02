@@ -14,7 +14,7 @@ package net.rubyeye.xmemcached.buffer;
 import java.nio.ByteBuffer;
 
 /**
- * 简单ByteBuffer分配器
+ * Simple IoBuffer allocator,allcate a new heap ByteBuffer each time.
  * 
  * @author dennis
  * 
@@ -25,10 +25,11 @@ public class SimpleBufferAllocator implements BufferAllocator {
 			.allocate(0));
 
 	public final IoBuffer allocate(int capacity) {
-		if (capacity == 0)
+		if (capacity == 0) {
 			return EMPTY_IOBUFFER;
-		else
+		} else {
 			return wrap(ByteBuffer.allocate(capacity));
+		}
 	}
 
 	public final void dispose() {

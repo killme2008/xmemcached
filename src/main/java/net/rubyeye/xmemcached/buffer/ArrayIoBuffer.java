@@ -1,6 +1,13 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
+/**
+ *Copyright [2009-2010] [dennis zhuang(killme2008@gmail.com)]
+ *Licensed under the Apache License, Version 2.0 (the "License");
+ *you may not use this file except in compliance with the License.
+ *You may obtain a copy of the License at
+ *             http://www.apache.org/licenses/LICENSE-2.0
+ *Unless required by applicable law or agreed to in writing,
+ *software distributed under the License is distributed on an "AS IS" BASIS,
+ *WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ *either express or implied. See the License for the specific language governing permissions and limitations under the License
  */
 package net.rubyeye.xmemcached.buffer;
 
@@ -23,7 +30,7 @@ public class ArrayIoBuffer implements IoBuffer {
 	}
 
 	public ArrayIoBuffer(List<ByteBuffer> bufferList) {
-		byteBuffers = new ByteBuffer[bufferList.size()];
+		this.byteBuffers = new ByteBuffer[bufferList.size()];
 		bufferList.toArray(this.byteBuffers);
 	}
 
@@ -40,7 +47,7 @@ public class ArrayIoBuffer implements IoBuffer {
 	@Override
 	public final int capacity() {
 		int result = 0;
-		for (ByteBuffer buffer : byteBuffers) {
+		for (ByteBuffer buffer : this.byteBuffers) {
 			if (buffer != null) {
 				result += buffer.capacity();
 			}
@@ -50,7 +57,7 @@ public class ArrayIoBuffer implements IoBuffer {
 
 	@Override
 	public final void clear() {
-		for (ByteBuffer buffer : byteBuffers) {
+		for (ByteBuffer buffer : this.byteBuffers) {
 			if (buffer != null) {
 				buffer.clear();
 			}
@@ -59,7 +66,7 @@ public class ArrayIoBuffer implements IoBuffer {
 
 	@Override
 	public final void flip() {
-		for (ByteBuffer buffer : byteBuffers) {
+		for (ByteBuffer buffer : this.byteBuffers) {
 			if (buffer != null) {
 				buffer.flip();
 			}
@@ -68,7 +75,7 @@ public class ArrayIoBuffer implements IoBuffer {
 
 	@Override
 	public final void free() {
-		for (ByteBuffer buffer : byteBuffers) {
+		for (ByteBuffer buffer : this.byteBuffers) {
 			if (buffer != null) {
 				buffer.clear();
 			}
@@ -114,7 +121,7 @@ public class ArrayIoBuffer implements IoBuffer {
 	@Override
 	public final int limit() {
 		int result = 0;
-		for (ByteBuffer buffer : byteBuffers) {
+		for (ByteBuffer buffer : this.byteBuffers) {
 			if (buffer != null) {
 				result += buffer.limit();
 			}
@@ -129,7 +136,7 @@ public class ArrayIoBuffer implements IoBuffer {
 
 	@Override
 	public final void mark() {
-		for (ByteBuffer buffer : byteBuffers) {
+		for (ByteBuffer buffer : this.byteBuffers) {
 			if (buffer != null) {
 				buffer.mark();
 			}
@@ -176,7 +183,7 @@ public class ArrayIoBuffer implements IoBuffer {
 	@Override
 	public final int remaining() {
 		int result = 0;
-		for (ByteBuffer buffer : byteBuffers) {
+		for (ByteBuffer buffer : this.byteBuffers) {
 			if (buffer != null) {
 				result += buffer.remaining();
 			}
@@ -186,7 +193,7 @@ public class ArrayIoBuffer implements IoBuffer {
 
 	@Override
 	public final void reset() {
-		for (ByteBuffer buffer : byteBuffers) {
+		for (ByteBuffer buffer : this.byteBuffers) {
 			if (buffer != null) {
 				buffer.reset();
 			}
@@ -195,7 +202,7 @@ public class ArrayIoBuffer implements IoBuffer {
 
 	@Override
 	public void order(ByteOrder byteOrder) {
-		for (ByteBuffer buffer : byteBuffers) {
+		for (ByteBuffer buffer : this.byteBuffers) {
 			if (buffer != null) {
 				buffer.order(byteOrder);
 			}
