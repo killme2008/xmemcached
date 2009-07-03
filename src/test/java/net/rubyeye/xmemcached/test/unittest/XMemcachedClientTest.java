@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -54,7 +55,8 @@ public abstract class XMemcachedClientTest extends TestCase {
 
 	protected void createClients() throws IOException, Exception,
 			TimeoutException, InterruptedException, MemcachedException {
-		this.properties = ResourcesUtils.getResourceAsProperties("test.properties");
+		this.properties = ResourcesUtils
+				.getResourceAsProperties("test.properties");
 
 		MemcachedClientBuilder builder = createBuilder();
 		builder.getConfiguration().setStatisticsServer(true);
@@ -73,7 +75,8 @@ public abstract class XMemcachedClientTest extends TestCase {
 		} catch (Exception e) {
 
 		}
-		this.memcachedClient.set("name", 1, "dennis", new StringTranscoder(), 1000);
+		this.memcachedClient.set("name", 1, "dennis", new StringTranscoder(),
+				1000);
 		assertEquals("dennis", this.memcachedClient.get("name",
 				new StringTranscoder()));
 		Thread.sleep(2000);
@@ -360,12 +363,15 @@ public abstract class XMemcachedClientTest extends TestCase {
 
 	public void testSetLoggingLevelVerbosity() throws Exception {
 		this.memcachedClient.setLoggingLevelVerbosity(AddrUtil.getAddresses(
-				this.properties.getProperty("test.memcached.servers")).get(0), 2);
+				this.properties.getProperty("test.memcached.servers")).get(0),
+				2);
 		this.memcachedClient.setLoggingLevelVerbosityWithNoReply(AddrUtil
-				.getAddresses(this.properties.getProperty("test.memcached.servers"))
+				.getAddresses(
+						this.properties.getProperty("test.memcached.servers"))
 				.get(0), 3);
 		this.memcachedClient.setLoggingLevelVerbosityWithNoReply(AddrUtil
-				.getAddresses(this.properties.getProperty("test.memcached.servers"))
+				.getAddresses(
+						this.properties.getProperty("test.memcached.servers"))
 				.get(0), 0);
 	}
 
@@ -467,7 +473,8 @@ public abstract class XMemcachedClientTest extends TestCase {
 		this.memcachedClient.set(key, 0, "dennis");
 		assertEquals("dennis", this.memcachedClient.get(key));
 		CountDownLatch latch = new CountDownLatch(1);
-		int currentServerCount = this.memcachedClient.getAvaliableServers().size();
+		int currentServerCount = this.memcachedClient.getAvaliableServers()
+				.size();
 		MockErrorTextGetOneCommand errorCommand = new MockErrorTextGetOneCommand(
 				key, key.getBytes(), CommandType.GET_ONE, latch);
 		this.memcachedClient.getConnector().send(errorCommand);
@@ -475,8 +482,8 @@ public abstract class XMemcachedClientTest extends TestCase {
 		assertTrue(errorCommand.isDecoded());
 		// wait for reconnecting
 		Thread.sleep(2000);
-		assertEquals(currentServerCount, this.memcachedClient.getAvaliableServers()
-				.size());
+		assertEquals(currentServerCount, this.memcachedClient
+				.getAvaliableServers().size());
 		// It works
 		assertEquals("dennis", this.memcachedClient.get(key));
 	}
@@ -500,8 +507,8 @@ public abstract class XMemcachedClientTest extends TestCase {
 	public void TESTOPERATIONENCODETIMEOUT() throws Exception {
 		this.memcachedClient.set("name", 0, "dennis");
 		assertEquals("dennis", this.memcachedClient.get("name"));
-		long writeMessageCount = this.memcachedClient.getConnector().getStatistics()
-				.getWriteMessageCount();
+		long writeMessageCount = this.memcachedClient.getConnector()
+				.getStatistics().getWriteMessageCount();
 		CountDownLatch latch = new CountDownLatch(1);
 		MockEncodeTimeoutTextGetOneCommand errorCommand = new MockEncodeTimeoutTextGetOneCommand(
 				"name", "name".getBytes(), CommandType.GET_ONE, latch, 1000);
@@ -571,8 +578,9 @@ public abstract class XMemcachedClientTest extends TestCase {
 			assertEquals(i, this.memcachedClient.get(String.valueOf(i)));
 		}
 
-		List<InetSocketAddress> addressList = AddrUtil.getAddresses(this.properties
-				.getProperty("test.memcached.servers"));
+		List<InetSocketAddress> addressList = AddrUtil
+				.getAddresses(this.properties
+						.getProperty("test.memcached.servers"));
 		Map<InetSocketAddress, Map<String, String>> newStats = this.memcachedClient
 				.getStats();
 		for (InetSocketAddress address : addressList) {
@@ -616,6 +624,19 @@ public abstract class XMemcachedClientTest extends TestCase {
 
 		this.memcachedClient.set("name", 0, "dennis");
 		assertEquals("dennis", this.memcachedClient.get("name"));
+	}
+
+	public void testGetAvaliableServers() {
+		Collection<InetSocketAddress> servers = this.memcachedClient
+				.getAvaliableServers();
+
+		List<InetSocketAddress> serverList = AddrUtil
+				.getAddresses(this.properties
+						.getProperty("test.memcached.servers"));
+		assertEquals(servers.size(), serverList.size());
+		for (InetSocketAddress address : servers) {
+			assertTrue(serverList.contains(address));
+		}
 	}
 
 	@Override
