@@ -1,5 +1,22 @@
 *******************************************
+2009-07-13
+--------xmemcached 1.1.3-Released-----------
+1.Upgrade yanf4j to 0.7.0, yanf4j-0.7.0 is a refactoring version and turned for best performance.
 
+2.Disable tcp nagle algorithm by default,change default tcp receive buffer size from 16k to 8k.
+3.Add a new interface MemcachedClientStateListener for listenning xmemcached client's events to callback.MemcachedClient add two methods:
+
+public void addStateListener(MemcachedClientStateListener listener);
+public void removeStateListener(MemcachedClientStateListener listener);
+public Collection<MemcachedClientStateListener> getStateListeners();
+
+4.Make a new benchmark,please see 
+http://xmemcached.googlecode.com/svn/trunk/benchmark/benchmark.html
+
+5.Refactoring and bug fixed.Issue 39 etc.
+
+
+--------------------------------------------
 2009-06-22
 --------xmemcached 1.1.2-Released-----------
 1.Supports integrating to spring framework.for example:

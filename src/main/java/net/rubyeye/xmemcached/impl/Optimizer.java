@@ -36,7 +36,7 @@ import com.google.code.yanf4j.nio.util.FutureImpl;
  */
 public class Optimizer implements OptimizerMBean, MemcachedOptimizer {
 
-	public static final int DEFAULT_MERGE_FACTOR = 200;
+	public static final int DEFAULT_MERGE_FACTOR = 150;
 	private int mergeFactor = DEFAULT_MERGE_FACTOR; // default merge factor;
 	private boolean optimiezeGet = true;
 	private boolean optimiezeMergeBuffer = true;
