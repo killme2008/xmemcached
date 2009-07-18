@@ -3,9 +3,9 @@ package net.rubyeye.xmemcached.test.unittest.codec;
 import java.nio.ByteBuffer;
 import java.util.concurrent.CountDownLatch;
 
-import net.rubyeye.xmemcached.TextCommandFactory;
 import net.rubyeye.xmemcached.codec.MemcachedCodecFactory;
 import net.rubyeye.xmemcached.command.Command;
+import net.rubyeye.xmemcached.command.TextCommandFactory;
 import net.rubyeye.xmemcached.impl.MemcachedTCPSession;
 
 import com.google.code.yanf4j.nio.CodecFactory.Decoder;

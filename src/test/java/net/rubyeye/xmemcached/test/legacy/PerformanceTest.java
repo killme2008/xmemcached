@@ -5,6 +5,7 @@ import java.util.concurrent.CountDownLatch;
 import net.rubyeye.xmemcached.MemcachedClient;
 import net.rubyeye.xmemcached.MemcachedClientBuilder;
 import net.rubyeye.xmemcached.XMemcachedClientBuilder;
+import net.rubyeye.xmemcached.command.BinaryCommandFactory;
 import net.rubyeye.xmemcached.utils.AddrUtil;
 
 public class PerformanceTest {
@@ -208,12 +209,13 @@ public class PerformanceTest {
 
 			MemcachedClientBuilder builder = new XMemcachedClientBuilder(
 					AddrUtil.getAddresses(args[4]));
+			builder.setCommandFactory(new BinaryCommandFactory());
 			MemcachedClient mc = builder.build();
 			// mc.setOptimizeMergeBuffer(false);
 			// 分别测试写、读、删除
 			testWrite(thread, size, repeat, keySize, valueSize, mc);
-			testRead(thread, size, repeat, keySize, valueSize, mc);
-			testDelete(thread, size, repeat, keySize, valueSize, mc);
+//			testRead(thread, size, repeat, keySize, valueSize, mc);
+//			testDelete(thread, size, repeat, keySize, valueSize, mc);
 
 			mc.shutdown();
 		} catch (Exception e) {

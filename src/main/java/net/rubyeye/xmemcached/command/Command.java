@@ -38,6 +38,10 @@ import com.google.code.yanf4j.nio.util.FutureImpl;
  */
 public abstract class Command implements WriteMessage {
 
+	public static final byte REQUEST_MAGIC_NUMBER = (byte) (0x80 & 0xFF);
+
+	public static final byte RESPONSE_MAGIC_NUMBER = (byte) (0x81 & 0xFF);
+
 	@Override
 	public final Object getMessage() {
 		return this;
@@ -288,8 +292,6 @@ public abstract class Command implements WriteMessage {
 	public FutureImpl<Boolean> getWriteFuture() {
 		return this.writeFuture;
 	}
-	
-	
 
 	public final void setWriteFuture(FutureImpl<Boolean> writeFuture) {
 		this.writeFuture = writeFuture;

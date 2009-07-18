@@ -41,7 +41,7 @@ public class SerializingTranscoderTest extends BaseTranscoderCase {
 		tc.setCompressionThreshold(8);
 		CachedData cd=tc.encode(s1);
 		// This should *not* be compressed because it is too small
-		assertEquals(0, cd.getFlags());
+		assertEquals(0, cd.getFlag());
 		assertTrue(Arrays.equals(s1.getBytes(), cd.getData()));
 		assertEquals(s1, tc.decode(cd));
 	}
@@ -51,7 +51,7 @@ public class SerializingTranscoderTest extends BaseTranscoderCase {
 		String s1="aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
 		tc.setCompressionThreshold(8);
 		CachedData cd=tc.encode(s1);
-		assertEquals(SerializingTranscoder.COMPRESSED, cd.getFlags());
+		assertEquals(SerializingTranscoder.COMPRESSED, cd.getFlag());
 		assertFalse(Arrays.equals(s1.getBytes(), cd.getData()));
 		assertEquals(s1, tc.decode(cd));
 	}
@@ -59,7 +59,7 @@ public class SerializingTranscoderTest extends BaseTranscoderCase {
 	public void testObject() throws Exception {
 		Calendar c=Calendar.getInstance();
 		CachedData cd=tc.encode(c);
-		assertEquals(SerializingTranscoder.SERIALIZED, cd.getFlags());
+		assertEquals(SerializingTranscoder.SERIALIZED, cd.getFlag());
 		assertEquals(c, tc.decode(cd));
 	}
 
@@ -68,7 +68,7 @@ public class SerializingTranscoderTest extends BaseTranscoderCase {
 		Calendar c=Calendar.getInstance();
 		CachedData cd=tc.encode(c);
 		assertEquals(SerializingTranscoder.SERIALIZED
-				|SerializingTranscoder.COMPRESSED, cd.getFlags());
+				|SerializingTranscoder.COMPRESSED, cd.getFlag());
 		assertEquals(c, tc.decode(cd));
 	}
 

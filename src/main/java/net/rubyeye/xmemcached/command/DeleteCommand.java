@@ -14,7 +14,7 @@ public abstract class DeleteCommand extends Command {
 	}
 
 	public final int getTime() {
-		return time;
+		return this.time;
 	}
 
 	public final void setTime(int time) {

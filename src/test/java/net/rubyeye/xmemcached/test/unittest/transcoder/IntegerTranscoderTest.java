@@ -23,7 +23,7 @@ public class IntegerTranscoderTest extends TestCase {
 
 	public void testBadFlags() throws Exception {
 		CachedData cd=tc.encode(9284);
-		assertNull(tc.decode(new CachedData(cd.getFlags()+1, cd.getData(),
+		assertNull(tc.decode(new CachedData(cd.getFlag()+1, cd.getData(),
 				CachedData.MAX_SIZE,-1)));
 	}
 }

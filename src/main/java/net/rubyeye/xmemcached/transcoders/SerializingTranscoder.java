@@ -55,11 +55,11 @@ public class SerializingTranscoder extends BaseSerializingTranscoder implements
 	public final Object decode(CachedData d) {
 		byte[] data = d.getData();
 		Object rv = null;
-		if ((d.getFlags() & COMPRESSED) != 0) {
+		if ((d.getFlag() & COMPRESSED) != 0) {
 			data = decompress(d.getData());
 		}
-		int flags = d.getFlags() & SPECIAL_MASK;
-		if ((d.getFlags() & SERIALIZED) != 0 && data != null) {
+		int flags = d.getFlag() & SPECIAL_MASK;
+		if ((d.getFlag() & SERIALIZED) != 0 && data != null) {
 			rv = deserialize(data);
 		} else if (flags != 0 && data != null) {
 			switch (flags) {

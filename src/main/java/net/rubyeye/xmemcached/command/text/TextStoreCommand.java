@@ -54,8 +54,8 @@ public class TextStoreCommand extends StoreCommand {
 	@SuppressWarnings("unchecked")
 	public final void encode(BufferAllocator bufferAllocator) {
 		final CachedData data = transcoder.encode(value);
-		byte[] flagBytes = ByteUtils.getBytes(String.valueOf(data.getFlags()));
-		byte[] expBytes = ByteUtils.getBytes(String.valueOf(exp));
+		byte[] flagBytes = ByteUtils.getBytes(String.valueOf(data.getFlag()));
+		byte[] expBytes = ByteUtils.getBytes(String.valueOf(expTime));
 		byte[] dataLenBytes = ByteUtils.getBytes(String
 				.valueOf(data.getData().length));
 		byte[] casBytes = ByteUtils.getBytes(String.valueOf(cas));

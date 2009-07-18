@@ -43,38 +43,49 @@ public class SimpleIoBuffer implements IoBuffer {
 	}
 
 	@Override
+	public void putInt(int i) {
+		this.origBuffer.putInt(i);
+
+	}
+
+	@Override
+	public void putShort(short s) {
+		this.origBuffer.putShort(s);
+	}
+
+	@Override
 	public final void clear() {
 		this.origBuffer.clear();
 	}
 
 	@Override
 	public final void reset() {
-		origBuffer.reset();
+		this.origBuffer.reset();
 	}
 
 	@Override
 	public final int remaining() {
-		return origBuffer.remaining();
+		return this.origBuffer.remaining();
 	}
 
 	@Override
 	public final int position() {
-		return origBuffer.position();
+		return this.origBuffer.position();
 	}
 
 	@Override
 	public final void mark() {
-		origBuffer.mark();
+		this.origBuffer.mark();
 	}
 
 	@Override
 	public final int limit() {
-		return origBuffer.limit();
+		return this.origBuffer.limit();
 	}
 
 	@Override
 	public final boolean hasRemaining() {
-		return origBuffer.hasRemaining();
+		return this.origBuffer.hasRemaining();
 	}
 
 	@Override
@@ -120,6 +131,12 @@ public class SimpleIoBuffer implements IoBuffer {
 	@Override
 	public ByteOrder order() {
 		return this.origBuffer.order();
+	}
+
+	@Override
+	public void putLong(long l) {
+		this.origBuffer.putLong(l);
+
 	}
 
 }

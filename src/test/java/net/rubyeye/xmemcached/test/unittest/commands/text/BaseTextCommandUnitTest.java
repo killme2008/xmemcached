@@ -3,10 +3,10 @@ package net.rubyeye.xmemcached.test.unittest.commands.text;
 import java.nio.ByteBuffer;
 
 import net.rubyeye.xmemcached.CommandFactory;
-import net.rubyeye.xmemcached.TextCommandFactory;
 import net.rubyeye.xmemcached.buffer.BufferAllocator;
 import net.rubyeye.xmemcached.buffer.SimpleBufferAllocator;
 import net.rubyeye.xmemcached.command.Command;
+import net.rubyeye.xmemcached.command.TextCommandFactory;
 import net.rubyeye.xmemcached.exception.MemcachedDecodeException;
 import junit.framework.TestCase;
 

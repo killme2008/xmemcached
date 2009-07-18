@@ -41,7 +41,7 @@ public class WhalinTranscoderTest extends BaseTranscoderCase {
 		tc.setCompressionThreshold(8);
 		CachedData cd=tc.encode(s1);
 		// This should *not* be compressed because it is too small
-		assertEquals(WhalinTranscoder.SPECIAL_STRING, cd.getFlags());
+		assertEquals(WhalinTranscoder.SPECIAL_STRING, cd.getFlag());
 		assertTrue(Arrays.equals(s1.getBytes(), cd.getData()));
 		assertEquals(s1, tc.decode(cd));
 	}
@@ -53,7 +53,7 @@ public class WhalinTranscoderTest extends BaseTranscoderCase {
 		CachedData cd=tc.encode(s1);
 		assertEquals(
 			WhalinTranscoder.COMPRESSED | WhalinTranscoder.SPECIAL_STRING,
-			cd.getFlags());
+			cd.getFlag());
 		assertFalse(Arrays.equals(s1.getBytes(), cd.getData()));
 		assertEquals(s1, tc.decode(cd));
 	}
@@ -61,7 +61,7 @@ public class WhalinTranscoderTest extends BaseTranscoderCase {
 	public void testObject() throws Exception {
 		Calendar c=Calendar.getInstance();
 		CachedData cd=tc.encode(c);
-		assertEquals(WhalinTranscoder.SERIALIZED, cd.getFlags());
+		assertEquals(WhalinTranscoder.SERIALIZED, cd.getFlag());
 		assertEquals(c, tc.decode(cd));
 	}
 
@@ -70,7 +70,7 @@ public class WhalinTranscoderTest extends BaseTranscoderCase {
 		Calendar c=Calendar.getInstance();
 		CachedData cd=tc.encode(c);
 		assertEquals(WhalinTranscoder.SERIALIZED
-				|WhalinTranscoder.COMPRESSED, cd.getFlags());
+				|WhalinTranscoder.COMPRESSED, cd.getFlag());
 		assertEquals(c, tc.decode(cd));
 	}
 

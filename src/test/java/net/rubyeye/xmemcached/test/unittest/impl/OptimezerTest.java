@@ -6,10 +6,10 @@ import java.util.concurrent.BlockingQueue;
 
 import junit.framework.TestCase;
 import net.rubyeye.xmemcached.CommandFactory;
-import net.rubyeye.xmemcached.TextCommandFactory;
 import net.rubyeye.xmemcached.buffer.SimpleBufferAllocator;
 import net.rubyeye.xmemcached.command.Command;
 import net.rubyeye.xmemcached.command.CommandType;
+import net.rubyeye.xmemcached.command.TextCommandFactory;
 import net.rubyeye.xmemcached.impl.Optimizer;
 import net.rubyeye.xmemcached.transcoders.CachedData;
 import net.rubyeye.xmemcached.transcoders.SerializingTranscoder;

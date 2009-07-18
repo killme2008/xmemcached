@@ -23,7 +23,7 @@ public final class CachedData {
 	private int size = 0;
 
 	public final int getSize() {
-		return size;
+		return this.size;
 	}
 
 	public final void fillData(ByteBuffer buffer, int offset, int length) {
@@ -37,7 +37,7 @@ public final class CachedData {
 	}
 
 	public final int getCapacity() {
-		return capacity;
+		return this.capacity;
 	}
 
 	public final void setSize(int size) {
@@ -57,10 +57,11 @@ public final class CachedData {
 	}
 
 	public final void setData(byte[] data) {
-		if (data.length > this.capacity)
+		if (data.length > this.capacity) {
 			throw new IllegalArgumentException(
 					"Cannot cache data larger than 1MB (you tried to cache a "
 							+ data.length + " byte object)");
+		}
 		this.data = data;
 	}
 
@@ -69,7 +70,7 @@ public final class CachedData {
 	}
 
 	public long getCas() {
-		return cas;
+		return this.cas;
 	}
 
 	public CachedData() {
@@ -95,8 +96,8 @@ public final class CachedData {
 					"Cannot cache data larger than 1MB (you tried to cache a "
 							+ d.length + " byte object)");
 		}
-		flags = f;
-		data = d;
+		this.flags = f;
+		this.data = d;
 		this.cas = casId;
 	}
 
@@ -116,19 +117,19 @@ public final class CachedData {
 	 * Get the stored data.
 	 */
 	public final byte[] getData() {
-		return data;
+		return this.data;
 	}
 
 	/**
 	 * Get the flags stored along with this value.
 	 */
-	public final int getFlags() {
-		return flags;
+	public final int getFlag() {
+		return this.flags;
 	}
 
 	@Override
 	public String toString() {
-		return "{CachedData flags=" + flags + " data=" + Arrays.toString(data)
+		return "{CachedData flags=" + this.flags + " data=" + Arrays.toString(this.data)
 				+ "}";
 	}
 

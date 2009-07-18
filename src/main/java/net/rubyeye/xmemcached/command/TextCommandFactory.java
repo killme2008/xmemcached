@@ -1,10 +1,10 @@
-package net.rubyeye.xmemcached;
+package net.rubyeye.xmemcached.command;
 
 import java.net.InetSocketAddress;
 import java.util.Collection;
 import java.util.concurrent.CountDownLatch;
-import net.rubyeye.xmemcached.command.Command;
-import net.rubyeye.xmemcached.command.CommandType;
+
+import net.rubyeye.xmemcached.CommandFactory;
 import net.rubyeye.xmemcached.command.text.TextCASCommand;
 import net.rubyeye.xmemcached.command.text.TextDeleteCommand;
 import net.rubyeye.xmemcached.command.text.TextFlushAllCommand;

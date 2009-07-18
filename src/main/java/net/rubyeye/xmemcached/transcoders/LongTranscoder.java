@@ -19,10 +19,10 @@ public final class LongTranscoder implements Transcoder<Long> {
 	}
 
 	public Long decode(CachedData d) {
-		if (flags == d.getFlags()) {
+		if (flags == d.getFlag()) {
 			return tu.decodeLong(d.getData());
 		} else {
-			log.error("Unexpected flags for long:  " + d.getFlags()
+			log.error("Unexpected flags for long:  " + d.getFlag()
 					+ " wanted " + flags);
 			return null;
 		}

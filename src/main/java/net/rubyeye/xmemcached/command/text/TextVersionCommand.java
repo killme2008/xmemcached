@@ -5,15 +5,28 @@ import java.nio.ByteBuffer;
 import java.util.concurrent.CountDownLatch;
 
 import net.rubyeye.xmemcached.buffer.BufferAllocator;
+import net.rubyeye.xmemcached.command.Command;
+import net.rubyeye.xmemcached.command.CommandType;
 import net.rubyeye.xmemcached.command.VersionCommand;
 import net.rubyeye.xmemcached.impl.MemcachedTCPSession;
 import net.rubyeye.xmemcached.utils.ByteUtils;
 
-public class TextVersionCommand extends VersionCommand {
+public class TextVersionCommand extends Command implements VersionCommand {
+	public InetSocketAddress server;
 
-	public TextVersionCommand(InetSocketAddress server,CountDownLatch latch) {
-		super(server,latch);
+	public final InetSocketAddress getServer() {
+		return this.server;
+	}
 
+	public final void setServer(InetSocketAddress server) {
+		this.server = server;
+	}
+
+	public TextVersionCommand(InetSocketAddress server,
+			final CountDownLatch latch) {
+		super("version", (byte[]) null, latch);
+		this.commandType = CommandType.VERSION;
+		this.server = server;
 	}
 
 	@Override
@@ -25,8 +38,9 @@ public class TextVersionCommand extends VersionCommand {
 				setResult(items.length > 1 ? items[1] : "unknown version");
 				countDownLatch();
 				return true;
-			} else
+			} else {
 				return decodeError(line);
+			}
 		}
 		return false;
 	}

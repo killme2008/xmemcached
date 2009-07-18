@@ -17,7 +17,7 @@ public final class IntegerTranscoder
 	}
 
 	public Integer decode(CachedData d) {
-		if (flags == d.getFlags()) {
+		if (flags == d.getFlag()) {
 			return tu.decodeInt(d.getData());
 		} else {
 			return null;

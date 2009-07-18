@@ -11,22 +11,15 @@
  */
 package net.rubyeye.xmemcached.example;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.TimeoutException;
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.concurrent.TimeoutException;
 
-import net.rubyeye.xmemcached.CASOperation;
-import net.rubyeye.xmemcached.GetsResponse;
 import net.rubyeye.xmemcached.MemcachedClient;
 import net.rubyeye.xmemcached.MemcachedClientBuilder;
 import net.rubyeye.xmemcached.XMemcachedClientBuilder;
+import net.rubyeye.xmemcached.command.BinaryCommandFactory;
 import net.rubyeye.xmemcached.exception.MemcachedException;
-import net.rubyeye.xmemcached.transcoders.IntegerTranscoder;
-import net.rubyeye.xmemcached.transcoders.StringTranscoder;
 import net.rubyeye.xmemcached.utils.AddrUtil;
 
 class Name implements Serializable {
@@ -44,9 +37,10 @@ class Name implements Serializable {
 		this.money = money;
 	}
 
+	@Override
 	public String toString() {
-		return "[" + firstName + " " + lastName + ",age=" + age + ",money="
-				+ money + "]";
+		return "[" + this.firstName + " " + this.lastName + ",age=" + this.age
+				+ ",money=" + this.money + "]";
 	}
 }
 
@@ -62,152 +56,163 @@ public class Example {
 
 			MemcachedClientBuilder builder = new XMemcachedClientBuilder(
 					AddrUtil.getAddresses(args[0]));
+			builder.setCommandFactory(new BinaryCommandFactory());
 			MemcachedClient client = builder.build();
-			if (!client.set("hello", 0, "dennis")) {
+			if (!client.set("hello", 0, "world")) {
 				System.err.println("set error");
 			}
-			client.add("hello", 0, "dennis");
-			client.replace("hello", 0, "dennis");
+			if (client.add("hello", 0, "dennis")) {
+				System.err.println("Add error,key is existed");
+			}
+			if (!client.replace("hello", 0, "dennis")) {
+				System.err.println("replace error");
+			}
 			client.append("hello", " good");
 			client.prepend("hello", "hello ");
-			String name = client.get("hello", new StringTranscoder());
-			System.out.println(name);
-
-			List<String> keys = new ArrayList<String>();
-			keys.add("hello");
-			keys.add("test");
-			Map<String, Integer> map = client
-					.get(keys, new IntegerTranscoder());
-			System.out.println("map size:" + map.size());
-
-			if (!client.delete("hello", 1000)) {
-				System.err.println("delete error");
-			}
-
-			client.set("a", 0, "4");
-			System.out.println(client.incr("a", 4));
-			System.out.println(client.decr("a", 4));
-
-			String version = client.version();
-			System.out.println("memcached version:" + version);
-			Name dennis = new Name("dennis", "zhuang", 26, -1);
-			System.out.println("dennis:" + dennis);
-			client.set("dennis", 0, dennis);
-
-			Name cachedPerson = (Name) client.get("dennis");
-			System.out.println("cachedPerson:" + cachedPerson);
-			cachedPerson.money = -10000;
-
-			client.replace("dennis", 0, cachedPerson);
-			Name cachedPerson2 = (Name) client.get("dennis");
-			System.out.println("cachedPerson2:" + cachedPerson2);
-
-			client.delete("dennis");
-			System.out.println("after delete:" + client.get("dennis"));
-
-			map = new HashMap<String, Integer>();
-			for (int i = 0; i < 1000; i++) {
-				map.put(String.valueOf(i), i);
-			}
-			if (!client.set("map", 0, map, 10000)) {
-				System.err.println("set map error");
-			}
-			HashMap<String, Integer> cachedMap = (HashMap<String, Integer>) client
-					.get("map");
-			if (cachedMap.size() != 1000) {
-				System.err.println("get map error");
-			}
-			for (Object key : cachedMap.keySet()) {
-				if (!cachedMap.get(key).equals(Integer.parseInt((String) key))) {
-					System.err.println("get map error");
-				}
-			}
-			for (int i = 0; i < 100; i++) {
-				if (client.get("hello__" + i) != null) {
-					System.err.println("get error");
-				}
-			}
-			for (int i = 0; i < 100; i++) {
-				if (client.delete("hello__" + i)) {
-					System.err.println("get error");
-				}
-			}
-
-			long start = System.currentTimeMillis();
-			for (int i = 0; i < 200; i++) {
-				if (!client.set("test", 0, i)) {
-					System.out.println("set error");
-				}
-			}
-			System.out.println(System.currentTimeMillis() - start);
-			client.delete("test");
-			// 测试cas
-			client.set("a", 0, 1);
-			GetsResponse<Integer> result = client.gets("a");
-			long cas = result.getCas();
-			if (result.getValue() != 1) {
-				System.err.println("gets error");
-			}
-			System.out.println("cas value:" + cas);
-			if (!client.cas("a", 0, 2, cas)) {
-				System.err.println("cas error");
-			}
-			result = client.gets("a");
-
-			if (result.getValue() != 2) {
-				System.err.println("cas error");
-			}
-			List<String> getsKeys = new ArrayList<String>();
-			getsKeys.add("a");
-			Map<String, GetsResponse<Integer>> getsMap = client.gets(getsKeys);
-			System.out.println("getsMap:" + getsMap.toString());
-
-			/**
-			 * 合并gets和cas，利用CASOperation
-			 */
-			client.cas("a", 0, new CASOperation<Integer>() {
-
-				@Override
-				public int getMaxTries() {
-					return 1;
-				}
-
-				@Override
-				public Integer getNewValue(long currentCAS, Integer currentValue) {
-					System.out.println("current value " + currentValue);
-					return 3;
-				}
-			});
-			result = client.gets("a");
-			if (result.getValue() != 3) {
-				System.err.println("cas error");
-			}
-			result.setCas(100);// 改变cas值，因此需要试2次
-			client.cas("a", result, new CASOperation<Integer>() {
-
-				@Override
-				public int getMaxTries() {
-					return 2;
-				}
-
-				@Override
-				public Integer getNewValue(long currentCAS, Integer currentValue) {
-					System.out.println("current value " + currentValue);
-					return 4;
-				}
-			});
-			result = client.gets("a");
-			if (result.getValue() != 4) {
-				System.err.println("cas error");
-			}
-			keys.add("a");
-			// 批量gets
-			System.out.println(client.gets(keys).get("a").getValue());
-			client.flushAll(); // 使所有数据项失效
-			// 查看统计信息
-			System.out.println(client.getStats()); // 查看统计信息
-			
-			Thread.sleep(300000000);
+			// String name = client.get("hello", new StringTranscoder());
+			//System.out.println(name);
+			client.delete("hello");
+			System.out.println(client.getVersions());
+			//
+			// List<String> keys = new ArrayList<String>();
+			// keys.add("hello");
+			// keys.add("test");
+			// Map<String, Integer> map = client
+			// .get(keys, new IntegerTranscoder());
+			// System.out.println("map size:" + map.size());
+			//
+			// if (!client.delete("hello", 1000)) {
+			// System.err.println("delete error");
+			// }
+			//
+			// client.set("a", 0, "4");
+			// System.out.println(client.incr("a", 4));
+			// System.out.println(client.decr("a", 4));
+			//
+			// String version = client.version();
+			// System.out.println("memcached version:" + version);
+			// Name dennis = new Name("dennis", "zhuang", 26, -1);
+			// System.out.println("dennis:" + dennis);
+			// client.set("dennis", 0, dennis);
+			//
+			// Name cachedPerson = (Name) client.get("dennis");
+			// System.out.println("cachedPerson:" + cachedPerson);
+			// cachedPerson.money = -10000;
+			//
+			// client.replace("dennis", 0, cachedPerson);
+			// Name cachedPerson2 = (Name) client.get("dennis");
+			// System.out.println("cachedPerson2:" + cachedPerson2);
+			//
+			// client.delete("dennis");
+			// System.out.println("after delete:" + client.get("dennis"));
+			//
+			// map = new HashMap<String, Integer>();
+			// for (int i = 0; i < 1000; i++) {
+			// map.put(String.valueOf(i), i);
+			// }
+			// if (!client.set("map", 0, map, 10000)) {
+			// System.err.println("set map error");
+			// }
+			// HashMap<String, Integer> cachedMap = (HashMap<String, Integer>)
+			// client
+			// .get("map");
+			// if (cachedMap.size() != 1000) {
+			// System.err.println("get map error");
+			// }
+			// for (Object key : cachedMap.keySet()) {
+			// if (!cachedMap.get(key).equals(Integer.parseInt((String) key))) {
+			// System.err.println("get map error");
+			// }
+			// }
+			// for (int i = 0; i < 100; i++) {
+			// if (client.get("hello__" + i) != null) {
+			// System.err.println("get error");
+			// }
+			// }
+			// for (int i = 0; i < 100; i++) {
+			// if (client.delete("hello__" + i)) {
+			// System.err.println("get error");
+			// }
+			// }
+			//
+			// long start = System.currentTimeMillis();
+			// for (int i = 0; i < 200; i++) {
+			// if (!client.set("test", 0, i)) {
+			// System.out.println("set error");
+			// }
+			// }
+			// System.out.println(System.currentTimeMillis() - start);
+			// client.delete("test");
+			// // 测试cas
+			// client.set("a", 0, 1);
+			// GetsResponse<Integer> result = client.gets("a");
+			// long cas = result.getCas();
+			// if (result.getValue() != 1) {
+			// System.err.println("gets error");
+			// }
+			// System.out.println("cas value:" + cas);
+			// if (!client.cas("a", 0, 2, cas)) {
+			// System.err.println("cas error");
+			// }
+			// result = client.gets("a");
+			//
+			// if (result.getValue() != 2) {
+			// System.err.println("cas error");
+			// }
+			// List<String> getsKeys = new ArrayList<String>();
+			// getsKeys.add("a");
+			// Map<String, GetsResponse<Integer>> getsMap =
+			// client.gets(getsKeys);
+			// System.out.println("getsMap:" + getsMap.toString());
+			//
+			// /**
+			// * 合并gets和cas，利用CASOperation
+			// */
+			// client.cas("a", 0, new CASOperation<Integer>() {
+			//
+			// @Override
+			// public int getMaxTries() {
+			// return 1;
+			// }
+			//
+			// @Override
+			// public Integer getNewValue(long currentCAS, Integer currentValue)
+			// {
+			// System.out.println("current value " + currentValue);
+			// return 3;
+			// }
+			// });
+			// result = client.gets("a");
+			// if (result.getValue() != 3) {
+			// System.err.println("cas error");
+			// }
+			// result.setCas(100);// 改变cas值，因此需要试2次
+			// client.cas("a", result, new CASOperation<Integer>() {
+			//
+			// @Override
+			// public int getMaxTries() {
+			// return 2;
+			// }
+			//
+			// @Override
+			// public Integer getNewValue(long currentCAS, Integer currentValue)
+			// {
+			// System.out.println("current value " + currentValue);
+			// return 4;
+			// }
+			// });
+			// result = client.gets("a");
+			// if (result.getValue() != 4) {
+			// System.err.println("cas error");
+			// }
+			// keys.add("a");
+			// // 批量gets
+			// System.out.println(client.gets(keys).get("a").getValue());
+			// client.flushAll(); // 使所有数据项失效
+			// // 查看统计信息
+			// System.out.println(client.getStats()); // 查看统计信息
+			//			
+			// Thread.sleep(300000000);
 			client.shutdown();
 
 		} catch (IOException e) {

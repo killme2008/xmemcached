@@ -22,7 +22,7 @@ public class StringTranscoder implements Transcoder<String> {
 
 	@Override
 	public String decode(CachedData d) {
-		if (d.getFlags() == 0) {
+		if (d.getFlag() == 0) {
 			String rv = null;
 			try {
 				if (d.getData() != null) {

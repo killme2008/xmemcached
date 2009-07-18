@@ -172,7 +172,7 @@ public abstract class BaseTranscoderCase extends TestCase {
 	public void testStrings() throws Exception {
 		String s1="This is a simple test string.";
 		CachedData cd=tc.encode(s1);
-		assertEquals(getStringFlags(), cd.getFlags());
+		assertEquals(getStringFlags(), cd.getFlag());
 		assertEquals(s1, tc.decode(cd));
 	}
 
@@ -181,7 +181,7 @@ public abstract class BaseTranscoderCase extends TestCase {
 			+ "\u2264\u2014\u00c5\u2014\u00c7\u2013\u2264\u2014\u00c9\u2013"
 			+ "\u03c0, \u2013\u00ba\u2013\u220f\u2014\u00c4.";
 		CachedData cd=tc.encode(s1);
-		assertEquals(getStringFlags(), cd.getFlags());
+		assertEquals(getStringFlags(), cd.getFlag());
 		assertEquals(s1, tc.decode(cd));
 	}
 

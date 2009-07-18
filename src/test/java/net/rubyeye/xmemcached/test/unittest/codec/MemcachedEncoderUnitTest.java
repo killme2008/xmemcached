@@ -5,10 +5,10 @@ import java.util.concurrent.CountDownLatch;
 
 import com.google.code.yanf4j.nio.CodecFactory.Encoder;
 
-import net.rubyeye.xmemcached.TextCommandFactory;
 import net.rubyeye.xmemcached.buffer.SimpleBufferAllocator;
 import net.rubyeye.xmemcached.codec.MemcachedCodecFactory;
 import net.rubyeye.xmemcached.command.Command;
+import net.rubyeye.xmemcached.command.TextCommandFactory;
 import net.rubyeye.xmemcached.command.VersionCommand;
 import junit.framework.TestCase;
 

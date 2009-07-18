@@ -103,7 +103,8 @@ public class CachedBufferAllocator implements BufferAllocator {
 	 */
 	private Map<Integer, Queue<CachedIoBuffer>> newPoolMap() {
 		Map<Integer, Queue<CachedIoBuffer>> poolMap = new HashMap<Integer, Queue<CachedIoBuffer>>();
-		int poolSize = this.maxPoolSize == 0 ? DEFAULT_MAX_POOL_SIZE : this.maxPoolSize;
+		int poolSize = this.maxPoolSize == 0 ? DEFAULT_MAX_POOL_SIZE
+				: this.maxPoolSize;
 		for (int i = 0; i < 31; i++) {
 			poolMap.put(1 << i, new CircularQueue<CachedIoBuffer>(poolSize));
 		}
@@ -120,7 +121,8 @@ public class CachedBufferAllocator implements BufferAllocator {
 		// 圆整requestedCapacity到2的x次方
 		int actualCapacity = ByteUtils.normalizeCapacity(requestedCapacity);
 		IoBuffer buf;
-		if (this.maxCachedBufferSize != 0 && actualCapacity > this.maxCachedBufferSize) {
+		if (this.maxCachedBufferSize != 0
+				&& actualCapacity > this.maxCachedBufferSize) {
 			buf = wrap(ByteBuffer.allocate(actualCapacity));
 		} else {
 			Queue<CachedIoBuffer> pool;
@@ -166,6 +168,17 @@ public class CachedBufferAllocator implements BufferAllocator {
 		}
 
 		@Override
+		public void putInt(int i) {
+			this.origBuffer.putInt(i);
+
+		}
+
+		@Override
+		public void putShort(short s) {
+			this.origBuffer.putShort(s);
+		}
+
+		@Override
 		public ByteOrder order() {
 			return this.origBuffer.order();
 		}
@@ -179,7 +192,11 @@ public class CachedBufferAllocator implements BufferAllocator {
 		public void order(ByteOrder byteOrder) {
 			this.origBuffer.order(byteOrder);
 		}
+		@Override
+		public void putLong(long l) {
+			this.origBuffer.putLong(l);
 
+		}
 		@Override
 		public final void free() {
 			if (this.origBuffer == null
@@ -190,12 +207,14 @@ public class CachedBufferAllocator implements BufferAllocator {
 
 			// Add to the cache.
 			Queue<CachedIoBuffer> pool;
-			pool = CachedBufferAllocator.this.heapBuffers.get().get(this.origBuffer.capacity());
+			pool = CachedBufferAllocator.this.heapBuffers.get().get(
+					this.origBuffer.capacity());
 			if (pool == null) {
 				return;
 			}
 			// 防止OOM
-			if (CachedBufferAllocator.this.maxPoolSize == 0 || pool.size() < CachedBufferAllocator.this.maxPoolSize) {
+			if (CachedBufferAllocator.this.maxPoolSize == 0
+					|| pool.size() < CachedBufferAllocator.this.maxPoolSize) {
 				pool.offer(new CachedIoBuffer(this.origBuffer));
 			}
 			this.origBuffer = null;

@@ -210,4 +210,22 @@ public class ArrayIoBuffer implements IoBuffer {
 
 	}
 
+	@Override
+	public void putInt(int i) {
+		throw new UnsupportedOperationException();
+		
+	}
+
+	@Override
+	public void putShort(short s) {
+		throw new UnsupportedOperationException();
+		
+	}
+
+	@Override
+	public void putLong(long l) {
+		throw new UnsupportedOperationException();
+		
+	}
+
 }

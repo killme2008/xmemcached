@@ -53,13 +53,13 @@ public class WhalinTranscoder extends BaseSerializingTranscoder implements
 	public Object decode(CachedData d) {
 		byte[] data = d.getData();
 		Object rv = null;
-		if ((d.getFlags() & COMPRESSED) != 0) {
+		if ((d.getFlag() & COMPRESSED) != 0) {
 			data = decompress(d.getData());
 		}
-		if ((d.getFlags() & SERIALIZED) != 0) {
+		if ((d.getFlag() & SERIALIZED) != 0) {
 			rv = deserialize(data);
 		} else {
-			int f = d.getFlags() & ~COMPRESSED;
+			int f = d.getFlag() & ~COMPRESSED;
 			switch (f) {
 			case SPECIAL_BOOLEAN:
 				rv = Boolean.valueOf(this.decodeBoolean(data));

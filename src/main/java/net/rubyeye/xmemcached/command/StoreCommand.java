@@ -5,7 +5,7 @@ import java.util.concurrent.CountDownLatch;
 import net.rubyeye.xmemcached.transcoders.Transcoder;
 
 public abstract class StoreCommand extends Command {
-	protected int exp;
+	protected int expTime;
 	protected long cas;
 	protected Object value;
 	@SuppressWarnings("unchecked")
@@ -13,23 +13,23 @@ public abstract class StoreCommand extends Command {
 			CountDownLatch latch, int exp, long cas, Object value,
 			boolean noreply, Transcoder transcoder) {
 		super(key, keyBytes, cmdType, latch);
-		this.exp = exp;
+		this.expTime = exp;
 		this.cas = cas;
 		this.value = value;
 		this.noreply = noreply;
 		this.transcoder = transcoder;
 	}
 
-	public final int getExp() {
-		return exp;
+	public final int getExpTime() {
+		return this.expTime;
 	}
 
-	public final void setExp(int exp) {
-		this.exp = exp;
+	public final void setExpTime(int exp) {
+		this.expTime = exp;
 	}
 
 	public final long getCas() {
-		return cas;
+		return this.cas;
 	}
 
 	public final void setCas(long cas) {
@@ -37,18 +37,20 @@ public abstract class StoreCommand extends Command {
 	}
 
 	public final Object getValue() {
-		return value;
+		return this.value;
 	}
 
 	public final void setValue(Object value) {
 		this.value = value;
 	}
 
+	@Override
 	@SuppressWarnings("unchecked")
 	public final Transcoder getTranscoder() {
-		return transcoder;
+		return this.transcoder;
 	}
 
+	@Override
 	@SuppressWarnings("unchecked")
 	public final void setTranscoder(Transcoder transcoder) {
 		this.transcoder = transcoder;
