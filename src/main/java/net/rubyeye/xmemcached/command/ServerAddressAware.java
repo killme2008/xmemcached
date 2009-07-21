@@ -3,7 +3,7 @@ package net.rubyeye.xmemcached.command;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 
-public interface VersionCommand {
+public interface ServerAddressAware {
 	public static final ByteBuffer VERSION = ByteBuffer.wrap("version\r\n"
 			.getBytes());
 

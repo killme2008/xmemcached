@@ -5,11 +5,11 @@ import java.nio.ByteBuffer;
 import java.util.concurrent.CountDownLatch;
 
 import net.rubyeye.xmemcached.command.CommandType;
-import net.rubyeye.xmemcached.command.VersionCommand;
+import net.rubyeye.xmemcached.command.ServerAddressAware;
 import net.rubyeye.xmemcached.transcoders.CachedData;
 
 public class BinaryVersionCommand extends BaseBinaryCommand implements
-		VersionCommand {
+		ServerAddressAware {
 	public InetSocketAddress server;
 
 	public final InetSocketAddress getServer() {
@@ -30,12 +30,17 @@ public class BinaryVersionCommand extends BaseBinaryCommand implements
 	}
 
 	@Override
-	protected void readValue(ByteBuffer buffer, int bodyLength, int keyLength,
-			int extrasLength) {
-		byte[] bytes = new byte[bodyLength - keyLength - extrasLength];
+	protected boolean readValue(ByteBuffer buffer, int bodyLength,
+			int keyLength, int extrasLength) {
+		int valueLength = bodyLength - keyLength - extrasLength;
+		if (buffer.remaining() < valueLength) {
+			return false;
+		}
+		byte[] bytes = new byte[valueLength];
 		buffer.get(bytes);
 		setResult(new String(bytes));
 		countDownLatch();
+		return true;
 	}
 
 	@Override

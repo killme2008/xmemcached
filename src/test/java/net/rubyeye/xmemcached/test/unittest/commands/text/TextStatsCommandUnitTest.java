@@ -5,7 +5,7 @@ import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 
 import net.rubyeye.xmemcached.command.Command;
-import net.rubyeye.xmemcached.command.StatsCommand;
+import net.rubyeye.xmemcached.command.text.TextStatsCommand;
 
 /**
  * 
@@ -17,15 +17,15 @@ public class TextStatsCommandUnitTest extends BaseTextCommandUnitTest {
 		Command command = this.commandFactory.createStatsCommand(null,
 				new CountDownLatch(1), null);
 		assertNull(command.getIoBuffer());
-		command.encode(bufferAllocator);
-		assertEquals(StatsCommand.STATS, command.getIoBuffer().getByteBuffer());
+		command.encode(this.bufferAllocator);
+		assertEquals(TextStatsCommand.STATS, command.getIoBuffer().getByteBuffer());
 	}
 
 	public void testItemEncode() {
 		Command command = this.commandFactory.createStatsCommand(null,
 				new CountDownLatch(1), "items");
 		assertNull(command.getIoBuffer());
-		command.encode(bufferAllocator);
+		command.encode(this.bufferAllocator);
 		assertEquals(ByteBuffer.wrap("stats items\r\n".getBytes()), command
 				.getIoBuffer().getByteBuffer());
 	}

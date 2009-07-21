@@ -34,9 +34,8 @@ import net.rubyeye.xmemcached.buffer.SimpleBufferAllocator;
 import net.rubyeye.xmemcached.codec.MemcachedCodecFactory;
 import net.rubyeye.xmemcached.command.Command;
 import net.rubyeye.xmemcached.command.CommandType;
-import net.rubyeye.xmemcached.command.StatsCommand;
+import net.rubyeye.xmemcached.command.ServerAddressAware;
 import net.rubyeye.xmemcached.command.TextCommandFactory;
-import net.rubyeye.xmemcached.command.VersionCommand;
 import net.rubyeye.xmemcached.exception.MemcachedException;
 import net.rubyeye.xmemcached.impl.ArrayMemcachedSessionLocator;
 import net.rubyeye.xmemcached.impl.MemcachedClientStateListenerAdapter;
@@ -2041,7 +2040,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 		}
 		for (Command command : commands) {
 			checkException(command);
-			collectResult.put(((StatsCommand) command).getServer(),
+			collectResult.put(((ServerAddressAware) command).getServer(),
 					(Map<String, String>) command.getResult());
 		}
 		return collectResult;
@@ -2078,7 +2077,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 		}
 		for (Command command : commands) {
 			checkException(command);
-			collectResult.put(((VersionCommand) command).getServer(),
+			collectResult.put(((ServerAddressAware) command).getServer(),
 					(String) command.getResult());
 		}
 		return collectResult;

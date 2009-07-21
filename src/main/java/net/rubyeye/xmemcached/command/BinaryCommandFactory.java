@@ -8,6 +8,7 @@ import net.rubyeye.xmemcached.CommandFactory;
 import net.rubyeye.xmemcached.command.binary.BaseBinaryCommand;
 import net.rubyeye.xmemcached.command.binary.BinaryAppendPrependCommand;
 import net.rubyeye.xmemcached.command.binary.BinaryDeleteCommand;
+import net.rubyeye.xmemcached.command.binary.BinaryStatsCommand;
 import net.rubyeye.xmemcached.command.binary.BinaryVersionCommand;
 import net.rubyeye.xmemcached.transcoders.Transcoder;
 
@@ -109,8 +110,7 @@ public class BinaryCommandFactory implements CommandFactory {
 	@Override
 	public Command createStatsCommand(InetSocketAddress server,
 			CountDownLatch latch, String itemName) {
-		// TODO Auto-generated method stub
-		return null;
+		return new BinaryStatsCommand(server,latch,itemName);
 	}
 
 	@Override

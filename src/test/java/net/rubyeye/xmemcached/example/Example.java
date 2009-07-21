@@ -71,8 +71,9 @@ public class Example {
 			client.prepend("hello", "hello ");
 			// String name = client.get("hello", new StringTranscoder());
 			//System.out.println(name);
-			client.delete("hello");
+		//	client.delete("hello");
 			System.out.println(client.getVersions());
+			System.out.println(client.getStatsByItem("items"));
 			//
 			// List<String> keys = new ArrayList<String>();
 			// keys.add("hello");

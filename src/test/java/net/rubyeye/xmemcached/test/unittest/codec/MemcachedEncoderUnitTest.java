@@ -9,7 +9,7 @@ import net.rubyeye.xmemcached.buffer.SimpleBufferAllocator;
 import net.rubyeye.xmemcached.codec.MemcachedCodecFactory;
 import net.rubyeye.xmemcached.command.Command;
 import net.rubyeye.xmemcached.command.TextCommandFactory;
-import net.rubyeye.xmemcached.command.VersionCommand;
+import net.rubyeye.xmemcached.command.ServerAddressAware;
 import junit.framework.TestCase;
 
 public class MemcachedEncoderUnitTest extends TestCase {
@@ -20,7 +20,7 @@ public class MemcachedEncoderUnitTest extends TestCase {
 		Command command = new TextCommandFactory().createVersionCommand(new CountDownLatch(1),null);
 		command.encode(new SimpleBufferAllocator());
 		ByteBuffer buffer = this.encoder.encode(command, null);
-		assertEquals(buffer, VersionCommand.VERSION);
+		assertEquals(buffer, ServerAddressAware.VERSION);
 	}
 
 }

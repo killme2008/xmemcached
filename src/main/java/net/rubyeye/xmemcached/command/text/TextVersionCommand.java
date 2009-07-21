@@ -7,11 +7,11 @@ import java.util.concurrent.CountDownLatch;
 import net.rubyeye.xmemcached.buffer.BufferAllocator;
 import net.rubyeye.xmemcached.command.Command;
 import net.rubyeye.xmemcached.command.CommandType;
-import net.rubyeye.xmemcached.command.VersionCommand;
+import net.rubyeye.xmemcached.command.ServerAddressAware;
 import net.rubyeye.xmemcached.impl.MemcachedTCPSession;
 import net.rubyeye.xmemcached.utils.ByteUtils;
 
-public class TextVersionCommand extends Command implements VersionCommand {
+public class TextVersionCommand extends Command implements ServerAddressAware {
 	public InetSocketAddress server;
 
 	public final InetSocketAddress getServer() {

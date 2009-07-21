@@ -56,6 +56,13 @@ public enum OpCode {
 			return 0x0b;
 
 		}
+	},
+	STAT {
+		@Override
+		public byte fieldValue() {
+			return 0x10;
+
+		}
 	};
 	public abstract byte fieldValue();
 }

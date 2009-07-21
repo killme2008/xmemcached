@@ -22,6 +22,9 @@ import net.rubyeye.xmemcached.utils.ByteUtils;
 @SuppressWarnings("unchecked")
 public class BaseBinaryCommand extends StoreCommand {
 	protected OpCode opCode;
+	protected BinaryDecodeStatus decodeStatus = BinaryDecodeStatus.NONE;
+	protected int responseKeyLength, responseExtrasLength,
+			responseTotalBodyLength;
 
 	public BaseBinaryCommand(String key, byte[] keyBytes, CommandType cmdType,
 			CountDownLatch latch, int exp, long cas, Object value,
@@ -44,45 +47,66 @@ public class BaseBinaryCommand extends StoreCommand {
 
 	@Override
 	public final boolean decode(MemcachedTCPSession session, ByteBuffer buffer) {
-		if (buffer.remaining() < 24) {
-			return false;
+		while (true) {
+			LABEL: switch (this.decodeStatus) {
+			case NONE:
+				if (buffer.remaining() < 24) {
+					return false;
+				} else {
+					this.decodeStatus = BinaryDecodeStatus.READ_HEADER;
+				}
+				continue;
+			case READ_HEADER:
+				readHeader(buffer);
+				continue;
+			case READ_EXTRAS:
+				if (readExtras(buffer, this.responseExtrasLength)) {
+					this.decodeStatus = BinaryDecodeStatus.READ_KEY;
+					continue;
+				} else {
+					return false;
+				}
+			case READ_KEY:
+				if (readKey(buffer, this.responseKeyLength)) {
+					this.decodeStatus = BinaryDecodeStatus.READ_VALUE;
+					continue;
+				} else {
+					return false;
+				}
+			case READ_VALUE:
+				if (readValue(buffer, this.responseTotalBodyLength,
+						this.responseKeyLength, this.responseExtrasLength)) {
+					this.decodeStatus = BinaryDecodeStatus.DONE;
+					continue;
+				} else {
+					return false;
+				}
+			case DONE:
+				if (finish()) {
+					return true;
+				} else {
+					this.decodeStatus = BinaryDecodeStatus.NONE;
+					break LABEL;
+				}
+			}
 		}
+	}
+
+	protected boolean finish() {
+		countDownLatch();
+		return true;
+	}
+
+	protected void readHeader(ByteBuffer buffer) {
 		readMagicNumber(buffer);
 		readOpCode(buffer);
-		int keyLength = readKeyLength(buffer);
-		int extrasLength = readExtrasLength(buffer);
+		this.responseKeyLength = readKeyLength(buffer);
+		this.responseExtrasLength = readExtrasLength(buffer);
 		readStatus(buffer);
-		int bodyLength = readBodyLength(buffer);
+		this.responseTotalBodyLength = readBodyLength(buffer);
 		readOpaque(buffer);
 		readCAS(buffer);
-		readExtras(buffer, extrasLength);
-		readKey(buffer, keyLength);
-		readValue(buffer, bodyLength, keyLength, extrasLength);
-
-		countDownLatch();
-		// // if (log.isDebugEnabled()) {
-		// StringBuffer sb = new StringBuffer(30);
-		// ByteUtils.byte2hex(magic, sb);
-		// ByteUtils.byte2hex(op, sb);
-		// ByteUtils.short2hex(0, sb);
-		// sb.append("\n");
-		// ByteUtils.short2hex(0, sb);
-		// ByteUtils.short2hex(this.opCode.fieldValue(), sb);
-		// sb.append("\n");
-		// byte [] bytes=new byte[16];
-		// buffer.get(bytes);
-		// buffer.position(buffer.position()-16);
-		// for(int i=0;i<bytes.length;i++){
-		// ByteUtils.byte2hex(bytes[i], sb);
-		// if(i%4==0) {
-		// sb.append("\n");
-		// }
-		// // }
-		// log.debug("Response:"+sb.toString());
-		// System.out.println("response:"+sb.toString());
-		// }
-
-		return true;
+		this.decodeStatus = BinaryDecodeStatus.READ_EXTRAS;
 	}
 
 	protected void readOpaque(ByteBuffer buffer) {
@@ -94,30 +118,29 @@ public class BaseBinaryCommand extends StoreCommand {
 		return 0;
 	}
 
-	protected void readKey(ByteBuffer buffer, int keyLength) {
-
+	protected boolean readKey(ByteBuffer buffer, int keyLength) {
+		return true;
 	}
 
-	protected void readValue(ByteBuffer buffer, int bodyLength, int keyLength,
-			int extrasLength) {
+	protected boolean readValue(ByteBuffer buffer, int bodyLength,
+			int keyLength, int extrasLength) {
 		if (!ByteUtils.stepBuffer(buffer, bodyLength)) {
 			throw new MemcachedDecodeException(
 					"Store command decode error,buffer remaining <"
 							+ (12 + bodyLength));
 		}
+		return true;
 	}
 
-	protected void readExtras(ByteBuffer buffer, int extrasLength) {
-
+	protected boolean readExtras(ByteBuffer buffer, int extrasLength) {
+		return true;
 	}
 
 	private int readBodyLength(ByteBuffer buffer) {
-		int bodyLength = buffer.getInt();
-
-		return bodyLength;
+		return buffer.getInt();
 	}
 
-	private void readStatus(ByteBuffer buffer) {
+	protected void readStatus(ByteBuffer buffer) {
 		ResponseStatus responseStatus = ResponseStatus.parseShort(buffer
 				.getShort());
 
@@ -131,13 +154,11 @@ public class BaseBinaryCommand extends StoreCommand {
 	}
 
 	private int readKeyLength(ByteBuffer buffer) {
-		ByteUtils.stepBuffer(buffer, 2);
-		return 0;
+		return buffer.getShort();
 	}
 
 	private int readExtrasLength(ByteBuffer buffer) {
-		ByteUtils.stepBuffer(buffer, 2);
-		return 0;
+		return buffer.getShort();
 	}
 
 	private void readOpCode(ByteBuffer buffer) {
