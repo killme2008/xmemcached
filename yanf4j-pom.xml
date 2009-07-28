@@ -2,20 +2,12 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<repositories>
-		<repository>
-			<id>hibernate-memcached</id>
-			<name>hibernate-memcached</name>
-			<url>http://raykrueger.googlecode.com/svn/repository</url>
-		</repository>
-	</repositories>
-	<groupId>xmemcached</groupId>
-	<artifactId>xmemcached</artifactId>
+	<groupId>yanf4j</groupId>
+	<artifactId>yanf4j</artifactId>
 	<packaging>jar</packaging>
-	<version>1.2.0</version>
-	<name>xmemcached</name>
+	<version>0.7.0</version>
+	<name>yanf4j</name>
 	<url>http://maven.apache.org</url>
-
 	<build>
 		<plugins>
 			<plugin>
@@ -25,6 +17,10 @@
 					<target>1.6</target>
 					<encoding>UTF-8</encoding>
 				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-source-plugin</artifactId>
 			</plugin>
 		</plugins>
 	</build>
@@ -46,24 +42,7 @@
 			<version>1.2.15</version>
 			<scope>provided</scope>
 		</dependency>
-		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>spring</artifactId>
-			<version>2.5</version>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>yanf4j</groupId>
-			<artifactId>yanf4j</artifactId>
-			<version>0.7.0</version>
-		</dependency>
-		<dependency>
-			<groupId>com.googlecode</groupId>
-			<artifactId>hibernate-memcached</artifactId>
-			<version>1.2</version>
-		</dependency>
 	</dependencies>
-
 	<reporting>
 		<plugins>
 			<plugin>
@@ -72,7 +51,6 @@
 				<configuration>
 					<encoding>utf-8</encoding>
 					<charset>utf-8</charset>
-					<excludePackageNames>net.rubyeye.xmemcached.test</excludePackageNames>
 				</configuration>
 			</plugin>
 		</plugins>
