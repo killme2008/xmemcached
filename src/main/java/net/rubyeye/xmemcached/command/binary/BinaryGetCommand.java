@@ -26,10 +26,16 @@ public class BinaryGetCommand extends BaseBinaryCommand {
 	}
 
 	public BinaryGetCommand(String key, byte[] keyBytes, CommandType cmdType,
-			CountDownLatch latch, OpCode opCode,boolean noreply) {
+			CountDownLatch latch, OpCode opCode, boolean noreply) {
 		super(key, keyBytes, cmdType, latch, 0, 0, null, noreply, null);
 		this.opCode = opCode;
 		this.responseValue = new CachedData();
+	}
+
+	@Override
+	protected boolean finish() {
+		countDownLatch();
+		return true;
 	}
 
 	@Override
@@ -67,8 +73,8 @@ public class BinaryGetCommand extends BaseBinaryCommand {
 			setResult(this.responseValue);
 			return true;
 		} else {
-			setResult(null);
-			return true;
+			return ByteUtils.stepBuffer(buffer, bodyLength - keyLength
+					- extrasLength);
 		}
 	}
 

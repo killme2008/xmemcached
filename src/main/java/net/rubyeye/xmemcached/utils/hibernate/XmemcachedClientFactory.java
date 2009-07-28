@@ -60,11 +60,11 @@ public class XmemcachedClientFactory implements MemcacheClientFactory {
 	}
 
 	protected MemcachedSessionLocator getSessionLocator() {
-		if (clazzNameEquals(ArrayMemcachedSessionLocator.class)) {
+		if (sessionLocatorNameEquals(ArrayMemcachedSessionLocator.class)) {
 			return new ArrayMemcachedSessionLocator(getHashAlgorithm());
 		}
 
-		if (clazzNameEquals(KetamaMemcachedSessionLocator.class)) {
+		if (sessionLocatorNameEquals(KetamaMemcachedSessionLocator.class)) {
 			return new KetamaMemcachedSessionLocator(getHashAlgorithm());
 		}
 
@@ -73,11 +73,11 @@ public class XmemcachedClientFactory implements MemcacheClientFactory {
 	}
 
 	protected CommandFactory getCommandFactory() {
-		if (clazzNameEquals(TextCommandFactory.class)) {
+		if (commandFactoryNameEquals(TextCommandFactory.class)) {
 			return new TextCommandFactory();
 		}
 
-		if (clazzNameEquals(BinaryCommandFactory.class)) {
+		if (commandFactoryNameEquals(BinaryCommandFactory.class)) {
 			return new BinaryCommandFactory();
 		}
 
@@ -85,8 +85,12 @@ public class XmemcachedClientFactory implements MemcacheClientFactory {
 				+ PROP_COMMAND_FACTORY + " value: " + getCommandFactoryName());
 	}
 
-	private boolean clazzNameEquals(Class<?> cls) {
+	private boolean commandFactoryNameEquals(Class<?> cls) {
 		return cls.getSimpleName().equals(getCommandFactoryName());
+	}
+	
+	private boolean sessionLocatorNameEquals(Class<?> cls) {
+		return cls.getSimpleName().equals(getSessionLocatorName());
 	}
 
 	public String getServerList() {
