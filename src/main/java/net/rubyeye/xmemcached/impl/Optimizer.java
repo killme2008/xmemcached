@@ -301,13 +301,9 @@ public class Optimizer implements OptimizerMBean, MemcachedOptimizer {
 				+ Constants.CRLF.length + 1 + keyBytes.length);
 		ByteUtils.setArguments(buffer, cmdBytes, keyBytes);
 		buffer.flip();
-		Command cmd = new TextGetOneCommand(key.toString(), keyBytes,
-				commandType, null) {
-			@Override
-			public Map<Object, Command> getMergeCommands() {
-				return mergeCommands;
-			}
-		};
+		TextGetOneCommand cmd = new TextGetOneCommand(key.toString(), keyBytes,
+				commandType, null);
+		cmd.setMergeCommands(mergeCommands);
 		cmd.setWriteFuture(new FutureImpl<Boolean>());
 		cmd.setMergeCount(mergeCount);
 		cmd.setIoBuffer(buffer);

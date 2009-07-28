@@ -8,6 +8,27 @@ public enum OpCode {
 
 		}
 	},
+	GET_QUIETLY {
+		@Override
+		public byte fieldValue() {
+			return 0x09;
+
+		}
+	},
+	GET_KEY {
+		@Override
+		public byte fieldValue() {
+			return 0x0C;
+
+		}
+	},
+	GET_KEY_QUIETLY {
+		@Override
+		public byte fieldValue() {
+			return 0x0D;
+
+		}
+	},
 	SET {
 		@Override
 		public byte fieldValue() {
@@ -61,6 +82,13 @@ public enum OpCode {
 		@Override
 		public byte fieldValue() {
 			return 0x10;
+
+		}
+	},
+	NOOP {
+		@Override
+		public byte fieldValue() {
+			return 0x0a;
 
 		}
 	};

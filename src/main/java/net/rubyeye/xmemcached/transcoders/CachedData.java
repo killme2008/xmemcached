@@ -15,7 +15,7 @@ public final class CachedData {
 	 */
 	public static final int MAX_SIZE = 1024 * 1024;
 
-	private int flags;
+	private int flag;
 	private byte[] data;
 	private long cas;
 	private int capacity;
@@ -52,8 +52,8 @@ public final class CachedData {
 		return MAX_SIZE;
 	}
 
-	public final void setFlags(int flags) {
-		this.flags = flags;
+	public final void setFlag(int flags) {
+		this.flag = flags;
 	}
 
 	public final void setData(byte[] data) {
@@ -96,7 +96,7 @@ public final class CachedData {
 					"Cannot cache data larger than 1MB (you tried to cache a "
 							+ d.length + " byte object)");
 		}
-		this.flags = f;
+		this.flag = f;
 		this.data = d;
 		this.cas = casId;
 	}
@@ -124,12 +124,12 @@ public final class CachedData {
 	 * Get the flags stored along with this value.
 	 */
 	public final int getFlag() {
-		return this.flags;
+		return this.flag;
 	}
 
 	@Override
 	public String toString() {
-		return "{CachedData flags=" + this.flags + " data=" + Arrays.toString(this.data)
+		return "{CachedData flags=" + this.flag + " data=" + Arrays.toString(this.data)
 				+ "}";
 	}
 

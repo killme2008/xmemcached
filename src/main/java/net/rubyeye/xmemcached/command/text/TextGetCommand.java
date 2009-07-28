@@ -10,12 +10,13 @@ import java.util.concurrent.CountDownLatch;
 import net.rubyeye.xmemcached.buffer.BufferAllocator;
 import net.rubyeye.xmemcached.command.Command;
 import net.rubyeye.xmemcached.command.CommandType;
+import net.rubyeye.xmemcached.command.MergeCommandsAware;
 import net.rubyeye.xmemcached.impl.MemcachedTCPSession;
 import net.rubyeye.xmemcached.monitor.Constants;
 import net.rubyeye.xmemcached.transcoders.CachedData;
 import net.rubyeye.xmemcached.utils.ByteUtils;
 
-public abstract class TextGetCommand extends Command {
+public abstract class TextGetCommand extends Command implements MergeCommandsAware{
 	public static final byte[] GET = { 'g', 'e', 't' };
 	public static final byte[] GETS = { 'g', 'e', 't', 's' };
 	protected Map<String, CachedData> returnValues;
@@ -27,6 +28,16 @@ public abstract class TextGetCommand extends Command {
 	 * assocCommands contains all these commands with the same key.
 	 */
 	private List<Command> assocCommands;
+
+	private Map<Object, Command> mergeCommands;
+
+	public final Map<Object, Command> getMergeCommands() {
+		return this.mergeCommands;
+	}
+
+	public final void setMergeCommands(Map<Object, Command> mergeCommands) {
+		this.mergeCommands = mergeCommands;
+	}
 
 	public final List<Command> getAssocCommands() {
 		return this.assocCommands;
@@ -109,7 +120,7 @@ public abstract class TextGetCommand extends Command {
 				} else {
 					final CachedData cachedData = this.returnValues
 							.get(this.currentReturnKey);
-					cachedData.setFlags(Integer.parseInt(item));
+					cachedData.setFlag(Integer.parseInt(item));
 					this.parseStatus = ParseStatus.DATA_LEN;
 					continue;
 				}

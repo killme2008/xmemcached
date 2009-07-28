@@ -395,7 +395,7 @@ public class MemcachedConnector extends SocketChannelController {
 		session.write(msg);
 	}
 
-	protected final Session findSessionByKey(String key) {
+	public final Session findSessionByKey(String key) {
 		return this.sessionLocator.getSessionByKey(key);
 	}
 

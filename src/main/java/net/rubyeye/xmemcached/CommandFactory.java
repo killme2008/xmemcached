@@ -3,11 +3,21 @@ package net.rubyeye.xmemcached;
 import java.net.InetSocketAddress;
 import java.util.Collection;
 import java.util.concurrent.CountDownLatch;
+
+import net.rubyeye.xmemcached.buffer.BufferAllocator;
 import net.rubyeye.xmemcached.command.Command;
 import net.rubyeye.xmemcached.command.CommandType;
 import net.rubyeye.xmemcached.transcoders.Transcoder;
 
 public interface CommandFactory {
+
+	/**
+	 * set command factory's buffer allocator
+	 * 
+	 * @since 1.2.0
+	 * @param bufferAllocator
+	 */
+	public void setBufferAllocator(BufferAllocator bufferAllocator);
 
 	/**
 	 * 创建delete命令
@@ -107,11 +117,13 @@ public interface CommandFactory {
 
 	/**
 	 * Create verbosity command
+	 * 
 	 * @param latch
 	 * @param level
 	 * @param noreply
 	 * @return
 	 */
-	public Command createVerbosityCommand(CountDownLatch latch, int level, boolean noreply);
+	public Command createVerbosityCommand(CountDownLatch latch, int level,
+			boolean noreply);
 
 }

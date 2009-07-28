@@ -13,6 +13,7 @@ package net.rubyeye.xmemcached.example;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.concurrent.TimeoutException;
 
 import net.rubyeye.xmemcached.MemcachedClient;
@@ -20,6 +21,7 @@ import net.rubyeye.xmemcached.MemcachedClientBuilder;
 import net.rubyeye.xmemcached.XMemcachedClientBuilder;
 import net.rubyeye.xmemcached.command.BinaryCommandFactory;
 import net.rubyeye.xmemcached.exception.MemcachedException;
+import net.rubyeye.xmemcached.transcoders.StringTranscoder;
 import net.rubyeye.xmemcached.utils.AddrUtil;
 
 class Name implements Serializable {
@@ -69,11 +71,28 @@ public class Example {
 			}
 			client.append("hello", " good");
 			client.prepend("hello", "hello ");
-			// String name = client.get("hello", new StringTranscoder());
-			//System.out.println(name);
-		//	client.delete("hello");
+			String name = client.get("hello", new StringTranscoder());
+			System.out.println(name);
+			if (!client.delete("hello")) {
+				System.err.println("delete error");
+			}
+			
 			System.out.println(client.getVersions());
 			System.out.println(client.getStatsByItem("items"));
+			
+			client.set("a", 0, 1);
+			client.set("b", 0, 2);
+
+			client.set("c", 0, 3);
+			client.set("d", 0, 4);
+			java.util.List<String> list=new ArrayList<String>();
+			list.add("a");
+			list.add("b");
+			list.add("c");
+			list.add("d");
+			System.out.println(client.get(list));
+			System.out.println(client.gets(list));
+			System.out.println(client.gets("a"));
 			//
 			// List<String> keys = new ArrayList<String>();
 			// keys.add("hello");

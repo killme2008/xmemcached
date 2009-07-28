@@ -10,6 +10,7 @@ import net.rubyeye.xmemcached.buffer.SimpleBufferAllocator;
 import net.rubyeye.xmemcached.command.Command;
 import net.rubyeye.xmemcached.command.CommandType;
 import net.rubyeye.xmemcached.command.TextCommandFactory;
+import net.rubyeye.xmemcached.command.text.TextGetOneCommand;
 import net.rubyeye.xmemcached.impl.Optimizer;
 import net.rubyeye.xmemcached.transcoders.CachedData;
 import net.rubyeye.xmemcached.transcoders.SerializingTranscoder;
@@ -52,7 +53,7 @@ public class OptimezerTest extends TestCase {
 
 	public void testOptimiezeGet() {
 
-		Command optimiezeCommand = this.optimiezer.optimiezeGet(
+		TextGetOneCommand optimiezeCommand = (TextGetOneCommand)this.optimiezer.optimiezeGet(
 				this.writeQueue, this.executingCmds, this.currentCmd);
 
 		assertEquals(10, optimiezeCommand.getMergeCommands().size());
@@ -77,7 +78,7 @@ public class OptimezerTest extends TestCase {
 			cmd.setWriteFuture(new FutureImpl<Boolean>());
 			localQueue.add(cmd);
 		}
-		Command optimiezeCommand = this.optimiezer.optimiezeGet(
+		TextGetOneCommand optimiezeCommand =(TextGetOneCommand) this.optimiezer.optimiezeGet(
 				this.writeQueue, this.executingCmds, this.currentCmd);
 
 		assertEquals(1, optimiezeCommand.getMergeCommands().size());
@@ -105,7 +106,7 @@ public class OptimezerTest extends TestCase {
 
 	public void testMergeFactorDecrease() {
 		this.optimiezer.setMergeFactor(5);
-		Command optimiezeCommand = this.optimiezer.optimiezeGet(
+		TextGetOneCommand optimiezeCommand =(TextGetOneCommand) this.optimiezer.optimiezeGet(
 				this.writeQueue, this.executingCmds, this.currentCmd);
 
 		assertEquals(5, optimiezeCommand.getMergeCommands().size());
@@ -118,7 +119,7 @@ public class OptimezerTest extends TestCase {
 
 	public void testMergeFactorEqualsZero() {
 		this.optimiezer.setMergeFactor(0);
-		Command optimiezeCommand = this.optimiezer.optimiezeGet(
+		TextGetOneCommand optimiezeCommand =(TextGetOneCommand) this.optimiezer.optimiezeGet(
 				this.writeQueue, this.executingCmds, this.currentCmd);
 		optimiezeCommand.encode(new SimpleBufferAllocator());
 
@@ -134,7 +135,7 @@ public class OptimezerTest extends TestCase {
 
 	public void testDisableMergeGet() {
 		this.optimiezer.setOptimizeGet(false); // disable merge get
-		Command optimiezeCommand = this.optimiezer.optimiezeGet(
+		TextGetOneCommand optimiezeCommand =(TextGetOneCommand) this.optimiezer.optimiezeGet(
 				this.writeQueue, this.executingCmds, this.currentCmd);
 		optimiezeCommand.encode(new SimpleBufferAllocator());
 		assertNull(optimiezeCommand.getMergeCommands());
@@ -165,7 +166,7 @@ public class OptimezerTest extends TestCase {
 			cmd.setWriteFuture(new FutureImpl<Boolean>());
 		}
 		// merge five get commands at most
-		Command optimiezeCommand = this.optimiezer.optimiezeGet(
+		TextGetOneCommand optimiezeCommand =(TextGetOneCommand) this.optimiezer.optimiezeGet(
 				this.writeQueue, this.executingCmds, this.currentCmd);
 
 		assertEquals(5, optimiezeCommand.getMergeCommands().size());

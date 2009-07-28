@@ -1,24 +1,40 @@
 package net.rubyeye.xmemcached.command;
 
 import java.net.InetSocketAddress;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
 import net.rubyeye.xmemcached.CommandFactory;
-import net.rubyeye.xmemcached.command.binary.BaseBinaryCommand;
+import net.rubyeye.xmemcached.buffer.BufferAllocator;
+import net.rubyeye.xmemcached.buffer.IoBuffer;
 import net.rubyeye.xmemcached.command.binary.BinaryAppendPrependCommand;
 import net.rubyeye.xmemcached.command.binary.BinaryDeleteCommand;
+import net.rubyeye.xmemcached.command.binary.BinaryGetCommand;
+import net.rubyeye.xmemcached.command.binary.BinaryGetMultiCommand;
 import net.rubyeye.xmemcached.command.binary.BinaryStatsCommand;
+import net.rubyeye.xmemcached.command.binary.BinaryStoreCommand;
 import net.rubyeye.xmemcached.command.binary.BinaryVersionCommand;
+import net.rubyeye.xmemcached.command.binary.OpCode;
 import net.rubyeye.xmemcached.transcoders.Transcoder;
+import net.rubyeye.xmemcached.utils.ByteUtils;
 
 /**
  * Binary protocol command factory
  * 
  * @author dennis
- * 
+ * @since 1.2.0
  */
 public class BinaryCommandFactory implements CommandFactory {
+
+	private BufferAllocator bufferAllocator;
+
+	@Override
+	public void setBufferAllocator(BufferAllocator bufferAllocator) {
+		this.bufferAllocator = bufferAllocator;
+	}
 
 	@Override
 	public Command createAddCommand(String key, byte[] keyBytes, int exp,
@@ -59,15 +75,45 @@ public class BinaryCommandFactory implements CommandFactory {
 	@Override
 	public Command createGetCommand(String key, byte[] keyBytes,
 			CommandType cmdType) {
-		// TODO Auto-generated method stub
-		return null;
+		return new BinaryGetCommand(key, keyBytes, cmdType, new CountDownLatch(
+				1), OpCode.GET, false);
 	}
 
 	@Override
 	public <T> Command createGetMultiCommand(Collection<String> keys,
 			CountDownLatch latch, CommandType cmdType, Transcoder<T> transcoder) {
-		// TODO Auto-generated method stub
-		return null;
+		Iterator<String> it = keys.iterator();
+		String key = null;
+		List<IoBuffer> bufferList = new ArrayList<IoBuffer>();
+		int totalLength = 0;
+		while (it.hasNext()) {
+			key = it.next();
+			if (it.hasNext()) {
+				// first n-1 send getkq command
+				Command command = new BinaryGetCommand(key, ByteUtils
+						.getBytes(key), cmdType, null, OpCode.GET_KEY_QUIETLY,
+						true);
+				command.encode(this.bufferAllocator);
+				totalLength += command.getIoBuffer().remaining();
+				bufferList.add(command.getIoBuffer());
+			}
+		}
+		// last key,create a getk command
+		Command lastCommand = new BinaryGetCommand(key,
+				ByteUtils.getBytes(key), cmdType, new CountDownLatch(1),
+				OpCode.GET_KEY, false);
+		lastCommand.encode(this.bufferAllocator);
+		bufferList.add(lastCommand.getIoBuffer());
+		totalLength += lastCommand.getIoBuffer().remaining();
+
+		IoBuffer mergetBuffer = this.bufferAllocator.allocate(totalLength);
+		for (IoBuffer buffer : bufferList) {
+			mergetBuffer.put(buffer.getByteBuffer());
+		}
+		mergetBuffer.flip();
+		Command mergeCommand = new BinaryGetMultiCommand(key, cmdType, latch);
+		mergeCommand.setIoBuffer(mergetBuffer);
+		return mergeCommand;
 	}
 
 	@Override
@@ -96,7 +142,7 @@ public class BinaryCommandFactory implements CommandFactory {
 	final Command createStoreCommand(String key, byte[] keyBytes, int exp,
 			Object value, CommandType cmdType, boolean noreply,
 			Transcoder transcoder) {
-		return new BaseBinaryCommand(key, keyBytes, cmdType,
+		return new BinaryStoreCommand(key, keyBytes, cmdType,
 				new CountDownLatch(1), exp, -1, value, noreply, transcoder);
 	}
 
@@ -110,20 +156,20 @@ public class BinaryCommandFactory implements CommandFactory {
 	@Override
 	public Command createStatsCommand(InetSocketAddress server,
 			CountDownLatch latch, String itemName) {
-		return new BinaryStatsCommand(server,latch,itemName);
+		return new BinaryStatsCommand(server, latch, itemName);
 	}
 
 	@Override
 	public Command createVerbosityCommand(CountDownLatch latch, int level,
 			boolean noreply) {
-		// TODO Auto-generated method stub
-		return null;
+		throw new UnsupportedOperationException(
+				"Binary protocol doesn't support verbosity");
 	}
 
 	@Override
 	public Command createVersionCommand(CountDownLatch latch,
 			InetSocketAddress server) {
-		return new BinaryVersionCommand(latch,server);
+		return new BinaryVersionCommand(latch, server);
 	}
 
 }

@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.concurrent.CountDownLatch;
 
 import net.rubyeye.xmemcached.CommandFactory;
+import net.rubyeye.xmemcached.buffer.BufferAllocator;
 import net.rubyeye.xmemcached.command.text.TextCASCommand;
 import net.rubyeye.xmemcached.command.text.TextDeleteCommand;
 import net.rubyeye.xmemcached.command.text.TextFlushAllCommand;
@@ -25,6 +26,11 @@ import net.rubyeye.xmemcached.utils.ByteUtils;
  * 
  */
 public final class TextCommandFactory implements CommandFactory {
+
+	@Override
+	public void setBufferAllocator(BufferAllocator bufferAllocator) {
+		
+	}
 
 	/*
 	 * (non-Javadoc)
@@ -63,6 +69,7 @@ public final class TextCommandFactory implements CommandFactory {
 
 	/**
 	 * Create verbosity command
+	 * 
 	 * @param latch
 	 * @param level
 	 * @param noreply

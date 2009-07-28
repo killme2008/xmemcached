@@ -13,7 +13,6 @@ package net.rubyeye.xmemcached.command;
 
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
-import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 
 import net.rubyeye.xmemcached.buffer.BufferAllocator;
@@ -156,11 +155,6 @@ public abstract class Command implements WriteMessage {
 	public final void setIoBuffer(IoBuffer byteBufferWrapper) {
 		this.ioBuffer = byteBufferWrapper;
 	}
-
-	public Map<Object, Command> getMergeCommands() {
-		return null;
-	}
-
 	public Exception getException() {
 		return this.exception;
 	}

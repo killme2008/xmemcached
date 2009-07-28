@@ -211,11 +211,12 @@ public class PerformanceTest {
 					AddrUtil.getAddresses(args[4]));
 			builder.setCommandFactory(new BinaryCommandFactory());
 			MemcachedClient mc = builder.build();
+			mc.setOptimizeGet(false);
 			// mc.setOptimizeMergeBuffer(false);
 			// 分别测试写、读、删除
 			testWrite(thread, size, repeat, keySize, valueSize, mc);
-//			testRead(thread, size, repeat, keySize, valueSize, mc);
-//			testDelete(thread, size, repeat, keySize, valueSize, mc);
+			testRead(thread, size, repeat, keySize, valueSize, mc);
+			testDelete(thread, size, repeat, keySize, valueSize, mc);
 
 			mc.shutdown();
 		} catch (Exception e) {

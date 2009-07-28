@@ -11,14 +11,14 @@
  */
 package net.rubyeye.xmemcached.impl;
 
-import com.google.code.yanf4j.nio.Session;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
 import net.rubyeye.xmemcached.HashAlgorithm;
 import net.rubyeye.xmemcached.MemcachedSessionLocator;
+
+import com.google.code.yanf4j.nio.Session;
 
 /**
  * Session locator base on hash(key) mod sessions.size().Standard hash strategy
@@ -38,17 +38,22 @@ public class ArrayMemcachedSessionLocator implements MemcachedSessionLocator {
 	public ArrayMemcachedSessionLocator(HashAlgorithm hashAlgorighm) {
 		this.hashAlgorighm = hashAlgorighm;
 	}
+	
+	public final void setHashAlgorighm(HashAlgorithm hashAlgorighm) {
+		this.hashAlgorighm = hashAlgorighm;
+	}
 
 	public final long getHash(int size, String key) {
-		long hash = hashAlgorighm.hash(key);
+		long hash = this.hashAlgorighm.hash(key);
 		return hash % size;
 	}
 
 	@Override
 	public final Session getSessionByKey(final String key) {
-		if (sessions == null || sessions.size() == 0)
+		if (this.sessions == null || this.sessions.size() == 0) {
 			return null;
-		List<Session> sessionList = sessions;
+		}
+		List<Session> sessionList = this.sessions;
 		int size = sessionList.size();
 		if (size == 0) {
 			return null;
@@ -84,8 +89,9 @@ public class ArrayMemcachedSessionLocator implements MemcachedSessionLocator {
 				for (int i = 0; i < weight; i++) {
 					newSessions.add(session);
 				}
-			} else
+			} else {
 				newSessions.add(session);
+			}
 		}
 		this.sessions = newSessions;
 	}

@@ -450,14 +450,14 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 
 	@SuppressWarnings("unchecked")
 	private void buildConnector(MemcachedSessionLocator locator,
-			BufferAllocator allocator, Configuration configuration,
+			BufferAllocator bufferAllocator, Configuration configuration,
 			CommandFactory commandFactory, Transcoder transcoder) {
 		if (locator == null) {
 			locator = new ArrayMemcachedSessionLocator();
 
 		}
-		if (allocator == null) {
-			allocator = new SimpleBufferAllocator();
+		if (bufferAllocator == null) {
+			bufferAllocator = new SimpleBufferAllocator();
 		}
 		if (configuration == null) {
 			configuration = getDefaultConfiguration();
@@ -469,11 +469,12 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 			commandFactory = new TextCommandFactory();
 		}
 		this.commandFactory = commandFactory;
+		this.commandFactory.setBufferAllocator(bufferAllocator);
 		this.shutdown = true;
 		this.transcoder = transcoder;
 		this.sessionLocator = locator;
 		this.connector = new MemcachedConnector(configuration,
-				this.sessionLocator, allocator);
+				this.sessionLocator, bufferAllocator);
 		this.connector.setSendBufferSize(DEFAULT_TCP_SEND_BUFF_SIZE);
 		this.memcachedHandler = new MemcachedHandler(this);
 		this.connector.setHandler(this.memcachedHandler);

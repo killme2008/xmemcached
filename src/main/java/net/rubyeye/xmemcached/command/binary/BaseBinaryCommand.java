@@ -4,8 +4,8 @@ import java.nio.ByteBuffer;
 import java.util.concurrent.CountDownLatch;
 
 import net.rubyeye.xmemcached.buffer.BufferAllocator;
+import net.rubyeye.xmemcached.command.Command;
 import net.rubyeye.xmemcached.command.CommandType;
-import net.rubyeye.xmemcached.command.StoreCommand;
 import net.rubyeye.xmemcached.exception.MemcachedDecodeException;
 import net.rubyeye.xmemcached.exception.UnknownCommandException;
 import net.rubyeye.xmemcached.impl.MemcachedTCPSession;
@@ -13,36 +13,63 @@ import net.rubyeye.xmemcached.transcoders.CachedData;
 import net.rubyeye.xmemcached.transcoders.Transcoder;
 import net.rubyeye.xmemcached.utils.ByteUtils;
 
-/**
- * Base binary protocol implementation
- * 
- * @author dennis
- * 
- */
-@SuppressWarnings("unchecked")
-public class BaseBinaryCommand extends StoreCommand {
+public abstract class BaseBinaryCommand extends Command {
+	protected int expTime;
+	protected long cas;
+	protected Object value;
+
 	protected OpCode opCode;
 	protected BinaryDecodeStatus decodeStatus = BinaryDecodeStatus.NONE;
 	protected int responseKeyLength, responseExtrasLength,
 			responseTotalBodyLength;
+	protected ResponseStatus responseStatus;
 
+	@SuppressWarnings("unchecked")
 	public BaseBinaryCommand(String key, byte[] keyBytes, CommandType cmdType,
 			CountDownLatch latch, int exp, long cas, Object value,
 			boolean noreply, Transcoder transcoder) {
-		super(key, keyBytes, cmdType, latch, exp, cas, value, noreply,
-				transcoder);
-		switch (cmdType) {
-		case SET:
-			this.opCode = OpCode.SET;
-			break;
-		case REPLACE:
-			this.opCode = OpCode.REPLACE;
-			break;
-		case ADD:
-			this.opCode = OpCode.ADD;
-			break;
+		super(key, keyBytes, cmdType, latch);
+		this.expTime = exp;
+		this.cas = cas;
+		this.value = value;
+		this.noreply = noreply;
+		this.transcoder = transcoder;
+	}
 
-		}
+	public final int getExpTime() {
+		return this.expTime;
+	}
+
+	public final void setExpTime(int exp) {
+		this.expTime = exp;
+	}
+
+	public final long getCas() {
+		return this.cas;
+	}
+
+	public final void setCas(long cas) {
+		this.cas = cas;
+	}
+
+	public final Object getValue() {
+		return this.value;
+	}
+
+	public final void setValue(Object value) {
+		this.value = value;
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public final Transcoder getTranscoder() {
+		return this.transcoder;
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public final void setTranscoder(Transcoder transcoder) {
+		this.transcoder = transcoder;
 	}
 
 	@Override
@@ -85,6 +112,7 @@ public class BaseBinaryCommand extends StoreCommand {
 				if (finish()) {
 					return true;
 				} else {
+					//Do not finish,continue to decode
 					this.decodeStatus = BinaryDecodeStatus.NONE;
 					break LABEL;
 				}
@@ -93,6 +121,13 @@ public class BaseBinaryCommand extends StoreCommand {
 	}
 
 	protected boolean finish() {
+		if (this.result == null) {
+			if (this.responseStatus == ResponseStatus.NO_ERROR) {
+				setResult(Boolean.TRUE);
+			} else {
+				setResult(Boolean.FALSE);
+			}
+		}
 		countDownLatch();
 		return true;
 	}
@@ -102,6 +137,7 @@ public class BaseBinaryCommand extends StoreCommand {
 		readOpCode(buffer);
 		this.responseKeyLength = readKeyLength(buffer);
 		this.responseExtrasLength = readExtrasLength(buffer);
+		readDataType(buffer);
 		readStatus(buffer);
 		this.responseTotalBodyLength = readBodyLength(buffer);
 		readOpaque(buffer);
@@ -119,21 +155,22 @@ public class BaseBinaryCommand extends StoreCommand {
 	}
 
 	protected boolean readKey(ByteBuffer buffer, int keyLength) {
-		return true;
+		return ByteUtils.stepBuffer(buffer, keyLength);
 	}
 
 	protected boolean readValue(ByteBuffer buffer, int bodyLength,
 			int keyLength, int extrasLength) {
-		if (!ByteUtils.stepBuffer(buffer, bodyLength)) {
+		if (!ByteUtils
+				.stepBuffer(buffer, bodyLength - keyLength - extrasLength)) {
 			throw new MemcachedDecodeException(
-					"Store command decode error,buffer remaining <"
-							+ (12 + bodyLength));
+					"Binary command decode error,buffer remaining less than value length:"
+							+ (bodyLength - keyLength - extrasLength));
 		}
 		return true;
 	}
 
 	protected boolean readExtras(ByteBuffer buffer, int extrasLength) {
-		return true;
+		return ByteUtils.stepBuffer(buffer, extrasLength);
 	}
 
 	private int readBodyLength(ByteBuffer buffer) {
@@ -141,15 +178,9 @@ public class BaseBinaryCommand extends StoreCommand {
 	}
 
 	protected void readStatus(ByteBuffer buffer) {
-		ResponseStatus responseStatus = ResponseStatus.parseShort(buffer
-				.getShort());
-
-		if (responseStatus == ResponseStatus.NO_ERROR) {
-			setResult(true);
-		} else if (responseStatus == ResponseStatus.UNKNOWN_COMMAND) {
+		this.responseStatus = ResponseStatus.parseShort(buffer.getShort());
+		if (this.responseStatus == ResponseStatus.UNKNOWN_COMMAND) {
 			setException(new UnknownCommandException());
-		} else {
-			setResult(false);
 		}
 	}
 
@@ -157,11 +188,15 @@ public class BaseBinaryCommand extends StoreCommand {
 		return buffer.getShort();
 	}
 
-	private int readExtrasLength(ByteBuffer buffer) {
-		return buffer.getShort();
+	private byte readExtrasLength(ByteBuffer buffer) {
+		return buffer.get();
 	}
 
-	private void readOpCode(ByteBuffer buffer) {
+	private byte readDataType(ByteBuffer buffer) {
+		return buffer.get();
+	}
+
+	protected void readOpCode(ByteBuffer buffer) {
 		byte op = buffer.get();
 
 		if (op != this.opCode.fieldValue()) {
@@ -178,10 +213,14 @@ public class BaseBinaryCommand extends StoreCommand {
 		}
 	}
 
+	/**
+	 * Set,add,replace protocol's extras length
+	 */
 	static final byte EXTRAS_LENGTH = (byte) 8;
 
 	@Override
-	public final void encode(BufferAllocator bufferAllocator) {
+	@SuppressWarnings("unchecked")
+	public void encode(BufferAllocator bufferAllocator) {
 		CachedData data = null;
 		if (this.transcoder != null) {
 			data = this.transcoder.encode(this.value);

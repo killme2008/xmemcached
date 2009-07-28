@@ -18,8 +18,11 @@ import net.rubyeye.xmemcached.buffer.IoBuffer;
 import net.rubyeye.xmemcached.codec.MemcachedDecoder;
 import net.rubyeye.xmemcached.monitor.Constants;
 
-public final class ByteUtils {
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
+public final class ByteUtils {
+	public static final Log log = LogFactory.getLog(ByteUtils.class);
 	public static final String DEFAULT_CHARSET = "utf-8";
 	public static final ByteBuffer SPLIT = ByteBuffer.wrap(Constants.CRLF);
 
@@ -179,17 +182,20 @@ public final class ByteUtils {
 			buffer.get(bytes);
 			buffer.limit(limit);
 			buffer.position(index + ByteUtils.SPLIT.remaining());
-			try {
-				String line = new String(bytes, "utf-8");
-				return line;
-			} catch (UnsupportedEncodingException e) {
-				MemcachedDecoder.log.error(e, e);
-
-			}
+			return getString(bytes);
 
 		}
 		return null;
+	}
 
+	public static String getString(byte[] bytes) {
+		try {
+			return new String(bytes, "utf-8");
+		} catch (UnsupportedEncodingException e) {
+			log.error("new String error", e);
+
+		}
+		return null;
 	}
 
 	public static void byte2hex(byte b, StringBuffer buf) {
@@ -205,7 +211,7 @@ public final class ByteUtils {
 		str.append(Integer.toHexString(a));
 	}
 
-	public static void short2hex(int a,StringBuffer str) {
+	public static void short2hex(int a, StringBuffer str) {
 		str.append(Integer.toHexString(a));
 	}
 }
