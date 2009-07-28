@@ -13,6 +13,7 @@ FAQ
 1.How to build project by maven?
 
 Please install lib/yanf4j-0.61-SNAPSHOT.jar to local repository,groupId and artifactId both are yanf4j.
+You can use ant task "ant install-yanf4j" to complete this work.
 Then type command "mvn package" to build the project.
 
 
