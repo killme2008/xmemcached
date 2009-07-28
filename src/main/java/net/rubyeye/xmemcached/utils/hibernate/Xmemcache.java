@@ -67,7 +67,6 @@ public class Xmemcache implements Memcache {
 		} catch (MemcachedException e) {
 			try {
 				this.memcachedClient.add(key, 0, String.valueOf(startingValue));
-				this.memcachedClient.incr(key, factor);
 			} catch (Exception ex) {
 				this.exceptionHandler.handleErrorOnIncr(key, factor,
 						startingValue, ex);
