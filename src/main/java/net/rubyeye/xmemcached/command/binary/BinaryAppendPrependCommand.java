@@ -13,6 +13,7 @@ import net.rubyeye.xmemcached.transcoders.Transcoder;
  * @author dennis
  * 
  */
+@SuppressWarnings("unchecked")
 public class BinaryAppendPrependCommand extends BaseBinaryCommand {
 
 	public BinaryAppendPrependCommand(String key, byte[] keyBytes,
@@ -22,10 +23,10 @@ public class BinaryAppendPrependCommand extends BaseBinaryCommand {
 				transcoder);
 		switch (cmdType) {
 		case APPEND:
-			this.opCode = OpCode.APPEND;
+			this.opCode = noreply ? OpCode.ADD_QUIETLY : OpCode.APPEND;
 			break;
 		case PREPEND:
-			this.opCode = OpCode.PREPEND;
+			this.opCode = noreply ? OpCode.PREPEND_QUIETLY : OpCode.PREPEND;
 			break;
 		default:
 			throw new UnknownCommandException(

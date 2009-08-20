@@ -10,17 +10,33 @@ public class TextFlushAllCommandUnitTest extends BaseTextCommandUnitTest {
 		Command command = this.commandFactory.createFlushAllCommand(
 				new CountDownLatch(1), 0, false);
 		assertNull(command.getIoBuffer());
-		command.encode(bufferAllocator);
+		command.encode(this.bufferAllocator);
 		assertEquals(TextFlushAllCommand.FLUSH_ALL, command.getIoBuffer()
 				.getByteBuffer());
 
 		command = this.commandFactory.createFlushAllCommand(new CountDownLatch(
 				1), 0, true);
 		assertNull(command.getIoBuffer());
-		command.encode(bufferAllocator);
+		command.encode(this.bufferAllocator);
 		assertEquals("flush_all noreply\r\n", new String(command.getIoBuffer()
 				.getByteBuffer().array()));
 
+	}
+	
+	public void testEncodeWithDelay(){
+		Command command = this.commandFactory.createFlushAllCommand(
+				new CountDownLatch(1), 10, false);
+		assertNull(command.getIoBuffer());
+		command.encode(this.bufferAllocator);
+		assertEquals("flush_all 10\r\n", new String(command.getIoBuffer()
+				.getByteBuffer().array()));
+
+		command = this.commandFactory.createFlushAllCommand(new CountDownLatch(
+				1), 10, true);
+		assertNull(command.getIoBuffer());
+		command.encode(this.bufferAllocator);
+		assertEquals("flush_all 10 noreply\r\n", new String(command.getIoBuffer()
+				.getByteBuffer().array()));
 	}
 
 	public void testDecode() {

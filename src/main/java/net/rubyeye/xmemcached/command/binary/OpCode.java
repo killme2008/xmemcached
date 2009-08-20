@@ -1,5 +1,11 @@
 package net.rubyeye.xmemcached.command.binary;
 
+/**
+ * Binary command Opcodes
+ * 
+ * @author dennis
+ * 
+ */
 public enum OpCode {
 	GET {
 		@Override
@@ -36,10 +42,24 @@ public enum OpCode {
 
 		}
 	},
+	SET_QUIETLY {
+		@Override
+		public byte fieldValue() {
+			return 0x11;
+
+		}
+	},
 	REPLACE {
 		@Override
 		public byte fieldValue() {
 			return 0x03;
+
+		}
+	},
+	REPLACE_QUIETLY {
+		@Override
+		public byte fieldValue() {
+			return 0x13;
 
 		}
 	},
@@ -50,10 +70,24 @@ public enum OpCode {
 
 		}
 	},
+	ADD_QUIETLY {
+		@Override
+		public byte fieldValue() {
+			return 0x12;
+
+		}
+	},
 	APPEND {
 		@Override
 		public byte fieldValue() {
 			return 0x0E;
+
+		}
+	},
+	APPEND_QUIETLY {
+		@Override
+		public byte fieldValue() {
+			return 0x19;
 
 		}
 	},
@@ -64,10 +98,24 @@ public enum OpCode {
 
 		}
 	},
+	PREPEND_QUIETLY {
+		@Override
+		public byte fieldValue() {
+			return 0x1A;
+
+		}
+	},
 	DELETE {
 		@Override
 		public byte fieldValue() {
 			return 0x04;
+
+		}
+	},
+	DELETE_QUIETLY {
+		@Override
+		public byte fieldValue() {
+			return 0x14;
 
 		}
 	},
@@ -89,6 +137,48 @@ public enum OpCode {
 		@Override
 		public byte fieldValue() {
 			return 0x0a;
+
+		}
+	},
+	INCREMENT {
+		@Override
+		public byte fieldValue() {
+			return 0x05;
+
+		}
+	},
+	INCREMENT_QUIETLY {
+		@Override
+		public byte fieldValue() {
+			return 0x15;
+
+		}
+	},
+	DECREMENT {
+		@Override
+		public byte fieldValue() {
+			return 0x06;
+
+		}
+	},
+	DECREMENT_QUIETLY {
+		@Override
+		public byte fieldValue() {
+			return 0x16;
+
+		}
+	},
+	FLUSH {
+		@Override
+		public byte fieldValue() {
+			return 0x08;
+
+		}
+	},
+	FLUSH_QUIETLY {
+		@Override
+		public byte fieldValue() {
+			return 0x18;
 
 		}
 	};

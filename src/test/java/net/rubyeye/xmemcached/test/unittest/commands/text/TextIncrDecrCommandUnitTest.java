@@ -8,14 +8,14 @@ import net.rubyeye.xmemcached.command.CommandType;
 public class TextIncrDecrCommandUnitTest extends BaseTextCommandUnitTest {
 	public void testEncodeIncr() {
 		Command command = this.commandFactory.createIncrDecrCommand("test",
-				"test".getBytes(), 10, CommandType.INCR,false);
+				"test".getBytes(), 10, 0,0, CommandType.INCR, false);
 		assertNull(command.getIoBuffer());
 		command.encode(bufferAllocator);
 
 		checkByteBufferEquals(command, "incr test 10\r\n");
 		
 		command = this.commandFactory.createIncrDecrCommand("test",
-				"test".getBytes(), 10, CommandType.INCR,true);
+				"test".getBytes(), 10, 0,0, CommandType.INCR, true);
 		assertNull(command.getIoBuffer());
 		command.encode(bufferAllocator);
 
@@ -24,14 +24,14 @@ public class TextIncrDecrCommandUnitTest extends BaseTextCommandUnitTest {
 
 	public void testEncodeDecr() {
 		Command command = this.commandFactory.createIncrDecrCommand("test",
-				"test".getBytes(), 10, CommandType.DECR,false);
+				"test".getBytes(), 10, 0,0, CommandType.DECR, false);
 		assertNull(command.getIoBuffer());
 		command.encode(bufferAllocator);
 
 		checkByteBufferEquals(command, "decr test 10\r\n");
 		
 		command = this.commandFactory.createIncrDecrCommand("test",
-				"test".getBytes(), 10, CommandType.DECR,true);
+				"test".getBytes(), 10, 0,0, CommandType.DECR, true);
 		assertNull(command.getIoBuffer());
 		command.encode(bufferAllocator);
 
@@ -40,7 +40,7 @@ public class TextIncrDecrCommandUnitTest extends BaseTextCommandUnitTest {
 
 	public void testDecode() {
 		Command command = this.commandFactory.createIncrDecrCommand("test",
-				"test".getBytes(), 10, CommandType.DECR,false);
+				"test".getBytes(), 10, 0,0, CommandType.DECR, false);
 		checkDecodeNullAndNotLineByteBuffer(command);
 		try {
 			command.decode(null, ByteBuffer.wrap("NOT_STORED\r\n".getBytes()));

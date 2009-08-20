@@ -47,7 +47,7 @@ public abstract class Command implements WriteMessage {
 	}
 
 	@Override
-	public final ByteBuffer getWriteBuffer() {
+	public synchronized final ByteBuffer getWriteBuffer() {
 		return getIoBuffer().getByteBuffer();
 	}
 
@@ -62,7 +62,7 @@ public abstract class Command implements WriteMessage {
 	protected CountDownLatch latch;
 	protected CommandType commandType;
 	protected Exception exception;
-	protected IoBuffer ioBuffer;
+	protected volatile IoBuffer ioBuffer;
 	protected volatile boolean cancel;
 	protected volatile OperationStatus status;
 	protected int mergeCount = -1;

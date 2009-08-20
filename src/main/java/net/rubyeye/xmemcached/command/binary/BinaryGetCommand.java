@@ -83,9 +83,11 @@ public class BinaryGetCommand extends BaseBinaryCommand {
 		if (buffer.remaining() < extrasLength) {
 			return false;
 		}
-		// read flag
-		int flag = buffer.getInt();
-		this.responseValue.setFlag(flag);
+		if (extrasLength > 0) {
+			// read flag
+			int flag = buffer.getInt();
+			this.responseValue.setFlag(flag);
+		}
 		return true;
 	}
 

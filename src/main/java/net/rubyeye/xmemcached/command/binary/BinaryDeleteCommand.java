@@ -10,7 +10,7 @@ public class BinaryDeleteCommand extends BaseBinaryCommand {
 	public BinaryDeleteCommand(String key, byte[] keyBytes,
 			CommandType cmdType, CountDownLatch latch, boolean noreply) {
 		super(key, keyBytes, cmdType, latch, 0, 0, null, noreply, null);
-		this.opCode = OpCode.DELETE;
+		this.opCode = noreply?OpCode.DELETE_QUIETLY:OpCode.DELETE;
 	}
 
 	@Override

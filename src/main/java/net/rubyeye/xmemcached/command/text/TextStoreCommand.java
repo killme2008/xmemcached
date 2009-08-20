@@ -4,29 +4,73 @@ import java.nio.ByteBuffer;
 import java.util.concurrent.CountDownLatch;
 
 import net.rubyeye.xmemcached.buffer.BufferAllocator;
+import net.rubyeye.xmemcached.command.Command;
 import net.rubyeye.xmemcached.command.CommandType;
-import net.rubyeye.xmemcached.command.StoreCommand;
 import net.rubyeye.xmemcached.impl.MemcachedTCPSession;
 import net.rubyeye.xmemcached.monitor.Constants;
 import net.rubyeye.xmemcached.transcoders.CachedData;
 import net.rubyeye.xmemcached.transcoders.Transcoder;
 import net.rubyeye.xmemcached.utils.ByteUtils;
 
-public class TextStoreCommand extends StoreCommand {
+public class TextStoreCommand extends Command {
+	protected int expTime;
+	protected long cas;
+	protected Object value;
 
 	@SuppressWarnings("unchecked")
 	public TextStoreCommand(String key, byte[] keyBytes, CommandType cmdType,
 			CountDownLatch latch, int exp, long cas, Object value,
 			boolean noreply, Transcoder transcoder) {
-		super(key, keyBytes, cmdType, latch, exp, cas, value, noreply,
-				transcoder);
+		super(key, keyBytes, cmdType, latch);
+		this.expTime = exp;
+		this.cas = cas;
+		this.value = value;
+		this.noreply = noreply;
+		this.transcoder = transcoder;
+	}
+
+	public final int getExpTime() {
+		return this.expTime;
+	}
+
+	public final void setExpTime(int exp) {
+		this.expTime = exp;
+	}
+
+	public final long getCas() {
+		return this.cas;
+	}
+
+	public final void setCas(long cas) {
+		this.cas = cas;
+	}
+
+	public final Object getValue() {
+		return this.value;
+	}
+
+	public final void setValue(Object value) {
+		this.value = value;
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public final Transcoder getTranscoder() {
+		return this.transcoder;
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public final void setTranscoder(Transcoder transcoder) {
+		this.transcoder = transcoder;
 	}
 
 	@Override
 	public boolean decode(MemcachedTCPSession session, ByteBuffer buffer) {
-		if (buffer == null || !buffer.hasRemaining())
+		if (buffer == null || !buffer.hasRemaining()) {
 			return false;
-		if (result == null) {
+		}
+		if (this.result == null) {
 			byte first = buffer.get(buffer.position());
 			if (first == 'S') {
 				setResult(Boolean.TRUE);
@@ -38,8 +82,9 @@ public class TextStoreCommand extends StoreCommand {
 				countDownLatch();
 				// NOT_STORED\r\n
 				return ByteUtils.stepBuffer(buffer, 12);
-			} else
+			} else {
 				return decodeError(session, buffer);
+			}
 		} else {
 			Boolean result = (Boolean) this.result;
 			if (result) {
@@ -53,39 +98,42 @@ public class TextStoreCommand extends StoreCommand {
 	@Override
 	@SuppressWarnings("unchecked")
 	public final void encode(BufferAllocator bufferAllocator) {
-		final CachedData data = transcoder.encode(value);
+		final CachedData data = this.transcoder.encode(this.value);
 		byte[] flagBytes = ByteUtils.getBytes(String.valueOf(data.getFlag()));
-		byte[] expBytes = ByteUtils.getBytes(String.valueOf(expTime));
+		byte[] expBytes = ByteUtils.getBytes(String.valueOf(this.expTime));
 		byte[] dataLenBytes = ByteUtils.getBytes(String
 				.valueOf(data.getData().length));
-		byte[] casBytes = ByteUtils.getBytes(String.valueOf(cas));
+		byte[] casBytes = ByteUtils.getBytes(String.valueOf(this.cas));
 		String cmdStr = this.commandType.name().toLowerCase();
-		int size = cmdStr.length() + 1 + keyBytes.length + 1 + flagBytes.length
+		int size = cmdStr.length() + 1 + this.keyBytes.length + 1 + flagBytes.length
 				+ 1 + expBytes.length + 1 + data.getData().length + 2
 				* Constants.CRLF.length + dataLenBytes.length;
 		if (this.commandType == CommandType.CAS) {
 			size += 1 + casBytes.length;
 		}
-		if (isNoreply())
+		if (isNoreply()) {
 			this.ioBuffer = bufferAllocator.allocate(size + 1
 					+ Constants.NO_REPLY.length());
-		else
+		} else {
 			this.ioBuffer = bufferAllocator.allocate(size);
+		}
 		if (this.commandType == CommandType.CAS) {
-			if (isNoreply())
-				ByteUtils.setArguments(this.ioBuffer, cmdStr, keyBytes,
+			if (isNoreply()) {
+				ByteUtils.setArguments(this.ioBuffer, cmdStr, this.keyBytes,
 						flagBytes, expBytes, dataLenBytes, casBytes,
 						Constants.NO_REPLY);
-			else
-				ByteUtils.setArguments(this.ioBuffer, cmdStr, keyBytes,
+			} else {
+				ByteUtils.setArguments(this.ioBuffer, cmdStr, this.keyBytes,
 						flagBytes, expBytes, dataLenBytes, casBytes);
+			}
 		} else {
-			if (isNoreply())
-				ByteUtils.setArguments(this.ioBuffer, cmdStr, keyBytes,
+			if (isNoreply()) {
+				ByteUtils.setArguments(this.ioBuffer, cmdStr, this.keyBytes,
 						flagBytes, expBytes, dataLenBytes, Constants.NO_REPLY);
-			else
-				ByteUtils.setArguments(this.ioBuffer, cmdStr, keyBytes,
+			} else {
+				ByteUtils.setArguments(this.ioBuffer, cmdStr, this.keyBytes,
 						flagBytes, expBytes, dataLenBytes);
+			}
 		}
 		ByteUtils.setArguments(this.ioBuffer, data.getData());
 

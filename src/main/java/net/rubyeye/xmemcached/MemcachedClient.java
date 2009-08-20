@@ -929,13 +929,15 @@ public interface MemcachedClient {
 			throws IOException;
 
 	/**
-	 * Delete key's data item from memcached.This method doesn't wait for reply
-	 * 
+	 * Delete key's data item from memcached.This method doesn't wait for reply.
+	 * This method does not work on memcached 1.3 or later version.See 
+	 * <a href='http://code.google.com/p/memcached/issues/detail?id=3&q=delete%20noreply'>issue 3</a>
 	 * @param key
 	 * @param time
 	 * @throws InterruptedException
 	 * @throws MemcachedException
 	 */
+	@Deprecated
 	public void deleteWithNoReply(final String key, final int time)
 			throws InterruptedException, MemcachedException;
 
@@ -1024,4 +1026,16 @@ public interface MemcachedClient {
 	 * @return
 	 */
 	public Collection<MemcachedClientStateListener> getStateListeners();
+
+	public void flushAllWithNoReply(int exptime)
+			throws InterruptedException, MemcachedException;
+
+	public void flushAll(int exptime, long timeout) throws TimeoutException,
+			InterruptedException, MemcachedException;
+
+	public void flushAllWithNoReply(InetSocketAddress address, int exptime)
+			throws MemcachedException, InterruptedException;
+
+	public void flushAll(InetSocketAddress address, long timeout, int exptime)
+			throws MemcachedException, InterruptedException, TimeoutException;
 }

@@ -73,9 +73,11 @@ public class Example {
 			client.prepend("hello", "hello ");
 			String name = client.get("hello", new StringTranscoder());
 			System.out.println(name);
-			if (!client.delete("hello")) {
-				System.err.println("delete error");
-			}
+//			if (!client.delete("hello")) {
+//				System.err.println("delete error");
+//			}
+			client.deleteWithNoReply("hello");
+			System.out.println(client.get("hello"));
 			
 			System.out.println(client.getVersions());
 			System.out.println(client.getStatsByItem("items"));
@@ -84,7 +86,7 @@ public class Example {
 			client.set("b", 0, 2);
 
 			client.set("c", 0, 3);
-			client.set("d", 0, 4);
+			client.setWithNoReply("d", 0, 4);
 			java.util.List<String> list=new ArrayList<String>();
 			list.add("a");
 			list.add("b");
@@ -93,6 +95,16 @@ public class Example {
 			System.out.println(client.get(list));
 			System.out.println(client.gets(list));
 			System.out.println(client.gets("a"));
+			
+			client.flushAll();
+			
+			
+			System.out.println("After flush all");
+			System.out.println(client.get(list));
+			System.out.println(client.get("a"));
+			client.addWithNoReply("a", 0, 4);
+			System.out.println(client.gets("a"));
+			//System.out.println(client.gets(list));
 			//
 			// List<String> keys = new ArrayList<String>();
 			// keys.add("hello");

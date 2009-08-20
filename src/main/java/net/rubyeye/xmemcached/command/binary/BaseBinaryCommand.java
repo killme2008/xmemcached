@@ -85,6 +85,7 @@ public abstract class BaseBinaryCommand extends Command {
 				continue;
 			case READ_HEADER:
 				readHeader(buffer);
+				this.decodeStatus = BinaryDecodeStatus.READ_EXTRAS;
 				continue;
 			case READ_EXTRAS:
 				if (readExtras(buffer, this.responseExtrasLength)) {
@@ -112,7 +113,7 @@ public abstract class BaseBinaryCommand extends Command {
 				if (finish()) {
 					return true;
 				} else {
-					//Do not finish,continue to decode
+					// Do not finish,continue to decode
 					this.decodeStatus = BinaryDecodeStatus.NONE;
 					break LABEL;
 				}
@@ -135,14 +136,14 @@ public abstract class BaseBinaryCommand extends Command {
 	protected void readHeader(ByteBuffer buffer) {
 		readMagicNumber(buffer);
 		readOpCode(buffer);
-		this.responseKeyLength = readKeyLength(buffer);
-		this.responseExtrasLength = readExtrasLength(buffer);
+		readKeyLength(buffer);
+		readExtrasLength(buffer);
 		readDataType(buffer);
 		readStatus(buffer);
-		this.responseTotalBodyLength = readBodyLength(buffer);
+		readBodyLength(buffer);
 		readOpaque(buffer);
 		readCAS(buffer);
-		this.decodeStatus = BinaryDecodeStatus.READ_EXTRAS;
+
 	}
 
 	protected void readOpaque(ByteBuffer buffer) {
@@ -174,7 +175,8 @@ public abstract class BaseBinaryCommand extends Command {
 	}
 
 	private int readBodyLength(ByteBuffer buffer) {
-		return buffer.getInt();
+		this.responseTotalBodyLength = buffer.getInt();
+		return this.responseTotalBodyLength;
 	}
 
 	protected void readStatus(ByteBuffer buffer) {
@@ -184,12 +186,30 @@ public abstract class BaseBinaryCommand extends Command {
 		}
 	}
 
-	private int readKeyLength(ByteBuffer buffer) {
-		return buffer.getShort();
+	public final OpCode getOpCode() {
+		return this.opCode;
 	}
 
-	private byte readExtrasLength(ByteBuffer buffer) {
-		return buffer.get();
+	public final void setOpCode(OpCode opCode) {
+		this.opCode = opCode;
+	}
+
+	public final ResponseStatus getResponseStatus() {
+		return this.responseStatus;
+	}
+
+	public final void setResponseStatus(ResponseStatus responseStatus) {
+		this.responseStatus = responseStatus;
+	}
+
+	private int readKeyLength(ByteBuffer buffer) {
+		this.responseKeyLength = buffer.getShort();
+		return this.responseKeyLength;
+	}
+
+	private int readExtrasLength(ByteBuffer buffer) {
+		this.responseExtrasLength = buffer.get();
+		return this.responseExtrasLength;
 	}
 
 	private byte readDataType(ByteBuffer buffer) {
@@ -217,6 +237,7 @@ public abstract class BaseBinaryCommand extends Command {
 	 * Set,add,replace protocol's extras length
 	 */
 	static final byte EXTRAS_LENGTH = (byte) 8;
+	
 
 	@Override
 	@SuppressWarnings("unchecked")
@@ -226,7 +247,8 @@ public abstract class BaseBinaryCommand extends Command {
 			data = this.transcoder.encode(this.value);
 		}
 		// header+key+value+extras
-		int length = 16 + 8 + getKeyLength() + getValueLength(data) + 8;
+		int length = 24 + getKeyLength() + getValueLength(data)
+				+ getExtrasLength();
 
 		this.ioBuffer = bufferAllocator.allocate(length);
 		fillHeader(data);

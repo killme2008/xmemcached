@@ -12,6 +12,7 @@ import net.rubyeye.xmemcached.buffer.BufferAllocator;
 import net.rubyeye.xmemcached.buffer.IoBuffer;
 import net.rubyeye.xmemcached.command.binary.BinaryAppendPrependCommand;
 import net.rubyeye.xmemcached.command.binary.BinaryDeleteCommand;
+import net.rubyeye.xmemcached.command.binary.BinaryFlushAllCommand;
 import net.rubyeye.xmemcached.command.binary.BinaryGetCommand;
 import net.rubyeye.xmemcached.command.binary.BinaryGetMultiCommand;
 import net.rubyeye.xmemcached.command.binary.BinaryStatsCommand;
@@ -62,14 +63,13 @@ public class BinaryCommandFactory implements CommandFactory {
 	public Command createDeleteCommand(String key, byte[] keyBytes, int time,
 			boolean noreply) {
 		return new BinaryDeleteCommand(key, keyBytes, CommandType.DELETE,
-				new CountDownLatch(1), false);
+				new CountDownLatch(1), noreply);
 	}
 
 	@Override
 	public Command createFlushAllCommand(CountDownLatch latch, int delay,
 			boolean noreply) {
-		// TODO Auto-generated method stub
-		return null;
+		return new BinaryFlushAllCommand(latch,delay,noreply);
 	}
 
 	@Override
@@ -106,19 +106,19 @@ public class BinaryCommandFactory implements CommandFactory {
 		bufferList.add(lastCommand.getIoBuffer());
 		totalLength += lastCommand.getIoBuffer().remaining();
 
-		IoBuffer mergetBuffer = this.bufferAllocator.allocate(totalLength);
+		IoBuffer mergedBuffer = this.bufferAllocator.allocate(totalLength);
 		for (IoBuffer buffer : bufferList) {
-			mergetBuffer.put(buffer.getByteBuffer());
+			mergedBuffer.put(buffer.getByteBuffer());
 		}
-		mergetBuffer.flip();
-		Command mergeCommand = new BinaryGetMultiCommand(key, cmdType, latch);
-		mergeCommand.setIoBuffer(mergetBuffer);
-		return mergeCommand;
+		mergedBuffer.flip();
+		Command resultCommand = new BinaryGetMultiCommand(key, cmdType, latch);
+		resultCommand.setIoBuffer(mergedBuffer);
+		return resultCommand;
 	}
 
 	@Override
 	public Command createIncrDecrCommand(String key, byte[] keyBytes, int num,
-			CommandType cmdType, boolean noreply) {
+			int init, int exptime, CommandType cmdType, boolean noreply) {
 		// TODO Auto-generated method stub
 		return null;
 	}

@@ -62,9 +62,9 @@ public final class TextCommandFactory implements CommandFactory {
 	 * net.rubyeye.xmemcached.CommandFactory#createFlushAllCommand(java.util
 	 * .concurrent.CountDownLatch)
 	 */
-	public final Command createFlushAllCommand(CountDownLatch latch, int delay,
+	public final Command createFlushAllCommand(CountDownLatch latch, int exptime,
 			boolean noreply) {
-		return new TextFlushAllCommand(latch, delay, noreply);
+		return new TextFlushAllCommand(latch, exptime, noreply);
 	}
 
 	/**
@@ -200,8 +200,8 @@ public final class TextCommandFactory implements CommandFactory {
 	 * .String, byte[], int, net.rubyeye.xmemcached.command.CommandType)
 	 */
 	public final Command createIncrDecrCommand(final String key,
-			final byte[] keyBytes, final int num, CommandType cmdType,
-			boolean noreply) {
+			final byte[] keyBytes, final int num, int init,
+			int exptime, CommandType cmdType, boolean noreply) {
 		return new TextIncrDecrCommand(key, keyBytes, cmdType,
 				new CountDownLatch(1), num, noreply);
 	}

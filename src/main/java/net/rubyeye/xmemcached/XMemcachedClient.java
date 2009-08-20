@@ -1080,8 +1080,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 			Map<String, CachedData> map = (Map<String, CachedData>) getCmd
 					.getResult();
 			if (cmdType == CommandType.GET_MANY) {
-
-				Iterator<Map.Entry<String, CachedData>> it = map.entrySet()
+ 				Iterator<Map.Entry<String, CachedData>> it = map.entrySet()
 						.iterator();
 				while (it.hasNext()) {
 					Map.Entry<String, CachedData> entry = it.next();
@@ -1780,7 +1779,16 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 	public void flushAllWithNoReply() throws InterruptedException,
 			MemcachedException {
 		try {
-			flushAllMemcachedServers(this.opTimeout, true);
+			flushAllMemcachedServers(this.opTimeout, true, 0);
+		} catch (TimeoutException e) {
+			throw new MemcachedException(e);
+		}
+	}
+
+	public void flushAllWithNoReply(int exptime) throws InterruptedException,
+			MemcachedException {
+		try {
+			flushAllMemcachedServers(this.opTimeout, true, exptime);
 		} catch (TimeoutException e) {
 			throw new MemcachedException(e);
 		}
@@ -1790,10 +1798,24 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 	public void flushAllWithNoReply(InetSocketAddress address)
 			throws MemcachedException, InterruptedException {
 		try {
-			flushSpecialMemcachedServer(address, this.opTimeout, true);
+			flushSpecialMemcachedServer(address, this.opTimeout, true, 0);
 		} catch (TimeoutException e) {
 			throw new MemcachedException(e);
 		}
+	}
+
+	public void flushAllWithNoReply(InetSocketAddress address,int exptime)
+			throws MemcachedException, InterruptedException {
+		try {
+			flushSpecialMemcachedServer(address, this.opTimeout, true, exptime);
+		} catch (TimeoutException e) {
+			throw new MemcachedException(e);
+		}
+	}
+
+	public final void flushAll(int exptime, long timeout)
+			throws TimeoutException, InterruptedException, MemcachedException {
+		flushAllMemcachedServers(timeout, false, exptime);
 	}
 
 	/*
@@ -1803,18 +1825,19 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 	 */
 	public final void flushAll(long timeout) throws TimeoutException,
 			InterruptedException, MemcachedException {
-		flushAllMemcachedServers(timeout, false);
+		flushAllMemcachedServers(timeout, false, 0);
 	}
 
-	private void flushAllMemcachedServers(long timeout, boolean noreply)
-			throws MemcachedException, InterruptedException, TimeoutException {
+	private void flushAllMemcachedServers(long timeout, boolean noreply,
+			int exptime) throws MemcachedException, InterruptedException,
+			TimeoutException {
 		final Collection<Session> sessions = this.connector.getSessionSet();
 		CountDownLatch latch = new CountDownLatch(sessions.size());
 		List<Command> commands = new ArrayList<Command>(sessions.size());
 		for (Session session : sessions) {
 			if (session != null && !session.isClosed()) {
 				Command command = this.commandFactory.createFlushAllCommand(
-						latch, 0, noreply);
+						latch, exptime, noreply);
 
 				session.write(command);
 			} else {
@@ -1905,12 +1928,18 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 	 */
 	public final void flushAll(InetSocketAddress address, long timeout)
 			throws MemcachedException, InterruptedException, TimeoutException {
-		flushSpecialMemcachedServer(address, timeout, false);
+		flushSpecialMemcachedServer(address, timeout, false, 0);
+	}
+
+	public final void flushAll(InetSocketAddress address, long timeout,
+			int exptime) throws MemcachedException, InterruptedException,
+			TimeoutException {
+		flushSpecialMemcachedServer(address, timeout, false, exptime);
 	}
 
 	private void flushSpecialMemcachedServer(InetSocketAddress address,
-			long timeout, boolean noreply) throws MemcachedException,
-			InterruptedException, TimeoutException {
+			long timeout, boolean noreply, int exptime)
+			throws MemcachedException, InterruptedException, TimeoutException {
 		if (address == null) {
 			throw new IllegalArgumentException("Null adderss");
 		}
@@ -1922,8 +1951,8 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 					+ address.getHostName() + ":" + address.getPort()
 					+ ",maybe it have not been connected");
 		}
-		Command command = this.commandFactory.createFlushAllCommand(latch, 0,
-				noreply);
+		Command command = this.commandFactory.createFlushAllCommand(latch,
+				exptime, noreply);
 		session.write(command);
 		if (!noreply) {
 			latchWait(command, timeout);
@@ -2110,7 +2139,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 		final byte[] keyBytes = ByteUtils.getBytes(key);
 		ByteUtils.checkKey(keyBytes);
 		final Command command = this.commandFactory.createIncrDecrCommand(key,
-				keyBytes, num, cmdType, noreply);
+				keyBytes, num, 0, 0, cmdType, noreply);
 		sendCommand(command);
 		if (!command.isNoreply()) {
 			latchWait(command, this.opTimeout);

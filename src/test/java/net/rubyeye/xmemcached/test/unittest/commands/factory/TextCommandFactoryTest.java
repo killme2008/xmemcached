@@ -88,7 +88,7 @@ public class TextCommandFactoryTest extends TestCase {
 		byte[] keyBytes = ByteUtils.getBytes(key);
 		int num = 10;
 		Command inCr = commandFactory.createIncrDecrCommand(key, keyBytes,
-				num, CommandType.INCR,false);
+				num, 0,0, CommandType.INCR, false);
 		inCr.encode(bufferAllocator);
 		assertEquals(CommandType.INCR, inCr.getCommandType());
 		String commandStr = new String(inCr.getIoBuffer().getByteBuffer()

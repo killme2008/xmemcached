@@ -21,13 +21,13 @@ public class BinaryStoreCommand extends BaseBinaryCommand {
 				transcoder);
 		switch (cmdType) {
 		case SET:
-			this.opCode = OpCode.SET;
+			this.opCode = noreply ? OpCode.SET_QUIETLY : OpCode.SET;
 			break;
 		case REPLACE:
-			this.opCode = OpCode.REPLACE;
+			this.opCode = noreply ? OpCode.REPLACE_QUIETLY : OpCode.REPLACE;
 			break;
 		case ADD:
-			this.opCode = OpCode.ADD;
+			this.opCode = noreply ? OpCode.ADD_QUIETLY : OpCode.ADD;
 			break;
 
 		}

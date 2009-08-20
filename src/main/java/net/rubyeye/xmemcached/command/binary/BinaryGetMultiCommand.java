@@ -93,7 +93,7 @@ public class BinaryGetMultiCommand extends BaseBinaryCommand {
 			}
 			return true;
 		} else {
-			setResult(null);
+			((Map<String, CachedData>) this.result).remove(this.responseKey);
 			return true;
 		}
 	}
@@ -103,8 +103,10 @@ public class BinaryGetMultiCommand extends BaseBinaryCommand {
 		if (buffer.remaining() < extrasLength) {
 			return false;
 		}
-		// read flag
-		this.responseFlag = buffer.getInt();
+		if (extrasLength == 4) {
+			// read flag
+			this.responseFlag = buffer.getInt();
+		}
 		return true;
 	}
 

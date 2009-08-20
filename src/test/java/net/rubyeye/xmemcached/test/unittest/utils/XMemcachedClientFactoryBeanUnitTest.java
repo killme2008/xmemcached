@@ -16,20 +16,30 @@ public class XMemcachedClientFactoryBeanUnitTest extends TestCase {
 
 	@Override
 	public void setUp() throws Exception {
-		ctx = new ClassPathXmlApplicationContext("applicationContext.xml");
+		this.ctx = new ClassPathXmlApplicationContext("applicationContext.xml");
 	}
 
 	public void testSimpleConfig() throws Exception {
-		MemcachedClient memcachedClient = (MemcachedClient) ctx
+		MemcachedClient memcachedClient = (MemcachedClient) this.ctx
 				.getBean("memcachedClient1");
 
 		validateClient(memcachedClient);
 	}
 
 	public void testAllConfig() throws Exception {
-		MemcachedClient memcachedClient = (MemcachedClient) ctx
+		MemcachedClient memcachedClient = (MemcachedClient) this.ctx
 				.getBean("memcachedClient2");
 		validateClient(memcachedClient);
+	}
+
+	public void testComposite() throws Exception {
+		MemcachedClient memcachedClient1 = (MemcachedClient) this.ctx
+				.getBean("memcachedClient1");
+		MemcachedClient memcachedClient2 = (MemcachedClient) this.ctx
+				.getBean("memcachedClient2");
+		validateClient(memcachedClient1);
+		memcachedClient1.flushAll();
+		validateClient(memcachedClient2);
 	}
 
 	private void validateClient(MemcachedClient memcachedClient)

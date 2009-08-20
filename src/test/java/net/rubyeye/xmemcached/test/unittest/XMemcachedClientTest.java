@@ -261,10 +261,6 @@ public abstract class XMemcachedClientTest extends TestCase {
 		assertEquals("dennis", this.memcachedClient.get("name"));
 		assertTrue(this.memcachedClient.delete("name", 2));
 		assertNull(this.memcachedClient.get("name"));
-		// add,replace fail
-		assertFalse(this.memcachedClient.add("name", 0, "zhuang"));
-		assertFalse(this.memcachedClient.replace("name", 0, "zhuang"));
-		Thread.sleep(3000);
 		// add,replace success
 		assertTrue(this.memcachedClient.add("name", 0, "zhuang"));
 		assertTrue(this.memcachedClient.replace("name", 0, "zhuang"));
@@ -279,12 +275,8 @@ public abstract class XMemcachedClientTest extends TestCase {
 
 		this.memcachedClient.set("name", 0, "dennis");
 		assertEquals("dennis", this.memcachedClient.get("name"));
-		this.memcachedClient.deleteWithNoReply("name", 2);
+		this.memcachedClient.deleteWithNoReply("name");
 		assertNull(this.memcachedClient.get("name"));
-		// add,replace fail
-		assertFalse(this.memcachedClient.add("name", 0, "zhuang"));
-		assertFalse(this.memcachedClient.replace("name", 0, "zhuang"));
-		Thread.sleep(3000);
 		// add,replace success
 		assertTrue(this.memcachedClient.add("name", 0, "zhuang"));
 		assertTrue(this.memcachedClient.replace("name", 0, "zhuang"));
