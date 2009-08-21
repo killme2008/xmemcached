@@ -54,6 +54,7 @@ public class MemcachedConnector extends SocketChannelController {
 	private BufferAllocator bufferAllocator;
 	private final SessionMonitor sessionMonitor;
 	private final MemcachedOptimizer optimiezer;
+	private volatile long healSessionInterval=2000L;
 
 	class SessionMonitor extends Thread {
 
@@ -82,7 +83,7 @@ public class MemcachedConnector extends SocketChannelController {
 											.get(
 													MemcachedClient.DEFAULT_CONNECT_TIMEOUT,
 													TimeUnit.MILLISECONDS)) {
-								Thread.sleep(2000);
+								Thread.sleep(MemcachedConnector.this.healSessionInterval);
 								continue;
 							} else {
 								connected = true;
@@ -109,6 +110,10 @@ public class MemcachedConnector extends SocketChannelController {
 				}
 			}
 		}
+	}
+
+	public final void setHealSessionInterval(long healConnectionInterval) {
+		this.healSessionInterval = healConnectionInterval;
 	}
 
 	public void setOptimizeGet(boolean optimiezeGet) {

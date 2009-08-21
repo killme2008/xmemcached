@@ -930,8 +930,10 @@ public interface MemcachedClient {
 
 	/**
 	 * Delete key's data item from memcached.This method doesn't wait for reply.
-	 * This method does not work on memcached 1.3 or later version.See 
-	 * <a href='http://code.google.com/p/memcached/issues/detail?id=3&q=delete%20noreply'>issue 3</a>
+	 * This method does not work on memcached 1.3 or later version.See <a href=
+	 * 'http://code.google.com/p/memcached/issues/detail?id=3&q=delete%20noreply'>issue
+	 * 3</a>
+	 * 
 	 * @param key
 	 * @param time
 	 * @throws InterruptedException
@@ -1027,8 +1029,8 @@ public interface MemcachedClient {
 	 */
 	public Collection<MemcachedClientStateListener> getStateListeners();
 
-	public void flushAllWithNoReply(int exptime)
-			throws InterruptedException, MemcachedException;
+	public void flushAllWithNoReply(int exptime) throws InterruptedException,
+			MemcachedException;
 
 	public void flushAll(int exptime, long timeout) throws TimeoutException,
 			InterruptedException, MemcachedException;
@@ -1038,4 +1040,13 @@ public interface MemcachedClient {
 
 	public void flushAll(InetSocketAddress address, long timeout, int exptime)
 			throws MemcachedException, InterruptedException, TimeoutException;
+
+	/**
+	 * If the memcached dump or network error cause connection closed,xmemcached
+	 * would try to heal the connection.The interval between reconnections is 2
+	 * seconds by default. You can change that value by this method.
+	 * 
+	 * @param healConnectionInterval
+	 */
+	public void setHealSessionInterval(long healConnectionInterval);
 }

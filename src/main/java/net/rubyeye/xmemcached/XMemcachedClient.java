@@ -132,6 +132,14 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 		this.opTimeout = opTimeout;
 	}
 
+	@Override
+	public void setHealSessionInterval(long healConnectionInterval) {
+		if (null != this.connector) {
+			this.connector.setHealSessionInterval(healConnectionInterval);
+		}
+
+	}
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -1080,7 +1088,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 			Map<String, CachedData> map = (Map<String, CachedData>) getCmd
 					.getResult();
 			if (cmdType == CommandType.GET_MANY) {
- 				Iterator<Map.Entry<String, CachedData>> it = map.entrySet()
+				Iterator<Map.Entry<String, CachedData>> it = map.entrySet()
 						.iterator();
 				while (it.hasNext()) {
 					Map.Entry<String, CachedData> entry = it.next();
@@ -1804,7 +1812,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 		}
 	}
 
-	public void flushAllWithNoReply(InetSocketAddress address,int exptime)
+	public void flushAllWithNoReply(InetSocketAddress address, int exptime)
 			throws MemcachedException, InterruptedException {
 		try {
 			flushSpecialMemcachedServer(address, this.opTimeout, true, exptime);
