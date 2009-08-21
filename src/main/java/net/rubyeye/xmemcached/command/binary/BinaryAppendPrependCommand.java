@@ -23,7 +23,7 @@ public class BinaryAppendPrependCommand extends BaseBinaryCommand {
 				transcoder);
 		switch (cmdType) {
 		case APPEND:
-			this.opCode = noreply ? OpCode.ADD_QUIETLY : OpCode.APPEND;
+			this.opCode = noreply ? OpCode.APPEND_QUIETLY : OpCode.APPEND;
 			break;
 		case PREPEND:
 			this.opCode = noreply ? OpCode.PREPEND_QUIETLY : OpCode.PREPEND;

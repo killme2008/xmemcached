@@ -13,14 +13,16 @@ public class StandardHashMemcachedClientTest extends XMemcachedClientTest {
 	@Override
 	public MemcachedClientBuilder createBuilder() throws Exception {
 		MemcachedClientBuilder builder = new XMemcachedClientBuilder(AddrUtil
-				.getAddresses(properties.getProperty("test.memcached.servers")));
+				.getAddresses(this.properties
+						.getProperty("test.memcached.servers")));
 		return builder;
 	}
 
 	@Override
 	public MemcachedClientBuilder createWeightedBuilder() throws Exception {
-		List<InetSocketAddress> addressList = AddrUtil.getAddresses(properties
-				.getProperty("test.memcached.servers"));
+		List<InetSocketAddress> addressList = AddrUtil
+				.getAddresses(this.properties
+						.getProperty("test.memcached.servers"));
 		int[] weights = new int[addressList.size()];
 		for (int i = 0; i < weights.length; i++) {
 			weights[i] = i + 1;

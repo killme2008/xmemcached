@@ -77,7 +77,7 @@ public class BinaryGetMultiCommand extends BaseBinaryCommand {
 			int valueLength = bodyLength - keyLength - extrasLength;
 			CachedData responseValue = ((Map<String, CachedData>) this.result)
 					.get(this.responseKey);
-			if (valueLength > 0 && responseValue.getCapacity() == 0) {
+			if (valueLength >= 0 && responseValue.getCapacity() < 0) {
 				responseValue.setCapacity(valueLength);
 				responseValue.setData(new byte[valueLength]);
 			}

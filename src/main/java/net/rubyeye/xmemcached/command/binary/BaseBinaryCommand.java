@@ -274,21 +274,56 @@ public abstract class BaseBinaryCommand extends Command {
 	}
 
 	protected final void fillHeader(final CachedData data) {
-		this.ioBuffer.put(REQUEST_MAGIC_NUMBER);
-		this.ioBuffer.put(this.opCode.fieldValue());
-		this.ioBuffer.putShort((short) getKeyLength());
-		this.ioBuffer.put(getExtrasLength());
-		// Data type
-		this.ioBuffer.put((byte) 0);
-		// Reserved
-		this.ioBuffer.putShort((short) 0);
+		fillMagicNumber();
+		fillOpCode();
+		fillKeyLength();
+		fillExtrasLength();
+		fillDataType();
+		fillReserved();
+		fillTotalBodyLength(data);
+		fillOpaque();
+		fillCAS();
+	}
 
-		this.ioBuffer.putInt(getExtrasLength() + getKeyLength()
-				+ getValueLength(data));
-		// Opaque
-		this.ioBuffer.putInt(0);
+	protected void fillCAS() {
 		// CAS
 		this.ioBuffer.putLong(0L);
+	}
+
+	private void fillOpaque() {
+		// Opaque
+		this.ioBuffer.putInt(0);
+	}
+
+	private void fillTotalBodyLength(final CachedData data) {
+		this.ioBuffer.putInt(getExtrasLength() + getKeyLength()
+				+ getValueLength(data));
+	}
+
+	private void fillReserved() {
+		// Reserved
+		this.ioBuffer.putShort((short) 0);
+	}
+
+	private void fillDataType() {
+		// Data type
+		this.ioBuffer.put((byte) 0);
+	}
+
+	private void fillExtrasLength() {
+		this.ioBuffer.put(getExtrasLength());
+	}
+
+	private void fillKeyLength() {
+		this.ioBuffer.putShort((short) getKeyLength());
+	}
+
+	private void fillOpCode() {
+		this.ioBuffer.put(this.opCode.fieldValue());
+	}
+
+	private void fillMagicNumber() {
+		this.ioBuffer.put(REQUEST_MAGIC_NUMBER);
 	}
 
 	protected int getValueLength(final CachedData data) {

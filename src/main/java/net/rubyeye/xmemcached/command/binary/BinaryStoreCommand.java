@@ -30,6 +30,10 @@ public class BinaryStoreCommand extends BaseBinaryCommand {
 			this.opCode = noreply ? OpCode.ADD_QUIETLY : OpCode.ADD;
 			break;
 
+		default:
+			throw new IllegalArgumentException(
+					"Unknow cmd type for storage commands:" + cmdType);
+
 		}
 	}
 }

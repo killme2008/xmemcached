@@ -83,8 +83,8 @@ public interface CommandFactory {
 			CountDownLatch latch, CommandType cmdType, Transcoder<T> transcoder);
 
 	public abstract Command createIncrDecrCommand(final String key,
-			final byte[] keyBytes, final int num, int init,
-			int exptime, CommandType cmdType, boolean noreply);
+			final byte[] keyBytes, final int amount, int initial,
+			int expTime, CommandType cmdType, boolean noreply);
 
 	@SuppressWarnings("unchecked")
 	public Command createCASCommand(final String key, final byte[] keyBytes,

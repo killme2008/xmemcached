@@ -11,10 +11,12 @@ import net.rubyeye.xmemcached.CommandFactory;
 import net.rubyeye.xmemcached.buffer.BufferAllocator;
 import net.rubyeye.xmemcached.buffer.IoBuffer;
 import net.rubyeye.xmemcached.command.binary.BinaryAppendPrependCommand;
+import net.rubyeye.xmemcached.command.binary.BinaryCASCommand;
 import net.rubyeye.xmemcached.command.binary.BinaryDeleteCommand;
 import net.rubyeye.xmemcached.command.binary.BinaryFlushAllCommand;
 import net.rubyeye.xmemcached.command.binary.BinaryGetCommand;
 import net.rubyeye.xmemcached.command.binary.BinaryGetMultiCommand;
+import net.rubyeye.xmemcached.command.binary.BinaryIncrDecrCommand;
 import net.rubyeye.xmemcached.command.binary.BinaryStatsCommand;
 import net.rubyeye.xmemcached.command.binary.BinaryStoreCommand;
 import net.rubyeye.xmemcached.command.binary.BinaryVersionCommand;
@@ -28,6 +30,7 @@ import net.rubyeye.xmemcached.utils.ByteUtils;
  * @author dennis
  * @since 1.2.0
  */
+@SuppressWarnings("unchecked")
 public class BinaryCommandFactory implements CommandFactory {
 
 	private BufferAllocator bufferAllocator;
@@ -55,8 +58,8 @@ public class BinaryCommandFactory implements CommandFactory {
 	@Override
 	public Command createCASCommand(String key, byte[] keyBytes, int exp,
 			Object value, long cas, boolean noreply, Transcoder transcoder) {
-		// TODO Auto-generated method stub
-		return null;
+		return new BinaryCASCommand(key, keyBytes, CommandType.CAS,
+				new CountDownLatch(1), exp, cas, value, noreply, transcoder);
 	}
 
 	@Override
@@ -69,7 +72,7 @@ public class BinaryCommandFactory implements CommandFactory {
 	@Override
 	public Command createFlushAllCommand(CountDownLatch latch, int delay,
 			boolean noreply) {
-		return new BinaryFlushAllCommand(latch,delay,noreply);
+		return new BinaryFlushAllCommand(latch, delay, noreply);
 	}
 
 	@Override
@@ -117,10 +120,11 @@ public class BinaryCommandFactory implements CommandFactory {
 	}
 
 	@Override
-	public Command createIncrDecrCommand(String key, byte[] keyBytes, int num,
-			int init, int exptime, CommandType cmdType, boolean noreply) {
-		// TODO Auto-generated method stub
-		return null;
+	public Command createIncrDecrCommand(String key, byte[] keyBytes,
+			int amount, int initial, int expTime, CommandType cmdType,
+			boolean noreply) {
+		return new BinaryIncrDecrCommand(key, keyBytes, amount, initial,
+				expTime, cmdType, noreply);
 	}
 
 	@Override
@@ -138,7 +142,6 @@ public class BinaryCommandFactory implements CommandFactory {
 				CommandType.REPLACE, noreply, transcoder);
 	}
 
-	@SuppressWarnings("unchecked")
 	final Command createStoreCommand(String key, byte[] keyBytes, int exp,
 			Object value, CommandType cmdType, boolean noreply,
 			Transcoder transcoder) {

@@ -13,22 +13,24 @@ import net.rubyeye.xmemcached.utils.ByteUtils;
 
 public class TextIncrDecrCommand extends Command {
 
-	private int increment;
+	private int amount;
+	private int initial;
 
 	public TextIncrDecrCommand(String key, byte[] keyBytes,
 			CommandType cmdType, CountDownLatch latch, int increment,
-			boolean noreply) {
+			int initial, boolean noreply) {
 		super(key, keyBytes, cmdType, latch);
-		this.increment = increment;
+		this.amount = increment;
 		this.noreply = noreply;
+		this.initial = initial;
 	}
 
-	public final int getIncrement() {
-		return this.increment;
+	public final int getAmount() {
+		return this.amount;
 	}
 
-	public final void setIncrement(int increment) {
-		this.increment = increment;
+	public final void setAmount(int increment) {
+		this.amount = increment;
 	}
 
 	public static final byte[] INCR = { 'i', 'n', 'c', 'r' };
@@ -44,7 +46,7 @@ public class TextIncrDecrCommand extends Command {
 				countDownLatch();
 				return true;
 			} else {
-				setResult(Integer.parseInt(line));
+				setResult(Long.parseLong(line));
 				countDownLatch();
 				return true;
 			}
@@ -54,8 +56,7 @@ public class TextIncrDecrCommand extends Command {
 
 	@Override
 	public final void encode(BufferAllocator bufferAllocator) {
-		byte[] numBytes = ByteUtils.getBytes(String
-				.valueOf(this.getIncrement()));
+		byte[] numBytes = ByteUtils.getBytes(String.valueOf(this.getAmount()));
 		byte[] cmdBytes = this.commandType == CommandType.INCR ? INCR : DECR;
 		int capacity = cmdBytes.length + 2 + this.key.length()
 				+ numBytes.length + Constants.CRLF.length;

@@ -10,14 +10,14 @@ public class TextIncrDecrCommandUnitTest extends BaseTextCommandUnitTest {
 		Command command = this.commandFactory.createIncrDecrCommand("test",
 				"test".getBytes(), 10, 0,0, CommandType.INCR, false);
 		assertNull(command.getIoBuffer());
-		command.encode(bufferAllocator);
+		command.encode(this.bufferAllocator);
 
 		checkByteBufferEquals(command, "incr test 10\r\n");
 		
 		command = this.commandFactory.createIncrDecrCommand("test",
 				"test".getBytes(), 10, 0,0, CommandType.INCR, true);
 		assertNull(command.getIoBuffer());
-		command.encode(bufferAllocator);
+		command.encode(this.bufferAllocator);
 
 		checkByteBufferEquals(command, "incr test 10 noreply\r\n");
 	}
@@ -26,14 +26,14 @@ public class TextIncrDecrCommandUnitTest extends BaseTextCommandUnitTest {
 		Command command = this.commandFactory.createIncrDecrCommand("test",
 				"test".getBytes(), 10, 0,0, CommandType.DECR, false);
 		assertNull(command.getIoBuffer());
-		command.encode(bufferAllocator);
+		command.encode(this.bufferAllocator);
 
 		checkByteBufferEquals(command, "decr test 10\r\n");
 		
 		command = this.commandFactory.createIncrDecrCommand("test",
 				"test".getBytes(), 10, 0,0, CommandType.DECR, true);
 		assertNull(command.getIoBuffer());
-		command.encode(bufferAllocator);
+		command.encode(this.bufferAllocator);
 
 		checkByteBufferEquals(command, "decr test 10 noreply\r\n");
 	}
@@ -71,7 +71,7 @@ public class TextIncrDecrCommandUnitTest extends BaseTextCommandUnitTest {
 		assertEquals("The key's value is not found for increase or decrease",
 				command.getException().getMessage());
 		checkDecodeValidLine(command, "3\r\n");
-		assertEquals(3,command.getResult());
+		assertEquals(3L,command.getResult());
 	}
 
 }

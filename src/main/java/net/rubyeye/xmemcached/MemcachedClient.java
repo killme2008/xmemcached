@@ -696,7 +696,7 @@ public interface MemcachedClient {
 	 * @throws InterruptedException
 	 * @throws MemcachedException
 	 */
-	public abstract int incr(final String key, final int num)
+	public abstract long incr(final String key, final int num)
 			throws TimeoutException, InterruptedException, MemcachedException;
 
 	/**
@@ -715,7 +715,7 @@ public interface MemcachedClient {
 	 * @throws InterruptedException
 	 * @throws MemcachedException
 	 */
-	public abstract int decr(final String key, final int num)
+	public abstract long decr(final String key, final int num)
 			throws TimeoutException, InterruptedException, MemcachedException;
 
 	/**

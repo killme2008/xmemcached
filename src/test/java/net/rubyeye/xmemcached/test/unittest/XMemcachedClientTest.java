@@ -73,6 +73,7 @@ public abstract class XMemcachedClientTest extends TestCase {
 		try {
 			assertNull(this.memcachedClient.get("name"));
 		} catch (Exception e) {
+			e.printStackTrace();
 
 		}
 		this.memcachedClient.set("name", 1, "dennis", new StringTranscoder(),
@@ -179,6 +180,9 @@ public abstract class XMemcachedClientTest extends TestCase {
 	}
 
 	public void testStoreNoReply() throws Exception {
+		this.memcachedClient.replaceWithNoReply("name", 0, 1);
+		assertNull(this.memcachedClient.get("name"));
+		
 		this.memcachedClient.setWithNoReply("name", 1, "dennis",
 				new StringTranscoder());
 		assertEquals("dennis", this.memcachedClient.get("name"));

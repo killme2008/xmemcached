@@ -200,9 +200,9 @@ public final class TextCommandFactory implements CommandFactory {
 	 * .String, byte[], int, net.rubyeye.xmemcached.command.CommandType)
 	 */
 	public final Command createIncrDecrCommand(final String key,
-			final byte[] keyBytes, final int num, int init,
+			final byte[] keyBytes, final int amount, int initial,
 			int exptime, CommandType cmdType, boolean noreply) {
 		return new TextIncrDecrCommand(key, keyBytes, cmdType,
-				new CountDownLatch(1), num, noreply);
+				new CountDownLatch(1), amount,initial, noreply);
 	}
 }

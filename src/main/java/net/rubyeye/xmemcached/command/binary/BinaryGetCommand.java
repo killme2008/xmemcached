@@ -56,7 +56,7 @@ public class BinaryGetCommand extends BaseBinaryCommand {
 			int keyLength, int extrasLength) {
 		if (this.responseStatus == ResponseStatus.NO_ERROR) {
 			int valueLength = bodyLength - keyLength - extrasLength;
-			if (valueLength > 0 && this.responseValue.getCapacity() == 0) {
+			if (valueLength >=0 && this.responseValue.getCapacity()< 0) {
 				this.responseValue.setCapacity(valueLength);
 				this.responseValue.setData(new byte[valueLength]);
 			}

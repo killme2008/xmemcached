@@ -253,7 +253,7 @@ public class OptimezerTest extends TestCase {
 		}
 		sb.append("\r\n");
 		for (int i = 0; i < 10; i++) {
-			sb.append("delete " + String.valueOf(i) + " 0\r\n");
+			sb.append("delete " + String.valueOf(i) + "\r\n");
 		}
 		assertEquals(sb.toString(), new String(mergeBuffer.array()));
 		assertEquals(0, this.writeQueue.size());

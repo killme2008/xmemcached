@@ -18,7 +18,7 @@ public final class CachedData {
 	private int flag;
 	private byte[] data;
 	private long cas;
-	private int capacity;
+	private int capacity = -1;
 
 	private int size = 0;
 
@@ -129,11 +129,14 @@ public final class CachedData {
 
 	@Override
 	public String toString() {
-		return "{CachedData flags=" + this.flag + " data=" + Arrays.toString(this.data)
-				+ "}";
+		return "{CachedData flags=" + this.flag + " data="
+				+ Arrays.toString(this.data) + "}";
 	}
 
 	public int remainingCapacity() {
+		if (getCapacity() < 0) {
+			return -1;
+		}
 		int remainingCapacity = getCapacity() - getSize();
 		return remainingCapacity;
 	}
