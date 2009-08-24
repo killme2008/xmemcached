@@ -12,6 +12,7 @@ import net.rubyeye.xmemcached.impl.MemcachedTCPSession;
 import net.rubyeye.xmemcached.transcoders.CachedData;
 import net.rubyeye.xmemcached.transcoders.Transcoder;
 import net.rubyeye.xmemcached.utils.ByteUtils;
+import net.rubyeye.xmemcached.utils.OpaqueGenerater;
 
 public abstract class BaseBinaryCommand extends Command {
 	protected int expTime;
@@ -23,6 +24,7 @@ public abstract class BaseBinaryCommand extends Command {
 	protected int responseKeyLength, responseExtrasLength,
 			responseTotalBodyLength;
 	protected ResponseStatus responseStatus;
+	protected int opaque;
 
 	@SuppressWarnings("unchecked")
 	public BaseBinaryCommand(String key, byte[] keyBytes, CommandType cmdType,
@@ -73,7 +75,7 @@ public abstract class BaseBinaryCommand extends Command {
 	}
 
 	@Override
-	public final boolean decode(MemcachedTCPSession session, ByteBuffer buffer) {
+	public boolean decode(MemcachedTCPSession session, ByteBuffer buffer) {
 		while (true) {
 			LABEL: switch (this.decodeStatus) {
 			case NONE:
@@ -85,7 +87,6 @@ public abstract class BaseBinaryCommand extends Command {
 				continue;
 			case READ_HEADER:
 				readHeader(buffer);
-				this.decodeStatus = BinaryDecodeStatus.READ_EXTRAS;
 				continue;
 			case READ_EXTRAS:
 				if (readExtras(buffer, this.responseExtrasLength)) {
@@ -117,6 +118,9 @@ public abstract class BaseBinaryCommand extends Command {
 					this.decodeStatus = BinaryDecodeStatus.NONE;
 					break LABEL;
 				}
+			case IGNORE:
+				buffer.reset();
+				return true;
 			}
 		}
 	}
@@ -134,20 +138,40 @@ public abstract class BaseBinaryCommand extends Command {
 	}
 
 	protected void readHeader(ByteBuffer buffer) {
+		markBuffer(buffer);
 		readMagicNumber(buffer);
-		readOpCode(buffer);
+		if (!readOpCode(buffer)) {
+			this.decodeStatus = BinaryDecodeStatus.IGNORE;
+			return;
+		}
 		readKeyLength(buffer);
 		readExtrasLength(buffer);
 		readDataType(buffer);
 		readStatus(buffer);
 		readBodyLength(buffer);
-		readOpaque(buffer);
+		if (!readOpaque(buffer)) {
+			this.decodeStatus = BinaryDecodeStatus.IGNORE;
+			return;
+		}
+		this.decodeStatus = BinaryDecodeStatus.READ_EXTRAS;
 		readCAS(buffer);
 
 	}
 
-	protected void readOpaque(ByteBuffer buffer) {
-		ByteUtils.stepBuffer(buffer, 4);
+	private void markBuffer(ByteBuffer buffer) {
+		buffer.mark();
+	}
+
+	protected boolean readOpaque(ByteBuffer buffer) {
+		if (this.noreply) {
+			int returnOpaque = buffer.getInt();
+			if (returnOpaque != this.opaque) {
+				return false;
+			}
+		} else {
+			ByteUtils.stepBuffer(buffer, 4);
+		}
+		return true;
 	}
 
 	protected long readCAS(ByteBuffer buffer) {
@@ -216,13 +240,17 @@ public abstract class BaseBinaryCommand extends Command {
 		return buffer.get();
 	}
 
-	protected void readOpCode(ByteBuffer buffer) {
+	protected boolean readOpCode(ByteBuffer buffer) {
 		byte op = buffer.get();
-
 		if (op != this.opCode.fieldValue()) {
-			throw new MemcachedDecodeException("Not a proper "
-					+ this.opCode.name() + " response");
+			if (this.noreply) {
+				return false;
+			} else {
+				throw new MemcachedDecodeException("Not a proper "
+						+ this.opCode.name() + " response");
+			}
 		}
+		return true;
 	}
 
 	private void readMagicNumber(ByteBuffer buffer) {
@@ -237,7 +265,6 @@ public abstract class BaseBinaryCommand extends Command {
 	 * Set,add,replace protocol's extras length
 	 */
 	static final byte EXTRAS_LENGTH = (byte) 8;
-	
 
 	@Override
 	@SuppressWarnings("unchecked")
@@ -292,7 +319,10 @@ public abstract class BaseBinaryCommand extends Command {
 
 	private void fillOpaque() {
 		// Opaque
-		this.ioBuffer.putInt(0);
+		if (this.noreply) {
+			this.opaque = OpaqueGenerater.getInstance().getNextValue();
+		}
+		this.ioBuffer.putInt(this.opaque);
 	}
 
 	private void fillTotalBodyLength(final CachedData data) {

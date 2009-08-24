@@ -53,7 +53,7 @@ public abstract class Command implements WriteMessage {
 
 	@Override
 	public void setWriteBuffer(ByteBuffer buffers) {
-		throw new UnsupportedOperationException();
+		//throw new UnsupportedOperationException();
 	}
 
 	protected String key;

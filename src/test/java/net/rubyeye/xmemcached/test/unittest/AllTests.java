@@ -3,6 +3,8 @@ package net.rubyeye.xmemcached.test.unittest;
 import java.io.IOException;
 import java.util.Properties;
 
+import junit.framework.Test;
+import junit.framework.TestSuite;
 import net.rubyeye.xmemcached.test.unittest.buffer.BufferAllocatorTestSuite;
 import net.rubyeye.xmemcached.test.unittest.codec.MemcachedDecoderUnitTest;
 import net.rubyeye.xmemcached.test.unittest.codec.MemcachedEncoderUnitTest;
@@ -17,9 +19,6 @@ import net.rubyeye.xmemcached.test.unittest.utils.AddrUtilTest;
 import net.rubyeye.xmemcached.test.unittest.utils.XMemcachedClientFactoryBeanUnitTest;
 
 import com.google.code.yanf4j.util.ResourcesUtils;
-
-import junit.framework.Test;
-import junit.framework.TestSuite;
 
 /**
  * Run this test suite with jvm args "-ea"
@@ -51,6 +50,7 @@ public class AllTests {
 			if (properties.get("test.memcached.servers") != null) {
 				suite.addTestSuite(StandardHashMemcachedClientTest.class);
 				suite.addTestSuite(ConsistentHashMemcachedClientTest.class);
+				suite.addTestSuite(BinaryMemcachedClientUnitTest.class);
 			}
 		} catch (IOException e) {
 			System.err

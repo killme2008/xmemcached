@@ -30,11 +30,12 @@ public class BinaryGetMultiCommand extends BaseBinaryCommand {
 	}
 
 	@Override
-	protected void readOpCode(ByteBuffer buffer) {
+	protected boolean readOpCode(ByteBuffer buffer) {
 		byte opCode = buffer.get();
 		if (opCode == OpCode.GET_KEY.fieldValue()) {
 			this.finished = true;
 		}
+		return true;
 	}
 
 	@Override

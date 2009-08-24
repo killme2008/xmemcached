@@ -1,11 +1,11 @@
-package net.rubyeye.xmemcached.test.unittest;
+package net.rubyeye.xmemcached.test.unittest.mock;
 
 import java.util.concurrent.CountDownLatch;
 
 import net.rubyeye.xmemcached.command.CommandType;
 import net.rubyeye.xmemcached.command.text.TextGetOneCommand;
 
-public class MockErrorTextGetOneCommand extends TextGetOneCommand {
+public class MockErrorTextGetOneCommand extends TextGetOneCommand implements MockErrorCommand{
 
 	private volatile boolean decoded;
 
@@ -15,14 +15,15 @@ public class MockErrorTextGetOneCommand extends TextGetOneCommand {
 
 	}
 
+	@Override
 	public void dispatch() {
-		decoded = true;
+		this.decoded = true;
 		countDownLatch();
 		decodeError();
 	}
 
 	public boolean isDecoded() {
-		return decoded;
+		return this.decoded;
 	}
 
 	public void setDecoded(boolean decoded) {

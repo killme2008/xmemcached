@@ -18,6 +18,7 @@ import net.rubyeye.xmemcached.command.text.TextVerbosityCommand;
 import net.rubyeye.xmemcached.command.text.TextVersionCommand;
 import net.rubyeye.xmemcached.transcoders.Transcoder;
 import net.rubyeye.xmemcached.utils.ByteUtils;
+import net.rubyeye.xmemcached.utils.Protocol;
 
 /**
  * Command Factory for creating text protocol commands.
@@ -29,7 +30,7 @@ public final class TextCommandFactory implements CommandFactory {
 
 	@Override
 	public void setBufferAllocator(BufferAllocator bufferAllocator) {
-		
+
 	}
 
 	/*
@@ -62,8 +63,8 @@ public final class TextCommandFactory implements CommandFactory {
 	 * net.rubyeye.xmemcached.CommandFactory#createFlushAllCommand(java.util
 	 * .concurrent.CountDownLatch)
 	 */
-	public final Command createFlushAllCommand(CountDownLatch latch, int exptime,
-			boolean noreply) {
+	public final Command createFlushAllCommand(CountDownLatch latch,
+			int exptime, boolean noreply) {
 		return new TextFlushAllCommand(latch, exptime, noreply);
 	}
 
@@ -200,9 +201,15 @@ public final class TextCommandFactory implements CommandFactory {
 	 * .String, byte[], int, net.rubyeye.xmemcached.command.CommandType)
 	 */
 	public final Command createIncrDecrCommand(final String key,
-			final byte[] keyBytes, final int amount, int initial,
-			int exptime, CommandType cmdType, boolean noreply) {
+			final byte[] keyBytes, final int amount, int initial, int exptime,
+			CommandType cmdType, boolean noreply) {
 		return new TextIncrDecrCommand(key, keyBytes, cmdType,
-				new CountDownLatch(1), amount,initial, noreply);
+				new CountDownLatch(1), amount, initial, noreply);
 	}
+
+	@Override
+	public Protocol getProtocol() {
+		return Protocol.Text;
+	}
+
 }

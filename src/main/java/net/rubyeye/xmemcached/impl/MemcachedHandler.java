@@ -19,6 +19,7 @@ import net.rubyeye.xmemcached.command.OperationStatus;
 import net.rubyeye.xmemcached.command.text.TextGetCommand;
 import net.rubyeye.xmemcached.command.text.TextGetOneCommand;
 import net.rubyeye.xmemcached.monitor.StatisticsHandler;
+import net.rubyeye.xmemcached.utils.Protocol;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -70,8 +71,7 @@ public class MemcachedHandler extends HandlerAdapter {
 	public final void onMessageSent(Session session, Object msg) {
 		Command command = (Command) msg;
 		command.setStatus(OperationStatus.SENT);
-		// It is no noreply
-		if (!command.isNoreply()) {
+		if (!command.isNoreply() || this.client.getProtocol() == Protocol.Binary) {
 			((MemcachedTCPSession) session).addCommand(command);
 		}
 	}

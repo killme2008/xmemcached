@@ -49,6 +49,7 @@ import net.rubyeye.xmemcached.transcoders.SerializingTranscoder;
 import net.rubyeye.xmemcached.transcoders.Transcoder;
 import net.rubyeye.xmemcached.utils.AddrUtil;
 import net.rubyeye.xmemcached.utils.ByteUtils;
+import net.rubyeye.xmemcached.utils.Protocol;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -2259,4 +2260,10 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 			}
 		}
 	}
+
+	@Override
+	public Protocol getProtocol() {
+		return this.commandFactory.getProtocol();
+	}
+
 }

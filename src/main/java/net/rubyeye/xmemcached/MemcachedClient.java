@@ -11,6 +11,7 @@ import net.rubyeye.xmemcached.buffer.BufferAllocator;
 import net.rubyeye.xmemcached.exception.MemcachedException;
 import net.rubyeye.xmemcached.impl.MemcachedConnector;
 import net.rubyeye.xmemcached.transcoders.Transcoder;
+import net.rubyeye.xmemcached.utils.Protocol;
 
 /**
  * The memcached client's interface
@@ -1049,4 +1050,6 @@ public interface MemcachedClient {
 	 * @param healConnectionInterval
 	 */
 	public void setHealSessionInterval(long healConnectionInterval);
+	
+	public Protocol getProtocol();
 }

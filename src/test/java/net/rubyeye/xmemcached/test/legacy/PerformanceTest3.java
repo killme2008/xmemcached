@@ -9,6 +9,7 @@ import java.util.concurrent.TimeoutException;
 import net.rubyeye.xmemcached.MemcachedClient;
 import net.rubyeye.xmemcached.MemcachedClientBuilder;
 import net.rubyeye.xmemcached.XMemcachedClientBuilder;
+import net.rubyeye.xmemcached.command.BinaryCommandFactory;
 import net.rubyeye.xmemcached.exception.MemcachedException;
 import net.rubyeye.xmemcached.utils.AddrUtil;
 
@@ -33,7 +34,9 @@ public class PerformanceTest3 {
 		int count = Integer.parseInt(args[3]);
 		MemcachedClientBuilder builder = new XMemcachedClientBuilder(AddrUtil
 				.getAddresses(server));
+		builder.setCommandFactory(new BinaryCommandFactory());
 		MemcachedClient client = builder.build();
+		client.setOptimizeGet(false);
 		List<String> keys = new ArrayList<String>();
 
 		for (int i = 0; i < count; i++) {
@@ -72,14 +75,16 @@ public class PerformanceTest3 {
 			this.repeat = repeat;
 		}
 
+		@Override
 		public void run() {
 			try {
-				barrier.await();
-				Map<String, NameClass> result = multiGet(repeat, count, client,
-						keys);
-				if (result.size() != count)
+				this.barrier.await();
+				Map<String, NameClass> result = multiGet(this.repeat, this.count, this.client,
+						this.keys);
+				if (result.size() != this.count) {
 					System.err.println("multi get error");
-				barrier.await();
+				}
+				this.barrier.await();
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -92,8 +97,9 @@ public class PerformanceTest3 {
 		Map<String, NameClass> result = null;
 		for (int i = 0; i < repeat; i++) {
 			result = client.get(keys, 10000);
-			if (result.size() != count)
+			if (result.size() != count) {
 				System.err.println("multi get error");
+			}
 		}
 		return result;
 	}

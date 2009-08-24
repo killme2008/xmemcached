@@ -23,6 +23,7 @@ import net.rubyeye.xmemcached.command.binary.BinaryVersionCommand;
 import net.rubyeye.xmemcached.command.binary.OpCode;
 import net.rubyeye.xmemcached.transcoders.Transcoder;
 import net.rubyeye.xmemcached.utils.ByteUtils;
+import net.rubyeye.xmemcached.utils.Protocol;
 
 /**
  * Binary protocol command factory
@@ -173,6 +174,11 @@ public class BinaryCommandFactory implements CommandFactory {
 	public Command createVersionCommand(CountDownLatch latch,
 			InetSocketAddress server) {
 		return new BinaryVersionCommand(latch, server);
+	}
+
+	@Override
+	public Protocol getProtocol() {
+		return Protocol.Binary;
 	}
 
 }

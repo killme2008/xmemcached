@@ -7,15 +7,17 @@ import java.util.concurrent.CountDownLatch;
 import net.rubyeye.xmemcached.MemcachedClient;
 import net.rubyeye.xmemcached.MemcachedClientBuilder;
 import net.rubyeye.xmemcached.XMemcachedClientBuilder;
+import net.rubyeye.xmemcached.command.BinaryCommandFactory;
 import net.rubyeye.xmemcached.utils.AddrUtil;
 
 public class PerformanceTest2 {
 	static Map<String, NameClass> map2 = new HashMap<String, NameClass>();
 	static final int ELEMENT_NUM = 50;
 	static {
-		for (int i = 0; i < ELEMENT_NUM; i++)
+		for (int i = 0; i < ELEMENT_NUM; i++) {
 			map2.put(String.valueOf(i), new NameClass(String.valueOf(i), String
 					.valueOf(i)));
+		}
 	}
 
 	static class TestWriteRunnable implements Runnable {
@@ -38,9 +40,9 @@ public class PerformanceTest2 {
 		public void run() {
 			try {
 
-				for (int i = 0; i < repeat; i++) {
-					String key = String.valueOf(start + i);
-					if (!mc.set(key, 0, map2, 2000)) {
+				for (int i = 0; i < this.repeat; i++) {
+					String key = String.valueOf(this.start + i);
+					if (!this.mc.set(key, 0, map2, 5000)) {
 						System.err.println("set error");
 					}
 
@@ -49,7 +51,7 @@ public class PerformanceTest2 {
 			} catch (Exception e) {
 				e.printStackTrace();
 			} finally {
-				cd.countDown();
+				this.cd.countDown();
 			}
 		}
 
@@ -75,10 +77,10 @@ public class PerformanceTest2 {
 		@SuppressWarnings("unchecked")
 		public void run() {
 			try {
-				for (int i = 0; i < repeat; i++) {
+				for (int i = 0; i < this.repeat; i++) {
 
-					String key = String.valueOf(start + i);
-					Map<String, NameClass> result = (Map<String, NameClass>) mc
+					String key = String.valueOf(this.start + i);
+					Map<String, NameClass> result = (Map<String, NameClass>) this.mc
 							.get(key, 5000);
 					if (result == null || result.size() != ELEMENT_NUM) {
 						System.err.println("get " + key + " error");
@@ -88,7 +90,7 @@ public class PerformanceTest2 {
 			} catch (Exception e) {
 				e.printStackTrace();
 			} finally {
-				cd.countDown();
+				this.cd.countDown();
 			}
 		}
 
@@ -112,8 +114,10 @@ public class PerformanceTest2 {
 
 			MemcachedClientBuilder builder = new XMemcachedClientBuilder(
 					AddrUtil.getAddresses(args[2]));
+			builder.setCommandFactory(new BinaryCommandFactory());
 			// builder.getConfiguration().setReadThreadCount(0);
 			MemcachedClient mc = builder.build();
+			mc.setOptimizeGet(false);
 			testWrite(cpuCount, thread, repeat, mc);
 			testRead(cpuCount, thread, repeat, mc);
 			// mc.flushAll(10000); // delete all

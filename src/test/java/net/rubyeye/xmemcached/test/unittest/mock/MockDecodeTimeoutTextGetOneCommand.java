@@ -1,30 +1,29 @@
-package net.rubyeye.xmemcached.test.unittest;
+package net.rubyeye.xmemcached.test.unittest.mock;
 
-import java.nio.ByteBuffer;
 import java.util.concurrent.CountDownLatch;
 
-import net.rubyeye.xmemcached.buffer.BufferAllocator;
 import net.rubyeye.xmemcached.command.CommandType;
 import net.rubyeye.xmemcached.command.text.TextGetOneCommand;
 
-public class MockEncodeTimeoutTextGetOneCommand extends TextGetOneCommand {
+public class MockDecodeTimeoutTextGetOneCommand extends TextGetOneCommand {
 
 	private long sleepTime;
 
-	public MockEncodeTimeoutTextGetOneCommand(String key, byte[] keyBytes,
+	public MockDecodeTimeoutTextGetOneCommand(String key, byte[] keyBytes,
 			CommandType cmdType, CountDownLatch latch, long sleepTime) {
 		super(key, keyBytes, cmdType, latch);
 		this.sleepTime = sleepTime;
 	}
 
-	public void encode(BufferAllocator bufferAllocator) {
-		// Sleep,then encode timeout
+	@Override
+	public void dispatch() {
+		// Sleep,then operation is timeout
 		try {
 			Thread.sleep(sleepTime);
 		} catch (InterruptedException e) {
-			e.printStackTrace();
+			throw new RuntimeException(e);
 		}
-		super.encode(bufferAllocator);
+		super.dispatch();
 	}
 
 }

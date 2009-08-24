@@ -8,6 +8,7 @@ import net.rubyeye.xmemcached.buffer.BufferAllocator;
 import net.rubyeye.xmemcached.command.Command;
 import net.rubyeye.xmemcached.command.CommandType;
 import net.rubyeye.xmemcached.transcoders.Transcoder;
+import net.rubyeye.xmemcached.utils.Protocol;
 
 public interface CommandFactory {
 
@@ -83,8 +84,8 @@ public interface CommandFactory {
 			CountDownLatch latch, CommandType cmdType, Transcoder<T> transcoder);
 
 	public abstract Command createIncrDecrCommand(final String key,
-			final byte[] keyBytes, final int amount, int initial,
-			int expTime, CommandType cmdType, boolean noreply);
+			final byte[] keyBytes, final int amount, int initial, int expTime,
+			CommandType cmdType, boolean noreply);
 
 	@SuppressWarnings("unchecked")
 	public Command createCASCommand(final String key, final byte[] keyBytes,
@@ -125,5 +126,7 @@ public interface CommandFactory {
 	 */
 	public Command createVerbosityCommand(CountDownLatch latch, int level,
 			boolean noreply);
+
+	public Protocol getProtocol();
 
 }
