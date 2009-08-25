@@ -36,7 +36,7 @@ public class PerformanceTest3 {
 				.getAddresses(server));
 		builder.setCommandFactory(new BinaryCommandFactory());
 		MemcachedClient client = builder.build();
-		client.setOptimizeGet(false);
+		//client.setOptimizeGet(false);
 		List<String> keys = new ArrayList<String>();
 
 		for (int i = 0; i < count; i++) {

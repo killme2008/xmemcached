@@ -117,7 +117,7 @@ public class XMemcachedClientThreadSafeTest {
 		builder.setCommandFactory(new BinaryCommandFactory());
 		builder.setSessionLocator(new KetamaMemcachedSessionLocator());
 		MemcachedClient client = builder.build();
-		client.setOptimizeGet(false);
+		//client.setOptimizeGet(false);
 
 		for (int i = 0; i < num; i++) {
 			new Thread(new TestThread(i, client, barrier)).start();

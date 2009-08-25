@@ -117,7 +117,7 @@ public class PerformanceTest2 {
 			builder.setCommandFactory(new BinaryCommandFactory());
 			// builder.getConfiguration().setReadThreadCount(0);
 			MemcachedClient mc = builder.build();
-			mc.setOptimizeGet(false);
+			//mc.setOptimizeGet(false);
 			testWrite(cpuCount, thread, repeat, mc);
 			testRead(cpuCount, thread, repeat, mc);
 			// mc.flushAll(10000); // delete all
