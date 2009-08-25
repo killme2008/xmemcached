@@ -1,12 +1,16 @@
 package net.rubyeye.xmemcached.command.binary;
 
 import java.nio.ByteBuffer;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 
 import net.rubyeye.xmemcached.buffer.BufferAllocator;
+import net.rubyeye.xmemcached.command.Command;
 import net.rubyeye.xmemcached.command.CommandType;
+import net.rubyeye.xmemcached.command.MapReturnValueAware;
+import net.rubyeye.xmemcached.command.MergeCommandsAware;
 import net.rubyeye.xmemcached.transcoders.CachedData;
 import net.rubyeye.xmemcached.utils.ByteUtils;
 
@@ -17,16 +21,23 @@ import net.rubyeye.xmemcached.utils.ByteUtils;
  * 
  */
 @SuppressWarnings("unchecked")
-public class BinaryGetMultiCommand extends BaseBinaryCommand {
+public class BinaryGetMultiCommand extends BaseBinaryCommand implements
+		MergeCommandsAware, MapReturnValueAware {
 	private boolean finished;
 	private String responseKey;
 	private long responseCAS;
 	private int responseFlag;
+	private Map<Object, Command> mergeCommands;
 
 	public BinaryGetMultiCommand(String key, CommandType cmdType,
 			CountDownLatch latch) {
 		super(key, null, cmdType, latch, 0, 0, null, false, null);
 		this.result = new HashMap<String, CachedData>();
+	}
+
+	@Override
+	public Map<String, CachedData> getReturnValues() {
+		return (Map<String, CachedData>) this.result;
 	}
 
 	@Override
@@ -45,9 +56,43 @@ public class BinaryGetMultiCommand extends BaseBinaryCommand {
 
 	@Override
 	protected boolean finish() {
+		final CachedData cachedData = ((Map<String, CachedData>) this.result)
+				.get(this.responseKey);
+		Map<Object, Command> mergetCommands = getMergeCommands();
+		if (mergetCommands != null) {
+			final BinaryGetCommand command = (BinaryGetCommand) mergetCommands
+					.remove(this.responseKey);
+			if (command != null) {
+				command.setResult(cachedData);
+				command.countDownLatch();
+				this.mergeCount--;
+				if (command.getAssocCommands() != null) {
+					for (Command assocCommand : command.getAssocCommands()) {
+						assocCommand.setResult(cachedData);
+						assocCommand.countDownLatch();
+						this.mergeCount--;
+					}
+				}
+
+			}
+		}
 		if (this.finished) {
+			if (getMergeCommands() != null) {
+				Collection<Command> mergeCommands = getMergeCommands().values();
+				getIoBuffer().free();
+				for (Command nextCommand : mergeCommands) {
+					BinaryGetCommand command = (BinaryGetCommand) nextCommand;
+					command.countDownLatch();
+					if (command.getAssocCommands() != null) {
+						for (Command assocCommand : command.getAssocCommands()) {
+							assocCommand.countDownLatch();
+						}
+					}
+				}
+			}
 			countDownLatch();
 		} else {
+
 			this.responseKey = null;
 		}
 		return this.finished;
@@ -115,6 +160,16 @@ public class BinaryGetMultiCommand extends BaseBinaryCommand {
 	protected long readCAS(ByteBuffer buffer) {
 		this.responseCAS = buffer.getLong();
 		return this.responseCAS;
+	}
+
+	@Override
+	public Map<Object, Command> getMergeCommands() {
+		return this.mergeCommands;
+	}
+
+	@Override
+	public void setMergeCommands(Map<Object, Command> mergeCommands) {
+		this.mergeCommands = mergeCommands;
 	}
 
 }

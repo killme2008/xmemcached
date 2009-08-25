@@ -50,7 +50,7 @@ public class PerformanceTest {
 				}
 
 			} catch (Exception e) {
-				// e.printStackTrace();
+				 e.printStackTrace();
 			} finally {
 				this.cd.countDown();
 			}
@@ -123,15 +123,19 @@ public class PerformanceTest {
 
 					String key = getKey(this.start+i);
 					String result = (String) this.mc.get(key, 5000);
+					if(result==null){
+						System.out.println(key);
+					}
 					if (!result.equals(getValue(this.start+i))) {
 						System.out.println(key + " " + result);
 						System.err.println("get error");
 						System.exit(1);
 					}
+				
 				}
 
 			} catch (Exception e) {
-				// e.printStackTrace();
+				e.printStackTrace();
 			} finally {
 				this.cd.countDown();
 			}
@@ -210,7 +214,8 @@ public class PerformanceTest {
 					AddrUtil.getAddresses(args[4]));
 			//builder.setCommandFactory(new BinaryCommandFactory());
 			MemcachedClient mc = builder.build();
-			mc.setOptimizeGet(false);
+			mc.flushAll();
+			//mc.setOptimizeGet(false);
 			// mc.setOptimizeMergeBuffer(false);
 			// 分别测试写、读、删除
 			testWrite(thread, size, repeat, keySize, valueSize, mc);

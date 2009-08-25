@@ -1,8 +1,11 @@
 package net.rubyeye.xmemcached.command.binary;
 
 import java.nio.ByteBuffer;
+import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
+import net.rubyeye.xmemcached.command.AssocCommandAware;
+import net.rubyeye.xmemcached.command.Command;
 import net.rubyeye.xmemcached.command.CommandType;
 import net.rubyeye.xmemcached.transcoders.CachedData;
 import net.rubyeye.xmemcached.utils.ByteUtils;
@@ -13,9 +16,11 @@ import net.rubyeye.xmemcached.utils.ByteUtils;
  * @author dennis
  * 
  */
-public class BinaryGetCommand extends BaseBinaryCommand {
+public class BinaryGetCommand extends BaseBinaryCommand implements
+		AssocCommandAware {
 	private String responseKey;
 	private CachedData responseValue;
+	private List<Command> assocCommands;
 
 	public final String getResponseKey() {
 		return this.responseKey;
@@ -30,6 +35,14 @@ public class BinaryGetCommand extends BaseBinaryCommand {
 		super(key, keyBytes, cmdType, latch, 0, 0, null, noreply, null);
 		this.opCode = opCode;
 		this.responseValue = new CachedData();
+	}
+
+	public final List<Command> getAssocCommands() {
+		return this.assocCommands;
+	}
+
+	public final void setAssocCommands(List<Command> assocCommands) {
+		this.assocCommands = assocCommands;
 	}
 
 	@Override
@@ -56,7 +69,7 @@ public class BinaryGetCommand extends BaseBinaryCommand {
 			int keyLength, int extrasLength) {
 		if (this.responseStatus == ResponseStatus.NO_ERROR) {
 			int valueLength = bodyLength - keyLength - extrasLength;
-			if (valueLength >=0 && this.responseValue.getCapacity()< 0) {
+			if (valueLength >= 0 && this.responseValue.getCapacity() < 0) {
 				this.responseValue.setCapacity(valueLength);
 				this.responseValue.setData(new byte[valueLength]);
 			}

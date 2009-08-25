@@ -35,6 +35,7 @@ import net.rubyeye.xmemcached.MemcachedSessionLocator;
 import net.rubyeye.xmemcached.buffer.BufferAllocator;
 import net.rubyeye.xmemcached.command.Command;
 import net.rubyeye.xmemcached.exception.MemcachedException;
+import net.rubyeye.xmemcached.utils.Protocol;
 
 import com.google.code.yanf4j.config.Configuration;
 import com.google.code.yanf4j.nio.Session;
@@ -415,13 +416,13 @@ public class MemcachedConnector extends SocketChannelController {
 	}
 
 	public MemcachedConnector(Configuration configuration,
-			MemcachedSessionLocator locator, BufferAllocator allocator) {
+			MemcachedSessionLocator locator, BufferAllocator allocator,Protocol protocol) {
 		super(configuration, null);
 		this.sessionLocator = locator;
 		updateSessions();
 		this.sessionMonitor = new SessionMonitor();
 		this.bufferAllocator = allocator;
-		this.optimiezer = new Optimizer();
+		this.optimiezer = new Optimizer(protocol);
 		this.optimiezer.setBufferAllocator(this.bufferAllocator);
 		// setDispatchMessageThreadPoolSize(Runtime.getRuntime().
 		// availableProcessors());

@@ -7,21 +7,27 @@ package net.rubyeye.xmemcached.impl;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
+import java.util.concurrent.CountDownLatch;
 
 import net.rubyeye.xmemcached.MemcachedOptimizer;
 import net.rubyeye.xmemcached.buffer.BufferAllocator;
 import net.rubyeye.xmemcached.buffer.IoBuffer;
+import net.rubyeye.xmemcached.command.AssocCommandAware;
 import net.rubyeye.xmemcached.command.Command;
 import net.rubyeye.xmemcached.command.CommandType;
 import net.rubyeye.xmemcached.command.OperationStatus;
-import net.rubyeye.xmemcached.command.text.TextGetCommand;
+import net.rubyeye.xmemcached.command.binary.BinaryGetCommand;
+import net.rubyeye.xmemcached.command.binary.BinaryGetMultiCommand;
+import net.rubyeye.xmemcached.command.binary.OpCode;
 import net.rubyeye.xmemcached.command.text.TextGetOneCommand;
 import net.rubyeye.xmemcached.monitor.Constants;
 import net.rubyeye.xmemcached.monitor.XMemcachedMbeanServer;
 import net.rubyeye.xmemcached.utils.ByteUtils;
+import net.rubyeye.xmemcached.utils.Protocol;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -42,12 +48,14 @@ public class Optimizer implements OptimizerMBean, MemcachedOptimizer {
 	private boolean optimiezeMergeBuffer = true;
 	private BufferAllocator bufferAllocator;
 	private static final Log log = LogFactory.getLog(Optimizer.class);
+	private Protocol protocol = Protocol.Binary;
 
-	public Optimizer() {
+	public Optimizer(Protocol protocol) {
 		XMemcachedMbeanServer.getInstance().registMBean(
 				this,
 				this.getClass().getPackage().getName() + ":type="
 						+ this.getClass().getSimpleName());
+		this.protocol = protocol;
 	}
 
 	public BufferAllocator getBufferAllocator() {
@@ -233,15 +241,97 @@ public class Optimizer implements OptimizerMBean, MemcachedOptimizer {
 		return list;
 	}
 
+	static interface CommandCollector {
+		public Object getResult();
+
+		public void visit(Command command);
+
+		public void finish();
+	}
+
+	static class KeyStringCollector implements CommandCollector {
+		final StringBuilder key = new StringBuilder();
+		boolean wasFirst = true;
+
+		@Override
+		public Object getResult() {
+			return this.key.toString();
+		}
+
+		@Override
+		public void visit(Command command) {
+			if (this.wasFirst) {
+				this.key.append(command.getKey());
+				this.wasFirst = false;
+			} else {
+				this.key.append(" ").append(command.getKey());
+			}
+		}
+
+		@Override
+		public void finish() {
+			// do nothing
+
+		}
+
+	}
+
+	class BinaryGetQCollector implements CommandCollector {
+		LinkedList<IoBuffer> bufferList = new LinkedList<IoBuffer>();
+		int totalLength;
+		Command lastCommand;
+
+		@Override
+		public Object getResult() {
+			IoBuffer mergedBuffer = Optimizer.this.bufferAllocator
+					.allocate(this.totalLength);
+			for (IoBuffer buffer : this.bufferList) {
+				mergedBuffer.put(buffer.getByteBuffer());
+			}
+			mergedBuffer.flip();
+			BinaryGetMultiCommand resultCommand = new BinaryGetMultiCommand(
+					null, CommandType.GET_MANY, new CountDownLatch(1));
+			resultCommand.setIoBuffer(mergedBuffer);
+			return resultCommand;
+		}
+
+		@Override
+		public void visit(Command command) {
+			this.lastCommand = command;
+			// first n-1 send getkq command
+			Command getqCommand = new BinaryGetCommand(command.getKey(),
+					command.getKeyBytes(), null, null, OpCode.GET_KEY_QUIETLY,
+					true);
+			getqCommand.encode(Optimizer.this.bufferAllocator);
+			this.totalLength += getqCommand.getIoBuffer().remaining();
+			this.bufferList.add(getqCommand.getIoBuffer());
+		}
+
+		@Override
+		public void finish() {
+			// last command is getk
+			Command lastGetKCommand = new BinaryGetCommand(this.lastCommand
+					.getKey(), this.lastCommand.getKeyBytes(),
+					CommandType.GET_ONE, new CountDownLatch(1), OpCode.GET_KEY,
+					false);
+			lastGetKCommand.encode(Optimizer.this.bufferAllocator);
+			this.totalLength-=this.bufferList.removeLast().remaining();
+			this.bufferList.add(lastGetKCommand.getIoBuffer());
+			this.totalLength += lastGetKCommand.getIoBuffer().remaining();
+		}
+
+	}
+
 	@SuppressWarnings("unchecked")
 	private final Command mergeGetCommands(final Command currentCmd,
 			final Queue writeQueue, final Queue<Command> executingCmds,
-			CommandType commandType) {
+			CommandType expectedCommandType) {
 		Map<Object, Command> mergeCommands = null;
 		int mergeCount = 1;
-		final StringBuilder key = new StringBuilder();
+		final CommandCollector commandCollector = creatCommandCollector();
 		currentCmd.setStatus(OperationStatus.WRITING);
-		key.append(currentCmd.getKey());
+
+		commandCollector.visit(currentCmd);
 		while (mergeCount < this.mergeFactor) {
 			Command nextCmd = (Command) writeQueue.peek();
 			if (nextCmd == null) {
@@ -251,7 +341,7 @@ public class Optimizer implements OptimizerMBean, MemcachedOptimizer {
 				writeQueue.remove();
 				continue;
 			}
-			if (nextCmd.getCommandType() == commandType) {
+			if (nextCmd.getCommandType() == expectedCommandType) {
 				if (mergeCommands == null) { // lazy initialize
 					mergeCommands = new HashMap<Object, Command>(
 							this.mergeFactor / 2);
@@ -264,7 +354,7 @@ public class Optimizer implements OptimizerMBean, MemcachedOptimizer {
 				Command removedCommand = (Command) writeQueue.remove();
 				// If the key is exists,add the command to associated list.
 				if (mergeCommands.containsKey(removedCommand.getKey())) {
-					final TextGetCommand mergedGetCommand = (TextGetCommand) mergeCommands
+					final AssocCommandAware mergedGetCommand = (AssocCommandAware) mergeCommands
 							.get(removedCommand.getKey());
 					if (mergedGetCommand.getAssocCommands() == null) {
 						mergedGetCommand
@@ -272,7 +362,7 @@ public class Optimizer implements OptimizerMBean, MemcachedOptimizer {
 					}
 					mergedGetCommand.getAssocCommands().add(removedCommand);
 				} else {
-					key.append(" ").append(nextCmd.getKey());
+					commandCollector.visit(nextCmd);
 					mergeCommands.put(removedCommand.getKey(), removedCommand);
 				}
 				mergeCount++;
@@ -280,6 +370,7 @@ public class Optimizer implements OptimizerMBean, MemcachedOptimizer {
 				break;
 			}
 		}
+		commandCollector.finish();
 		if (mergeCount == 1) {
 			return currentCmd;
 		} else {
@@ -287,26 +378,49 @@ public class Optimizer implements OptimizerMBean, MemcachedOptimizer {
 				log.debug("Merge optimieze:merge " + mergeCount
 						+ " get commands");
 			}
-			return newMergedCommand(mergeCommands, mergeCount, key, commandType);
+			return newMergedCommand(mergeCommands, mergeCount,
+					commandCollector, expectedCommandType);
 		}
 	}
 
+	private CommandCollector creatCommandCollector() {
+		CommandCollector commandCollector = null;
+		if (this.protocol == Protocol.Text) {
+			commandCollector = new KeyStringCollector();
+		} else {
+			commandCollector = new BinaryGetQCollector();
+		}
+		return commandCollector;
+	}
+
 	private Command newMergedCommand(final Map<Object, Command> mergeCommands,
-			int mergeCount, final StringBuilder key,
+			int mergeCount, final CommandCollector commandCollector,
 			final CommandType commandType) {
-		byte[] keyBytes = ByteUtils.getBytes(key.toString());
-		byte[] cmdBytes = commandType == CommandType.GET_ONE ? Constants.GET
-				: Constants.GETS;
-		final IoBuffer buffer = this.bufferAllocator.allocate(cmdBytes.length
-				+ Constants.CRLF.length + 1 + keyBytes.length);
-		ByteUtils.setArguments(buffer, cmdBytes, keyBytes);
-		buffer.flip();
-		TextGetOneCommand cmd = new TextGetOneCommand(key.toString(), keyBytes,
-				commandType, null);
-		cmd.setMergeCommands(mergeCommands);
-		cmd.setWriteFuture(new FutureImpl<Boolean>());
-		cmd.setMergeCount(mergeCount);
-		cmd.setIoBuffer(buffer);
-		return cmd;
+		// TODO,check protocol insteadof instanceof operation
+		if (this.protocol == Protocol.Text) {
+			String resultKey = (String) commandCollector.getResult();
+
+			byte[] keyBytes = ByteUtils.getBytes(resultKey);
+			byte[] cmdBytes = commandType == CommandType.GET_ONE ? Constants.GET
+					: Constants.GETS;
+			final IoBuffer buffer = this.bufferAllocator
+					.allocate(cmdBytes.length + Constants.CRLF.length + 1
+							+ keyBytes.length);
+			ByteUtils.setArguments(buffer, cmdBytes, keyBytes);
+			buffer.flip();
+			TextGetOneCommand cmd = new TextGetOneCommand(resultKey.toString(),
+					keyBytes, commandType, null);
+			cmd.setMergeCommands(mergeCommands);
+			cmd.setWriteFuture(new FutureImpl<Boolean>());
+			cmd.setMergeCount(mergeCount);
+			cmd.setIoBuffer(buffer);
+			return cmd;
+		} else {
+			BinaryGetMultiCommand result = (BinaryGetMultiCommand) commandCollector
+					.getResult();
+			result.setMergeCount(mergeCount);
+			result.setMergeCommands(mergeCommands);
+			return result;
+		}
 	}
 }

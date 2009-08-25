@@ -483,7 +483,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 		this.transcoder = transcoder;
 		this.sessionLocator = locator;
 		this.connector = new MemcachedConnector(configuration,
-				this.sessionLocator, bufferAllocator);
+				this.sessionLocator, bufferAllocator,this.commandFactory.getProtocol());
 		this.connector.setSendBufferSize(DEFAULT_TCP_SEND_BUFF_SIZE);
 		this.memcachedHandler = new MemcachedHandler(this);
 		this.connector.setHandler(this.memcachedHandler);

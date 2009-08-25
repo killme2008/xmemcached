@@ -56,7 +56,7 @@ public class TextGetMultiCommandUnitTest extends BaseTextCommandUnitTest {
 		checkDecodeValidLine(command, "END\r\n");
 		assertEquals(0, ((Map) command.getResult()).size());
 		// data not complelte
-		command.setParseStatus(TextGetCommand.ParseStatus.NULL);
+		command.setParseStatus(net.rubyeye.xmemcached.command.text.TextGetCommand.ParseStatus.NULL);
 		assertFalse(command.decode(null, ByteBuffer
 				.wrap("VALUE test1 0 2\r\n10\r\nVALUE test2 0 4\r\n10"
 						.getBytes())));
@@ -84,7 +84,7 @@ public class TextGetMultiCommandUnitTest extends BaseTextCommandUnitTest {
 
 		checkDecodeValidLine(command, "END\r\n");
 		assertEquals(0, ((Map) command.getResult()).size());
-		command.setParseStatus(TextGetCommand.ParseStatus.NULL);
+		command.setParseStatus(net.rubyeye.xmemcached.command.text.TextGetCommand.ParseStatus.NULL);
 		// data not complelte
 		assertFalse(command.decode(null, ByteBuffer
 				.wrap("VALUE test1 0 2 999\r\n10\r\nVALUE test2 0 4 1000\r\n10"

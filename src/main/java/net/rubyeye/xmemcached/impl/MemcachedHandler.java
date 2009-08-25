@@ -15,8 +15,9 @@ import net.rubyeye.xmemcached.MemcachedClient;
 import net.rubyeye.xmemcached.MemcachedClientStateListener;
 import net.rubyeye.xmemcached.command.Command;
 import net.rubyeye.xmemcached.command.CommandType;
+import net.rubyeye.xmemcached.command.MapReturnValueAware;
 import net.rubyeye.xmemcached.command.OperationStatus;
-import net.rubyeye.xmemcached.command.text.TextGetCommand;
+import net.rubyeye.xmemcached.command.binary.BinaryGetCommand;
 import net.rubyeye.xmemcached.command.text.TextGetOneCommand;
 import net.rubyeye.xmemcached.monitor.StatisticsHandler;
 import net.rubyeye.xmemcached.utils.Protocol;
@@ -45,12 +46,12 @@ public class MemcachedHandler extends HandlerAdapter {
 	public final void onReceive(final Session session, final Object msg) {
 		Command command = (Command) msg;
 		if (command.getMergeCount() > 0) {
-			int size = ((TextGetCommand) command).getReturnValues().size();
+			int size = ((MapReturnValueAware) command).getReturnValues().size();
 			this.statisticsHandler.statistics(CommandType.GET_HIT, size);
 			this.statisticsHandler.statistics(CommandType.GET_MISS, command
 					.getMergeCount()
 					- size);
-		} else if (command instanceof TextGetOneCommand) {
+		} else if (command instanceof TextGetOneCommand||command instanceof BinaryGetCommand) {
 			if (command.getResult() != null) {
 				this.statisticsHandler.statistics(CommandType.GET_HIT);
 			} else {

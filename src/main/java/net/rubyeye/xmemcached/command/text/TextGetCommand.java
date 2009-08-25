@@ -8,15 +8,17 @@ import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 
 import net.rubyeye.xmemcached.buffer.BufferAllocator;
+import net.rubyeye.xmemcached.command.AssocCommandAware;
 import net.rubyeye.xmemcached.command.Command;
 import net.rubyeye.xmemcached.command.CommandType;
+import net.rubyeye.xmemcached.command.MapReturnValueAware;
 import net.rubyeye.xmemcached.command.MergeCommandsAware;
 import net.rubyeye.xmemcached.impl.MemcachedTCPSession;
 import net.rubyeye.xmemcached.monitor.Constants;
 import net.rubyeye.xmemcached.transcoders.CachedData;
 import net.rubyeye.xmemcached.utils.ByteUtils;
 
-public abstract class TextGetCommand extends Command implements MergeCommandsAware{
+public abstract class TextGetCommand extends Command implements MergeCommandsAware,AssocCommandAware, MapReturnValueAware{
 	public static final byte[] GET = { 'g', 'e', 't' };
 	public static final byte[] GETS = { 'g', 'e', 't', 's' };
 	protected Map<String, CachedData> returnValues;
@@ -251,6 +253,9 @@ public abstract class TextGetCommand extends Command implements MergeCommandsAwa
 		}
 	}
 
+	/* (non-Javadoc)
+	 * @see net.rubyeye.xmemcached.command.text.MapReturnValueAware#getReturnValues()
+	 */
 	public final Map<String, CachedData> getReturnValues() {
 		return this.returnValues;
 	}

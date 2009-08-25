@@ -15,6 +15,7 @@ import net.rubyeye.xmemcached.impl.Optimizer;
 import net.rubyeye.xmemcached.transcoders.CachedData;
 import net.rubyeye.xmemcached.transcoders.SerializingTranscoder;
 import net.rubyeye.xmemcached.transcoders.Transcoder;
+import net.rubyeye.xmemcached.utils.Protocol;
 import net.rubyeye.xmemcached.utils.SimpleBlockingQueue;
 
 import com.google.code.yanf4j.nio.util.FutureImpl;
@@ -34,7 +35,7 @@ public class OptimezerTest extends TestCase {
 
 	@Override
 	protected void setUp() throws Exception {
-		this.optimiezer = new Optimizer();
+		this.optimiezer = new Optimizer(Protocol.Text);
 		this.commandFactory = new TextCommandFactory();
 		this.optimiezer.setBufferAllocator(new SimpleBufferAllocator());
 		this.writeQueue = new LinkedTransferQueue<Command>();

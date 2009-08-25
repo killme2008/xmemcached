@@ -14,7 +14,9 @@ package net.rubyeye.xmemcached.example;
 import java.util.concurrent.CountDownLatch;
 
 import net.rubyeye.xmemcached.CASOperation;
-import net.rubyeye.xmemcached.XMemcachedClient;
+import net.rubyeye.xmemcached.MemcachedClient;
+import net.rubyeye.xmemcached.XMemcachedClientBuilder;
+import net.rubyeye.xmemcached.command.BinaryCommandFactory;
 import net.rubyeye.xmemcached.utils.AddrUtil;
 
 /**
@@ -41,10 +43,10 @@ class CASThread extends Thread {
 		}
 	}
 
-	private XMemcachedClient mc;
+	private MemcachedClient mc;
 	private CountDownLatch cd;
 
-	public CASThread(XMemcachedClient mc, CountDownLatch cdl) {
+	public CASThread(MemcachedClient mc, CountDownLatch cdl) {
 		super();
 		this.mc = mc;
 		this.cd = cdl;
@@ -71,8 +73,11 @@ public class CASTest {
 		    System.exit(1);
 		}
 		int NUM = Integer.parseInt(args[0]);
-		XMemcachedClient mc = new XMemcachedClient(AddrUtil.getAddresses(args[1]));
+		XMemcachedClientBuilder builder=new XMemcachedClientBuilder(AddrUtil.getAddresses(args[1]));
+		builder.setCommandFactory(new BinaryCommandFactory());
+		MemcachedClient mc = builder.build();
 		// 设置初始值为0
+		mc.setOptimizeGet(false);
 		mc.set("a", 0, 0);
 		CountDownLatch cdl = new CountDownLatch(NUM);
 		long start = System.currentTimeMillis();
