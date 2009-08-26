@@ -279,7 +279,7 @@ public class Optimizer implements OptimizerMBean, MemcachedOptimizer {
 	class BinaryGetQCollector implements CommandCollector {
 		LinkedList<IoBuffer> bufferList = new LinkedList<IoBuffer>();
 		int totalLength;
-		Command lastCommand;
+		Command prevCommand;
 
 		@Override
 		public Object getResult() {
@@ -297,25 +297,28 @@ public class Optimizer implements OptimizerMBean, MemcachedOptimizer {
 
 		@Override
 		public void visit(Command command) {
-			this.lastCommand = command;
-			// first n-1 send getkq command
-			Command getqCommand = new BinaryGetCommand(command.getKey(),
-					command.getKeyBytes(), null, null, OpCode.GET_KEY_QUIETLY,
-					true);
-			getqCommand.encode(Optimizer.this.bufferAllocator);
-			this.totalLength += getqCommand.getIoBuffer().remaining();
-			this.bufferList.add(getqCommand.getIoBuffer());
+			// Encode prev command
+			if (this.prevCommand != null) {
+				// first n-1 send getkq command
+				Command getqCommand = new BinaryGetCommand(this.prevCommand
+						.getKey(), this.prevCommand.getKeyBytes(), null, null,
+						OpCode.GET_KEY_QUIETLY, true);
+				getqCommand.encode(Optimizer.this.bufferAllocator);
+				this.totalLength += getqCommand.getIoBuffer().remaining();
+				this.bufferList.add(getqCommand.getIoBuffer());
+			}
+			this.prevCommand = command;
 		}
 
 		@Override
 		public void finish() {
-			// last command is getk
-			Command lastGetKCommand = new BinaryGetCommand(this.lastCommand
-					.getKey(), this.lastCommand.getKeyBytes(),
+			// prev command is the last command,last command must be getk,ensure
+			// getq commands send response back
+			Command lastGetKCommand = new BinaryGetCommand(this.prevCommand
+					.getKey(), this.prevCommand.getKeyBytes(),
 					CommandType.GET_ONE, new CountDownLatch(1), OpCode.GET_KEY,
 					false);
 			lastGetKCommand.encode(Optimizer.this.bufferAllocator);
-			this.totalLength-=this.bufferList.removeLast().remaining();
 			this.bufferList.add(lastGetKCommand.getIoBuffer());
 			this.totalLength += lastGetKCommand.getIoBuffer().remaining();
 		}
@@ -396,7 +399,6 @@ public class Optimizer implements OptimizerMBean, MemcachedOptimizer {
 	private Command newMergedCommand(final Map<Object, Command> mergeCommands,
 			int mergeCount, final CommandCollector commandCollector,
 			final CommandType commandType) {
-		// TODO,check protocol insteadof instanceof operation
 		if (this.protocol == Protocol.Text) {
 			String resultKey = (String) commandCollector.getResult();
 

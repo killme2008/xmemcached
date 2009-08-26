@@ -35,6 +35,13 @@ type command "ant build-package" to build project.
  XMemcachedClientBuilder builder = new XMemcachedClientBuilder(
            AddrUtil.getAddresses("localhost:11211"));
  XMemcachedClient client=builder.build();
+ 
+#If you want to use binary protocol(use memcached 1.4.0)
+  XMemcachedClientBuilder builder = new XMemcachedClientBuilder(
+           AddrUtil.getAddresses("localhost:11211"));
+  builder.setCommandFactory(new BinaryCommandFactory());
+  XMemcachedClient client=builder.build();
+ 
 
 #add or remove memcached server dynamically 
 

@@ -153,15 +153,6 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.rubyeye.xmemcached.MemcachedClient#setOptimiezeGet(boolean)
-	 */
-	public final void setOptimiezeGet(final boolean optimiezeGet) {
-		this.connector.setOptimizeGet(optimiezeGet);
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
 	 * @see
 	 * net.rubyeye.xmemcached.MemcachedClient#setOptimizeMergeBuffer(boolean)
 	 */
@@ -501,7 +492,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 
 	@Override
 	public void setOptimizeGet(boolean optimizeGet) {
-		setOptimiezeGet(optimizeGet);
+		this.connector.setOptimizeGet(optimizeGet);
 	}
 
 	/*

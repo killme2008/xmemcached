@@ -3,6 +3,7 @@ package net.rubyeye.xmemcached.utils;
 import java.net.InetSocketAddress;
 import java.util.List;
 
+import net.rubyeye.xmemcached.CommandFactory;
 import net.rubyeye.xmemcached.MemcachedClient;
 import net.rubyeye.xmemcached.MemcachedClientBuilder;
 import net.rubyeye.xmemcached.MemcachedSessionLocator;
@@ -10,6 +11,7 @@ import net.rubyeye.xmemcached.XMemcachedClient;
 import net.rubyeye.xmemcached.XMemcachedClientBuilder;
 import net.rubyeye.xmemcached.buffer.BufferAllocator;
 import net.rubyeye.xmemcached.buffer.SimpleBufferAllocator;
+import net.rubyeye.xmemcached.command.TextCommandFactory;
 import net.rubyeye.xmemcached.impl.ArrayMemcachedSessionLocator;
 import net.rubyeye.xmemcached.transcoders.SerializingTranscoder;
 import net.rubyeye.xmemcached.transcoders.Transcoder;
@@ -18,6 +20,12 @@ import org.springframework.beans.factory.FactoryBean;
 
 import com.google.code.yanf4j.config.Configuration;
 
+/**
+ * Implement spring's factory bean,for integrating to spring framework.
+ * 
+ * @author dennis
+ * 
+ */
 public class XMemcachedClientFactoryBean implements FactoryBean {
 
 	private MemcachedSessionLocator sessionLocator = new ArrayMemcachedSessionLocator();
@@ -28,6 +36,15 @@ public class XMemcachedClientFactoryBean implements FactoryBean {
 	private Transcoder transcoder = new SerializingTranscoder();
 	private Configuration configuration = XMemcachedClient
 			.getDefaultConfiguration();
+	private CommandFactory commandFactory = new TextCommandFactory();
+
+	public final CommandFactory getCommandFactory() {
+		return this.commandFactory;
+	}
+
+	public final void setCommandFactory(CommandFactory commandFactory) {
+		this.commandFactory = commandFactory;
+	}
 
 	public XMemcachedClientFactoryBean() {
 
@@ -51,7 +68,7 @@ public class XMemcachedClientFactoryBean implements FactoryBean {
 	}
 
 	public String getServers() {
-		return servers;
+		return this.servers;
 	}
 
 	public void setServers(String servers) {
@@ -59,20 +76,20 @@ public class XMemcachedClientFactoryBean implements FactoryBean {
 	}
 
 	public MemcachedSessionLocator getSessionLocator() {
-		return sessionLocator;
+		return this.sessionLocator;
 	}
 
 	public BufferAllocator getBufferAllocator() {
-		return bufferAllocator;
+		return this.bufferAllocator;
 	}
 
 	@SuppressWarnings("unchecked")
 	public Transcoder getTranscoder() {
-		return transcoder;
+		return this.transcoder;
 	}
 
 	public List<Integer> getWeights() {
-		return weights;
+		return this.weights;
 	}
 
 	public void setWeights(List<Integer> weights) {
@@ -80,7 +97,7 @@ public class XMemcachedClientFactoryBean implements FactoryBean {
 	}
 
 	public Configuration getConfiguration() {
-		return configuration;
+		return this.configuration;
 	}
 
 	@Override
@@ -96,9 +113,9 @@ public class XMemcachedClientFactoryBean implements FactoryBean {
 	private MemcachedClientBuilder newBuilder(
 			List<InetSocketAddress> serverList, int[] weightsArray) {
 		MemcachedClientBuilder builder;
-		if (weightsArray == null)
+		if (weightsArray == null) {
 			builder = new XMemcachedClientBuilder(serverList);
-		else {
+		} else {
 			builder = new XMemcachedClientBuilder(serverList, weightsArray);
 		}
 		return builder;
@@ -109,17 +126,20 @@ public class XMemcachedClientFactoryBean implements FactoryBean {
 		builder.setBufferAllocator(this.bufferAllocator);
 		builder.setSessionLocator(this.sessionLocator);
 		builder.setTranscoder(this.transcoder);
+		builder.setCommandFactory(this.commandFactory);
 	}
 
 	private int[] getWeightsArray(List<InetSocketAddress> serverList) {
 		int[] weightsArray = null;
-		if (serverList != null && serverList.size() > 0 && weights != null) {
-			if (this.weights.size() < serverList.size())
+		if (serverList != null && serverList.size() > 0 && this.weights != null) {
+			if (this.weights.size() < serverList.size()) {
 				throw new IllegalArgumentException(
 						"Weight list's size is less than server list's size");
-			weightsArray = new int[weights.size()];
-			for (int i = 0; i < weightsArray.length; i++)
-				weightsArray[i] = weights.get(i);
+			}
+			weightsArray = new int[this.weights.size()];
+			for (int i = 0; i < weightsArray.length; i++) {
+				weightsArray[i] = this.weights.get(i);
+			}
 		}
 		return weightsArray;
 	}
@@ -127,7 +147,7 @@ public class XMemcachedClientFactoryBean implements FactoryBean {
 	private List<InetSocketAddress> getServerList() {
 		List<InetSocketAddress> serverList = null;
 
-		if (servers != null && servers.length() > 0) {
+		if (this.servers != null && this.servers.length() > 0) {
 			serverList = AddrUtil.getAddresses(this.servers);
 
 		}
@@ -135,14 +155,21 @@ public class XMemcachedClientFactoryBean implements FactoryBean {
 	}
 
 	private void checkAttribute() {
-		if (bufferAllocator == null)
+		if (this.bufferAllocator == null) {
 			throw new NullPointerException("Null BufferAllocator");
-		if (sessionLocator == null)
+		}
+		if (this.sessionLocator == null) {
 			throw new NullPointerException("Null MemcachedSessionLocator");
-		if (configuration == null)
+		}
+		if (this.configuration == null) {
 			throw new NullPointerException("Null networking configuration");
-		if (this.weights != null && this.servers == null)
+		}
+		if (this.commandFactory == null) {
+			throw new NullPointerException("Null command factory");
+		}
+		if (this.weights != null && this.servers == null) {
 			throw new NullPointerException("Empty server list");
+		}
 	}
 
 	@Override

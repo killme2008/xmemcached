@@ -27,8 +27,6 @@ import com.googlecode.hibernate.memcached.PropertiesHelper;
 public class XmemcachedClientFactory implements MemcacheClientFactory {
 
 	public static final String PROP_SERVERS = Config.PROP_PREFIX + "servers";
-	public static final String PROP_OPERATION_QUEUE_LENGTH = Config.PROP_PREFIX
-			+ "operationQueueLength";
 	public static final String PROP_READ_BUFFER_SIZE = Config.PROP_PREFIX
 			+ "readBufferSize";
 	public static final String PROP_OPERATION_TIMEOUT = Config.PROP_PREFIX
