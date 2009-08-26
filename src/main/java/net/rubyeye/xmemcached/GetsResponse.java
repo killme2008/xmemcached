@@ -12,10 +12,10 @@
 package net.rubyeye.xmemcached;
 
 /**
- * gets命令结果
- *
+ * Response for gets command
+ * 
  * @author dennis
- *
+ * 
  */
 public class GetsResponse<T> {
 	private long cas;
@@ -28,23 +28,63 @@ public class GetsResponse<T> {
 	}
 
 	public long getCas() {
-		return cas;
+		return this.cas;
 	}
 
+	@Deprecated
 	public void setCas(long cas) {
 		this.cas = cas;
 	}
 
 	public T getValue() {
-		return value;
+		return this.value;
 	}
 
+	@Deprecated
 	public void setValue(T value) {
 		this.value = value;
 	}
 
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + (int) (this.cas ^ (this.cas >>> 32));
+		result = prime * result
+				+ ((this.value == null) ? 0 : this.value.hashCode());
+		return result;
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (obj == null) {
+			return false;
+		}
+		if (getClass() != obj.getClass()) {
+			return false;
+		}
+		GetsResponse other = (GetsResponse) obj;
+		if (this.cas != other.cas) {
+			return false;
+		}
+		if (this.value == null) {
+			if (other.value != null) {
+				return false;
+			}
+		} else if (!this.value.equals(other.value)) {
+			return false;
+		}
+		return true;
+	}
+
+	@Override
 	public String toString() {
-		return "GetsResponse[cas=" + cas + ",value=" + value.toString() + "]";
+		return "GetsResponse[cas=" + this.cas + ",value="
+				+ this.value.toString() + "]";
 	}
 
 }

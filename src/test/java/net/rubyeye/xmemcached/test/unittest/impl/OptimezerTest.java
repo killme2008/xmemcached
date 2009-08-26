@@ -16,7 +16,6 @@ import net.rubyeye.xmemcached.transcoders.CachedData;
 import net.rubyeye.xmemcached.transcoders.SerializingTranscoder;
 import net.rubyeye.xmemcached.transcoders.Transcoder;
 import net.rubyeye.xmemcached.utils.Protocol;
-import net.rubyeye.xmemcached.utils.SimpleBlockingQueue;
 
 import com.google.code.yanf4j.nio.util.FutureImpl;
 import com.google.code.yanf4j.util.LinkedTransferQueue;
@@ -39,7 +38,7 @@ public class OptimezerTest extends TestCase {
 		this.commandFactory = new TextCommandFactory();
 		this.optimiezer.setBufferAllocator(new SimpleBufferAllocator());
 		this.writeQueue = new LinkedTransferQueue<Command>();
-		this.executingCmds = new SimpleBlockingQueue<Command>();
+		this.executingCmds = new LinkedTransferQueue<Command>();
 		for (int i = 0; i < 10; i++) {
 			Command cmd = this.commandFactory.createGetCommand(String
 					.valueOf(i), String.valueOf(i).getBytes(),

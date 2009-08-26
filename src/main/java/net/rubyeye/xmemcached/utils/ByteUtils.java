@@ -21,6 +21,12 @@ import net.rubyeye.xmemcached.monitor.Constants;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+/**
+ * Utilities for byte process
+ * 
+ * @author dennis
+ * 
+ */
 public final class ByteUtils {
 	public static final Log log = LogFactory.getLog(ByteUtils.class);
 	public static final String DEFAULT_CHARSET = "utf-8";

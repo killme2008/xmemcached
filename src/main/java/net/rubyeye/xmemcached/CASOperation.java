@@ -12,25 +12,26 @@
 package net.rubyeye.xmemcached;
 
 /**
- * cas操作接口
- *
+ * CAS operation,encapsulate gets and cas commands,and supports retry times.
+ * 
  * @author dennis
- *
+ * 
  */
 public interface CASOperation<T> {
 	/**
-	 * 最大重试次数
-	 *
+	 * Max retry times,If retry times is great than this value,xmemcached will
+	 * throw TimeoutException
+	 * 
 	 * @return
 	 */
 	public int getMaxTries();
 
 	/**
-	 * 根据当前value和cas返回想要设置的新value
-	 *
+	 * Return the new value which you want to cas
+	 * 
 	 * @param currentCAS
 	 * @param currentValue
-	 * @return 新的期望设置值
+	 * @return expected new value
 	 */
 	public T getNewValue(long currentCAS, T currentValue);
 }

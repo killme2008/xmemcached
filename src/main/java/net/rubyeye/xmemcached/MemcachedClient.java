@@ -52,6 +52,16 @@ public interface MemcachedClient {
 	 * second,throw TimeoutException
 	 */
 	public static final long DEFAULT_OP_TIMEOUT = 1000L;
+	/**
+	 * In a high concurrent enviroment,you may want to pool memcached
+	 * clients.But a xmemcached client has to start a reactor thread and some
+	 * thread pools,if you create too many clients,the cost is very large.
+	 * Xmemcached supports connection pool instreadof client pool.you can create
+	 * more connections to one or more memcached servers,and these connections
+	 * share the same reactor and thread pools,it will reduce the cost of
+	 * system.Default pool size is 1.
+	 */
+	public static final int DEFAULT_POOL_SIZE = 1;
 
 	/**
 	 * Set the merge factor,this factor determins how many 'get' commands would
@@ -921,8 +931,8 @@ public interface MemcachedClient {
 	/**
 	 * Delete key's data item from memcached.This method doesn't wait for reply.
 	 * This method does not work on memcached 1.3 or later version.See <a href=
-	 * 'http://code.google.com/p/memcached/issues/detail?id=3&q=delete%20noreply'>issue
-	 * 3</a>
+	 * 'http://code.google.com/p/memcached/issues/detail?id=3&q=delete%20noreply
+	 * ' > i s s u e 3</a>
 	 * 
 	 * @param key
 	 * @param time
@@ -1039,6 +1049,20 @@ public interface MemcachedClient {
 	 * @param healConnectionInterval
 	 */
 	public void setHealSessionInterval(long healConnectionInterval);
-	
+
 	public Protocol getProtocol();
+
+	/**
+	 * In a high concurrent enviroment,you may want to pool memcached
+	 * clients.But a xmemcached client has to start a reactor thread and some
+	 * thread pools,if you create too many clients,the cost is very large.
+	 * Xmemcached supports connection pool instreadof client pool.you can create
+	 * more connections to one or more memcached servers,and these connections
+	 * share the same reactor and thread pools,it will reduce the cost of
+	 * system.
+	 * 
+	 * @param poolSize
+	 *            pool size,default is 1
+	 */
+	public void setPoolSize(int poolSize);
 }

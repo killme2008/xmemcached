@@ -1,5 +1,11 @@
 package net.rubyeye.xmemcached.utils;
 
+/**
+ * Opaque generator for memcached binary xxxq(getq,addq etc.) commands
+ * 
+ * @author dennis
+ * 
+ */
 public final class OpaqueGenerater {
 	private OpaqueGenerater() {
 

@@ -20,9 +20,11 @@ import java.util.concurrent.TimeoutException;
 
 import net.rubyeye.xmemcached.HashAlgorithm;
 import net.rubyeye.xmemcached.MemcachedClient;
-import net.rubyeye.xmemcached.XMemcachedClient;
+import net.rubyeye.xmemcached.MemcachedClientBuilder;
+import net.rubyeye.xmemcached.XMemcachedClientBuilder;
 import net.rubyeye.xmemcached.exception.MemcachedException;
 import net.rubyeye.xmemcached.impl.KetamaMemcachedSessionLocator;
+
 import com.google.code.yanf4j.util.ResourcesUtils;
 
 /**
@@ -41,8 +43,10 @@ public class CacheHitRateTest {
 		// Replace this hashAlg with other HashAlgorithm
 		HashAlgorithm hashAlg = HashAlgorithm.KETAMA_HASH;
 
-		MemcachedClient client = new XMemcachedClient(
-				new KetamaMemcachedSessionLocator(hashAlg));
+		MemcachedClientBuilder memcachedClientBuilder = new XMemcachedClientBuilder();
+		memcachedClientBuilder
+				.setSessionLocator(new KetamaMemcachedSessionLocator());
+		MemcachedClient client = memcachedClientBuilder.build();
 		client.addServer(ip, 12000);
 		client.addServer(ip, 12001);
 		client.addServer(ip, 12002);
@@ -88,8 +92,9 @@ public class CacheHitRateTest {
 		int hits = 0;
 		for (String key : keys) {
 			total++;
-			if (client.get(key) != null)
+			if (client.get(key) != null) {
 				hits++;
+			}
 		}
 		System.out.println("hit rate=" + (double) hits / total);
 	}
@@ -109,8 +114,9 @@ public class CacheHitRateTest {
 			String[] words = line.split("[\\s,.,\"'?\t]+");
 			for (String word : words) {
 				word = word.trim();
-				if (word.length() == 0)
+				if (word.length() == 0) {
 					continue;
+				}
 				if (counters.containsKey(word)) {
 					counters.put(word, counters.get(word).intValue() + 1);
 				} else {
@@ -123,8 +129,9 @@ public class CacheHitRateTest {
 				.iterator();
 		while (it.hasNext()) {
 			Map.Entry<String, Integer> entry = it.next();
-			if (!client.set(entry.getKey(), 0, entry.getValue()))
+			if (!client.set(entry.getKey(), 0, entry.getValue())) {
 				System.err.println("put error");
+			}
 		}
 		System.out.println("initialize successfully!");
 		reader.close();

@@ -29,6 +29,10 @@
 				<value>5</value>
 			</list>
 		</property>
+		<property name="poolSize" value="2"></property>
+		<property name="commandFactory">
+		   <bean class="net.rubyeye.xmemcached.command.BinaryCommandFactory"></bean>
+		</property>
 		<property name="sessionLocator">
 			<bean class="net.rubyeye.xmemcached.impl.KetamaMemcachedSessionLocator"></bean>
 		</property>

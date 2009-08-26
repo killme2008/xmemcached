@@ -65,6 +65,20 @@ public interface MemcachedClientBuilder {
 	public MemcachedClient build() throws IOException;
 
 	/**
+	 * In a high concurrent enviroment,you may want to pool memcached
+	 * clients.But a xmemcached client has to start a reactor thread and some
+	 * thread pools,if you create too many clients,the cost is very large.
+	 * Xmemcached supports connection pool instreadof client pool.you can create
+	 * more connections to one or more memcached servers,and these connections
+	 * share the same reactor and thread pools,it will reduce the cost of
+	 * system.
+	 * 
+	 * @param poolSize
+	 *            pool size,default is 1
+	 */
+	public void setPoolSize(int poolSize);
+
+	/**
 	 * Set xmemcached's transcoder,it is used for seriailizing
 	 * 
 	 * @return

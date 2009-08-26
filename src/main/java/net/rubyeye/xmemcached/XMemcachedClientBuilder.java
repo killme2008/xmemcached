@@ -30,11 +30,20 @@ public class XMemcachedClientBuilder implements MemcachedClientBuilder {
 
 	private int[] weights;
 
+	private int poolSize = MemcachedClient.DEFAULT_POOL_SIZE;
+
 	private List<MemcachedClientStateListener> stateListeners = new ArrayList<MemcachedClientStateListener>();
 
 	@Override
 	public void addStateListener(MemcachedClientStateListener stateListener) {
 		this.stateListeners.add(stateListener);
+	}
+
+	public final void setPoolSize(int poolSize) {
+		if (this.poolSize <= 0) {
+			throw new IllegalArgumentException("poolSize<=0");
+		}
+		this.poolSize = poolSize;
 	}
 
 	@Override
@@ -45,15 +54,16 @@ public class XMemcachedClientBuilder implements MemcachedClientBuilder {
 	@Override
 	public void setStateListeners(
 			List<MemcachedClientStateListener> stateListeners) {
-		if (stateListeners == null)
+		if (stateListeners == null) {
 			throw new IllegalArgumentException("Null state listeners");
+		}
 		this.stateListeners = stateListeners;
 	}
 
 	private CommandFactory commandFactory = new TextCommandFactory();
 
 	public final CommandFactory getCommandFactory() {
-		return commandFactory;
+		return this.commandFactory;
 	}
 
 	public final void setCommandFactory(CommandFactory commandFactory) {
@@ -83,7 +93,7 @@ public class XMemcachedClientBuilder implements MemcachedClientBuilder {
 	 * @see net.rubyeye.xmemcached.MemcachedClientBuilder#getSessionLocator()
 	 */
 	public MemcachedSessionLocator getSessionLocator() {
-		return sessionLocator;
+		return this.sessionLocator;
 	}
 
 	/*
@@ -94,8 +104,9 @@ public class XMemcachedClientBuilder implements MemcachedClientBuilder {
 	 * .xmemcached.MemcachedSessionLocator)
 	 */
 	public void setSessionLocator(MemcachedSessionLocator sessionLocator) {
-		if (sessionLocator == null)
+		if (sessionLocator == null) {
 			throw new IllegalArgumentException("Null SessionLocator");
+		}
 		this.sessionLocator = sessionLocator;
 	}
 
@@ -105,7 +116,7 @@ public class XMemcachedClientBuilder implements MemcachedClientBuilder {
 	 * @see net.rubyeye.xmemcached.MemcachedClientBuilder#getBufferAllocator()
 	 */
 	public BufferAllocator getBufferAllocator() {
-		return bufferAllocator;
+		return this.bufferAllocator;
 	}
 
 	/*
@@ -116,8 +127,9 @@ public class XMemcachedClientBuilder implements MemcachedClientBuilder {
 	 * rubyeye.xmemcached.buffer.BufferAllocator)
 	 */
 	public void setBufferAllocator(BufferAllocator bufferAllocator) {
-		if (bufferAllocator == null)
+		if (bufferAllocator == null) {
 			throw new IllegalArgumentException("Null bufferAllocator");
+		}
 		this.bufferAllocator = bufferAllocator;
 	}
 
@@ -127,7 +139,7 @@ public class XMemcachedClientBuilder implements MemcachedClientBuilder {
 	 * @see net.rubyeye.xmemcached.MemcachedClientBuilder#getConfiguration()
 	 */
 	public Configuration getConfiguration() {
-		return configuration;
+		return this.configuration;
 	}
 
 	/*
@@ -147,33 +159,36 @@ public class XMemcachedClientBuilder implements MemcachedClientBuilder {
 	 * @see net.rubyeye.xmemcached.MemcachedClientBuilder#build()
 	 */
 	public MemcachedClient build() throws IOException {
-		if (this.weights == null)
+		if (this.weights == null) {
 			return new XMemcachedClient(this.sessionLocator,
 					this.bufferAllocator, this.configuration,
 					this.commandFactory, this.transcoder, this.addressList,
-					this.stateListeners);
-		else {
-			if (this.addressList == null)
+					this.stateListeners, this.poolSize);
+		} else {
+			if (this.addressList == null) {
 				throw new IllegalArgumentException("Null Address List");
-			if (this.addressList.size() > this.weights.length)
+			}
+			if (this.addressList.size() > this.weights.length) {
 				throw new IllegalArgumentException(
 						"Weights Array's length is less than server's number");
+			}
 			return new XMemcachedClient(this.sessionLocator,
 					this.bufferAllocator, this.configuration,
 					this.commandFactory, this.transcoder, this.addressList,
-					weights, this.stateListeners);
+					this.weights, this.stateListeners, this.poolSize);
 		}
 	}
 
 	@SuppressWarnings("unchecked")
 	public Transcoder getTranscoder() {
-		return transcoder;
+		return this.transcoder;
 	}
 
 	@SuppressWarnings("unchecked")
 	public void setTranscoder(Transcoder transcoder) {
-		if (transcoder == null)
+		if (transcoder == null) {
 			throw new IllegalArgumentException("Null Transcoder");
+		}
 		this.transcoder = transcoder;
 	}
 
