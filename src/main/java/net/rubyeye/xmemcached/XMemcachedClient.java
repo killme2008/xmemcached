@@ -483,6 +483,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 			commandFactory = new TextCommandFactory();
 		}
 		this.commandFactory = commandFactory;
+		ByteUtils.setMaxKeyLength(this.commandFactory.getMaxKeyLength());
 		this.commandFactory.setBufferAllocator(bufferAllocator);
 		this.shutdown = true;
 		this.transcoder = transcoder;
@@ -520,8 +521,6 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 	public final void setBufferAllocator(final BufferAllocator bufferAllocator) {
 		this.connector.setBufferAllocator(bufferAllocator);
 	}
-
-	
 
 	/**
 	 * Get default network configration for xmemcached.
@@ -594,7 +593,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 			BufferAllocator allocator, Configuration conf,
 			CommandFactory commandFactory, Transcoder transcoder,
 			List<InetSocketAddress> addressList,
-			List<MemcachedClientStateListener> stateListeners,int poolSize)
+			List<MemcachedClientStateListener> stateListeners, int poolSize)
 			throws IOException {
 		super();
 		optimiezeSetReadThreadCount(conf, addressList);
@@ -612,7 +611,6 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 			}
 		}
 	}
-
 
 	/**
 	 * XMemcachedClient constructor.
@@ -1406,7 +1404,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 			result = gets0(key, keyBytes, transcoder);
 			if (result == null) {
 				throw new MemcachedException(
-						"could not gets the value for Key=" + key+" for cas");
+						"could not gets the value for Key=" + key + " for cas");
 			}
 			if (tryCount > operation.getMaxTries()) {
 				throw new TimeoutException("CAS try times is greater than max");

@@ -128,5 +128,7 @@ public interface CommandFactory {
 			boolean noreply);
 
 	public Protocol getProtocol();
+	
+	public int getMaxKeyLength();
 
 }

@@ -33,6 +33,11 @@ public final class TextCommandFactory implements CommandFactory {
 
 	}
 
+	@Override
+	public int getMaxKeyLength() {
+		return 250;
+	}
+
 	/*
 	 * (non-Javadoc)
 	 * 

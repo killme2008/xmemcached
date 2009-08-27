@@ -69,9 +69,9 @@ public final class ByteUtils {
 
 	public static final void checkKey(final byte[] keyBytes) {
 
-		if (keyBytes.length > ByteUtils.MAX_KEY_LENGTH) {
+		if (keyBytes.length > ByteUtils.maxKeyLength) {
 			throw new IllegalArgumentException("Key is too long (maxlen = "
-					+ ByteUtils.MAX_KEY_LENGTH + ")");
+					+ ByteUtils.maxKeyLength + ")");
 		}
 		// Validate the key
 		for (byte b : keyBytes) {
@@ -93,9 +93,9 @@ public final class ByteUtils {
 			throw new IllegalArgumentException("Key must not be blank");
 		}
 		byte[] keyBytes = getBytes(key);
-		if (keyBytes.length > ByteUtils.MAX_KEY_LENGTH) {
+		if (keyBytes.length > ByteUtils.maxKeyLength) {
 			throw new IllegalArgumentException("Key is too long (maxlen = "
-					+ ByteUtils.MAX_KEY_LENGTH + ")");
+					+ ByteUtils.maxKeyLength + ")");
 		}
 		// Validate the key
 		for (byte b : keyBytes) {
@@ -112,7 +112,14 @@ public final class ByteUtils {
 		}
 	}
 
-	public static final int MAX_KEY_LENGTH = 250;
+	private static int maxKeyLength = 250;
+
+	public static void setMaxKeyLength(int length) {
+		if(length<=0) {
+			throw new IllegalArgumentException("maxKeyLength<=0");
+		}
+		maxKeyLength = length;
+	}
 
 	public static final int normalizeCapacity(int requestedCapacity) {
 		switch (requestedCapacity) {

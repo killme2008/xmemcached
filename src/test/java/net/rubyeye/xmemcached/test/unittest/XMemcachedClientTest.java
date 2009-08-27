@@ -123,14 +123,17 @@ public abstract class XMemcachedClientTest extends TestCase {
 		}
 		// key is too long
 		try {
+			int keyLength = this.memcachedClient.getProtocol() == Protocol.Text ? 256
+					: 65536;
 			StringBuilder sb = new StringBuilder();
-			for (int i = 0; i < 256; i++) {
+			for (int i = 0; i < keyLength; i++) {
 				sb.append(i);
 			}
 			this.memcachedClient.get(sb.toString());
 			fail();
 		} catch (IllegalArgumentException e) {
-			assertEquals("Key is too long (maxlen = 250)", e.getMessage());
+			assertEquals("Key is too long (maxlen = "+(this.memcachedClient.getProtocol() == Protocol.Text ? 250
+					: 65535)+")", e.getMessage());
 		}
 		// client is shutdown
 		try {
