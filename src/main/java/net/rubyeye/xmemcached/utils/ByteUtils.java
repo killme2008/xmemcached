@@ -97,28 +97,37 @@ public final class ByteUtils {
 			throw new IllegalArgumentException("Key is too long (maxlen = "
 					+ ByteUtils.maxKeyLength + ")");
 		}
-		// Validate the key
-		for (byte b : keyBytes) {
-			if (b == ' ' || b == '\n' || b == '\r' || b == 0) {
-				try {
-					throw new IllegalArgumentException(
-							"Key contains invalid characters:  ``"
-									+ new String(keyBytes, "utf-8") + "''");
+		if (memcachedProtocol == Protocol.Text) {
+			// Validate the key
+			for (byte b : keyBytes) {
+				if (b == ' ' || b == '\n' || b == '\r' || b == 0) {
+					try {
+						throw new IllegalArgumentException(
+								"Key contains invalid characters:\""
+										+ new String(keyBytes, "utf-8") + "\"");
 
-				} catch (UnsupportedEncodingException e) {
+					} catch (UnsupportedEncodingException e) {
+					}
 				}
-			}
 
+			}
 		}
 	}
 
+	private static Protocol memcachedProtocol = Protocol.Text;
+
 	private static int maxKeyLength = 250;
 
-	public static void setMaxKeyLength(int length) {
-		if(length<=0) {
-			throw new IllegalArgumentException("maxKeyLength<=0");
+	public static void setProtocol(Protocol protocol) {
+		if (protocol == null) {
+			throw new NullPointerException("Null Protocol");
 		}
-		maxKeyLength = length;
+		memcachedProtocol = protocol;
+		if (protocol == Protocol.Text) {
+			maxKeyLength = 250;
+		} else {
+			maxKeyLength = 65535;
+		}
 	}
 
 	public static final int normalizeCapacity(int requestedCapacity) {

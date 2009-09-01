@@ -483,7 +483,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 			commandFactory = new TextCommandFactory();
 		}
 		this.commandFactory = commandFactory;
-		ByteUtils.setMaxKeyLength(this.commandFactory.getMaxKeyLength());
+		ByteUtils.setProtocol(this.commandFactory.getProtocol());
 		this.commandFactory.setBufferAllocator(bufferAllocator);
 		this.shutdown = true;
 		this.transcoder = transcoder;
@@ -2155,5 +2155,31 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 	public Protocol getProtocol() {
 		return this.commandFactory.getProtocol();
 	}
+
+	@Override
+	public void appendList(String key, Object e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public <E> List<E> getList(String key) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public <E> void initList(String key) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void prependList(String key, Object e) {
+		// TODO Auto-generated method stub
+		
+	}
+	
+	
 
 }

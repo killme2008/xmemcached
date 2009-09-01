@@ -542,7 +542,7 @@ public abstract class XMemcachedClientTest extends TestCase {
 		assertEquals("dennis", this.memcachedClient.get("name"));
 	}
 
-	public void TestOperationEncodeTimeout() throws Exception {
+	public void testOperationEncodeTimeout() throws Exception {
 		this.memcachedClient.set("name", 0, "dennis");
 		assertEquals("dennis", this.memcachedClient.get("name"));
 		long writeMessageCount = this.memcachedClient.getConnector()

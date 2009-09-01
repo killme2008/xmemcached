@@ -45,7 +45,7 @@ public class CacheHitRateTest {
 
 		MemcachedClientBuilder memcachedClientBuilder = new XMemcachedClientBuilder();
 		memcachedClientBuilder
-				.setSessionLocator(new KetamaMemcachedSessionLocator());
+				.setSessionLocator(new KetamaMemcachedSessionLocator(hashAlg));
 		MemcachedClient client = memcachedClientBuilder.build();
 		client.addServer(ip, 12000);
 		client.addServer(ip, 12001);

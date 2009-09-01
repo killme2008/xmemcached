@@ -37,11 +37,6 @@ public class BinaryCommandFactory implements CommandFactory {
 	private BufferAllocator bufferAllocator;
 
 	@Override
-	public int getMaxKeyLength() {
-		return 65535;
-	}
-
-	@Override
 	public void setBufferAllocator(BufferAllocator bufferAllocator) {
 		this.bufferAllocator = bufferAllocator;
 	}

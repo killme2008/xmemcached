@@ -13,7 +13,7 @@ public class SerializingTranscoder extends BaseSerializingTranscoder implements
 	private final int maxSize;
 
 	public final int getMaxSize() {
-		return maxSize;
+		return this.maxSize;
 	}
 
 	// General flags
@@ -30,8 +30,10 @@ public class SerializingTranscoder extends BaseSerializingTranscoder implements
 	public static final int SPECIAL_FLOAT = (6 << 8);
 	public static final int SPECIAL_DOUBLE = (7 << 8);
 	public static final int SPECIAL_BYTEARRAY = (8 << 8);
+	public static final int SPECIAL_LIST = (9 << 8);
 
 	private final TranscoderUtils tu = new TranscoderUtils(true);
+	private final ListTranscoder listTranscoder=new ListTranscoder();
 
 	/**
 	 * Get a serializing transcoder with the default max data size.
@@ -44,7 +46,7 @@ public class SerializingTranscoder extends BaseSerializingTranscoder implements
 	 * Get a serializing transcoder that specifies the max data size.
 	 */
 	public SerializingTranscoder(int max) {
-		maxSize = max;
+		this.maxSize = max;
 	}
 
 	/*
@@ -64,28 +66,31 @@ public class SerializingTranscoder extends BaseSerializingTranscoder implements
 		} else if (flags != 0 && data != null) {
 			switch (flags) {
 			case SPECIAL_BOOLEAN:
-				rv = Boolean.valueOf(tu.decodeBoolean(data));
+				rv = Boolean.valueOf(this.tu.decodeBoolean(data));
 				break;
 			case SPECIAL_INT:
-				rv = Integer.valueOf(tu.decodeInt(data));
+				rv = Integer.valueOf(this.tu.decodeInt(data));
 				break;
 			case SPECIAL_LONG:
-				rv = Long.valueOf(tu.decodeLong(data));
+				rv = Long.valueOf(this.tu.decodeLong(data));
 				break;
 			case SPECIAL_DATE:
-				rv = new Date(tu.decodeLong(data));
+				rv = new Date(this.tu.decodeLong(data));
 				break;
 			case SPECIAL_BYTE:
-				rv = Byte.valueOf(tu.decodeByte(data));
+				rv = Byte.valueOf(this.tu.decodeByte(data));
 				break;
 			case SPECIAL_FLOAT:
-				rv = new Float(Float.intBitsToFloat(tu.decodeInt(data)));
+				rv = new Float(Float.intBitsToFloat(this.tu.decodeInt(data)));
 				break;
 			case SPECIAL_DOUBLE:
-				rv = new Double(Double.longBitsToDouble(tu.decodeLong(data)));
+				rv = new Double(Double.longBitsToDouble(this.tu.decodeLong(data)));
 				break;
 			case SPECIAL_BYTEARRAY:
 				rv = data;
+				break;
+			case SPECIAL_LIST:
+				rv=this.listTranscoder.decode(d);
 				break;
 			default:
 				log.warn(String.format("Undecodeable with flags %x", flags));
@@ -107,25 +112,25 @@ public class SerializingTranscoder extends BaseSerializingTranscoder implements
 		if (o instanceof String) {
 			b = encodeString((String) o);
 		} else if (o instanceof Long) {
-			b = tu.encodeLong((Long) o);
+			b = this.tu.encodeLong((Long) o);
 			flags |= SPECIAL_LONG;
 		} else if (o instanceof Integer) {
-			b = tu.encodeInt((Integer) o);
+			b = this.tu.encodeInt((Integer) o);
 			flags |= SPECIAL_INT;
 		} else if (o instanceof Boolean) {
-			b = tu.encodeBoolean((Boolean) o);
+			b = this.tu.encodeBoolean((Boolean) o);
 			flags |= SPECIAL_BOOLEAN;
 		} else if (o instanceof Date) {
-			b = tu.encodeLong(((Date) o).getTime());
+			b = this.tu.encodeLong(((Date) o).getTime());
 			flags |= SPECIAL_DATE;
 		} else if (o instanceof Byte) {
-			b = tu.encodeByte((Byte) o);
+			b = this.tu.encodeByte((Byte) o);
 			flags |= SPECIAL_BYTE;
 		} else if (o instanceof Float) {
-			b = tu.encodeInt(Float.floatToRawIntBits((Float) o));
+			b = this.tu.encodeInt(Float.floatToRawIntBits((Float) o));
 			flags |= SPECIAL_FLOAT;
 		} else if (o instanceof Double) {
-			b = tu.encodeLong(Double.doubleToRawLongBits((Double) o));
+			b = this.tu.encodeLong(Double.doubleToRawLongBits((Double) o));
 			flags |= SPECIAL_DOUBLE;
 		} else if (o instanceof byte[]) {
 			b = (byte[]) o;
@@ -135,22 +140,24 @@ public class SerializingTranscoder extends BaseSerializingTranscoder implements
 			flags |= SERIALIZED;
 		}
 		assert b != null;
-		if (b.length > compressionThreshold) {
+		if (b.length > this.compressionThreshold) {
 			byte[] compressed = compress(b);
 			if (compressed.length < b.length) {
-				if (log.isDebugEnabled())
+				if (log.isDebugEnabled()) {
 					log.debug("Compressed " + o.getClass().getName() + " from "
 							+ b.length + " to " + compressed.length);
+				}
 				b = compressed;
 				flags |= COMPRESSED;
 			} else {
-				if (log.isDebugEnabled())
+				if (log.isDebugEnabled()) {
 					log.debug("Compression increased the size of "
 							+ o.getClass().getName() + " from " + b.length
 							+ " to " + compressed.length);
+				}
 			}
 		}
-		return new CachedData(flags, b, maxSize, -1);
+		return new CachedData(flags, b, this.maxSize, -1);
 	}
 
 }
