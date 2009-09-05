@@ -2,14 +2,15 @@ package net.rubyeye.xmemcached.test.unittest.impl;
 
 import java.util.ArrayList;
 import java.util.List;
-import com.google.code.yanf4j.nio.Session;
 
+import junit.framework.TestCase;
 import net.rubyeye.xmemcached.HashAlgorithm;
 import net.rubyeye.xmemcached.MemcachedSessionLocator;
 import net.rubyeye.xmemcached.impl.ArrayMemcachedSessionLocator;
 import net.rubyeye.xmemcached.impl.KetamaMemcachedSessionLocator;
 import net.rubyeye.xmemcached.test.unittest.MockSession;
-import junit.framework.TestCase;
+
+import com.google.code.yanf4j.core.Session;
 
 public class SessionLocatorTest extends TestCase {
 	MemcachedSessionLocator sessionLocator;
@@ -56,7 +57,7 @@ public class SessionLocatorTest extends TestCase {
 			String key = String.valueOf(i);
 
 			assertSame(((KetamaMemcachedSessionLocator) sessionLocator)
-					.getSessionByHash((long) key.hashCode()), sessionLocator
+					.getSessionByHash(key.hashCode()), sessionLocator
 					.getSessionByKey(key));
 		}
 

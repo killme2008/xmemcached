@@ -25,9 +25,9 @@ import net.rubyeye.xmemcached.impl.MemcachedTCPSession;
 import net.rubyeye.xmemcached.transcoders.Transcoder;
 import net.rubyeye.xmemcached.utils.ByteUtils;
 
-import com.google.code.yanf4j.nio.Session;
-import com.google.code.yanf4j.nio.WriteMessage;
-import com.google.code.yanf4j.nio.util.FutureImpl;
+import com.google.code.yanf4j.core.Session;
+import com.google.code.yanf4j.core.WriteMessage;
+import com.google.code.yanf4j.core.impl.FutureImpl;
 
 /**
  * memcached命令类
@@ -53,7 +53,7 @@ public abstract class Command implements WriteMessage {
 
 	@Override
 	public void setWriteBuffer(ByteBuffer buffers) {
-		//throw new UnsupportedOperationException();
+		// throw new UnsupportedOperationException();
 	}
 
 	protected String key;
@@ -155,6 +155,7 @@ public abstract class Command implements WriteMessage {
 	public final void setIoBuffer(IoBuffer byteBufferWrapper) {
 		this.ioBuffer = byteBufferWrapper;
 	}
+
 	public Exception getException() {
 		return this.exception;
 	}

@@ -32,7 +32,7 @@ import net.rubyeye.xmemcached.utils.Protocol;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.google.code.yanf4j.nio.util.FutureImpl;
+import com.google.code.yanf4j.core.impl.FutureImpl;
 
 /**
  * Memcached command optimizer,merge single-get comands to multi-get

@@ -3,7 +3,9 @@ package net.rubyeye.xmemcached;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import net.rubyeye.xmemcached.buffer.BufferAllocator;
 import net.rubyeye.xmemcached.buffer.SimpleBufferAllocator;
@@ -13,6 +15,7 @@ import net.rubyeye.xmemcached.transcoders.SerializingTranscoder;
 import net.rubyeye.xmemcached.transcoders.Transcoder;
 
 import com.google.code.yanf4j.config.Configuration;
+import com.google.code.yanf4j.core.SocketOption;
 
 /**
  * Builder pattern.Configure XmemcachedClient's options,then build it
@@ -24,13 +27,15 @@ public class XMemcachedClientBuilder implements MemcachedClientBuilder {
 
 	private MemcachedSessionLocator sessionLocator = new ArrayMemcachedSessionLocator();
 	private BufferAllocator bufferAllocator = new SimpleBufferAllocator();
-	private Configuration configuration = XMemcachedClient
-			.getDefaultConfiguration();
+	private Configuration configuration = getDefaultConfiguration();
 	private List<InetSocketAddress> addressList = new ArrayList<InetSocketAddress>();
 
 	private int[] weights;
 
-	private int poolSize = MemcachedClient.DEFAULT_POOL_SIZE;
+	private int poolSize = MemcachedClient.DEFAULT_CONNECTION_POOL_SIZE;
+
+	@SuppressWarnings("unchecked")
+	private final Map<SocketOption, Object> socketOptions = getDefaultSocketOptions();
 
 	private List<MemcachedClientStateListener> stateListeners = new ArrayList<MemcachedClientStateListener>();
 
@@ -39,7 +44,17 @@ public class XMemcachedClientBuilder implements MemcachedClientBuilder {
 		this.stateListeners.add(stateListener);
 	}
 
-	public final void setPoolSize(int poolSize) {
+	@SuppressWarnings("unchecked")
+	public void setSocketOption(SocketOption socketOption, Object value) {
+		this.socketOptions.put(socketOption, value);
+	}
+
+	@SuppressWarnings("unchecked")
+	public Map<SocketOption, Object> getSocketOptions() {
+		return socketOptions;
+	}
+
+	public final void setConnectionPoolSize(int poolSize) {
 		if (this.poolSize <= 0) {
 			throw new IllegalArgumentException("poolSize<=0");
 		}
@@ -61,6 +76,32 @@ public class XMemcachedClientBuilder implements MemcachedClientBuilder {
 	}
 
 	private CommandFactory commandFactory = new TextCommandFactory();
+
+	@SuppressWarnings("unchecked")
+	public static final Map<SocketOption, Object> getDefaultSocketOptions() {
+		Map<SocketOption, Object> map = new HashMap<SocketOption, Object>();
+		map.put(SocketOption.TCP_NODELAY, MemcachedClient.DEFAULT_TCP_NO_DELAY);
+		map.put(SocketOption.SO_RCVBUF,
+				MemcachedClient.DEFAULT_TCP_RECV_BUFF_SIZE);
+		map
+				.put(SocketOption.SO_KEEPALIVE,
+						MemcachedClient.DEFAULT_TCP_KEEPLIVE);
+		map.put(SocketOption.SO_SNDBUF,
+				MemcachedClient.DEFAULT_TCP_SEND_BUFF_SIZE);
+		return map;
+	}
+
+	public static final Configuration getDefaultConfiguration() {
+		final Configuration configuration = new Configuration();
+		configuration
+				.setSessionReadBufferSize(MemcachedClient.DEFAULT_SESSION_READ_BUFF_SIZE);
+		configuration
+				.setReadThreadCount(MemcachedClient.DEFAULT_READ_THREAD_COUNT);
+		configuration.setSessionIdleTimeout(0);
+		configuration.setWriteThreadCount(0);
+		configuration.setCheckSessionTimeoutInterval(0);
+		return configuration;
+	}
 
 	public final CommandFactory getCommandFactory() {
 		return this.commandFactory;
@@ -162,8 +203,8 @@ public class XMemcachedClientBuilder implements MemcachedClientBuilder {
 		if (this.weights == null) {
 			return new XMemcachedClient(this.sessionLocator,
 					this.bufferAllocator, this.configuration,
-					this.commandFactory, this.transcoder, this.addressList,
-					this.stateListeners, this.poolSize);
+					this.socketOptions, this.commandFactory, this.transcoder,
+					this.addressList, this.stateListeners, this.poolSize);
 		} else {
 			if (this.addressList == null) {
 				throw new IllegalArgumentException("Null Address List");
@@ -174,8 +215,9 @@ public class XMemcachedClientBuilder implements MemcachedClientBuilder {
 			}
 			return new XMemcachedClient(this.sessionLocator,
 					this.bufferAllocator, this.configuration,
-					this.commandFactory, this.transcoder, this.addressList,
-					this.weights, this.stateListeners, this.poolSize);
+					this.socketOptions, this.commandFactory, this.transcoder,
+					this.addressList, this.weights, this.stateListeners,
+					this.poolSize);
 		}
 	}
 

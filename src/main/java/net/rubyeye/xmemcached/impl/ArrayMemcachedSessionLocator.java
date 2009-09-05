@@ -18,7 +18,7 @@ import java.util.List;
 import net.rubyeye.xmemcached.HashAlgorithm;
 import net.rubyeye.xmemcached.MemcachedSessionLocator;
 
-import com.google.code.yanf4j.nio.Session;
+import com.google.code.yanf4j.core.Session;
 
 /**
  * Session locator base on hash(key) mod sessions.size().Standard hash strategy
@@ -38,7 +38,7 @@ public class ArrayMemcachedSessionLocator implements MemcachedSessionLocator {
 	public ArrayMemcachedSessionLocator(HashAlgorithm hashAlgorighm) {
 		this.hashAlgorighm = hashAlgorighm;
 	}
-	
+
 	public final void setHashAlgorighm(HashAlgorithm hashAlgorighm) {
 		this.hashAlgorighm = hashAlgorighm;
 	}

@@ -2,14 +2,12 @@ package net.rubyeye.xmemcached.test.unittest;
 
 import java.net.InetSocketAddress;
 import java.nio.ByteOrder;
-import java.nio.channels.Selector;
 import java.util.concurrent.Future;
 
-import com.google.code.yanf4j.nio.Session;
-import com.google.code.yanf4j.nio.CodecFactory.Decoder;
-import com.google.code.yanf4j.nio.CodecFactory.Encoder;
-import com.google.code.yanf4j.nio.util.EventType;
-import com.google.code.yanf4j.nio.util.FutureImpl;
+import com.google.code.yanf4j.core.Session;
+import com.google.code.yanf4j.core.CodecFactory.Decoder;
+import com.google.code.yanf4j.core.CodecFactory.Encoder;
+import com.google.code.yanf4j.core.impl.FutureImpl;
 
 public class MockSession implements Session {
 	private boolean closed = false;
@@ -111,11 +109,6 @@ public class MockSession implements Session {
 	public boolean isUseBlockingWrite() {
 
 		return false;
-	}
-
-	@Override
-	public void onEvent(EventType event, Selector selector) {
-
 	}
 
 	@Override

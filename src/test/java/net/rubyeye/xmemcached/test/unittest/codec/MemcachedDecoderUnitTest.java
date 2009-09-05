@@ -3,17 +3,16 @@ package net.rubyeye.xmemcached.test.unittest.codec;
 import java.nio.ByteBuffer;
 import java.util.concurrent.CountDownLatch;
 
+import junit.framework.TestCase;
 import net.rubyeye.xmemcached.codec.MemcachedCodecFactory;
 import net.rubyeye.xmemcached.command.Command;
 import net.rubyeye.xmemcached.command.TextCommandFactory;
 import net.rubyeye.xmemcached.impl.MemcachedTCPSession;
 
-import com.google.code.yanf4j.nio.CodecFactory.Decoder;
-import com.google.code.yanf4j.nio.impl.ByteBufferCodecFactory;
-import com.google.code.yanf4j.nio.impl.HandlerAdapter;
-import com.google.code.yanf4j.nio.impl.SessionConfig;
-
-import junit.framework.TestCase;
+import com.google.code.yanf4j.core.CodecFactory.Decoder;
+import com.google.code.yanf4j.core.impl.ByteBufferCodecFactory;
+import com.google.code.yanf4j.core.impl.HandlerAdapter;
+import com.google.code.yanf4j.nio.NioSessionConfig;
 
 public class MemcachedDecoderUnitTest extends TestCase {
 	private Decoder<Command> decoder;
@@ -31,7 +30,7 @@ public class MemcachedDecoderUnitTest extends TestCase {
 	}
 
 	public MemcachedTCPSession buildSession() {
-		SessionConfig sessionConfig = new SessionConfig(null, null,
+		NioSessionConfig sessionConfig = new NioSessionConfig(null, null,
 				new HandlerAdapter(), null, new ByteBufferCodecFactory(), null,
 				null, null, true);
 		return new MemcachedTCPSession(sessionConfig, 16 * 1024, null, 0, 1);

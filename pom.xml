@@ -15,7 +15,6 @@
 	<version>1.2.0-beta</version>
 	<name>xmemcached</name>
 	<url>http://maven.apache.org</url>
-
 	<build>
 		<plugins>
 			<plugin>
@@ -32,19 +31,24 @@
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
-			<version>3.8.1</version>
+			<version>4.3.1</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>commons-logging</groupId>
-			<artifactId>commons-logging</artifactId>
-			<version>1.0.4</version>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+			<version>1.5.6</version>
 		</dependency>
 		<dependency>
-			<groupId>log4j</groupId>
-			<artifactId>log4j</artifactId>
-			<version>1.2.15</version>
-			<scope>provided</scope>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-log4j12</artifactId>
+			<version>1.5.6</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>yanf4j</groupId>
+			<artifactId>yanf4j</artifactId>
+			<version>0.7.0</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework</groupId>
@@ -53,22 +57,11 @@
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
-			<groupId>yanf4j</groupId>
-			<artifactId>yanf4j</artifactId>
-			<version>0.7.0</version>
-		</dependency>
-		<dependency>
 			<groupId>com.googlecode</groupId>
 			<artifactId>hibernate-memcached</artifactId>
 			<version>1.2</version>
 		</dependency>
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-log4j12</artifactId>
-			<version>1.5.2</version>
-		</dependency>
 	</dependencies>
-
 	<reporting>
 		<plugins>
 			<plugin>
@@ -82,5 +75,4 @@
 			</plugin>
 		</plugins>
 	</reporting>
-
-</project> 
+</project>

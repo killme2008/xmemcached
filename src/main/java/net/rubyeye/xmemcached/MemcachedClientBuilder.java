@@ -76,7 +76,7 @@ public interface MemcachedClientBuilder {
 	 * @param poolSize
 	 *            pool size,default is 1
 	 */
-	public void setPoolSize(int poolSize);
+	public void setConnectionPoolSize(int poolSize);
 
 	/**
 	 * Set xmemcached's transcoder,it is used for seriailizing

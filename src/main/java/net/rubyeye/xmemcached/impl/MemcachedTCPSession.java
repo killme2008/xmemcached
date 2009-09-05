@@ -24,10 +24,10 @@ import net.rubyeye.xmemcached.buffer.BufferAllocator;
 import net.rubyeye.xmemcached.command.Command;
 import net.rubyeye.xmemcached.command.OperationStatus;
 
-import com.google.code.yanf4j.nio.WriteMessage;
-import com.google.code.yanf4j.nio.impl.DefaultTCPSession;
-import com.google.code.yanf4j.nio.impl.SessionConfig;
-import com.google.code.yanf4j.nio.util.FutureImpl;
+import com.google.code.yanf4j.core.WriteMessage;
+import com.google.code.yanf4j.core.impl.FutureImpl;
+import com.google.code.yanf4j.nio.NioSessionConfig;
+import com.google.code.yanf4j.nio.impl.NioTCPSession;
 import com.google.code.yanf4j.util.LinkedTransferQueue;
 
 /**
@@ -35,7 +35,7 @@ import com.google.code.yanf4j.util.LinkedTransferQueue;
  * 
  * @author dennis
  */
-public class MemcachedTCPSession extends DefaultTCPSession {
+public class MemcachedTCPSession extends NioTCPSession {
 
 	/**
 	 * Command which are already sent
@@ -67,7 +67,7 @@ public class MemcachedTCPSession extends DefaultTCPSession {
 		this.weight = weight;
 	}
 
-	public MemcachedTCPSession(SessionConfig sessionConfig,
+	public MemcachedTCPSession(NioSessionConfig sessionConfig,
 			int readRecvBufferSize, MemcachedOptimizer optimiezer,
 			int readThreadCount, int weight) {
 		super(sessionConfig, readRecvBufferSize, -1);

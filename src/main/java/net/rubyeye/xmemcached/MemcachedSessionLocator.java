@@ -11,9 +11,9 @@
  */
 package net.rubyeye.xmemcached;
 
-import com.google.code.yanf4j.nio.Session;
-
 import java.util.Collection;
+
+import com.google.code.yanf4j.core.Session;
 
 /**
  * session查找接口，依据key查找存储的session

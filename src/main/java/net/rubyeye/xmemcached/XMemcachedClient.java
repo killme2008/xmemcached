@@ -56,7 +56,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.google.code.yanf4j.config.Configuration;
-import com.google.code.yanf4j.nio.Session;
+import com.google.code.yanf4j.core.Session;
+import com.google.code.yanf4j.core.SocketOption;
 
 /**
  * Memcached Client for connecting to memcached server and do operations.
@@ -77,7 +78,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 	private CommandFactory commandFactory;
 	private long opTimeout = DEFAULT_OP_TIMEOUT;
 	private long connectTimeout = DEFAULT_CONNECT_TIMEOUT; // 连接超时
-	private int poolSize = DEFAULT_POOL_SIZE;
+	private int connectionPoolSize = DEFAULT_CONNECTION_POOL_SIZE;
 
 	private final CopyOnWriteArrayList<MemcachedClientStateListenerAdapter> stateListenerAdapters = new CopyOnWriteArrayList<MemcachedClientStateListenerAdapter>();
 
@@ -221,6 +222,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 		checkServerPort(server, port);
 		buildConnector(new ArrayMemcachedSessionLocator(),
 				new SimpleBufferAllocator(), getDefaultConfiguration(),
+				XMemcachedClientBuilder.getDefaultSocketOptions(),
 				new TextCommandFactory(), new SerializingTranscoder());
 		start0();
 		connect(new InetSocketAddress(server, port), weight);
@@ -374,7 +376,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 	private void connect(final InetSocketAddress inetSocketAddress, int weight)
 			throws IOException {
 		// creat connection pool
-		for (int i = 0; i < this.poolSize; i++) {
+		for (int i = 0; i < this.connectionPoolSize; i++) {
 			Future<Boolean> future = null;
 			boolean connected = false;
 			Throwable throwable = null;
@@ -465,6 +467,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 	@SuppressWarnings("unchecked")
 	private void buildConnector(MemcachedSessionLocator locator,
 			BufferAllocator bufferAllocator, Configuration configuration,
+			Map<SocketOption, Object> socketOptions,
 			CommandFactory commandFactory, Transcoder transcoder) {
 		if (locator == null) {
 			locator = new ArrayMemcachedSessionLocator();
@@ -490,11 +493,11 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 		this.sessionLocator = locator;
 		this.connector = new MemcachedConnector(configuration,
 				this.sessionLocator, bufferAllocator, this.commandFactory
-						.getProtocol(), this.poolSize);
-		this.connector.setSendBufferSize(DEFAULT_TCP_SEND_BUFF_SIZE);
+						.getProtocol(), this.connectionPoolSize);
 		this.memcachedHandler = new MemcachedHandler(this);
 		this.connector.setHandler(this.memcachedHandler);
 		this.connector.setCodecFactory(new MemcachedCodecFactory());
+		this.connector.setSocketOptions(socketOptions);
 	}
 
 	private final void registerMBean() {
@@ -523,15 +526,17 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 	}
 
 	/**
-	 * Get default network configration for xmemcached.
+	 * Get default network configration for xmemcached.This method is
+	 * depreacated,please use XmemcachedClientBuilder.getDefaultConfiguration()
+	 * instead.
 	 * 
+	 * @deprecated instead by XmemcachedClientBuilder.getDefaultConfiguration()
 	 * @return
 	 */
+	@Deprecated
 	public static final Configuration getDefaultConfiguration() {
 		final Configuration configuration = new Configuration();
-		configuration.setTcpRecvBufferSize(DEFAULT_TCP_RECV_BUFF_SIZE);
 		configuration.setSessionReadBufferSize(DEFAULT_SESSION_READ_BUFF_SIZE);
-		configuration.setTcpNoDelay(DEFAULT_TCP_NO_DELAY);
 		configuration.setReadThreadCount(DEFAULT_READ_THREAD_COUNT);
 		configuration.setSessionIdleTimeout(0);
 		configuration.setWriteThreadCount(0);
@@ -558,6 +563,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 		}
 		buildConnector(new ArrayMemcachedSessionLocator(),
 				new SimpleBufferAllocator(), getDefaultConfiguration(),
+				XMemcachedClientBuilder.getDefaultSocketOptions(),
 				new TextCommandFactory(), new SerializingTranscoder());
 		start0();
 		connect(inetSocketAddress, weight);
@@ -572,6 +578,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 		super();
 		buildConnector(new ArrayMemcachedSessionLocator(),
 				new SimpleBufferAllocator(), getDefaultConfiguration(),
+				XMemcachedClientBuilder.getDefaultSocketOptions(),
 				new TextCommandFactory(), new SerializingTranscoder());
 		start0();
 	}
@@ -591,19 +598,21 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 	@SuppressWarnings("unchecked")
 	XMemcachedClient(MemcachedSessionLocator locator,
 			BufferAllocator allocator, Configuration conf,
+			Map<SocketOption, Object> socketOptions,
 			CommandFactory commandFactory, Transcoder transcoder,
 			List<InetSocketAddress> addressList,
 			List<MemcachedClientStateListener> stateListeners, int poolSize)
 			throws IOException {
 		super();
 		optimiezeSetReadThreadCount(conf, addressList);
-		buildConnector(locator, allocator, conf, commandFactory, transcoder);
+		buildConnector(locator, allocator, conf, socketOptions, commandFactory,
+				transcoder);
 		if (stateListeners != null) {
 			for (MemcachedClientStateListener stateListener : stateListeners) {
 				addStateListener(stateListener);
 			}
 		}
-		setPoolSize(poolSize);
+		setConnectionPoolSize(poolSize);
 		start0();
 		if (addressList != null) {
 			for (InetSocketAddress inetSocketAddress : addressList) {
@@ -629,6 +638,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 	@SuppressWarnings("unchecked")
 	XMemcachedClient(MemcachedSessionLocator locator,
 			BufferAllocator allocator, Configuration conf,
+			Map<SocketOption, Object> socketOptions,
 			CommandFactory commandFactory, Transcoder transcoder,
 			List<InetSocketAddress> addressList, int[] weights,
 			List<MemcachedClientStateListener> stateListeners, int poolSize)
@@ -654,13 +664,14 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 					"weights.length is less than addressList.size()");
 		}
 		optimiezeSetReadThreadCount(conf, addressList);
-		buildConnector(locator, allocator, conf, commandFactory, transcoder);
+		buildConnector(locator, allocator, conf, socketOptions, commandFactory,
+				transcoder);
 		if (stateListeners != null) {
 			for (MemcachedClientStateListener stateListener : stateListeners) {
 				addStateListener(stateListener);
 			}
 		}
-		setPoolSize(poolSize);
+		setConnectionPoolSize(poolSize);
 		start0();
 		if (addressList != null && weights != null) {
 			for (int i = 0; i < addressList.size(); i++) {
@@ -706,6 +717,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 		BufferAllocator simpleBufferAllocator = new SimpleBufferAllocator();
 		buildConnector(new ArrayMemcachedSessionLocator(),
 				simpleBufferAllocator, getDefaultConfiguration(),
+				XMemcachedClientBuilder.getDefaultSocketOptions(),
 				new TextCommandFactory(), new SerializingTranscoder());
 		start0();
 		for (InetSocketAddress inetSocketAddress : addressList) {
@@ -2042,7 +2054,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 	}
 
 	@Override
-	public void setPoolSize(int poolSize) {
+	public void setConnectionPoolSize(int poolSize) {
 		if (!this.shutdown) {
 			throw new IllegalStateException(
 					"Xmemcached client has been started");
@@ -2050,8 +2062,8 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 		if (poolSize <= 0) {
 			throw new IllegalArgumentException("poolSize<=0");
 		}
-		this.poolSize = poolSize;
-		this.connector.setPoolSize(poolSize);
+		this.connectionPoolSize = poolSize;
+		this.connector.setConnectionPoolSize(poolSize);
 	}
 
 	/*
@@ -2159,7 +2171,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 	@Override
 	public void appendList(String key, Object e) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
@@ -2171,15 +2183,13 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 	@Override
 	public <E> void initList(String key) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void prependList(String key, Object e) {
 		// TODO Auto-generated method stub
-		
+
 	}
-	
-	
 
 }

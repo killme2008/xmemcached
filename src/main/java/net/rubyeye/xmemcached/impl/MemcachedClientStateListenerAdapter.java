@@ -3,8 +3,8 @@ package net.rubyeye.xmemcached.impl;
 import net.rubyeye.xmemcached.MemcachedClient;
 import net.rubyeye.xmemcached.MemcachedClientStateListener;
 
-import com.google.code.yanf4j.nio.Controller;
-import com.google.code.yanf4j.nio.ControllerStateListener;
+import com.google.code.yanf4j.core.Controller;
+import com.google.code.yanf4j.core.ControllerStateListener;
 
 /**
  * Adapte MemcachedClientStateListener to yanf4j's ControllStateListener
@@ -14,8 +14,8 @@ import com.google.code.yanf4j.nio.ControllerStateListener;
  */
 public class MemcachedClientStateListenerAdapter implements
 		ControllerStateListener {
-	private MemcachedClientStateListener memcachedClientStateListener;
-	private MemcachedClient memcachedClient;
+	private final MemcachedClientStateListener memcachedClientStateListener;
+	private final MemcachedClient memcachedClient;
 
 	public MemcachedClientStateListenerAdapter(
 			MemcachedClientStateListener memcachedClientStateListener,

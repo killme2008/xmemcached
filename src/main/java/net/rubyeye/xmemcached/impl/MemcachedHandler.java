@@ -25,8 +25,8 @@ import net.rubyeye.xmemcached.utils.Protocol;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.google.code.yanf4j.nio.Session;
-import com.google.code.yanf4j.nio.impl.HandlerAdapter;
+import com.google.code.yanf4j.core.Session;
+import com.google.code.yanf4j.core.impl.HandlerAdapter;
 
 /**
  * Memcached Session Handler,used for dispatching commands and session's
@@ -43,7 +43,7 @@ public class MemcachedHandler extends HandlerAdapter {
 	 * On receive message from memcached server
 	 */
 	@Override
-	public final void onReceive(final Session session, final Object msg) {
+	public final void onMessageReceived(final Session session, final Object msg) {
 		Command command = (Command) msg;
 		if (command.getMergeCount() > 0) {
 			int size = ((MapReturnValueAware) command).getReturnValues().size();
@@ -51,7 +51,8 @@ public class MemcachedHandler extends HandlerAdapter {
 			this.statisticsHandler.statistics(CommandType.GET_MISS, command
 					.getMergeCount()
 					- size);
-		} else if (command instanceof TextGetOneCommand||command instanceof BinaryGetCommand) {
+		} else if (command instanceof TextGetOneCommand
+				|| command instanceof BinaryGetCommand) {
 			if (command.getResult() != null) {
 				this.statisticsHandler.statistics(CommandType.GET_HIT);
 			} else {
@@ -72,13 +73,14 @@ public class MemcachedHandler extends HandlerAdapter {
 	public final void onMessageSent(Session session, Object msg) {
 		Command command = (Command) msg;
 		command.setStatus(OperationStatus.SENT);
-		if (!command.isNoreply() || this.client.getProtocol() == Protocol.Binary) {
+		if (!command.isNoreply()
+				|| this.client.getProtocol() == Protocol.Binary) {
 			((MemcachedTCPSession) session).addCommand(command);
 		}
 	}
 
 	@Override
-	public void onException(Session session, Throwable throwable) {
+	public void onExceptionCaught(Session session, Throwable throwable) {
 		log.error(throwable, throwable);
 	}
 

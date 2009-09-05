@@ -11,8 +11,6 @@
  */
 package net.rubyeye.xmemcached.impl;
 
-import com.google.code.yanf4j.nio.Session;
-
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -21,6 +19,8 @@ import java.util.TreeMap;
 
 import net.rubyeye.xmemcached.HashAlgorithm;
 import net.rubyeye.xmemcached.MemcachedSessionLocator;
+
+import com.google.code.yanf4j.core.Session;
 
 /**
  * ConnectionFactory instance that sets up a ketama compatible connection.
@@ -84,10 +84,10 @@ public class KetamaMemcachedSessionLocator implements MemcachedSessionLocator {
 				for (int i = 0; i < numReps / 4; i++) {
 					byte[] digest = HashAlgorithm.computeMd5(sockStr + "-" + i);
 					for (int h = 0; h < 4; h++) {
-						long k = ((long) (digest[3 + h * 4] & 0xFF) << 24)
-								| ((long) (digest[2 + h * 4] & 0xFF) << 16)
-								| ((long) (digest[1 + h * 4] & 0xFF) << 8)
-								| (digest[h * 4] & 0xFF);
+						long k = (long) (digest[3 + h * 4] & 0xFF) << 24
+								| (long) (digest[2 + h * 4] & 0xFF) << 16
+								| (long) (digest[1 + h * 4] & 0xFF) << 8
+								| digest[h * 4] & 0xFF;
 						sessionMap.put(k, session);
 					}
 
@@ -130,7 +130,7 @@ public class KetamaMemcachedSessionLocator implements MemcachedSessionLocator {
 
 	public final long nextHash(long hashVal, String key, int tries) {
 		long tmpKey = hashAlg.hash(tries + key);
-		hashVal += (int) (tmpKey ^ (tmpKey >>> 32));
+		hashVal += (int) (tmpKey ^ tmpKey >>> 32);
 		hashVal &= 0xffffffffL; /* truncate to 32-bits */
 		return hashVal;
 	}

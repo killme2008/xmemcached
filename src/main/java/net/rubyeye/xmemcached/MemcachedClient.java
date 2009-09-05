@@ -27,6 +27,11 @@ public interface MemcachedClient {
 	 * server's number on linux platform,keep default on windows.Default is 0.
 	 */
 	public static final int DEFAULT_READ_THREAD_COUNT = 0;
+
+	/**
+	 * Default TCP keeplive option,which is true
+	 */
+	public static final boolean DEFAULT_TCP_KEEPLIVE = true;
 	/**
 	 * Default connect timeout,1 minutes
 	 */
@@ -44,24 +49,25 @@ public interface MemcachedClient {
 	 */
 	public static final int DEFAULT_SESSION_READ_BUFF_SIZE = 16 * 1024;
 	/**
-	 * Default socket's receive buffer size,8k
+	 * Default socket's receive buffer size,16k
 	 */
-	public static final int DEFAULT_TCP_RECV_BUFF_SIZE = 8 * 1024;
+	public static final int DEFAULT_TCP_RECV_BUFF_SIZE = 16 * 1024;
 	/**
 	 * Default operation timeout,if the operation is not returned in 1
 	 * second,throw TimeoutException
 	 */
 	public static final long DEFAULT_OP_TIMEOUT = 1000L;
 	/**
-	 * In a high concurrent enviroment,you may want to pool memcached
-	 * clients.But a xmemcached client has to start a reactor thread and some
-	 * thread pools,if you create too many clients,the cost is very large.
-	 * Xmemcached supports connection pool instreadof client pool.you can create
-	 * more connections to one or more memcached servers,and these connections
-	 * share the same reactor and thread pools,it will reduce the cost of
-	 * system.Default pool size is 1.
+	 * With java nio,there is only one connection to a memcached.In a high
+	 * concurrent enviroment,you may want to pool memcached clients.But a
+	 * xmemcached client has to start a reactor thread and some thread pools,if
+	 * you create too many clients,the cost is very large. Xmemcached supports
+	 * connection pool instreadof client pool.you can create more connections to
+	 * one or more memcached servers,and these connections share the same
+	 * reactor and thread pools,it will reduce the cost of system.Default pool
+	 * size is 1.
 	 */
-	public static final int DEFAULT_POOL_SIZE = 1;
+	public static final int DEFAULT_CONNECTION_POOL_SIZE = 1;
 
 	/**
 	 * Set the merge factor,this factor determins how many 'get' commands would
@@ -1062,9 +1068,10 @@ public interface MemcachedClient {
 	 * system.
 	 * 
 	 * @param poolSize
-	 *            pool size,default is 1
+	 *            pool size,default is 1,every memcached has only one
+	 *            connection.
 	 */
-	public void setPoolSize(int poolSize);
+	public void setConnectionPoolSize(int poolSize);
 
 	/**
 	 * Initialize a list.Some applications need to store a list of objects in

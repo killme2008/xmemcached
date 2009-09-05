@@ -37,10 +37,7 @@ public class ListTranscoder extends BaseSerializingTranscoder implements
 
 	@Override
 	public CachedData encode(Object o) {
-		ListElement listElement = (ListElement) o;
-		Object element = listElement.element;
-		byte data[] = serialize(o);
-		return new CachedData(flags, data);
+		return null;
 	}
 
 }

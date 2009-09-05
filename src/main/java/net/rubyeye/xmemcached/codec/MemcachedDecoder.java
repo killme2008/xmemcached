@@ -20,8 +20,8 @@ import net.rubyeye.xmemcached.utils.ByteUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.google.code.yanf4j.nio.Session;
-import com.google.code.yanf4j.nio.CodecFactory.Decoder;
+import com.google.code.yanf4j.core.Session;
+import com.google.code.yanf4j.core.CodecFactory.Decoder;
 import com.google.code.yanf4j.util.ByteBufferMatcher;
 import com.google.code.yanf4j.util.ShiftAndByteBufferMatcher;
 

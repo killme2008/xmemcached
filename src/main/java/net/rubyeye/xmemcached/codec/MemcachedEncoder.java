@@ -15,12 +15,14 @@ import java.nio.ByteBuffer;
 
 import net.rubyeye.xmemcached.command.Command;
 
-import com.google.code.yanf4j.nio.Session;
-import com.google.code.yanf4j.nio.CodecFactory.Encoder;
+import com.google.code.yanf4j.core.Session;
+import com.google.code.yanf4j.core.CodecFactory.Encoder;
+
 /**
  * memcached protocol encoder
+ * 
  * @author dennis
- *
+ * 
  */
 public class MemcachedEncoder implements Encoder<Command> {
 

@@ -13,7 +13,7 @@ package net.rubyeye.xmemcached.codec;
 
 import net.rubyeye.xmemcached.command.Command;
 
-import com.google.code.yanf4j.nio.CodecFactory;
+import com.google.code.yanf4j.core.CodecFactory;
 
 /**
  * Memcached protocol codec factory
@@ -24,9 +24,9 @@ import com.google.code.yanf4j.nio.CodecFactory;
  */
 public class MemcachedCodecFactory implements CodecFactory<Command> {
 
-	private MemcachedEncoder encoder;
+	private final MemcachedEncoder encoder;
 
-	private MemcachedDecoder decoder;
+	private final MemcachedDecoder decoder;
 
 	public MemcachedCodecFactory() {
 		super();

@@ -7,7 +7,6 @@ import net.rubyeye.xmemcached.CommandFactory;
 import net.rubyeye.xmemcached.MemcachedClient;
 import net.rubyeye.xmemcached.MemcachedClientBuilder;
 import net.rubyeye.xmemcached.MemcachedSessionLocator;
-import net.rubyeye.xmemcached.XMemcachedClient;
 import net.rubyeye.xmemcached.XMemcachedClientBuilder;
 import net.rubyeye.xmemcached.buffer.BufferAllocator;
 import net.rubyeye.xmemcached.buffer.SimpleBufferAllocator;
@@ -34,11 +33,11 @@ public class XMemcachedClientFactoryBean implements FactoryBean {
 	private List<Integer> weights;
 	@SuppressWarnings("unchecked")
 	private Transcoder transcoder = new SerializingTranscoder();
-	private Configuration configuration = XMemcachedClient
+	private Configuration configuration = XMemcachedClientBuilder
 			.getDefaultConfiguration();
 	private CommandFactory commandFactory = new TextCommandFactory();
 
-	private int poolSize=MemcachedClient.DEFAULT_POOL_SIZE;
+	private int poolSize = MemcachedClient.DEFAULT_CONNECTION_POOL_SIZE;
 
 	public final CommandFactory getCommandFactory() {
 		return this.commandFactory;
@@ -133,7 +132,7 @@ public class XMemcachedClientFactoryBean implements FactoryBean {
 		builder.setSessionLocator(this.sessionLocator);
 		builder.setTranscoder(this.transcoder);
 		builder.setCommandFactory(this.commandFactory);
-		builder.setPoolSize(this.poolSize);
+		builder.setConnectionPoolSize(this.poolSize);
 	}
 
 	private int[] getWeightsArray(List<InetSocketAddress> serverList) {

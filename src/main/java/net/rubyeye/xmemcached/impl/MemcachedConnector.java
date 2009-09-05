@@ -28,9 +28,6 @@ import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-import java.util.concurrent.locks.Condition;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
 import net.rubyeye.xmemcached.MemcachedClient;
 import net.rubyeye.xmemcached.MemcachedOptimizer;
@@ -41,11 +38,13 @@ import net.rubyeye.xmemcached.exception.MemcachedException;
 import net.rubyeye.xmemcached.utils.Protocol;
 
 import com.google.code.yanf4j.config.Configuration;
-import com.google.code.yanf4j.nio.Session;
-import com.google.code.yanf4j.nio.WriteMessage;
-import com.google.code.yanf4j.nio.impl.SessionConfig;
+import com.google.code.yanf4j.core.EventType;
+import com.google.code.yanf4j.core.NioSession;
+import com.google.code.yanf4j.core.Session;
+import com.google.code.yanf4j.core.SocketOption;
+import com.google.code.yanf4j.core.WriteMessage;
+import com.google.code.yanf4j.nio.NioSessionConfig;
 import com.google.code.yanf4j.nio.impl.SocketChannelController;
-import com.google.code.yanf4j.nio.util.EventType;
 
 /**
  * Connected session manager
@@ -59,7 +58,7 @@ public class MemcachedConnector extends SocketChannelController {
 	private final SessionMonitor sessionMonitor;
 	private final MemcachedOptimizer optimiezer;
 	private volatile long healSessionInterval = 2000L;
-	private int poolSize;
+	private int connectionPoolSize; // session pool size
 
 	class SessionMonitor extends Thread {
 
@@ -133,144 +132,6 @@ public class MemcachedConnector extends SocketChannelController {
 
 	protected MemcachedSessionLocator sessionLocator;
 
-	static class ConnectFuture implements Future<Boolean> {
-
-		private int weight;
-		private boolean connected = false;
-		private boolean done = false;
-		private boolean cancel = false;
-		private final Lock lock = new ReentrantLock();
-		private final Condition notDone = this.lock.newCondition();
-		private volatile Exception exception;
-		private final InetSocketAddress inetSocketAddress;
-
-		public ConnectFuture(InetSocketAddress inetSocketAddress, int weight) {
-			super();
-			this.inetSocketAddress = inetSocketAddress;
-			this.weight = weight;
-		}
-
-		public final InetSocketAddress getInetSocketAddress() {
-			return this.inetSocketAddress;
-		}
-
-		public final int getWeight() {
-			return this.weight;
-		}
-
-		public final void setWeight(int weight) {
-			this.weight = weight;
-		}
-
-		public boolean isConnected() {
-			this.lock.lock();
-			try {
-				return this.connected;
-			} finally {
-				this.lock.unlock();
-			}
-		}
-
-		public void setConnected(boolean connected) {
-			this.lock.lock();
-			try {
-				this.connected = connected;
-				this.done = true;
-				this.notDone.signalAll();
-			} finally {
-				this.lock.unlock();
-			}
-		}
-
-		public Exception getException() {
-			this.lock.lock();
-			try {
-				return this.exception;
-			} finally {
-				this.lock.unlock();
-			}
-		}
-
-		public void setException(Exception exception) {
-			this.lock.lock();
-			try {
-				this.exception = exception;
-				this.done = true;
-				this.notDone.signalAll();
-			} finally {
-				this.lock.unlock();
-			}
-		}
-
-		@Override
-		public boolean cancel(boolean mayInterruptIfRunning) {
-			this.lock.lock();
-			try {
-				this.cancel = true;
-				return this.cancel;
-			} finally {
-				this.lock.unlock();
-			}
-		}
-
-		@Override
-		public Boolean get() throws InterruptedException, ExecutionException {
-			this.lock.lock();
-			try {
-				while (!this.done) {
-					this.notDone.await();
-				}
-				if (this.exception != null) {
-					throw new ExecutionException(this.exception);
-				}
-				return this.connected;
-			} finally {
-				this.lock.unlock();
-			}
-		}
-
-		@Override
-		public Boolean get(long timeout, TimeUnit unit)
-				throws InterruptedException, ExecutionException,
-				TimeoutException {
-			this.lock.lock();
-			try {
-
-				while (!this.done) {
-					if (!this.notDone.await(timeout, unit)) {
-						throw new TimeoutException("connect timeout");
-					}
-				}
-				if (this.exception != null) {
-					throw new ExecutionException(this.exception);
-				}
-				return this.connected;
-			} finally {
-				this.lock.unlock();
-			}
-		}
-
-		@Override
-		public boolean isCancelled() {
-			this.lock.lock();
-			try {
-				return this.cancel;
-			} finally {
-				this.lock.unlock();
-			}
-		}
-
-		@Override
-		public boolean isDone() {
-			this.lock.lock();
-			try {
-				return this.done;
-			} finally {
-				this.lock.unlock();
-			}
-		}
-	}
-
 	private final ConcurrentHashMap<InetSocketAddress, Queue<Session>> sessionMap = new ConcurrentHashMap<InetSocketAddress, Queue<Session>>();
 
 	public void addSession(MemcachedTCPSession session) {
@@ -289,7 +150,7 @@ public class MemcachedConnector extends SocketChannelController {
 		}
 		sessions.offer(session);
 		// Remove old session and close it
-		if (sessions.size() > this.poolSize) {
+		while (sessions.size() > this.connectionPoolSize) {
 			Session oldSession = sessions.poll();
 			oldSession.close();
 		}
@@ -318,17 +179,6 @@ public class MemcachedConnector extends SocketChannelController {
 			}
 		}
 		updateSessions();
-	}
-
-	private int sendBufferSize = 0;
-	private MemcachedTCPSession session;
-
-	public final int getSendBufferSize() {
-		return this.sendBufferSize;
-	}
-
-	public final void setSendBufferSize(int sendBufferSize) {
-		this.sendBufferSize = sendBufferSize;
 	}
 
 	@Override
@@ -386,15 +236,31 @@ public class MemcachedConnector extends SocketChannelController {
 		SocketChannel socketChannel = SocketChannel.open();
 		socketChannel.configureBlocking(false);
 		socketChannel.socket().setSoTimeout(this.soTimeout);
-		socketChannel.socket().setReuseAddress(this.reuseAddress);
-
-		if (this.receiveBufferSize > 0) {
-			socketChannel.socket().setReceiveBufferSize(this.receiveBufferSize);
+		if (this.socketOptions.get(SocketOption.SO_REUSEADDR) != null) {
+			socketChannel.socket().setReuseAddress(
+					SocketOption.SO_REUSEADDR.type().cast(
+							this.socketOptions.get(SocketOption.SO_REUSEADDR)));
+		}
+		if (this.socketOptions.get(SocketOption.TCP_NODELAY) != null) {
+			socketChannel.socket().setTcpNoDelay(
+					SocketOption.TCP_NODELAY.type().cast(
+							this.socketOptions.get(SocketOption.TCP_NODELAY)));
+		}
+		if (this.socketOptions.get(SocketOption.SO_RCVBUF) != null) {
+			socketChannel.socket().setReceiveBufferSize(
+					SocketOption.SO_RCVBUF.type().cast(
+							this.socketOptions.get(SocketOption.SO_RCVBUF)));
 
 		}
-		socketChannel.socket().bind(this.socketAddress);
-		if (this.sendBufferSize > 0) {
-			socketChannel.socket().setSendBufferSize(this.sendBufferSize);
+		if (this.socketOptions.get(SocketOption.SO_SNDBUF) != null) {
+			socketChannel.socket().setSendBufferSize(
+					SocketOption.SO_SNDBUF.type().cast(
+							this.socketOptions.get(SocketOption.SO_SNDBUF)));
+		}
+		if (this.socketOptions.get(SocketOption.SO_KEEPALIVE) != null) {
+			socketChannel.socket().setKeepAlive(
+					SocketOption.SO_KEEPALIVE.type().cast(
+							this.socketOptions.get(SocketOption.SO_KEEPALIVE)));
 		}
 		ConnectFuture future = new ConnectFuture(address, weight);
 		if (!socketChannel.connect(address)) {
@@ -445,7 +311,7 @@ public class MemcachedConnector extends SocketChannelController {
 
 	public MemcachedConnector(Configuration configuration,
 			MemcachedSessionLocator locator, BufferAllocator allocator,
-			Protocol protocol,int poolSize) {
+			Protocol protocol, int poolSize) {
 		super(configuration, null);
 		this.sessionLocator = locator;
 		updateSessions();
@@ -453,13 +319,13 @@ public class MemcachedConnector extends SocketChannelController {
 		this.bufferAllocator = allocator;
 		this.optimiezer = new Optimizer(protocol);
 		this.optimiezer.setBufferAllocator(this.bufferAllocator);
-		this.poolSize=poolSize;
+		this.connectionPoolSize = poolSize;
 		// setDispatchMessageThreadPoolSize(Runtime.getRuntime().
 		// availableProcessors());
 	}
 
-	public final void setPoolSize(int poolSize) {
-		this.poolSize = poolSize;
+	public final void setConnectionPoolSize(int poolSize) {
+		this.connectionPoolSize = poolSize;
 	}
 
 	public void setMergeFactor(int mergeFactor) {
@@ -467,17 +333,18 @@ public class MemcachedConnector extends SocketChannelController {
 	}
 
 	@Override
-	protected Session buildSession(SocketChannel sc, SelectionKey selectionKey) {
+	protected NioSession buildSession(SocketChannel sc,
+			SelectionKey selectionKey) {
 		Queue<WriteMessage> queue = buildQueue();
-		final SessionConfig sessionCofig = buildSessionConfig(sc, selectionKey,
-				queue);
+		final NioSessionConfig sessionCofig = buildSessionConfig(sc,
+				selectionKey, queue);
 		int weight = selectionKey.attachment() == null ? 1
 				: (Integer) selectionKey.attachment();
-		this.session = new MemcachedTCPSession(sessionCofig, this.configuration
-				.getSessionReadBufferSize(), this.optimiezer, this
-				.getReadThreadCount(), weight);
-		this.session.setBufferAllocator(this.bufferAllocator);
-		return this.session;
+		MemcachedTCPSession session = new MemcachedTCPSession(sessionCofig,
+				this.configuration.getSessionReadBufferSize(), this.optimiezer,
+				this.getReadThreadCount(), weight);
+		session.setBufferAllocator(this.bufferAllocator);
+		return session;
 	}
 
 	public BufferAllocator getBufferAllocator() {

@@ -15,7 +15,7 @@ public class StandardHashMemcachedClientTest extends XMemcachedClientTest {
 		MemcachedClientBuilder builder = new XMemcachedClientBuilder(AddrUtil
 				.getAddresses(this.properties
 						.getProperty("test.memcached.servers")));
-		builder.setPoolSize(Runtime.getRuntime().availableProcessors());
+		builder.setConnectionPoolSize(Runtime.getRuntime().availableProcessors());
 		return builder;
 	}
 

@@ -17,8 +17,8 @@ public class PerformanceTest {
 	 */
 	static class TestWriteRunnable implements Runnable {
 
-		private MemcachedClient mc;
-		private CountDownLatch cd;
+		private final MemcachedClient mc;
+		private final CountDownLatch cd;
 		int repeat;
 		int start;
 		int keySize;
@@ -40,17 +40,17 @@ public class PerformanceTest {
 			try {
 
 				for (int i = 0; i < this.repeat; i++) {
-					 String key = getKey(this.start + i);
-					 if (!this.mc.set(key, 0, getValue(this.start + i))) {
+					String key = getKey(this.start + i);
+					if (!this.mc.set(key, 0, getValue(this.start + i))) {
 						System.err.println("set error");
 						System.exit(1);
 					}
-			//		this.mc.setWithNoReply(key, 0, getValue(this.start + i));
+					// this.mc.setWithNoReply(key, 0, getValue(this.start + i));
 
 				}
 
 			} catch (Exception e) {
-				 e.printStackTrace();
+				e.printStackTrace();
 			} finally {
 				this.cd.countDown();
 			}
@@ -81,8 +81,8 @@ public class PerformanceTest {
 	 */
 	static class TestReadRunnable implements Runnable {
 
-		private MemcachedClient mc;
-		private CountDownLatch cd;
+		private final MemcachedClient mc;
+		private final CountDownLatch cd;
 		int repeat;
 		int start;
 
@@ -121,17 +121,17 @@ public class PerformanceTest {
 			try {
 				for (int i = 0; i < this.repeat; i++) {
 
-					String key = getKey(this.start+i);
+					String key = getKey(this.start + i);
 					String result = (String) this.mc.get(key, 5000);
-					if(result==null){
+					if (result == null) {
 						System.out.println(key);
 					}
-					if (!result.equals(getValue(this.start+i))) {
+					if (!result.equals(getValue(this.start + i))) {
 						System.out.println(key + " " + result);
 						System.err.println("get error");
 						System.exit(1);
 					}
-				
+
 				}
 
 			} catch (Exception e) {
@@ -150,8 +150,8 @@ public class PerformanceTest {
 	 */
 	static class TestDeleteRunnable implements Runnable {
 
-		private MemcachedClient mc;
-		private CountDownLatch cd;
+		private final MemcachedClient mc;
+		private final CountDownLatch cd;
 		int repeat;
 		int start;
 
@@ -182,11 +182,11 @@ public class PerformanceTest {
 			try {
 				for (int i = 0; i < this.repeat; i++) {
 					String key = getKey(this.start + i);
-					 if (!this.mc.delete(key)) {
+					if (!this.mc.delete(key)) {
 						System.err.println("delete " + key + " error");
 						System.exit(1);
 					}
-					//this.mc.deleteWithNoReply(key);
+					// this.mc.deleteWithNoReply(key);
 				}
 
 			} catch (Exception e) {
@@ -212,11 +212,11 @@ public class PerformanceTest {
 
 			MemcachedClientBuilder builder = new XMemcachedClientBuilder(
 					AddrUtil.getAddresses(args[4]));
-			//builder.setCommandFactory(new BinaryCommandFactory());
-			builder.setPoolSize(2);
+			// builder.setCommandFactory(new BinaryCommandFactory());
+			// builder.setConnectionPoolSize(2);
 			MemcachedClient mc = builder.build();
 			mc.flushAll();
-			//mc.setOptimizeGet(false);
+			// mc.setOptimizeGet(false);
 			// mc.setOptimizeMergeBuffer(false);
 			// 分别测试写、读、删除
 			testWrite(thread, size, repeat, keySize, valueSize, mc);
@@ -246,7 +246,7 @@ public class PerformanceTest {
 		} catch (InterruptedException e) {
 		}
 		all = thread * repeat;
-		usingtime = (System.nanoTime() - t);
+		usingtime = System.nanoTime() - t;
 		System.out
 				.println(String
 						.format(
@@ -268,7 +268,7 @@ public class PerformanceTest {
 		} catch (InterruptedException e) {
 		}
 		long all = thread * repeat;
-		long usingtime = (System.nanoTime() - t);
+		long usingtime = System.nanoTime() - t;
 		System.out
 				.println(String
 						.format(
@@ -290,7 +290,7 @@ public class PerformanceTest {
 		} catch (InterruptedException e) {
 		}
 		long all = thread * repeat;
-		long usingtime = (System.nanoTime() - start);
+		long usingtime = System.nanoTime() - start;
 
 		System.out
 				.println(String
