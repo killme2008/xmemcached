@@ -2,31 +2,118 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<repositories>
-		<repository>
+    <groupId>com.googlecode</groupId>
+    <artifactId>xmemcached</artifactId>
+    <version>1.2.0-RC1</version>
+    <name>xmemcached</name>
+    <description>Extreme performance modern memcached client for java</description>
+    <url>http://code.google.com/p/xmemcached/</url>
+    <packaging>jar</packaging>
+
+    <developers>
+        <developer>
+            <name>dennis zhuang</name>
+            <url>http://www.blogjava.net/killme2008/</url>
+            <timezone>8</timezone>
+        </developer>
+    </developers>
+
+    <licenses>
+        <license>
+            <name>Apache License, Version 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0</url>
+        </license>
+    </licenses>
+
+    <repositories>
+	    <repository>
 			<id>hibernate-memcached</id>
 			<name>hibernate-memcached</name>
 			<url>http://raykrueger.googlecode.com/svn/repository</url>
 		</repository>
-	</repositories>
-	<groupId>xmemcached</groupId>
-	<artifactId>xmemcached</artifactId>
-	<packaging>jar</packaging>
-	<version>1.2.0-beta</version>
-	<name>xmemcached</name>
-	<url>http://maven.apache.org</url>
-	<build>
-		<plugins>
+		<repository>
+			<id>yanf4j</id>
+			<name>yanf4j</name>
+			<url>http://denniszhuang.googlecode.com/svn/repository</url>
+		</repository>
+		<repository>
+            <id>maven2-repository</id>
+            <name>Java.net Repository for Maven</name>
+            <url>http://download.java.net/maven/2/</url>
+        </repository>
+    </repositories>
+
+    <distributionManagement>
+        <!-- use the following if you're not using a snapshot version. -->
+        <repository>
+            <uniqueVersion>false</uniqueVersion>
+            <id>googlecode</id>
+            <url>svn:https://denniszhuang.googlecode.com/svn/repository</url>
+            <!--<url>file://distribution</url>-->
+        </repository>
+        <!-- use the following if you ARE using a snapshot version. -->
+        <snapshotRepository>
+            <uniqueVersion>false</uniqueVersion>
+            <id>googlecode</id>
+            <url>svn:https://denniszhuang.googlecode.com/svn/repository</url>
+            <!--<url>file://distribution</url>-->
+        </snapshotRepository>
+    </distributionManagement>
+    <build>
+        <extensions>
+            <extension>
+                <groupId>org.jvnet.wagon-svn</groupId>
+                <artifactId>wagon-svn</artifactId>
+                <version>1.8</version>
+            </extension>
+        </extensions>
+		<plugins>    
 			<plugin>
-				<artifactId>maven-compiler-plugin </artifactId>
-				<configuration>
-					<source>1.6</source>
-					<target>1.6</target>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>attach-sources</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>attach-javadoc</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>1.6</source>
+                    <target>1.6</target>
 					<encoding>UTF-8</encoding>
-				</configuration>
-			</plugin>
-		</plugins>
-	</build>
+                </configuration>
+            </plugin>
+            <plugin>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <configuration>
+                    <descriptorRefs>
+                        <descriptorRef>bin</descriptorRef>
+                        <descriptorRef>src</descriptorRef>
+                    </descriptorRefs>
+                </configuration>
+            </plugin>
+         </plugins>
+    </build>
 	<dependencies>
 		<dependency>
 			<groupId>junit</groupId>
@@ -46,9 +133,9 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>yanf4j</groupId>
+			<groupId>com.googlecode</groupId>
 			<artifactId>yanf4j</artifactId>
-			<version>0.7.0</version>
+			<version>1.0-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework</groupId>
