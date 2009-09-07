@@ -16,6 +16,7 @@ import net.rubyeye.xmemcached.transcoders.Transcoder;
 
 import com.google.code.yanf4j.config.Configuration;
 import com.google.code.yanf4j.core.SocketOption;
+import com.google.code.yanf4j.core.impl.StandardSocketOption;
 
 /**
  * Builder pattern.Configure XmemcachedClient's options,then build it
@@ -32,10 +33,10 @@ public class XMemcachedClientBuilder implements MemcachedClientBuilder {
 
 	private int[] weights;
 
-	private int poolSize = MemcachedClient.DEFAULT_CONNECTION_POOL_SIZE;
+	private int connectionPoolSize = MemcachedClient.DEFAULT_CONNECTION_POOL_SIZE;
 
 	@SuppressWarnings("unchecked")
-	private final Map<SocketOption, Object> socketOptions = getDefaultSocketOptions();
+	final Map<SocketOption, Object> socketOptions = getDefaultSocketOptions();
 
 	private List<MemcachedClientStateListener> stateListeners = new ArrayList<MemcachedClientStateListener>();
 
@@ -46,19 +47,30 @@ public class XMemcachedClientBuilder implements MemcachedClientBuilder {
 
 	@SuppressWarnings("unchecked")
 	public void setSocketOption(SocketOption socketOption, Object value) {
+		if (socketOption == null) {
+			throw new NullPointerException("Null socketOption");
+		}
+		if (value == null) {
+			throw new NullPointerException("Null value");
+		}
+		if (!socketOption.type().equals(value.getClass())) {
+			throw new IllegalArgumentException("Expected "
+					+ socketOption.type().getSimpleName()
+					+ " value,but givend " + value.getClass().getSimpleName());
+		}
 		this.socketOptions.put(socketOption, value);
 	}
 
 	@SuppressWarnings("unchecked")
 	public Map<SocketOption, Object> getSocketOptions() {
-		return socketOptions;
+		return this.socketOptions;
 	}
 
 	public final void setConnectionPoolSize(int poolSize) {
-		if (this.poolSize <= 0) {
+		if (this.connectionPoolSize <= 0) {
 			throw new IllegalArgumentException("poolSize<=0");
 		}
-		this.poolSize = poolSize;
+		this.connectionPoolSize = poolSize;
 	}
 
 	@Override
@@ -80,13 +92,13 @@ public class XMemcachedClientBuilder implements MemcachedClientBuilder {
 	@SuppressWarnings("unchecked")
 	public static final Map<SocketOption, Object> getDefaultSocketOptions() {
 		Map<SocketOption, Object> map = new HashMap<SocketOption, Object>();
-		map.put(SocketOption.TCP_NODELAY, MemcachedClient.DEFAULT_TCP_NO_DELAY);
-		map.put(SocketOption.SO_RCVBUF,
+		map.put(StandardSocketOption.TCP_NODELAY, MemcachedClient.DEFAULT_TCP_NO_DELAY);
+		map.put(StandardSocketOption.SO_RCVBUF,
 				MemcachedClient.DEFAULT_TCP_RECV_BUFF_SIZE);
 		map
-				.put(SocketOption.SO_KEEPALIVE,
+				.put(StandardSocketOption.SO_KEEPALIVE,
 						MemcachedClient.DEFAULT_TCP_KEEPLIVE);
-		map.put(SocketOption.SO_SNDBUF,
+		map.put(StandardSocketOption.SO_SNDBUF,
 				MemcachedClient.DEFAULT_TCP_SEND_BUFF_SIZE);
 		return map;
 	}
@@ -204,7 +216,7 @@ public class XMemcachedClientBuilder implements MemcachedClientBuilder {
 			return new XMemcachedClient(this.sessionLocator,
 					this.bufferAllocator, this.configuration,
 					this.socketOptions, this.commandFactory, this.transcoder,
-					this.addressList, this.stateListeners, this.poolSize);
+					this.addressList, this.stateListeners, this.connectionPoolSize);
 		} else {
 			if (this.addressList == null) {
 				throw new IllegalArgumentException("Null Address List");
@@ -217,7 +229,7 @@ public class XMemcachedClientBuilder implements MemcachedClientBuilder {
 					this.bufferAllocator, this.configuration,
 					this.socketOptions, this.commandFactory, this.transcoder,
 					this.addressList, this.weights, this.stateListeners,
-					this.poolSize);
+					this.connectionPoolSize);
 		}
 	}
 

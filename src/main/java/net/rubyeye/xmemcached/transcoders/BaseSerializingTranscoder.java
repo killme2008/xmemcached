@@ -9,8 +9,8 @@ import java.io.UnsupportedEncodingException;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Base class for any transcoders that may want to work with serialized or
@@ -27,8 +27,8 @@ public abstract class BaseSerializingTranscoder {
 
 	protected int compressionThreshold = DEFAULT_COMPRESSION_THRESHOLD;
 	protected String charset = DEFAULT_CHARSET;
-	protected static final Log log = LogFactory
-			.getLog(BaseSerializingTranscoder.class);
+	protected static final Logger log = LoggerFactory
+			.getLogger(BaseSerializingTranscoder.class);
 
 	/**
 	 * Set the compression threshold to the given number of bytes. This
@@ -39,7 +39,7 @@ public abstract class BaseSerializingTranscoder {
 	 *            the number of bytes
 	 */
 	public void setCompressionThreshold(int to) {
-		compressionThreshold = to;
+		this.compressionThreshold = to;
 	}
 
 	/**
@@ -52,7 +52,7 @@ public abstract class BaseSerializingTranscoder {
 		} catch (UnsupportedEncodingException e) {
 			throw new RuntimeException(e);
 		}
-		charset = to;
+		this.charset = to;
 	}
 
 	/**
@@ -115,18 +115,20 @@ public abstract class BaseSerializingTranscoder {
 		} catch (IOException e) {
 			throw new RuntimeException("IO exception compressing data", e);
 		} finally {
-			if (gz != null)
+			if (gz != null) {
 				try {
 					gz.close();
 				} catch (IOException e) {
 					log.error("Close GZIPOutputStream error", e);
 				}
-			if (bos != null)
+			}
+			if (bos != null) {
 				try {
 					bos.close();
 				} catch (IOException e) {
 					log.error("Close ByteArrayOutputStream error", e);
 				}
+			}
 		}
 		byte[] rv = bos.toByteArray();
 		// log.debug("Compressed %d bytes to %d", in.length, rv.length);
@@ -167,7 +169,7 @@ public abstract class BaseSerializingTranscoder {
 		String rv = null;
 		try {
 			if (data != null) {
-				rv = new String(data, charset);
+				rv = new String(data, this.charset);
 			}
 		} catch (UnsupportedEncodingException e) {
 			throw new RuntimeException(e);
@@ -181,7 +183,7 @@ public abstract class BaseSerializingTranscoder {
 	protected byte[] encodeString(String in) {
 		byte[] rv = null;
 		try {
-			rv = in.getBytes(charset);
+			rv = in.getBytes(this.charset);
 		} catch (UnsupportedEncodingException e) {
 			throw new RuntimeException(e);
 		}

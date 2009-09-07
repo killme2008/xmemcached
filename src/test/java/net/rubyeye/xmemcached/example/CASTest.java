@@ -15,6 +15,7 @@ import java.util.concurrent.CountDownLatch;
 
 import net.rubyeye.xmemcached.CASOperation;
 import net.rubyeye.xmemcached.MemcachedClient;
+import net.rubyeye.xmemcached.MemcachedClientBuilder;
 import net.rubyeye.xmemcached.XMemcachedClientBuilder;
 import net.rubyeye.xmemcached.command.BinaryCommandFactory;
 import net.rubyeye.xmemcached.utils.AddrUtil;
@@ -73,7 +74,7 @@ public class CASTest {
 		    System.exit(1);
 		}
 		int NUM = Integer.parseInt(args[0]);
-		XMemcachedClientBuilder builder=new XMemcachedClientBuilder(AddrUtil.getAddresses(args[1]));
+		MemcachedClientBuilder builder=new XMemcachedClientBuilder(AddrUtil.getAddresses(args[1]));
 		builder.setCommandFactory(new BinaryCommandFactory());
 		MemcachedClient mc = builder.build();
 		// 设置初始值为0

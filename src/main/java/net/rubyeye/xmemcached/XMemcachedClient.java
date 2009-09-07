@@ -52,8 +52,8 @@ import net.rubyeye.xmemcached.utils.AddrUtil;
 import net.rubyeye.xmemcached.utils.ByteUtils;
 import net.rubyeye.xmemcached.utils.Protocol;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.code.yanf4j.config.Configuration;
 import com.google.code.yanf4j.core.Session;
@@ -68,7 +68,7 @@ import com.google.code.yanf4j.core.SocketOption;
 public final class XMemcachedClient implements XMemcachedClientMBean,
 		MemcachedClient {
 
-	private static final Log log = LogFactory.getLog(XMemcachedClient.class);
+	private static final Logger log = LoggerFactory.getLogger(XMemcachedClient.class);
 	private MemcachedSessionLocator sessionLocator;
 	private volatile boolean shutdown;
 	private MemcachedConnector connector;
@@ -487,6 +487,8 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 		}
 		this.commandFactory = commandFactory;
 		ByteUtils.setProtocol(this.commandFactory.getProtocol());
+		log.warn("XMemcachedClient use "
+				+ this.commandFactory.getProtocol().name() + " protocol");
 		this.commandFactory.setBufferAllocator(bufferAllocator);
 		this.shutdown = true;
 		this.transcoder = transcoder;
@@ -2167,29 +2169,4 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 	public Protocol getProtocol() {
 		return this.commandFactory.getProtocol();
 	}
-
-	@Override
-	public void appendList(String key, Object e) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public <E> List<E> getList(String key) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public <E> void initList(String key) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void prependList(String key, Object e) {
-		// TODO Auto-generated method stub
-
-	}
-
 }

@@ -5,22 +5,23 @@ import java.lang.management.ManagementFactory;
 import java.net.InetAddress;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
+
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
 import javax.management.remote.JMXConnectorServer;
 import javax.management.remote.JMXConnectorServerFactory;
 import javax.management.remote.JMXServiceURL;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
- * jmx MBeanServer，通过RMI发布，你可以通过service:jmx:rmi:///jndi/rmi://[host]:[port]/[
- * name]访问此服务</br>
+ * jmx MBeanServer锛岄�杩嘡MI鍙戝竷锛屼綘鍙互閫氳繃service:jmx:rmi:///jndi/rmi://[host]:[port]/[
+ * name]璁块棶姝ゆ湇鍔�/br>
  * 
- * 默认JMX未开启，你可以通过启动参数java
- * -Dxmemcached.jmx.enable=true来启用，默认的port是7077，默认的name是xmemcachedServer
- * 这些参数可以通过下列参数来修改:</br>
+ * 榛樿JMX鏈紑鍚紝浣犲彲浠ラ�杩囧惎鍔ㄥ弬鏁癹ava
+ * -Dxmemcached.jmx.enable=true鏉ュ惎鐢紝榛樿鐨刾ort鏄�077锛岄粯璁ょ殑name鏄痻memcachedServer
+ * 杩欎簺鍙傛暟鍙互閫氳繃涓嬪垪鍙傛暟鏉ヤ慨鏀�</br>
  * <ul>
  * <li>-Dxmemcached.rmi.port</li>
  * <li>-Dxmemcached.rmi.name</li>
@@ -30,8 +31,8 @@ import org.apache.commons.logging.LogFactory;
  * 
  */
 public final class XMemcachedMbeanServer {
-	private static final Log log = LogFactory
-			.getLog(XMemcachedMbeanServer.class);
+	private static final Logger log = LoggerFactory
+			.getLogger(XMemcachedMbeanServer.class);
 
 	private MBeanServer mbserver = null;
 
@@ -43,10 +44,11 @@ public final class XMemcachedMbeanServer {
 	}
 
 	private void initialize() {
-		if (mbserver != null && connectorServer != null
-				&& connectorServer.isActive())
+		if (this.mbserver != null && this.connectorServer != null
+				&& this.connectorServer.isActive()) {
 			return;
-		// 创建MBServer
+		}
+		// 鍒涘缓MBServer
 		String hostName = null;
 		try {
 			InetAddress addr = InetAddress.getLocalHost();
@@ -61,7 +63,7 @@ public final class XMemcachedMbeanServer {
 			boolean enableJMX = Boolean.parseBoolean(System.getProperty(
 					Constants.XMEMCACHED_JMX_ENABLE, "false"));
 			if (enableJMX) {
-				mbserver = ManagementFactory.getPlatformMBeanServer();
+				this.mbserver = ManagementFactory.getPlatformMBeanServer();
 				int port = Integer.parseInt(System.getProperty(
 						Constants.XMEMCACHED_RMI_PORT, "7077"));
 				String rmiName = System.getProperty(
@@ -80,20 +82,20 @@ public final class XMemcachedMbeanServer {
 				String serverURL = "service:jmx:rmi:///jndi/rmi://" + host
 						+ ":" + port + "/" + rmiName;
 				JMXServiceURL url = new JMXServiceURL(serverURL);
-				connectorServer = JMXConnectorServerFactory
-						.newJMXConnectorServer(url, null, mbserver);
-				connectorServer.start();
+				this.connectorServer = JMXConnectorServerFactory
+						.newJMXConnectorServer(url, null, this.mbserver);
+				this.connectorServer.start();
 				Runtime.getRuntime().addShutdownHook(new Thread() {
 					@Override
 					public void run() {
 						try {
 
-							if (connectorServer.isActive()) {
-								connectorServer.stop();
+							if (XMemcachedMbeanServer.this.connectorServer.isActive()) {
+								XMemcachedMbeanServer.this.connectorServer.stop();
 								log.warn("JMXConnector stop");
 							}
 						} catch (IOException e) {
-							log.error(e);
+							log.error("Shutdown Xmemcached MBean server error",e);
 						}
 					}
 				});
@@ -110,43 +112,45 @@ public final class XMemcachedMbeanServer {
 
 	public final void shutdown() {
 		try {
-			if (connectorServer != null && connectorServer.isActive()) {
-				connectorServer.stop();
+			if (this.connectorServer != null && this.connectorServer.isActive()) {
+				this.connectorServer.stop();
 				log.warn("JMXConnector stop");
 			}
 		} catch (IOException e) {
-			log.error(e);
+			log.error("Shutdown Xmemcached MBean server error",e);
 		}
 	}
 
 	public boolean isRegistered(String name) {
 		try {
-			return mbserver != null
-					&& mbserver.isRegistered(new ObjectName(name));
+			return this.mbserver != null
+					&& this.mbserver.isRegistered(new ObjectName(name));
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
 	}
 
 	public boolean isActive() {
-		return mbserver != null && connectorServer != null
+		return this.mbserver != null && this.connectorServer != null
 				&& this.connectorServer.isActive();
 	}
 
 	public int getMBeanCount() {
-		if (mbserver != null)
-			return mbserver.getMBeanCount();
-		else
+		if (this.mbserver != null) {
+			return this.mbserver.getMBeanCount();
+		} else {
 			return 0;
+		}
 	}
 
 	public void registMBean(Object o, String name) {
-		if (isRegistered(name))
+		if (isRegistered(name)) {
 			return;
-		// 注册MBean
-		if (mbserver != null) {
+		}
+		// 娉ㄥ唽MBean
+		if (this.mbserver != null) {
 			try {
-				mbserver.registerMBean(o, new ObjectName(name));
+				this.mbserver.registerMBean(o, new ObjectName(name));
 			} catch (Exception e) {
 				throw new RuntimeException(e);
 			}

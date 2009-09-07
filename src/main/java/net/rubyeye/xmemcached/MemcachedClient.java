@@ -1073,43 +1073,4 @@ public interface MemcachedClient {
 	 */
 	public void setConnectionPoolSize(int poolSize);
 
-	/**
-	 * Initialize a list.Some applications need to store a list of objects in
-	 * memcached,you have to get list from memcached,add a object,then store the
-	 * list back to memcached.It's a cost if the list became large.XMemcached
-	 * allow you to store a list type,you can append/prepend a object insteadof
-	 * get the list from memcached and set it back.This method initialize a list
-	 * type.
-	 * 
-	 * @param <E>
-	 * @param key
-	 */
-	public <E> void initList(String key);
-
-	/**
-	 * Append a object to a list type
-	 * 
-	 * 
-	 * @param key
-	 * @param e
-	 */
-	public void appendList(String key, Object e);
-
-	/**
-	 * Prepend a object to a list type
-	 * 
-	 * @param key
-	 * @param e
-	 */
-	public void prependList(String key, Object e);
-
-	/**
-	 * get List from memcached
-	 * 
-	 * @param <E>
-	 * @param key
-	 * @return
-	 */
-	public <E> List<E> getList(String key);
-
 }

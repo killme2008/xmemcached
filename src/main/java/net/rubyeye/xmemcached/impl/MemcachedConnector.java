@@ -41,8 +41,8 @@ import com.google.code.yanf4j.config.Configuration;
 import com.google.code.yanf4j.core.EventType;
 import com.google.code.yanf4j.core.NioSession;
 import com.google.code.yanf4j.core.Session;
-import com.google.code.yanf4j.core.SocketOption;
 import com.google.code.yanf4j.core.WriteMessage;
+import com.google.code.yanf4j.core.impl.StandardSocketOption;
 import com.google.code.yanf4j.nio.NioSessionConfig;
 import com.google.code.yanf4j.nio.impl.SocketChannelController;
 
@@ -184,6 +184,7 @@ public class MemcachedConnector extends SocketChannelController {
 	@Override
 	protected void doStart() throws IOException {
 		this.sessionMonitor.start();
+		setLocalSocketAddress(new InetSocketAddress("localhost",0));
 	}
 
 	@Override
@@ -236,31 +237,31 @@ public class MemcachedConnector extends SocketChannelController {
 		SocketChannel socketChannel = SocketChannel.open();
 		socketChannel.configureBlocking(false);
 		socketChannel.socket().setSoTimeout(this.soTimeout);
-		if (this.socketOptions.get(SocketOption.SO_REUSEADDR) != null) {
+		if (this.socketOptions.get(StandardSocketOption.SO_REUSEADDR) != null) {
 			socketChannel.socket().setReuseAddress(
-					SocketOption.SO_REUSEADDR.type().cast(
-							this.socketOptions.get(SocketOption.SO_REUSEADDR)));
+					StandardSocketOption.SO_REUSEADDR.type().cast(
+							this.socketOptions.get(StandardSocketOption.SO_REUSEADDR)));
 		}
-		if (this.socketOptions.get(SocketOption.TCP_NODELAY) != null) {
+		if (this.socketOptions.get(StandardSocketOption.TCP_NODELAY) != null) {
 			socketChannel.socket().setTcpNoDelay(
-					SocketOption.TCP_NODELAY.type().cast(
-							this.socketOptions.get(SocketOption.TCP_NODELAY)));
+					StandardSocketOption.TCP_NODELAY.type().cast(
+							this.socketOptions.get(StandardSocketOption.TCP_NODELAY)));
 		}
-		if (this.socketOptions.get(SocketOption.SO_RCVBUF) != null) {
+		if (this.socketOptions.get(StandardSocketOption.SO_RCVBUF) != null) {
 			socketChannel.socket().setReceiveBufferSize(
-					SocketOption.SO_RCVBUF.type().cast(
-							this.socketOptions.get(SocketOption.SO_RCVBUF)));
+					StandardSocketOption.SO_RCVBUF.type().cast(
+							this.socketOptions.get(StandardSocketOption.SO_RCVBUF)));
 
 		}
-		if (this.socketOptions.get(SocketOption.SO_SNDBUF) != null) {
+		if (this.socketOptions.get(StandardSocketOption.SO_SNDBUF) != null) {
 			socketChannel.socket().setSendBufferSize(
-					SocketOption.SO_SNDBUF.type().cast(
-							this.socketOptions.get(SocketOption.SO_SNDBUF)));
+					StandardSocketOption.SO_SNDBUF.type().cast(
+							this.socketOptions.get(StandardSocketOption.SO_SNDBUF)));
 		}
-		if (this.socketOptions.get(SocketOption.SO_KEEPALIVE) != null) {
+		if (this.socketOptions.get(StandardSocketOption.SO_KEEPALIVE) != null) {
 			socketChannel.socket().setKeepAlive(
-					SocketOption.SO_KEEPALIVE.type().cast(
-							this.socketOptions.get(SocketOption.SO_KEEPALIVE)));
+					StandardSocketOption.SO_KEEPALIVE.type().cast(
+							this.socketOptions.get(StandardSocketOption.SO_KEEPALIVE)));
 		}
 		ConnectFuture future = new ConnectFuture(address, weight);
 		if (!socketChannel.connect(address)) {

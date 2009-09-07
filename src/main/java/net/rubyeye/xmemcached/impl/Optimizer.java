@@ -29,8 +29,8 @@ import net.rubyeye.xmemcached.monitor.XMemcachedMbeanServer;
 import net.rubyeye.xmemcached.utils.ByteUtils;
 import net.rubyeye.xmemcached.utils.Protocol;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.code.yanf4j.core.impl.FutureImpl;
 
@@ -47,7 +47,7 @@ public class Optimizer implements OptimizerMBean, MemcachedOptimizer {
 	private boolean optimiezeGet = true;
 	private boolean optimiezeMergeBuffer = true;
 	private BufferAllocator bufferAllocator;
-	private static final Log log = LogFactory.getLog(Optimizer.class);
+	private static final Logger log = LoggerFactory.getLogger(Optimizer.class);
 	private Protocol protocol = Protocol.Binary;
 
 	public Optimizer(Protocol protocol) {

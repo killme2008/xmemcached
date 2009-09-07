@@ -122,8 +122,8 @@ public class Example {
 			System.out.println(client.decr("a", 5));
 			client.decr("a", 5);
 			System.out.println(client.get("a"));
-		    
-			//测试CAS
+
+			// 测试CAS
 			client.set("a", 0, 1);
 			GetsResponse<Integer> result = client.gets("a");
 			long cas = result.getCas();
@@ -182,14 +182,10 @@ public class Example {
 			if (result.getValue() != 4) {
 				System.err.println("cas error");
 			}
-			// keys.add("a");
-			// // 批量gets
-			// System.out.println(client.gets(keys).get("a").getValue());
-			// client.flushAll(); // 使所有数据项失效
-			// // 查看统计信息
-			// System.out.println(client.getStats()); // 查看统计信息
-			//			
-			// Thread.sleep(300000000);
+			client.flushAll(); // 使所有数据项失效
+			// 查看统计信息
+			System.out.println(client.getStats()); // 查看统计信息
+
 			client.shutdown();
 
 		} catch (IOException e) {

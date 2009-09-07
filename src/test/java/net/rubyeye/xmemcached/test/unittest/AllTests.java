@@ -10,6 +10,7 @@ import net.rubyeye.xmemcached.test.unittest.codec.MemcachedDecoderUnitTest;
 import net.rubyeye.xmemcached.test.unittest.codec.MemcachedEncoderUnitTest;
 import net.rubyeye.xmemcached.test.unittest.commands.factory.TextCommandFactoryTest;
 import net.rubyeye.xmemcached.test.unittest.commands.text.TextCommandsAllTests;
+import net.rubyeye.xmemcached.test.unittest.impl.MemcachedClientStateListenerUnitTest;
 import net.rubyeye.xmemcached.test.unittest.impl.OptimezerTest;
 import net.rubyeye.xmemcached.test.unittest.impl.SessionLocatorTest;
 import net.rubyeye.xmemcached.test.unittest.monitor.StatisticsHandlerUnitTest;
@@ -44,6 +45,7 @@ public class AllTests {
 		suite.addTest(BufferAllocatorTestSuite.suite());
 		suite.addTestSuite(XMemcachedClientFactoryBeanUnitTest.class);
 		suite.addTestSuite(XMemcachedMBeanServerUnitTest.class);
+		suite.addTestSuite(MemcachedClientStateListenerUnitTest.class);
 		try {
 			Properties properties = ResourcesUtils
 					.getResourceAsProperties("test.properties");

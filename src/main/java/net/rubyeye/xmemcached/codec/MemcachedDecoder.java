@@ -17,8 +17,8 @@ import net.rubyeye.xmemcached.command.Command;
 import net.rubyeye.xmemcached.impl.MemcachedTCPSession;
 import net.rubyeye.xmemcached.utils.ByteUtils;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.code.yanf4j.core.Session;
 import com.google.code.yanf4j.core.CodecFactory.Decoder;
@@ -33,7 +33,7 @@ import com.google.code.yanf4j.util.ShiftAndByteBufferMatcher;
  */
 public class MemcachedDecoder implements Decoder<Command> {
 
-	public static final Log log = LogFactory.getLog(MemcachedDecoder.class);
+	public static final Logger log = LoggerFactory.getLogger(MemcachedDecoder.class);
 
 	public MemcachedDecoder() {
 		super();

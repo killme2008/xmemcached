@@ -80,11 +80,11 @@ public class Xmemcache implements Memcache {
 	}
 
 	public void shutdown() {
-		log.debug("Shutting down spy MemcachedClient");
+		log.debug("Shutting down XMemcachedClient");
 		try {
 			this.memcachedClient.shutdown();
 		} catch (Exception e) {
-			log.error("Shut down MemcachedClient error", e);
+			log.error("Shut down XMemcachedClient error", e);
 		}
 
 	}

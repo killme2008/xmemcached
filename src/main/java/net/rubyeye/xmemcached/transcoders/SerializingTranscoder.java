@@ -30,10 +30,9 @@ public class SerializingTranscoder extends BaseSerializingTranscoder implements
 	public static final int SPECIAL_FLOAT = (6 << 8);
 	public static final int SPECIAL_DOUBLE = (7 << 8);
 	public static final int SPECIAL_BYTEARRAY = (8 << 8);
-	public static final int SPECIAL_LIST = (9 << 8);
-
+	
 	private final TranscoderUtils tu = new TranscoderUtils(true);
-	private final ListTranscoder listTranscoder=new ListTranscoder();
+	
 
 	/**
 	 * Get a serializing transcoder with the default max data size.
@@ -88,9 +87,6 @@ public class SerializingTranscoder extends BaseSerializingTranscoder implements
 				break;
 			case SPECIAL_BYTEARRAY:
 				rv = data;
-				break;
-			case SPECIAL_LIST:
-				rv=this.listTranscoder.decode(d);
 				break;
 			default:
 				log.warn(String.format("Undecodeable with flags %x", flags));

@@ -18,8 +18,8 @@ import net.rubyeye.xmemcached.buffer.IoBuffer;
 import net.rubyeye.xmemcached.codec.MemcachedDecoder;
 import net.rubyeye.xmemcached.monitor.Constants;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Utilities for byte process
@@ -28,7 +28,7 @@ import org.apache.commons.logging.LogFactory;
  * 
  */
 public final class ByteUtils {
-	public static final Log log = LogFactory.getLog(ByteUtils.class);
+	public static final Logger log = LoggerFactory.getLogger(ByteUtils.class);
 	public static final String DEFAULT_CHARSET = "utf-8";
 	public static final ByteBuffer SPLIT = ByteBuffer.wrap(Constants.CRLF);
 

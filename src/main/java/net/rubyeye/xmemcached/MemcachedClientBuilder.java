@@ -2,11 +2,13 @@ package net.rubyeye.xmemcached;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 import net.rubyeye.xmemcached.buffer.BufferAllocator;
 import net.rubyeye.xmemcached.transcoders.Transcoder;
 
 import com.google.code.yanf4j.config.Configuration;
+import com.google.code.yanf4j.core.SocketOption;
 
 /**
  * Builder pattern.Configure XmemcachedClient's options,then build it
@@ -125,5 +127,17 @@ public interface MemcachedClientBuilder {
 	 * @param commandFactory
 	 */
 	public void setCommandFactory(CommandFactory commandFactory);
+
+	/**
+	 * Set tcp socket option
+	 * 
+	 * @param socketOption
+	 * @param value
+	 */
+	@SuppressWarnings("unchecked")
+	public void setSocketOption(SocketOption socketOption, Object value);
+
+	@SuppressWarnings("unchecked")
+	public Map<SocketOption, Object> getSocketOptions();
 
 }
