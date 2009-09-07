@@ -37,7 +37,7 @@ public class XMemcachedClientFactoryBean implements FactoryBean {
 			.getDefaultConfiguration();
 	private CommandFactory commandFactory = new TextCommandFactory();
 
-	private int poolSize = MemcachedClient.DEFAULT_CONNECTION_POOL_SIZE;
+	private int connectionPoolSize = MemcachedClient.DEFAULT_CONNECTION_POOL_SIZE;
 
 	public final CommandFactory getCommandFactory() {
 		return this.commandFactory;
@@ -51,8 +51,8 @@ public class XMemcachedClientFactoryBean implements FactoryBean {
 
 	}
 
-	public final void setPoolSize(int poolSize) {
-		this.poolSize = poolSize;
+	public final void setConnectionPoolSize(int poolSize) {
+		this.connectionPoolSize = poolSize;
 	}
 
 	public void setSessionLocator(MemcachedSessionLocator sessionLocator) {
@@ -132,7 +132,7 @@ public class XMemcachedClientFactoryBean implements FactoryBean {
 		builder.setSessionLocator(this.sessionLocator);
 		builder.setTranscoder(this.transcoder);
 		builder.setCommandFactory(this.commandFactory);
-		builder.setConnectionPoolSize(this.poolSize);
+		builder.setConnectionPoolSize(this.connectionPoolSize);
 	}
 
 	private int[] getWeightsArray(List<InetSocketAddress> serverList) {
