@@ -1,7 +1,7 @@
 =======================Introduction==========================
 xmemcached
   XMemcached is a high performance, easy to use blocking multithreaded memcached client in java.
-  It's nio based (using my nio framework :yanf4j), and was carefully tuned to get top performance. 
+  It's nio based (using my opensource nio framework :yanf4j), and was carefully tuned to get top performance. 
 
 homepage:  http://code.google.com/p/xmemcached/
 downloads; http://code.google.com/p/xmemcached/downloads/list 
@@ -12,9 +12,7 @@ author : dennis zhuang(killme2008@gmail.com)
 FAQ
 1.How to build project by maven?
 
-Please install lib/yanf4j-0.61-SNAPSHOT.jar to local repository,groupId and artifactId both are yanf4j.
-You can use ant task "ant install-yanf4j" to complete this work.
-Then type command "mvn package" to build the project.
+Type command "mvn package" to build the project.Maven will download the dependencies automacly and build project.
 
 
 2.How to run unit tests?
@@ -22,11 +20,9 @@ Then type command "mvn package" to build the project.
 The test.properties file under the src/test/resources folder is used for setting memcached test server.
 Please set test.memcached.servers property,Then run the AllTests class with jvm option "-ea".
 
+3.Is Xmemcached compatible with jdk5?
+Yes,since 1.2.0-RC1,Xmemcached is compatible with jdk5.
 
-3.How to build project by ant?
-
-Set property build.provided.lib in build.properties to a file path which include spring framework's core jar,then
-type command "ant build-package" to build project.
 
 ======================Example==================================
 
@@ -36,7 +32,7 @@ type command "ant build-package" to build project.
            AddrUtil.getAddresses("localhost:11211"));
  XMemcachedClient client=builder.build();
  
-#If you want to use binary protocol(use memcached 1.4.0)
+#If you want to use binary protocol(use memcached 1.4.0 and xmemcached 1.2.0)
   XMemcachedClientBuilder builder = new XMemcachedClientBuilder(
            AddrUtil.getAddresses("localhost:11211"));
   builder.setCommandFactory(new BinaryCommandFactory());
@@ -112,6 +108,7 @@ Access MBean through service:jmx:rmi:///jndi/rmi://[host]:7077/xmemcachedServer
  </bean>
 
 #Set server's weight
+
 //set weight to 2
 client.addServer("localhost",12000,2); 
 

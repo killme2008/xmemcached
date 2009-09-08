@@ -1,4 +1,34 @@
 *******************************************
+
+2009-09-08
+--------xmemcached 1.2.0-RC1-Released-----------
+
+1.Supports all binary protcol of memcached.Add BinaryCommandFactory class to support it.if you want to use 
+that,just add one line code:
+
+memcachedClientbuilder.setCommandFactory(new BinaryCommandFactory()); 
+
+2.Supports hibernate-memcached,about the detail please see wiki page 
+http://code.google.com/p/xmemcached/wiki/Hibernate_memcached_integration 
+
+3.Compatible with jdk5.
+
+4.Move from common-logging to slf4j.
+
+5.Implement connection pool.Allow to create more connection to one memcached server.Default pool size is one,you can change it like this:
+   memcachedClient.setConnectionPoolSize(2);
+Then,xmemcached will create two connections to one memcached server.Your application must ensure updating data is synchronized between connections.
+
+6.Upgrade yanf4j to 1.0-SNAPSHOT.This version is introduce SocketOption class to configure tcp options easily,and refactoring for implement aio(jdk7 nio2.0).
+
+7.BUG fixed since 1.1.3 and 1.2.0-beta
+
+
+--------------------------------------------
+
+
+
+
 2009-07-13
 --------xmemcached 1.1.3-Released-----------
 1.Upgrade yanf4j to 0.7.0, yanf4j-0.7.0 is a refactoring version and turned for best performance.
