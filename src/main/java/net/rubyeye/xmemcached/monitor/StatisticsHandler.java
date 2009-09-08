@@ -21,7 +21,7 @@ public class StatisticsHandler implements StatisticsHandlerMBean {
 			Constants.XMEMCACHED_STATISTICS_ENABLE, "false"));
 
 	private void buildCounterMap() {
-		if (statistics) {
+		if (this.statistics) {
 			Map<CommandType, AtomicLong> map = new HashMap<CommandType, AtomicLong>();
 			map.put(CommandType.APPEND, new AtomicLong());
 			map.put(CommandType.SET, new AtomicLong());
@@ -40,91 +40,93 @@ public class StatisticsHandler implements StatisticsHandlerMBean {
 		}
 	}
 
-	@Override
+	
 	public final boolean isStatistics() {
 		return this.statistics;
 	}
 
 	public final void statistics(CommandType cmdType) {
-		if (this.statistics&&this.counterMap.get(cmdType)!=null)
+		if (this.statistics&&this.counterMap.get(cmdType)!=null) {
 			this.counterMap.get(cmdType).incrementAndGet();
+		}
 	}
 	
 	public final void statistics(CommandType cmdType,int count) {
-		if (this.statistics&&this.counterMap.get(cmdType)!=null)
+		if (this.statistics&&this.counterMap.get(cmdType)!=null) {
 			this.counterMap.get(cmdType).addAndGet(count);
+		}
 	}
 
-	@Override
+	
 	public final void setStatistics(boolean statistics) {
 		this.statistics = statistics;
 		buildCounterMap();
 
 	}
 
-	@Override
+	
 	public long getAppendCount() {
-		return counterMap.get(CommandType.APPEND).get();
+		return this.counterMap.get(CommandType.APPEND).get();
 	}
 
-	@Override
+	
 	public long getCASCount() {
-		return counterMap.get(CommandType.CAS).get();
+		return this.counterMap.get(CommandType.CAS).get();
 	}
 
-	@Override
+	
 	public long getDecrCount() {
-		return counterMap.get(CommandType.DECR).get();
+		return this.counterMap.get(CommandType.DECR).get();
 	}
 
-	@Override
+	
 	public long getDeleteCount() {
-		return counterMap.get(CommandType.DELETE).get();
+		return this.counterMap.get(CommandType.DELETE).get();
 	}
 
-	@Override
+	
 	public long getGetHitCount() {
-		return counterMap.get(CommandType.GET_HIT).get();
+		return this.counterMap.get(CommandType.GET_HIT).get();
 	}
 
-	@Override
+	
 	public long getGetMissCount() {
-		return counterMap.get(CommandType.GET_MISS).get();
+		return this.counterMap.get(CommandType.GET_MISS).get();
 	}
 
-	@Override
+	
 	public long getIncrCount() {
-		return counterMap.get(CommandType.INCR).get();
+		return this.counterMap.get(CommandType.INCR).get();
 	}
 
-	@Override
+	
 	public long getMultiGetCount() {
-		return counterMap.get(CommandType.GET_MANY).get();
+		return this.counterMap.get(CommandType.GET_MANY).get();
 	}
 
-	@Override
+	
 	public long getMultiGetsCount() {
-		return counterMap.get(CommandType.GETS_MANY).get();
+		return this.counterMap.get(CommandType.GETS_MANY).get();
 	}
 
-	@Override
+	
 	public long getPrependCount() {
-		return counterMap.get(CommandType.PREPEND).get();
+		return this.counterMap.get(CommandType.PREPEND).get();
 	}
 
-	@Override
+	
 	public long getSetCount() {
-		return counterMap.get(CommandType.SET).get();
+		return this.counterMap.get(CommandType.SET).get();
 	}
 
-	@Override
+	
 	public long getAddCount() {
-		return counterMap.get(CommandType.ADD).get();
+		return this.counterMap.get(CommandType.ADD).get();
 	}
 
-	@Override
+	
 	public long getReplaceCount() {
-		return counterMap.get(CommandType.REPLACE).get();
+		return this.counterMap.get(CommandType.REPLACE).get();
 	}
 
 }

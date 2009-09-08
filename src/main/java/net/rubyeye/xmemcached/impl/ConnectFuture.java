@@ -78,7 +78,7 @@ public class ConnectFuture implements Future<Boolean> {
 		}
 	}
 
-	@Override
+	
 	public boolean cancel(boolean mayInterruptIfRunning) {
 		this.lock.lock();
 		try {
@@ -89,7 +89,7 @@ public class ConnectFuture implements Future<Boolean> {
 		}
 	}
 
-	@Override
+	
 	public Boolean get() throws InterruptedException, ExecutionException {
 		this.lock.lock();
 		try {
@@ -105,7 +105,7 @@ public class ConnectFuture implements Future<Boolean> {
 		}
 	}
 
-	@Override
+	
 	public Boolean get(long timeout, TimeUnit unit)
 			throws InterruptedException, ExecutionException,
 			TimeoutException {
@@ -126,7 +126,7 @@ public class ConnectFuture implements Future<Boolean> {
 		}
 	}
 
-	@Override
+	
 	public boolean isCancelled() {
 		this.lock.lock();
 		try {
@@ -136,7 +136,7 @@ public class ConnectFuture implements Future<Boolean> {
 		}
 	}
 
-	@Override
+	
 	public boolean isDone() {
 		this.lock.lock();
 		try {

@@ -105,7 +105,7 @@ public class XMemcachedClientFactoryBean implements FactoryBean {
 		return this.configuration;
 	}
 
-	@Override
+	
 	public Object getObject() throws Exception {
 		checkAttribute();
 		List<InetSocketAddress> serverList = getServerList();
@@ -178,13 +178,13 @@ public class XMemcachedClientFactoryBean implements FactoryBean {
 		}
 	}
 
-	@Override
+	
 	@SuppressWarnings("unchecked")
 	public Class getObjectType() {
 		return MemcachedClient.class;
 	}
 
-	@Override
+	
 	public boolean isSingleton() {
 		return true;
 	}

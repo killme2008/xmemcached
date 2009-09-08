@@ -19,6 +19,7 @@ public class MockErrorBinaryGetOneCommand extends BinaryGetCommand implements
 	}
 
 	
+	
 	@Override
 	protected boolean finish() {
 		this.decode=true;
@@ -28,7 +29,7 @@ public class MockErrorBinaryGetOneCommand extends BinaryGetCommand implements
 	}
 
 
-	@Override
+	
 	public boolean isDecoded() {
 		return this.decode;
 	}

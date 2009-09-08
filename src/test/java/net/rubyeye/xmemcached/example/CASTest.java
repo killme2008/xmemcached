@@ -33,12 +33,12 @@ class CASThread extends Thread {
 	 * 
 	 */
 	static final class IncrmentOperation implements CASOperation<Integer> {
-		@Override
+		
 		public int getMaxTries() {
 			return Integer.MAX_VALUE; // 最大重试次数
 		}
 
-		@Override
+		
 		public Integer getNewValue(long currentCAS, Integer currentValue) {
 			return currentValue + 1; // 当前值+1
 		}
@@ -54,6 +54,7 @@ class CASThread extends Thread {
 
 	}
 
+	
 	@Override
 	public void run() {
 		try {

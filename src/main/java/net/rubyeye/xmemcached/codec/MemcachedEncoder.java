@@ -26,7 +26,7 @@ import com.google.code.yanf4j.core.CodecFactory.Encoder;
  */
 public class MemcachedEncoder implements Encoder<Command> {
 
-	@Override
+	
 	public ByteBuffer encode(Command message, Session session) {
 		return message.getIoBuffer().getByteBuffer();
 	}

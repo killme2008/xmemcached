@@ -40,7 +40,7 @@ public class XMemcachedClientBuilder implements MemcachedClientBuilder {
 
 	private List<MemcachedClientStateListener> stateListeners = new ArrayList<MemcachedClientStateListener>();
 
-	@Override
+	
 	public void addStateListener(MemcachedClientStateListener stateListener) {
 		this.stateListeners.add(stateListener);
 	}
@@ -73,12 +73,12 @@ public class XMemcachedClientBuilder implements MemcachedClientBuilder {
 		this.connectionPoolSize = poolSize;
 	}
 
-	@Override
+	
 	public void removeStateListener(MemcachedClientStateListener stateListener) {
 		this.stateListeners.remove(stateListener);
 	}
 
-	@Override
+	
 	public void setStateListeners(
 			List<MemcachedClientStateListener> stateListeners) {
 		if (stateListeners == null) {

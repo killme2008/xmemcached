@@ -20,30 +20,29 @@ public class StringTranscoder implements Transcoder<String> {
 		this(BaseSerializingTranscoder.DEFAULT_CHARSET);
 	}
 
-	@Override
 	public String decode(CachedData d) {
 		if (d.getFlag() == 0) {
 			String rv = null;
 			try {
 				if (d.getData() != null) {
-					rv = new String(d.getData(), charset);
+					rv = new String(d.getData(), this.charset);
 				}
 			} catch (UnsupportedEncodingException e) {
 				throw new RuntimeException(e);
 			}
 			return rv;
-		} else
+		} else {
 			throw new RuntimeException("Decode String error");
+		}
 	}
 
 	public static final int STRING_FLAG = 0;
 
-	@Override
 	public CachedData encode(String o) {
 		byte[] b = null;
 
 		try {
-			b = o.getBytes(charset);
+			b = o.getBytes(this.charset);
 		} catch (UnsupportedEncodingException e) {
 			throw new RuntimeException(e);
 		}

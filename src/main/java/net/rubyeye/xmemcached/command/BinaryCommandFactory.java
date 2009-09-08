@@ -36,19 +36,19 @@ public class BinaryCommandFactory implements CommandFactory {
 
 	private BufferAllocator bufferAllocator;
 
-	@Override
+	
 	public void setBufferAllocator(BufferAllocator bufferAllocator) {
 		this.bufferAllocator = bufferAllocator;
 	}
 
-	@Override
+	
 	public Command createAddCommand(String key, byte[] keyBytes, int exp,
 			Object value, boolean noreply, Transcoder transcoder) {
 		return createStoreCommand(key, keyBytes, exp, value, CommandType.ADD,
 				noreply, transcoder);
 	}
 
-	@Override
+	
 	public Command createAppendCommand(String key, byte[] keyBytes,
 			Object value, boolean noreply, Transcoder transcoder) {
 		return new BinaryAppendPrependCommand(key, keyBytes,
@@ -56,34 +56,34 @@ public class BinaryCommandFactory implements CommandFactory {
 				noreply, transcoder);
 	}
 
-	@Override
+	
 	public Command createCASCommand(String key, byte[] keyBytes, int exp,
 			Object value, long cas, boolean noreply, Transcoder transcoder) {
 		return new BinaryCASCommand(key, keyBytes, CommandType.CAS,
 				new CountDownLatch(1), exp, cas, value, noreply, transcoder);
 	}
 
-	@Override
+	
 	public Command createDeleteCommand(String key, byte[] keyBytes, int time,
 			boolean noreply) {
 		return new BinaryDeleteCommand(key, keyBytes, CommandType.DELETE,
 				new CountDownLatch(1), noreply);
 	}
 
-	@Override
+	
 	public Command createFlushAllCommand(CountDownLatch latch, int delay,
 			boolean noreply) {
 		return new BinaryFlushAllCommand(latch, delay, noreply);
 	}
 
-	@Override
+	
 	public Command createGetCommand(String key, byte[] keyBytes,
 			CommandType cmdType) {
 		return new BinaryGetCommand(key, keyBytes, cmdType, new CountDownLatch(
 				1), OpCode.GET, false);
 	}
 
-	@Override
+	
 	public <T> Command createGetMultiCommand(Collection<String> keys,
 			CountDownLatch latch, CommandType cmdType, Transcoder<T> transcoder) {
 		Iterator<String> it = keys.iterator();
@@ -120,7 +120,7 @@ public class BinaryCommandFactory implements CommandFactory {
 		return resultCommand;
 	}
 
-	@Override
+	
 	public Command createIncrDecrCommand(String key, byte[] keyBytes,
 			int amount, int initial, int expTime, CommandType cmdType,
 			boolean noreply) {
@@ -128,7 +128,7 @@ public class BinaryCommandFactory implements CommandFactory {
 				expTime, cmdType, noreply);
 	}
 
-	@Override
+	
 	public Command createPrependCommand(String key, byte[] keyBytes,
 			Object value, boolean noreply, Transcoder transcoder) {
 		return new BinaryAppendPrependCommand(key, keyBytes,
@@ -136,7 +136,7 @@ public class BinaryCommandFactory implements CommandFactory {
 				noreply, transcoder);
 	}
 
-	@Override
+	
 	public Command createReplaceCommand(String key, byte[] keyBytes, int exp,
 			Object value, boolean noreply, Transcoder transcoder) {
 		return createStoreCommand(key, keyBytes, exp, value,
@@ -150,33 +150,33 @@ public class BinaryCommandFactory implements CommandFactory {
 				new CountDownLatch(1), exp, -1, value, noreply, transcoder);
 	}
 
-	@Override
+	
 	public Command createSetCommand(String key, byte[] keyBytes, int exp,
 			Object value, boolean noreply, Transcoder transcoder) {
 		return createStoreCommand(key, keyBytes, exp, value, CommandType.SET,
 				noreply, transcoder);
 	}
 
-	@Override
+	
 	public Command createStatsCommand(InetSocketAddress server,
 			CountDownLatch latch, String itemName) {
 		return new BinaryStatsCommand(server, latch, itemName);
 	}
 
-	@Override
+	
 	public Command createVerbosityCommand(CountDownLatch latch, int level,
 			boolean noreply) {
 		throw new UnsupportedOperationException(
 				"Binary protocol doesn't support verbosity");
 	}
 
-	@Override
+	
 	public Command createVersionCommand(CountDownLatch latch,
 			InetSocketAddress server) {
 		return new BinaryVersionCommand(latch, server);
 	}
 
-	@Override
+	
 	public Protocol getProtocol() {
 		return Protocol.Binary;
 	}

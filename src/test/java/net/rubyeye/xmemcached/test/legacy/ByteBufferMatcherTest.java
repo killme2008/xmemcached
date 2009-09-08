@@ -29,7 +29,7 @@ class TestResult implements Comparable<TestResult> {
 		this.result = result;
 	}
 
-	@Override
+	
 	public int compareTo(TestResult o) {
 		return (int) (this.result - o.result);
 	}
@@ -80,12 +80,14 @@ public class ByteBufferMatcherTest {
 		for (int i = 0; i < num; i++) {
 			for (ByteBuffer buffer : buffers) {
 				pos = matcher1.matchFirst(buffer);
-				if (debug)
+				if (debug) {
 					System.out.print(pos + " ");
+				}
 			}
 		}
-		if (debug)
+		if (debug) {
 			System.out.println();
+		}
 		result.add(new TestResult("BM", System.nanoTime() - start));
 	}
 
@@ -95,12 +97,14 @@ public class ByteBufferMatcherTest {
 		for (int i = 0; i < num; i++) {
 			for (ByteBuffer buffer : buffers) {
 				pos = matcher2.matchFirst(buffer);
-				if (debug)
+				if (debug) {
 					System.out.print(pos + " ");
+				}
 			}
 		}
-		if (debug)
+		if (debug) {
 			System.out.println();
+		}
 		result.add(new TestResult("Shift-And", System.nanoTime() - start));
 	}
 
@@ -110,12 +114,14 @@ public class ByteBufferMatcherTest {
 		for (int i = 0; i < num; i++) {
 			for (ByteBuffer buffer : buffers) {
 				pos = matcher4.matchFirst(buffer);
-				if (debug)
+				if (debug) {
 					System.out.print(pos + " ");
+				}
 			}
 		}
-		if (debug)
+		if (debug) {
 			System.out.println();
+		}
 		result.add(new TestResult("Shift-Or", System.nanoTime() - start));
 	}
 
@@ -125,12 +131,14 @@ public class ByteBufferMatcherTest {
 		for (int i = 0; i < num; i++) {
 			for (ByteBuffer buffer : buffers) {
 				pos = matcher3.matchFirst(buffer);
-				if (debug)
+				if (debug) {
 					System.out.print(pos + " ");
+				}
 			}
 		}
-		if (debug)
+		if (debug) {
 			System.out.println();
+		}
 		result.add(new TestResult("BNDM", System.nanoTime() - start));
 	}
 
@@ -140,12 +148,14 @@ public class ByteBufferMatcherTest {
 		for (int i = 0; i < num; i++) {
 			for (ByteBuffer buffer : buffers) {
 				pos = matcher5.matchFirst(buffer);
-				if (debug)
+				if (debug) {
 					System.out.print(pos + " ");
+				}
 			}
 		}
-		if (debug)
+		if (debug) {
 			System.out.println();
+		}
 		result.add(new TestResult("KMP", System.nanoTime() - start));
 	}
 
@@ -155,12 +165,14 @@ public class ByteBufferMatcherTest {
 		for (int i = 0; i < num; i++) {
 			for (ByteBuffer buffer : buffers) {
 				pos = ByteBufferUtils.indexOf(buffer, SPLIT);
-				if (debug)
+				if (debug) {
 					System.out.print(pos + " ");
+				}
 			}
 		}
-		if (debug)
+		if (debug) {
 			System.out.println();
+		}
 		result.add(new TestResult("Simple", System.nanoTime() - start));
 	}
 }

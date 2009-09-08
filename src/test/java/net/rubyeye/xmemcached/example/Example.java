@@ -149,12 +149,12 @@ public class Example {
 			 */
 			client.cas("a", 0, new CASOperation<Integer>() {
 
-				@Override
+				
 				public int getMaxTries() {
 					return 1;
 				}
 
-				@Override
+				
 				public Integer getNewValue(long currentCAS, Integer currentValue) {
 					System.out.println("current value " + currentValue);
 					return 3;
@@ -167,12 +167,12 @@ public class Example {
 			result.setCas(100);// 改变cas值，因此需要试2次
 			client.cas("a", result, new CASOperation<Integer>() {
 
-				@Override
+				
 				public int getMaxTries() {
 					return 2;
 				}
 
-				@Override
+				
 				public Integer getNewValue(long currentCAS, Integer currentValue) {
 					System.out.println("current value " + currentValue);
 					return 4;

@@ -41,17 +41,17 @@ public abstract class Command implements WriteMessage {
 
 	public static final byte RESPONSE_MAGIC_NUMBER = (byte) (0x81 & 0xFF);
 
-	@Override
+	
 	public final Object getMessage() {
 		return this;
 	}
 
-	@Override
+	
 	public synchronized final ByteBuffer getWriteBuffer() {
 		return getIoBuffer().getByteBuffer();
 	}
 
-	@Override
+	
 	public void setWriteBuffer(ByteBuffer buffers) {
 		// throw new UnsupportedOperationException();
 	}
@@ -184,6 +184,7 @@ public abstract class Command implements WriteMessage {
 		return this.ioBuffer;
 	}
 
+	
 	@Override
 	public String toString() {
 		try {
@@ -283,7 +284,7 @@ public abstract class Command implements WriteMessage {
 		this.noreply = noreply;
 	}
 
-	@Override
+	
 	public FutureImpl<Boolean> getWriteFuture() {
 		return this.writeFuture;
 	}
@@ -292,12 +293,12 @@ public abstract class Command implements WriteMessage {
 		this.writeFuture = writeFuture;
 	}
 
-	@Override
+	
 	public final boolean isWriting() {
 		return true;
 	}
 
-	@Override
+	
 	public final void writing() {
 		// do nothing
 	}

@@ -35,11 +35,12 @@ public class BinaryGetMultiCommand extends BaseBinaryCommand implements
 		this.result = new HashMap<String, CachedData>();
 	}
 
-	@Override
+	
 	public Map<String, CachedData> getReturnValues() {
 		return (Map<String, CachedData>) this.result;
 	}
 
+	
 	@Override
 	protected boolean readOpCode(ByteBuffer buffer) {
 		byte opCode = buffer.get();
@@ -49,11 +50,13 @@ public class BinaryGetMultiCommand extends BaseBinaryCommand implements
 		return true;
 	}
 
+	
 	@Override
 	public void encode(BufferAllocator bufferAllocator) {
 		// do nothing
 	}
 
+	
 	@Override
 	protected boolean finish() {
 		final CachedData cachedData = ((Map<String, CachedData>) this.result)
@@ -98,6 +101,7 @@ public class BinaryGetMultiCommand extends BaseBinaryCommand implements
 		return this.finished;
 	}
 
+	
 	@Override
 	protected boolean readKey(ByteBuffer buffer, int keyLength) {
 		if (buffer.remaining() < keyLength) {
@@ -116,6 +120,7 @@ public class BinaryGetMultiCommand extends BaseBinaryCommand implements
 		return true;
 	}
 
+	
 	@Override
 	protected boolean readValue(ByteBuffer buffer, int bodyLength,
 			int keyLength, int extrasLength) {
@@ -144,6 +149,7 @@ public class BinaryGetMultiCommand extends BaseBinaryCommand implements
 		}
 	}
 
+	
 	@Override
 	protected boolean readExtras(ByteBuffer buffer, int extrasLength) {
 		if (buffer.remaining() < extrasLength) {
@@ -156,18 +162,19 @@ public class BinaryGetMultiCommand extends BaseBinaryCommand implements
 		return true;
 	}
 
+	
 	@Override
 	protected long readCAS(ByteBuffer buffer) {
 		this.responseCAS = buffer.getLong();
 		return this.responseCAS;
 	}
 
-	@Override
+	
 	public Map<Object, Command> getMergeCommands() {
 		return this.mergeCommands;
 	}
 
-	@Override
+	
 	public void setMergeCommands(Map<Object, Command> mergeCommands) {
 		this.mergeCommands = mergeCommands;
 	}

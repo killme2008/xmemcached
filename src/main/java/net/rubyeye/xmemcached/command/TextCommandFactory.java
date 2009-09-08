@@ -28,7 +28,6 @@ import net.rubyeye.xmemcached.utils.Protocol;
  */
 public final class TextCommandFactory implements CommandFactory {
 
-	@Override
 	public void setBufferAllocator(BufferAllocator bufferAllocator) {
 
 	}
@@ -207,7 +206,7 @@ public final class TextCommandFactory implements CommandFactory {
 				new CountDownLatch(1), amount, initial, noreply);
 	}
 
-	@Override
+	
 	public Protocol getProtocol() {
 		return Protocol.Text;
 	}

@@ -229,6 +229,7 @@ public class Optimizer implements OptimizerMBean, MemcachedOptimizer {
 
 	private final ThreadLocal<List<Command>> threadLocal = new ThreadLocal<List<Command>>() {
 
+		
 		@Override
 		protected List<Command> initialValue() {
 			return new ArrayList<Command>(Optimizer.this.mergeFactor);
@@ -253,12 +254,12 @@ public class Optimizer implements OptimizerMBean, MemcachedOptimizer {
 		final StringBuilder key = new StringBuilder();
 		boolean wasFirst = true;
 
-		@Override
+		
 		public Object getResult() {
 			return this.key.toString();
 		}
 
-		@Override
+		
 		public void visit(Command command) {
 			if (this.wasFirst) {
 				this.key.append(command.getKey());
@@ -268,7 +269,7 @@ public class Optimizer implements OptimizerMBean, MemcachedOptimizer {
 			}
 		}
 
-		@Override
+		
 		public void finish() {
 			// do nothing
 
@@ -281,7 +282,7 @@ public class Optimizer implements OptimizerMBean, MemcachedOptimizer {
 		int totalLength;
 		Command prevCommand;
 
-		@Override
+		
 		public Object getResult() {
 			IoBuffer mergedBuffer = Optimizer.this.bufferAllocator
 					.allocate(this.totalLength);
@@ -295,7 +296,7 @@ public class Optimizer implements OptimizerMBean, MemcachedOptimizer {
 			return resultCommand;
 		}
 
-		@Override
+		
 		public void visit(Command command) {
 			// Encode prev command
 			if (this.prevCommand != null) {
@@ -310,7 +311,7 @@ public class Optimizer implements OptimizerMBean, MemcachedOptimizer {
 			this.prevCommand = command;
 		}
 
-		@Override
+		
 		public void finish() {
 			// prev command is the last command,last command must be getk,ensure
 			// getq commands send response back

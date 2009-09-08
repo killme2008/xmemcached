@@ -15,6 +15,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.SortedMap;
 import java.util.TreeMap;
 
 import net.rubyeye.xmemcached.HashAlgorithm;
@@ -55,7 +56,7 @@ public class KetamaMemcachedSessionLocator implements MemcachedSessionLocator {
 	}
 
 	public final Map<Long, Session> getSessionMap() {
-		return Collections.unmodifiableMap(ketamaSessions);
+		return Collections.unmodifiableMap(this.ketamaSessions);
 	}
 
 	public KetamaMemcachedSessionLocator(HashAlgorithm alg) {
@@ -64,7 +65,7 @@ public class KetamaMemcachedSessionLocator implements MemcachedSessionLocator {
 
 	public KetamaMemcachedSessionLocator(List<Session> list, HashAlgorithm alg) {
 		super();
-		hashAlg = alg;
+		this.hashAlg = alg;
 		buildMap(list, alg);
 	}
 
@@ -98,15 +99,15 @@ public class KetamaMemcachedSessionLocator implements MemcachedSessionLocator {
 				}
 			}
 		}
-		ketamaSessions = sessionMap;
+		this.ketamaSessions = sessionMap;
 		this.maxTries = list.size();
 	}
 
-	@Override
 	public final Session getSessionByKey(final String key) {
-		if (ketamaSessions == null || ketamaSessions.size() == 0)
+		if (this.ketamaSessions == null || this.ketamaSessions.size() == 0) {
 			return null;
-		long hash = hashAlg.hash(key);
+		}
+		long hash = this.hashAlg.hash(key);
 		Session rv = getSessionByHash(hash);
 		int tries = 0;
 		while ((rv == null || rv.isClosed()) && tries++ < this.maxTries) {
@@ -117,25 +118,35 @@ public class KetamaMemcachedSessionLocator implements MemcachedSessionLocator {
 	}
 
 	public final Session getSessionByHash(final long hash) {
-		TreeMap<Long, Session> sessionMap = ketamaSessions;
+		TreeMap<Long, Session> sessionMap = this.ketamaSessions;
 		Long resultHash = hash;
-		if (!sessionMap.containsKey(resultHash)) {
-			resultHash = sessionMap.ceilingKey(resultHash);
-			if (resultHash == null && sessionMap.size() > 0) {
+		if (!sessionMap.containsKey(hash)) {
+			// Java 1.6 adds a ceilingKey method, but xmemcached is compatible
+			// with jdk5,So use tailMap method to do this.
+			SortedMap<Long, Session> tailMap = sessionMap.tailMap(hash);
+			if (tailMap.isEmpty()) {
 				resultHash = sessionMap.firstKey();
+			} else {
+				resultHash = tailMap.firstKey();
 			}
 		}
+		//		
+		// if (!sessionMap.containsKey(resultHash)) {
+		// resultHash = sessionMap.ceilingKey(resultHash);
+		// if (resultHash == null && sessionMap.size() > 0) {
+		// resultHash = sessionMap.firstKey();
+		// }
+		// }
 		return sessionMap.get(resultHash);
 	}
 
 	public final long nextHash(long hashVal, String key, int tries) {
-		long tmpKey = hashAlg.hash(tries + key);
+		long tmpKey = this.hashAlg.hash(tries + key);
 		hashVal += (int) (tmpKey ^ tmpKey >>> 32);
 		hashVal &= 0xffffffffL; /* truncate to 32-bits */
 		return hashVal;
 	}
 
-	@Override
 	public final void updateSessions(final Collection<Session> list) {
 		buildMap(list, this.hashAlg);
 	}

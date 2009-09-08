@@ -184,7 +184,7 @@ public class MemcachedConnector extends SocketChannelController {
 	@Override
 	protected void doStart() throws IOException {
 		this.sessionMonitor.start();
-		setLocalSocketAddress(new InetSocketAddress("localhost",0));
+		setLocalSocketAddress(new InetSocketAddress("localhost", 0));
 	}
 
 	@Override
@@ -212,7 +212,8 @@ public class MemcachedConnector extends SocketChannelController {
 			future.setException(e);
 			throw new IOException("Connect to "
 					+ future.getInetSocketAddress().getHostName() + ":"
-					+ future.getInetSocketAddress().getPort() + " fail", e);
+					+ future.getInetSocketAddress().getPort() + " fail,"
+					+ e.getMessage());
 		}
 	}
 
@@ -240,28 +241,33 @@ public class MemcachedConnector extends SocketChannelController {
 		if (this.socketOptions.get(StandardSocketOption.SO_REUSEADDR) != null) {
 			socketChannel.socket().setReuseAddress(
 					StandardSocketOption.SO_REUSEADDR.type().cast(
-							this.socketOptions.get(StandardSocketOption.SO_REUSEADDR)));
+							this.socketOptions
+									.get(StandardSocketOption.SO_REUSEADDR)));
 		}
 		if (this.socketOptions.get(StandardSocketOption.TCP_NODELAY) != null) {
 			socketChannel.socket().setTcpNoDelay(
 					StandardSocketOption.TCP_NODELAY.type().cast(
-							this.socketOptions.get(StandardSocketOption.TCP_NODELAY)));
+							this.socketOptions
+									.get(StandardSocketOption.TCP_NODELAY)));
 		}
 		if (this.socketOptions.get(StandardSocketOption.SO_RCVBUF) != null) {
 			socketChannel.socket().setReceiveBufferSize(
 					StandardSocketOption.SO_RCVBUF.type().cast(
-							this.socketOptions.get(StandardSocketOption.SO_RCVBUF)));
+							this.socketOptions
+									.get(StandardSocketOption.SO_RCVBUF)));
 
 		}
 		if (this.socketOptions.get(StandardSocketOption.SO_SNDBUF) != null) {
 			socketChannel.socket().setSendBufferSize(
 					StandardSocketOption.SO_SNDBUF.type().cast(
-							this.socketOptions.get(StandardSocketOption.SO_SNDBUF)));
+							this.socketOptions
+									.get(StandardSocketOption.SO_SNDBUF)));
 		}
 		if (this.socketOptions.get(StandardSocketOption.SO_KEEPALIVE) != null) {
 			socketChannel.socket().setKeepAlive(
 					StandardSocketOption.SO_KEEPALIVE.type().cast(
-							this.socketOptions.get(StandardSocketOption.SO_KEEPALIVE)));
+							this.socketOptions
+									.get(StandardSocketOption.SO_KEEPALIVE)));
 		}
 		ConnectFuture future = new ConnectFuture(address, weight);
 		if (!socketChannel.connect(address)) {

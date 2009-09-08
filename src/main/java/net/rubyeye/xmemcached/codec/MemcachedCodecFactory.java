@@ -37,7 +37,7 @@ public class MemcachedCodecFactory implements CodecFactory<Command> {
 	/**
 	 * return the memcached protocol decoder
 	 */
-	@Override
+	
 	public final CodecFactory.Decoder<Command> getDecoder() {
 		return this.decoder;
 
@@ -46,7 +46,7 @@ public class MemcachedCodecFactory implements CodecFactory<Command> {
 	/**
 	 * return the memcached protocol encoder
 	 */
-	@Override
+	
 	public final CodecFactory.Encoder<Command> getEncoder() {
 		return this.encoder;
 	}

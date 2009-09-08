@@ -48,7 +48,7 @@ public class ArrayMemcachedSessionLocator implements MemcachedSessionLocator {
 		return hash % size;
 	}
 
-	@Override
+	
 	public final Session getSessionByKey(final String key) {
 		if (this.sessions == null || this.sessions.size() == 0) {
 			return null;
@@ -78,7 +78,7 @@ public class ArrayMemcachedSessionLocator implements MemcachedSessionLocator {
 		}
 	}
 
-	@Override
+	
 	public final void updateSessions(final Collection<Session> list) {
 		Collection<Session> copySessions = list;
 		List<Session> newSessions = new ArrayList<Session>(

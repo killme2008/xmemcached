@@ -45,7 +45,7 @@ public class MemcachedDecoder implements Decoder<Command> {
 	public static final ByteBufferMatcher SPLIT_MATCHER = new ShiftAndByteBufferMatcher(
 			ByteUtils.SPLIT);
 
-	@Override
+	
 	public Command decode(ByteBuffer buffer, Session origSession) {
 		MemcachedTCPSession session = (MemcachedTCPSession) origSession;
 		if (session.getCurrentCommand() != null) {

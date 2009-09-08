@@ -26,38 +26,38 @@ public class MemcachedClientStateListenerAdapter implements
 	}
 
 	public final MemcachedClientStateListener getMemcachedClientStateListener() {
-		return memcachedClientStateListener;
+		return this.memcachedClientStateListener;
 	}
 
 	public final MemcachedClient getMemcachedClient() {
-		return memcachedClient;
+		return this.memcachedClient;
 	}
 
-	@Override
+	
 	public final void onAllSessionClosed(Controller acceptor) {
 
 	}
 
-	@Override
+	
 	public final void onException(Controller acceptor, Throwable t) {
-		memcachedClientStateListener.onException(memcachedClient, t);
+		this.memcachedClientStateListener.onException(this.memcachedClient, t);
 
 	}
 
-	@Override
+	
 	public final void onReady(Controller acceptor) {
 
 	}
 
-	@Override
+	
 	public final void onStarted(Controller acceptor) {
-		memcachedClientStateListener.onStarted(memcachedClient);
+		this.memcachedClientStateListener.onStarted(this.memcachedClient);
 
 	}
 
-	@Override
+	
 	public final void onStopped(Controller acceptor) {
-		memcachedClientStateListener.onShutDown(memcachedClient);
+		this.memcachedClientStateListener.onShutDown(this.memcachedClient);
 
 	}
 

@@ -136,7 +136,6 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 		this.opTimeout = opTimeout;
 	}
 
-	@Override
 	public void setHealSessionInterval(long healConnectionInterval) {
 		if (null != this.connector) {
 			this.connector.setHealSessionInterval(healConnectionInterval);
@@ -302,7 +301,6 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 		}
 	}
 
-	@Override
 	public void addOneServerWithWeight(String server, int weight)
 			throws IOException {
 		InetSocketAddress address = AddrUtil.getOneAddress(server);
@@ -321,7 +319,6 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 	 * 
 	 * @see net.rubyeye.xmemcached.MemcachedClient#getServersDescription()
 	 */
-	@Override
 	public final List<String> getServersDescription() {
 		final List<String> result = new ArrayList<String>();
 		for (Session session : this.connector.getSessionSet()) {
@@ -511,7 +508,6 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 		}
 	}
 
-	@Override
 	public void setOptimizeGet(boolean optimizeGet) {
 		this.connector.setOptimizeGet(optimizeGet);
 	}
@@ -1051,13 +1047,12 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 	}
 
 	@SuppressWarnings("unchecked")
-	@Override
 	public void setWithNoReply(String key, int exp, Object value)
 			throws InterruptedException, MemcachedException {
 		setWithNoReply(key, exp, value, this.transcoder);
 	}
 
-	@Override
+
 	public <T> void setWithNoReply(String key, int exp, T value,
 			Transcoder<T> transcoder) throws InterruptedException,
 			MemcachedException {
@@ -1170,7 +1165,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 		return add(key, exp, value, transcoder, this.opTimeout);
 	}
 
-	@Override
+	
 	@SuppressWarnings("unchecked")
 	public void addWithNoReply(String key, int exp, Object value)
 			throws InterruptedException, MemcachedException {
@@ -1178,7 +1173,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 
 	}
 
-	@Override
+	
 	public <T> void addWithNoReply(String key, int exp, T value,
 			Transcoder<T> transcoder) throws InterruptedException,
 			MemcachedException {
@@ -1192,7 +1187,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 
 	}
 
-	@Override
+	
 	@SuppressWarnings("unchecked")
 	public void replaceWithNoReply(String key, int exp, Object value)
 			throws InterruptedException, MemcachedException {
@@ -1200,7 +1195,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 
 	}
 
-	@Override
+	
 	public <T> void replaceWithNoReply(String key, int exp, T value,
 			Transcoder<T> transcoder) throws InterruptedException,
 			MemcachedException {
@@ -1290,7 +1285,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 				keyBytes, value, false, this.transcoder), timeout);
 	}
 
-	@Override
+	
 	public void appendWithNoReply(String key, Object value)
 			throws InterruptedException, MemcachedException {
 		byte[] keyBytes = checkStoreArguments(key, 0, value);
@@ -1328,7 +1323,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 				keyBytes, value, false, this.transcoder), timeout);
 	}
 
-	@Override
+	
 	public void prependWithNoReply(String key, Object value)
 			throws InterruptedException, MemcachedException {
 		byte[] keyBytes = checkStoreArguments(key, 0, value);
@@ -1472,13 +1467,13 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 		return cas(key, exp, getsReponse, operation, this.transcoder);
 	}
 
-	@Override
+	
 	public <T> void casWithNoReply(String key, CASOperation<T> operation)
 			throws TimeoutException, InterruptedException, MemcachedException {
 		casWithNoReply(key, 0, operation);
 	}
 
-	@Override
+	
 	public <T> void casWithNoReply(String key, GetsResponse<T> getsResponse,
 			CASOperation<T> operation) throws TimeoutException,
 			InterruptedException, MemcachedException {
@@ -1486,7 +1481,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 
 	}
 
-	@Override
+	
 	@SuppressWarnings("unchecked")
 	public <T> void casWithNoReply(String key, int exp,
 			CASOperation<T> operation) throws TimeoutException,
@@ -1497,7 +1492,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 
 	}
 
-	@Override
+	
 	@SuppressWarnings("unchecked")
 	public <T> void casWithNoReply(String key, int exp,
 			GetsResponse<T> getsReponse, CASOperation<T> operation)
@@ -1671,7 +1666,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 		flushAll(this.opTimeout);
 	}
 
-	@Override
+	
 	public void flushAllWithNoReply() throws InterruptedException,
 			MemcachedException {
 		try {
@@ -1690,7 +1685,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 		}
 	}
 
-	@Override
+	
 	public void flushAllWithNoReply(InetSocketAddress address)
 			throws MemcachedException, InterruptedException {
 		try {
@@ -1750,7 +1745,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 		}
 	}
 
-	@Override
+	
 	public void setLoggingLevelVerbosity(InetSocketAddress address, int level)
 			throws TimeoutException, InterruptedException, MemcachedException {
 		setMemcachedLoggingLevel(address, level, false);
@@ -1781,7 +1776,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 		}
 	}
 
-	@Override
+	
 	public void setLoggingLevelVerbosityWithNoReply(InetSocketAddress address,
 			int level) throws InterruptedException, MemcachedException {
 		try {
@@ -1930,13 +1925,13 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 		return (Map<String, String>) command.getResult();
 	}
 
-	@Override
+	
 	public final Map<InetSocketAddress, Map<String, String>> getStats()
 			throws MemcachedException, InterruptedException, TimeoutException {
 		return getStats(this.opTimeout);
 	}
 
-	@Override
+	
 	public final Map<InetSocketAddress, Map<String, String>> getStatsByItem(
 			String itemName) throws MemcachedException, InterruptedException,
 			TimeoutException {
@@ -1976,7 +1971,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 		return collectResult;
 	}
 
-	@Override
+	
 	public final Map<InetSocketAddress, String> getVersions()
 			throws TimeoutException, InterruptedException, MemcachedException {
 		return getVersions(this.opTimeout);
@@ -2013,7 +2008,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 		return collectResult;
 	}
 
-	@Override
+	
 	public Map<InetSocketAddress, Map<String, String>> getStats(long timeout)
 			throws MemcachedException, InterruptedException, TimeoutException {
 		return getStatsByItem(null, timeout);
@@ -2055,7 +2050,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 		}
 	}
 
-	@Override
+	
 	public void setConnectionPoolSize(int poolSize) {
 		if (!this.shutdown) {
 			throw new IllegalStateException(
@@ -2127,7 +2122,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 		}
 	}
 
-	@Override
+	
 	public final Collection<InetSocketAddress> getAvaliableServers() {
 		Set<Session> sessionSet = this.connector.getSessionSet();
 		Set<InetSocketAddress> result = new HashSet<InetSocketAddress>();
@@ -2137,7 +2132,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 		return Collections.unmodifiableSet(result);
 	}
 
-	@Override
+	
 	public void addStateListener(MemcachedClientStateListener listener) {
 		MemcachedClientStateListenerAdapter adapter = new MemcachedClientStateListenerAdapter(
 				listener, this);
@@ -2145,7 +2140,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 		this.connector.addStateListener(adapter);
 	}
 
-	@Override
+	
 	public Collection<MemcachedClientStateListener> getStateListeners() {
 		final List<MemcachedClientStateListener> result = new ArrayList<MemcachedClientStateListener>(
 				this.stateListenerAdapters.size());
@@ -2155,7 +2150,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 		return result;
 	}
 
-	@Override
+	
 	public void removeStateListener(MemcachedClientStateListener listener) {
 		for (MemcachedClientStateListenerAdapter adapter : this.stateListenerAdapters) {
 			if (adapter.getMemcachedClientStateListener().equals(listener)) {
@@ -2165,7 +2160,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 		}
 	}
 
-	@Override
+	
 	public Protocol getProtocol() {
 		return this.commandFactory.getProtocol();
 	}

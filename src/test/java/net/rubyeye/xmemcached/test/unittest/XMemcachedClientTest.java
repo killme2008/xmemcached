@@ -44,6 +44,7 @@ public abstract class XMemcachedClientTest extends TestCase {
 	MemcachedClient memcachedClient;
 	Properties properties;
 
+	
 	@Override
 	public void setUp() throws Exception {
 		createClients();
@@ -219,12 +220,12 @@ public abstract class XMemcachedClientTest extends TestCase {
 		this.memcachedClient.casWithNoReply("a", 0, getsResponse,
 				new CASOperation<Integer>() {
 
-					@Override
+					
 					public int getMaxTries() {
 						return 1;
 					}
 
-					@Override
+					
 					public Integer getNewValue(long currentCAS,
 							Integer currentValue) {
 						return currentValue + 1;
@@ -236,12 +237,12 @@ public abstract class XMemcachedClientTest extends TestCase {
 		this.memcachedClient.casWithNoReply("a", getsResponse,
 				new CASOperation<Integer>() {
 
-					@Override
+					
 					public int getMaxTries() {
 						return 1;
 					}
 
-					@Override
+					
 					public Integer getNewValue(long currentCAS,
 							Integer currentValue) {
 						return currentValue + 1;
@@ -252,12 +253,12 @@ public abstract class XMemcachedClientTest extends TestCase {
 
 		this.memcachedClient.casWithNoReply("a", new CASOperation<Integer>() {
 
-			@Override
+			
 			public int getMaxTries() {
 				return 1;
 			}
 
-			@Override
+			
 			public Integer getNewValue(long currentCAS, Integer currentValue) {
 				return currentValue + 1;
 			}
@@ -471,12 +472,12 @@ public abstract class XMemcachedClientTest extends TestCase {
 		assertTrue(this.memcachedClient.cas("name", getsResponse,
 				new CASOperation<String>() {
 
-					@Override
+					
 					public int getMaxTries() {
 						return 1;
 					}
 
-					@Override
+					
 					public String getNewValue(long currentCAS,
 							String currentValue) {
 						return "zhuang";
@@ -646,11 +647,13 @@ public abstract class XMemcachedClientTest extends TestCase {
 
 	public void _testErrorCommand() throws Exception {
 		Command nonexisCmd = new Command() {
+			
 			@Override
 			public boolean decode(MemcachedTCPSession session, ByteBuffer buffer) {
 				return decodeError(ByteUtils.nextLine(buffer));
 			}
 
+			
 			@Override
 			public void encode(BufferAllocator bufferAllocator) {
 				this.ioBuffer = bufferAllocator.wrap(ByteBuffer.wrap("test\r\n"
@@ -686,6 +689,7 @@ public abstract class XMemcachedClientTest extends TestCase {
 		}
 	}
 
+	
 	@Override
 	public void tearDown() throws Exception {
 		this.memcachedClient.shutdown();
