@@ -21,7 +21,9 @@ Then,xmemcached will create two connections to one memcached server.Your applica
 
 6.Upgrade yanf4j to 1.0-SNAPSHOT.This version is introduce SocketOption class to configure tcp options easily,and refactoring for implement aio(jdk7 nio2.0).
 
-7.BUG fixed since 1.1.3 and 1.2.0-beta
+7.Remove ant build script,simplify maven build.
+
+8.BUG fixed since 1.1.3 and 1.2.0-beta
 
 
 --------------------------------------------
