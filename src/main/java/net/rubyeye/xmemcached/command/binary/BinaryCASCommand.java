@@ -6,7 +6,7 @@ import net.rubyeye.xmemcached.command.CommandType;
 import net.rubyeye.xmemcached.transcoders.Transcoder;
 
 /**
- * Base binary protocol implementation
+ * CAS binary protocol implementation
  * 
  * @author dennis
  * 
