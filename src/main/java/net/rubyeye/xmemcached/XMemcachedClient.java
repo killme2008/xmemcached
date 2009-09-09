@@ -296,7 +296,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 		List<InetSocketAddress> addresses = AddrUtil.getAddresses(hostList);
 		if (addresses != null && addresses.size() > 0) {
 			for (InetSocketAddress address : addresses) {
-				this.connector.connect(address, 1);
+				connect(address, 1);
 			}
 		}
 	}
@@ -310,7 +310,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 		if (weight <= 0) {
 			throw new IllegalArgumentException("weight<=0");
 		}
-		this.connector.connect(address, weight);
+		connect(address, weight);
 
 	}
 

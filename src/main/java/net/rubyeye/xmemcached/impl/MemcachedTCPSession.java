@@ -51,14 +51,6 @@ public class MemcachedTCPSession extends NioTCPSession {
 	private final MemcachedOptimizer optimiezer;
 	private volatile boolean allowReconnect;
 
-	public static final String CURRENT_GET_KEY = "current_key";
-
-	public static final String CURRENT_GET_VALUES = "current_values";
-
-	public static final String CURRENT_LINE_ATTR = "current_line";
-
-	public static final String PARSE_STATUS_ATTR = "parse_status";
-
 	public final int getWeight() {
 		return this.weight;
 	}
@@ -176,7 +168,7 @@ public class MemcachedTCPSession extends NioTCPSession {
 	}
 
 	public final Command getCurrentCommand() {
-		return currentCommand.get();
+		return this.currentCommand.get();
 	}
 
 	public final void takeCurrentCommand() {
