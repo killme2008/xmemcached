@@ -1,17 +1,18 @@
 /**
  *Copyright [2009-2010] [dennis zhuang(killme2008@gmail.com)]
  *Licensed under the Apache License, Version 2.0 (the "License");
- *you may not use this file except in compliance with the License. 
- *You may obtain a copy of the License at 
- *             http://www.apache.org/licenses/LICENSE-2.0 
- *Unless required by applicable law or agreed to in writing, 
- *software distributed under the License is distributed on an "AS IS" BASIS, 
- *WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, 
+ *you may not use this file except in compliance with the License.
+ *You may obtain a copy of the License at
+ *             http://www.apache.org/licenses/LICENSE-2.0
+ *Unless required by applicable law or agreed to in writing,
+ *software distributed under the License is distributed on an "AS IS" BASIS,
+ *WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
  *either express or implied. See the License for the specific language governing permissions and limitations under the License
  */
 package net.rubyeye.xmemcached.test.legacy;
 
 import java.io.BufferedReader;
+import java.net.InetSocketAddress;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -23,7 +24,7 @@ import net.rubyeye.xmemcached.MemcachedClient;
 import net.rubyeye.xmemcached.MemcachedClientBuilder;
 import net.rubyeye.xmemcached.XMemcachedClientBuilder;
 import net.rubyeye.xmemcached.exception.MemcachedException;
-import net.rubyeye.xmemcached.impl.KetamaMemcachedSessionLocator;
+import net.rubyeye.xmemcached.impl.ElectionMemcachedSessionLocator;
 
 import com.google.code.yanf4j.util.ResourcesUtils;
 
@@ -38,14 +39,14 @@ import com.google.code.yanf4j.util.ResourcesUtils;
 public class CacheHitRateTest {
 
 	public static void main(String[] args) throws Exception {
-		String ip = "192.168.222.100";
+		String ip = "localhost";
 
 		// Replace this hashAlg with other HashAlgorithm
 		HashAlgorithm hashAlg = HashAlgorithm.KETAMA_HASH;
 
 		MemcachedClientBuilder memcachedClientBuilder = new XMemcachedClientBuilder();
-		memcachedClientBuilder
-				.setSessionLocator(new KetamaMemcachedSessionLocator(hashAlg));
+		ElectionMemcachedSessionLocator sessionLocator = new ElectionMemcachedSessionLocator();
+		memcachedClientBuilder.setSessionLocator(sessionLocator);
 		MemcachedClient client = memcachedClientBuilder.build();
 		client.addServer(ip, 12000);
 		client.addServer(ip, 12001);
@@ -70,7 +71,9 @@ public class CacheHitRateTest {
 		// Add two server,calculate the cache hit rate now
 		client.addServer(ip, 12010);
 		client.addServer(ip, 12011);
+		client.addServer(ip, 12012);
 		printHitRate(client, keys);
+		printCurrentItems(client);
 		client.shutdown();
 	}
 
@@ -84,6 +87,17 @@ public class CacheHitRateTest {
 		}
 		System.out.println(hashAlg.name() + ":"
 				+ (System.currentTimeMillis() - start));
+	}
+
+	private static void printCurrentItems(MemcachedClient client)
+			throws Exception {
+		System.out.println("After add two nodes,every node's current items:");
+		Map<InetSocketAddress, Map<String, String>> result = client.getStats();
+		for (Map.Entry<InetSocketAddress, Map<String, String>> entry : result
+				.entrySet()) {
+			System.out.println(entry.getKey() + ",current items:"
+					+ entry.getValue().get("curr_items"));
+		}
 	}
 
 	private static void printHitRate(MemcachedClient client, Set<String> keys)
@@ -106,6 +120,7 @@ public class CacheHitRateTest {
 	 * @throws Exception
 	 */
 	public static Set<String> init(MemcachedClient client) throws Exception {
+		client.flushAll(10000);
 		BufferedReader reader = new BufferedReader(ResourcesUtils
 				.getResourceAsReader("golden_compass.txt"));
 		String line = null;

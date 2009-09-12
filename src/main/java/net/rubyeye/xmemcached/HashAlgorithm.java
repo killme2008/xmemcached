@@ -62,7 +62,7 @@ public enum HashAlgorithm {
 	/**
 	 * From lua source,it is used for long key
 	 */
-	LUA_HASH;
+	LUA_HASH, ELECTION_HASH;
 
 	private static final long FNV_64_INIT = 0xcbf29ce484222325L;
 	private static final long FNV_64_PRIME = 0x100000001b3L;
@@ -85,7 +85,7 @@ public enum HashAlgorithm {
 			// return (crc32(shift) >> 16) & 0x7fff;
 			CRC32 crc32 = new CRC32();
 			crc32.update(ByteUtils.getBytes(k));
-			rv = (crc32.getValue() >> 16) & 0x7fff;
+			rv = crc32.getValue() >> 16 & 0x7fff;
 			break;
 		case FNV1_64_HASH: {
 			// Thanks to pierre@demartines.com for the pointer
@@ -124,16 +124,17 @@ public enum HashAlgorithm {
 			}
 		}
 			break;
+		case ELECTION_HASH:
 		case KETAMA_HASH:
 			byte[] bKey = computeMd5(k);
-			rv = ((long) (bKey[3] & 0xFF) << 24)
-					| ((long) (bKey[2] & 0xFF) << 16)
-					| ((long) (bKey[1] & 0xFF) << 8) | (bKey[0] & 0xFF);
+			rv = (long) (bKey[3] & 0xFF) << 24 | (long) (bKey[2] & 0xFF) << 16
+					| (long) (bKey[1] & 0xFF) << 8 | bKey[0] & 0xFF;
 			break;
+
 		case MYSQL_HASH:
 			int nr2 = 4;
 			for (int i = 0; i < k.length(); i++) {
-				rv ^= (((rv & 63) + nr2) * k.charAt(i)) + (rv << 8);
+				rv ^= ((rv & 63) + nr2) * k.charAt(i) + (rv << 8);
 				nr2 += 3;
 			}
 			break;
@@ -142,11 +143,11 @@ public enum HashAlgorithm {
 			for (int i = 0; i < k.length(); i++) {
 				rv = (rv << 4) + k.charAt(i);
 				if ((x = rv & 0xF0000000L) != 0) {
-					rv ^= (x >> 24);
+					rv ^= x >> 24;
 					rv &= ~x;
 				}
 			}
-			rv = (rv & 0x7FFFFFFF);
+			rv = rv & 0x7FFFFFFF;
 			break;
 		case RS_HASH:
 			long b = 378551;
@@ -155,13 +156,13 @@ public enum HashAlgorithm {
 				rv = rv * a + k.charAt(i);
 				a *= b;
 			}
-			rv = (rv & 0x7FFFFFFF);
+			rv = rv & 0x7FFFFFFF;
 			break;
 		case LUA_HASH:
 			int step = (k.length() >> 5) + 1;
 			rv = k.length();
 			for (int len = k.length(); len >= step; len -= step) {
-				rv = rv ^ ((rv << 5) + (rv >> 2) + k.charAt(len - 1));
+				rv = rv ^ (rv << 5) + (rv >> 2) + k.charAt(len - 1);
 			}
 		default:
 			assert false;
