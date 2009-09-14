@@ -96,18 +96,18 @@ public class TextStoreCommand extends Command {
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
 	public final void encode(BufferAllocator bufferAllocator) {
-		final CachedData data = this.transcoder.encode(this.value);
+		final CachedData data = encodeValue();
 		byte[] flagBytes = ByteUtils.getBytes(String.valueOf(data.getFlag()));
 		byte[] expBytes = ByteUtils.getBytes(String.valueOf(this.expTime));
 		byte[] dataLenBytes = ByteUtils.getBytes(String
 				.valueOf(data.getData().length));
 		byte[] casBytes = ByteUtils.getBytes(String.valueOf(this.cas));
 		String cmdStr = this.commandType.name().toLowerCase();
-		int size = cmdStr.length() + 1 + this.keyBytes.length + 1 + flagBytes.length
-				+ 1 + expBytes.length + 1 + data.getData().length + 2
-				* Constants.CRLF.length + dataLenBytes.length;
+		int size = cmdStr.length() + 1 + this.keyBytes.length + 1
+				+ flagBytes.length + 1 + expBytes.length + 1
+				+ data.getData().length + 2 * Constants.CRLF.length
+				+ dataLenBytes.length;
 		if (this.commandType == CommandType.CAS) {
 			size += 1 + casBytes.length;
 		}
@@ -138,6 +138,12 @@ public class TextStoreCommand extends Command {
 		ByteUtils.setArguments(this.ioBuffer, data.getData());
 
 		this.ioBuffer.flip();
+	}
+
+	@SuppressWarnings("unchecked")
+	protected CachedData encodeValue() {
+		final CachedData data = this.transcoder.encode(this.value);
+		return data;
 	}
 
 }
