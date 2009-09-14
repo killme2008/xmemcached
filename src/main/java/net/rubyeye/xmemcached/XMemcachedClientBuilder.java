@@ -13,6 +13,7 @@ import net.rubyeye.xmemcached.command.TextCommandFactory;
 import net.rubyeye.xmemcached.impl.ArrayMemcachedSessionLocator;
 import net.rubyeye.xmemcached.transcoders.SerializingTranscoder;
 import net.rubyeye.xmemcached.transcoders.Transcoder;
+import net.rubyeye.xmemcached.utils.Protocol;
 
 import com.google.code.yanf4j.config.Configuration;
 import com.google.code.yanf4j.core.SocketOption;
@@ -40,7 +41,6 @@ public class XMemcachedClientBuilder implements MemcachedClientBuilder {
 
 	private List<MemcachedClientStateListener> stateListeners = new ArrayList<MemcachedClientStateListener>();
 
-	
 	public void addStateListener(MemcachedClientStateListener stateListener) {
 		this.stateListeners.add(stateListener);
 	}
@@ -73,12 +73,10 @@ public class XMemcachedClientBuilder implements MemcachedClientBuilder {
 		this.connectionPoolSize = poolSize;
 	}
 
-	
 	public void removeStateListener(MemcachedClientStateListener stateListener) {
 		this.stateListeners.remove(stateListener);
 	}
 
-	
 	public void setStateListeners(
 			List<MemcachedClientStateListener> stateListeners) {
 		if (stateListeners == null) {
@@ -92,12 +90,12 @@ public class XMemcachedClientBuilder implements MemcachedClientBuilder {
 	@SuppressWarnings("unchecked")
 	public static final Map<SocketOption, Object> getDefaultSocketOptions() {
 		Map<SocketOption, Object> map = new HashMap<SocketOption, Object>();
-		map.put(StandardSocketOption.TCP_NODELAY, MemcachedClient.DEFAULT_TCP_NO_DELAY);
+		map.put(StandardSocketOption.TCP_NODELAY,
+				MemcachedClient.DEFAULT_TCP_NO_DELAY);
 		map.put(StandardSocketOption.SO_RCVBUF,
 				MemcachedClient.DEFAULT_TCP_RECV_BUFF_SIZE);
-		map
-				.put(StandardSocketOption.SO_KEEPALIVE,
-						MemcachedClient.DEFAULT_TCP_KEEPLIVE);
+		map.put(StandardSocketOption.SO_KEEPALIVE,
+				MemcachedClient.DEFAULT_TCP_KEEPLIVE);
 		map.put(StandardSocketOption.SO_SNDBUF,
 				MemcachedClient.DEFAULT_TCP_SEND_BUFF_SIZE);
 		return map;
@@ -212,11 +210,13 @@ public class XMemcachedClientBuilder implements MemcachedClientBuilder {
 	 * @see net.rubyeye.xmemcached.MemcachedClientBuilder#build()
 	 */
 	public MemcachedClient build() throws IOException {
+		XMemcachedClient memcachedClient;
 		if (this.weights == null) {
-			return new XMemcachedClient(this.sessionLocator,
+			memcachedClient = new XMemcachedClient(this.sessionLocator,
 					this.bufferAllocator, this.configuration,
 					this.socketOptions, this.commandFactory, this.transcoder,
-					this.addressList, this.stateListeners, this.connectionPoolSize);
+					this.addressList, this.stateListeners,
+					this.connectionPoolSize);
 		} else {
 			if (this.addressList == null) {
 				throw new IllegalArgumentException("Null Address List");
@@ -225,12 +225,16 @@ public class XMemcachedClientBuilder implements MemcachedClientBuilder {
 				throw new IllegalArgumentException(
 						"Weights Array's length is less than server's number");
 			}
-			return new XMemcachedClient(this.sessionLocator,
+			memcachedClient = new XMemcachedClient(this.sessionLocator,
 					this.bufferAllocator, this.configuration,
 					this.socketOptions, this.commandFactory, this.transcoder,
 					this.addressList, this.weights, this.stateListeners,
 					this.connectionPoolSize);
 		}
+		if (this.commandFactory.getProtocol() == Protocol.Kestrel) {
+			memcachedClient.setOptimizeGet(false);
+		}
+		return memcachedClient;
 	}
 
 	@SuppressWarnings("unchecked")
