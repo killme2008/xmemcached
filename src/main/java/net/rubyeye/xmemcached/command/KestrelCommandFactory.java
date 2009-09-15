@@ -55,9 +55,9 @@ public class KestrelCommandFactory implements CommandFactory {
 	}
 
 	public Command createGetCommand(String key, byte[] keyBytes,
-			CommandType cmdType) {
+			CommandType cmdType, Transcoder transcoder) {
 		return new KestrelGetCommand(key, keyBytes, cmdType,
-				new CountDownLatch(1));
+				new CountDownLatch(1),transcoder);
 	}
 
 	public <T> Command createGetMultiCommand(Collection<String> keys,

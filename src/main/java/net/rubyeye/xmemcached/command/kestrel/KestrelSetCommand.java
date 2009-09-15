@@ -23,15 +23,17 @@ public class KestrelSetCommand extends TextStoreCommand {
 	protected CachedData encodeValue() {
 
 		final CachedData value = this.transcoder.encode(this.value);
-
-		int flags = value.getFlag();
-		byte[] flagBytes = KestrelGetCommand.transcoderUtils.encodeInt(flags);
-		byte[] origData = value.getData();
-		byte[] newData = new byte[origData.length + 4];
-		System.arraycopy(flagBytes, 0, newData, 0, 4);
-		System.arraycopy(origData, 0, newData, 4, origData.length);
-		value.setCapacity(newData.length);
-		value.setData(newData);
+		if (!this.transcoder.isPrimitiveAsString()) {
+			int flags = value.getFlag();
+			byte[] flagBytes = KestrelGetCommand.transcoderUtils
+					.encodeInt(flags);
+			byte[] origData = value.getData();
+			byte[] newData = new byte[origData.length + 4];
+			System.arraycopy(flagBytes, 0, newData, 0, 4);
+			System.arraycopy(origData, 0, newData, 4, origData.length);
+			value.setCapacity(newData.length);
+			value.setData(newData);
+		}
 		return value;
 	}
 

@@ -164,7 +164,7 @@ public final class TextCommandFactory implements CommandFactory {
 	 * byte[], net.rubyeye.xmemcached.command.CommandType)
 	 */
 	public final Command createGetCommand(final String key,
-			final byte[] keyBytes, final CommandType cmdType) {
+			final byte[] keyBytes, final CommandType cmdType, Transcoder transcoder) {
 		return new TextGetOneCommand(key, keyBytes, cmdType,
 				new CountDownLatch(1));
 	}

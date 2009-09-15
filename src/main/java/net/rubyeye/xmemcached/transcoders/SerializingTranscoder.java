@@ -10,7 +10,18 @@ import java.util.Date;
 public class SerializingTranscoder extends BaseSerializingTranscoder implements
 		Transcoder<Object> {
 
+	public void setPackZeros(boolean packZeros) {
+		this.tu.setPackZeros(packZeros);
+
+	}
+
+	public void setPrimitiveAsString(boolean primitiveAsString) {
+		this.primitiveAsString = primitiveAsString;
+	}
+
 	private final int maxSize;
+
+	private boolean primitiveAsString;
 
 	public final int getMaxSize() {
 		return this.maxSize;
@@ -30,9 +41,8 @@ public class SerializingTranscoder extends BaseSerializingTranscoder implements
 	public static final int SPECIAL_FLOAT = (6 << 8);
 	public static final int SPECIAL_DOUBLE = (7 << 8);
 	public static final int SPECIAL_BYTEARRAY = (8 << 8);
-	
+
 	private final TranscoderUtils tu = new TranscoderUtils(true);
-	
 
 	/**
 	 * Get a serializing transcoder with the default max data size.
@@ -46,6 +56,13 @@ public class SerializingTranscoder extends BaseSerializingTranscoder implements
 	 */
 	public SerializingTranscoder(int max) {
 		this.maxSize = max;
+	}
+	public boolean isPackZeros() {
+		return this.tu.isPackZeros();
+	}
+
+	public boolean isPrimitiveAsString() {
+		return this.primitiveAsString;
 	}
 
 	/*
@@ -62,37 +79,48 @@ public class SerializingTranscoder extends BaseSerializingTranscoder implements
 		int flags = d.getFlag() & SPECIAL_MASK;
 		if ((d.getFlag() & SERIALIZED) != 0 && data != null) {
 			rv = deserialize(data);
-		} else if (flags != 0 && data != null) {
-			switch (flags) {
-			case SPECIAL_BOOLEAN:
-				rv = Boolean.valueOf(this.tu.decodeBoolean(data));
-				break;
-			case SPECIAL_INT:
-				rv = Integer.valueOf(this.tu.decodeInt(data));
-				break;
-			case SPECIAL_LONG:
-				rv = Long.valueOf(this.tu.decodeLong(data));
-				break;
-			case SPECIAL_DATE:
-				rv = new Date(this.tu.decodeLong(data));
-				break;
-			case SPECIAL_BYTE:
-				rv = Byte.valueOf(this.tu.decodeByte(data));
-				break;
-			case SPECIAL_FLOAT:
-				rv = new Float(Float.intBitsToFloat(this.tu.decodeInt(data)));
-				break;
-			case SPECIAL_DOUBLE:
-				rv = new Double(Double.longBitsToDouble(this.tu.decodeLong(data)));
-				break;
-			case SPECIAL_BYTEARRAY:
-				rv = data;
-				break;
-			default:
-				log.warn(String.format("Undecodeable with flags %x", flags));
-			}
 		} else {
-			rv = decodeString(data);
+			if (this.primitiveAsString) {
+				if (flags == 0) {
+					return decodeString(d.getData());
+				}
+			}
+			if (flags != 0 && data != null) {
+				switch (flags) {
+				case SPECIAL_BOOLEAN:
+					rv = Boolean.valueOf(this.tu.decodeBoolean(data));
+					break;
+				case SPECIAL_INT:
+					rv = Integer.valueOf(this.tu.decodeInt(data));
+					break;
+				case SPECIAL_LONG:
+					rv = Long.valueOf(this.tu.decodeLong(data));
+					break;
+				case SPECIAL_BYTE:
+					rv = Byte.valueOf(this.tu.decodeByte(data));
+					break;
+				case SPECIAL_FLOAT:
+					rv = new Float(Float
+							.intBitsToFloat(this.tu.decodeInt(data)));
+					break;
+				case SPECIAL_DOUBLE:
+					rv = new Double(Double.longBitsToDouble(this.tu
+							.decodeLong(data)));
+					break;
+				case SPECIAL_DATE:
+					rv = new Date(this.tu.decodeLong(data));
+					break;
+				case SPECIAL_BYTEARRAY:
+					rv = data;
+					break;
+				default:
+					log
+							.warn(String.format("Undecodeable with flags %x",
+									flags));
+				}
+			} else {
+				rv = decodeString(data);
+			}
 		}
 		return rv;
 	}
@@ -108,25 +136,49 @@ public class SerializingTranscoder extends BaseSerializingTranscoder implements
 		if (o instanceof String) {
 			b = encodeString((String) o);
 		} else if (o instanceof Long) {
-			b = this.tu.encodeLong((Long) o);
+			if (this.primitiveAsString) {
+				b = encodeString(o.toString());
+			} else {
+				b = this.tu.encodeLong((Long) o);
+			}
 			flags |= SPECIAL_LONG;
 		} else if (o instanceof Integer) {
-			b = this.tu.encodeInt((Integer) o);
+			if (this.primitiveAsString) {
+				b = encodeString(o.toString());
+			} else {
+				b = this.tu.encodeInt((Integer) o);
+			}
 			flags |= SPECIAL_INT;
 		} else if (o instanceof Boolean) {
-			b = this.tu.encodeBoolean((Boolean) o);
+			if (this.primitiveAsString) {
+				b = encodeString(o.toString());
+			} else {
+				b = this.tu.encodeBoolean((Boolean) o);
+			}
 			flags |= SPECIAL_BOOLEAN;
 		} else if (o instanceof Date) {
 			b = this.tu.encodeLong(((Date) o).getTime());
 			flags |= SPECIAL_DATE;
 		} else if (o instanceof Byte) {
-			b = this.tu.encodeByte((Byte) o);
+			if (this.primitiveAsString) {
+				b = encodeString(o.toString());
+			} else {
+				b = this.tu.encodeByte((Byte) o);
+			}
 			flags |= SPECIAL_BYTE;
 		} else if (o instanceof Float) {
-			b = this.tu.encodeInt(Float.floatToRawIntBits((Float) o));
+			if (this.primitiveAsString) {
+				b = encodeString(o.toString());
+			} else {
+				b = this.tu.encodeInt(Float.floatToRawIntBits((Float) o));
+			}
 			flags |= SPECIAL_FLOAT;
 		} else if (o instanceof Double) {
-			b = this.tu.encodeLong(Double.doubleToRawLongBits((Double) o));
+			if (this.primitiveAsString) {
+				b = encodeString(o.toString());
+			} else {
+				b = this.tu.encodeLong(Double.doubleToRawLongBits((Double) o));
+			}
 			flags |= SPECIAL_DOUBLE;
 		} else if (o instanceof byte[]) {
 			b = (byte[]) o;
@@ -136,6 +188,12 @@ public class SerializingTranscoder extends BaseSerializingTranscoder implements
 			flags |= SERIALIZED;
 		}
 		assert b != null;
+		if (this.primitiveAsString) {
+			// It is not be SERIALIZED,so change it to string type
+			if ((flags & SERIALIZED) == 0) {
+				flags = 0;
+			}
+		}
 		if (b.length > this.compressionThreshold) {
 			byte[] compressed = compress(b);
 			if (compressed.length < b.length) {
@@ -155,5 +213,4 @@ public class SerializingTranscoder extends BaseSerializingTranscoder implements
 		}
 		return new CachedData(flags, b, this.maxSize, -1);
 	}
-
 }

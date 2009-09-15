@@ -28,6 +28,24 @@ public class WhalinV1Transcoder extends BaseSerializingTranscoder implements
 	public static final int COMPRESSED = 2;
 	public static final int SERIALIZED = 8;
 
+
+	public void setPackZeros(boolean packZeros) {
+		throw new UnsupportedOperationException();
+
+	}
+
+	public void setPrimitiveAsString(boolean primitiveAsString) {
+		throw new UnsupportedOperationException();
+	}
+	public boolean isPackZeros() {
+		return false;
+	}
+
+	public boolean isPrimitiveAsString() {
+		return false;
+	}
+
+
 	public CachedData encode(Object o) {
 		byte[] b = null;
 		int flags = 0;
@@ -62,7 +80,7 @@ public class WhalinV1Transcoder extends BaseSerializingTranscoder implements
 			flags |= SERIALIZED;
 		}
 		assert b != null;
-		if (b.length > compressionThreshold) {
+		if (b.length > this.compressionThreshold) {
 			byte[] compressed = compress(b);
 			if (compressed.length < b.length) {
 				log.debug(String.format("Compressed %s from %d to %d", o
@@ -182,7 +200,7 @@ public class WhalinV1Transcoder extends BaseSerializingTranscoder implements
 
 	private String decodeW1String(byte[] b) {
 		try {
-			return new String(b, 1, b.length - 1, charset);
+			return new String(b, 1, b.length - 1, this.charset);
 		} catch (UnsupportedEncodingException e) {
 			throw new RuntimeException(e);
 		}
@@ -257,7 +275,7 @@ public class WhalinV1Transcoder extends BaseSerializingTranscoder implements
 	private byte[] encodeW1String(String value) {
 		byte[] svalue = null;
 		try {
-			svalue = value.getBytes(charset);
+			svalue = value.getBytes(this.charset);
 		} catch (UnsupportedEncodingException e) {
 			throw new RuntimeException(e);
 		}

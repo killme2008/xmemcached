@@ -1059,6 +1059,11 @@ public interface MemcachedClient {
 	public Protocol getProtocol();
 
 	/**
+	 * Store all primitive type as string,defualt is false.
+	 */
+	public void setPrimitiveAsString(boolean primitiveAsString);
+
+	/**
 	 * In a high concurrent enviroment,you may want to pool memcached
 	 * clients.But a xmemcached client has to start a reactor thread and some
 	 * thread pools,if you create too many clients,the cost is very large.

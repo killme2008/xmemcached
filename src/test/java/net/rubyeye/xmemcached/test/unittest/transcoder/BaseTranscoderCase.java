@@ -6,7 +6,6 @@ import java.util.Collection;
 import java.util.Date;
 
 import junit.framework.TestCase;
-
 import net.rubyeye.xmemcached.transcoders.CachedData;
 import net.rubyeye.xmemcached.transcoders.Transcoder;
 
@@ -21,11 +20,11 @@ public abstract class BaseTranscoderCase extends TestCase {
 
 	protected void setTranscoder(Transcoder<Object> t) {
 		assert t != null;
-		tc=t;
+		this.tc=t;
 	}
 
 	protected Transcoder<Object> getTranscoder() {
-		return tc;
+		return this.tc;
 	}
 
 	public void testSomethingBigger() throws Exception {
@@ -33,60 +32,60 @@ public abstract class BaseTranscoderCase extends TestCase {
 		for(int i=0; i<1024; i++) {
 			dates.add(new Date());
 		}
-		CachedData d=tc.encode(dates);
-		assertEquals(dates, tc.decode(d));
+		CachedData d=this.tc.encode(dates);
+		assertEquals(dates, this.tc.decode(d));
 	}
 
 	public void testDate() throws Exception {
 		Date d=new Date();
-		CachedData cd=tc.encode(d);
-		assertEquals(d, tc.decode(cd));
+		CachedData cd=this.tc.encode(d);
+		assertEquals(d, this.tc.decode(cd));
 	}
 
 	public void testLong() throws Exception {
-		assertEquals(923L, tc.decode(tc.encode(923L)));
+		assertEquals(923L, this.tc.decode(this.tc.encode(923L)));
 	}
 
 	public void testInt() throws Exception {
-		assertEquals(923, tc.decode(tc.encode(923)));
+		assertEquals(923, this.tc.decode(this.tc.encode(923)));
 	}
 
 	public void testShort() throws Exception {
-		assertEquals((short)923, tc.decode(tc.encode((short)923)));
+		assertEquals((short)923, this.tc.decode(this.tc.encode((short)923)));
 	}
 
 	public void testChar() throws Exception {
-		assertEquals('c', tc.decode(tc.encode('c')));
+		assertEquals('c', this.tc.decode(this.tc.encode('c')));
 	}
 
 	public void testBoolean() throws Exception {
-		assertSame(Boolean.TRUE, tc.decode(tc.encode(true)));
-		assertSame(Boolean.FALSE, tc.decode(tc.encode(false)));
+		assertSame(Boolean.TRUE, this.tc.decode(this.tc.encode(true)));
+		assertSame(Boolean.FALSE, this.tc.decode(this.tc.encode(false)));
 	}
 
 	public void testByte() throws Exception {
-		assertEquals((byte)-127, tc.decode(tc.encode((byte)-127)));
+		assertEquals((byte)-127, this.tc.decode(this.tc.encode((byte)-127)));
 	}
 
 	public void testCharacter() throws Exception {
-		assertEquals('c', tc.decode(tc.encode('c')));
+		assertEquals('c', this.tc.decode(this.tc.encode('c')));
 	}
 
 	public void testStringBuilder() throws Exception {
 		StringBuilder sb=new StringBuilder("test");
-		StringBuilder sb2=(StringBuilder)tc.decode(tc.encode(sb));
+		StringBuilder sb2=(StringBuilder)this.tc.decode(this.tc.encode(sb));
 		assertEquals(sb.toString(), sb2.toString());
 	}
 
 	public void testStringBuffer() throws Exception {
 		StringBuffer sb=new StringBuffer("test");
-		StringBuffer sb2=(StringBuffer)tc.decode(tc.encode(sb));
+		StringBuffer sb2=(StringBuffer)this.tc.decode(this.tc.encode(sb));
 		assertEquals(sb.toString(), sb2.toString());
 	}
 
 
 	private void assertFloat(float f) {
-		assertEquals(f, tc.decode(tc.encode(f)));
+		assertEquals(f, this.tc.decode(this.tc.encode(f)));
 	}
 
 	public void testFloat() throws Exception {
@@ -101,7 +100,7 @@ public abstract class BaseTranscoderCase extends TestCase {
 	}
 
 	private void assertDouble(double d) {
-		assertEquals(d, tc.decode(tc.encode(d)));
+		assertEquals(d, this.tc.decode(this.tc.encode(d)));
 	}
 
 	public void testDouble() throws Exception {
@@ -116,8 +115,8 @@ public abstract class BaseTranscoderCase extends TestCase {
 	}
 
 	private void assertLong(long l) {
-		CachedData encoded=tc.encode(l);
-		long decoded=(Long)tc.decode(encoded);
+		CachedData encoded=this.tc.encode(l);
+		long decoded=(Long)this.tc.decode(encoded);
 		assertEquals(l, decoded);
 	}
 
@@ -142,8 +141,8 @@ public abstract class BaseTranscoderCase extends TestCase {
 	}
 
 	private void assertInt(int i) {
-		CachedData encoded=tc.encode(i);
-		int decoded=(Integer)tc.decode(encoded);
+		CachedData encoded=this.tc.encode(i);
+		int decoded=(Integer)this.tc.decode(encoded);
 		assertEquals(i, decoded);
 	}
 
@@ -158,31 +157,31 @@ public abstract class BaseTranscoderCase extends TestCase {
 	}
 
 	public void testBooleanEncoding() throws Exception {
-		assertTrue((Boolean)tc.decode(tc.encode(true)));
-		assertFalse((Boolean)tc.decode(tc.encode(false)));
+		assertTrue((Boolean)this.tc.decode(this.tc.encode(true)));
+		assertFalse((Boolean)this.tc.decode(this.tc.encode(false)));
 	}
 
 	public void testByteArray() throws Exception {
 		byte[] a={'a', 'b', 'c'};
-		CachedData cd=tc.encode(a);
+		CachedData cd=this.tc.encode(a);
 		assertTrue(Arrays.equals(a, cd.getData()));
-		assertTrue(Arrays.equals(a, (byte[])tc.decode(cd)));
+		assertTrue(Arrays.equals(a, (byte[])this.tc.decode(cd)));
 	}
 
 	public void testStrings() throws Exception {
 		String s1="This is a simple test string.";
-		CachedData cd=tc.encode(s1);
+		CachedData cd=this.tc.encode(s1);
 		assertEquals(getStringFlags(), cd.getFlag());
-		assertEquals(s1, tc.decode(cd));
+		assertEquals(s1, this.tc.decode(cd));
 	}
 
 	public void testUTF8String() throws Exception {
 		String s1="\u2013\u00f3\u2013\u00a5\u2014\u00c4\u2013\u221e\u2013"
 			+ "\u2264\u2014\u00c5\u2014\u00c7\u2013\u2264\u2014\u00c9\u2013"
 			+ "\u03c0, \u2013\u00ba\u2013\u220f\u2014\u00c4.";
-		CachedData cd=tc.encode(s1);
+		CachedData cd=this.tc.encode(s1);
 		assertEquals(getStringFlags(), cd.getFlag());
-		assertEquals(s1, tc.decode(cd));
+		assertEquals(s1, this.tc.decode(cd));
 	}
 
 	protected abstract int getStringFlags();

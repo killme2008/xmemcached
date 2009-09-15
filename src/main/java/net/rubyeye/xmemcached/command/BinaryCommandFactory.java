@@ -78,7 +78,7 @@ public class BinaryCommandFactory implements CommandFactory {
 
 	
 	public Command createGetCommand(String key, byte[] keyBytes,
-			CommandType cmdType) {
+			CommandType cmdType, Transcoder transcoder) {
 		return new BinaryGetCommand(key, keyBytes, cmdType, new CountDownLatch(
 				1), OpCode.GET, false);
 	}

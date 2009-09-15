@@ -26,6 +26,16 @@ public class WhalinTranscoder extends BaseSerializingTranscoder implements
 
 	private int maxSize;
 
+	private boolean primitiveAsString;
+
+	public void setPackZeros(boolean packZeros) {
+		this.tu.setPackZeros(packZeros);
+	}
+
+	public void setPrimitiveAsString(boolean primitiveAsString) {
+		this.primitiveAsString = primitiveAsString;
+	}
+
 	public WhalinTranscoder() {
 		this(CachedData.MAX_SIZE);
 	}
@@ -36,11 +46,18 @@ public class WhalinTranscoder extends BaseSerializingTranscoder implements
 	}
 
 	public final int getMaxSize() {
-		return maxSize;
+		return this.maxSize;
 	}
 
 	public final void setMaxSize(int maxSize) {
 		this.maxSize = maxSize;
+	}
+	public boolean isPackZeros() {
+		return this.tu.isPackZeros();
+	}
+
+	public boolean isPrimitiveAsString() {
+		return this.primitiveAsString;
 	}
 
 	private final TranscoderUtils tu = new TranscoderUtils(false);
@@ -60,30 +77,36 @@ public class WhalinTranscoder extends BaseSerializingTranscoder implements
 			rv = deserialize(data);
 		} else {
 			int f = d.getFlag() & ~COMPRESSED;
+			if (this.primitiveAsString) {
+				if (f == SPECIAL_STRING) {
+					return decodeString(d.getData());
+				}
+			}
 			switch (f) {
 			case SPECIAL_BOOLEAN:
 				rv = Boolean.valueOf(this.decodeBoolean(data));
 				break;
 			case SPECIAL_INT:
-				rv = Integer.valueOf(tu.decodeInt(data));
+				rv = Integer.valueOf(this.tu.decodeInt(data));
 				break;
 			case SPECIAL_SHORT:
-				rv = Short.valueOf((short) tu.decodeInt(data));
+				rv = Short.valueOf((short) this.tu.decodeInt(data));
 				break;
 			case SPECIAL_LONG:
-				rv = Long.valueOf(tu.decodeLong(data));
+				rv = Long.valueOf(this.tu.decodeLong(data));
 				break;
 			case SPECIAL_DATE:
-				rv = new Date(tu.decodeLong(data));
+				rv = new Date(this.tu.decodeLong(data));
 				break;
 			case SPECIAL_BYTE:
-				rv = Byte.valueOf(tu.decodeByte(data));
+				rv = Byte.valueOf(this.tu.decodeByte(data));
 				break;
 			case SPECIAL_FLOAT:
-				rv = new Float(Float.intBitsToFloat(tu.decodeInt(data)));
+				rv = new Float(Float.intBitsToFloat(this.tu.decodeInt(data)));
 				break;
 			case SPECIAL_DOUBLE:
-				rv = new Double(Double.longBitsToDouble(tu.decodeLong(data)));
+				rv = new Double(Double.longBitsToDouble(this.tu
+						.decodeLong(data)));
 				break;
 			case SPECIAL_BYTEARRAY:
 				rv = data;
@@ -120,65 +143,101 @@ public class WhalinTranscoder extends BaseSerializingTranscoder implements
 			flags |= SPECIAL_STRINGBUILDER;
 			b = encodeString(String.valueOf(o));
 		} else if (o instanceof Long) {
-			b = tu.encodeLong((Long) o);
+			if (this.primitiveAsString) {
+				b = encodeString(o.toString());
+			} else {
+				b = this.tu.encodeLong((Long) o);
+			}
 			flags |= SPECIAL_LONG;
 		} else if (o instanceof Integer) {
-			b = tu.encodeInt((Integer) o);
+			if (this.primitiveAsString) {
+				b = encodeString(o.toString());
+			} else {
+				b = this.tu.encodeInt((Integer) o);
+			}
 			flags |= SPECIAL_INT;
 		} else if (o instanceof Short) {
-			b = tu.encodeInt((Short) o);
+			if (this.primitiveAsString) {
+				b = encodeString(o.toString());
+			} else {
+				b = this.tu.encodeInt((Short) o);
+			}
 			flags |= SPECIAL_SHORT;
 		} else if (o instanceof Boolean) {
-			b = this.encodeBoolean((Boolean) o);
+			if (this.primitiveAsString) {
+				b = encodeString(o.toString());
+			} else {
+				b = this.encodeBoolean((Boolean) o);
+			}
 			flags |= SPECIAL_BOOLEAN;
 		} else if (o instanceof Date) {
-			b = tu.encodeLong(((Date) o).getTime());
+			b = this.tu.encodeLong(((Date) o).getTime());
 			flags |= SPECIAL_DATE;
 		} else if (o instanceof Byte) {
-			b = tu.encodeByte((Byte) o);
+			if (this.primitiveAsString) {
+				b = encodeString(o.toString());
+			} else {
+				b = this.tu.encodeByte((Byte) o);
+			}
 			flags |= SPECIAL_BYTE;
 		} else if (o instanceof Float) {
-			b = tu.encodeInt(Float.floatToIntBits((Float) o));
+			if (this.primitiveAsString) {
+				b = encodeString(o.toString());
+			} else {
+				b = this.tu.encodeInt(Float.floatToIntBits((Float) o));
+			}
 			flags |= SPECIAL_FLOAT;
 		} else if (o instanceof Double) {
-			b = tu.encodeLong(Double.doubleToLongBits((Double) o));
+			if (this.primitiveAsString) {
+				b = encodeString(o.toString());
+			} else {
+				b = this.tu.encodeLong(Double.doubleToLongBits((Double) o));
+			}
 			flags |= SPECIAL_DOUBLE;
 		} else if (o instanceof byte[]) {
 			b = (byte[]) o;
 			flags |= SPECIAL_BYTEARRAY;
 		} else if (o instanceof Character) {
-			b = tu.encodeInt((Character) o);
+			b = this.tu.encodeInt((Character) o);
 			flags |= SPECIAL_CHARACTER;
 		} else {
 			b = serialize(o);
 			flags |= SERIALIZED;
 		}
 		assert b != null;
-		if (b.length > compressionThreshold) {
+		if (this.primitiveAsString) {
+			if ((flags & SERIALIZED) == 0) {
+				flags = 0;
+				flags |= SPECIAL_STRING;
+			}
+		}
+		if (b.length > this.compressionThreshold) {
 			byte[] compressed = compress(b);
 			if (compressed.length < b.length) {
-				if (log.isDebugEnabled())
+				if (log.isDebugEnabled()) {
 					log
 							.debug(String.format("Compressed %s from %d to %d",
 									o.getClass().getName(), b.length,
 									compressed.length));
+				}
 				b = compressed;
 				flags |= COMPRESSED;
 			} else {
-				if (log.isDebugEnabled())
+				if (log.isDebugEnabled()) {
 					log
 							.debug(String
 									.format(
 											"Compression increased the size of %s from %d to %d",
 											o.getClass().getName(), b.length,
 											compressed.length));
+				}
 			}
 		}
 		return new CachedData(flags, b);
 	}
 
 	protected Character decodeCharacter(byte[] b) {
-		return Character.valueOf((char) tu.decodeInt(b));
+		return Character.valueOf((char) this.tu.decodeInt(b));
 	}
 
 	public byte[] encodeBoolean(boolean b) {

@@ -50,6 +50,30 @@ public class KestrelClientUnitTest extends TestCase {
 		return builder;
 	}
 
+	public void testPrimitiveAsString() throws Exception {
+		this.memcachedClient.setPrimitiveAsString(true);
+		// store integer
+		for (int i = 0; i < 1000; i++) {
+			this.memcachedClient.set("queue1", 0, i);
+		}
+		// but get string
+		for (int i = 0; i < 1000; i++) {
+			Assert.assertEquals(String.valueOf(i), this.memcachedClient
+					.get("queue1"));
+		}
+
+		this.memcachedClient.setPrimitiveAsString(false);
+		// store integer
+		for (int i = 0; i < 1000; i++) {
+			this.memcachedClient.set("queue1", 0, i);
+		}
+		// still get integer
+		for (int i = 0; i < 1000; i++) {
+			Assert.assertEquals(i, this.memcachedClient
+					.get("queue1"));
+		}
+	}
+
 	@Override
 	public void tearDown() throws IOException {
 		this.memcachedClient.shutdown();

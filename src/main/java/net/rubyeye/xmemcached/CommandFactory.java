@@ -59,14 +59,15 @@ public interface CommandFactory {
 	 * 
 	 * @param key
 	 * @param keyBytes
-	 * @param cmdBytes
-	 *            命令的字节数组，如"get".getBytes()
 	 * @param cmdType
 	 *            命令类型
+	 * @param transcoder TODO
+	 * @param cmdBytes
+	 *            命令的字节数组，如"get".getBytes()
 	 * @return
 	 */
 	public abstract Command createGetCommand(final String key,
-			final byte[] keyBytes, final CommandType cmdType);
+			final byte[] keyBytes, final CommandType cmdType, Transcoder transcoder);
 
 	/**
 	 * 创建批量获取 command

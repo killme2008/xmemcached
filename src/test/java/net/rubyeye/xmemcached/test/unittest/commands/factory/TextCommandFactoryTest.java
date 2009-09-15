@@ -73,7 +73,7 @@ public class TextCommandFactoryTest extends TestCase {
 		String key = "test";
 		byte[] keyBytes = ByteUtils.getBytes(key);
 		Command getCmd = commandFactory.createGetCommand(key, keyBytes,
-				CommandType.GET_ONE);
+				CommandType.GET_ONE, null);
 		getCmd.encode(bufferAllocator);
 		assertEquals(CommandType.GET_ONE, getCmd.getCommandType());
 		String commandStr = new String(getCmd.getIoBuffer().getByteBuffer()

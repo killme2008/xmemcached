@@ -3,12 +3,12 @@ package net.rubyeye.xmemcached.transcoders;
 import java.io.UnsupportedEncodingException;
 
 /**
- * String转换器，通常不建议直接使用这个类
+ * String Transcoder
  * 
  * @author dennis
  * 
  */
-public class StringTranscoder implements Transcoder<String> {
+public class StringTranscoder extends PrimitiveTypeTranscoder<String> {
 
 	private String charset = BaseSerializingTranscoder.DEFAULT_CHARSET;
 

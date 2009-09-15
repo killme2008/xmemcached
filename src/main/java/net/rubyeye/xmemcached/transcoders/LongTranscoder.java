@@ -8,24 +8,60 @@ import org.slf4j.LoggerFactory;
 /**
  * Transcoder that serializes and unserializes longs.
  */
-public final class LongTranscoder implements Transcoder<Long> {
-	private static final Logger log = LoggerFactory.getLogger(LongTranscoder.class);
-
-	private static final int flags = SerializingTranscoder.SPECIAL_LONG;
-
-	private final TranscoderUtils tu = new TranscoderUtils(true);
+public final class LongTranscoder extends PrimitiveTypeTranscoder<Long> {
+	private static final Logger log = LoggerFactory
+			.getLogger(LongTranscoder.class);
 
 	public CachedData encode(java.lang.Long l) {
-		return new CachedData(flags, this.tu.encodeLong(l));
+		/**
+		 * store Long as string
+		 */
+		if (this.primitiveAsString) {
+			byte[] b = encodeString(l.toString());
+			int flags = 0;
+			if (b.length > this.compressionThreshold) {
+				byte[] compressed = compress(b);
+				if (compressed.length < b.length) {
+					if (log.isDebugEnabled()) {
+						log.debug("Compressed " + l.getClass().getName()
+								+ " from " + b.length + " to "
+								+ compressed.length);
+					}
+					b = compressed;
+					flags |= SerializingTranscoder.COMPRESSED;
+				} else {
+					if (log.isDebugEnabled()) {
+						log.debug("Compression increased the size of "
+								+ l.getClass().getName() + " from " + b.length
+								+ " to " + compressed.length);
+					}
+				}
+			}
+			return new CachedData(0, b, b.length, -1);
+		}
+		return new CachedData(SerializingTranscoder.SPECIAL_LONG, this.tu.encodeLong(l));
 	}
 
 	public Long decode(CachedData d) {
-		if (flags == d.getFlag()) {
-			return this.tu.decodeLong(d.getData());
+		if (this.primitiveAsString) {
+			byte[] data = d.getData();
+			if ((d.getFlag() & SerializingTranscoder.COMPRESSED) != 0) {
+				data = decompress(d.getData());
+			}
+			int flag = d.getFlag();
+			if (flag == 0) {
+				return Long.valueOf(decodeString(data));
+			} else {
+				return null;
+			}
 		} else {
-			log.error("Unexpected flags for long:  " + d.getFlag()
-					+ " wanted " + flags);
-			return null;
+			if (SerializingTranscoder.SPECIAL_LONG == d.getFlag()) {
+				return this.tu.decodeLong(d.getData());
+			} else {
+				log.error("Unexpected flags for long:  " + d.getFlag()
+						+ " wanted " + SerializingTranscoder.SPECIAL_LONG);
+				return null;
+			}
 		}
 	}
 

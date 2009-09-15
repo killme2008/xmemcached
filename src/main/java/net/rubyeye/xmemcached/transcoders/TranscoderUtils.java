@@ -7,7 +7,7 @@ package net.rubyeye.xmemcached.transcoders;
  */
 public final class TranscoderUtils {
 
-	private final boolean packZeros;
+	private boolean packZeros;
 
 	/**
 	 * Get an instance of TranscoderUtils.
@@ -17,7 +17,15 @@ public final class TranscoderUtils {
 	 */
 	public TranscoderUtils(boolean pack) {
 		super();
-		packZeros = pack;
+		this.packZeros = pack;
+	}
+
+	public final boolean isPackZeros() {
+		return this.packZeros;
+	}
+
+	public final void setPackZeros(boolean packZeros) {
+		this.packZeros = packZeros;
 	}
 
 	public final byte[] encodeNum(long l, int maxBytes) {
@@ -26,7 +34,7 @@ public final class TranscoderUtils {
 			int pos = rv.length - i - 1;
 			rv[pos] = (byte) ((l >> (8 * i)) & 0xff);
 		}
-		if (packZeros) {
+		if (this.packZeros) {
 			int firstNon0 = 0;
 			for (; firstNon0 < rv.length && rv[firstNon0] == 0; firstNon0++) {
 				// Just looking for what we can reduce

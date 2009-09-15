@@ -430,7 +430,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 			Transcoder<T> transcoder) throws InterruptedException,
 			TimeoutException, MemcachedException, MemcachedException {
 		final Command command = this.commandFactory.createGetCommand(key,
-				keyBytes, cmdType);
+				keyBytes, cmdType, this.transcoder);
 		sendCommand(command);
 		latchWait(command, timeout);
 		command.getIoBuffer().free(); // free buffer
@@ -2151,6 +2151,10 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 	}
 
 	
+	public void setPrimitiveAsString(boolean primitiveAsString) {
+		this.transcoder.setPrimitiveAsString(primitiveAsString);		
+	}
+
 	public void removeStateListener(MemcachedClientStateListener listener) {
 		for (MemcachedClientStateListenerAdapter adapter : this.stateListenerAdapters) {
 			if (adapter.getMemcachedClientStateListener().equals(listener)) {

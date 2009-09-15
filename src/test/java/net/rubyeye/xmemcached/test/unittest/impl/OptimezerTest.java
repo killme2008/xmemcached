@@ -42,7 +42,7 @@ public class OptimezerTest extends TestCase {
 		for (int i = 0; i < 10; i++) {
 			Command cmd = this.commandFactory.createGetCommand(String
 					.valueOf(i), String.valueOf(i).getBytes(),
-					CommandType.GET_ONE);
+					CommandType.GET_ONE, null);
 			cmd.encode(new SimpleBufferAllocator());
 			this.writeQueue.add(cmd);
 			cmd.setWriteFuture(new FutureImpl<Boolean>());
@@ -73,7 +73,7 @@ public class OptimezerTest extends TestCase {
 		for (int i = 0; i < 10; i++) {
 			Command cmd = this.commandFactory.createGetCommand(String
 					.valueOf(0), String.valueOf(0).getBytes(),
-					CommandType.GET_ONE);
+					CommandType.GET_ONE, null);
 			cmd.encode(new SimpleBufferAllocator());
 			this.writeQueue.add(cmd);
 			cmd.setWriteFuture(new FutureImpl<Boolean>());
@@ -159,7 +159,7 @@ public class OptimezerTest extends TestCase {
 		for (int i = 0; i < 5; i++) {
 			Command cmd = this.commandFactory.createGetCommand(String
 					.valueOf(i), String.valueOf(i).getBytes(),
-					CommandType.GET_ONE);
+					CommandType.GET_ONE, null);
 			this.writeQueue.add(cmd);
 			cmd.setWriteFuture(new FutureImpl<Boolean>());
 		}

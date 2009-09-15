@@ -9,7 +9,7 @@ import net.rubyeye.xmemcached.transcoders.CachedData;
 public class TextGetOneCommandUnitTest extends BaseTextCommandUnitTest {
 	public void testGetOneEncode() {
 		Command command = this.commandFactory.createGetCommand("test", "test"
-				.getBytes(), CommandType.GET_ONE);
+				.getBytes(), CommandType.GET_ONE, null);
 		assertNull(command.getIoBuffer());
 		command.encode(this.bufferAllocator);
 		checkByteBufferEquals(command, "get test\r\n");
@@ -17,7 +17,7 @@ public class TextGetOneCommandUnitTest extends BaseTextCommandUnitTest {
 
 	public void testGetsOneEncode() {
 		Command command = this.commandFactory.createGetCommand("test", "test"
-				.getBytes(), CommandType.GETS_ONE);
+				.getBytes(), CommandType.GETS_ONE, null);
 		assertNull(command.getIoBuffer());
 		command.encode(this.bufferAllocator);
 		checkByteBufferEquals(command, "gets test\r\n");
@@ -25,7 +25,7 @@ public class TextGetOneCommandUnitTest extends BaseTextCommandUnitTest {
 
 	public void testGetOneDecode() {
 		Command command = this.commandFactory.createGetCommand("test", "test"
-				.getBytes(), CommandType.GET_ONE);
+				.getBytes(), CommandType.GET_ONE, null);
 		checkDecodeNullAndNotLineByteBuffer(command);
 		checkDecodeInvalidLine(command, "STORED\r\n");
 		checkDecodeInvalidLine(command, "NOT_FOUND\r\n");
@@ -37,7 +37,7 @@ public class TextGetOneCommandUnitTest extends BaseTextCommandUnitTest {
 		assertEquals(0, command.getLatch().getCount());
 
 		command = this.commandFactory.createGetCommand("test", "test"
-				.getBytes(), CommandType.GET_ONE);
+				.getBytes(), CommandType.GET_ONE, null);
 		assertFalse(command.decode(null, ByteBuffer
 				.wrap("VALUE test 0 2\r\n10\r\n".getBytes())));
 		assertNull(command.getResult());
@@ -55,7 +55,7 @@ public class TextGetOneCommandUnitTest extends BaseTextCommandUnitTest {
 
 	public void testGetsOneDecode() {
 		Command command = this.commandFactory.createGetCommand("test", "test"
-				.getBytes(), CommandType.GETS_ONE);
+				.getBytes(), CommandType.GETS_ONE, null);
 		checkDecodeNullAndNotLineByteBuffer(command);
 		checkDecodeInvalidLine(command, "STORED\r\n");
 		checkDecodeInvalidLine(command, "NOT_FOUND\r\n");
@@ -67,7 +67,7 @@ public class TextGetOneCommandUnitTest extends BaseTextCommandUnitTest {
 		assertEquals(0, command.getLatch().getCount());
 
 		command = this.commandFactory.createGetCommand("test", "test"
-				.getBytes(), CommandType.GET_ONE);
+				.getBytes(), CommandType.GET_ONE, null);
 		assertFalse(command.decode(null, ByteBuffer
 				.wrap("VALUE test 0 2 999\r\n10\r\n".getBytes())));
 		assertNull(command.getResult());

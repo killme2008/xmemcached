@@ -9,7 +9,7 @@ import net.rubyeye.xmemcached.utils.AddrUtil;
 public class KestrelClientPerformanceTest {
 	static int[] CLIENT_NUM = { 1, 10, 100 };
 
-	static final int MESSAGE_COUNT = 10000;
+	static final int MESSAGE_COUNT = 500000;
 
 	public static void main(String args[]) throws Exception {
 		if (args.length < 2) {
