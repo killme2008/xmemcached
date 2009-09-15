@@ -16,7 +16,7 @@ import java.util.Collection;
 import com.google.code.yanf4j.core.Session;
 
 /**
- * session查找接口，依据key查找存储的session
+ * Session locator.Find session by key.
  * 
  * @author dennis
  * 
