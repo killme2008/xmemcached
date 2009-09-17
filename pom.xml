@@ -158,6 +158,7 @@
 				<configuration>
 					<encoding>utf-8</encoding>
 					<charset>utf-8</charset>
+					<locale>en_US</locale>
 					<excludePackageNames>net.rubyeye.xmemcached.test</excludePackageNames>
 				</configuration>
 			</plugin>
