@@ -12,7 +12,7 @@ author : dennis zhuang(killme2008@gmail.com)
 FAQ
 1.How to build project by maven?
 
-Type command "mvn package" to build the project.Maven will download the dependencies automacly and build project.
+Type command "mvn -Dtest -DfailIfNoTests=false assembly:assembly" to build the project.Maven will download the dependencies automacly and build project.
 
 
 2.How to run unit tests?
@@ -38,6 +38,14 @@ Yes,since 1.2.0-RC1,Xmemcached is compatible with jdk5.
   builder.setCommandFactory(new BinaryCommandFactory());
   XMemcachedClient client=builder.build();
  
+#If you want to use xmemcached talking with kestrel
+  XMemcachedClientBuilder builder = new XMemcachedClientBuilder(
+           AddrUtil.getAddresses("localhost:11211"));
+  builder.setCommandFactory(new KestrelCommandFactory());
+  XMemcachedClient client=builder.build();
+
+#If you want to store primitive type as String
+  client.setPrimitiveAsString(true);
 
 #add or remove memcached server dynamically 
 
