@@ -13,19 +13,19 @@ import net.rubyeye.xmemcached.utils.ByteUtils;
 
 public class TextIncrDecrCommand extends Command {
 
-	private int amount;
-	private int initial;
+	private long amount;
+	private long initial;
 
 	public TextIncrDecrCommand(String key, byte[] keyBytes,
-			CommandType cmdType, CountDownLatch latch, int increment,
-			int initial, boolean noreply) {
+			CommandType cmdType, CountDownLatch latch, long increment,
+			long initial, boolean noreply) {
 		super(key, keyBytes, cmdType, latch);
 		this.amount = increment;
 		this.noreply = noreply;
 		this.initial = initial;
 	}
 
-	public final int getAmount() {
+	public final long getAmount() {
 		return this.amount;
 	}
 

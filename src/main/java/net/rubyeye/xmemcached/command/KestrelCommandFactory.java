@@ -67,7 +67,7 @@ public class KestrelCommandFactory implements CommandFactory {
 	}
 
 	public Command createIncrDecrCommand(String key, byte[] keyBytes,
-			int amount, int initial, int expTime, CommandType cmdType,
+			long amount, long initial, int expTime, CommandType cmdType,
 			boolean noreply) {
 		throw new UnsupportedOperationException(
 				"Kestrel doesn't support this operation");

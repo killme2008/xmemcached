@@ -1623,12 +1623,12 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 	 * 
 	 * @see net.rubyeye.xmemcached.MemcachedClient#incr(java.lang.String, int)
 	 */
-	public final long incr(final String key, final int num)
+	public final long incr(final String key, final long num)
 			throws TimeoutException, InterruptedException, MemcachedException {
 		return sendIncrOrDecrCommand(key, num, CommandType.INCR, false);
 	}
 
-	public final void incrWithNoReply(final String key, final int num)
+	public final void incrWithNoReply(final String key, long num)
 			throws InterruptedException, MemcachedException {
 		try {
 			sendIncrOrDecrCommand(key, num, CommandType.INCR, true);
@@ -1637,7 +1637,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 		}
 	}
 
-	public final void decrWithNoReply(final String key, final int num)
+	public final void decrWithNoReply(final String key, final long num)
 			throws InterruptedException, MemcachedException {
 		try {
 			sendIncrOrDecrCommand(key, num, CommandType.DECR, true);
@@ -1651,7 +1651,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 	 * 
 	 * @see net.rubyeye.xmemcached.MemcachedClient#decr(java.lang.String, int)
 	 */
-	public final long decr(final String key, final int num)
+	public final long decr(final String key, final long num)
 			throws TimeoutException, InterruptedException, MemcachedException {
 		return sendIncrOrDecrCommand(key, num, CommandType.DECR, false);
 	}
@@ -2028,7 +2028,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 		XMemcachedMbeanServer.getInstance().shutdown();
 	}
 
-	private long sendIncrOrDecrCommand(final String key, final int num,
+	private long sendIncrOrDecrCommand(final String key, final long num,
 			final CommandType cmdType, boolean noreply)
 			throws InterruptedException, TimeoutException, MemcachedException {
 		final byte[] keyBytes = ByteUtils.getBytes(key);

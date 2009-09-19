@@ -122,7 +122,7 @@ public class BinaryCommandFactory implements CommandFactory {
 
 	
 	public Command createIncrDecrCommand(String key, byte[] keyBytes,
-			int amount, int initial, int expTime, CommandType cmdType,
+			long amount, long initial, int expTime, CommandType cmdType,
 			boolean noreply) {
 		return new BinaryIncrDecrCommand(key, keyBytes, amount, initial,
 				expTime, cmdType, noreply);
