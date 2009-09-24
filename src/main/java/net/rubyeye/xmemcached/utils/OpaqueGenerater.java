@@ -11,7 +11,7 @@ public final class OpaqueGenerater {
 
 	}
 
-	private int counter = Integer.MIN_VALUE;
+	private int counter = 0;
 
 	static final class SingletonHolder {
 		static final OpaqueGenerater opaqueGenerater = new OpaqueGenerater();
@@ -22,9 +22,9 @@ public final class OpaqueGenerater {
 	}
 
 	public synchronized int getNextValue() {
-		int result = this.counter + 1;
+		int result = this.counter++;
 		if (result < 0) {
-			this.counter = Integer.MIN_VALUE;
+			this.counter = 0;
 		}
 		return result;
 	}
