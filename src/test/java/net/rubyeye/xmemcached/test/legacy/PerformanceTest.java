@@ -213,10 +213,10 @@ public class PerformanceTest {
 
 			MemcachedClientBuilder builder = new XMemcachedClientBuilder(
 					AddrUtil.getAddresses(args[4]));
-			builder.setCommandFactory(new BinaryCommandFactory());
+			//builder.setCommandFactory(new BinaryCommandFactory());
 			// builder.setConnectionPoolSize(2);
 			MemcachedClient mc = builder.build();
-			mc.setOptimizeMergeBuffer(false);
+			//mc.setOptimizeMergeBuffer(false);
 			mc.flushAll();
 			// mc.setOptimizeGet(false);
 			// mc.setOptimizeMergeBuffer(false);

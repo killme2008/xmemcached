@@ -21,7 +21,7 @@ import net.rubyeye.xmemcached.command.BinaryCommandFactory;
 import net.rubyeye.xmemcached.utils.AddrUtil;
 
 /**
- * 测试CAS
+ * CASOperation example
  * 
  * @author dennis
  */
@@ -33,12 +33,11 @@ class CASThread extends Thread {
 	 * 
 	 */
 	static final class IncrmentOperation implements CASOperation<Integer> {
-		
+
 		public int getMaxTries() {
 			return Integer.MAX_VALUE; // 最大重试次数
 		}
 
-		
 		public Integer getNewValue(long currentCAS, Integer currentValue) {
 			return currentValue + 1; // 当前值+1
 		}
@@ -54,7 +53,6 @@ class CASThread extends Thread {
 
 	}
 
-	
 	@Override
 	public void run() {
 		try {
@@ -72,14 +70,15 @@ public class CASTest {
 	public static void main(String[] args) throws Exception {
 		if (args.length < 2) {
 			System.err.println("Usage:java CASTest [threadNum] [server]");
-		    System.exit(1);
+			System.exit(1);
 		}
 		int NUM = Integer.parseInt(args[0]);
-		MemcachedClientBuilder builder=new XMemcachedClientBuilder(AddrUtil.getAddresses(args[1]));
+		MemcachedClientBuilder builder = new XMemcachedClientBuilder(AddrUtil
+				.getAddresses(args[1]));
+		// use binary protocol
 		builder.setCommandFactory(new BinaryCommandFactory());
 		MemcachedClient mc = builder.build();
 		// 设置初始值为0
-		mc.setOptimizeGet(false);
 		mc.set("a", 0, 0);
 		CountDownLatch cdl = new CountDownLatch(NUM);
 		long start = System.currentTimeMillis();

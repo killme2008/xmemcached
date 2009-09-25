@@ -185,13 +185,8 @@ public abstract class BaseBinaryCommand extends Command {
 
 	protected boolean readValue(ByteBuffer buffer, int bodyLength,
 			int keyLength, int extrasLength) {
-		if (!ByteUtils
-				.stepBuffer(buffer, bodyLength - keyLength - extrasLength)) {
-			throw new MemcachedDecodeException(
-					"Binary command decode error,buffer remaining less than value length:"
-							+ (bodyLength - keyLength - extrasLength));
-		}
-		return true;
+		return ByteUtils.stepBuffer(buffer, bodyLength - keyLength
+				- extrasLength);
 	}
 
 	protected boolean readExtras(ByteBuffer buffer, int extrasLength) {
