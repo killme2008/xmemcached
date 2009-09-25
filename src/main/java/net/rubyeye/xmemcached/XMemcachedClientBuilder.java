@@ -98,6 +98,8 @@ public class XMemcachedClientBuilder implements MemcachedClientBuilder {
 				MemcachedClient.DEFAULT_TCP_KEEPLIVE);
 		map.put(StandardSocketOption.SO_SNDBUF,
 				MemcachedClient.DEFAULT_TCP_SEND_BUFF_SIZE);
+		map.put(StandardSocketOption.SO_LINGER, 0);
+		map.put(StandardSocketOption.SO_REUSEADDR, true);
 		return map;
 	}
 

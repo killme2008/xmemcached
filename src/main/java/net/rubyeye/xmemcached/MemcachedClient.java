@@ -705,6 +705,9 @@ public interface MemcachedClient {
 	public abstract long incr(final String key, final long num)
 			throws TimeoutException, InterruptedException, MemcachedException;
 
+	public long incr(final String key, final long num, final long initValue)
+			throws TimeoutException, InterruptedException, MemcachedException;
+
 	/**
 	 * "decr" are used to change data for some item in-place, decrementing it.
 	 * The data for the item is treated as decimal representation of a 64-bit
@@ -968,6 +971,10 @@ public interface MemcachedClient {
 	 */
 	public void incrWithNoReply(final String key, final long num)
 			throws InterruptedException, MemcachedException;
+
+	public void incrWithNoReply(final String key, final long num,
+			final long initValue) throws InterruptedException,
+			MemcachedException;
 
 	/**
 	 * "decr" are used to change data for some item in-place, decrementing it.

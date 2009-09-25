@@ -6,7 +6,6 @@ import java.util.concurrent.CountDownLatch;
 import net.rubyeye.xmemcached.buffer.BufferAllocator;
 import net.rubyeye.xmemcached.command.Command;
 import net.rubyeye.xmemcached.command.CommandType;
-import net.rubyeye.xmemcached.exception.MemcachedException;
 import net.rubyeye.xmemcached.impl.MemcachedTCPSession;
 import net.rubyeye.xmemcached.monitor.Constants;
 import net.rubyeye.xmemcached.utils.ByteUtils;
@@ -14,7 +13,7 @@ import net.rubyeye.xmemcached.utils.ByteUtils;
 public class TextIncrDecrCommand extends Command {
 
 	private long amount;
-	private long initial;
+	private final long initial;
 
 	public TextIncrDecrCommand(String key, byte[] keyBytes,
 			CommandType cmdType, CountDownLatch latch, long increment,
@@ -41,8 +40,9 @@ public class TextIncrDecrCommand extends Command {
 		String line = ByteUtils.nextLine(buffer);
 		if (line != null) {
 			if (line.equals("NOT_FOUND")) {
-				setException(new MemcachedException(
-						"The key's value is not found for increase or decrease"));
+				// setException(new MemcachedException(
+				// "The key's value is not found for increase or decrease"));
+				setResult("NOT_FOUND");
 				countDownLatch();
 				return true;
 			} else {

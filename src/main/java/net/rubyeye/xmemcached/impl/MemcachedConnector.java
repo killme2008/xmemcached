@@ -42,7 +42,6 @@ import com.google.code.yanf4j.core.EventType;
 import com.google.code.yanf4j.core.NioSession;
 import com.google.code.yanf4j.core.Session;
 import com.google.code.yanf4j.core.WriteMessage;
-import com.google.code.yanf4j.core.impl.StandardSocketOption;
 import com.google.code.yanf4j.nio.NioSessionConfig;
 import com.google.code.yanf4j.nio.impl.SocketChannelController;
 
@@ -230,45 +229,15 @@ public class MemcachedConnector extends SocketChannelController {
 	}
 
 	public void addToWatingQueue(ReconnectRequest request) {
-		this.waitingQueue.add(request);
+		// add connectionPoolSize requests.issue 57,fixed on 2009-09-26
+		for (int i = 0; i < this.connectionPoolSize; i++)
+			this.waitingQueue.add(request);
 	}
 
 	public Future<Boolean> connect(InetSocketAddress address, int weight)
 			throws IOException {
 		SocketChannel socketChannel = SocketChannel.open();
-		socketChannel.configureBlocking(false);
-		socketChannel.socket().setSoTimeout(this.soTimeout);
-		if (this.socketOptions.get(StandardSocketOption.SO_REUSEADDR) != null) {
-			socketChannel.socket().setReuseAddress(
-					StandardSocketOption.SO_REUSEADDR.type().cast(
-							this.socketOptions
-									.get(StandardSocketOption.SO_REUSEADDR)));
-		}
-		if (this.socketOptions.get(StandardSocketOption.TCP_NODELAY) != null) {
-			socketChannel.socket().setTcpNoDelay(
-					StandardSocketOption.TCP_NODELAY.type().cast(
-							this.socketOptions
-									.get(StandardSocketOption.TCP_NODELAY)));
-		}
-		if (this.socketOptions.get(StandardSocketOption.SO_RCVBUF) != null) {
-			socketChannel.socket().setReceiveBufferSize(
-					StandardSocketOption.SO_RCVBUF.type().cast(
-							this.socketOptions
-									.get(StandardSocketOption.SO_RCVBUF)));
-
-		}
-		if (this.socketOptions.get(StandardSocketOption.SO_SNDBUF) != null) {
-			socketChannel.socket().setSendBufferSize(
-					StandardSocketOption.SO_SNDBUF.type().cast(
-							this.socketOptions
-									.get(StandardSocketOption.SO_SNDBUF)));
-		}
-		if (this.socketOptions.get(StandardSocketOption.SO_KEEPALIVE) != null) {
-			socketChannel.socket().setKeepAlive(
-					StandardSocketOption.SO_KEEPALIVE.type().cast(
-							this.socketOptions
-									.get(StandardSocketOption.SO_KEEPALIVE)));
-		}
+		configureSocketChannel(socketChannel);
 		ConnectFuture future = new ConnectFuture(address, weight);
 		if (!socketChannel.connect(address)) {
 			this.reactor.registerChannel(socketChannel,
@@ -327,6 +296,7 @@ public class MemcachedConnector extends SocketChannelController {
 		this.optimiezer = new Optimizer(protocol);
 		this.optimiezer.setBufferAllocator(this.bufferAllocator);
 		this.connectionPoolSize = poolSize;
+		this.soLingerOn = true;
 		// setDispatchMessageThreadPoolSize(Runtime.getRuntime().
 		// availableProcessors());
 	}
