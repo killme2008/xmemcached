@@ -67,9 +67,7 @@ public class TextIncrDecrCommandUnitTest extends BaseTextCommandUnitTest {
 			assertEquals("For input string: \"VALUE test\"", e.getMessage());
 		}
 		checkDecodeValidLine(command, "NOT_FOUND\r\n");
-		assertNotNull(command.getException());
-		assertEquals("The key's value is not found for increase or decrease",
-				command.getException().getMessage());
+		assertEquals("NOT_FOUND",command.getResult());
 		checkDecodeValidLine(command, "3\r\n");
 		assertEquals(3L,command.getResult());
 	}

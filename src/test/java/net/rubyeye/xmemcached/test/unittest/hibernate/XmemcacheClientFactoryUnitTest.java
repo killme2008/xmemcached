@@ -41,6 +41,11 @@ public class XmemcacheClientFactoryUnitTest extends TestCase {
 		XmemcachedClientFactory clientFactory = new XmemcachedClientFactory(
 				propertiesHelper);
 		Memcache cache = clientFactory.createMemcacheClient();
+		testCache(cache);
+		cache.shutdown();
+	}
+
+	private void testCache(Memcache cache) {
 		cache.set("a", 0, 1);
 		assertEquals(1, cache.get("a"));
 		cache.delete("a");
@@ -53,11 +58,12 @@ public class XmemcacheClientFactoryUnitTest extends TestCase {
 		assertEquals(1, map.get("a"));
 		assertEquals(2, map.get("b"));
 
-		cache.incr("c", 1, 1);
-		assertEquals("1", cache.get("c"));
+		cache.incr("c", 1, 10);
+		assertEquals("10", cache.get("c"));
+		cache.incr("c", 1, 0);
+		assertEquals("11", cache.get("c"));
 		cache.delete("c");
 		assertNull(cache.get("c"));
-		cache.shutdown();
 	}
 	
 	public void testSpymemcacheClient() throws Exception {
@@ -66,22 +72,7 @@ public class XmemcacheClientFactoryUnitTest extends TestCase {
 		SpyMemcacheClientFactory clientFactory = new SpyMemcacheClientFactory(
 				propertiesHelper);
 		Memcache cache = clientFactory.createMemcacheClient();
-		cache.set("a", 0, 1);
-		assertEquals(1, cache.get("a"));
-		cache.delete("a");
-		assertNull(cache.get("a"));
-		cache.set("a", 0, 1);
-		cache.set("b", 0, 2);
-
-		Map<String, Object> map = cache.getMulti("a", "b");
-		assertEquals(2, map.size());
-		assertEquals(1, map.get("a"));
-		assertEquals(2, map.get("b"));
-
-		cache.incr("c", 1, 1);
-		assertEquals("1", cache.get("c"));
-		cache.delete("c");
-		assertNull(cache.get("c"));
+		testCache(cache);
 		cache.shutdown();
 	}
 }

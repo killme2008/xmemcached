@@ -156,6 +156,15 @@ public class MemcachedConnector extends SocketChannelController {
 		updateSessions();
 	}
 
+	public List<Session> getSessionListBySocketAddress(
+			InetSocketAddress inetSocketAddress) {
+		if (sessionMap.get(inetSocketAddress) != null)
+			return new ArrayList<Session>(this.sessionMap
+					.get(inetSocketAddress));
+		else
+			return null;
+	}
+
 	public final void updateSessions() {
 		Collection<Queue<Session>> sessionCollection = this.sessionMap.values();
 		List<Session> sessionList = new ArrayList<Session>(20);
@@ -229,13 +238,13 @@ public class MemcachedConnector extends SocketChannelController {
 	}
 
 	public void addToWatingQueue(ReconnectRequest request) {
-		// add connectionPoolSize requests.issue 57,fixed on 2009-09-26
-		for (int i = 0; i < this.connectionPoolSize; i++)
-			this.waitingQueue.add(request);
+		this.waitingQueue.add(request);
 	}
 
 	public Future<Boolean> connect(InetSocketAddress address, int weight)
 			throws IOException {
+		if (address == null)
+			throw new NullPointerException("Null Address");
 		SocketChannel socketChannel = SocketChannel.open();
 		configureSocketChannel(socketChannel);
 		ConnectFuture future = new ConnectFuture(address, weight);

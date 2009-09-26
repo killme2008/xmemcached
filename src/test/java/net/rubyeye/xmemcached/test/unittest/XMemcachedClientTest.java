@@ -44,7 +44,6 @@ public abstract class XMemcachedClientTest extends TestCase {
 	MemcachedClient memcachedClient;
 	Properties properties;
 
-	
 	@Override
 	public void setUp() throws Exception {
 		createClients();
@@ -133,8 +132,10 @@ public abstract class XMemcachedClientTest extends TestCase {
 			this.memcachedClient.get(sb.toString());
 			fail();
 		} catch (IllegalArgumentException e) {
-			assertEquals("Key is too long (maxlen = "+(this.memcachedClient.getProtocol() == Protocol.Text ? 250
-					: 65535)+")", e.getMessage());
+			assertEquals(
+					"Key is too long (maxlen = "
+							+ (this.memcachedClient.getProtocol() == Protocol.Text ? 250
+									: 65535) + ")", e.getMessage());
 		}
 		// client is shutdown
 		try {
@@ -220,12 +221,10 @@ public abstract class XMemcachedClientTest extends TestCase {
 		this.memcachedClient.casWithNoReply("a", 0, getsResponse,
 				new CASOperation<Integer>() {
 
-					
 					public int getMaxTries() {
 						return 1;
 					}
 
-					
 					public Integer getNewValue(long currentCAS,
 							Integer currentValue) {
 						return currentValue + 1;
@@ -237,12 +236,10 @@ public abstract class XMemcachedClientTest extends TestCase {
 		this.memcachedClient.casWithNoReply("a", getsResponse,
 				new CASOperation<Integer>() {
 
-					
 					public int getMaxTries() {
 						return 1;
 					}
 
-					
 					public Integer getNewValue(long currentCAS,
 							Integer currentValue) {
 						return currentValue + 1;
@@ -253,12 +250,10 @@ public abstract class XMemcachedClientTest extends TestCase {
 
 		this.memcachedClient.casWithNoReply("a", new CASOperation<Integer>() {
 
-			
 			public int getMaxTries() {
 				return 1;
 			}
 
-			
 			public Integer getNewValue(long currentCAS, Integer currentValue) {
 				return currentValue + 1;
 			}
@@ -411,19 +406,14 @@ public abstract class XMemcachedClientTest extends TestCase {
 	}
 
 	public void testIncr() throws Exception {
-		if (this.memcachedClient.getProtocol() == Protocol.Text) {
-			try {
-				this.memcachedClient.incr("a", 5);
-				fail();
-			} catch (MemcachedException e) {
-				assertEquals(
-						"net.rubyeye.xmemcached.exception.MemcachedException: The key's value is not found for increase or decrease",
-						e.getMessage());
-			}
-		} else {
-			assertEquals(0, this.memcachedClient.incr("a", 5));
-		}
+		assertEquals(0, this.memcachedClient.incr("a", 5));
 		assertTrue(this.memcachedClient.set("a", 0, "1"));
+		assertEquals(6, this.memcachedClient.incr("a", 5));
+		assertEquals(10, this.memcachedClient.incr("a", 4));
+
+		// test incr with initValue
+		this.memcachedClient.delete("a");
+		assertEquals(1, this.memcachedClient.incr("a", 5, 1));
 		assertEquals(6, this.memcachedClient.incr("a", 5));
 		assertEquals(10, this.memcachedClient.incr("a", 4));
 	}
@@ -438,19 +428,15 @@ public abstract class XMemcachedClientTest extends TestCase {
 	}
 
 	public void testDecr() throws Exception {
-		if (this.memcachedClient.getProtocol() == Protocol.Text) {
-			try {
-				this.memcachedClient.decr("a", 5);
-				fail();
-			} catch (MemcachedException e) {
-				assertEquals(
-						"net.rubyeye.xmemcached.exception.MemcachedException: The key's value is not found for increase or decrease",
-						e.getMessage());
-			}
-		} else {
-			assertEquals(0, this.memcachedClient.decr("a", 5));
-		}
+		assertEquals(0, this.memcachedClient.decr("a", 5));
+
 		assertTrue(this.memcachedClient.set("a", 0, "100"));
+		assertEquals(50, this.memcachedClient.decr("a", 50));
+		assertEquals(46, this.memcachedClient.decr("a", 4));
+		
+		// test decr with initValue
+		this.memcachedClient.delete("a");
+		assertEquals(100, this.memcachedClient.decr("a", 5, 100));
 		assertEquals(50, this.memcachedClient.decr("a", 50));
 		assertEquals(46, this.memcachedClient.decr("a", 4));
 	}
@@ -472,12 +458,10 @@ public abstract class XMemcachedClientTest extends TestCase {
 		assertTrue(this.memcachedClient.cas("name", getsResponse,
 				new CASOperation<String>() {
 
-					
 					public int getMaxTries() {
 						return 1;
 					}
 
-					
 					public String getNewValue(long currentCAS,
 							String currentValue) {
 						return "zhuang";
@@ -543,7 +527,6 @@ public abstract class XMemcachedClientTest extends TestCase {
 		assertEquals("dennis", this.memcachedClient.get("name"));
 	}
 
-	
 	public void _testOperationEncodeTimeout() throws Exception {
 		this.memcachedClient.set("name", 0, "dennis");
 		assertEquals("dennis", this.memcachedClient.get("name"));
@@ -647,13 +630,12 @@ public abstract class XMemcachedClientTest extends TestCase {
 
 	public void _testErrorCommand() throws Exception {
 		Command nonexisCmd = new Command() {
-			
+
 			@Override
 			public boolean decode(MemcachedTCPSession session, ByteBuffer buffer) {
 				return decodeError(ByteUtils.nextLine(buffer));
 			}
 
-			
 			@Override
 			public void encode(BufferAllocator bufferAllocator) {
 				this.ioBuffer = bufferAllocator.wrap(ByteBuffer.wrap("test\r\n"
@@ -689,7 +671,6 @@ public abstract class XMemcachedClientTest extends TestCase {
 		}
 	}
 
-	
 	@Override
 	public void tearDown() throws Exception {
 		this.memcachedClient.shutdown();

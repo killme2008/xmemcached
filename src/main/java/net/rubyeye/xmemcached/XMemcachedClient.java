@@ -1618,16 +1618,6 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 				false);
 	}
 
-	public void incrWithNoReply(String key, long num, long initValue)
-			throws InterruptedException, MemcachedException {
-		try {
-			sendIncrOrDecrCommand(key, num, initValue, CommandType.INCR, true);
-		} catch (TimeoutException e) {
-			throw new MemcachedException(e);
-		}
-
-	}
-
 	public final void incrWithNoReply(final String key, long num)
 			throws InterruptedException, MemcachedException {
 		try {
@@ -1654,6 +1644,12 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 	public final long decr(final String key, final long num)
 			throws TimeoutException, InterruptedException, MemcachedException {
 		return sendIncrOrDecrCommand(key, num, 0, CommandType.DECR, false);
+	}
+
+	public long decr(String key, long num, long initValue)
+			throws TimeoutException, InterruptedException, MemcachedException {
+		return sendIncrOrDecrCommand(key, num, initValue, CommandType.DECR,
+				false);
 	}
 
 	/*
@@ -2039,9 +2035,11 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 			final Object result = command.getResult();
 			if (result instanceof String) {
 				if (((String) result).equals("NOT_FOUND")) {
-					add(key, 0, String.valueOf(initValue), this.opTimeout);
-					return sendIncrOrDecrCommand(key, num, initValue, cmdType,
-							noreply);
+					if (add(key, 0, String.valueOf(initValue), this.opTimeout))
+						return initValue;
+					else
+						return sendIncrOrDecrCommand(key, num, initValue,
+								cmdType, noreply);
 				} else
 					throw new MemcachedException(
 							"Unknown result type for incr/decr:"
@@ -2054,7 +2052,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 	}
 
 	public void setConnectionPoolSize(int poolSize) {
-		if (!this.shutdown) {
+		if (!this.shutdown&&this.getAvaliableServers().size()>0) {
 			throw new IllegalStateException(
 					"Xmemcached client has been started");
 		}
@@ -2131,6 +2129,12 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 			result.add(session.getRemoteSocketAddress());
 		}
 		return Collections.unmodifiableSet(result);
+	}
+
+	public final int getConnectionSizeBySocketAddress(InetSocketAddress address) {
+		List<Session> sessionList = this.connector
+				.getSessionListBySocketAddress(address);
+		return sessionList == null ? 0 : sessionList.size();
 	}
 
 	public void addStateListener(MemcachedClientStateListener listener) {

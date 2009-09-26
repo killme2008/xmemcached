@@ -727,6 +727,8 @@ public interface MemcachedClient {
 	public abstract long decr(final String key, final long num)
 			throws TimeoutException, InterruptedException, MemcachedException;
 
+	public abstract long decr(final String key, final long num,long initValue)
+	throws TimeoutException, InterruptedException, MemcachedException;
 	/**
 	 * Make All connected memcached's data item invalid
 	 * 
@@ -972,10 +974,6 @@ public interface MemcachedClient {
 	public void incrWithNoReply(final String key, final long num)
 			throws InterruptedException, MemcachedException;
 
-	public void incrWithNoReply(final String key, final long num,
-			final long initValue) throws InterruptedException,
-			MemcachedException;
-
 	/**
 	 * "decr" are used to change data for some item in-place, decrementing it.
 	 * The data for the item is treated as decimal representation of a 64-bit
@@ -992,7 +990,7 @@ public interface MemcachedClient {
 	 */
 	public void decrWithNoReply(final String key, final long num)
 			throws InterruptedException, MemcachedException;
-
+	
 	/**
 	 * Set the verbosity level of the memcached's logging output.This method
 	 * will wait for reply.
