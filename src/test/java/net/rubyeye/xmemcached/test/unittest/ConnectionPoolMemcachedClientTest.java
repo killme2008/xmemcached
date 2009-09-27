@@ -88,6 +88,11 @@ public class ConnectionPoolMemcachedClientTest extends XMemcachedClientTest {
 		XMemcachedClient client = new XMemcachedClient();
 		client.setConnectionPoolSize(5);
 		client.addServer(serverAddress);
+		synchronized(this){
+			while(server.sessionCounter.get()<5){
+				this.wait(1000);
+			}
+		}
 		assertEquals(1, client.getAvaliableServers().size());
 		assertEquals(5, client.getConnectionSizeBySocketAddress(serverAddress));
 		assertEquals(5, server.sessionCounter.get());
@@ -95,14 +100,14 @@ public class ConnectionPoolMemcachedClientTest extends XMemcachedClientTest {
 		// stop mock server,try to heal sessions
 		server.stop();
 
-		Thread.sleep(5000);
+		Thread.sleep(10000);
 		assertEquals(0, client.getAvaliableServers().size());
 		assertEquals(0, client.getConnectionSizeBySocketAddress(serverAddress));
 		// new server start
 		server = new MockServer();
 		server.localAddress=serverAddress;
 		server.start();
-		Thread.sleep(5000);
+		Thread.sleep(20000);
 		assertEquals(1, client.getAvaliableServers().size());
 		assertEquals(5, client.getConnectionSizeBySocketAddress(serverAddress));
 		assertEquals(5, server.sessionCounter.get());

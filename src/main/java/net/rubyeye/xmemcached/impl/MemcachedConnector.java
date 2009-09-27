@@ -71,7 +71,7 @@ public class MemcachedConnector extends SocketChannelController {
 					InetSocketAddress address = request.getAddress();
 					boolean connected = false;
 					int tries = 0;
-					while (tries < 3) {
+					while (tries < 1) {
 						Future<Boolean> future = connect(address, request
 								.getWeight());
 						tries++;
@@ -81,8 +81,7 @@ public class MemcachedConnector extends SocketChannelController {
 									+ address.getHostName() + ":"
 									+ address.getPort() + " for "
 									+ request.getTries() + " times");
-							if (!future.isDone()
-									&& !future
+							if ( !future
 											.get(
 													MemcachedClient.DEFAULT_CONNECT_TIMEOUT,
 													TimeUnit.MILLISECONDS)) {
@@ -98,6 +97,7 @@ public class MemcachedConnector extends SocketChannelController {
 							continue;
 						} catch (ExecutionException e) {
 							future.cancel(true);
+							Thread.sleep(MemcachedConnector.this.healSessionInterval);
 							continue;
 						}
 					}

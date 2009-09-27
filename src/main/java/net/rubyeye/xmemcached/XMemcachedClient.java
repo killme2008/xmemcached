@@ -381,8 +381,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 			try {
 				future = this.connector.connect(inetSocketAddress, weight);
 
-				if (!future.isDone()
-						&& !future.get(this.connectTimeout,
+				if (!future.get(this.connectTimeout,
 								TimeUnit.MILLISECONDS)) {
 					log.error("connect to " + inetSocketAddress.getHostName()
 							+ ":" + inetSocketAddress.getPort() + " fail");
