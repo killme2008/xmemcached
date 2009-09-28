@@ -46,7 +46,11 @@ public final class ByteUtils {
 		if (k == null || k.length() == 0) {
 			throw new IllegalArgumentException("Key must not be blank");
 		}
-		return k.getBytes(DEFAULT_CHARSET);
+		try {
+			return k.getBytes(DEFAULT_CHARSET_NAME);
+		} catch (UnsupportedEncodingException e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 	public static final void setArguments(IoBuffer bb, Object... args) {
@@ -210,7 +214,11 @@ public final class ByteUtils {
 	}
 
 	public static String getString(byte[] bytes) {
-		return new String(bytes, DEFAULT_CHARSET);
+		try {
+			return new String(bytes, DEFAULT_CHARSET_NAME);
+		} catch (UnsupportedEncodingException e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 	public static void byte2hex(byte b, StringBuffer buf) {

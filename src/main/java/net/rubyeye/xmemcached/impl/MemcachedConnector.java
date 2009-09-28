@@ -81,10 +81,9 @@ public class MemcachedConnector extends SocketChannelController {
 									+ address.getHostName() + ":"
 									+ address.getPort() + " for "
 									+ request.getTries() + " times");
-							if ( !future
-											.get(
-													MemcachedClient.DEFAULT_CONNECT_TIMEOUT,
-													TimeUnit.MILLISECONDS)) {
+							if (!future.get(
+									MemcachedClient.DEFAULT_CONNECT_TIMEOUT,
+									TimeUnit.MILLISECONDS)) {
 								Thread
 										.sleep(MemcachedConnector.this.healSessionInterval);
 								continue;
@@ -97,7 +96,8 @@ public class MemcachedConnector extends SocketChannelController {
 							continue;
 						} catch (ExecutionException e) {
 							future.cancel(true);
-							Thread.sleep(MemcachedConnector.this.healSessionInterval);
+							Thread
+									.sleep(MemcachedConnector.this.healSessionInterval);
 							continue;
 						}
 					}
@@ -253,9 +253,14 @@ public class MemcachedConnector extends SocketChannelController {
 					SelectionKey.OP_CONNECT, future);
 			this.reactor.wakeup();
 		} else {
-			SelectionKey selectionKey = socketChannel
-					.register(this.selector, 0);
-			addSession(createSession(selectionKey, socketChannel, weight));
+			SelectionKey selectionKey = this.reactor.registerChannel(
+					socketChannel, 0, null);
+			if (selectionKey != null) {
+				addSession(createSession(selectionKey, socketChannel, weight));
+			} else {
+				socketChannel.close();
+				log.warn("Register channel fail,close SocketChannel...");
+			}
 			future.setConnected(true);
 		}
 		return future;
