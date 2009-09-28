@@ -13,6 +13,7 @@ package net.rubyeye.xmemcached.utils;
 
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
 
 import net.rubyeye.xmemcached.buffer.IoBuffer;
 import net.rubyeye.xmemcached.codec.MemcachedDecoder;
@@ -29,7 +30,9 @@ import org.slf4j.LoggerFactory;
  */
 public final class ByteUtils {
 	public static final Logger log = LoggerFactory.getLogger(ByteUtils.class);
-	public static final String DEFAULT_CHARSET = "utf-8";
+	public static final String DEFAULT_CHARSET_NAME = "utf-8";
+	public static final Charset DEFAULT_CHARSET = Charset
+			.forName(DEFAULT_CHARSET_NAME);
 	public static final ByteBuffer SPLIT = ByteBuffer.wrap(Constants.CRLF);
 
 	/**
@@ -43,11 +46,7 @@ public final class ByteUtils {
 		if (k == null || k.length() == 0) {
 			throw new IllegalArgumentException("Key must not be blank");
 		}
-		try {
-			return k.getBytes(DEFAULT_CHARSET);
-		} catch (UnsupportedEncodingException e) {
-			throw new RuntimeException(e);
-		}
+		return k.getBytes(DEFAULT_CHARSET);
 	}
 
 	public static final void setArguments(IoBuffer bb, Object... args) {
@@ -211,13 +210,7 @@ public final class ByteUtils {
 	}
 
 	public static String getString(byte[] bytes) {
-		try {
-			return new String(bytes, "utf-8");
-		} catch (UnsupportedEncodingException e) {
-			log.error("new String error", e);
-
-		}
-		return null;
+		return new String(bytes, DEFAULT_CHARSET);
 	}
 
 	public static void byte2hex(byte b, StringBuffer buf) {
