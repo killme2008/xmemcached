@@ -81,6 +81,7 @@ public class BinaryStatsCommand extends BaseBinaryCommand implements
 	}
 
 	@Override
+	@SuppressWarnings("unchecked")
 	protected boolean readValue(ByteBuffer buffer, int bodyLength,
 			int keyLength, int extrasLength) {
 		int valueLength = bodyLength - keyLength - extrasLength;

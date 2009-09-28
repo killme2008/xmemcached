@@ -11,7 +11,7 @@ import net.rubyeye.xmemcached.transcoders.TranscoderUtils;
 public class KestrelGetCommand extends TextGetCommand {
 
 	public KestrelGetCommand(String key, byte[] keyBytes, CommandType cmdType,
-			CountDownLatch latch, Transcoder transcoder) {
+			CountDownLatch latch, Transcoder<?> transcoder) {
 		super(key, keyBytes, cmdType, latch);
 		this.transcoder = transcoder;
 	}
@@ -35,7 +35,7 @@ public class KestrelGetCommand extends TextGetCommand {
 					System.arraycopy(data, 0, flagBytes, 0, 4);
 					byte[] realData = new byte[data.length - 4];
 					System.arraycopy(data, 4, realData, 0, data.length - 4);
-					int flag = this.transcoderUtils.decodeInt(flagBytes);
+					int flag = transcoderUtils.decodeInt(flagBytes);
 					value.setFlag(flag);
 					value.setData(realData);
 					value.setCapacity(realData.length);

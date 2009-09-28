@@ -163,6 +163,7 @@ public final class TextCommandFactory implements CommandFactory {
 	 * net.rubyeye.xmemcached.CommandFactory#createGetCommand(java.lang.String,
 	 * byte[], net.rubyeye.xmemcached.command.CommandType)
 	 */
+	@SuppressWarnings("unchecked")
 	public final Command createGetCommand(final String key,
 			final byte[] keyBytes, final CommandType cmdType, Transcoder transcoder) {
 		return new TextGetOneCommand(key, keyBytes, cmdType,

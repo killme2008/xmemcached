@@ -23,6 +23,7 @@ import net.rubyeye.xmemcached.utils.Protocol;
  * @author dennis
  * 
  */
+@SuppressWarnings("unchecked")
 public class KestrelCommandFactory implements CommandFactory {
 
 	public Command createAddCommand(String key, byte[] keyBytes, int exp,

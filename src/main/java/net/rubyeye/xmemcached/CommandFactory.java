@@ -66,6 +66,7 @@ public interface CommandFactory {
 	 *            命令的字节数组，如"get".getBytes()
 	 * @return
 	 */
+	@SuppressWarnings("unchecked")
 	public abstract Command createGetCommand(final String key,
 			final byte[] keyBytes, final CommandType cmdType, Transcoder transcoder);
 
