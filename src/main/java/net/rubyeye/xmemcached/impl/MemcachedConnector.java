@@ -230,10 +230,10 @@ public class MemcachedConnector extends SocketChannelController {
 		key.attach(weight);
 		MemcachedTCPSession session = (MemcachedTCPSession) buildSession(
 				socketChannel, key);
-		session.onEvent(EventType.ENABLE_READ, this.selector);
+		session.onEvent(EventType.ENABLE_READ);
 		key.attach(session);
 		session.start();
-		session.onEvent(EventType.CONNECTED, this.selector);
+		session.onEvent(EventType.CONNECTED);
 		return session;
 	}
 
