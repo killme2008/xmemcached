@@ -216,7 +216,6 @@ public class MemcachedConnector extends SocketChannelController {
 				future.setConnected(true);
 			}
 		} catch (Exception e) {
-			e.printStackTrace();
 			future.setException(e);
 			throw new IOException("Connect to "
 					+ future.getInetSocketAddress().getHostName() + ":"
@@ -256,12 +255,17 @@ public class MemcachedConnector extends SocketChannelController {
 			SelectionKey selectionKey = this.reactor.registerChannel(
 					socketChannel, 0, null);
 			if (selectionKey != null) {
+				future.setConnected(true);
 				addSession(createSession(selectionKey, socketChannel, weight));
 			} else {
+				future.setConnected(false);
+				socketChannel.socket().setSoLinger(true, 0);// avoid time_wait
+				if (!socketChannel.socket().isOutputShutdown())
+					socketChannel.socket().shutdownOutput();
 				socketChannel.close();
 				log.warn("Register channel fail,close SocketChannel...");
 			}
-			future.setConnected(true);
+
 		}
 		return future;
 	}
