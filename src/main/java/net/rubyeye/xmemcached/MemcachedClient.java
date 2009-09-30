@@ -70,6 +70,12 @@ public interface MemcachedClient {
 	public static final int DEFAULT_CONNECTION_POOL_SIZE = 1;
 
 	/**
+	 * Default session idle timeout,if session is idle,xmemcached will do a
+	 * heartbeat action to check if connection is alive.
+	 */
+	public static final int DEFAULT_SESSION_IDLE_TIMEOUT = 5000;
+
+	/**
 	 * Set the merge factor,this factor determins how many 'get' commands would
 	 * be merge to one multi-get command.default is 150
 	 * 
@@ -727,8 +733,9 @@ public interface MemcachedClient {
 	public abstract long decr(final String key, final long num)
 			throws TimeoutException, InterruptedException, MemcachedException;
 
-	public abstract long decr(final String key, final long num,long initValue)
-	throws TimeoutException, InterruptedException, MemcachedException;
+	public abstract long decr(final String key, final long num, long initValue)
+			throws TimeoutException, InterruptedException, MemcachedException;
+
 	/**
 	 * Make All connected memcached's data item invalid
 	 * 
@@ -990,7 +997,7 @@ public interface MemcachedClient {
 	 */
 	public void decrWithNoReply(final String key, final long num)
 			throws InterruptedException, MemcachedException;
-	
+
 	/**
 	 * Set the verbosity level of the memcached's logging output.This method
 	 * will wait for reply.
@@ -1082,5 +1089,12 @@ public interface MemcachedClient {
 	 *            connection.
 	 */
 	public void setConnectionPoolSize(int poolSize);
+
+	/**
+	 * Whether to enable heart beat
+	 * 
+	 * @param enableHeartBeat
+	 */
+	public void setEnableHeartBeat(boolean enableHeartBeat);
 
 }

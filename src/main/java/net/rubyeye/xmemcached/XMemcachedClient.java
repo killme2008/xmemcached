@@ -116,6 +116,10 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 		this.connectTimeout = connectTimeout;
 	}
 
+	public void setEnableHeartBeat(boolean enableHeartBeat) {
+		this.memcachedHandler.setEnableHeartBeat(enableHeartBeat);
+	}
+
 	/**
 	 * get operation timeout setting
 	 * 
@@ -381,8 +385,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 			try {
 				future = this.connector.connect(inetSocketAddress, weight);
 
-				if (!future.get(this.connectTimeout,
-								TimeUnit.MILLISECONDS)) {
+				if (!future.get(this.connectTimeout, TimeUnit.MILLISECONDS)) {
 					log.error("connect to " + inetSocketAddress.getHostName()
 							+ ":" + inetSocketAddress.getPort() + " fail");
 				} else {
@@ -496,6 +499,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 		this.memcachedHandler = new MemcachedHandler(this);
 		this.connector.setHandler(this.memcachedHandler);
 		this.connector.setCodecFactory(new MemcachedCodecFactory());
+		this.connector.setSessionTimeout(-1);
 		this.connector.setSocketOptions(socketOptions);
 	}
 
@@ -2051,7 +2055,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 	}
 
 	public void setConnectionPoolSize(int poolSize) {
-		if (!this.shutdown&&this.getAvaliableServers().size()>0) {
+		if (!this.shutdown && this.getAvaliableServers().size() > 0) {
 			throw new IllegalStateException(
 					"Xmemcached client has been started");
 		}

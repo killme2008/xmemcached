@@ -109,9 +109,9 @@ public class XMemcachedClientBuilder implements MemcachedClientBuilder {
 				.setSessionReadBufferSize(MemcachedClient.DEFAULT_SESSION_READ_BUFF_SIZE);
 		configuration
 				.setReadThreadCount(MemcachedClient.DEFAULT_READ_THREAD_COUNT);
-		configuration.setSessionIdleTimeout(0);
+		configuration
+				.setSessionIdleTimeout(MemcachedClient.DEFAULT_SESSION_IDLE_TIMEOUT);
 		configuration.setWriteThreadCount(0);
-		configuration.setCheckSessionTimeoutInterval(0);
 		return configuration;
 	}
 

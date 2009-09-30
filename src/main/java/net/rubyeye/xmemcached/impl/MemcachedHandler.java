@@ -11,6 +11,10 @@
  */
 package net.rubyeye.xmemcached.impl;
 
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
+
 import net.rubyeye.xmemcached.MemcachedClient;
 import net.rubyeye.xmemcached.MemcachedClientStateListener;
 import net.rubyeye.xmemcached.command.Command;
@@ -18,7 +22,9 @@ import net.rubyeye.xmemcached.command.CommandType;
 import net.rubyeye.xmemcached.command.MapReturnValueAware;
 import net.rubyeye.xmemcached.command.OperationStatus;
 import net.rubyeye.xmemcached.command.binary.BinaryGetCommand;
+import net.rubyeye.xmemcached.command.binary.BinaryVersionCommand;
 import net.rubyeye.xmemcached.command.text.TextGetOneCommand;
+import net.rubyeye.xmemcached.command.text.TextVersionCommand;
 import net.rubyeye.xmemcached.monitor.StatisticsHandler;
 import net.rubyeye.xmemcached.utils.Protocol;
 
@@ -63,6 +69,12 @@ public class MemcachedHandler extends HandlerAdapter {
 		}
 	}
 
+	private volatile boolean enableHeartBeat = true;
+
+	public void setEnableHeartBeat(boolean enableHeartBeat) {
+		this.enableHeartBeat = enableHeartBeat;
+	}
+
 	private final MemcachedClient client;
 	private static final Logger log = LoggerFactory
 			.getLogger(MemcachedHandler.class);
@@ -91,6 +103,7 @@ public class MemcachedHandler extends HandlerAdapter {
 	@Override
 	public void onSessionStarted(Session session) {
 		session.setUseBlockingRead(true);
+		session.setAttribute(HEART_BEAT_FAIL_COUNT_ATTR, new AtomicInteger(0));
 		for (MemcachedClientStateListener listener : this.client
 				.getStateListeners()) {
 			listener.onConnected(this.client, session.getRemoteSocketAddress());
@@ -110,6 +123,74 @@ public class MemcachedHandler extends HandlerAdapter {
 				.getStateListeners()) {
 			listener.onDisconnected(this.client, session
 					.getRemoteSocketAddress());
+		}
+	}
+
+	/**
+	 * Do a heartbeat action
+	 */
+	@Override
+	public void onSessionIdle(Session session) {
+		if (enableHeartBeat) {
+			log.debug("Session(" + session.getRemoteSocketAddress()
+					+ ") is idle,send heartbeat");
+			Command versionCommand = null;
+			CountDownLatch latch = new CountDownLatch(1);
+			if (client.getProtocol() == Protocol.Binary) {
+				versionCommand = new BinaryVersionCommand(latch, session
+						.getRemoteSocketAddress());
+
+			} else {
+				versionCommand = new TextVersionCommand(latch, session
+						.getRemoteSocketAddress());
+			}
+			session.write(versionCommand);
+			// Start a check thread,avoid blocking reactor thread
+			new CheckHeartResultThread(versionCommand, session).start();
+		}
+
+	}
+
+	private static final String HEART_BEAT_FAIL_COUNT_ATTR = "heartBeatFailCount";
+	private static final int MAX_HEART_BEAT_FAIL_COUNT = 5;
+
+	final class CheckHeartResultThread extends Thread {
+
+		private Command versionCommand;
+		private Session session;
+
+		public CheckHeartResultThread(Command versionCommand, Session session) {
+			super();
+			this.versionCommand = versionCommand;
+			this.session = session;
+		}
+
+		public void run() {
+			try {
+				AtomicInteger heartBeatFailCount = (AtomicInteger) session
+						.getAttribute(HEART_BEAT_FAIL_COUNT_ATTR);
+				if (!versionCommand.getLatch().await(2000,
+						TimeUnit.MILLISECONDS)) {
+					heartBeatFailCount.incrementAndGet();
+				}
+				if (versionCommand.getResult() == null) {
+					heartBeatFailCount.incrementAndGet();
+				} else {
+					// reset
+					heartBeatFailCount.set(0);
+				}
+				// 10 times fail
+				if (heartBeatFailCount.get() > MAX_HEART_BEAT_FAIL_COUNT) {
+					log
+							.debug("Session("
+									+ session.getRemoteSocketAddress()
+									+ ") heartbeat fail 10 times,close session and try to heal it");
+					session.close();// close session
+					heartBeatFailCount.set(0);
+				}
+			} catch (InterruptedException e) {
+				// ignore
+			}
 		}
 	}
 

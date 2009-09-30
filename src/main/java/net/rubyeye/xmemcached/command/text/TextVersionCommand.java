@@ -22,8 +22,8 @@ public class TextVersionCommand extends Command implements ServerAddressAware {
 		this.server = server;
 	}
 
-	public TextVersionCommand(InetSocketAddress server,
-			final CountDownLatch latch) {
+	public TextVersionCommand(final CountDownLatch latch,
+			InetSocketAddress server) {
 		super("version", (byte[]) null, latch);
 		this.commandType = CommandType.VERSION;
 		this.server = server;

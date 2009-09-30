@@ -52,7 +52,7 @@ public final class TextCommandFactory implements CommandFactory {
 	 */
 	public final Command createVersionCommand(CountDownLatch latch,
 			InetSocketAddress server) {
-		return new TextVersionCommand(server, latch);
+		return new TextVersionCommand(latch, server);
 	}
 
 	/*

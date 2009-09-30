@@ -186,7 +186,6 @@ public class Example {
 			// 查看统计信息
 			System.out.println(client.getStats()); // 查看统计信息
 
-			Thread.sleep(Integer.MAX_VALUE);
 			client.shutdown();
 
 		} catch (IOException e) {
