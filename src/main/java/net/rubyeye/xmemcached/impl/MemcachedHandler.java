@@ -169,24 +169,26 @@ public class MemcachedHandler extends HandlerAdapter {
 			try {
 				AtomicInteger heartBeatFailCount = (AtomicInteger) session
 						.getAttribute(HEART_BEAT_FAIL_COUNT_ATTR);
-				if (!versionCommand.getLatch().await(2000,
-						TimeUnit.MILLISECONDS)) {
-					heartBeatFailCount.incrementAndGet();
-				}
-				if (versionCommand.getResult() == null) {
-					heartBeatFailCount.incrementAndGet();
-				} else {
-					// reset
-					heartBeatFailCount.set(0);
-				}
-				// 10 times fail
-				if (heartBeatFailCount.get() > MAX_HEART_BEAT_FAIL_COUNT) {
-					log
-							.debug("Session("
-									+ session.getRemoteSocketAddress()
-									+ ") heartbeat fail 10 times,close session and try to heal it");
-					session.close();// close session
-					heartBeatFailCount.set(0);
+				if (heartBeatFailCount != null) {
+					if (!versionCommand.getLatch().await(2000,
+							TimeUnit.MILLISECONDS)) {
+						heartBeatFailCount.incrementAndGet();
+					}
+					if (versionCommand.getResult() == null) {
+						heartBeatFailCount.incrementAndGet();
+					} else {
+						// reset
+						heartBeatFailCount.set(0);
+					}
+					// 10 times fail
+					if (heartBeatFailCount.get() > MAX_HEART_BEAT_FAIL_COUNT) {
+						log
+								.debug("Session("
+										+ session.getRemoteSocketAddress()
+										+ ") heartbeat fail 10 times,close session and try to heal it");
+						session.close();// close session
+						heartBeatFailCount.set(0);
+					}
 				}
 			} catch (InterruptedException e) {
 				// ignore

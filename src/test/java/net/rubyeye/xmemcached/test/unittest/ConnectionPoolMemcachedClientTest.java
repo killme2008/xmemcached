@@ -39,9 +39,9 @@ public class ConnectionPoolMemcachedClientTest extends XMemcachedClientTest {
 	 * 
 	 */
 	static class MockServer {
+		private static final int PORT = 9999;
 		TCPController controller;
 		AtomicInteger sessionCounter = new AtomicInteger(0);
-		private InetSocketAddress localAddress;
 
 		public void start() {
 			controller = new TCPController();
@@ -59,17 +59,14 @@ public class ConnectionPoolMemcachedClientTest extends XMemcachedClientTest {
 
 			});
 			try {
-				if (localAddress != null)
-					controller.bind(localAddress);
-				else
-					controller.bind(0);
+				controller.bind(PORT);
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
 		}
 
 		public InetSocketAddress getServerAddress() {
-			return this.controller.getLocalSocketAddress();
+			return new InetSocketAddress("localhost", PORT);
 		}
 
 		public void stop() {
@@ -88,8 +85,8 @@ public class ConnectionPoolMemcachedClientTest extends XMemcachedClientTest {
 		XMemcachedClient client = new XMemcachedClient();
 		client.setConnectionPoolSize(5);
 		client.addServer(serverAddress);
-		synchronized(this){
-			while(server.sessionCounter.get()<5){
+		synchronized (this) {
+			while (server.sessionCounter.get() < 5) {
 				this.wait(1000);
 			}
 		}
@@ -105,7 +102,6 @@ public class ConnectionPoolMemcachedClientTest extends XMemcachedClientTest {
 		assertEquals(0, client.getConnectionSizeBySocketAddress(serverAddress));
 		// new server start
 		server = new MockServer();
-		server.localAddress=serverAddress;
 		server.start();
 		Thread.sleep(20000);
 		assertEquals(1, client.getAvaliableServers().size());
