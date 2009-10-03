@@ -169,4 +169,22 @@ public class MockSession implements Session {
 		return false;
 	}
 
+
+	public long getSessionIdleTimeout() {
+		return 0;
+	}
+
+
+	public void setSessionIdleTimeout(long sessionIdelTimeout) {
+	}
+
+
+	public long getSessionTimeout() {
+		return 0;
+	}
+
+
+	public void setSessionTimeout(long sessionTimeout) {
+	}
+
 }

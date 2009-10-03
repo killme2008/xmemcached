@@ -58,6 +58,7 @@ import org.slf4j.LoggerFactory;
 import com.google.code.yanf4j.config.Configuration;
 import com.google.code.yanf4j.core.Session;
 import com.google.code.yanf4j.core.SocketOption;
+import com.google.code.yanf4j.util.SystemUtils;
 
 /**
  * Memcached Client for connecting to memcached server and do operations.
@@ -681,9 +682,9 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 		if (conf != null && addressList != null) {
 			if (isLinuxPlatform() && addressList.size() > 1
 					&& conf.getReadThreadCount() == DEFAULT_READ_THREAD_COUNT) {
-				int cpus = Runtime.getRuntime().availableProcessors();
+				int threadCount = SystemUtils.getSystemThreadCount();
 				conf
-						.setReadThreadCount(addressList.size() > cpus + 1 ? cpus + 1
+						.setReadThreadCount(addressList.size() > threadCount ? threadCount
 								: addressList.size());
 			}
 		}

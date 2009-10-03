@@ -23,7 +23,6 @@ import net.rubyeye.xmemcached.GetsResponse;
 import net.rubyeye.xmemcached.MemcachedClient;
 import net.rubyeye.xmemcached.MemcachedClientBuilder;
 import net.rubyeye.xmemcached.XMemcachedClientBuilder;
-import net.rubyeye.xmemcached.command.BinaryCommandFactory;
 import net.rubyeye.xmemcached.exception.MemcachedException;
 import net.rubyeye.xmemcached.transcoders.StringTranscoder;
 import net.rubyeye.xmemcached.utils.AddrUtil;
@@ -62,7 +61,7 @@ public class Example {
 
 			MemcachedClientBuilder builder = new XMemcachedClientBuilder(
 					AddrUtil.getAddresses(args[0]));
-			builder.setCommandFactory(new BinaryCommandFactory());
+			// builder.setCommandFactory(new BinaryCommandFactory());
 			MemcachedClient client = builder.build();
 			if (!client.set("hello", 0, "world")) {
 				System.err.println("set error");
@@ -149,12 +148,10 @@ public class Example {
 			 */
 			client.cas("a", 0, new CASOperation<Integer>() {
 
-				
 				public int getMaxTries() {
 					return 1;
 				}
 
-				
 				public Integer getNewValue(long currentCAS, Integer currentValue) {
 					System.out.println("current value " + currentValue);
 					return 3;
@@ -167,12 +164,10 @@ public class Example {
 			result.setCas(100);// 改变cas值，因此需要试2次
 			client.cas("a", result, new CASOperation<Integer>() {
 
-				
 				public int getMaxTries() {
 					return 2;
 				}
 
-				
 				public Integer getNewValue(long currentCAS, Integer currentValue) {
 					System.out.println("current value " + currentValue);
 					return 4;

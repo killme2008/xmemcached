@@ -30,9 +30,9 @@ public class MemcachedDecoderUnitTest extends TestCase {
 	}
 
 	public MemcachedTCPSession buildSession() {
-		NioSessionConfig sessionConfig = new NioSessionConfig(null, null,
+		NioSessionConfig sessionConfig = new NioSessionConfig(null,
 				new HandlerAdapter(), null, new ByteBufferCodecFactory(), null,
-				null, null, true);
-		return new MemcachedTCPSession(sessionConfig, 16 * 1024, null, 0, 1);
+				null, null, true, 0, 0);
+		return new MemcachedTCPSession(sessionConfig, 16 * 1024, null, 0);
 	}
 }

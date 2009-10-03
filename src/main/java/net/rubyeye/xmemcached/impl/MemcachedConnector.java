@@ -39,9 +39,9 @@ import net.rubyeye.xmemcached.utils.Protocol;
 
 import com.google.code.yanf4j.config.Configuration;
 import com.google.code.yanf4j.core.EventType;
-import com.google.code.yanf4j.core.NioSession;
 import com.google.code.yanf4j.core.Session;
 import com.google.code.yanf4j.core.WriteMessage;
+import com.google.code.yanf4j.nio.NioSession;
 import com.google.code.yanf4j.nio.NioSessionConfig;
 import com.google.code.yanf4j.nio.impl.SocketChannelController;
 
@@ -211,8 +211,8 @@ public class MemcachedConnector extends SocketChannelController {
 						+ future.getInetSocketAddress().getPort() + " fail"));
 			} else {
 				key.attach(null);
-				addSession(createSession(key, (SocketChannel) key.channel(),
-						future.getWeight()));
+				addSession(createSession((SocketChannel) key.channel(), future
+						.getWeight()));
 				future.setConnected(true);
 			}
 		} catch (Exception e) {
@@ -224,15 +224,14 @@ public class MemcachedConnector extends SocketChannelController {
 		}
 	}
 
-	protected MemcachedTCPSession createSession(SelectionKey key,
-			SocketChannel socketChannel, int weight) {
-		key.attach(weight);
-		MemcachedTCPSession session = (MemcachedTCPSession) buildSession(
-				socketChannel, key);
-		session.onEvent(EventType.ENABLE_READ);
-		key.attach(session);
+	protected MemcachedTCPSession createSession(SocketChannel socketChannel,
+			int weight) {
+		MemcachedTCPSession session = (MemcachedTCPSession) buildSession(socketChannel);
+		session.setWeight(weight);
+		this.selectorManager.registerChannel(socketChannel,
+				SelectionKey.OP_READ, session);
 		session.start();
-		session.onEvent(EventType.CONNECTED);
+		session.onEvent(EventType.CONNECTED, null);
 		return session;
 	}
 
@@ -248,24 +247,11 @@ public class MemcachedConnector extends SocketChannelController {
 		configureSocketChannel(socketChannel);
 		ConnectFuture future = new ConnectFuture(address, weight);
 		if (!socketChannel.connect(address)) {
-			this.reactor.registerChannel(socketChannel,
+			this.selectorManager.registerChannel(socketChannel,
 					SelectionKey.OP_CONNECT, future);
-			this.reactor.wakeup();
 		} else {
-			SelectionKey selectionKey = this.reactor.registerChannel(
-					socketChannel, 0, null);
-			if (selectionKey != null) {
-				future.setConnected(true);
-				addSession(createSession(selectionKey, socketChannel, weight));
-			} else {
-				future.setConnected(false);
-				socketChannel.socket().setSoLinger(true, 0);// avoid time_wait
-				if (!socketChannel.socket().isOutputShutdown())
-					socketChannel.socket().shutdownOutput();
-				socketChannel.close();
-				log.warn("Register channel fail,close SocketChannel...");
-			}
-
+			addSession(createSession(socketChannel, weight));
+			future.setConnected(true);
 		}
 		return future;
 	}
@@ -328,16 +314,12 @@ public class MemcachedConnector extends SocketChannelController {
 	}
 
 	@Override
-	protected NioSession buildSession(SocketChannel sc,
-			SelectionKey selectionKey) {
+	protected NioSession buildSession(SocketChannel sc) {
 		Queue<WriteMessage> queue = buildQueue();
-		final NioSessionConfig sessionCofig = buildSessionConfig(sc,
-				selectionKey, queue);
-		int weight = selectionKey.attachment() == null ? 1
-				: (Integer) selectionKey.attachment();
+		final NioSessionConfig sessionCofig = buildSessionConfig(sc, queue);
 		MemcachedTCPSession session = new MemcachedTCPSession(sessionCofig,
 				this.configuration.getSessionReadBufferSize(), this.optimiezer,
-				this.getReadThreadCount(), weight);
+				this.getReadThreadCount());
 		session.setBufferAllocator(this.bufferAllocator);
 		return session;
 	}

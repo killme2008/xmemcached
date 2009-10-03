@@ -61,10 +61,9 @@ public class MemcachedTCPSession extends NioTCPSession {
 
 	public MemcachedTCPSession(NioSessionConfig sessionConfig,
 			int readRecvBufferSize, MemcachedOptimizer optimiezer,
-			int readThreadCount, int weight) {
-		super(sessionConfig, readRecvBufferSize, -1);
+			int readThreadCount) {
+		super(sessionConfig, readRecvBufferSize);
 		this.optimiezer = optimiezer;
-		this.weight = weight;
 		if (this.selectableChannel != null) {
 			this.remoteSocketAddress = ((SocketChannel) this.selectableChannel)
 					.socket().getRemoteSocketAddress();
