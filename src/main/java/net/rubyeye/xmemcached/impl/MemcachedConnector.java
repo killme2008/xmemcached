@@ -28,6 +28,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.nio.channels.Selector;
 
 import net.rubyeye.xmemcached.MemcachedClient;
 import net.rubyeye.xmemcached.MemcachedOptimizer;
@@ -151,6 +152,7 @@ public class MemcachedConnector extends SocketChannelController {
 		// Remove old session and close it
 		while (sessions.size() > this.connectionPoolSize) {
 			Session oldSession = sessions.poll();
+			((MemcachedTCPSession)oldSession).setAllowReconnect(false);
 			oldSession.close();
 		}
 		updateSessions();
@@ -256,7 +258,7 @@ public class MemcachedConnector extends SocketChannelController {
 		return future;
 	}
 
-	public void closeChannel() throws IOException {
+	public void closeChannel(Selector selector) throws IOException {
 		this.sessionMonitor.interrupt();
 		while (this.sessionMonitor.isAlive()) {
 			try {

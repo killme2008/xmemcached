@@ -62,7 +62,9 @@ public class Example {
 			MemcachedClientBuilder builder = new XMemcachedClientBuilder(
 					AddrUtil.getAddresses(args[0]));
 			// builder.setCommandFactory(new BinaryCommandFactory());
+			builder.setConnectionPoolSize(5);
 			MemcachedClient client = builder.build();
+			
 			if (!client.set("hello", 0, "world")) {
 				System.err.println("set error");
 			}
@@ -181,6 +183,7 @@ public class Example {
 			// 查看统计信息
 			System.out.println(client.getStats()); // 查看统计信息
 
+			Thread.sleep(Integer.MAX_VALUE);
 			client.shutdown();
 
 		} catch (IOException e) {
