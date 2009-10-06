@@ -12,6 +12,8 @@
 package net.rubyeye.xmemcached.impl;
 
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -45,27 +47,32 @@ public class MemcachedHandler extends HandlerAdapter {
 
 	private final StatisticsHandler statisticsHandler;
 
+	private ExecutorService heartBeatThreadPool;
+
 	/**
 	 * On receive message from memcached server
 	 */
 	@Override
 	public final void onMessageReceived(final Session session, final Object msg) {
 		Command command = (Command) msg;
-		if (command.getMergeCount() > 0) {
-			int size = ((MapReturnValueAware) command).getReturnValues().size();
-			this.statisticsHandler.statistics(CommandType.GET_HIT, size);
-			this.statisticsHandler.statistics(CommandType.GET_MISS, command
-					.getMergeCount()
-					- size);
-		} else if (command instanceof TextGetOneCommand
-				|| command instanceof BinaryGetCommand) {
-			if (command.getResult() != null) {
-				this.statisticsHandler.statistics(CommandType.GET_HIT);
+		if (this.statisticsHandler.isStatistics()) {
+			if (command.getMergeCount() > 0) {
+				int size = ((MapReturnValueAware) command).getReturnValues()
+						.size();
+				this.statisticsHandler.statistics(CommandType.GET_HIT, size);
+				this.statisticsHandler.statistics(CommandType.GET_MISS, command
+						.getMergeCount()
+						- size);
+			} else if (command instanceof TextGetOneCommand
+					|| command instanceof BinaryGetCommand) {
+				if (command.getResult() != null) {
+					this.statisticsHandler.statistics(CommandType.GET_HIT);
+				} else {
+					this.statisticsHandler.statistics(CommandType.GET_MISS);
+				}
 			} else {
-				this.statisticsHandler.statistics(CommandType.GET_MISS);
+				this.statisticsHandler.statistics(command.getCommandType());
 			}
-		} else {
-			this.statisticsHandler.statistics(command.getCommandType());
 		}
 	}
 
@@ -146,7 +153,9 @@ public class MemcachedHandler extends HandlerAdapter {
 			}
 			session.write(versionCommand);
 			// Start a check thread,avoid blocking reactor thread
-			new CheckHeartResultThread(versionCommand, session).start();
+			if (this.heartBeatThreadPool != null)
+				this.heartBeatThreadPool.execute(new CheckHeartResultThread(
+						versionCommand, session));
 		}
 
 	}
@@ -154,10 +163,10 @@ public class MemcachedHandler extends HandlerAdapter {
 	private static final String HEART_BEAT_FAIL_COUNT_ATTR = "heartBeatFailCount";
 	private static final int MAX_HEART_BEAT_FAIL_COUNT = 5;
 
-	final class CheckHeartResultThread extends Thread {
+	final class CheckHeartResultThread implements Runnable {
 
-		private Command versionCommand;
-		private Session session;
+		private final Command versionCommand;
+		private final Session session;
 
 		public CheckHeartResultThread(Command versionCommand, Session session) {
 			super();
@@ -211,10 +220,28 @@ public class MemcachedHandler extends HandlerAdapter {
 		}
 	}
 
+	public void stop() {
+		this.heartBeatThreadPool.shutdown();
+		try {
+			this.heartBeatThreadPool.awaitTermination(5000,
+					TimeUnit.MILLISECONDS);
+		} catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
+		}
+	}
+
+	public void start() {
+		int serverSize = client.getAvaliableServers().size();
+		this.heartBeatThreadPool = Executors
+				.newFixedThreadPool(serverSize == 0 ? Runtime.getRuntime()
+						.availableProcessors() : serverSize);
+	}
+
 	public MemcachedHandler(MemcachedClient client) {
 		super();
 		this.client = client;
 		this.statisticsHandler = new StatisticsHandler();
+
 	}
 
 }

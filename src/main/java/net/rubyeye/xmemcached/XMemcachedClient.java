@@ -462,6 +462,17 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 		if (this.shutdown) {
 			this.shutdown = false;
 			this.connector.start();
+			this.memcachedHandler.start();
+			Runtime.getRuntime().addShutdownHook(new Thread() {
+				@Override
+				public void run() {
+					try {
+						XMemcachedClient.this.shutdown();
+					} catch (IOException e) {
+						log.error("Shutdown XMemcachedClient error", e);
+					}
+				}
+			});
 		}
 	}
 
@@ -2017,6 +2028,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 		}
 		this.shutdown = true;
 		this.connector.stop();
+		this.memcachedHandler.stop();
 		XMemcachedMbeanServer.getInstance().shutdown();
 	}
 
