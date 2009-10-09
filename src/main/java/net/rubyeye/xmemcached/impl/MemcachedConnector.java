@@ -29,7 +29,6 @@ import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-import java.nio.channels.Selector;
 
 import net.rubyeye.xmemcached.MemcachedClient;
 import net.rubyeye.xmemcached.MemcachedOptimizer;
@@ -153,7 +152,7 @@ public class MemcachedConnector extends SocketChannelController {
 		// Remove old session and close it
 		while (sessions.size() > this.connectionPoolSize) {
 			Session oldSession = sessions.poll();
-			((MemcachedTCPSession)oldSession).setAllowReconnect(false);
+			((MemcachedTCPSession) oldSession).setAllowReconnect(false);
 			oldSession.close();
 		}
 		updateSessions();
@@ -161,11 +160,12 @@ public class MemcachedConnector extends SocketChannelController {
 
 	public List<Session> getSessionListBySocketAddress(
 			InetSocketAddress inetSocketAddress) {
-		if (sessionMap.get(inetSocketAddress) != null)
+		if (this.sessionMap.get(inetSocketAddress) != null) {
 			return new ArrayList<Session>(this.sessionMap
 					.get(inetSocketAddress));
-		else
+		} else {
 			return null;
+		}
 	}
 
 	public final void updateSessions() {
@@ -231,8 +231,7 @@ public class MemcachedConnector extends SocketChannelController {
 			int weight) {
 		MemcachedTCPSession session = (MemcachedTCPSession) buildSession(socketChannel);
 		session.setWeight(weight);
-		this.selectorManager.registerChannel(socketChannel,
-				SelectionKey.OP_READ, session);
+		this.selectorManager.registerSession(session, EventType.ENABLE_READ);
 		session.start();
 		session.onEvent(EventType.CONNECTED, null);
 		return session;
@@ -244,8 +243,9 @@ public class MemcachedConnector extends SocketChannelController {
 
 	public Future<Boolean> connect(InetSocketAddress address, int weight)
 			throws IOException {
-		if (address == null)
+		if (address == null) {
 			throw new NullPointerException("Null Address");
+		}
 		SocketChannel socketChannel = SocketChannel.open();
 		configureSocketChannel(socketChannel);
 		ConnectFuture future = new ConnectFuture(address, weight);

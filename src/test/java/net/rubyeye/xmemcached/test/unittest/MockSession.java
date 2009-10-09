@@ -17,11 +17,6 @@ public class MockSession implements Session {
 		this.port = port;
 	}
 
-	public Object setAttributeIfAbsent(String key, Object value) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
 	public void write(Object packet) {
 		// TODO Auto-generated method stub
 
@@ -161,6 +156,11 @@ public class MockSession implements Session {
 	}
 
 	public void setSessionTimeout(long sessionTimeout) {
+	}
+
+
+	public Object setAttributeIfAbsent(String key, Object value) {
+		return null;
 	}
 
 }
