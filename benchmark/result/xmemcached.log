@@ -1,4 +1,4 @@
-Xmemcached startup
+Xmemcached-1.1 startup
 warm up
 threads=1,repeats=20000,valueLength=64,tps=4890,miss=0,fail=0,hit=15003,all=20000,hitRate=1.00
 threads=1,repeats=20000,valueLength=128,tps=4762,miss=0,fail=0,hit=15003,all=20000,hitRate=1.00
