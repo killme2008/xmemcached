@@ -2,9 +2,12 @@ net.rubyeye.xmemcached
 net.rubyeye.xmemcached.buffer
 net.rubyeye.xmemcached.codec
 net.rubyeye.xmemcached.command
+net.rubyeye.xmemcached.command.binary
+net.rubyeye.xmemcached.command.kestrel
 net.rubyeye.xmemcached.command.text
 net.rubyeye.xmemcached.exception
 net.rubyeye.xmemcached.impl
 net.rubyeye.xmemcached.monitor
 net.rubyeye.xmemcached.transcoders
 net.rubyeye.xmemcached.utils
+net.rubyeye.xmemcached.utils.hibernate
