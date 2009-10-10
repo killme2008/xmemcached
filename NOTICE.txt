@@ -5,6 +5,25 @@
 Xmemcached Change log
 
 
+*******************************************
+
+2009-10-10
+
+-------xmemcached 1.2.0-stable Released--------
+
+1.Add heartbeat for connection to keepalive,xmemcached enable this feature by default.You can disable it by:
+memcachedClient.setEnableHeartBeat(false);
+
+2.Add new methods for incr/decr,you can pass initial value as parameter now:
+public long incr(final String key, final long num, final long initValue)
+			throws TimeoutException, InterruptedException, MemcachedException;
+public abstract long decr(final String key, final long num, long initValue)
+			throws TimeoutException, InterruptedException, MemcachedException;
+			
+3.Bug fixed.This release has fixed some bug that is very important,included issue 57,issue 59 etc.
+
+4.Recommend upgrade. 
+
 
 *******************************************
 
