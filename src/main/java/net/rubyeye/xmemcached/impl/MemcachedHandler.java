@@ -138,12 +138,12 @@ public class MemcachedHandler extends HandlerAdapter {
 	 */
 	@Override
 	public void onSessionIdle(Session session) {
-		if (enableHeartBeat) {
+		if (this.enableHeartBeat) {
 			log.debug("Session(" + session.getRemoteSocketAddress()
 					+ ") is idle,send heartbeat");
 			Command versionCommand = null;
 			CountDownLatch latch = new CountDownLatch(1);
-			if (client.getProtocol() == Protocol.Binary) {
+			if (this.client.getProtocol() == Protocol.Binary) {
 				versionCommand = new BinaryVersionCommand(latch, session
 						.getRemoteSocketAddress());
 
@@ -153,9 +153,10 @@ public class MemcachedHandler extends HandlerAdapter {
 			}
 			session.write(versionCommand);
 			// Start a check thread,avoid blocking reactor thread
-			if (this.heartBeatThreadPool != null)
+			if (this.heartBeatThreadPool != null) {
 				this.heartBeatThreadPool.execute(new CheckHeartResultThread(
 						versionCommand, session));
+			}
 		}
 
 	}
@@ -176,14 +177,14 @@ public class MemcachedHandler extends HandlerAdapter {
 
 		public void run() {
 			try {
-				AtomicInteger heartBeatFailCount = (AtomicInteger) session
+				AtomicInteger heartBeatFailCount = (AtomicInteger) this.session
 						.getAttribute(HEART_BEAT_FAIL_COUNT_ATTR);
 				if (heartBeatFailCount != null) {
-					if (!versionCommand.getLatch().await(2000,
+					if (!this.versionCommand.getLatch().await(2000,
 							TimeUnit.MILLISECONDS)) {
 						heartBeatFailCount.incrementAndGet();
 					}
-					if (versionCommand.getResult() == null) {
+					if (this.versionCommand.getResult() == null) {
 						heartBeatFailCount.incrementAndGet();
 					} else {
 						// reset
@@ -192,10 +193,10 @@ public class MemcachedHandler extends HandlerAdapter {
 					// 10 times fail
 					if (heartBeatFailCount.get() > MAX_HEART_BEAT_FAIL_COUNT) {
 						log
-								.debug("Session("
-										+ session.getRemoteSocketAddress()
+								.warn("Session("
+										+ this.session.getRemoteSocketAddress()
 										+ ") heartbeat fail 10 times,close session and try to heal it");
-						session.close();// close session
+						this.session.close();// close session
 						heartBeatFailCount.set(0);
 					}
 				}
@@ -231,7 +232,7 @@ public class MemcachedHandler extends HandlerAdapter {
 	}
 
 	public void start() {
-		int serverSize = client.getAvaliableServers().size();
+		int serverSize = this.client.getAvaliableServers().size();
 		this.heartBeatThreadPool = Executors
 				.newFixedThreadPool(serverSize == 0 ? Runtime.getRuntime()
 						.availableProcessors() : serverSize);
