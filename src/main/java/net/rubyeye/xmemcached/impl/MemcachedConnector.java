@@ -19,6 +19,7 @@ import java.nio.channels.SocketChannel;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.BlockingQueue;
@@ -165,6 +166,16 @@ public class MemcachedConnector extends SocketChannelController {
 					.get(inetSocketAddress));
 		} else {
 			return null;
+		}
+	}
+
+	public void removeReconnectRequest(InetSocketAddress inetSocketAddress) {
+		Iterator<ReconnectRequest> it = this.waitingQueue.iterator();
+		while (it.hasNext()) {
+			ReconnectRequest request = it.next();
+			if (request.getAddress().equals(inetSocketAddress)) {
+				it.remove();
+			}
 		}
 	}
 

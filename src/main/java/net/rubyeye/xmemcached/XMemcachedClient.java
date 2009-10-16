@@ -372,8 +372,11 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 						session.close();
 					}
 				}
+				this.connector.removeReconnectRequest(address);
 			}
+
 		}
+
 	}
 
 	private void connect(final InetSocketAddress inetSocketAddress, int weight)

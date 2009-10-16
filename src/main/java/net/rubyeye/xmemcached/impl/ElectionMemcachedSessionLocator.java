@@ -25,7 +25,8 @@ public class ElectionMemcachedSessionLocator implements MemcachedSessionLocator 
 	}
 
 	public Session getSessionByKey(String key) {
-		List<Session> copySessionList = this.sessions;
+		// copy on write
+		List<Session> copySessionList = new ArrayList<Session>(this.sessions);
 		Session result = getSessionByElection(key, copySessionList);
 		while ((result == null || result.isClosed())
 				&& copySessionList.size() > 0) {

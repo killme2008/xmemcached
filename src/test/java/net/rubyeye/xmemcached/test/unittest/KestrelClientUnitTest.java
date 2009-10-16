@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.CyclicBarrier;
 
 import junit.framework.Assert;
 import junit.framework.TestCase;
@@ -37,6 +38,7 @@ public class KestrelClientUnitTest extends TestCase {
 		this.properties = ResourcesUtils
 				.getResourceAsProperties("test.properties");
 		MemcachedClientBuilder builder = newBuilder();
+		builder.setConnectionPoolSize(5);
 		this.memcachedClient = builder.build();
 		this.memcachedClient.flushAll();
 	}
@@ -69,8 +71,7 @@ public class KestrelClientUnitTest extends TestCase {
 		}
 		// still get integer
 		for (int i = 0; i < 1000; i++) {
-			Assert.assertEquals(i, this.memcachedClient
-					.get("queue1"));
+			Assert.assertEquals(i, this.memcachedClient.get("queue1"));
 		}
 	}
 
@@ -160,6 +161,7 @@ public class KestrelClientUnitTest extends TestCase {
 		newClient.shutdown();
 	}
 
+	
 	public void testPerformance() throws Exception {
 		long start = System.currentTimeMillis();
 		for (int i = 0; i < 10000; i++) {
@@ -175,4 +177,45 @@ public class KestrelClientUnitTest extends TestCase {
 		System.out.println("fetch 10000 message:"
 				+ (System.currentTimeMillis() - start) + "ms");
 	}
+
+	
+	
+	
+	class AccessThread extends Thread {
+		private CyclicBarrier cyclicBarrier;
+
+		public AccessThread(CyclicBarrier cyclicBarrier) {
+			super();
+			this.cyclicBarrier = cyclicBarrier;
+		}
+
+		@Override
+		public void run() {
+			try {
+				this.cyclicBarrier.await();
+				for (int i = 0; i < 1000; i++) {
+					KestrelClientUnitTest.this.memcachedClient.set("queue1", 0,
+							"hello");
+				}
+				for (int i = 0; i < 1000; i++) {
+					KestrelClientUnitTest.this.memcachedClient.get("queue1");
+				}
+				this.cyclicBarrier.await();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+	}
+
+	public void testConcurrentAccess() throws Exception{
+		int threadCount = 10;
+		CyclicBarrier cyclicBarrier = new CyclicBarrier(threadCount + 1);
+		for (int i = 0; i < threadCount; i++) {
+			new AccessThread(cyclicBarrier).start();
+		}
+		cyclicBarrier.await();
+		cyclicBarrier.await();
+
+	}
+
 }
