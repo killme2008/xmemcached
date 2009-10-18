@@ -73,14 +73,14 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 			.getLogger(XMemcachedClient.class);
 	private MemcachedSessionLocator sessionLocator;
 	private volatile boolean shutdown;
-	private Connector connector;
+	protected Connector connector;
 	@SuppressWarnings("unchecked")
 	private Transcoder transcoder;
 	private MemcachedHandler memcachedHandler;
 	private CommandFactory commandFactory;
 	private long opTimeout = DEFAULT_OP_TIMEOUT;
 	private long connectTimeout = DEFAULT_CONNECT_TIMEOUT; // 连接超时
-	private int connectionPoolSize = DEFAULT_CONNECTION_POOL_SIZE;
+	protected int connectionPoolSize = DEFAULT_CONNECTION_POOL_SIZE;
 
 	private final CopyOnWriteArrayList<MemcachedClientStateListenerAdapter> stateListenerAdapters = new CopyOnWriteArrayList<MemcachedClientStateListenerAdapter>();
 
@@ -518,7 +518,9 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 		this.shutdown = true;
 		this.transcoder = transcoder;
 		this.sessionLocator = locator;
-		this.connector = newConnector(bufferAllocator, configuration);
+		this.connector = newConnector(bufferAllocator, configuration,
+				this.sessionLocator, this.commandFactory.getProtocol(),
+				this.connectionPoolSize);
 		this.memcachedHandler = new MemcachedHandler(this);
 		this.connector.setHandler(this.memcachedHandler);
 		this.connector.setCodecFactory(new MemcachedCodecFactory());
@@ -527,10 +529,11 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 	}
 
 	protected Connector newConnector(BufferAllocator bufferAllocator,
-			Configuration configuration) {
-		return new MemcachedConnector(configuration, this.sessionLocator,
-				bufferAllocator, this.commandFactory.getProtocol(),
-				this.connectionPoolSize);
+			Configuration configuration,
+			MemcachedSessionLocator memcachedSessionLocator, Protocol protocol,
+			int i) {
+		return new MemcachedConnector(configuration, memcachedSessionLocator,
+				bufferAllocator, protocol, i);
 	}
 
 	private final void registerMBean() {
