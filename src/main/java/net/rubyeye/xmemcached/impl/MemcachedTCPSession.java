@@ -23,6 +23,7 @@ import net.rubyeye.xmemcached.MemcachedOptimizer;
 import net.rubyeye.xmemcached.buffer.BufferAllocator;
 import net.rubyeye.xmemcached.command.Command;
 import net.rubyeye.xmemcached.command.OperationStatus;
+import net.rubyeye.xmemcached.networking.MemcachedSession;
 
 import com.google.code.yanf4j.core.WriteMessage;
 import com.google.code.yanf4j.core.impl.FutureImpl;
@@ -35,7 +36,8 @@ import com.google.code.yanf4j.util.LinkedTransferQueue;
  * 
  * @author dennis
  */
-public class MemcachedTCPSession extends NioTCPSession {
+public class MemcachedTCPSession extends NioTCPSession implements
+		MemcachedSession {
 
 	/**
 	 * Command which are already sent

@@ -45,10 +45,10 @@ import net.rubyeye.xmemcached.impl.MemcachedHandler;
 import net.rubyeye.xmemcached.impl.MemcachedTCPSession;
 import net.rubyeye.xmemcached.impl.ReconnectRequest;
 import net.rubyeye.xmemcached.monitor.XMemcachedMbeanServer;
+import net.rubyeye.xmemcached.networking.Connector;
 import net.rubyeye.xmemcached.transcoders.CachedData;
 import net.rubyeye.xmemcached.transcoders.SerializingTranscoder;
 import net.rubyeye.xmemcached.transcoders.Transcoder;
-import net.rubyeye.xmemcached.uds.UDSocketConnector;
 import net.rubyeye.xmemcached.utils.AddrUtil;
 import net.rubyeye.xmemcached.utils.ByteUtils;
 import net.rubyeye.xmemcached.utils.Protocol;
@@ -67,8 +67,7 @@ import com.google.code.yanf4j.util.SystemUtils;
  * @author dennis(killme2008@gmail.com)
  * 
  */
-public final class XMemcachedClient implements XMemcachedClientMBean,
-		MemcachedClient {
+public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient {
 
 	private static final Logger log = LoggerFactory
 			.getLogger(XMemcachedClient.class);
@@ -231,7 +230,12 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 				XMemcachedClientBuilder.getDefaultSocketOptions(),
 				new TextCommandFactory(), new SerializingTranscoder());
 		start0();
-		connect(new InetSocketAddress(server, port), weight);
+		connect(newSocketAddress(server, port), weight);
+	}
+
+	protected InetSocketAddress newSocketAddress(final String server,
+			final int port) {
+		return new InetSocketAddress(server, port);
 	}
 
 	private void checkServerPort(String server, int port) {
@@ -268,7 +272,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 			throw new IllegalArgumentException("weight<=0");
 		}
 		checkServerPort(server, port);
-		connect(new InetSocketAddress(server, port), weight);
+		connect(newSocketAddress(server, port), weight);
 	}
 
 	/*
@@ -380,9 +384,14 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 
 	}
 
+	protected void checkSocketAddress(InetSocketAddress address) {
+
+	}
+
 	private void connect(final InetSocketAddress inetSocketAddress, int weight)
 			throws IOException {
 		// creat connection pool
+		checkSocketAddress(inetSocketAddress);
 		for (int i = 0; i < this.connectionPoolSize; i++) {
 			Future<Boolean> future = null;
 			boolean connected = false;
@@ -509,15 +518,19 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 		this.shutdown = true;
 		this.transcoder = transcoder;
 		this.sessionLocator = locator;
-		this.connector=new UDSocketConnector();
-//		this.connector = new MemcachedConnector(configuration,
-//				this.sessionLocator, bufferAllocator, this.commandFactory
-//						.getProtocol(), this.connectionPoolSize);
+		this.connector = newConnector(bufferAllocator, configuration);
 		this.memcachedHandler = new MemcachedHandler(this);
 		this.connector.setHandler(this.memcachedHandler);
 		this.connector.setCodecFactory(new MemcachedCodecFactory());
 		this.connector.setSessionTimeout(-1);
 		this.connector.setSocketOptions(socketOptions);
+	}
+
+	protected Connector newConnector(BufferAllocator bufferAllocator,
+			Configuration configuration) {
+		return new MemcachedConnector(configuration, this.sessionLocator,
+				bufferAllocator, this.commandFactory.getProtocol(),
+				this.connectionPoolSize);
 	}
 
 	private final void registerMBean() {
@@ -2153,8 +2166,8 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 	}
 
 	public final int getConnectionSizeBySocketAddress(InetSocketAddress address) {
-		List<Session> sessionList = this.connector
-				.getSessionListBySocketAddress(address);
+		Queue<Session> sessionList = this.connector
+				.getSessionByAddress(address);
 		return sessionList == null ? 0 : sessionList.size();
 	}
 

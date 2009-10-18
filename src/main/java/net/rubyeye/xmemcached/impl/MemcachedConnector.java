@@ -31,13 +31,13 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import net.rubyeye.xmemcached.Connector;
 import net.rubyeye.xmemcached.MemcachedClient;
 import net.rubyeye.xmemcached.MemcachedOptimizer;
 import net.rubyeye.xmemcached.MemcachedSessionLocator;
 import net.rubyeye.xmemcached.buffer.BufferAllocator;
 import net.rubyeye.xmemcached.command.Command;
 import net.rubyeye.xmemcached.exception.MemcachedException;
+import net.rubyeye.xmemcached.networking.Connector;
 import net.rubyeye.xmemcached.utils.Protocol;
 
 import com.google.code.yanf4j.config.Configuration;
@@ -53,7 +53,8 @@ import com.google.code.yanf4j.nio.impl.SocketChannelController;
  * 
  * @author dennis
  */
-public class MemcachedConnector extends SocketChannelController implements Connector{
+public class MemcachedConnector extends SocketChannelController implements
+		Connector {
 
 	private final BlockingQueue<ReconnectRequest> waitingQueue = new LinkedBlockingQueue<ReconnectRequest>();
 	private BufferAllocator bufferAllocator;
@@ -136,7 +137,7 @@ public class MemcachedConnector extends SocketChannelController implements Conne
 
 	private final ConcurrentHashMap<InetSocketAddress, Queue<Session>> sessionMap = new ConcurrentHashMap<InetSocketAddress, Queue<Session>>();
 
-	public void addSession(MemcachedTCPSession session) {
+	public void addSession(Session session) {
 		log.warn("add session "
 				+ session.getRemoteSocketAddress().getHostName() + ":"
 				+ session.getRemoteSocketAddress().getPort());
@@ -281,7 +282,7 @@ public class MemcachedConnector extends SocketChannelController implements Conne
 		}
 	}
 
-	public final void send(final Command msg) throws MemcachedException {
+	public void send(final Command msg) throws MemcachedException {
 		Session session = findSessionByKey(msg.getKey());
 		if (session == null) {
 			throw new MemcachedException(
