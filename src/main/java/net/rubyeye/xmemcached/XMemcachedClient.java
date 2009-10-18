@@ -71,13 +71,13 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 
 	private static final Logger log = LoggerFactory
 			.getLogger(XMemcachedClient.class);
-	private MemcachedSessionLocator sessionLocator;
+	protected MemcachedSessionLocator sessionLocator;
 	private volatile boolean shutdown;
 	protected Connector connector;
 	@SuppressWarnings("unchecked")
 	private Transcoder transcoder;
 	private MemcachedHandler memcachedHandler;
-	private CommandFactory commandFactory;
+	protected CommandFactory commandFactory;
 	private long opTimeout = DEFAULT_OP_TIMEOUT;
 	private long connectTimeout = DEFAULT_CONNECT_TIMEOUT; // 连接超时
 	protected int connectionPoolSize = DEFAULT_CONNECTION_POOL_SIZE;

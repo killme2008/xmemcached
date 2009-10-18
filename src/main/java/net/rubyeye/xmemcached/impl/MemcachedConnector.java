@@ -38,6 +38,7 @@ import net.rubyeye.xmemcached.buffer.BufferAllocator;
 import net.rubyeye.xmemcached.command.Command;
 import net.rubyeye.xmemcached.exception.MemcachedException;
 import net.rubyeye.xmemcached.networking.Connector;
+import net.rubyeye.xmemcached.networking.MemcachedSession;
 import net.rubyeye.xmemcached.utils.Protocol;
 
 import com.google.code.yanf4j.config.Configuration;
@@ -62,7 +63,13 @@ public class MemcachedConnector extends SocketChannelController implements
 	private final MemcachedOptimizer optimiezer;
 	private volatile long healSessionInterval = 2000L;
 	private int connectionPoolSize; // session pool size
+	protected Protocol protocol;
 
+
+	public void setSessionLocator(MemcachedSessionLocator sessionLocator){
+		this.sessionLocator=sessionLocator;
+	}
+	
 	class SessionMonitor extends Thread {
 
 		@Override
@@ -132,15 +139,20 @@ public class MemcachedConnector extends SocketChannelController implements
 		((OptimizerMBean) this.optimiezer)
 				.setOptimizeMergeBuffer(optimizeMergeBuffer);
 	}
+	
+
+	public Protocol getProtocol() {
+		return protocol;
+	}
+
 
 	protected MemcachedSessionLocator sessionLocator;
 
-	private final ConcurrentHashMap<InetSocketAddress, Queue<Session>> sessionMap = new ConcurrentHashMap<InetSocketAddress, Queue<Session>>();
+	protected final ConcurrentHashMap<InetSocketAddress, Queue<Session>> sessionMap = new ConcurrentHashMap<InetSocketAddress, Queue<Session>>();
 
 	public void addSession(Session session) {
-		log.warn("add session "
-				+ session.getRemoteSocketAddress().getHostName() + ":"
-				+ session.getRemoteSocketAddress().getPort());
+		log.warn("add session: "
+				+ session.getRemoteSocketAddress().toString());
 		Queue<Session> sessions = this.sessionMap.get(session
 				.getRemoteSocketAddress());
 		if (sessions == null) {
@@ -155,7 +167,7 @@ public class MemcachedConnector extends SocketChannelController implements
 		// Remove old session and close it
 		while (sessions.size() > this.connectionPoolSize) {
 			Session oldSession = sessions.poll();
-			((MemcachedTCPSession) oldSession).setAllowReconnect(false);
+			((MemcachedSession) oldSession).setAllowReconnect(false);
 			oldSession.close();
 		}
 		updateSessions();
@@ -316,6 +328,7 @@ public class MemcachedConnector extends SocketChannelController implements
 		this.optimiezer = new Optimizer(protocol);
 		this.optimiezer.setBufferAllocator(this.bufferAllocator);
 		this.connectionPoolSize = poolSize;
+		this.protocol = protocol;
 		this.soLingerOn = true;
 		// setDispatchMessageThreadPoolSize(Runtime.getRuntime().
 		// availableProcessors());
@@ -347,7 +360,7 @@ public class MemcachedConnector extends SocketChannelController implements
 	public void setBufferAllocator(BufferAllocator allocator) {
 		this.bufferAllocator = allocator;
 		for (Session session : getSessionSet()) {
-			((MemcachedTCPSession) session).setBufferAllocator(allocator);
+			((MemcachedSession) session).setBufferAllocator(allocator);
 		}
 	}
 

@@ -10,6 +10,7 @@ import java.util.concurrent.CountDownLatch;
 import net.rubyeye.xmemcached.CommandFactory;
 import net.rubyeye.xmemcached.buffer.BufferAllocator;
 import net.rubyeye.xmemcached.buffer.IoBuffer;
+import net.rubyeye.xmemcached.buffer.SimpleBufferAllocator;
 import net.rubyeye.xmemcached.command.binary.BinaryAppendPrependCommand;
 import net.rubyeye.xmemcached.command.binary.BinaryCASCommand;
 import net.rubyeye.xmemcached.command.binary.BinaryDeleteCommand;
@@ -34,7 +35,7 @@ import net.rubyeye.xmemcached.utils.Protocol;
 @SuppressWarnings("unchecked")
 public class BinaryCommandFactory implements CommandFactory {
 
-	private BufferAllocator bufferAllocator;
+	private BufferAllocator bufferAllocator=new SimpleBufferAllocator();
 
 	
 	public void setBufferAllocator(BufferAllocator bufferAllocator) {

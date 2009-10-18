@@ -7,6 +7,7 @@ import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.Future;
 
+import net.rubyeye.xmemcached.MemcachedSessionLocator;
 import net.rubyeye.xmemcached.buffer.BufferAllocator;
 import net.rubyeye.xmemcached.command.Command;
 import net.rubyeye.xmemcached.exception.MemcachedException;
@@ -47,4 +48,6 @@ public interface Connector extends Controller {
 			throws IOException;
 
 	public void updateSessions();
+	
+	public void setSessionLocator(MemcachedSessionLocator sessionLocator);
 }

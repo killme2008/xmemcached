@@ -40,8 +40,8 @@ import net.rubyeye.xmemcached.utils.Protocol;
 
 import com.google.code.yanf4j.util.ResourcesUtils;
 
-public abstract class XMemcachedClientTest extends TestCase {
-	MemcachedClient memcachedClient;
+public class XMemcachedClientTest extends TestCase {
+	protected MemcachedClient memcachedClient;
 	Properties properties;
 
 	@Override
@@ -73,10 +73,14 @@ public abstract class XMemcachedClientTest extends TestCase {
 		this.memcachedClient.flushAll();
 	}
 
-	public abstract MemcachedClientBuilder createBuilder() throws Exception;
+	public MemcachedClientBuilder createBuilder() throws Exception{
+		return null;
+	}
 
-	public abstract MemcachedClientBuilder createWeightedBuilder()
-			throws Exception;
+	public MemcachedClientBuilder createWeightedBuilder()
+			throws Exception{
+		return null;
+	}
 
 	public void testGet() throws Exception {
 		try {
