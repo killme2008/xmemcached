@@ -31,6 +31,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+import net.rubyeye.xmemcached.Connector;
 import net.rubyeye.xmemcached.MemcachedClient;
 import net.rubyeye.xmemcached.MemcachedOptimizer;
 import net.rubyeye.xmemcached.MemcachedSessionLocator;
@@ -52,7 +53,7 @@ import com.google.code.yanf4j.nio.impl.SocketChannelController;
  * 
  * @author dennis
  */
-public class MemcachedConnector extends SocketChannelController {
+public class MemcachedConnector extends SocketChannelController implements Connector{
 
 	private final BlockingQueue<ReconnectRequest> waitingQueue = new LinkedBlockingQueue<ReconnectRequest>();
 	private BufferAllocator bufferAllocator;
@@ -188,7 +189,7 @@ public class MemcachedConnector extends SocketChannelController {
 		this.sessionLocator.updateSessions(sessionList);
 	}
 
-	public void removeSession(MemcachedTCPSession session) {
+	public void removeSession(Session session) {
 		log.warn("remove session "
 				+ session.getRemoteSocketAddress().getHostName() + ":"
 				+ session.getRemoteSocketAddress().getPort());

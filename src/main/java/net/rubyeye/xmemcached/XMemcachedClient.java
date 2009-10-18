@@ -48,6 +48,7 @@ import net.rubyeye.xmemcached.monitor.XMemcachedMbeanServer;
 import net.rubyeye.xmemcached.transcoders.CachedData;
 import net.rubyeye.xmemcached.transcoders.SerializingTranscoder;
 import net.rubyeye.xmemcached.transcoders.Transcoder;
+import net.rubyeye.xmemcached.uds.UDSocketConnector;
 import net.rubyeye.xmemcached.utils.AddrUtil;
 import net.rubyeye.xmemcached.utils.ByteUtils;
 import net.rubyeye.xmemcached.utils.Protocol;
@@ -73,7 +74,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 			.getLogger(XMemcachedClient.class);
 	private MemcachedSessionLocator sessionLocator;
 	private volatile boolean shutdown;
-	private MemcachedConnector connector;
+	private Connector connector;
 	@SuppressWarnings("unchecked")
 	private Transcoder transcoder;
 	private MemcachedHandler memcachedHandler;
@@ -154,7 +155,7 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 	 * 
 	 * @see net.rubyeye.xmemcached.MemcachedClient#getConnector()
 	 */
-	public final MemcachedConnector getConnector() {
+	public final Connector getConnector() {
 		return this.connector;
 	}
 
@@ -508,9 +509,10 @@ public final class XMemcachedClient implements XMemcachedClientMBean,
 		this.shutdown = true;
 		this.transcoder = transcoder;
 		this.sessionLocator = locator;
-		this.connector = new MemcachedConnector(configuration,
-				this.sessionLocator, bufferAllocator, this.commandFactory
-						.getProtocol(), this.connectionPoolSize);
+		this.connector=new UDSocketConnector();
+//		this.connector = new MemcachedConnector(configuration,
+//				this.sessionLocator, bufferAllocator, this.commandFactory
+//						.getProtocol(), this.connectionPoolSize);
 		this.memcachedHandler = new MemcachedHandler(this);
 		this.connector.setHandler(this.memcachedHandler);
 		this.connector.setCodecFactory(new MemcachedCodecFactory());

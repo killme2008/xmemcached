@@ -102,7 +102,7 @@ public interface MemcachedClient {
 	 * 
 	 * @return
 	 */
-	public abstract MemcachedConnector getConnector();
+	public abstract Connector getConnector();
 
 	/**
 	 * Enable/Disable merge many get commands to one multi-get command.true is
