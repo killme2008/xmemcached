@@ -16,7 +16,7 @@ public class KestrelGetCommand extends TextGetCommand {
 		this.transcoder = transcoder;
 	}
 
-	public static TranscoderUtils transcoderUtils = new TranscoderUtils(false);
+	public static final TranscoderUtils transcoderUtils = new TranscoderUtils(false);
 
 	@Override
 	public void dispatch() {

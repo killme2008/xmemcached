@@ -13,7 +13,6 @@ public class TranscoderAllTests {
 		suite.addTestSuite(WhalinTranscoderTest.class);
 		suite.addTestSuite(LongTranscoderTest.class);
 		suite.addTestSuite(BaseSerializingTranscoderTest.class);
-		suite.addTest(TranscoderAllTests.suite());
 		suite.addTestSuite(SerializingTranscoderTest.class);
 		suite.addTestSuite(TranscoderUtilsTest.class);
 		suite.addTestSuite(IntegerTranscoderTest.class);

@@ -19,8 +19,6 @@ import net.rubyeye.xmemcached.transcoders.CachedData;
 import net.rubyeye.xmemcached.utils.ByteUtils;
 
 public abstract class TextGetCommand extends Command implements MergeCommandsAware,AssocCommandAware, MapReturnValueAware{
-	public static final byte[] GET = { 'g', 'e', 't' };
-	public static final byte[] GETS = { 'g', 'e', 't', 's' };
 	protected Map<String, CachedData> returnValues;
 	private String currentReturnKey;
 	private int offset;
@@ -269,7 +267,7 @@ public abstract class TextGetCommand extends Command implements MergeCommandsAwa
 	@Override
 	public void encode(BufferAllocator bufferAllocator) {
 		byte[] cmdBytes = this.commandType == CommandType.GET_ONE
-				|| this.commandType == CommandType.GET_MANY ? GET : GETS;
+				|| this.commandType == CommandType.GET_MANY ? Constants.GET : Constants.GETS;
 		this.ioBuffer = bufferAllocator.allocate(cmdBytes.length
 				+ Constants.CRLF.length + 1 + this.keyBytes.length);
 		ByteUtils.setArguments(this.ioBuffer, cmdBytes, this.keyBytes);

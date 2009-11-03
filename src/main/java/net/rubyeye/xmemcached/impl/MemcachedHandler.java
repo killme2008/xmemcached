@@ -165,7 +165,7 @@ public class MemcachedHandler extends HandlerAdapter {
 	private static final String HEART_BEAT_FAIL_COUNT_ATTR = "heartBeatFailCount";
 	private static final int MAX_HEART_BEAT_FAIL_COUNT = 5;
 
-	final class CheckHeartResultThread implements Runnable {
+	final static class CheckHeartResultThread implements Runnable {
 
 		private final Command versionCommand;
 		private final Session session;

@@ -30,7 +30,7 @@ public class TextDeleteCommand extends Command {
 		this.time = time;
 	}
 
-	public static final byte[] DELETE = { 'd', 'e', 'l', 'e', 't', 'e' };
+	
 
 	@Override
 	public final boolean decode(MemcachedTCPSession session, ByteBuffer buffer) {
@@ -65,7 +65,7 @@ public class TextDeleteCommand extends Command {
 	@Override
 	public final void encode(BufferAllocator bufferAllocator) {
 		byte[] timeBytes = ByteUtils.getBytes(String.valueOf(this.time));
-		int capacity = TextDeleteCommand.DELETE.length + 1
+		int capacity = Constants.DELETE.length + 1
 				+ this.keyBytes.length + Constants.CRLF.length;
 		if (this.time > 0) {
 			capacity += 1 + timeBytes.length;
@@ -76,18 +76,18 @@ public class TextDeleteCommand extends Command {
 		this.ioBuffer = bufferAllocator.allocate(capacity);
 		if (isNoreply()) {
 			if (this.time > 0) {
-				ByteUtils.setArguments(this.ioBuffer, TextDeleteCommand.DELETE,
+				ByteUtils.setArguments(this.ioBuffer, Constants.DELETE,
 						this.keyBytes, timeBytes, Constants.NO_REPLY);
 			} else {
-				ByteUtils.setArguments(this.ioBuffer, TextDeleteCommand.DELETE,
+				ByteUtils.setArguments(this.ioBuffer, Constants.DELETE,
 						this.keyBytes, Constants.NO_REPLY);
 			}
 		} else {
 			if (this.time > 0) {
-				ByteUtils.setArguments(this.ioBuffer, TextDeleteCommand.DELETE,
+				ByteUtils.setArguments(this.ioBuffer, Constants.DELETE,
 						this.keyBytes, timeBytes);
 			} else {
-				ByteUtils.setArguments(this.ioBuffer, TextDeleteCommand.DELETE,
+				ByteUtils.setArguments(this.ioBuffer, Constants.DELETE,
 						this.keyBytes);
 			}
 		}

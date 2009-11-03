@@ -32,8 +32,6 @@ public class TextIncrDecrCommand extends Command {
 		this.amount = increment;
 	}
 
-	public static final byte[] INCR = { 'i', 'n', 'c', 'r' };
-	public static final byte[] DECR = { 'd', 'e', 'c', 'r' };
 
 	@Override
 	public final boolean decode(MemcachedTCPSession session, ByteBuffer buffer) {
@@ -57,7 +55,7 @@ public class TextIncrDecrCommand extends Command {
 	@Override
 	public final void encode(BufferAllocator bufferAllocator) {
 		byte[] numBytes = ByteUtils.getBytes(String.valueOf(this.getAmount()));
-		byte[] cmdBytes = this.commandType == CommandType.INCR ? INCR : DECR;
+		byte[] cmdBytes = this.commandType == CommandType.INCR ? Constants.INCR : Constants.DECR;
 		int capacity = cmdBytes.length + 2 + this.key.length()
 				+ numBytes.length + Constants.CRLF.length;
 		if (isNoreply()) {

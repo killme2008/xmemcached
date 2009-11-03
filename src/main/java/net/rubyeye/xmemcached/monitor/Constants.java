@@ -27,7 +27,9 @@ public class Constants {
 	public static final byte[] GET = { 'g', 'e', 't' };
 	public static final byte[] GETS = { 'g', 'e', 't', 's' };
 	public static final byte SPACE = ' ';
-
+	public static final byte[] INCR = { 'i', 'n', 'c', 'r' };
+	public static final byte[] DECR = { 'd', 'e', 'c', 'r' };
+	public static final byte[] DELETE = { 'd', 'e', 'l', 'e', 't', 'e' };
 	/**
 	 * Max session read buffer size,758k
 	 */
