@@ -139,8 +139,9 @@ public class MemcachedHandler extends HandlerAdapter {
 	@Override
 	public void onSessionIdle(Session session) {
 		if (this.enableHeartBeat) {
-			log.debug("Session(" + session.getRemoteSocketAddress()
-					+ ") is idle,send heartbeat");
+			log.debug("Session (%s) is idle,send heartbeat", session
+					.getRemoteSocketAddress() == null ? "unknown" : session
+					.getRemoteSocketAddress().toString());
 			Command versionCommand = null;
 			CountDownLatch latch = new CountDownLatch(1);
 			if (this.client.getProtocol() == Protocol.Binary) {

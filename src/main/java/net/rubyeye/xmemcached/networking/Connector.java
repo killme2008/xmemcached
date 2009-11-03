@@ -17,6 +17,12 @@ import com.google.code.yanf4j.core.Controller;
 import com.google.code.yanf4j.core.Session;
 import com.google.code.yanf4j.core.SocketOption;
 
+/**
+ * Connector which is used to connect to memcached server.
+ * 
+ * @author dennis
+ * 
+ */
 public interface Connector extends Controller {
 	public void setOptimizeMergeBuffer(boolean optimiezeMergeBuffer);
 
@@ -42,12 +48,13 @@ public interface Connector extends Controller {
 
 	public void addToWatingQueue(ReconnectRequest request);
 
+	@SuppressWarnings("unchecked")
 	public void setSocketOptions(Map<SocketOption, Object> options);
 
 	public Future<Boolean> connect(InetSocketAddress address, int weight)
 			throws IOException;
 
 	public void updateSessions();
-	
+
 	public void setSessionLocator(MemcachedSessionLocator sessionLocator);
 }

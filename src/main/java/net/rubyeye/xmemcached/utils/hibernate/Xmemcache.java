@@ -4,8 +4,6 @@ import java.util.Arrays;
 import java.util.Map;
 
 import net.rubyeye.xmemcached.MemcachedClient;
-import net.rubyeye.xmemcached.exception.MemcachedException;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -63,16 +61,7 @@ public class Xmemcache implements Memcache {
 
 	public void incr(String key, int factor, int startingValue) {
 		try {
-			if (this.memcachedClient.incr(key, factor) == 0) {
-				this.memcachedClient.set(key, 0, String.valueOf(startingValue));
-			}
-		} catch (MemcachedException e) {
-			try {
-				this.memcachedClient.add(key, 0, String.valueOf(startingValue));
-			} catch (Exception ex) {
-				this.exceptionHandler.handleErrorOnIncr(key, factor,
-						startingValue, ex);
-			}
+			this.memcachedClient.incr(key, factor, startingValue);
 		} catch (Exception e) {
 			this.exceptionHandler.handleErrorOnIncr(key, factor, startingValue,
 					e);

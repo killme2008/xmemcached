@@ -1,7 +1,7 @@
 package net.rubyeye.xmemcached.utils;
 
 /**
- * Memcached protocol constants
+ * Memcached protocol enum
  * 
  * @author dennis
  * 

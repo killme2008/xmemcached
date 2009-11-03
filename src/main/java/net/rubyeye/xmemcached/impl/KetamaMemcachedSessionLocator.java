@@ -39,7 +39,8 @@ import com.google.code.yanf4j.core.Session;
  * </p>
  */
 /**
- * 一致性hash算法，基于TreeMap.ceilingKey()方法
+ * Consistent Hash Algorithm implementation,based on TreeMap.tailMap(hash)
+ * method.
  * 
  * @author dennis
  * 

@@ -9,7 +9,6 @@ import java.util.concurrent.TimeoutException;
 
 import net.rubyeye.xmemcached.buffer.BufferAllocator;
 import net.rubyeye.xmemcached.exception.MemcachedException;
-import net.rubyeye.xmemcached.impl.MemcachedConnector;
 import net.rubyeye.xmemcached.networking.Connector;
 import net.rubyeye.xmemcached.transcoders.Transcoder;
 import net.rubyeye.xmemcached.utils.Protocol;

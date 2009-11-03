@@ -14,11 +14,12 @@ public class ReconnectRequest {
 	private int tries;
 
 	private int weight;
-	public ReconnectRequest(InetSocketAddress address, int tries,int weight) {
+
+	public ReconnectRequest(InetSocketAddress address, int tries, int weight) {
 		super();
 		this.setAddress(address);
-		this.setTries(tries); // 记录重连次数
-		this.weight=weight;
+		this.setTries(tries); // record reconnect times
+		this.weight = weight;
 	}
 
 	public final void setAddress(InetSocketAddress address) {
@@ -44,8 +45,5 @@ public class ReconnectRequest {
 	public final void setWeight(int weight) {
 		this.weight = weight;
 	}
-	
-	
-	
-	
+
 }
