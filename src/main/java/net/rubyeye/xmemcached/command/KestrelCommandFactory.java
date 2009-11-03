@@ -9,6 +9,7 @@ import net.rubyeye.xmemcached.buffer.BufferAllocator;
 import net.rubyeye.xmemcached.command.kestrel.KestrelFlushAllCommand;
 import net.rubyeye.xmemcached.command.kestrel.KestrelGetCommand;
 import net.rubyeye.xmemcached.command.kestrel.KestrelSetCommand;
+import net.rubyeye.xmemcached.command.text.TextDeleteCommand;
 import net.rubyeye.xmemcached.command.text.TextStatsCommand;
 import net.rubyeye.xmemcached.transcoders.Transcoder;
 import net.rubyeye.xmemcached.utils.Protocol;
@@ -46,8 +47,8 @@ public class KestrelCommandFactory implements CommandFactory {
 
 	public Command createDeleteCommand(String key, byte[] keyBytes, int time,
 			boolean noreply) {
-		throw new UnsupportedOperationException(
-				"Kestrel doesn't support this operation");
+		return new TextDeleteCommand(key, keyBytes, -1,
+				new CountDownLatch(1), noreply);
 	}
 
 	public Command createFlushAllCommand(CountDownLatch latch, int delay,
