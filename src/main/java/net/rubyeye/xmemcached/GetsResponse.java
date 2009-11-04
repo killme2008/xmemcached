@@ -84,7 +84,7 @@ public class GetsResponse<T> {
 	@Override
 	public String toString() {
 		return "GetsResponse[cas=" + this.cas + ",value="
-				+ this.value.toString() + "]";
+				+ this.value + "]";
 	}
 
 }
