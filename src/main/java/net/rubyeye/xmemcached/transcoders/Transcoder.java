@@ -39,6 +39,8 @@ public interface Transcoder<T> {
 	 * @param primitiveAsString
 	 */
 	public void setPackZeros(boolean packZeros);
+	
+	public void setCompressionThreshold(int to);
 
 	public boolean isPrimitiveAsString();
 

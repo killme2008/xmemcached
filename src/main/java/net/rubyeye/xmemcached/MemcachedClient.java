@@ -1064,7 +1064,7 @@ public interface MemcachedClient {
 	 * would try to heal the connection.The interval between reconnections is 2
 	 * seconds by default. You can change that value by this method.
 	 * 
-	 * @param healConnectionInterval
+	 * @param healConnectionInterval MILLISECONDS
 	 */
 	public void setHealSessionInterval(long healConnectionInterval);
 
@@ -1085,7 +1085,7 @@ public interface MemcachedClient {
 	 * system.
 	 * 
 	 * @param poolSize
-	 *            pool size,default is 1,every memcached has only one
+	 *            pool size,default is one,every memcached has only one
 	 *            connection.
 	 */
 	public void setConnectionPoolSize(int poolSize);
@@ -1094,7 +1094,18 @@ public interface MemcachedClient {
 	 * Whether to enable heart beat
 	 * 
 	 * @param enableHeartBeat
+	 *            if true,then enable heartbeat,true by default
 	 */
 	public void setEnableHeartBeat(boolean enableHeartBeat);
+
+	/**
+	 * Enables/disables sanitizing keys by URLEncoding.
+	 * 
+	 * @param sanitizeKey
+	 *            if true, then URLEncode all keys
+	 */
+	public void setSanitizeKeys(boolean sanitizeKey);
+	
+	public boolean isSanitizeKeys();
 
 }
