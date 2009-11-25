@@ -65,11 +65,16 @@ public class MemcachedConnector extends SocketChannelController implements
 	private int connectionPoolSize; // session pool size
 	protected Protocol protocol;
 
-
-	public void setSessionLocator(MemcachedSessionLocator sessionLocator){
-		this.sessionLocator=sessionLocator;
+	public void setSessionLocator(MemcachedSessionLocator sessionLocator) {
+		this.sessionLocator = sessionLocator;
 	}
-	
+
+	/**
+	 * Session monitor for healing sessions.
+	 * 
+	 * @author dennis
+	 * 
+	 */
 	class SessionMonitor extends Thread {
 
 		@Override
@@ -139,20 +144,17 @@ public class MemcachedConnector extends SocketChannelController implements
 		((OptimizerMBean) this.optimiezer)
 				.setOptimizeMergeBuffer(optimizeMergeBuffer);
 	}
-	
 
 	public Protocol getProtocol() {
 		return protocol;
 	}
-
 
 	protected MemcachedSessionLocator sessionLocator;
 
 	protected final ConcurrentHashMap<InetSocketAddress, Queue<Session>> sessionMap = new ConcurrentHashMap<InetSocketAddress, Queue<Session>>();
 
 	public void addSession(Session session) {
-		log.warn("add session: "
-				+ session.getRemoteSocketAddress().toString());
+		log.warn("add session: " + session.getRemoteSocketAddress().toString());
 		Queue<Session> sessions = this.sessionMap.get(session
 				.getRemoteSocketAddress());
 		if (sessions == null) {

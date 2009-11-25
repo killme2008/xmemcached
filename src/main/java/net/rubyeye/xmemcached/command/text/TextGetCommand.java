@@ -81,6 +81,7 @@ public abstract class TextGetCommand extends Command implements MergeCommandsAwa
 				byte first = buffer.get(buffer.position());
 				if (first == 'E') {
 					this.parseStatus = ParseStatus.END;
+					//dispatch result
 					dispatch();
 					this.currentReturnKey = null;
 					continue;
@@ -142,6 +143,7 @@ public abstract class TextGetCommand extends Command implements MergeCommandsAwa
 					return false;
 				} else {
 					first = buffer.get(buffer.position());
+					//check if buffer has cas value
 					if (first == '\n') {
 						// skip '\n'
 						buffer.position(buffer.position() + 1);
@@ -172,7 +174,7 @@ public abstract class TextGetCommand extends Command implements MergeCommandsAwa
 				int remaining = buffer.remaining();
 				int remainingCapacity = value.remainingCapacity();
 				assert (remainingCapacity >= 0);
-				// 不够数据，返回
+				// Data is not enough,return false
 				if (remaining < remainingCapacity + 2) {
 					int length = remaining > remainingCapacity ? remainingCapacity
 							: remaining;

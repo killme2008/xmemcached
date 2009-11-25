@@ -50,7 +50,7 @@ public class TextStatsCommand extends Command implements ServerAddressAware {
 	public final boolean decode(MemcachedTCPSession session, ByteBuffer buffer) {
 		String line = null;
 		while ((line = ByteUtils.nextLine(buffer)) != null) {
-			if (line.equals("END")) { // 到消息结尾
+			if (line.equals("END")) { // at the end
 				return done(session);
 			} else if (line.startsWith("STAT")) {
 				String[] items = line.split(" ");

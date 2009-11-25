@@ -15,7 +15,6 @@ public class KestrelSetCommand extends TextStoreCommand {
 			boolean noreply, Transcoder transcoder) {
 		super(key, keyBytes, cmdType, latch, exp, cas, value, noreply,
 				transcoder);
-		// TODO Auto-generated constructor stub
 	}
 
 	@Override
@@ -23,6 +22,8 @@ public class KestrelSetCommand extends TextStoreCommand {
 	protected CachedData encodeValue() {
 
 		final CachedData value = this.transcoder.encode(this.value);
+		// If disable save primitive type as string,prepend 4 bytes flag to
+		// value
 		if (!this.transcoder.isPrimitiveAsString()) {
 			int flags = value.getFlag();
 			byte[] flagBytes = KestrelGetCommand.transcoderUtils

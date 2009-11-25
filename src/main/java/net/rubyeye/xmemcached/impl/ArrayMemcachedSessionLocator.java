@@ -48,11 +48,11 @@ public class ArrayMemcachedSessionLocator implements MemcachedSessionLocator {
 		return hash % size;
 	}
 
-	
 	public final Session getSessionByKey(final String key) {
 		if (this.sessions == null || this.sessions.size() == 0) {
 			return null;
 		}
+		// Copy on read
 		List<Session> sessionList = this.sessions;
 		int size = sessionList.size();
 		if (size == 0) {
@@ -78,7 +78,6 @@ public class ArrayMemcachedSessionLocator implements MemcachedSessionLocator {
 		}
 	}
 
-	
 	public final void updateSessions(final Collection<Session> list) {
 		Collection<Session> copySessions = list;
 		List<Session> newSessions = new ArrayList<Session>(

@@ -62,128 +62,135 @@ public class Example {
 			MemcachedClientBuilder builder = new XMemcachedClientBuilder(
 					AddrUtil.getAddresses(args[0]));
 			// builder.setCommandFactory(new BinaryCommandFactory());
-			builder.setConnectionPoolSize(5);
+			builder.setConnectionPoolSize(10);
 			MemcachedClient client = builder.build();
-			
-			if (!client.set("hello", 0, "world")) {
-				System.err.println("set error");
-			}
-			if (client.add("hello", 0, "dennis")) {
-				System.err.println("Add error,key is existed");
-			}
-			if (!client.replace("hello", 0, "dennis")) {
-				System.err.println("replace error");
-			}
-			client.append("hello", " good");
-			client.prepend("hello", "hello ");
-			String name = client.get("hello", new StringTranscoder());
-			System.out.println(name);
-			// if (!client.delete("hello")) {
-			// System.err.println("delete error");
+			for (int i = 0; i < 10000; i++)
+				client.setWithNoReply(String.valueOf(i), 0, i);
+			for (int i = 0; i < 10000; i++)
+				System.out.println(client.get(String.valueOf(i)));
+
+			// if (!client.set("hello", 0, "world")) {
+			// System.err.println("set error");
 			// }
-			client.deleteWithNoReply("hello");
-			System.out.println(client.get("hello"));
+			// if (client.add("hello", 0, "dennis")) {
+			// System.err.println("Add error,key is existed");
+			// }
+			// if (!client.replace("hello", 0, "dennis")) {
+			// System.err.println("replace error");
+			// }
+			// client.append("hello", " good");
+			// client.prepend("hello", "hello ");
+			// String name = client.get("hello", new StringTranscoder());
+			// System.out.println(name);
+			// // if (!client.delete("hello")) {
+			// // System.err.println("delete error");
+			// // }
+			// client.deleteWithNoReply("hello");
+			// System.out.println(client.get("hello"));
+			//
+			// System.out.println(client.getVersions());
+			// System.out.println(client.getStatsByItem("items"));
+			//
+			// client.set("a", 0, 1);
+			// client.set("b", 0, 2);
+			//
+			// client.set("c", 0, 3);
+			// client.setWithNoReply("d", 0, 4);
+			// java.util.List<String> list = new ArrayList<String>();
+			// list.add("a");
+			// list.add("b");
+			// list.add("c");
+			// list.add("d");
+			// System.out.println(client.get(list));
+			// System.out.println(client.gets(list));
+			// System.out.println(client.gets("a"));
+			//
+			// client.flushAll();
+			//
+			// System.out.println("After flush all");
+			// System.out.println(client.get(list));
+			// System.out.println(client.get("a"));
+			// client.addWithNoReply("a", 0, 4);
+			// System.out.println(client.gets("a"));
+			//
+			// client.flushAllWithNoReply();
+			// System.out.println("After flush all2");
+			// System.out.println(client.gets("a"));
+			//
+			// System.out.println(client.incr("a", 4));
+			// System.out.println(client.incr("a", 4));
+			// System.out.println(client.incr("a", 5));
+			// System.out.println(client.incr("a", 6));
+			// client.incrWithNoReply("a", 10);
+			// System.out.println(client.get("a"));
+			// System.out.println(client.decr("a", 15));
+			// System.out.println(client.decr("a", 5));
+			// client.decr("a", 5);
+			// System.out.println(client.get("a"));
+			//
+			// // 测试CAS
+			// client.set("a", 0, 1);
+			// GetsResponse<Integer> result = client.gets("a");
+			// long cas = result.getCas();
+			// if (result.getValue() != 1) {
+			// System.err.println("gets error");
+			// }
+			// System.out.println("cas value:" + cas);
+			// if (!client.cas("a", 0, 2, cas)) {
+			// System.err.println("cas error");
+			// }
+			// result = client.gets("a");
+			//
+			// if (result.getValue() != 2) {
+			// System.err.println("cas error");
+			// }
+			// List<String> getsKeys = new ArrayList<String>();
+			// getsKeys.add("a");
+			// Map<String, GetsResponse<Integer>> getsMap =
+			// client.gets(getsKeys);
+			// System.out.println("getsMap:" + getsMap.toString());
+			//
+			// /**
+			// * 合并gets和cas，利用CASOperation
+			// */
+			// client.cas("a", 0, new CASOperation<Integer>() {
+			//
+			// public int getMaxTries() {
+			// return 1;
+			// }
+			//
+			// public Integer getNewValue(long currentCAS, Integer currentValue)
+			// {
+			// System.out.println("current value " + currentValue);
+			// return 3;
+			// }
+			// });
+			// result = client.gets("a");
+			// if (result.getValue() != 3) {
+			// System.err.println("cas error");
+			// }
+			// result.setCas(100);// 改变cas值，因此需要试2次
+			// client.cas("a", result, new CASOperation<Integer>() {
+			//
+			// public int getMaxTries() {
+			// return 2;
+			// }
+			//
+			// public Integer getNewValue(long currentCAS, Integer currentValue)
+			// {
+			// System.out.println("current value " + currentValue);
+			// return 4;
+			// }
+			// });
+			// result = client.gets("a");
+			// if (result.getValue() != 4) {
+			// System.err.println("cas error");
+			// }
+			// client.flushAll(); // 使所有数据项失效
+			// // 查看统计信息
+			// System.out.println(client.getStats()); // 查看统计信息
 
-			System.out.println(client.getVersions());
-			System.out.println(client.getStatsByItem("items"));
-
-			client.set("a", 0, 1);
-			client.set("b", 0, 2);
-
-			client.set("c", 0, 3);
-			client.setWithNoReply("d", 0, 4);
-			java.util.List<String> list = new ArrayList<String>();
-			list.add("a");
-			list.add("b");
-			list.add("c");
-			list.add("d");
-			System.out.println(client.get(list));
-			System.out.println(client.gets(list));
-			System.out.println(client.gets("a"));
-
-			client.flushAll();
-
-			System.out.println("After flush all");
-			System.out.println(client.get(list));
-			System.out.println(client.get("a"));
-			client.addWithNoReply("a", 0, 4);
-			System.out.println(client.gets("a"));
-
-			client.flushAllWithNoReply();
-			System.out.println("After flush all2");
-			System.out.println(client.gets("a"));
-
-			System.out.println(client.incr("a", 4));
-			System.out.println(client.incr("a", 4));
-			System.out.println(client.incr("a", 5));
-			System.out.println(client.incr("a", 6));
-			client.incrWithNoReply("a", 10);
-			System.out.println(client.get("a"));
-			System.out.println(client.decr("a", 15));
-			System.out.println(client.decr("a", 5));
-			client.decr("a", 5);
-			System.out.println(client.get("a"));
-
-			// 测试CAS
-			client.set("a", 0, 1);
-			GetsResponse<Integer> result = client.gets("a");
-			long cas = result.getCas();
-			if (result.getValue() != 1) {
-				System.err.println("gets error");
-			}
-			System.out.println("cas value:" + cas);
-			if (!client.cas("a", 0, 2, cas)) {
-				System.err.println("cas error");
-			}
-			result = client.gets("a");
-
-			if (result.getValue() != 2) {
-				System.err.println("cas error");
-			}
-			List<String> getsKeys = new ArrayList<String>();
-			getsKeys.add("a");
-			Map<String, GetsResponse<Integer>> getsMap = client.gets(getsKeys);
-			System.out.println("getsMap:" + getsMap.toString());
-
-			/**
-			 * 合并gets和cas，利用CASOperation
-			 */
-			client.cas("a", 0, new CASOperation<Integer>() {
-
-				public int getMaxTries() {
-					return 1;
-				}
-
-				public Integer getNewValue(long currentCAS, Integer currentValue) {
-					System.out.println("current value " + currentValue);
-					return 3;
-				}
-			});
-			result = client.gets("a");
-			if (result.getValue() != 3) {
-				System.err.println("cas error");
-			}
-			result.setCas(100);// 改变cas值，因此需要试2次
-			client.cas("a", result, new CASOperation<Integer>() {
-
-				public int getMaxTries() {
-					return 2;
-				}
-
-				public Integer getNewValue(long currentCAS, Integer currentValue) {
-					System.out.println("current value " + currentValue);
-					return 4;
-				}
-			});
-			result = client.gets("a");
-			if (result.getValue() != 4) {
-				System.err.println("cas error");
-			}
-			client.flushAll(); // 使所有数据项失效
-			// 查看统计信息
-			System.out.println(client.getStats()); // 查看统计信息
-
-			Thread.sleep(Integer.MAX_VALUE);
+			// Thread.sleep(Integer.MAX_VALUE);
 			client.shutdown();
 
 		} catch (IOException e) {

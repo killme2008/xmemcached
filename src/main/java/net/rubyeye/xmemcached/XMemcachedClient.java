@@ -191,7 +191,7 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 
 	private final void sendCommand(final Command cmd) throws MemcachedException {
 		if (this.shutdown) {
-			throw new IllegalStateException("Xmemcached is stopped");
+			throw new MemcachedException("Xmemcached is stopped");
 		}
 		this.connector.send(cmd);
 	}

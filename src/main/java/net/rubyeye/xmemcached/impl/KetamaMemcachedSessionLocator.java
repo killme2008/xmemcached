@@ -76,7 +76,7 @@ public class KetamaMemcachedSessionLocator implements MemcachedSessionLocator {
 		for (Session session : list) {
 			String sockStr = String.valueOf(session.getRemoteSocketAddress());
 			/**
-			 * 每个节点复制160*weight次，并分配到环上
+			 * Duplicate 160 X weight references
 			 */
 			int numReps = NUM_REPS;
 			if (session instanceof MemcachedTCPSession) {
@@ -120,6 +120,8 @@ public class KetamaMemcachedSessionLocator implements MemcachedSessionLocator {
 
 	public final Session getSessionByHash(final long hash) {
 		TreeMap<Long, Session> sessionMap = this.ketamaSessions;
+		if (sessionMap.size() == 0)
+			return null;
 		Long resultHash = hash;
 		if (!sessionMap.containsKey(hash)) {
 			// Java 1.6 adds a ceilingKey method, but xmemcached is compatible

@@ -16,7 +16,8 @@ public class KestrelGetCommand extends TextGetCommand {
 		this.transcoder = transcoder;
 	}
 
-	public static final TranscoderUtils transcoderUtils = new TranscoderUtils(false);
+	public static final TranscoderUtils transcoderUtils = new TranscoderUtils(
+			false);
 
 	@Override
 	public void dispatch() {
@@ -28,6 +29,8 @@ public class KestrelGetCommand extends TextGetCommand {
 			}
 		} else {
 			CachedData value = this.returnValues.values().iterator().next();
+			// If disable save primitive type as string,the response data have
+			// 4-bytes flag aheader.
 			if (!this.transcoder.isPrimitiveAsString()) {
 				byte[] data = value.getData();
 				if (data.length >= 4) {
