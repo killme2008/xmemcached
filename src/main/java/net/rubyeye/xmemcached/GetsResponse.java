@@ -12,16 +12,16 @@
 package net.rubyeye.xmemcached;
 
 /**
- * Response for gets command
+ * Response for gets command.It's a value object.
  * 
  * @author dennis
  * 
  */
-public class GetsResponse<T> {
-	private long cas;
-	private T value;
+public final class GetsResponse<T> {
+	private final long cas;
+	private final T value;
 
-	public GetsResponse(long cas, T value) {
+	public GetsResponse(final long cas,final T value) {
 		super();
 		this.cas = cas;
 		this.value = value;
@@ -31,19 +31,10 @@ public class GetsResponse<T> {
 		return this.cas;
 	}
 
-	@Deprecated
-	public void setCas(long cas) {
-		this.cas = cas;
-	}
-
 	public T getValue() {
 		return this.value;
 	}
 
-	@Deprecated
-	public void setValue(T value) {
-		this.value = value;
-	}
 
 	@Override
 	public int hashCode() {

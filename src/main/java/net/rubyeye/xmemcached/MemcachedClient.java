@@ -658,28 +658,18 @@ public interface MemcachedClient {
 	 * retrieve it by the</br> "get" command, but "add" and "replace" command
 	 * with this key will also</br> fail (the "set" command will succeed,
 	 * however). After the time passes,</br> the item is finally deleted from
-	 * server memory.
-	 * 
+	 * server memory. </br><strong>Note: This method is deprecated,because
+	 * memcached 1.4.0 remove the optional argument "time".You can still use
+	 * this method on old version,but is not recommended.</strong>
 	 * 
 	 * @param key
 	 * @param time
 	 * @throws InterruptedException
 	 * @throws MemcachedException
 	 */
+	@Deprecated
 	public abstract boolean delete(final String key, final int time)
 			throws TimeoutException, InterruptedException, MemcachedException;
-
-	/**
-	 * This method will be removed in 1.20,Please use getVersions() instead.
-	 * 
-	 * @return version string
-	 * @throws TimeoutException
-	 * @throws InterruptedException
-	 * @throws MemcachedException
-	 */
-	@Deprecated
-	public abstract String version() throws TimeoutException,
-			InterruptedException, MemcachedException;
 
 	/**
 	 * Get all connected memcached servers's versions.
@@ -713,6 +703,26 @@ public interface MemcachedClient {
 
 	public long incr(final String key, final long num, final long initValue)
 			throws TimeoutException, InterruptedException, MemcachedException;
+	/**
+	 *   "incr" are used to change data for some item in-place, incrementing it.
+	 * The data for the item is treated as decimal representation of a 64-bit
+	 * unsigned integer. If the current data value does not conform to such a
+	 * representation, the commands behave as if the value were 0. Also, the
+	 * item must already exist for incr to work; these commands won't pretend
+	 * that a non-existent key exists with value 0; instead, it will fail.This
+	 * method doesn't wait for reply.
+	 * @param key key
+	 * @param num increment
+	 * @param initValue initValue if the data is not exists.
+	 * @param timeout operation timeout
+	 * @return
+	 * @throws TimeoutException
+	 * @throws InterruptedException
+	 * @throws MemcachedException
+	 */
+	public long incr(final String key, final long num, final long initValue,
+			long timeout) throws TimeoutException, InterruptedException,
+			MemcachedException;
 
 	/**
 	 * "decr" are used to change data for some item in-place, decrementing it.
@@ -733,8 +743,37 @@ public interface MemcachedClient {
 	public abstract long decr(final String key, final long num)
 			throws TimeoutException, InterruptedException, MemcachedException;
 
+	/**
+	 * @see decr
+	 * @param key
+	 * @param num
+	 * @param initValue
+	 * @return
+	 * @throws TimeoutException
+	 * @throws InterruptedException
+	 * @throws MemcachedException
+	 */
 	public abstract long decr(final String key, final long num, long initValue)
 			throws TimeoutException, InterruptedException, MemcachedException;
+	/**
+	 *  "decr" are used to change data for some item in-place, decrementing it.
+	 * The data for the item is treated as decimal representation of a 64-bit
+	 * unsigned integer. If the current data value does not conform to such a
+	 * representation, the commands behave as if the value were 0. Also, the
+	 * item must already exist for decr to work; these commands won't pretend
+	 * that a non-existent key exists with value 0; instead, it will fail.This
+	 * method doesn't wait for reply.
+	 * @param key The key
+	 * @param num  The increment
+	 * @param initValue The initial value if the data is not exists.
+	 * @param timeout Operation timeout
+	 * @return
+	 * @throws TimeoutException
+	 * @throws InterruptedException
+	 * @throws MemcachedException
+	 */
+	public abstract long decr(final String key, final long num, long initValue,long timeout)
+	throws TimeoutException, InterruptedException, MemcachedException;
 
 	/**
 	 * Make All connected memcached's data item invalid
@@ -806,37 +845,6 @@ public interface MemcachedClient {
 	 */
 	public abstract void flushAll(String host) throws TimeoutException,
 			InterruptedException, MemcachedException;
-
-	/**
-	 * Deprecated.This method will be removed in 1.20.</br> Please use
-	 * stats(InetSocketAddress address) instead.
-	 * 
-	 * @param host
-	 *            memcached节点host ip:port的形式
-	 * @param timeout
-	 *            操作超时
-	 * @return
-	 * @throws TimeoutException
-	 * @throws InterruptedException
-	 * @throws MemcachedException
-	 */
-	@Deprecated
-	public abstract Map<String, String> stats(String host, long timeout)
-			throws TimeoutException, InterruptedException, MemcachedException;
-
-	/**
-	 * Deprecated.This method will be removed in 1.20.</br> Please use
-	 * stats(InetSocketAddress address) instead.
-	 * 
-	 * @param host
-	 * @return
-	 * @throws TimeoutException
-	 * @throws InterruptedException
-	 * @throws MemcachedException
-	 */
-	@Deprecated
-	public abstract Map<String, String> stats(String host)
-			throws TimeoutException, InterruptedException, MemcachedException;
 
 	public abstract Map<String, String> stats(InetSocketAddress address)
 			throws MemcachedException, InterruptedException, TimeoutException;
@@ -950,7 +958,9 @@ public interface MemcachedClient {
 	 * Delete key's data item from memcached.This method doesn't wait for reply.
 	 * This method does not work on memcached 1.3 or later version.See <a href=
 	 * 'http://code.google.com/p/memcached/issues/detail?id=3&q=delete%20noreply
-	 * ' > i s s u e 3</a>
+	 * ' > i s s u e 3</a> </br><strong>Note: This method is deprecated,because
+	 * memcached 1.4.0 remove the optional argument "time".You can still use
+	 * this method on old version,but is not recommended.</strong>
 	 * 
 	 * @param key
 	 * @param time
@@ -1064,7 +1074,8 @@ public interface MemcachedClient {
 	 * would try to heal the connection.The interval between reconnections is 2
 	 * seconds by default. You can change that value by this method.
 	 * 
-	 * @param healConnectionInterval MILLISECONDS
+	 * @param healConnectionInterval
+	 *            MILLISECONDS
 	 */
 	public void setHealSessionInterval(long healConnectionInterval);
 
@@ -1105,7 +1116,7 @@ public interface MemcachedClient {
 	 *            if true, then URLEncode all keys
 	 */
 	public void setSanitizeKeys(boolean sanitizeKey);
-	
+
 	public boolean isSanitizeKeys();
 
 }

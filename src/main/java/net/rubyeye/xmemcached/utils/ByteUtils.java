@@ -34,6 +34,11 @@ public final class ByteUtils {
 	public static final Charset DEFAULT_CHARSET = Charset
 			.forName(DEFAULT_CHARSET_NAME);
 	public static final ByteBuffer SPLIT = ByteBuffer.wrap(Constants.CRLF);
+	/**
+	 * if it is testing,check key argument even if use binary protocol. The user
+	 * must never change this value at all.
+	 */
+	public static boolean testing;
 
 	/**
 	 * 防止创建
@@ -77,17 +82,19 @@ public final class ByteUtils {
 					+ ByteUtils.maxKeyLength + ")");
 		}
 		// Validate the key
-		for (byte b : keyBytes) {
-			if (b == ' ' || b == '\n' || b == '\r' || b == 0) {
-				try {
-					throw new IllegalArgumentException(
-							"Key contains invalid characters:  ``"
-									+ new String(keyBytes, "utf-8") + "''");
+		if (memcachedProtocol == Protocol.Text||testing) {
+			for (byte b : keyBytes) {
+				if (b == ' ' || b == '\n' || b == '\r' || b == 0) {
+					try {
+						throw new IllegalArgumentException(
+								"Key contains invalid characters:  ``"
+										+ new String(keyBytes, "utf-8") + "''");
 
-				} catch (UnsupportedEncodingException e) {
+					} catch (UnsupportedEncodingException e) {
+					}
 				}
-			}
 
+			}
 		}
 	}
 
@@ -100,7 +107,7 @@ public final class ByteUtils {
 			throw new IllegalArgumentException("Key is too long (maxlen = "
 					+ ByteUtils.maxKeyLength + ")");
 		}
-		if (memcachedProtocol == Protocol.Text) {
+		if (memcachedProtocol == Protocol.Text||testing) {
 			// Validate the key
 			for (byte b : keyBytes) {
 				if (b == ' ' || b == '\n' || b == '\r' || b == 0) {

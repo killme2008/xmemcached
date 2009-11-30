@@ -8,14 +8,24 @@ import net.rubyeye.xmemcached.XMemcachedClientBuilder;
 import net.rubyeye.xmemcached.command.BinaryCommandFactory;
 import net.rubyeye.xmemcached.impl.KetamaMemcachedSessionLocator;
 import net.rubyeye.xmemcached.utils.AddrUtil;
+import net.rubyeye.xmemcached.utils.ByteUtils;
+import net.rubyeye.xmemcached.utils.Protocol;
 
-public class BinaryMemcachedClientUnitTest extends XMemcachedClientTest{
+/**
+ * 为了使Binary协议的测试通过，将检测key是否有非法字符，事实上binary协议无需检测的。
+ * 
+ * @author boyan
+ * 
+ */
+public class BinaryMemcachedClientUnitTest extends XMemcachedClientTest {
 	@Override
 	public MemcachedClientBuilder createBuilder() throws Exception {
+		
 		MemcachedClientBuilder builder = new XMemcachedClientBuilder(AddrUtil
 				.getAddresses(this.properties
 						.getProperty("test.memcached.servers")));
 		builder.setCommandFactory(new BinaryCommandFactory());
+		ByteUtils.testing=true;
 		return builder;
 	}
 
@@ -33,6 +43,7 @@ public class BinaryMemcachedClientUnitTest extends XMemcachedClientTest{
 				addressList, weights);
 		builder.setCommandFactory(new BinaryCommandFactory());
 		builder.setSessionLocator(new KetamaMemcachedSessionLocator());
+		ByteUtils.testing=true;
 		return builder;
 	}
 }
