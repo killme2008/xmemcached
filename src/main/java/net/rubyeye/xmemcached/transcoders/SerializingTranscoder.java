@@ -11,7 +11,7 @@ public class SerializingTranscoder extends BaseSerializingTranscoder implements
 		Transcoder<Object> {
 
 	public void setPackZeros(boolean packZeros) {
-		this.tu.setPackZeros(packZeros);
+		this.transcoderUtils.setPackZeros(packZeros);
 
 	}
 
@@ -42,7 +42,13 @@ public class SerializingTranscoder extends BaseSerializingTranscoder implements
 	public static final int SPECIAL_DOUBLE = (7 << 8);
 	public static final int SPECIAL_BYTEARRAY = (8 << 8);
 
-	private final TranscoderUtils tu = new TranscoderUtils(true);
+	private final TranscoderUtils transcoderUtils = new TranscoderUtils(true);
+
+	
+	
+	public TranscoderUtils getTranscoderUtils() {
+		return transcoderUtils;
+	}
 
 	/**
 	 * Get a serializing transcoder with the default max data size.
@@ -58,7 +64,7 @@ public class SerializingTranscoder extends BaseSerializingTranscoder implements
 		this.maxSize = max;
 	}
 	public boolean isPackZeros() {
-		return this.tu.isPackZeros();
+		return this.transcoderUtils.isPackZeros();
 	}
 
 	public boolean isPrimitiveAsString() {
@@ -88,27 +94,27 @@ public class SerializingTranscoder extends BaseSerializingTranscoder implements
 			if (flags != 0 && data != null) {
 				switch (flags) {
 				case SPECIAL_BOOLEAN:
-					rv = Boolean.valueOf(this.tu.decodeBoolean(data));
+					rv = Boolean.valueOf(this.transcoderUtils.decodeBoolean(data));
 					break;
 				case SPECIAL_INT:
-					rv = Integer.valueOf(this.tu.decodeInt(data));
+					rv = Integer.valueOf(this.transcoderUtils.decodeInt(data));
 					break;
 				case SPECIAL_LONG:
-					rv = Long.valueOf(this.tu.decodeLong(data));
+					rv = Long.valueOf(this.transcoderUtils.decodeLong(data));
 					break;
 				case SPECIAL_BYTE:
-					rv = Byte.valueOf(this.tu.decodeByte(data));
+					rv = Byte.valueOf(this.transcoderUtils.decodeByte(data));
 					break;
 				case SPECIAL_FLOAT:
 					rv = new Float(Float
-							.intBitsToFloat(this.tu.decodeInt(data)));
+							.intBitsToFloat(this.transcoderUtils.decodeInt(data)));
 					break;
 				case SPECIAL_DOUBLE:
-					rv = new Double(Double.longBitsToDouble(this.tu
+					rv = new Double(Double.longBitsToDouble(this.transcoderUtils
 							.decodeLong(data)));
 					break;
 				case SPECIAL_DATE:
-					rv = new Date(this.tu.decodeLong(data));
+					rv = new Date(this.transcoderUtils.decodeLong(data));
 					break;
 				case SPECIAL_BYTEARRAY:
 					rv = data;
@@ -139,45 +145,45 @@ public class SerializingTranscoder extends BaseSerializingTranscoder implements
 			if (this.primitiveAsString) {
 				b = encodeString(o.toString());
 			} else {
-				b = this.tu.encodeLong((Long) o);
+				b = this.transcoderUtils.encodeLong((Long) o);
 			}
 			flags |= SPECIAL_LONG;
 		} else if (o instanceof Integer) {
 			if (this.primitiveAsString) {
 				b = encodeString(o.toString());
 			} else {
-				b = this.tu.encodeInt((Integer) o);
+				b = this.transcoderUtils.encodeInt((Integer) o);
 			}
 			flags |= SPECIAL_INT;
 		} else if (o instanceof Boolean) {
 			if (this.primitiveAsString) {
 				b = encodeString(o.toString());
 			} else {
-				b = this.tu.encodeBoolean((Boolean) o);
+				b = this.transcoderUtils.encodeBoolean((Boolean) o);
 			}
 			flags |= SPECIAL_BOOLEAN;
 		} else if (o instanceof Date) {
-			b = this.tu.encodeLong(((Date) o).getTime());
+			b = this.transcoderUtils.encodeLong(((Date) o).getTime());
 			flags |= SPECIAL_DATE;
 		} else if (o instanceof Byte) {
 			if (this.primitiveAsString) {
 				b = encodeString(o.toString());
 			} else {
-				b = this.tu.encodeByte((Byte) o);
+				b = this.transcoderUtils.encodeByte((Byte) o);
 			}
 			flags |= SPECIAL_BYTE;
 		} else if (o instanceof Float) {
 			if (this.primitiveAsString) {
 				b = encodeString(o.toString());
 			} else {
-				b = this.tu.encodeInt(Float.floatToRawIntBits((Float) o));
+				b = this.transcoderUtils.encodeInt(Float.floatToRawIntBits((Float) o));
 			}
 			flags |= SPECIAL_FLOAT;
 		} else if (o instanceof Double) {
 			if (this.primitiveAsString) {
 				b = encodeString(o.toString());
 			} else {
-				b = this.tu.encodeLong(Double.doubleToRawLongBits((Double) o));
+				b = this.transcoderUtils.encodeLong(Double.doubleToRawLongBits((Double) o));
 			}
 			flags |= SPECIAL_DOUBLE;
 		} else if (o instanceof byte[]) {
