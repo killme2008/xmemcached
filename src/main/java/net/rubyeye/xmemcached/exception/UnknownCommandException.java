@@ -11,6 +11,12 @@
  */
 package net.rubyeye.xmemcached.exception;
 
+/**
+ * Unknown command exception
+ * 
+ * @author boyan
+ * 
+ */
 public class UnknownCommandException extends RuntimeException {
 
 	public UnknownCommandException() {

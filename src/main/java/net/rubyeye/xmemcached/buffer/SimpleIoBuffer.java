@@ -10,7 +10,9 @@
  *either express or implied. See the License for the specific language governing permissions and limitations under the License
  */
 package net.rubyeye.xmemcached.buffer;
-
+/**
+ * Simpe ByteBuffer Wrapper
+ */
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 

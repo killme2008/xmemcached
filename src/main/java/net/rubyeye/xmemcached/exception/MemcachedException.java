@@ -11,6 +11,12 @@
  */
 package net.rubyeye.xmemcached.exception;
 
+/**
+ * Base exception type for memcached client
+ * 
+ * @author boyan
+ * 
+ */
 public class MemcachedException extends Exception {
 
 	public MemcachedException() {

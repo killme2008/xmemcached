@@ -30,9 +30,9 @@ import com.google.code.yanf4j.core.WriteMessage;
 import com.google.code.yanf4j.core.impl.FutureImpl;
 
 /**
- * memcached命令类
+ * Abstract Memcached Command
  * 
- * @author Administrator
+ * @author dennis
  * 
  */
 public abstract class Command implements WriteMessage {
