@@ -59,7 +59,7 @@ public class TextDeleteCommand extends Command {
 	
 
 	@Override
-	public final boolean decode(MemcachedTCPSession session, ByteBuffer buffer) {
+	public boolean decode(MemcachedTCPSession session, ByteBuffer buffer) {
 		if (buffer == null || !buffer.hasRemaining()) {
 			return false;
 		}

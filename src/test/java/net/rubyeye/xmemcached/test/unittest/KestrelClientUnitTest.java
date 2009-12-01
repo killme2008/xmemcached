@@ -142,6 +142,34 @@ public class KestrelClientUnitTest extends TestCase {
 				.get("queue1/t=1000"));
 
 	}
+	
+	public void testPeek()throws Exception{
+		Assert.assertNull(this.memcachedClient.get("queue1/peek"));
+		this.memcachedClient.set("queue1", 0, 1);
+		Assert.assertEquals(1,this.memcachedClient.get("queue1/peek"));
+		this.memcachedClient.set("queue1", 0, 10);
+		Assert.assertEquals(1,this.memcachedClient.get("queue1/peek"));
+		this.memcachedClient.set("queue1", 0, 11);
+		Assert.assertEquals(1,this.memcachedClient.get("queue1/peek"));
+		
+		Assert.assertEquals(1,this.memcachedClient.get("queue1"));
+		Assert.assertEquals(10,this.memcachedClient.get("queue1/peek"));
+		Assert.assertEquals(10,this.memcachedClient.get("queue1"));
+		Assert.assertEquals(11,this.memcachedClient.get("queue1/peek"));
+		Assert.assertEquals(11,this.memcachedClient.get("queue1"));
+		Assert.assertNull(this.memcachedClient.get("queue1/peek"));
+	}
+
+	public void testDelete() throws Exception {
+		Assert.assertNull(this.memcachedClient.get("queue1"));
+		for (int i = 0; i < 10; i++) {
+			Assert.assertTrue(this.memcachedClient.set("queue1", 0, i));
+		}
+		this.memcachedClient.delete("queue1");
+		for (int i = 0; i < 10; i++) {
+			Assert.assertNull(this.memcachedClient.get("queue1"));
+		}
+	}
 
 	public void testReliableFetch() throws Exception {
 		Assert.assertTrue(this.memcachedClient.set("queue1", 0, "hello world"));
@@ -158,10 +186,21 @@ public class KestrelClientUnitTest extends TestCase {
 		Assert.assertNull(newClient.get("queue1/close"));
 		Assert.assertNull(newClient.get("queue1"));
 
+		// test abort,for kestrel 1.2
+		Assert.assertTrue(newClient.set("queue1", 0, "hello world"));
+		Assert.assertEquals("hello world", newClient.get("queue1/open"));
+		// abort
+		Assert.assertNull(newClient.get("queue1/abort"));
+		// still alive
+		Assert.assertEquals("hello world", newClient.get("queue1/open"));
+		// confirm
+		Assert.assertNull(newClient.get("queue1/close"));
+		// null
+		Assert.assertNull(newClient.get("queue1"));
+
 		newClient.shutdown();
 	}
 
-	
 	public void testPerformance() throws Exception {
 		long start = System.currentTimeMillis();
 		for (int i = 0; i < 10000; i++) {
@@ -178,9 +217,6 @@ public class KestrelClientUnitTest extends TestCase {
 				+ (System.currentTimeMillis() - start) + "ms");
 	}
 
-	
-	
-	
 	class AccessThread extends Thread {
 		private CyclicBarrier cyclicBarrier;
 
@@ -207,7 +243,7 @@ public class KestrelClientUnitTest extends TestCase {
 		}
 	}
 
-	public void testConcurrentAccess() throws Exception{
+	public void testConcurrentAccess() throws Exception {
 		int threadCount = 10;
 		CyclicBarrier cyclicBarrier = new CyclicBarrier(threadCount + 1);
 		for (int i = 0; i < threadCount; i++) {
