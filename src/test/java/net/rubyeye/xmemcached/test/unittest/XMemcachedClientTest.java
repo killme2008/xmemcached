@@ -1078,7 +1078,7 @@ public class XMemcachedClientTest extends TestCase {
 				.getStats();
 
 		for (int i = 0; i < 100; i++) {
-			this.memcachedClient.set(String.valueOf(i), 0, i);
+			assertTrue(this.memcachedClient.set(String.valueOf(i), 0, i));
 		}
 		for (int i = 0; i < 100; i++) {
 			assertEquals(i, this.memcachedClient.get(String.valueOf(i)));

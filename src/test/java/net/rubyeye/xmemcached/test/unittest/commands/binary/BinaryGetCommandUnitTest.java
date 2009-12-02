@@ -42,7 +42,7 @@ public class BinaryGetCommandUnitTest extends BaseBinaryCommandUnitTest {
 		command = this.commandFactory.createGetCommand(key, keyBytes,
 				CommandType.GET_ONE, transcoder);
 		assertTrue(command.decode(null, buffer));
-		assertNull(command.getResult());
+		assertEquals(0, ((CachedData) command.getResult()).getData().length);
 		assertEquals(0, buffer.remaining());
 	}
 

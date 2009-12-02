@@ -94,7 +94,7 @@ public class BinaryCommandFactory implements CommandFactory {
 		while (it.hasNext()) {
 			key = it.next();
 			if (it.hasNext()) {
-				// first n-1 send getkq command
+				// first n-1 send getq command
 				Command command = new BinaryGetCommand(key, ByteUtils
 						.getBytes(key), cmdType, null, OpCode.GET_KEY_QUIETLY,
 						true);
@@ -103,7 +103,7 @@ public class BinaryCommandFactory implements CommandFactory {
 				bufferList.add(command.getIoBuffer());
 			}
 		}
-		// last key,create a getk command
+		// last key,create a get command
 		Command lastCommand = new BinaryGetCommand(key,
 				ByteUtils.getBytes(key), cmdType, new CountDownLatch(1),
 				OpCode.GET_KEY, false);

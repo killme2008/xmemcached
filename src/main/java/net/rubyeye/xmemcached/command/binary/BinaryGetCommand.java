@@ -73,9 +73,7 @@ public class BinaryGetCommand extends BaseBinaryCommand implements
 	 */
 	protected void readHeader(ByteBuffer buffer) {
 		super.readHeader(buffer);
-		if (this.responseStatus == ResponseStatus.NO_ERROR
-				&& (this.responseTotalBodyLength - this.responseKeyLength
-						- this.responseExtrasLength == 0)) {
+		if (this.responseStatus != ResponseStatus.NO_ERROR) {
 			if (ByteUtils.stepBuffer(buffer, this.responseTotalBodyLength)) {
 				this.decodeStatus = BinaryDecodeStatus.DONE;
 			}

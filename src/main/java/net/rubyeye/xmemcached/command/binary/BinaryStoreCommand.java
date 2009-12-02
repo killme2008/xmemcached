@@ -68,7 +68,6 @@ public class BinaryStoreCommand extends BaseBinaryCommand {
 		if (this.responseStatus == ResponseStatus.NO_ERROR) {
 			this.decodeStatus = BinaryDecodeStatus.DONE;
 		}
-
 	}
 
 }
