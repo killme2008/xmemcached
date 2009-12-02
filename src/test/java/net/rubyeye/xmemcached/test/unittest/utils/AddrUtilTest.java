@@ -63,28 +63,28 @@ public class AddrUtilTest extends TestCase {
 	
 	public void testGetAddress() {
 		try {
-			AddrUtil.getAddress(null);
+			AddrUtil.getOneAddress(null);
 			fail();
 		} catch (NullPointerException e) {
 			assertEquals("Null host", e.getMessage());
 		}
 
 		try {
-			AddrUtil.getAddress("   ");
+			AddrUtil.getOneAddress("   ");
 			fail();
 		} catch (IllegalArgumentException e) {
 			assertEquals("No hosts in:  ``" + "   " + "''", e.getMessage());
 		}
 		
 		try {
-			AddrUtil.getAddress("localhost");
+			AddrUtil.getOneAddress("localhost");
 			fail();
 		} catch (IllegalArgumentException e) {
 			assertEquals("Invalid server ``localhost''", e.getMessage());
 		}
 
 
-		InetSocketAddress addresses = AddrUtil.getAddress("localhost:12000");
+		InetSocketAddress addresses = AddrUtil.getOneAddress("localhost:12000");
 
 		assertEquals("localhost", addresses.getHostName());
 		// assertEquals("192.168.0.98",addresses.get(1).getHostName());

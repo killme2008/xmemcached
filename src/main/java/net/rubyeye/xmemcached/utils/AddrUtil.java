@@ -65,18 +65,6 @@ public class AddrUtil {
 		return addrs;
 	}
 
-	/**
-	 * Get one InetSocketAddress.This method is deprecated,replace with
-	 * getOneAddress
-	 * 
-	 * @param server
-	 * @return
-	 */
-	@Deprecated
-	public static InetSocketAddress getAddress(String server) {
-		return getOneAddress(server);
-	}
-
 	public static InetSocketAddress getOneAddress(String server) {
 		if (server == null) {
 			throw new NullPointerException("Null host");

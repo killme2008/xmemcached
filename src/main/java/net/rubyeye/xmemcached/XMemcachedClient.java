@@ -230,9 +230,10 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 		}
 		checkServerPort(server, port);
 		buildConnector(new ArrayMemcachedSessionLocator(),
-				new SimpleBufferAllocator(), getDefaultConfiguration(),
-				XMemcachedClientBuilder.getDefaultSocketOptions(),
-				new TextCommandFactory(), new SerializingTranscoder());
+				new SimpleBufferAllocator(), XMemcachedClientBuilder
+						.getDefaultConfiguration(), XMemcachedClientBuilder
+						.getDefaultSocketOptions(), new TextCommandFactory(),
+				new SerializingTranscoder());
 		start0();
 		connect(newSocketAddress(server, port), weight);
 	}
@@ -506,7 +507,7 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 			bufferAllocator = new SimpleBufferAllocator();
 		}
 		if (configuration == null) {
-			configuration = getDefaultConfiguration();
+			configuration = XMemcachedClientBuilder.getDefaultConfiguration();
 		}
 		if (transcoder == null) {
 			transcoder = new SerializingTranscoder();
@@ -565,19 +566,6 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 	}
 
 	/**
-	 * Get default network configration for xmemcached.This method is
-	 * depreacated,please use XmemcachedClientBuilder.getDefaultConfiguration()
-	 * instead.
-	 * 
-	 * @deprecated instead by XmemcachedClientBuilder.getDefaultConfiguration()
-	 * @return
-	 */
-	@Deprecated
-	public static final Configuration getDefaultConfiguration() {
-		return XMemcachedClientBuilder.getDefaultConfiguration();
-	}
-
-	/**
 	 * XMemcached Constructor.
 	 * 
 	 * @param inetSocketAddress
@@ -595,9 +583,10 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 			throw new IllegalArgumentException("weight<=0");
 		}
 		buildConnector(new ArrayMemcachedSessionLocator(),
-				new SimpleBufferAllocator(), getDefaultConfiguration(),
-				XMemcachedClientBuilder.getDefaultSocketOptions(),
-				new TextCommandFactory(), new SerializingTranscoder());
+				new SimpleBufferAllocator(), XMemcachedClientBuilder
+						.getDefaultConfiguration(), XMemcachedClientBuilder
+						.getDefaultSocketOptions(), new TextCommandFactory(),
+				new SerializingTranscoder());
 		start0();
 		connect(inetSocketAddress, weight);
 	}
@@ -610,9 +599,10 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 	public XMemcachedClient() throws IOException {
 		super();
 		buildConnector(new ArrayMemcachedSessionLocator(),
-				new SimpleBufferAllocator(), getDefaultConfiguration(),
-				XMemcachedClientBuilder.getDefaultSocketOptions(),
-				new TextCommandFactory(), new SerializingTranscoder());
+				new SimpleBufferAllocator(), XMemcachedClientBuilder
+						.getDefaultConfiguration(), XMemcachedClientBuilder
+						.getDefaultSocketOptions(), new TextCommandFactory(),
+				new SerializingTranscoder());
 		start0();
 	}
 
@@ -749,9 +739,10 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 		}
 		BufferAllocator simpleBufferAllocator = new SimpleBufferAllocator();
 		buildConnector(new ArrayMemcachedSessionLocator(),
-				simpleBufferAllocator, getDefaultConfiguration(),
-				XMemcachedClientBuilder.getDefaultSocketOptions(),
-				new TextCommandFactory(), new SerializingTranscoder());
+				simpleBufferAllocator, XMemcachedClientBuilder
+						.getDefaultConfiguration(), XMemcachedClientBuilder
+						.getDefaultSocketOptions(), new TextCommandFactory(),
+				new SerializingTranscoder());
 		start0();
 		for (InetSocketAddress inetSocketAddress : addressList) {
 			connect(inetSocketAddress, 1);
@@ -1658,8 +1649,8 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 	 * 
 	 * @see net.rubyeye.xmemcached.MemcachedClient#incr(java.lang.String, int)
 	 */
-	public final long incr(String key, final long delta) throws TimeoutException,
-			InterruptedException, MemcachedException {
+	public final long incr(String key, final long delta)
+			throws TimeoutException, InterruptedException, MemcachedException {
 		key = sanitizeKey(key);
 		return sendIncrOrDecrCommand(key, delta, 0, CommandType.INCR, false,
 				this.opTimeout);
@@ -1706,8 +1697,8 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 	 * 
 	 * @see net.rubyeye.xmemcached.MemcachedClient#decr(java.lang.String, int)
 	 */
-	public final long decr(String key, final long delta) throws TimeoutException,
-			InterruptedException, MemcachedException {
+	public final long decr(String key, final long delta)
+			throws TimeoutException, InterruptedException, MemcachedException {
 		key = sanitizeKey(key);
 		return sendIncrOrDecrCommand(key, delta, 0, CommandType.DECR, false,
 				this.opTimeout);
@@ -1857,19 +1848,6 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.rubyeye.xmemcached.MemcachedClient#flushAll(java.lang.String,
-	 * long)
-	 */
-	@Deprecated
-	public final void flushAll(String server, long timeout)
-			throws TimeoutException, InterruptedException, MemcachedException {
-		InetSocketAddress address = AddrUtil.getOneAddress(server);
-		flushAll(address, timeout);
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
 	 * @see
 	 * net.rubyeye.xmemcached.MemcachedClient#flushAll(java.net.InetSocketAddress
 	 * )
@@ -1927,7 +1905,7 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 	 */
 	public final void flushAll(String host) throws TimeoutException,
 			InterruptedException, MemcachedException {
-		flushAll(host, this.opTimeout);
+		flushAll(AddrUtil.getOneAddress(host), this.opTimeout);
 	}
 
 	/*

@@ -703,18 +703,24 @@ public interface MemcachedClient {
 
 	public long incr(final String key, final long delta, final long initValue)
 			throws TimeoutException, InterruptedException, MemcachedException;
+
 	/**
-	 *   "incr" are used to change data for some item in-place, incrementing it.
+	 * "incr" are used to change data for some item in-place, incrementing it.
 	 * The data for the item is treated as decimal representation of a 64-bit
 	 * unsigned integer. If the current data value does not conform to such a
 	 * representation, the commands behave as if the value were 0. Also, the
 	 * item must already exist for incr to work; these commands won't pretend
 	 * that a non-existent key exists with value 0; instead, it will fail.This
 	 * method doesn't wait for reply.
-	 * @param key key
-	 * @param num increment
-	 * @param initValue initValue if the data is not exists.
-	 * @param timeout operation timeout
+	 * 
+	 * @param key
+	 *            key
+	 * @param num
+	 *            increment
+	 * @param initValue
+	 *            initValue if the data is not exists.
+	 * @param timeout
+	 *            operation timeout
 	 * @return
 	 * @throws TimeoutException
 	 * @throws InterruptedException
@@ -755,25 +761,32 @@ public interface MemcachedClient {
 	 */
 	public abstract long decr(final String key, final long delta, long initValue)
 			throws TimeoutException, InterruptedException, MemcachedException;
+
 	/**
-	 *  "decr" are used to change data for some item in-place, decrementing it.
+	 * "decr" are used to change data for some item in-place, decrementing it.
 	 * The data for the item is treated as decimal representation of a 64-bit
 	 * unsigned integer. If the current data value does not conform to such a
 	 * representation, the commands behave as if the value were 0. Also, the
 	 * item must already exist for decr to work; these commands won't pretend
 	 * that a non-existent key exists with value 0; instead, it will fail.This
 	 * method doesn't wait for reply.
-	 * @param key The key
-	 * @param num  The increment
-	 * @param initValue The initial value if the data is not exists.
-	 * @param timeout Operation timeout
+	 * 
+	 * @param key
+	 *            The key
+	 * @param num
+	 *            The increment
+	 * @param initValue
+	 *            The initial value if the data is not exists.
+	 * @param timeout
+	 *            Operation timeout
 	 * @return
 	 * @throws TimeoutException
 	 * @throws InterruptedException
 	 * @throws MemcachedException
 	 */
-	public abstract long decr(final String key, final long delta, long initValue,long timeout)
-	throws TimeoutException, InterruptedException, MemcachedException;
+	public abstract long decr(final String key, final long delta,
+			long initValue, long timeout) throws TimeoutException,
+			InterruptedException, MemcachedException;
 
 	/**
 	 * Make All connected memcached's data item invalid
@@ -801,20 +814,6 @@ public interface MemcachedClient {
 			InterruptedException, MemcachedException;
 
 	/**
-	 * Invalidate all existing items immediately.This method is Deprecated,use
-	 * flushAll(InetSocketAddress address, long timeout) instead.
-	 * 
-	 * @param server
-	 * @param timeout
-	 * @throws TimeoutException
-	 * @throws InterruptedException
-	 * @throws MemcachedException
-	 */
-	@Deprecated
-	public abstract void flushAll(String server, long timeout)
-			throws TimeoutException, InterruptedException, MemcachedException;
-
-	/**
 	 * Invalidate all existing items immediately
 	 * 
 	 * @param address
@@ -835,10 +834,11 @@ public interface MemcachedClient {
 			throws MemcachedException, InterruptedException, TimeoutException;
 
 	/**
-	 * 使指定memcached节点的数据项失效
+	 * This method is deprecated,please use flushAll(InetSocketAddress) instead.
 	 * 
+	 * @deprecated
 	 * @param host
-	 *            memcached节点host ip:port的形式
+	 *            
 	 * @throws TimeoutException
 	 * @throws InterruptedException
 	 * @throws MemcachedException
