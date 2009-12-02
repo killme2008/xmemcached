@@ -7,6 +7,30 @@ Xmemcached Change log
 
 *******************************************
 
+2009-12-03
+
+------Xmemcached 1.2.1 Released----------------
+
+1.Add delete method support for Kestrel 1.2
+
+2.Add TokyoTyrantTranscoder for talking with Tokyo Tyrant.This transcoder add four bytes before value as flag.
+  
+3.Add new methods:
+(1)Transcoder.setCompressionThreshold(threshold) Used to set compress threshold,default is 16k.
+(2)MemcachedClient.setSanitizeKeys(true|false)   Enables/disables sanitizing keys by URLEncoding.
+
+4.Remove some deprecated methods,please use other methods instead.
+
+5.Make optimistics for binary protocol implementation.
+
+6.Remove some old codes for test,add new unit tests for binary commands and some new integrating tests.
+
+7.Bug fixes, issue 69 etc.
+
+8.Add chinese user guide.
+
+******************************************************************
+
 2009-10-10
 
 -------xmemcached 1.2.0-stable Released--------
