@@ -25,6 +25,9 @@ package net.rubyeye.xmemcached.command.binary;
 import java.nio.ByteBuffer;
 import java.util.concurrent.CountDownLatch;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import net.rubyeye.xmemcached.buffer.BufferAllocator;
 import net.rubyeye.xmemcached.command.Command;
 import net.rubyeye.xmemcached.command.CommandType;
@@ -43,6 +46,8 @@ import net.rubyeye.xmemcached.utils.OpaqueGenerater;
  * 
  */
 public abstract class BaseBinaryCommand extends Command {
+	private static final Logger log = LoggerFactory
+			.getLogger(BinaryStoreCommand.class);
 	protected int expTime;
 	protected long cas;
 	protected Object value;
@@ -158,6 +163,16 @@ public abstract class BaseBinaryCommand extends Command {
 			if (this.responseStatus == ResponseStatus.NO_ERROR) {
 				setResult(Boolean.TRUE);
 			} else {
+				switch (this.responseStatus) {
+				case VALUE_TOO_BIG:
+					log.error(ResponseStatus.VALUE_TOO_BIG.errorMessage());
+					break;
+				case INVALID_ARGUMENTS:
+					log.error(ResponseStatus.INVALID_ARGUMENTS.errorMessage());
+					break;
+				default:
+					log.debug(this.responseStatus.errorMessage());
+				}
 				setResult(Boolean.FALSE);
 			}
 		}

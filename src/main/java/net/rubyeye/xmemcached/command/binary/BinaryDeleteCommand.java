@@ -22,6 +22,7 @@
  */
 package net.rubyeye.xmemcached.command.binary;
 
+import java.nio.ByteBuffer;
 import java.util.concurrent.CountDownLatch;
 
 import net.rubyeye.xmemcached.command.CommandType;
@@ -37,6 +38,17 @@ public class BinaryDeleteCommand extends BaseBinaryCommand {
 			CommandType cmdType, CountDownLatch latch, boolean noreply) {
 		super(key, keyBytes, cmdType, latch, 0, 0, null, noreply, null);
 		this.opCode = noreply?OpCode.DELETE_QUIETLY:OpCode.DELETE;
+	}
+	
+	/**
+	 * optimistic,if no error,goto done
+	 */
+	protected void readHeader(ByteBuffer buffer) {
+		super.readHeader(buffer);
+		if (this.responseStatus == ResponseStatus.NO_ERROR) {
+			this.decodeStatus = BinaryDecodeStatus.DONE;
+		}
+
 	}
 
 	@Override

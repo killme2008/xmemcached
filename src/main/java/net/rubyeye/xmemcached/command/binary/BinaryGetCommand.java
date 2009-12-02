@@ -67,6 +67,22 @@ public class BinaryGetCommand extends BaseBinaryCommand implements
 		this.assocCommands = assocCommands;
 	}
 
+	/**
+	 * Optimistic,if the value length is 0,then skip remaining buffer,set result
+	 * as null
+	 */
+	protected void readHeader(ByteBuffer buffer) {
+		super.readHeader(buffer);
+		if (this.responseStatus == ResponseStatus.NO_ERROR
+				&& (this.responseTotalBodyLength - this.responseKeyLength
+						- this.responseExtrasLength == 0)) {
+			if (ByteUtils.stepBuffer(buffer, this.responseTotalBodyLength)) {
+				this.decodeStatus = BinaryDecodeStatus.DONE;
+			}
+		}
+
+	}
+
 	@Override
 	protected boolean finish() {
 		countDownLatch();

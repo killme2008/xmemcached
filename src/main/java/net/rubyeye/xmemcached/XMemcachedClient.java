@@ -1658,43 +1658,43 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 	 * 
 	 * @see net.rubyeye.xmemcached.MemcachedClient#incr(java.lang.String, int)
 	 */
-	public final long incr(String key, final long num) throws TimeoutException,
+	public final long incr(String key, final long delta) throws TimeoutException,
 			InterruptedException, MemcachedException {
 		key = sanitizeKey(key);
-		return sendIncrOrDecrCommand(key, num, 0, CommandType.INCR, false,
+		return sendIncrOrDecrCommand(key, delta, 0, CommandType.INCR, false,
 				this.opTimeout);
 	}
 
-	public long incr(String key, long num, long initValue)
+	public long incr(String key, long delta, long initValue)
 			throws TimeoutException, InterruptedException, MemcachedException {
 		key = sanitizeKey(key);
-		return sendIncrOrDecrCommand(key, num, initValue, CommandType.INCR,
+		return sendIncrOrDecrCommand(key, delta, initValue, CommandType.INCR,
 				false, this.opTimeout);
 	}
 
-	public long incr(String key, long num, long initValue, long timeout)
+	public long incr(String key, long delta, long initValue, long timeout)
 			throws TimeoutException, InterruptedException, MemcachedException {
 		key = sanitizeKey(key);
-		return sendIncrOrDecrCommand(key, num, initValue, CommandType.INCR,
+		return sendIncrOrDecrCommand(key, delta, initValue, CommandType.INCR,
 				false, timeout);
 	}
 
-	public final void incrWithNoReply(String key, long num)
+	public final void incrWithNoReply(String key, long delta)
 			throws InterruptedException, MemcachedException {
 		key = sanitizeKey(key);
 		try {
-			sendIncrOrDecrCommand(key, num, 0, CommandType.INCR, true,
+			sendIncrOrDecrCommand(key, delta, 0, CommandType.INCR, true,
 					this.opTimeout);
 		} catch (TimeoutException e) {
 			throw new MemcachedException(e);
 		}
 	}
 
-	public final void decrWithNoReply(String key, final long num)
+	public final void decrWithNoReply(String key, final long delta)
 			throws InterruptedException, MemcachedException {
 		key = sanitizeKey(key);
 		try {
-			sendIncrOrDecrCommand(key, num, 0, CommandType.DECR, true,
+			sendIncrOrDecrCommand(key, delta, 0, CommandType.DECR, true,
 					this.opTimeout);
 		} catch (TimeoutException e) {
 			throw new MemcachedException(e);
@@ -1706,24 +1706,24 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 	 * 
 	 * @see net.rubyeye.xmemcached.MemcachedClient#decr(java.lang.String, int)
 	 */
-	public final long decr(String key, final long num) throws TimeoutException,
+	public final long decr(String key, final long delta) throws TimeoutException,
 			InterruptedException, MemcachedException {
 		key = sanitizeKey(key);
-		return sendIncrOrDecrCommand(key, num, 0, CommandType.DECR, false,
+		return sendIncrOrDecrCommand(key, delta, 0, CommandType.DECR, false,
 				this.opTimeout);
 	}
 
-	public long decr(String key, long num, long initValue)
+	public long decr(String key, long delta, long initValue)
 			throws TimeoutException, InterruptedException, MemcachedException {
 		key = sanitizeKey(key);
-		return sendIncrOrDecrCommand(key, num, initValue, CommandType.DECR,
+		return sendIncrOrDecrCommand(key, delta, initValue, CommandType.DECR,
 				false, this.opTimeout);
 	}
 
-	public long decr(String key, long num, long initValue, long timeout)
+	public long decr(String key, long delta, long initValue, long timeout)
 			throws TimeoutException, InterruptedException, MemcachedException {
 		key = sanitizeKey(key);
-		return sendIncrOrDecrCommand(key, num, initValue, CommandType.DECR,
+		return sendIncrOrDecrCommand(key, delta, initValue, CommandType.DECR,
 				false, timeout);
 	}
 
@@ -2071,14 +2071,14 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 		XMemcachedMbeanServer.getInstance().shutdown();
 	}
 
-	private long sendIncrOrDecrCommand(final String key, final long num,
+	private long sendIncrOrDecrCommand(final String key, final long delta,
 			long initValue, final CommandType cmdType, boolean noreply,
 			long operationTimeout) throws InterruptedException,
 			TimeoutException, MemcachedException {
 		final byte[] keyBytes = ByteUtils.getBytes(key);
 		ByteUtils.checkKey(keyBytes);
 		final Command command = this.commandFactory.createIncrDecrCommand(key,
-				keyBytes, num, initValue, 0, cmdType, noreply);
+				keyBytes, delta, initValue, 0, cmdType, noreply);
 		sendCommand(command);
 		if (!command.isNoreply()) {
 			latchWait(command, operationTimeout);
@@ -2094,7 +2094,7 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 					if (add(key, 0, String.valueOf(initValue), this.opTimeout))
 						return initValue;
 					else
-						return sendIncrOrDecrCommand(key, num, initValue,
+						return sendIncrOrDecrCommand(key, delta, initValue,
 								cmdType, noreply, operationTimeout);
 				} else
 					throw new MemcachedException(

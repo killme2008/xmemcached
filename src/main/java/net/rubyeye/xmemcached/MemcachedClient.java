@@ -698,10 +698,10 @@ public interface MemcachedClient {
 	 * @throws InterruptedException
 	 * @throws MemcachedException
 	 */
-	public abstract long incr(final String key, final long num)
+	public abstract long incr(final String key, final long delta)
 			throws TimeoutException, InterruptedException, MemcachedException;
 
-	public long incr(final String key, final long num, final long initValue)
+	public long incr(final String key, final long delta, final long initValue)
 			throws TimeoutException, InterruptedException, MemcachedException;
 	/**
 	 *   "incr" are used to change data for some item in-place, incrementing it.
@@ -720,7 +720,7 @@ public interface MemcachedClient {
 	 * @throws InterruptedException
 	 * @throws MemcachedException
 	 */
-	public long incr(final String key, final long num, final long initValue,
+	public long incr(final String key, final long delta, final long initValue,
 			long timeout) throws TimeoutException, InterruptedException,
 			MemcachedException;
 
@@ -740,7 +740,7 @@ public interface MemcachedClient {
 	 * @throws InterruptedException
 	 * @throws MemcachedException
 	 */
-	public abstract long decr(final String key, final long num)
+	public abstract long decr(final String key, final long delta)
 			throws TimeoutException, InterruptedException, MemcachedException;
 
 	/**
@@ -753,7 +753,7 @@ public interface MemcachedClient {
 	 * @throws InterruptedException
 	 * @throws MemcachedException
 	 */
-	public abstract long decr(final String key, final long num, long initValue)
+	public abstract long decr(final String key, final long delta, long initValue)
 			throws TimeoutException, InterruptedException, MemcachedException;
 	/**
 	 *  "decr" are used to change data for some item in-place, decrementing it.
@@ -772,7 +772,7 @@ public interface MemcachedClient {
 	 * @throws InterruptedException
 	 * @throws MemcachedException
 	 */
-	public abstract long decr(final String key, final long num, long initValue,long timeout)
+	public abstract long decr(final String key, final long delta, long initValue,long timeout)
 	throws TimeoutException, InterruptedException, MemcachedException;
 
 	/**
@@ -988,7 +988,7 @@ public interface MemcachedClient {
 	 * @throws InterruptedException
 	 * @throws MemcachedException
 	 */
-	public void incrWithNoReply(final String key, final long num)
+	public void incrWithNoReply(final String key, final long delta)
 			throws InterruptedException, MemcachedException;
 
 	/**
@@ -1005,7 +1005,7 @@ public interface MemcachedClient {
 	 * @throws InterruptedException
 	 * @throws MemcachedException
 	 */
-	public void decrWithNoReply(final String key, final long num)
+	public void decrWithNoReply(final String key, final long delta)
 			throws InterruptedException, MemcachedException;
 
 	/**

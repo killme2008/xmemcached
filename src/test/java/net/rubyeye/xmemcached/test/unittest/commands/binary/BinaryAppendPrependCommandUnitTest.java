@@ -1,48 +1,73 @@
 package net.rubyeye.xmemcached.test.unittest.commands.binary;
 
 import java.nio.ByteBuffer;
-import java.util.concurrent.CountDownLatch;
 
-import junit.framework.TestCase;
-import net.rubyeye.xmemcached.buffer.BufferAllocator;
-import net.rubyeye.xmemcached.buffer.SimpleBufferAllocator;
-import net.rubyeye.xmemcached.command.CommandType;
-import net.rubyeye.xmemcached.command.binary.BinaryAppendPrependCommand;
-import net.rubyeye.xmemcached.transcoders.StringTranscoder;
+import net.rubyeye.xmemcached.command.Command;
+import net.rubyeye.xmemcached.command.binary.OpCode;
+import net.rubyeye.xmemcached.utils.ByteUtils;
 
-public class BinaryAppendPrependCommandUnitTest extends TestCase {
-	BufferAllocator bufferAllocator;
+public class BinaryAppendPrependCommandUnitTest extends
+		BaseBinaryCommandUnitTest {
+	String key = "hello";
+	byte[] keyBytes = ByteUtils.getBytes(key);
+	String value = "!";
+	boolean noreply = false;
 
-	@Override
-	public void setUp() {
-		this.bufferAllocator = new SimpleBufferAllocator();
+	public void testAppendEncodeAndDecode() {
+
+		Command command = this.commandFactory.createAppendCommand(key,
+				keyBytes, value, noreply, transcoder);
+		command.encode(bufferAllocator);
+		ByteBuffer encodeBuffer = command.getIoBuffer().getByteBuffer();
+		assertNotNull(encodeBuffer);
+		assertEquals(30, encodeBuffer.capacity());
+
+		byte opCode = encodeBuffer.get(1);
+		assertEquals(OpCode.APPEND.fieldValue(), opCode);
+
+		ByteBuffer buffer = constructResponse(OpCode.APPEND.fieldValue(),
+				(short) 0, (byte) 0, (byte) 0, (short) 0, 0, 0, 1L, null, null,
+				null);
+
+		assertTrue(command.decode(null, buffer));
+		assertTrue((Boolean) command.getResult());
+		assertEquals(0, buffer.remaining());
+
+		buffer = constructResponse(OpCode.APPEND.fieldValue(), (short) 0,
+				(byte) 0, (byte) 0, (short) 0x0005, 0, 0, 1L, null, null, null);
+		command = this.commandFactory.createAppendCommand(key, keyBytes, value,
+				noreply, transcoder);
+		assertTrue(command.decode(null, buffer));
+		assertFalse((Boolean) command.getResult());
+		assertEquals(0, buffer.remaining());
 	}
 
-	public void testEncode() {
-		BinaryAppendPrependCommand cmd = createAppendPrependCommand();
-		final ByteBuffer encodedBuffer = encodeBuffer(cmd);
-		assertEquals(24 + 5 + 1, encodedBuffer.capacity());
-		assertEquals(24 + 5 + 1, encodedBuffer.remaining());
-	}
+	public void testPrependEncodeAndDecode() {
 
-	private ByteBuffer encodeBuffer(BinaryAppendPrependCommand cmd) {
-		cmd.encode(this.bufferAllocator);
+		Command command = this.commandFactory.createPrependCommand(key,
+				keyBytes, value, noreply, transcoder);
+		command.encode(bufferAllocator);
+		ByteBuffer encodeBuffer = command.getIoBuffer().getByteBuffer();
+		assertNotNull(encodeBuffer);
+		assertEquals(30, encodeBuffer.capacity());
 
-		final ByteBuffer encodedBuffer = cmd.getIoBuffer().getByteBuffer();
-		return encodedBuffer;
-	}
+		byte opCode = encodeBuffer.get(1);
+		assertEquals(OpCode.PREPEND.fieldValue(), opCode);
 
-	private BinaryAppendPrependCommand createAppendPrependCommand() {
-		BinaryAppendPrependCommand cmd = new BinaryAppendPrependCommand(
-				"hello", "hello".getBytes(), CommandType.APPEND,
-				new CountDownLatch(1), 0, 0, "!", false, new StringTranscoder());
-		return cmd;
-	}
+		ByteBuffer buffer = constructResponse(OpCode.PREPEND.fieldValue(),
+				(short) 0, (byte) 0, (byte) 0, (short) 0, 0, 0, 1L, null, null,
+				null);
 
-	public void testDecode() {
-		BinaryAppendPrependCommand cmd = createAppendPrependCommand();
-		assertFalse(cmd.decode(null, this.bufferAllocator.allocate(0).getByteBuffer()));
-	     
-		
+		assertTrue(command.decode(null, buffer));
+		assertTrue((Boolean) command.getResult());
+		assertEquals(0, buffer.remaining());
+
+		buffer = constructResponse(OpCode.PREPEND.fieldValue(), (short) 0,
+				(byte) 0, (byte) 0, (short) 0x0005, 0, 0, 1L, null, null, null);
+		command = this.commandFactory.createPrependCommand(key, keyBytes,
+				value, noreply, transcoder);
+		assertTrue(command.decode(null, buffer));
+		assertFalse((Boolean) command.getResult());
+		assertEquals(0, buffer.remaining());
 	}
 }

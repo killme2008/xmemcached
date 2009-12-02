@@ -108,7 +108,7 @@ public interface CommandFactory {
 			CountDownLatch latch, CommandType cmdType, Transcoder<T> transcoder);
 
 	public abstract Command createIncrDecrCommand(final String key,
-			final byte[] keyBytes, final long amount, long initial, int expTime,
+			final byte[] keyBytes, final long delta, long initial, int expTime,
 			CommandType cmdType, boolean noreply);
 
 	@SuppressWarnings("unchecked")
