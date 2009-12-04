@@ -123,7 +123,8 @@ public class MemcachedHandler extends HandlerAdapter {
 	@Override
 	public final void onSessionClosed(Session session) {
 		this.client.getConnector().removeSession((MemcachedTCPSession) session);
-		if (((MemcachedTCPSession) session).isAllowReconnect()) {
+		if (this.client.getConnector().isStarted()
+				&& ((MemcachedTCPSession) session).isAllowReconnect()) {
 			reconnect(session);
 		}
 		for (MemcachedClientStateListener listener : this.client

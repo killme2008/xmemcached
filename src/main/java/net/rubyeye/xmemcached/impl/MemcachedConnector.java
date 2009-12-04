@@ -42,6 +42,8 @@ import net.rubyeye.xmemcached.networking.MemcachedSession;
 import net.rubyeye.xmemcached.utils.Protocol;
 
 import com.google.code.yanf4j.config.Configuration;
+import com.google.code.yanf4j.core.Controller;
+import com.google.code.yanf4j.core.ControllerStateListener;
 import com.google.code.yanf4j.core.EventType;
 import com.google.code.yanf4j.core.Session;
 import com.google.code.yanf4j.core.WriteMessage;
@@ -59,7 +61,7 @@ public class MemcachedConnector extends SocketChannelController implements
 
 	private final BlockingQueue<ReconnectRequest> waitingQueue = new LinkedBlockingQueue<ReconnectRequest>();
 	private BufferAllocator bufferAllocator;
-	private final SessionMonitor sessionMonitor;
+
 	private final MemcachedOptimizer optimiezer;
 	private volatile long healSessionInterval = 2000L;
 	private int connectionPoolSize; // session pool size
@@ -79,7 +81,7 @@ public class MemcachedConnector extends SocketChannelController implements
 
 		@Override
 		public void run() {
-			while (!Thread.currentThread().isInterrupted()) {
+			while (isStarted() && !Thread.currentThread().isInterrupted()) {
 
 				try {
 					ReconnectRequest request = MemcachedConnector.this.waitingQueue
@@ -125,6 +127,8 @@ public class MemcachedConnector extends SocketChannelController implements
 					}
 				} catch (InterruptedException e) {
 					Thread.currentThread().interrupt();
+					break;
+					// log.info("Stoping session monitor ...");
 				} catch (Exception e) {
 					log.error("SessionMonitor connect error", e);
 				}
@@ -221,7 +225,6 @@ public class MemcachedConnector extends SocketChannelController implements
 
 	@Override
 	protected void doStart() throws IOException {
-		this.sessionMonitor.start();
 		setLocalSocketAddress(new InetSocketAddress("localhost", 0));
 	}
 
@@ -287,13 +290,7 @@ public class MemcachedConnector extends SocketChannelController implements
 	}
 
 	public void closeChannel(Selector selector) throws IOException {
-		this.sessionMonitor.interrupt();
-		while (this.sessionMonitor.isAlive()) {
-			try {
-				this.sessionMonitor.join();
-			} catch (InterruptedException e) {
-			}
-		}
+		// do nothing
 	}
 
 	public void send(final Command msg) throws MemcachedException {
@@ -303,6 +300,37 @@ public class MemcachedConnector extends SocketChannelController implements
 					"There is no avriable session at this moment");
 		}
 		session.write(msg);
+	}
+
+	/**
+	 * Inner state listenner,manage session monitor.
+	 * 
+	 * @author boyan
+	 * 
+	 */
+	class InnerControllerStateListener implements ControllerStateListener {
+		private final SessionMonitor sessionMonitor = new SessionMonitor();
+
+		public void onAllSessionClosed(Controller controller) {
+
+		}
+
+		public void onException(Controller controller, Throwable t) {
+			log.error("Exception occured in controller", t);
+		}
+
+		public void onReady(Controller controller) {
+			this.sessionMonitor.start();
+		}
+
+		public void onStarted(Controller controller) {
+
+		}
+
+		public void onStopped(Controller controller) {
+			this.sessionMonitor.interrupt();
+		}
+
 	}
 
 	public final Session findSessionByKey(String key) {
@@ -324,8 +352,8 @@ public class MemcachedConnector extends SocketChannelController implements
 			Protocol protocol, int poolSize) {
 		super(configuration, null);
 		this.sessionLocator = locator;
+		addStateListener(new InnerControllerStateListener());
 		updateSessions();
-		this.sessionMonitor = new SessionMonitor();
 		this.bufferAllocator = allocator;
 		this.optimiezer = new Optimizer(protocol);
 		this.optimiezer.setBufferAllocator(this.bufferAllocator);

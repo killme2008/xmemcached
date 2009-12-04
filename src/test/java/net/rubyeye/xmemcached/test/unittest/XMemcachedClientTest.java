@@ -43,14 +43,13 @@ import net.rubyeye.xmemcached.test.unittest.mock.MockErrorCommand;
 import net.rubyeye.xmemcached.test.unittest.mock.MockErrorTextGetOneCommand;
 import net.rubyeye.xmemcached.transcoders.IntegerTranscoder;
 import net.rubyeye.xmemcached.transcoders.StringTranscoder;
-import net.rubyeye.xmemcached.transcoders.Transcoder;
 import net.rubyeye.xmemcached.utils.AddrUtil;
 import net.rubyeye.xmemcached.utils.ByteUtils;
 import net.rubyeye.xmemcached.utils.Protocol;
 
 import com.google.code.yanf4j.util.ResourcesUtils;
 
-public class XMemcachedClientTest extends TestCase {
+public abstract class XMemcachedClientTest extends TestCase {
 	protected MemcachedClient memcachedClient;
 	Properties properties;
 	private MockTranscoder mockTranscoder;
