@@ -13,7 +13,7 @@ import net.rubyeye.xmemcached.command.TextCommandFactory;
 import com.google.code.yanf4j.core.CodecFactory.Encoder;
 
 public class MemcachedEncoderUnitTest extends TestCase {
-	private Encoder<Command> encoder;
+	private Encoder encoder;
 
 	public void testEncode() {
 		this.encoder = new MemcachedCodecFactory().getEncoder();

@@ -11,8 +11,6 @@
  */
 package net.rubyeye.xmemcached.codec;
 
-import net.rubyeye.xmemcached.command.Command;
-
 import com.google.code.yanf4j.core.CodecFactory;
 
 /**
@@ -22,7 +20,7 @@ import com.google.code.yanf4j.core.CodecFactory;
  * 
  * @param <Command>
  */
-public class MemcachedCodecFactory implements CodecFactory<Command> {
+public class MemcachedCodecFactory implements CodecFactory {
 
 	private final MemcachedEncoder encoder;
 
@@ -37,8 +35,8 @@ public class MemcachedCodecFactory implements CodecFactory<Command> {
 	/**
 	 * return the memcached protocol decoder
 	 */
-	
-	public final CodecFactory.Decoder<Command> getDecoder() {
+
+	public final CodecFactory.Decoder getDecoder() {
 		return this.decoder;
 
 	}
@@ -46,8 +44,8 @@ public class MemcachedCodecFactory implements CodecFactory<Command> {
 	/**
 	 * return the memcached protocol encoder
 	 */
-	
-	public final CodecFactory.Encoder<Command> getEncoder() {
+
+	public final CodecFactory.Encoder getEncoder() {
 		return this.encoder;
 	}
 }

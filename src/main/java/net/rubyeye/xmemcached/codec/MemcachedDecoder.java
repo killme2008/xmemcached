@@ -31,9 +31,10 @@ import com.google.code.yanf4j.util.ShiftAndByteBufferMatcher;
  * @author dennis
  * 
  */
-public class MemcachedDecoder implements Decoder<Command> {
+public class MemcachedDecoder implements Decoder {
 
-	public static final Logger log = LoggerFactory.getLogger(MemcachedDecoder.class);
+	public static final Logger log = LoggerFactory
+			.getLogger(MemcachedDecoder.class);
 
 	public MemcachedDecoder() {
 		super();
@@ -45,8 +46,7 @@ public class MemcachedDecoder implements Decoder<Command> {
 	public static final ByteBufferMatcher SPLIT_MATCHER = new ShiftAndByteBufferMatcher(
 			ByteUtils.SPLIT);
 
-	
-	public Command decode(ByteBuffer buffer, Session origSession) {
+	public Object decode(ByteBuffer buffer, Session origSession) {
 		MemcachedTCPSession session = (MemcachedTCPSession) origSession;
 		if (session.getCurrentCommand() != null) {
 			return decode0(buffer, session);
@@ -56,7 +56,7 @@ public class MemcachedDecoder implements Decoder<Command> {
 		}
 	}
 
-	private Command decode0(ByteBuffer buffer, MemcachedTCPSession session) {
+	private Object decode0(ByteBuffer buffer, MemcachedTCPSession session) {
 		if (session.getCurrentCommand().decode(session, buffer)) {
 			final Command command = session.getCurrentCommand();
 			session.setCurrentCommand(null);

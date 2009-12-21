@@ -24,11 +24,10 @@ import com.google.code.yanf4j.core.CodecFactory.Encoder;
  * @author dennis
  * 
  */
-public class MemcachedEncoder implements Encoder<Command> {
+public class MemcachedEncoder implements Encoder {
 
-	
-	public ByteBuffer encode(Command message, Session session) {
-		return message.getIoBuffer().getByteBuffer();
+	public ByteBuffer encode(Object message, Session session) {
+		return ((Command) message).getIoBuffer().getByteBuffer();
 	}
 
 }
