@@ -963,7 +963,7 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 			return null;
 		}
 		Collection<String> keyCollections = keys;
-		if (sanitizeKeys) {
+		if (this.sanitizeKeys) {
 			keyCollections = new ArrayList<String>(keys.size());
 			for (String key : keys) {
 				keyCollections.add(sanitizeKey(key));
@@ -2069,17 +2069,20 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 			final Object result = command.getResult();
 			if (result instanceof String) {
 				if (((String) result).equals("NOT_FOUND")) {
-					if (add(key, 0, String.valueOf(initValue), this.opTimeout))
+					if (add(key, 0, String.valueOf(initValue), this.opTimeout)) {
 						return initValue;
-					else
+					} else {
 						return sendIncrOrDecrCommand(key, delta, initValue,
 								cmdType, noreply, operationTimeout);
-				} else
+					}
+				} else {
 					throw new MemcachedException(
 							"Unknown result type for incr/decr:"
 									+ result.getClass() + ",result=" + result);
-			} else
+				}
+			} else {
 				return (Long) command.getResult();
+			}
 		} else {
 			return -1;
 		}
@@ -2205,7 +2208,7 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 	}
 
 	public boolean isSanitizeKeys() {
-		return sanitizeKeys;
+		return this.sanitizeKeys;
 	}
 
 	public void setSanitizeKeys(boolean sanitizeKeys) {
@@ -2214,7 +2217,7 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 
 	private String decodeKey(String key) throws MemcachedException {
 		try {
-			return (sanitizeKeys) ? URLDecoder.decode(key, "UTF-8") : key;
+			return (this.sanitizeKeys) ? URLDecoder.decode(key, "UTF-8") : key;
 		} catch (UnsupportedEncodingException e) {
 			throw new MemcachedException(
 					"Unsupport encoding utf-8 when decodeKey", e);
@@ -2223,11 +2226,19 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 
 	private String sanitizeKey(String key) throws MemcachedException {
 		try {
-			return (sanitizeKeys) ? URLEncoder.encode(key, "UTF-8") : key;
+			return (this.sanitizeKeys) ? URLEncoder.encode(key, "UTF-8") : key;
 		} catch (UnsupportedEncodingException e) {
 			throw new MemcachedException(
 					"Unsupport encoding utf-8 when sanitizeKey", e);
 		}
+	}
+
+	public Counter getCounter(String key, long initialValue) {
+		return new Counter(this, key, initialValue);
+	}
+
+	public Counter getCounter(String key) {
+		return new Counter(this, key, 0);
 	}
 
 }

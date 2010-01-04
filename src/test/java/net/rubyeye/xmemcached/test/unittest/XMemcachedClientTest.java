@@ -14,8 +14,10 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+import junit.framework.Assert;
 import junit.framework.TestCase;
 import net.rubyeye.xmemcached.CASOperation;
+import net.rubyeye.xmemcached.Counter;
 import net.rubyeye.xmemcached.GetsResponse;
 import net.rubyeye.xmemcached.MemcachedClient;
 import net.rubyeye.xmemcached.MemcachedClientBuilder;
@@ -57,7 +59,7 @@ public abstract class XMemcachedClientTest extends TestCase {
 	@Override
 	public void setUp() throws Exception {
 		createClients();
-		mockTranscoder = new MockTranscoder();
+		this.mockTranscoder = new MockTranscoder();
 	}
 
 	public void testCreateClientWithEmptyServers() throws Exception {
@@ -100,10 +102,12 @@ public abstract class XMemcachedClientTest extends TestCase {
 
 		assertEquals("dennis", this.memcachedClient.get("name",
 				new StringTranscoder()));
-		new TranscoderChecker(mockTranscoder, 1) {
+		new TranscoderChecker(this.mockTranscoder, 1) {
+			@Override
 			public void call() throws Exception {
-				assertEquals("dennis", memcachedClient.get("name",
-						mockTranscoder));
+				assertEquals("dennis",
+						XMemcachedClientTest.this.memcachedClient.get("name",
+								XMemcachedClientTest.this.mockTranscoder));
 			}
 
 		}.check();
@@ -112,39 +116,44 @@ public abstract class XMemcachedClientTest extends TestCase {
 		assertNull(this.memcachedClient.get("name"));
 		// blank key
 		new BlankKeyChecker() {
+			@Override
 			public void call() throws Exception {
-				memcachedClient.get("");
+				XMemcachedClientTest.this.memcachedClient.get("");
 			}
 		}.check();
 		// null key
 		new BlankKeyChecker() {
+			@Override
 			public void call() throws Exception {
-				memcachedClient.get((String) null);
+				XMemcachedClientTest.this.memcachedClient.get((String) null);
 			}
 		}.check();
 
 		// invalid key
 		new InValidKeyChecker() {
+			@Override
 			public void call() throws Exception {
-				memcachedClient.get("test\r\n");
+				XMemcachedClientTest.this.memcachedClient.get("test\r\n");
 			}
 		}.check();
 		new InValidKeyChecker() {
+			@Override
 			public void call() throws Exception {
-				memcachedClient.get("test test2");
+				XMemcachedClientTest.this.memcachedClient.get("test test2");
 			}
 		}.check();
 
 		// key is too long
 		new TooLongKeyChecker(this.memcachedClient) {
+			@Override
 			public void call() throws Exception {
-				int keyLength = memcachedClient.getProtocol() == Protocol.Text ? 256
-						: 65536;
+				int keyLength = XMemcachedClientTest.this.memcachedClient
+						.getProtocol() == Protocol.Text ? 256 : 65536;
 				StringBuilder sb = new StringBuilder();
 				for (int i = 0; i < keyLength; i++) {
 					sb.append(i);
 				}
-				memcachedClient.get(sb.toString());
+				XMemcachedClientTest.this.memcachedClient.get(sb.toString());
 			}
 		}.check();
 
@@ -172,92 +181,112 @@ public abstract class XMemcachedClientTest extends TestCase {
 		// append test
 		// blank key
 		new BlankKeyChecker() {
+			@Override
 			public void call() throws Exception {
-				memcachedClient.append("", 0, 1);
+				XMemcachedClientTest.this.memcachedClient.append("", 0, 1);
 			}
 		}.check();
 		// null key
 		new BlankKeyChecker() {
+			@Override
 			public void call() throws Exception {
-				memcachedClient.append((String) null, 0, 1);
+				XMemcachedClientTest.this.memcachedClient.append((String) null,
+						0, 1);
 			}
 		}.check();
 
 		// invalid key
 		new InValidKeyChecker() {
+			@Override
 			public void call() throws Exception {
-				memcachedClient.append("test\r\n", 0, 1);
+				XMemcachedClientTest.this.memcachedClient.append("test\r\n", 0,
+						1);
 			}
 		}.check();
 		new InValidKeyChecker() {
+			@Override
 			public void call() throws Exception {
-				memcachedClient.append("test test2", 0, 1);
+				XMemcachedClientTest.this.memcachedClient.append("test test2",
+						0, 1);
 			}
 		}.check();
 
 		// key is too long
 		new TooLongKeyChecker(this.memcachedClient) {
+			@Override
 			public void call() throws Exception {
-				int keyLength = memcachedClient.getProtocol() == Protocol.Text ? 256
-						: 65536;
+				int keyLength = XMemcachedClientTest.this.memcachedClient
+						.getProtocol() == Protocol.Text ? 256 : 65536;
 				StringBuilder sb = new StringBuilder();
 				for (int i = 0; i < keyLength; i++) {
 					sb.append(i);
 				}
-				memcachedClient.append(sb.toString(), 0, 1);
+				XMemcachedClientTest.this.memcachedClient.append(sb.toString(),
+						0, 1);
 			}
 		}.check();
 
 		// timeout
 		new TimeoutChecker(0) {
+			@Override
 			public void call() throws Exception {
-				memcachedClient.append("0", 1, 0);
+				XMemcachedClientTest.this.memcachedClient.append("0", 1, 0);
 			}
 		}.check();
 
 		// prepend test
 		// blank key
 		new BlankKeyChecker() {
+			@Override
 			public void call() throws Exception {
-				memcachedClient.prepend("", 0, 1);
+				XMemcachedClientTest.this.memcachedClient.prepend("", 0, 1);
 			}
 		}.check();
 		// null key
 		new BlankKeyChecker() {
+			@Override
 			public void call() throws Exception {
-				memcachedClient.prepend((String) null, 0, 1);
+				XMemcachedClientTest.this.memcachedClient.prepend(
+						(String) null, 0, 1);
 			}
 		}.check();
 
 		// invalid key
 		new InValidKeyChecker() {
+			@Override
 			public void call() throws Exception {
-				memcachedClient.prepend("test\r\n", 0, 1);
+				XMemcachedClientTest.this.memcachedClient.prepend("test\r\n",
+						0, 1);
 			}
 		}.check();
 		new InValidKeyChecker() {
+			@Override
 			public void call() throws Exception {
-				memcachedClient.prepend("test test2", 0, 1);
+				XMemcachedClientTest.this.memcachedClient.prepend("test test2",
+						0, 1);
 			}
 		}.check();
 
 		// key is too long
 		new TooLongKeyChecker(this.memcachedClient) {
+			@Override
 			public void call() throws Exception {
-				int keyLength = memcachedClient.getProtocol() == Protocol.Text ? 256
-						: 65536;
+				int keyLength = XMemcachedClientTest.this.memcachedClient
+						.getProtocol() == Protocol.Text ? 256 : 65536;
 				StringBuilder sb = new StringBuilder();
 				for (int i = 0; i < keyLength; i++) {
 					sb.append(i);
 				}
-				memcachedClient.prepend(sb.toString(), 0, 1);
+				XMemcachedClientTest.this.memcachedClient.prepend(
+						sb.toString(), 0, 1);
 			}
 		}.check();
 
 		// timeout
 		new TimeoutChecker(0) {
+			@Override
 			public void call() throws Exception {
-				memcachedClient.prepend("0", 1, 0);
+				XMemcachedClientTest.this.memcachedClient.prepend("0", 1, 0);
 			}
 		}.check();
 
@@ -306,55 +335,67 @@ public abstract class XMemcachedClientTest extends TestCase {
 
 		// blank key
 		new BlankKeyChecker() {
+			@Override
 			public void call() throws Exception {
-				memcachedClient.set("", 0, 1);
+				XMemcachedClientTest.this.memcachedClient.set("", 0, 1);
 			}
 		}.check();
 		// null key
 		new BlankKeyChecker() {
+			@Override
 			public void call() throws Exception {
-				memcachedClient.set((String) null, 0, 1);
+				XMemcachedClientTest.this.memcachedClient.set((String) null, 0,
+						1);
 			}
 		}.check();
 
 		// invalid key
 		new InValidKeyChecker() {
+			@Override
 			public void call() throws Exception {
-				memcachedClient.set("test\r\n", 0, 1);
+				XMemcachedClientTest.this.memcachedClient.set("test\r\n", 0, 1);
 			}
 		}.check();
 		new InValidKeyChecker() {
+			@Override
 			public void call() throws Exception {
-				memcachedClient.set("test test2", 0, 1);
+				XMemcachedClientTest.this.memcachedClient.set("test test2", 0,
+						1);
 			}
 		}.check();
 
 		// key is too long
 		new TooLongKeyChecker(this.memcachedClient) {
+			@Override
 			public void call() throws Exception {
-				int keyLength = memcachedClient.getProtocol() == Protocol.Text ? 256
-						: 65536;
+				int keyLength = XMemcachedClientTest.this.memcachedClient
+						.getProtocol() == Protocol.Text ? 256 : 65536;
 				StringBuilder sb = new StringBuilder();
 				for (int i = 0; i < keyLength; i++) {
 					sb.append(i);
 				}
-				memcachedClient.set(sb.toString(), 0, 1);
+				XMemcachedClientTest.this.memcachedClient.set(sb.toString(), 0,
+						1);
 			}
 		}.check();
 
 		// timeout
 		new TimeoutChecker(0) {
+			@Override
 			public void call() throws Exception {
-				memcachedClient.set("0", 0, 1, 0);
+				XMemcachedClientTest.this.memcachedClient.set("0", 0, 1, 0);
 			}
 		}.check();
 
 		// Transcoder
-		new TranscoderChecker(mockTranscoder, 2) {
+		new TranscoderChecker(this.mockTranscoder, 2) {
+			@Override
 			public void call() throws Exception {
-				memcachedClient.set("name", 0, "xmemcached", mockTranscoder);
-				assertEquals("xmemcached", memcachedClient.get("name",
-						mockTranscoder));
+				XMemcachedClientTest.this.memcachedClient.set("name", 0,
+						"xmemcached", XMemcachedClientTest.this.mockTranscoder);
+				assertEquals("xmemcached",
+						XMemcachedClientTest.this.memcachedClient.get("name",
+								XMemcachedClientTest.this.mockTranscoder));
 
 			}
 		}.check();
@@ -371,57 +412,69 @@ public abstract class XMemcachedClientTest extends TestCase {
 
 		// blank key
 		new BlankKeyChecker() {
+			@Override
 			public void call() throws Exception {
-				memcachedClient.replace("", 0, 1);
+				XMemcachedClientTest.this.memcachedClient.replace("", 0, 1);
 			}
 		}.check();
 		// null key
 		new BlankKeyChecker() {
+			@Override
 			public void call() throws Exception {
-				memcachedClient.replace((String) null, 0, 1);
+				XMemcachedClientTest.this.memcachedClient.replace(
+						(String) null, 0, 1);
 			}
 		}.check();
 
 		// invalid key
 		new InValidKeyChecker() {
+			@Override
 			public void call() throws Exception {
-				memcachedClient.replace("test\r\n", 0, 1);
+				XMemcachedClientTest.this.memcachedClient.replace("test\r\n",
+						0, 1);
 			}
 		}.check();
 		new InValidKeyChecker() {
+			@Override
 			public void call() throws Exception {
-				memcachedClient.replace("test test2", 0, 1);
+				XMemcachedClientTest.this.memcachedClient.replace("test test2",
+						0, 1);
 			}
 		}.check();
 
 		// key is too long
 		new TooLongKeyChecker(this.memcachedClient) {
+			@Override
 			public void call() throws Exception {
-				int keyLength = memcachedClient.getProtocol() == Protocol.Text ? 256
-						: 65536;
+				int keyLength = XMemcachedClientTest.this.memcachedClient
+						.getProtocol() == Protocol.Text ? 256 : 65536;
 				StringBuilder sb = new StringBuilder();
 				for (int i = 0; i < keyLength; i++) {
 					sb.append(i);
 				}
-				memcachedClient.replace(sb.toString(), 0, 1);
+				XMemcachedClientTest.this.memcachedClient.replace(
+						sb.toString(), 0, 1);
 			}
 		}.check();
 
 		// timeout
 		new TimeoutChecker(0) {
+			@Override
 			public void call() throws Exception {
-				memcachedClient.replace("0", 0, 1, 0);
+				XMemcachedClientTest.this.memcachedClient.replace("0", 0, 1, 0);
 			}
 		}.check();
 
 		// Transcoder
-		new TranscoderChecker(mockTranscoder, 2) {
+		new TranscoderChecker(this.mockTranscoder, 2) {
+			@Override
 			public void call() throws Exception {
-				memcachedClient.set("name", 0, 1);
-				memcachedClient
-						.replace("name", 0, "xmemcached", mockTranscoder);
-				assertEquals("xmemcached", memcachedClient.get("name",
-						mockTranscoder));
+				XMemcachedClientTest.this.memcachedClient.set("name", 0, 1);
+				XMemcachedClientTest.this.memcachedClient.replace("name", 0,
+						"xmemcached", XMemcachedClientTest.this.mockTranscoder);
+				assertEquals("xmemcached",
+						XMemcachedClientTest.this.memcachedClient.get("name",
+								XMemcachedClientTest.this.mockTranscoder));
 
 			}
 		}.check();
@@ -434,54 +487,66 @@ public abstract class XMemcachedClientTest extends TestCase {
 
 		// blank key
 		new BlankKeyChecker() {
+			@Override
 			public void call() throws Exception {
-				memcachedClient.add("", 0, 1);
+				XMemcachedClientTest.this.memcachedClient.add("", 0, 1);
 			}
 		}.check();
 		// null key
 		new BlankKeyChecker() {
+			@Override
 			public void call() throws Exception {
-				memcachedClient.add((String) null, 0, 1);
+				XMemcachedClientTest.this.memcachedClient.add((String) null, 0,
+						1);
 			}
 		}.check();
 
 		// invalid key
 		new InValidKeyChecker() {
+			@Override
 			public void call() throws Exception {
-				memcachedClient.add("test\r\n", 0, 1);
+				XMemcachedClientTest.this.memcachedClient.add("test\r\n", 0, 1);
 			}
 		}.check();
 		new InValidKeyChecker() {
+			@Override
 			public void call() throws Exception {
-				memcachedClient.add("test test2", 0, 1);
+				XMemcachedClientTest.this.memcachedClient.add("test test2", 0,
+						1);
 			}
 		}.check();
 
 		// key is too long
 		new TooLongKeyChecker(this.memcachedClient) {
+			@Override
 			public void call() throws Exception {
-				int keyLength = memcachedClient.getProtocol() == Protocol.Text ? 256
-						: 65536;
+				int keyLength = XMemcachedClientTest.this.memcachedClient
+						.getProtocol() == Protocol.Text ? 256 : 65536;
 				StringBuilder sb = new StringBuilder();
 				for (int i = 0; i < keyLength; i++) {
 					sb.append(i);
 				}
-				memcachedClient.add(sb.toString(), 0, 1);
+				XMemcachedClientTest.this.memcachedClient.add(sb.toString(), 0,
+						1);
 			}
 		}.check();
 
 		// timeout
 		new TimeoutChecker(0) {
+			@Override
 			public void call() throws Exception {
-				memcachedClient.add("0", 0, 1, 0);
+				XMemcachedClientTest.this.memcachedClient.add("0", 0, 1, 0);
 			}
 		}.check();
 
 		// Transcoder
-		new TranscoderChecker(mockTranscoder, 2) {
+		new TranscoderChecker(this.mockTranscoder, 2) {
+			@Override
 			public void call() throws Exception {
-				memcachedClient.add("a", 0, 100, mockTranscoder);
-				assertEquals(100, memcachedClient.get("a", mockTranscoder));
+				XMemcachedClientTest.this.memcachedClient.add("a", 0, 100,
+						XMemcachedClientTest.this.mockTranscoder);
+				assertEquals(100, XMemcachedClientTest.this.memcachedClient
+						.get("a", XMemcachedClientTest.this.mockTranscoder));
 
 			}
 		}.check();
@@ -632,39 +697,44 @@ public abstract class XMemcachedClientTest extends TestCase {
 
 		// blank key
 		new BlankKeyChecker() {
+			@Override
 			public void call() throws Exception {
-				memcachedClient.gets("");
+				XMemcachedClientTest.this.memcachedClient.gets("");
 			}
 		}.check();
 		// null key
 		new BlankKeyChecker() {
+			@Override
 			public void call() throws Exception {
-				memcachedClient.gets((String) null);
+				XMemcachedClientTest.this.memcachedClient.gets((String) null);
 			}
 		}.check();
 
 		// invalid key
 		new InValidKeyChecker() {
+			@Override
 			public void call() throws Exception {
-				memcachedClient.gets("test\r\n");
+				XMemcachedClientTest.this.memcachedClient.gets("test\r\n");
 			}
 		}.check();
 		new InValidKeyChecker() {
+			@Override
 			public void call() throws Exception {
-				memcachedClient.gets("test test2");
+				XMemcachedClientTest.this.memcachedClient.gets("test test2");
 			}
 		}.check();
 
 		// key is too long
 		new TooLongKeyChecker(this.memcachedClient) {
+			@Override
 			public void call() throws Exception {
-				int keyLength = memcachedClient.getProtocol() == Protocol.Text ? 256
-						: 65536;
+				int keyLength = XMemcachedClientTest.this.memcachedClient
+						.getProtocol() == Protocol.Text ? 256 : 65536;
 				StringBuilder sb = new StringBuilder();
 				for (int i = 0; i < keyLength; i++) {
 					sb.append(i);
 				}
-				memcachedClient.gets(sb.toString());
+				XMemcachedClientTest.this.memcachedClient.gets(sb.toString());
 			}
 		}.check();
 
@@ -764,46 +834,56 @@ public abstract class XMemcachedClientTest extends TestCase {
 
 		// blank key
 		new BlankKeyChecker() {
+			@Override
 			public void call() throws Exception {
-				memcachedClient.incr("", 0, 1);
+				XMemcachedClientTest.this.memcachedClient.incr("", 0, 1);
 			}
 		}.check();
 		// null key
 		new BlankKeyChecker() {
+			@Override
 			public void call() throws Exception {
-				memcachedClient.incr((String) null, 0, 1);
+				XMemcachedClientTest.this.memcachedClient.incr((String) null,
+						0, 1);
 			}
 		}.check();
 
 		// invalid key
 		new InValidKeyChecker() {
+			@Override
 			public void call() throws Exception {
-				memcachedClient.incr("test\r\n", 0, 1);
+				XMemcachedClientTest.this.memcachedClient
+						.incr("test\r\n", 0, 1);
 			}
 		}.check();
 		new InValidKeyChecker() {
+			@Override
 			public void call() throws Exception {
-				memcachedClient.incr("test test2", 0, 1);
+				XMemcachedClientTest.this.memcachedClient.incr("test test2", 0,
+						1);
 			}
 		}.check();
 
 		// key is too long
 		new TooLongKeyChecker(this.memcachedClient) {
+			@Override
 			public void call() throws Exception {
-				int keyLength = memcachedClient.getProtocol() == Protocol.Text ? 256
-						: 65536;
+				int keyLength = XMemcachedClientTest.this.memcachedClient
+						.getProtocol() == Protocol.Text ? 256 : 65536;
 				StringBuilder sb = new StringBuilder();
 				for (int i = 0; i < keyLength; i++) {
 					sb.append(i);
 				}
-				memcachedClient.incr(sb.toString(), 0, 1);
+				XMemcachedClientTest.this.memcachedClient.incr(sb.toString(),
+						0, 1);
 			}
 		}.check();
 
 		// timeout
 		new TimeoutChecker(0) {
+			@Override
 			public void call() throws Exception {
-				memcachedClient.incr("0", 0, 1, 0);
+				XMemcachedClientTest.this.memcachedClient.incr("0", 0, 1, 0);
 			}
 		}.check();
 
@@ -833,46 +913,56 @@ public abstract class XMemcachedClientTest extends TestCase {
 
 		// blank key
 		new BlankKeyChecker() {
+			@Override
 			public void call() throws Exception {
-				memcachedClient.decr("", 0, 1);
+				XMemcachedClientTest.this.memcachedClient.decr("", 0, 1);
 			}
 		}.check();
 		// null key
 		new BlankKeyChecker() {
+			@Override
 			public void call() throws Exception {
-				memcachedClient.decr((String) null, 0, 1);
+				XMemcachedClientTest.this.memcachedClient.decr((String) null,
+						0, 1);
 			}
 		}.check();
 
 		// invalid key
 		new InValidKeyChecker() {
+			@Override
 			public void call() throws Exception {
-				memcachedClient.decr("test\r\n", 0, 1);
+				XMemcachedClientTest.this.memcachedClient
+						.decr("test\r\n", 0, 1);
 			}
 		}.check();
 		new InValidKeyChecker() {
+			@Override
 			public void call() throws Exception {
-				memcachedClient.decr("test test2", 0, 1);
+				XMemcachedClientTest.this.memcachedClient.decr("test test2", 0,
+						1);
 			}
 		}.check();
 
 		// key is too long
 		new TooLongKeyChecker(this.memcachedClient) {
+			@Override
 			public void call() throws Exception {
-				int keyLength = memcachedClient.getProtocol() == Protocol.Text ? 256
-						: 65536;
+				int keyLength = XMemcachedClientTest.this.memcachedClient
+						.getProtocol() == Protocol.Text ? 256 : 65536;
 				StringBuilder sb = new StringBuilder();
 				for (int i = 0; i < keyLength; i++) {
 					sb.append(i);
 				}
-				memcachedClient.decr(sb.toString(), 0, 1);
+				XMemcachedClientTest.this.memcachedClient.decr(sb.toString(),
+						0, 1);
 			}
 		}.check();
 
 		// timeout
 		new TimeoutChecker(0) {
+			@Override
 			public void call() throws Exception {
-				memcachedClient.decr("0", 0, 1, 0);
+				XMemcachedClientTest.this.memcachedClient.decr("0", 0, 1, 0);
 			}
 		}.check();
 	}
@@ -913,39 +1003,48 @@ public abstract class XMemcachedClientTest extends TestCase {
 
 		// blank key
 		new BlankKeyChecker() {
+			@Override
 			public void call() throws Exception {
-				memcachedClient.cas("", operation);
+				XMemcachedClientTest.this.memcachedClient.cas("", operation);
 			}
 		}.check();
 		// null key
 		new BlankKeyChecker() {
+			@Override
 			public void call() throws Exception {
-				memcachedClient.cas((String) null, operation);
+				XMemcachedClientTest.this.memcachedClient.cas((String) null,
+						operation);
 			}
 		}.check();
 
 		// invalid key
 		new InValidKeyChecker() {
+			@Override
 			public void call() throws Exception {
-				memcachedClient.cas("test\r\n", operation);
+				XMemcachedClientTest.this.memcachedClient.cas("test\r\n",
+						operation);
 			}
 		}.check();
 		new InValidKeyChecker() {
+			@Override
 			public void call() throws Exception {
-				memcachedClient.cas("test test2", operation);
+				XMemcachedClientTest.this.memcachedClient.cas("test test2",
+						operation);
 			}
 		}.check();
 
 		// key is too long
 		new TooLongKeyChecker(this.memcachedClient) {
+			@Override
 			public void call() throws Exception {
-				int keyLength = memcachedClient.getProtocol() == Protocol.Text ? 256
-						: 65536;
+				int keyLength = XMemcachedClientTest.this.memcachedClient
+						.getProtocol() == Protocol.Text ? 256 : 65536;
 				StringBuilder sb = new StringBuilder();
 				for (int i = 0; i < keyLength; i++) {
 					sb.append(i);
 				}
-				memcachedClient.cas(sb.toString(), operation);
+				XMemcachedClientTest.this.memcachedClient.cas(sb.toString(),
+						operation);
 			}
 		}.check();
 
@@ -1149,22 +1248,22 @@ public abstract class XMemcachedClientTest extends TestCase {
 		this.memcachedClient.setSanitizeKeys(true);
 
 		String key = "The string ü@foo-bar";
-		assertTrue(memcachedClient.add(key, 0, 0));
-		assertEquals(0, memcachedClient.get(key));
+		assertTrue(this.memcachedClient.add(key, 0, 0));
+		assertEquals(0, this.memcachedClient.get(key));
 
-		assertTrue(memcachedClient.replace(key, 0, 1));
-		assertEquals(1, memcachedClient.get(key, 2000));
+		assertTrue(this.memcachedClient.replace(key, 0, 1));
+		assertEquals(1, this.memcachedClient.get(key, 2000));
 
-		assertTrue(memcachedClient.set(key, 0, 2));
-		assertEquals((Integer) 2, memcachedClient.get(key, 2000,
+		assertTrue(this.memcachedClient.set(key, 0, 2));
+		assertEquals((Integer) 2, this.memcachedClient.get(key, 2000,
 				new IntegerTranscoder()));
 
-		assertTrue(memcachedClient.set(key, 0, "xmemcached",
+		assertTrue(this.memcachedClient.set(key, 0, "xmemcached",
 				new StringTranscoder()));
-		assertTrue(memcachedClient.append(key, " great"));
-		assertTrue(memcachedClient.prepend(key, "hello "));
+		assertTrue(this.memcachedClient.append(key, " great"));
+		assertTrue(this.memcachedClient.prepend(key, "hello "));
 
-		assertEquals("hello xmemcached great", memcachedClient.get(key));
+		assertEquals("hello xmemcached great", this.memcachedClient.get(key));
 
 		// test bulk get
 		List<String> keys = new ArrayList<String>();
@@ -1173,19 +1272,19 @@ public abstract class XMemcachedClientTest extends TestCase {
 			keys.add(key + i);
 		}
 
-		Map<String, Integer> result = memcachedClient.get(keys, 5000);
+		Map<String, Integer> result = this.memcachedClient.get(keys, 5000);
 		for (int i = 0; i < 100; i++) {
 			assertEquals((Integer) i, result.get(key + i));
 		}
 
 		for (int i = 0; i < 100; i++) {
-			assertTrue(memcachedClient.delete(key + i));
-			assertNull(memcachedClient.get(key + i));
+			assertTrue(this.memcachedClient.delete(key + i));
+			assertNull(this.memcachedClient.get(key + i));
 		}
 
 		// test cas
-		memcachedClient.set(key, 0, 1);
-		memcachedClient.cas(key, new CASOperation<Integer>() {
+		this.memcachedClient.set(key, 0, 1);
+		this.memcachedClient.cas(key, new CASOperation<Integer>() {
 
 			public int getMaxTries() {
 				return 1;
@@ -1196,7 +1295,7 @@ public abstract class XMemcachedClientTest extends TestCase {
 			}
 
 		});
-		assertEquals((Integer) 2, memcachedClient.get(key, 2000,
+		assertEquals((Integer) 2, this.memcachedClient.get(key, 2000,
 				new IntegerTranscoder()));
 
 	}
@@ -1204,6 +1303,34 @@ public abstract class XMemcachedClientTest extends TestCase {
 	@Override
 	public void tearDown() throws Exception {
 		this.memcachedClient.shutdown();
+	}
+
+	public void testCounter() throws Exception {
+		Counter counter = this.memcachedClient.getCounter("a");
+		Assert.assertEquals(0, counter.get());
+		Assert.assertEquals(0, counter.get());
+
+		Assert.assertEquals(1, counter.incrementAndGet());
+		Assert.assertEquals(2, counter.incrementAndGet());
+		Assert.assertEquals(3, counter.incrementAndGet());
+
+		Assert.assertEquals(2, counter.decrementAndGet());
+		Assert.assertEquals(1, counter.decrementAndGet());
+		Assert.assertEquals(0, counter.decrementAndGet());
+		Assert.assertEquals(0, counter.decrementAndGet());
+
+		Assert.assertEquals(4, counter.addAndGet(4));
+		Assert.assertEquals(7, counter.addAndGet(3));
+		Assert.assertEquals(0, counter.addAndGet(-7));
+
+		counter.set(1000);
+		Assert.assertEquals(1000, counter.get());
+		Assert.assertEquals(1001, counter.incrementAndGet());
+
+		counter = this.memcachedClient.getCounter("b", 100);
+		Assert.assertEquals(100, counter.incrementAndGet());
+		Assert.assertEquals(101, counter.incrementAndGet());
+		Assert.assertEquals(100, counter.decrementAndGet());
 	}
 
 }

@@ -39,6 +39,7 @@ public class KestrelClientUnitTest extends TestCase {
 				.getResourceAsProperties("test.properties");
 		MemcachedClientBuilder builder = newBuilder();
 		builder.setConnectionPoolSize(5);
+		//builder.getConfiguration().setSessionIdleTimeout(5);
 		this.memcachedClient = builder.build();
 		this.memcachedClient.flushAll();
 	}
@@ -229,11 +230,11 @@ public class KestrelClientUnitTest extends TestCase {
 		public void run() {
 			try {
 				this.cyclicBarrier.await();
-				for (int i = 0; i < 1000; i++) {
+				for (int i = 0; i < 10000; i++) {
 					KestrelClientUnitTest.this.memcachedClient.set("queue1", 0,
 							"hello");
 				}
-				for (int i = 0; i < 1000; i++) {
+				for (int i = 0; i < 10000; i++) {
 					KestrelClientUnitTest.this.memcachedClient.get("queue1");
 				}
 				this.cyclicBarrier.await();
@@ -244,7 +245,7 @@ public class KestrelClientUnitTest extends TestCase {
 	}
 
 	public void testConcurrentAccess() throws Exception {
-		int threadCount = 10;
+		int threadCount = 100;
 		CyclicBarrier cyclicBarrier = new CyclicBarrier(threadCount + 1);
 		for (int i = 0; i < threadCount; i++) {
 			new AccessThread(cyclicBarrier).start();
@@ -252,6 +253,12 @@ public class KestrelClientUnitTest extends TestCase {
 		cyclicBarrier.await();
 		cyclicBarrier.await();
 
+	}
+	
+	public void testHearBeat()throws Exception{
+		Thread.sleep(60*1000);
+		this.memcachedClient.set("queue1", 0, "hello");
+		assertEquals("hello",this.memcachedClient.get("queue1"));
 	}
 
 }

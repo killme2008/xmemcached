@@ -838,7 +838,7 @@ public interface MemcachedClient {
 	 * 
 	 * @deprecated
 	 * @param host
-	 *            
+	 * 
 	 * @throws TimeoutException
 	 * @throws InterruptedException
 	 * @throws MemcachedException
@@ -1118,5 +1118,23 @@ public interface MemcachedClient {
 	public void setSanitizeKeys(boolean sanitizeKey);
 
 	public boolean isSanitizeKeys();
+
+	/**
+	 * Get counter for key,and if the key's value is not set,then set it with 0.
+	 * 
+	 * @param key
+	 * @return
+	 */
+	public Counter getCounter(String key);
+
+	/**
+	 * Get counter for key,and if the key's value is not set,then set it with
+	 * initial value.
+	 * 
+	 * @param key
+	 * @param initialValue
+	 * @return
+	 */
+	public Counter getCounter(String key, long initialValue);
 
 }
