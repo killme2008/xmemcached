@@ -8,17 +8,17 @@ import net.rubyeye.xmemcached.utils.ByteUtils;
 
 public class BinaryCASCommandUnitTest extends BaseBinaryCommandUnitTest {
 	String key = "hello";
-	byte[] keyBytes = ByteUtils.getBytes(key);
+	byte[] keyBytes = ByteUtils.getBytes(this.key);
 	String value = "world";
 	boolean noreply = false;
 
 	public void testAddEncodeAndDecode() {
 
-		Command command = this.commandFactory.createCASCommand(key, keyBytes,
-				0, value, 9L, noreply, transcoder);
+		Command command = this.commandFactory.createCASCommand(this.key, this.keyBytes,
+				0, this.value, 9L, this.noreply, this.transcoder);
 
-		command.encode(bufferAllocator);
-		ByteBuffer encodeBuffer = command.getIoBuffer().getByteBuffer();
+		command.encode();
+		ByteBuffer encodeBuffer = command.getIoBuffer().buf();
 		assertNotNull(encodeBuffer);
 		assertEquals(42, encodeBuffer.capacity());
 
@@ -36,8 +36,8 @@ public class BinaryCASCommandUnitTest extends BaseBinaryCommandUnitTest {
 
 		buffer = constructResponse(OpCode.SET.fieldValue(), (short) 0,
 				(byte) 0, (byte) 0, (short) 0x0005, 0, 0, 0L, null, null, null);
-		command = this.commandFactory.createCASCommand(key, keyBytes, 0, value,
-				9L, noreply, transcoder);
+		command = this.commandFactory.createCASCommand(this.key, this.keyBytes, 0, this.value,
+				9L, this.noreply, this.transcoder);
 		assertTrue(command.decode(null, buffer));
 		assertFalse((Boolean) command.getResult());
 		assertEquals(0, buffer.remaining());

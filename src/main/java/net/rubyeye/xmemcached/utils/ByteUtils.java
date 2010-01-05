@@ -15,12 +15,13 @@ import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 
-import net.rubyeye.xmemcached.buffer.IoBuffer;
 import net.rubyeye.xmemcached.codec.MemcachedDecoder;
 import net.rubyeye.xmemcached.monitor.Constants;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.code.yanf4j.buffer.IoBuffer;
 
 /**
  * Utilities for byte process
@@ -206,7 +207,7 @@ public final class ByteUtils {
 		 * 测试表明采用 Shift-And算法匹配 >BM算法匹配效率 > 朴素匹配 > KMP匹配，
 		 * 如果你有更好的建议，请email给我(killme2008@gmail.com)
 		 */
-		int index = MemcachedDecoder.SPLIT_MATCHER.matchFirst(buffer);
+		int index = MemcachedDecoder.SPLIT_MATCHER.matchFirst(com.google.code.yanf4j.buffer.IoBuffer.wrap(buffer));
 		if (index >= 0) {
 			int limit = buffer.limit();
 			buffer.limit(index);

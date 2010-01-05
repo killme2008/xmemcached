@@ -2,7 +2,6 @@ package net.rubyeye.xmemcached.test.unittest.mock;
 
 import java.util.concurrent.CountDownLatch;
 
-import net.rubyeye.xmemcached.buffer.BufferAllocator;
 import net.rubyeye.xmemcached.command.CommandType;
 import net.rubyeye.xmemcached.command.binary.BinaryGetCommand;
 import net.rubyeye.xmemcached.command.binary.OpCode;
@@ -18,13 +17,13 @@ public class MockEncodeTimeoutBinaryGetCommand extends BinaryGetCommand {
 	}
 
 	@Override
-	public void encode(BufferAllocator bufferAllocator) {
+	public void encode() {
 		try {
 			Thread.sleep(this.sleepTime);
 		} catch (InterruptedException e) {
 			throw new RuntimeException(e);
 		}
-		super.encode(bufferAllocator);
+		super.encode();
 	}
 
 }

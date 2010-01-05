@@ -11,10 +11,9 @@
  */
 package net.rubyeye.xmemcached.codec;
 
-import java.nio.ByteBuffer;
-
 import net.rubyeye.xmemcached.command.Command;
 
+import com.google.code.yanf4j.buffer.IoBuffer;
 import com.google.code.yanf4j.core.Session;
 import com.google.code.yanf4j.core.CodecFactory.Encoder;
 
@@ -26,8 +25,8 @@ import com.google.code.yanf4j.core.CodecFactory.Encoder;
  */
 public class MemcachedEncoder implements Encoder {
 
-	public ByteBuffer encode(Object message, Session session) {
-		return ((Command) message).getIoBuffer().getByteBuffer();
+	public IoBuffer encode(Object message, Session session) {
+		return ((Command) message).getIoBuffer();
 	}
 
 }

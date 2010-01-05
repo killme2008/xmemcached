@@ -9,6 +9,7 @@ import net.rubyeye.xmemcached.command.Command;
 import net.rubyeye.xmemcached.command.TextCommandFactory;
 import net.rubyeye.xmemcached.impl.MemcachedTCPSession;
 
+import com.google.code.yanf4j.buffer.IoBuffer;
 import com.google.code.yanf4j.core.CodecFactory.Decoder;
 import com.google.code.yanf4j.core.impl.ByteBufferCodecFactory;
 import com.google.code.yanf4j.core.impl.HandlerAdapter;
@@ -23,8 +24,8 @@ public class MemcachedDecoderUnitTest extends TestCase {
 		Command versionCommand = new TextCommandFactory().createVersionCommand(
 				new CountDownLatch(1), null);
 		session.addCommand(versionCommand);
-		Command decodedCommand = (Command) this.decoder.decode(ByteBuffer
-				.wrap("VERSION 1.28\r\n".getBytes()), session);
+		Command decodedCommand = (Command) this.decoder.decode(IoBuffer.wrap(ByteBuffer
+				.wrap("VERSION 1.28\r\n".getBytes())), session);
 		assertSame(decodedCommand, versionCommand);
 		assertEquals("1.28", decodedCommand.getResult());
 	}

@@ -17,17 +17,17 @@ public class TextStatsCommandUnitTest extends BaseTextCommandUnitTest {
 		Command command = this.commandFactory.createStatsCommand(null,
 				new CountDownLatch(1), null);
 		assertNull(command.getIoBuffer());
-		command.encode(this.bufferAllocator);
-		assertEquals(TextStatsCommand.STATS, command.getIoBuffer().getByteBuffer());
+		command.encode();
+		assertEquals(TextStatsCommand.STATS, command.getIoBuffer().buf());
 	}
 
 	public void testItemEncode() {
 		Command command = this.commandFactory.createStatsCommand(null,
 				new CountDownLatch(1), "items");
 		assertNull(command.getIoBuffer());
-		command.encode(this.bufferAllocator);
+		command.encode();
 		assertEquals(ByteBuffer.wrap("stats items\r\n".getBytes()), command
-				.getIoBuffer().getByteBuffer());
+				.getIoBuffer().buf());
 	}
 
 	public void testDecode() {

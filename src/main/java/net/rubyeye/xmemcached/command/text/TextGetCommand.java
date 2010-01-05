@@ -29,7 +29,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 
-import net.rubyeye.xmemcached.buffer.BufferAllocator;
 import net.rubyeye.xmemcached.command.AssocCommandAware;
 import net.rubyeye.xmemcached.command.Command;
 import net.rubyeye.xmemcached.command.CommandType;
@@ -39,6 +38,8 @@ import net.rubyeye.xmemcached.impl.MemcachedTCPSession;
 import net.rubyeye.xmemcached.monitor.Constants;
 import net.rubyeye.xmemcached.transcoders.CachedData;
 import net.rubyeye.xmemcached.utils.ByteUtils;
+
+import com.google.code.yanf4j.buffer.IoBuffer;
 /**
  * Abstract get command for text protocol
  * @author dennis
@@ -293,10 +294,10 @@ public abstract class TextGetCommand extends Command implements MergeCommandsAwa
 	public abstract void dispatch();
 
 	@Override
-	public void encode(BufferAllocator bufferAllocator) {
+	public void encode() {
 		byte[] cmdBytes = this.commandType == CommandType.GET_ONE
 				|| this.commandType == CommandType.GET_MANY ? Constants.GET : Constants.GETS;
-		this.ioBuffer = bufferAllocator.allocate(cmdBytes.length
+		this.ioBuffer = IoBuffer.allocate(cmdBytes.length
 				+ Constants.CRLF.length + 1 + this.keyBytes.length);
 		ByteUtils.setArguments(this.ioBuffer, cmdBytes, this.keyBytes);
 		this.ioBuffer.flip();

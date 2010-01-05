@@ -19,6 +19,7 @@ import java.nio.ByteBuffer;
  * @author dennis
  * 
  */
+@Deprecated
 public class SimpleBufferAllocator implements BufferAllocator {
 
 	public static final IoBuffer EMPTY_IOBUFFER = new SimpleIoBuffer(ByteBuffer

@@ -11,7 +11,7 @@ public class TextGetOneCommandUnitTest extends BaseTextCommandUnitTest {
 		Command command = this.commandFactory.createGetCommand("test", "test"
 				.getBytes(), CommandType.GET_ONE, null);
 		assertNull(command.getIoBuffer());
-		command.encode(this.bufferAllocator);
+		command.encode();
 		checkByteBufferEquals(command, "get test\r\n");
 	}
 
@@ -19,7 +19,7 @@ public class TextGetOneCommandUnitTest extends BaseTextCommandUnitTest {
 		Command command = this.commandFactory.createGetCommand("test", "test"
 				.getBytes(), CommandType.GETS_ONE, null);
 		assertNull(command.getIoBuffer());
-		command.encode(this.bufferAllocator);
+		command.encode();
 		checkByteBufferEquals(command, "gets test\r\n");
 	}
 

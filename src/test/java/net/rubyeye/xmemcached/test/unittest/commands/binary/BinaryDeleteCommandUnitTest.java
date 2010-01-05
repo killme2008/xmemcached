@@ -8,15 +8,15 @@ import net.rubyeye.xmemcached.utils.ByteUtils;
 
 public class BinaryDeleteCommandUnitTest extends BaseBinaryCommandUnitTest {
 	String key = "hello";
-	byte[] keyBytes = ByteUtils.getBytes(key);
+	byte[] keyBytes = ByteUtils.getBytes(this.key);
 	boolean noreply = false;
 
 	public void testDeleteEncodeAndDecode() {
 
-		Command command = this.commandFactory.createDeleteCommand(key,
-				keyBytes, 0, noreply);
-		command.encode(bufferAllocator);
-		ByteBuffer encodeBuffer = command.getIoBuffer().getByteBuffer();
+		Command command = this.commandFactory.createDeleteCommand(this.key,
+				this.keyBytes, 0, this.noreply);
+		command.encode();
+		ByteBuffer encodeBuffer = command.getIoBuffer().buf();
 		assertNotNull(encodeBuffer);
 		assertEquals(29, encodeBuffer.capacity());
 
@@ -33,8 +33,8 @@ public class BinaryDeleteCommandUnitTest extends BaseBinaryCommandUnitTest {
 
 		buffer = constructResponse(OpCode.DELETE.fieldValue(), (short) 0,
 				(byte) 0, (byte) 0, (short) 0x0005, 0, 0, 1L, null, null, null);
-		command = this.commandFactory.createDeleteCommand(key, keyBytes, 0,
-				noreply);
+		command = this.commandFactory.createDeleteCommand(this.key, this.keyBytes, 0,
+				this.noreply);
 		assertTrue(command.decode(null, buffer));
 		assertFalse((Boolean) command.getResult());
 		assertEquals(0, buffer.remaining());

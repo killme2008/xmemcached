@@ -9,15 +9,15 @@ public class TextVerbositylCommandUnitTest extends BaseTextCommandUnitTest {
 		Command command = this.commandFactory.createVerbosityCommand(
 				new CountDownLatch(1), 1, false);
 		assertNull(command.getIoBuffer());
-		command.encode(bufferAllocator);
+		command.encode();
 		assertEquals("verbosity 1\r\n", new String(command.getIoBuffer()
-				.getByteBuffer().array()));
+				.buf().array()));
 
 		command = this.commandFactory.createVerbosityCommand(
 				new CountDownLatch(1), 1, true);
-		command.encode(bufferAllocator);
+		command.encode();
 		assertEquals("verbosity 1 noreply\r\n", new String(command
-				.getIoBuffer().getByteBuffer().array()));
+				.getIoBuffer().buf().array()));
 
 	}
 

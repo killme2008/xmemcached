@@ -9,9 +9,9 @@ public class TextVersionCommandUnitTest extends BaseTextCommandUnitTest {
 	public void testEncode() {
 		Command versionCommand = this.commandFactory.createVersionCommand(new CountDownLatch(1),null);
 		assertNull(versionCommand.getIoBuffer());
-		versionCommand.encode(this.bufferAllocator);
+		versionCommand.encode();
 		assertEquals(ServerAddressAware.VERSION, versionCommand.getIoBuffer()
-				.getByteBuffer());
+				.buf());
 	}
 
 	public void testDecode() {

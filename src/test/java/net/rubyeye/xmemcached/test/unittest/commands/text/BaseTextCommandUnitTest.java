@@ -2,19 +2,20 @@ package net.rubyeye.xmemcached.test.unittest.commands.text;
 
 import java.nio.ByteBuffer;
 
+import junit.framework.TestCase;
 import net.rubyeye.xmemcached.CommandFactory;
 import net.rubyeye.xmemcached.buffer.BufferAllocator;
 import net.rubyeye.xmemcached.buffer.SimpleBufferAllocator;
 import net.rubyeye.xmemcached.command.Command;
 import net.rubyeye.xmemcached.command.TextCommandFactory;
 import net.rubyeye.xmemcached.exception.MemcachedDecodeException;
-import junit.framework.TestCase;
 
 public class BaseTextCommandUnitTest extends TestCase {
 	static final String DECODE_ERROR_SESSION_WILL_BE_CLOSED = "Decode error,session will be closed";
 	protected CommandFactory commandFactory;
 	protected BufferAllocator bufferAllocator;
 
+	@Override
 	public void setUp() {
 		this.bufferAllocator = new SimpleBufferAllocator();
 		this.commandFactory = new TextCommandFactory();
@@ -48,6 +49,6 @@ public class BaseTextCommandUnitTest extends TestCase {
 
 	protected void checkByteBufferEquals(Command command, String line) {
 		assertEquals(ByteBuffer.wrap(line.getBytes()), command.getIoBuffer()
-				.getByteBuffer());
+				.buf());
 	}
 }

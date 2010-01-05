@@ -25,11 +25,12 @@ package net.rubyeye.xmemcached.command.text;
 import java.nio.ByteBuffer;
 import java.util.concurrent.CountDownLatch;
 
-import net.rubyeye.xmemcached.buffer.BufferAllocator;
 import net.rubyeye.xmemcached.command.VerbosityCommand;
 import net.rubyeye.xmemcached.impl.MemcachedTCPSession;
 import net.rubyeye.xmemcached.monitor.Constants;
 import net.rubyeye.xmemcached.utils.ByteUtils;
+
+import com.google.code.yanf4j.buffer.IoBuffer;
 /**
  * Verbosity command for text protocol
  * @author dennis
@@ -46,33 +47,35 @@ public class TextVerbosityCommand extends VerbosityCommand {
 
 	@Override
 	public boolean decode(MemcachedTCPSession session, ByteBuffer buffer) {
-		if (buffer == null || !buffer.hasRemaining())
+		if (buffer == null || !buffer.hasRemaining()) {
 			return false;
-		if (result == null) {
+		}
+		if (this.result == null) {
 			byte first = buffer.get(buffer.position());
 			if (first == 'O') {
 				setResult(Boolean.TRUE);
 				countDownLatch();
 				// OK\r\n
 				return ByteUtils.stepBuffer(buffer, 4);
-			} else
+			} else {
 				return decodeError(session, buffer);
+			}
 		} else {
 			return ByteUtils.stepBuffer(buffer, 4);
 		}
 	}
 
 	@Override
-	public void encode(BufferAllocator bufferAllocator) {
+	public void encode() {
 		final byte[] levelBytes = ByteUtils
 				.getBytes(String.valueOf(this.level));
 		if (isNoreply()) {
-			this.ioBuffer = bufferAllocator.allocate(2 + 1 + VERBOSITY.length()
+			this.ioBuffer = IoBuffer.allocate(2 + 1 + VERBOSITY.length()
 					+ levelBytes.length + 1 + Constants.NO_REPLY.length());
 			ByteUtils.setArguments(this.ioBuffer, VERBOSITY, levelBytes,
 					Constants.NO_REPLY);
 		} else {
-			this.ioBuffer = bufferAllocator.allocate(2 + 1 + VERBOSITY.length()
+			this.ioBuffer = IoBuffer.allocate(2 + 1 + VERBOSITY.length()
 					+ levelBytes.length);
 			ByteUtils.setArguments(this.ioBuffer, VERBOSITY, levelBytes);
 

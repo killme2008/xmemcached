@@ -16,11 +16,11 @@ public class TextStoreCommandUnitTest extends BaseTextCommandUnitTest {
 		Command command = this.commandFactory.createCASCommand(key, key
 				.getBytes(), exp, value, cas, false, transcoder);
 		assertNull(command.getIoBuffer());
-		command.encode(bufferAllocator);
+		command.encode();
 		checkByteBufferEquals(command, "cas test 0 0 2 999\r\n10\r\n");
 		command = this.commandFactory.createCASCommand(key, key.getBytes(),
 				exp, value, cas, true, transcoder);
-		command.encode(bufferAllocator);
+		command.encode();
 		checkByteBufferEquals(command, "cas test 0 0 2 999 noreply\r\n10\r\n");
 	}
 
@@ -28,11 +28,11 @@ public class TextStoreCommandUnitTest extends BaseTextCommandUnitTest {
 		Command command = this.commandFactory.createSetCommand(key, key
 				.getBytes(), exp, value, false, transcoder);
 		assertNull(command.getIoBuffer());
-		command.encode(bufferAllocator);
+		command.encode();
 		checkByteBufferEquals(command, "set test 0 0 2\r\n10\r\n");
 		 command = this.commandFactory.createSetCommand(key, key
 					.getBytes(), exp, value, true, transcoder);
-			command.encode(bufferAllocator);
+			command.encode();
 			checkByteBufferEquals(command, "set test 0 0 2 noreply\r\n10\r\n");
 	}
 
@@ -40,13 +40,13 @@ public class TextStoreCommandUnitTest extends BaseTextCommandUnitTest {
 		Command command = this.commandFactory.createAddCommand(key, key
 				.getBytes(), exp, value, false, transcoder);
 		assertNull(command.getIoBuffer());
-		command.encode(bufferAllocator);
+		command.encode();
 		checkByteBufferEquals(command, "add test 0 0 2\r\n10\r\n");
 		
 		command = this.commandFactory.createAddCommand(key, key
 				.getBytes(), exp, value, true, transcoder);
 		assertNull(command.getIoBuffer());
-		command.encode(bufferAllocator);
+		command.encode();
 		checkByteBufferEquals(command, "add test 0 0 2 noreply\r\n10\r\n");
 	}
 
@@ -54,13 +54,13 @@ public class TextStoreCommandUnitTest extends BaseTextCommandUnitTest {
 		Command command = this.commandFactory.createReplaceCommand(key, key
 				.getBytes(), exp, value, false, transcoder);
 		assertNull(command.getIoBuffer());
-		command.encode(bufferAllocator);
+		command.encode();
 		checkByteBufferEquals(command, "replace test 0 0 2\r\n10\r\n");
 		
 		command = this.commandFactory.createReplaceCommand(key, key
 				.getBytes(), exp, value, true, transcoder);
 		assertNull(command.getIoBuffer());
-		command.encode(bufferAllocator);
+		command.encode();
 		checkByteBufferEquals(command, "replace test 0 0 2 noreply\r\n10\r\n");
 	}
 
@@ -68,13 +68,13 @@ public class TextStoreCommandUnitTest extends BaseTextCommandUnitTest {
 		Command command = this.commandFactory.createAppendCommand(key, key
 				.getBytes(), value, false, transcoder);
 		assertNull(command.getIoBuffer());
-		command.encode(bufferAllocator);
+		command.encode();
 		checkByteBufferEquals(command, "append test 0 0 2\r\n10\r\n");
 		
 		command = this.commandFactory.createAppendCommand(key, key
 				.getBytes(), value, true, transcoder);
 		assertNull(command.getIoBuffer());
-		command.encode(bufferAllocator);
+		command.encode();
 		checkByteBufferEquals(command, "append test 0 0 2 noreply\r\n10\r\n");
 	}
 
@@ -82,13 +82,13 @@ public class TextStoreCommandUnitTest extends BaseTextCommandUnitTest {
 		Command command = this.commandFactory.createPrependCommand(key, key
 				.getBytes(), value, false, transcoder);
 		assertNull(command.getIoBuffer());
-		command.encode(bufferAllocator);
+		command.encode();
 		checkByteBufferEquals(command, "prepend test 0 0 2\r\n10\r\n");
 		
 		command = this.commandFactory.createPrependCommand(key, key
 				.getBytes(), value, true, transcoder);
 		assertNull(command.getIoBuffer());
-		command.encode(bufferAllocator);
+		command.encode();
 		checkByteBufferEquals(command, "prepend test 0 0 2 noreply\r\n10\r\n");
 	}
 

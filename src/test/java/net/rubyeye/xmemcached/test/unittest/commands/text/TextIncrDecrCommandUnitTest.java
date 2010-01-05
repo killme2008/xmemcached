@@ -10,14 +10,14 @@ public class TextIncrDecrCommandUnitTest extends BaseTextCommandUnitTest {
 		Command command = this.commandFactory.createIncrDecrCommand("test",
 				"test".getBytes(), 10, 0,0, CommandType.INCR, false);
 		assertNull(command.getIoBuffer());
-		command.encode(this.bufferAllocator);
+		command.encode();
 
 		checkByteBufferEquals(command, "incr test 10\r\n");
 		
 		command = this.commandFactory.createIncrDecrCommand("test",
 				"test".getBytes(), 10, 0,0, CommandType.INCR, true);
 		assertNull(command.getIoBuffer());
-		command.encode(this.bufferAllocator);
+		command.encode();
 
 		checkByteBufferEquals(command, "incr test 10 noreply\r\n");
 	}
@@ -26,14 +26,14 @@ public class TextIncrDecrCommandUnitTest extends BaseTextCommandUnitTest {
 		Command command = this.commandFactory.createIncrDecrCommand("test",
 				"test".getBytes(), 10, 0,0, CommandType.DECR, false);
 		assertNull(command.getIoBuffer());
-		command.encode(this.bufferAllocator);
+		command.encode();
 
 		checkByteBufferEquals(command, "decr test 10\r\n");
 		
 		command = this.commandFactory.createIncrDecrCommand("test",
 				"test".getBytes(), 10, 0,0, CommandType.DECR, true);
 		assertNull(command.getIoBuffer());
-		command.encode(this.bufferAllocator);
+		command.encode();
 
 		checkByteBufferEquals(command, "decr test 10 noreply\r\n");
 	}

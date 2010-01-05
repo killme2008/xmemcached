@@ -25,12 +25,13 @@ package net.rubyeye.xmemcached.command.text;
 import java.nio.ByteBuffer;
 import java.util.concurrent.CountDownLatch;
 
-import net.rubyeye.xmemcached.buffer.BufferAllocator;
 import net.rubyeye.xmemcached.command.Command;
 import net.rubyeye.xmemcached.command.CommandType;
 import net.rubyeye.xmemcached.impl.MemcachedTCPSession;
 import net.rubyeye.xmemcached.monitor.Constants;
 import net.rubyeye.xmemcached.utils.ByteUtils;
+
+import com.google.code.yanf4j.buffer.IoBuffer;
 /**
  * Incr/Decr command for text protocol
  * @author dennis
@@ -79,7 +80,7 @@ public class TextIncrDecrCommand extends Command {
 	}
 
 	@Override
-	public final void encode(BufferAllocator bufferAllocator) {
+	public final void encode() {
 		byte[] numBytes = ByteUtils.getBytes(String.valueOf(this.getAmount()));
 		byte[] cmdBytes = this.commandType == CommandType.INCR ? Constants.INCR : Constants.DECR;
 		int capacity = cmdBytes.length + 2 + this.key.length()
@@ -87,7 +88,7 @@ public class TextIncrDecrCommand extends Command {
 		if (isNoreply()) {
 			capacity += 1 + Constants.NO_REPLY.length();
 		}
-		this.ioBuffer = bufferAllocator.allocate(capacity);
+		this.ioBuffer = IoBuffer.allocate(capacity);
 		if (isNoreply()) {
 			ByteUtils.setArguments(this.ioBuffer, cmdBytes, this.keyBytes,
 					numBytes, Constants.NO_REPLY);

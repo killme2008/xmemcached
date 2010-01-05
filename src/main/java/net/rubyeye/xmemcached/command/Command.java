@@ -15,8 +15,6 @@ import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.util.concurrent.CountDownLatch;
 
-import net.rubyeye.xmemcached.buffer.BufferAllocator;
-import net.rubyeye.xmemcached.buffer.IoBuffer;
 import net.rubyeye.xmemcached.exception.MemcachedClientException;
 import net.rubyeye.xmemcached.exception.MemcachedDecodeException;
 import net.rubyeye.xmemcached.exception.MemcachedServerException;
@@ -25,6 +23,7 @@ import net.rubyeye.xmemcached.impl.MemcachedTCPSession;
 import net.rubyeye.xmemcached.transcoders.Transcoder;
 import net.rubyeye.xmemcached.utils.ByteUtils;
 
+import com.google.code.yanf4j.buffer.IoBuffer;
 import com.google.code.yanf4j.core.Session;
 import com.google.code.yanf4j.core.WriteMessage;
 import com.google.code.yanf4j.core.impl.FutureImpl;
@@ -47,12 +46,12 @@ public abstract class Command implements WriteMessage {
 	}
 
 	
-	public synchronized final ByteBuffer getWriteBuffer() {
-		return getIoBuffer().getByteBuffer();
+	public synchronized final com.google.code.yanf4j.buffer.IoBuffer getWriteBuffer() {
+		return  getIoBuffer();
 	}
 
 	
-	public void setWriteBuffer(ByteBuffer buffers) {
+	public void setWriteBuffer(com.google.code.yanf4j.buffer.IoBuffer buffers) {
 		// throw new UnsupportedOperationException();
 	}
 
@@ -152,9 +151,12 @@ public abstract class Command implements WriteMessage {
 		this.status = status;
 	}
 
-	public final void setIoBuffer(IoBuffer byteBufferWrapper) {
-		this.ioBuffer = byteBufferWrapper;
+
+
+	public final void setIoBuffer(IoBuffer ioBuffer) {
+		this.ioBuffer = ioBuffer;
 	}
+
 
 	public Exception getException() {
 		return this.exception;
@@ -180,15 +182,18 @@ public abstract class Command implements WriteMessage {
 		this.result = result;
 	}
 
+
+
+	
 	public final IoBuffer getIoBuffer() {
 		return this.ioBuffer;
 	}
 
-	
+
 	@Override
 	public String toString() {
 		try {
-			return new String(this.ioBuffer.getByteBuffer().array(), "utf-8");
+			return new String(this.ioBuffer.buf().array(), "utf-8");
 		} catch (UnsupportedEncodingException e) {
 		}
 		return "[error]";
@@ -226,7 +231,7 @@ public abstract class Command implements WriteMessage {
 		this.latch = latch;
 	}
 
-	public abstract void encode(BufferAllocator bufferAllocator);
+	public abstract void encode();
 
 	public abstract boolean decode(MemcachedTCPSession session,
 			ByteBuffer buffer);

@@ -28,7 +28,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 
-import net.rubyeye.xmemcached.buffer.BufferAllocator;
 import net.rubyeye.xmemcached.command.Command;
 import net.rubyeye.xmemcached.command.CommandType;
 import net.rubyeye.xmemcached.command.MapReturnValueAware;
@@ -85,7 +84,7 @@ public class BinaryGetMultiCommand extends BaseBinaryCommand implements
 	}
 
 	@Override
-	public void encode(BufferAllocator bufferAllocator) {
+	public void encode() {
 		// do nothing
 	}
 

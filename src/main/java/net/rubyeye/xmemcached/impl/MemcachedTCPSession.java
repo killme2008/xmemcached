@@ -94,7 +94,7 @@ public class MemcachedTCPSession extends NioTCPSession implements
 		Command currentCommand = (Command) writeMessage;
 		// Check if IoBuffer is null
 		if (currentCommand.getIoBuffer() == null) {
-			currentCommand.encode(this.bufferAllocator);
+			currentCommand.encode();
 		}
 		// Check if it is canceled.
 		if (currentCommand.isCancel()) {
@@ -125,7 +125,7 @@ public class MemcachedTCPSession extends NioTCPSession implements
 	@Override
 	protected final WriteMessage wrapMessage(Object msg,
 			Future<Boolean> writeFuture) {
-		((Command) msg).encode(this.bufferAllocator);
+		((Command) msg).encode();
 		((Command) msg).setWriteFuture((FutureImpl<Boolean>) writeFuture);
 		if (log.isDebugEnabled()) {
 			log.debug("After encoding" + ((Command) msg).toString());

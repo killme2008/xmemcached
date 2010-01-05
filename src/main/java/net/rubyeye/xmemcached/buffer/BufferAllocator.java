@@ -18,6 +18,7 @@ import java.nio.ByteBuffer;
  * 
  * @author dennis(killme2008@gmail.com)
  */
+@Deprecated
 public interface BufferAllocator {
 	public IoBuffer allocate(int capacity);
 

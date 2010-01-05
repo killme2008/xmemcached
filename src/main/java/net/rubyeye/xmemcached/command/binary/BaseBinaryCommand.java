@@ -25,10 +25,6 @@ package net.rubyeye.xmemcached.command.binary;
 import java.nio.ByteBuffer;
 import java.util.concurrent.CountDownLatch;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import net.rubyeye.xmemcached.buffer.BufferAllocator;
 import net.rubyeye.xmemcached.command.Command;
 import net.rubyeye.xmemcached.command.CommandType;
 import net.rubyeye.xmemcached.exception.MemcachedDecodeException;
@@ -38,6 +34,11 @@ import net.rubyeye.xmemcached.transcoders.CachedData;
 import net.rubyeye.xmemcached.transcoders.Transcoder;
 import net.rubyeye.xmemcached.utils.ByteUtils;
 import net.rubyeye.xmemcached.utils.OpaqueGenerater;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.google.code.yanf4j.buffer.IoBuffer;
 
 /**
  * Base Binary command.
@@ -306,7 +307,7 @@ public abstract class BaseBinaryCommand extends Command {
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public void encode(BufferAllocator bufferAllocator) {
+	public void encode() {
 		CachedData data = null;
 		if (this.transcoder != null) {
 			data = this.transcoder.encode(this.value);
@@ -315,7 +316,7 @@ public abstract class BaseBinaryCommand extends Command {
 		int length = 24 + getKeyLength() + getValueLength(data)
 				+ getExtrasLength();
 
-		this.ioBuffer = bufferAllocator.allocate(length);
+		this.ioBuffer = IoBuffer.allocate(length);
 		fillHeader(data);
 		fillExtras(data);
 		fillKey();

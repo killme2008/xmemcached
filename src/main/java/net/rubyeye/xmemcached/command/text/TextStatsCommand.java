@@ -28,12 +28,13 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 
-import net.rubyeye.xmemcached.buffer.BufferAllocator;
 import net.rubyeye.xmemcached.command.Command;
 import net.rubyeye.xmemcached.command.CommandType;
 import net.rubyeye.xmemcached.command.ServerAddressAware;
 import net.rubyeye.xmemcached.impl.MemcachedTCPSession;
 import net.rubyeye.xmemcached.utils.ByteUtils;
+
+import com.google.code.yanf4j.buffer.IoBuffer;
 /**
  * Stats command for text protocol
  * @author dennis
@@ -94,11 +95,11 @@ public class TextStatsCommand extends Command implements ServerAddressAware {
 	}
 
 	@Override
-	public final void encode(BufferAllocator bufferAllocator) {
+	public final void encode() {
 		if (this.itemName == null) {
-			this.ioBuffer = bufferAllocator.wrap(STATS.slice());
+			this.ioBuffer = IoBuffer.wrap(STATS.slice());
 		} else {
-			this.ioBuffer = bufferAllocator
+			this.ioBuffer = IoBuffer
 					.allocate(5 + this.itemName.length() + 3);
 			ByteUtils.setArguments(this.ioBuffer, "stats", this.itemName);
 			this.ioBuffer.flip();

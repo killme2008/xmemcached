@@ -33,7 +33,6 @@ import java.util.concurrent.CountDownLatch;
 
 import net.rubyeye.xmemcached.MemcachedOptimizer;
 import net.rubyeye.xmemcached.buffer.BufferAllocator;
-import net.rubyeye.xmemcached.buffer.IoBuffer;
 import net.rubyeye.xmemcached.command.AssocCommandAware;
 import net.rubyeye.xmemcached.command.Command;
 import net.rubyeye.xmemcached.command.CommandType;
@@ -50,6 +49,7 @@ import net.rubyeye.xmemcached.utils.Protocol;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.code.yanf4j.buffer.IoBuffer;
 import com.google.code.yanf4j.core.impl.FutureImpl;
 
 /**
@@ -142,7 +142,7 @@ public class Optimizer implements OptimizerMBean, MemcachedOptimizer {
 			log.debug("Optimieze merge buffer:" + optimiezeCommand.toString());
 		}
 		if (this.optimiezeMergeBuffer
-				&& optimiezeCommand.getIoBuffer().getByteBuffer().remaining() < sendBufferSize) {
+				&& optimiezeCommand.getIoBuffer().remaining() < sendBufferSize) {
 			optimiezeCommand = mergeBuffer(optimiezeCommand, writeQueue,
 					executingCmds, sendBufferSize);
 		}
@@ -184,11 +184,11 @@ public class Optimizer implements OptimizerMBean, MemcachedOptimizer {
 
 		final List<Command> commands = getLocalList();
 		final ByteBuffer firstBuffer = firstCommand.getIoBuffer()
-				.getByteBuffer();
+				.buf();
 		int totalBytes = firstBuffer.remaining();
 		commands.add(firstCommand);
 		boolean wasFirst = true;
-		while (totalBytes + nextCmd.getIoBuffer().getByteBuffer().remaining() <= sendBufferSize) {
+		while (totalBytes + nextCmd.getIoBuffer().remaining() <= sendBufferSize) {
 			if (nextCmd.getStatus() == OperationStatus.WRITING) {
 				break;
 			}
@@ -198,7 +198,7 @@ public class Optimizer implements OptimizerMBean, MemcachedOptimizer {
 			}
 			nextCmd.setStatus(OperationStatus.WRITING);
 
-			if (!nextCmd.getIoBuffer().getByteBuffer().hasRemaining()) {
+			if (!nextCmd.getIoBuffer().hasRemaining()) {
 				writeQueue.remove();
 				continue;
 			}
@@ -217,7 +217,7 @@ public class Optimizer implements OptimizerMBean, MemcachedOptimizer {
 
 			commands.add(nextCmd);
 			lastCommand = nextCmd;
-			totalBytes += nextCmd.getIoBuffer().getByteBuffer().remaining();
+			totalBytes += nextCmd.getIoBuffer().remaining();
 
 			if (totalBytes > sendBufferSize) {
 				break;
@@ -230,9 +230,9 @@ public class Optimizer implements OptimizerMBean, MemcachedOptimizer {
 		}
 		if (commands.size() > 1) {
 			// ArrayIoBuffer arrayBuffer = new ArrayIoBuffer(buffers);
-			IoBuffer gatherBuffer = this.bufferAllocator.allocate(totalBytes);
+			IoBuffer gatherBuffer = IoBuffer.allocate(totalBytes);
 			for (Command command : commands) {
-				gatherBuffer.put(command.getIoBuffer().getByteBuffer());
+				gatherBuffer.put(command.getIoBuffer());
 				if (command != lastCommand && !command.isNoreply()) {
 					executingCmds.add(command);
 				}
@@ -297,10 +297,10 @@ public class Optimizer implements OptimizerMBean, MemcachedOptimizer {
 		Command prevCommand;
 
 		public Object getResult() {
-			IoBuffer mergedBuffer = Optimizer.this.bufferAllocator
+			IoBuffer mergedBuffer = IoBuffer
 					.allocate(this.totalLength);
 			for (IoBuffer buffer : this.bufferList) {
-				mergedBuffer.put(buffer.getByteBuffer());
+				mergedBuffer.put(buffer);
 			}
 			mergedBuffer.flip();
 			BinaryGetMultiCommand resultCommand = new BinaryGetMultiCommand(
@@ -316,7 +316,7 @@ public class Optimizer implements OptimizerMBean, MemcachedOptimizer {
 				Command getqCommand = new BinaryGetCommand(this.prevCommand
 						.getKey(), this.prevCommand.getKeyBytes(), null, null,
 						OpCode.GET_KEY_QUIETLY, true);
-				getqCommand.encode(Optimizer.this.bufferAllocator);
+				getqCommand.encode();
 				this.totalLength += getqCommand.getIoBuffer().remaining();
 				this.bufferList.add(getqCommand.getIoBuffer());
 			}
@@ -330,7 +330,7 @@ public class Optimizer implements OptimizerMBean, MemcachedOptimizer {
 					.getKey(), this.prevCommand.getKeyBytes(),
 					CommandType.GET_ONE, new CountDownLatch(1), OpCode.GET_KEY,
 					false);
-			lastGetKCommand.encode(Optimizer.this.bufferAllocator);
+			lastGetKCommand.encode();
 			this.bufferList.add(lastGetKCommand.getIoBuffer());
 			this.totalLength += lastGetKCommand.getIoBuffer().remaining();
 		}
@@ -417,7 +417,7 @@ public class Optimizer implements OptimizerMBean, MemcachedOptimizer {
 			byte[] keyBytes = ByteUtils.getBytes(resultKey);
 			byte[] cmdBytes = commandType == CommandType.GET_ONE ? Constants.GET
 					: Constants.GETS;
-			final IoBuffer buffer = this.bufferAllocator
+			final IoBuffer buffer = IoBuffer
 					.allocate(cmdBytes.length + Constants.CRLF.length + 1
 							+ keyBytes.length);
 			ByteUtils.setArguments(buffer, cmdBytes, keyBytes);

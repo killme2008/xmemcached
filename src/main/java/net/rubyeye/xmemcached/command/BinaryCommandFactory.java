@@ -9,7 +9,6 @@ import java.util.concurrent.CountDownLatch;
 
 import net.rubyeye.xmemcached.CommandFactory;
 import net.rubyeye.xmemcached.buffer.BufferAllocator;
-import net.rubyeye.xmemcached.buffer.IoBuffer;
 import net.rubyeye.xmemcached.buffer.SimpleBufferAllocator;
 import net.rubyeye.xmemcached.command.binary.BinaryAppendPrependCommand;
 import net.rubyeye.xmemcached.command.binary.BinaryCASCommand;
@@ -25,6 +24,8 @@ import net.rubyeye.xmemcached.command.binary.OpCode;
 import net.rubyeye.xmemcached.transcoders.Transcoder;
 import net.rubyeye.xmemcached.utils.ByteUtils;
 import net.rubyeye.xmemcached.utils.Protocol;
+
+import com.google.code.yanf4j.buffer.IoBuffer;
 
 /**
  * Binary protocol command factory
@@ -89,7 +90,7 @@ public class BinaryCommandFactory implements CommandFactory {
 			CountDownLatch latch, CommandType cmdType, Transcoder<T> transcoder) {
 		Iterator<String> it = keys.iterator();
 		String key = null;
-		List<IoBuffer> bufferList = new ArrayList<IoBuffer>();
+		List<com.google.code.yanf4j.buffer.IoBuffer> bufferList = new ArrayList<com.google.code.yanf4j.buffer.IoBuffer>();
 		int totalLength = 0;
 		while (it.hasNext()) {
 			key = it.next();
@@ -98,7 +99,7 @@ public class BinaryCommandFactory implements CommandFactory {
 				Command command = new BinaryGetCommand(key, ByteUtils
 						.getBytes(key), cmdType, null, OpCode.GET_KEY_QUIETLY,
 						true);
-				command.encode(this.bufferAllocator);
+				command.encode();
 				totalLength += command.getIoBuffer().remaining();
 				bufferList.add(command.getIoBuffer());
 			}
@@ -107,13 +108,13 @@ public class BinaryCommandFactory implements CommandFactory {
 		Command lastCommand = new BinaryGetCommand(key,
 				ByteUtils.getBytes(key), cmdType, new CountDownLatch(1),
 				OpCode.GET_KEY, false);
-		lastCommand.encode(this.bufferAllocator);
+		lastCommand.encode();
 		bufferList.add(lastCommand.getIoBuffer());
 		totalLength += lastCommand.getIoBuffer().remaining();
 
-		IoBuffer mergedBuffer = this.bufferAllocator.allocate(totalLength);
+		IoBuffer mergedBuffer =IoBuffer.allocate(totalLength);
 		for (IoBuffer buffer : bufferList) {
-			mergedBuffer.put(buffer.getByteBuffer());
+			mergedBuffer.put(buffer.buf());
 		}
 		mergedBuffer.flip();
 		Command resultCommand = new BinaryGetMultiCommand(key, cmdType, latch);

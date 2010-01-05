@@ -15,7 +15,7 @@ package net.rubyeye.xmemcached.buffer;
  */
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-
+@Deprecated
 public class SimpleIoBuffer implements IoBuffer {
 
 	protected ByteBuffer origBuffer;

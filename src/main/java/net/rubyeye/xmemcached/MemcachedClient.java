@@ -174,9 +174,11 @@ public interface MemcachedClient {
 	/**
 	 * Set the nio's ByteBuffer Allocator,use SimpleBufferAllocator by default.
 	 * 
+	 * 
 	 * @param bufferAllocator
 	 * @return
 	 */
+	@Deprecated
 	public abstract void setBufferAllocator(
 			final BufferAllocator bufferAllocator);
 
@@ -1136,5 +1138,15 @@ public interface MemcachedClient {
 	 * @return
 	 */
 	public Counter getCounter(String key, long initialValue);
+
+	/**
+	 * Get key iterator for special memcached server.You must known that the
+	 * iterator is a snapshot for memcached all keys,it is not real-time.
+	 * 
+	 * @param address
+	 * @return
+	 */
+	public KeyIterator getKeyIterator(InetSocketAddress address)
+			throws MemcachedException, InterruptedException, TimeoutException;
 
 }

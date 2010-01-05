@@ -19,11 +19,11 @@ import junit.framework.TestCase;
 import net.rubyeye.xmemcached.CASOperation;
 import net.rubyeye.xmemcached.Counter;
 import net.rubyeye.xmemcached.GetsResponse;
+import net.rubyeye.xmemcached.KeyIterator;
 import net.rubyeye.xmemcached.MemcachedClient;
 import net.rubyeye.xmemcached.MemcachedClientBuilder;
 import net.rubyeye.xmemcached.XMemcachedClient;
 import net.rubyeye.xmemcached.XMemcachedClientBuilder;
-import net.rubyeye.xmemcached.buffer.BufferAllocator;
 import net.rubyeye.xmemcached.command.Command;
 import net.rubyeye.xmemcached.command.CommandType;
 import net.rubyeye.xmemcached.command.binary.OpCode;
@@ -49,6 +49,7 @@ import net.rubyeye.xmemcached.utils.AddrUtil;
 import net.rubyeye.xmemcached.utils.ByteUtils;
 import net.rubyeye.xmemcached.utils.Protocol;
 
+import com.google.code.yanf4j.buffer.IoBuffer;
 import com.google.code.yanf4j.util.ResourcesUtils;
 
 public abstract class XMemcachedClientTest extends TestCase {
@@ -1210,8 +1211,8 @@ public abstract class XMemcachedClientTest extends TestCase {
 			}
 
 			@Override
-			public void encode(BufferAllocator bufferAllocator) {
-				this.ioBuffer = bufferAllocator.wrap(ByteBuffer.wrap("test\r\n"
+			public void encode() {
+				this.ioBuffer = IoBuffer.wrap(ByteBuffer.wrap("test\r\n"
 						.getBytes()));
 			}
 
@@ -1331,6 +1332,35 @@ public abstract class XMemcachedClientTest extends TestCase {
 		Assert.assertEquals(100, counter.incrementAndGet());
 		Assert.assertEquals(101, counter.incrementAndGet());
 		Assert.assertEquals(100, counter.decrementAndGet());
+	}
+
+	public void testKeyIterator() throws Exception {
+		Collection<InetSocketAddress> avaliableServers = this.memcachedClient
+				.getAvaliableServers();
+		InetSocketAddress address = avaliableServers.iterator().next();
+		KeyIterator it = this.memcachedClient.getKeyIterator(address);
+		while(it.hasNext()){
+			this.memcachedClient.delete(it.next());
+		}
+		it = this.memcachedClient.getKeyIterator(address);
+		Assert.assertFalse(it.hasNext());
+		try {
+			it.next();
+			Assert.fail();
+		} catch (ArrayIndexOutOfBoundsException e) {
+			Assert.assertTrue(true);
+		}
+		for(int i=0;i<10;i++){
+			this.memcachedClient.set(String.valueOf(i), 0, i);
+		}
+		it = this.memcachedClient.getKeyIterator(address);
+		Assert.assertTrue(it.hasNext());
+		Assert.assertEquals(address,it.getServerAddress());
+		while(it.hasNext()){
+			String key=it.next();
+			Assert.assertEquals(Integer.parseInt(key),this.memcachedClient.get(key));
+		}
+		Assert.assertFalse(it.hasNext());
 	}
 
 }

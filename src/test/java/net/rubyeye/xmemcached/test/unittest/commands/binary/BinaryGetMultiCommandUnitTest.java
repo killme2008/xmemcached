@@ -21,9 +21,9 @@ public class BinaryGetMultiCommandUnitTest extends BaseBinaryCommandUnitTest {
 		}
 
 		Command command = this.commandFactory.createGetMultiCommand(keys,
-				new CountDownLatch(1), CommandType.GET_MANY, transcoder);
-		command.encode(bufferAllocator);
-		ByteBuffer encodeBuffer = command.getIoBuffer().getByteBuffer();
+				new CountDownLatch(1), CommandType.GET_MANY, this.transcoder);
+		command.encode();
+		ByteBuffer encodeBuffer = command.getIoBuffer().buf();
 		assertNotNull(encodeBuffer);
 		// (header length + key length) x Count
 		assertEquals((24 + 1) * keys.size(), encodeBuffer.capacity());
@@ -39,7 +39,7 @@ public class BinaryGetMultiCommandUnitTest extends BaseBinaryCommandUnitTest {
 		// First 9 buffer is getkq
 		for (int i = 0; i < 9; i++) {
 			int flag = 0;
-			byte[] flagBytes = transcoderUtils.encodeInt(flag);
+			byte[] flagBytes = this.transcoderUtils.encodeInt(flag);
 			String key = String.valueOf(i);
 			byte[] keyBytes = ByteUtils.getBytes(key);
 			if (i % 2 == 0) {
@@ -57,7 +57,7 @@ public class BinaryGetMultiCommandUnitTest extends BaseBinaryCommandUnitTest {
 		}
 		// last buffer is getk
 		int flag = 0;
-		byte[] flagBytes = transcoderUtils.encodeInt(flag);
+		byte[] flagBytes = this.transcoderUtils.encodeInt(flag);
 		String key = String.valueOf(9);
 		byte[] keyBytes = ByteUtils.getBytes(key);
 		buffers[9] = constructResponse(OpCode.GET_KEY.fieldValue(),
@@ -81,7 +81,7 @@ public class BinaryGetMultiCommandUnitTest extends BaseBinaryCommandUnitTest {
 		for(int i=0;i<10;i++){
 			if(i%2==0){
 				assertNotNull(result.get(String.valueOf(i)));
-				assertEquals(String.valueOf(i),transcoder.decode(result.get(String.valueOf(i))));
+				assertEquals(String.valueOf(i),this.transcoder.decode(result.get(String.valueOf(i))));
 			}else{
 				assertNull(result.get(String.valueOf(i)));
 			}

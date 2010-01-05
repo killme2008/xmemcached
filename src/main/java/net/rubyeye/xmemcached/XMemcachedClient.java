@@ -22,6 +22,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
@@ -42,6 +43,7 @@ import net.rubyeye.xmemcached.command.ServerAddressAware;
 import net.rubyeye.xmemcached.command.TextCommandFactory;
 import net.rubyeye.xmemcached.exception.MemcachedException;
 import net.rubyeye.xmemcached.impl.ArrayMemcachedSessionLocator;
+import net.rubyeye.xmemcached.impl.KeyIteratorImpl;
 import net.rubyeye.xmemcached.impl.MemcachedClientStateListenerAdapter;
 import net.rubyeye.xmemcached.impl.MemcachedConnector;
 import net.rubyeye.xmemcached.impl.MemcachedHandler;
@@ -2239,6 +2241,38 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 
 	public Counter getCounter(String key) {
 		return new Counter(this, key, 0);
+	}
+
+	@SuppressWarnings("unchecked")
+	public KeyIterator getKeyIterator(InetSocketAddress address)
+			throws MemcachedException, TimeoutException, InterruptedException {
+		Queue<Session> sessions = this.connector.getSessionByAddress(address);
+		if (sessions == null || sessions.size() == 0) {
+			throw new MemcachedException(
+					"The special memcached server has not been connected");
+		}
+		Session session = sessions.peek();
+		CountDownLatch latch = new CountDownLatch(1);
+		Command command = this.commandFactory.createStatsCommand(session
+				.getRemoteSocketAddress(), latch, "items");
+		session.write(command);
+		if (!latch.await(5000, TimeUnit.MILLISECONDS)) {
+			throw new TimeoutException("Operation timeout");
+		}
+		Map<String, String> result = (Map<String, String>) command.getResult();
+		LinkedList<Integer> itemNumberList = new LinkedList<Integer>();
+		for (Map.Entry<String, String> entry : result.entrySet()) {
+			final String key = entry.getKey();
+			final String[] keys = key.split(":");
+			if (keys.length == 3 && keys[2].equals("number")
+					&& keys[0].equals("items")) {
+				// has items,then add it to itemNumberList
+				if (Integer.parseInt(entry.getValue()) > 0) {
+					itemNumberList.add(Integer.parseInt(keys[1]));
+				}
+			}
+		}
+		return new KeyIteratorImpl(itemNumberList, this, address);
 	}
 
 }

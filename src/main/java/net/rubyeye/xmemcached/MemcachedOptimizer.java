@@ -37,5 +37,6 @@ public interface MemcachedOptimizer {
 	Command optimize(final Command currentCommand, final Queue writeQueue,
 			final Queue<Command> executingCmds, int sendBufferSize);
 
+	@Deprecated
 	public void setBufferAllocator(BufferAllocator bufferAllocator);
 }

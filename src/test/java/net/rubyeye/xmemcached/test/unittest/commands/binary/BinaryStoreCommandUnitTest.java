@@ -8,17 +8,17 @@ import net.rubyeye.xmemcached.utils.ByteUtils;
 
 public class BinaryStoreCommandUnitTest extends BaseBinaryCommandUnitTest {
 	String key = "hello";
-	byte[] keyBytes = ByteUtils.getBytes(key);
+	byte[] keyBytes = ByteUtils.getBytes(this.key);
 	String value = "world";
 	boolean noreply = false;
 
 	public void testAddEncodeAndDecode() {
 
-		Command command = this.commandFactory.createAddCommand(key, keyBytes,
-				0, value, noreply, transcoder);
+		Command command = this.commandFactory.createAddCommand(this.key, this.keyBytes,
+				0, this.value, this.noreply, this.transcoder);
 
-		command.encode(bufferAllocator);
-		ByteBuffer encodeBuffer = command.getIoBuffer().getByteBuffer();
+		command.encode();
+		ByteBuffer encodeBuffer = command.getIoBuffer().buf();
 		assertNotNull(encodeBuffer);
 		assertEquals(42, encodeBuffer.capacity());
 
@@ -35,8 +35,8 @@ public class BinaryStoreCommandUnitTest extends BaseBinaryCommandUnitTest {
 
 		buffer = constructResponse(OpCode.ADD.fieldValue(), (short) 0,
 				(byte) 0, (byte) 0, (short) 0x0005, 0, 0, 1L, null, null, null);
-		command = this.commandFactory.createAddCommand(key, keyBytes, 0, value,
-				noreply, transcoder);
+		command = this.commandFactory.createAddCommand(this.key, this.keyBytes, 0, this.value,
+				this.noreply, this.transcoder);
 		assertTrue(command.decode(null, buffer));
 		assertFalse((Boolean) command.getResult());
 		assertEquals(0, buffer.remaining());
@@ -44,11 +44,11 @@ public class BinaryStoreCommandUnitTest extends BaseBinaryCommandUnitTest {
 
 	public void testReplaceEncodeAndDecode() {
 
-		Command command = this.commandFactory.createReplaceCommand(key,
-				keyBytes, 0, value, noreply, transcoder);
+		Command command = this.commandFactory.createReplaceCommand(this.key,
+				this.keyBytes, 0, this.value, this.noreply, this.transcoder);
 
-		command.encode(bufferAllocator);
-		ByteBuffer encodeBuffer = command.getIoBuffer().getByteBuffer();
+		command.encode();
+		ByteBuffer encodeBuffer = command.getIoBuffer().buf();
 		assertNotNull(encodeBuffer);
 		assertEquals(42, encodeBuffer.capacity());
 
@@ -65,8 +65,8 @@ public class BinaryStoreCommandUnitTest extends BaseBinaryCommandUnitTest {
 
 		buffer = constructResponse(OpCode.REPLACE.fieldValue(), (short) 0,
 				(byte) 0, (byte) 0, (short) 0x0005, 0, 0, 1L, null, null, null);
-		command = this.commandFactory.createReplaceCommand(key, keyBytes, 0, value,
-				noreply, transcoder);
+		command = this.commandFactory.createReplaceCommand(this.key, this.keyBytes, 0, this.value,
+				this.noreply, this.transcoder);
 		assertTrue(command.decode(null, buffer));
 		assertFalse((Boolean) command.getResult());
 		assertEquals(0, buffer.remaining());
@@ -74,11 +74,11 @@ public class BinaryStoreCommandUnitTest extends BaseBinaryCommandUnitTest {
 
 	public void testSetEncodeAndDecode() {
 
-		Command command = this.commandFactory.createSetCommand(key, keyBytes,
-				0, value, noreply, transcoder);
+		Command command = this.commandFactory.createSetCommand(this.key, this.keyBytes,
+				0, this.value, this.noreply, this.transcoder);
 
-		command.encode(bufferAllocator);
-		ByteBuffer encodeBuffer = command.getIoBuffer().getByteBuffer();
+		command.encode();
+		ByteBuffer encodeBuffer = command.getIoBuffer().buf();
 		assertNotNull(encodeBuffer);
 		assertEquals(42, encodeBuffer.capacity());
 
@@ -95,8 +95,8 @@ public class BinaryStoreCommandUnitTest extends BaseBinaryCommandUnitTest {
 
 		buffer = constructResponse(OpCode.SET.fieldValue(), (short) 0,
 				(byte) 0, (byte) 0, (short) 0x0005, 0, 0, 1L, null, null, null);
-		command = this.commandFactory.createSetCommand(key, keyBytes, 0, value,
-				noreply, transcoder);
+		command = this.commandFactory.createSetCommand(this.key, this.keyBytes, 0, this.value,
+				this.noreply, this.transcoder);
 		assertTrue(command.decode(null, buffer));
 		assertFalse((Boolean) command.getResult());
 		assertEquals(0, buffer.remaining());

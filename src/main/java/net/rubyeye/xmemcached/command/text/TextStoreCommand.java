@@ -25,7 +25,6 @@ package net.rubyeye.xmemcached.command.text;
 import java.nio.ByteBuffer;
 import java.util.concurrent.CountDownLatch;
 
-import net.rubyeye.xmemcached.buffer.BufferAllocator;
 import net.rubyeye.xmemcached.command.Command;
 import net.rubyeye.xmemcached.command.CommandType;
 import net.rubyeye.xmemcached.impl.MemcachedTCPSession;
@@ -33,6 +32,8 @@ import net.rubyeye.xmemcached.monitor.Constants;
 import net.rubyeye.xmemcached.transcoders.CachedData;
 import net.rubyeye.xmemcached.transcoders.Transcoder;
 import net.rubyeye.xmemcached.utils.ByteUtils;
+
+import com.google.code.yanf4j.buffer.IoBuffer;
 /**
  * Store command for text protocol
  * @author dennis
@@ -122,7 +123,7 @@ public class TextStoreCommand extends Command {
 	}
 
 	@Override
-	public final void encode(BufferAllocator bufferAllocator) {
+	public final void encode() {
 		final CachedData data = encodeValue();
 		byte[] flagBytes = ByteUtils.getBytes(String.valueOf(data.getFlag()));
 		byte[] expBytes = ByteUtils.getBytes(String.valueOf(this.expTime));
@@ -138,10 +139,10 @@ public class TextStoreCommand extends Command {
 			size += 1 + casBytes.length;
 		}
 		if (isNoreply()) {
-			this.ioBuffer = bufferAllocator.allocate(size + 1
+			this.ioBuffer = IoBuffer.allocate(size + 1
 					+ Constants.NO_REPLY.length());
 		} else {
-			this.ioBuffer = bufferAllocator.allocate(size);
+			this.ioBuffer = IoBuffer.allocate(size);
 		}
 		if (this.commandType == CommandType.CAS) {
 			if (isNoreply()) {

@@ -25,12 +25,13 @@ package net.rubyeye.xmemcached.command.text;
 import java.nio.ByteBuffer;
 import java.util.concurrent.CountDownLatch;
 
-import net.rubyeye.xmemcached.buffer.BufferAllocator;
 import net.rubyeye.xmemcached.command.Command;
 import net.rubyeye.xmemcached.command.CommandType;
 import net.rubyeye.xmemcached.impl.MemcachedTCPSession;
 import net.rubyeye.xmemcached.monitor.Constants;
 import net.rubyeye.xmemcached.utils.ByteUtils;
+
+import com.google.code.yanf4j.buffer.IoBuffer;
 /**
  * FlushAll command for text protocol
  * @author dennis
@@ -76,17 +77,17 @@ public class TextFlushAllCommand extends Command {
 	}
 
 	@Override
-	public final void encode(BufferAllocator bufferAllocator) {
+	public final void encode() {
 		if (isNoreply()) {
 			if (this.exptime <= 0) {
-				this.ioBuffer = bufferAllocator.allocate("flush_all".length()
+				this.ioBuffer = IoBuffer.allocate("flush_all".length()
 						+ 1 + Constants.NO_REPLY.length() + 2);
 				ByteUtils.setArguments(this.ioBuffer, "flush_all",
 						Constants.NO_REPLY);
 			} else {
 				byte[] delayBytes = ByteUtils.getBytes(String
 						.valueOf(this.exptime));
-				this.ioBuffer = bufferAllocator.allocate("flush_all".length()
+				this.ioBuffer = IoBuffer.allocate("flush_all".length()
 						+ 2 + delayBytes.length + Constants.NO_REPLY.length()
 						+ 2);
 				ByteUtils.setArguments(this.ioBuffer, "flush_all", delayBytes,
@@ -95,12 +96,12 @@ public class TextFlushAllCommand extends Command {
 			this.ioBuffer.flip();
 		} else {
 			if (this.exptime <= 0) {
-				this.ioBuffer = bufferAllocator.wrap(FLUSH_ALL.slice());
+				this.ioBuffer = IoBuffer.wrap(FLUSH_ALL.slice());
 			} else {
 
 				byte[] delayBytes = ByteUtils.getBytes(String
 						.valueOf(this.exptime));
-				this.ioBuffer = bufferAllocator.allocate("flush_all".length()
+				this.ioBuffer = IoBuffer.allocate("flush_all".length()
 						+ 1 + delayBytes.length + 2);
 				ByteUtils.setArguments(this.ioBuffer, "flush_all", delayBytes);
 			}

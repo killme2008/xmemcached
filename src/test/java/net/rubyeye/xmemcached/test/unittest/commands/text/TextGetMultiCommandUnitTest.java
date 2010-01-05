@@ -28,7 +28,7 @@ public class TextGetMultiCommandUnitTest extends BaseTextCommandUnitTest {
 		Command command = this.commandFactory.createGetMultiCommand(keys,
 				new CountDownLatch(1), CommandType.GET_MANY, transcoder);
 		assertNull(command.getIoBuffer());
-		command.encode(this.bufferAllocator);
+		command.encode();
 
 		checkByteBufferEquals(command, "get test1 test2 test3 test4\r\n");
 
@@ -38,7 +38,7 @@ public class TextGetMultiCommandUnitTest extends BaseTextCommandUnitTest {
 		Command command = this.commandFactory.createGetMultiCommand(keys,
 				new CountDownLatch(1), CommandType.GETS_MANY, transcoder);
 		assertNull(command.getIoBuffer());
-		command.encode(this.bufferAllocator);
+		command.encode();
 
 		checkByteBufferEquals(command, "gets test1 test2 test3 test4\r\n");
 	}

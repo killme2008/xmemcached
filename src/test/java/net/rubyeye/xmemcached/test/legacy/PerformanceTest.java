@@ -5,6 +5,7 @@ import java.util.concurrent.CountDownLatch;
 import net.rubyeye.xmemcached.MemcachedClient;
 import net.rubyeye.xmemcached.MemcachedClientBuilder;
 import net.rubyeye.xmemcached.XMemcachedClientBuilder;
+import net.rubyeye.xmemcached.command.BinaryCommandFactory;
 import net.rubyeye.xmemcached.utils.AddrUtil;
 
 public class PerformanceTest {
@@ -212,7 +213,7 @@ public class PerformanceTest {
 
 			MemcachedClientBuilder builder = new XMemcachedClientBuilder(
 					AddrUtil.getAddresses(args[4]));
-			// builder.setCommandFactory(new BinaryCommandFactory());
+			 builder.setCommandFactory(new BinaryCommandFactory());
 			// builder.setConnectionPoolSize(2);
 			MemcachedClient mc = builder.build();
 			// mc.setOptimizeMergeBuffer(false);

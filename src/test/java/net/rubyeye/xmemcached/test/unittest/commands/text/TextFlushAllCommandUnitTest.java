@@ -10,16 +10,16 @@ public class TextFlushAllCommandUnitTest extends BaseTextCommandUnitTest {
 		Command command = this.commandFactory.createFlushAllCommand(
 				new CountDownLatch(1), 0, false);
 		assertNull(command.getIoBuffer());
-		command.encode(this.bufferAllocator);
+		command.encode();
 		assertEquals(TextFlushAllCommand.FLUSH_ALL, command.getIoBuffer()
-				.getByteBuffer());
+				.buf());
 
 		command = this.commandFactory.createFlushAllCommand(new CountDownLatch(
 				1), 0, true);
 		assertNull(command.getIoBuffer());
-		command.encode(this.bufferAllocator);
+		command.encode();
 		assertEquals("flush_all noreply\r\n", new String(command.getIoBuffer()
-				.getByteBuffer().array()));
+				.buf().array()));
 
 	}
 	
@@ -27,16 +27,16 @@ public class TextFlushAllCommandUnitTest extends BaseTextCommandUnitTest {
 		Command command = this.commandFactory.createFlushAllCommand(
 				new CountDownLatch(1), 10, false);
 		assertNull(command.getIoBuffer());
-		command.encode(this.bufferAllocator);
+		command.encode();
 		assertEquals("flush_all 10\r\n", new String(command.getIoBuffer()
-				.getByteBuffer().array()));
+				.buf().array()));
 
 		command = this.commandFactory.createFlushAllCommand(new CountDownLatch(
 				1), 10, true);
 		assertNull(command.getIoBuffer());
-		command.encode(this.bufferAllocator);
+		command.encode();
 		assertEquals("flush_all 10 noreply\r\n", new String(command.getIoBuffer()
-				.getByteBuffer().array()));
+				.buf().array()));
 	}
 
 	public void testDecode() {

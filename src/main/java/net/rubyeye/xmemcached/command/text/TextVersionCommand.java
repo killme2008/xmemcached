@@ -26,12 +26,13 @@ import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.util.concurrent.CountDownLatch;
 
-import net.rubyeye.xmemcached.buffer.BufferAllocator;
 import net.rubyeye.xmemcached.command.Command;
 import net.rubyeye.xmemcached.command.CommandType;
 import net.rubyeye.xmemcached.command.ServerAddressAware;
 import net.rubyeye.xmemcached.impl.MemcachedTCPSession;
 import net.rubyeye.xmemcached.utils.ByteUtils;
+
+import com.google.code.yanf4j.buffer.IoBuffer;
 
 /**
  * Version command for text protocol
@@ -74,8 +75,8 @@ public class TextVersionCommand extends Command implements ServerAddressAware {
 	}
 
 	@Override
-	public final void encode(BufferAllocator bufferAllocator) {
-		this.ioBuffer = bufferAllocator.wrap(VERSION.slice());
+	public final void encode() {
+		this.ioBuffer = IoBuffer.wrap(VERSION.slice());
 	}
 
 }

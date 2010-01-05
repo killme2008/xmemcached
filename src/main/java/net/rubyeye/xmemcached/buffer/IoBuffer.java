@@ -20,6 +20,7 @@ import java.nio.ByteOrder;
  * @author dennis
  * 
  */
+@Deprecated
 public interface IoBuffer {
 
 	int capacity();

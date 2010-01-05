@@ -10,11 +10,11 @@ import net.rubyeye.xmemcached.command.binary.OpCode;
 
 public class BinaryStatsCommandUnitTest extends BaseBinaryCommandUnitTest {
 	public void testEncodeDecode() {
-		Command command = commandFactory.createStatsCommand(
+		Command command = this.commandFactory.createStatsCommand(
 				new InetSocketAddress("localhost", 80), new CountDownLatch(1),
 				null);
-		command.encode(bufferAllocator);
-		ByteBuffer encodeBuffer = command.getIoBuffer().getByteBuffer();
+		command.encode();
+		ByteBuffer encodeBuffer = command.getIoBuffer().buf();
 		assertEquals(24, encodeBuffer.capacity());
 		byte opCode = encodeBuffer.get(1);
 		assertEquals(OpCode.STAT.fieldValue(), opCode);

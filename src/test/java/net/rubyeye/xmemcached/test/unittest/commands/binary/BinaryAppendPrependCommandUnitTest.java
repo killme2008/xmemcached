@@ -9,16 +9,16 @@ import net.rubyeye.xmemcached.utils.ByteUtils;
 public class BinaryAppendPrependCommandUnitTest extends
 		BaseBinaryCommandUnitTest {
 	String key = "hello";
-	byte[] keyBytes = ByteUtils.getBytes(key);
+	byte[] keyBytes = ByteUtils.getBytes(this.key);
 	String value = "!";
 	boolean noreply = false;
 
 	public void testAppendEncodeAndDecode() {
 
-		Command command = this.commandFactory.createAppendCommand(key,
-				keyBytes, value, noreply, transcoder);
-		command.encode(bufferAllocator);
-		ByteBuffer encodeBuffer = command.getIoBuffer().getByteBuffer();
+		Command command = this.commandFactory.createAppendCommand(this.key,
+				this.keyBytes, this.value, this.noreply, this.transcoder);
+		command.encode();
+		ByteBuffer encodeBuffer = command.getIoBuffer().buf();
 		assertNotNull(encodeBuffer);
 		assertEquals(30, encodeBuffer.capacity());
 
@@ -35,8 +35,8 @@ public class BinaryAppendPrependCommandUnitTest extends
 
 		buffer = constructResponse(OpCode.APPEND.fieldValue(), (short) 0,
 				(byte) 0, (byte) 0, (short) 0x0005, 0, 0, 1L, null, null, null);
-		command = this.commandFactory.createAppendCommand(key, keyBytes, value,
-				noreply, transcoder);
+		command = this.commandFactory.createAppendCommand(this.key, this.keyBytes, this.value,
+				this.noreply, this.transcoder);
 		assertTrue(command.decode(null, buffer));
 		assertFalse((Boolean) command.getResult());
 		assertEquals(0, buffer.remaining());
@@ -44,10 +44,10 @@ public class BinaryAppendPrependCommandUnitTest extends
 
 	public void testPrependEncodeAndDecode() {
 
-		Command command = this.commandFactory.createPrependCommand(key,
-				keyBytes, value, noreply, transcoder);
-		command.encode(bufferAllocator);
-		ByteBuffer encodeBuffer = command.getIoBuffer().getByteBuffer();
+		Command command = this.commandFactory.createPrependCommand(this.key,
+				this.keyBytes, this.value, this.noreply, this.transcoder);
+		command.encode();
+		ByteBuffer encodeBuffer = command.getIoBuffer().buf();
 		assertNotNull(encodeBuffer);
 		assertEquals(30, encodeBuffer.capacity());
 
@@ -64,8 +64,8 @@ public class BinaryAppendPrependCommandUnitTest extends
 
 		buffer = constructResponse(OpCode.PREPEND.fieldValue(), (short) 0,
 				(byte) 0, (byte) 0, (short) 0x0005, 0, 0, 1L, null, null, null);
-		command = this.commandFactory.createPrependCommand(key, keyBytes,
-				value, noreply, transcoder);
+		command = this.commandFactory.createPrependCommand(this.key, this.keyBytes,
+				this.value, this.noreply, this.transcoder);
 		assertTrue(command.decode(null, buffer));
 		assertFalse((Boolean) command.getResult());
 		assertEquals(0, buffer.remaining());

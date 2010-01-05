@@ -3,6 +3,7 @@ package net.rubyeye.xmemcached.example;
 import java.io.IOException;
 import java.util.concurrent.TimeoutException;
 
+import net.rubyeye.xmemcached.KeyIterator;
 import net.rubyeye.xmemcached.MemcachedClient;
 import net.rubyeye.xmemcached.MemcachedClientBuilder;
 import net.rubyeye.xmemcached.XMemcachedClientBuilder;
@@ -22,18 +23,27 @@ public class SimpleExample {
 			System.exit(1);
 		}
 		MemcachedClient memcachedClient = getMemcachedClient(args[0]);
-		if (memcachedClient == null)
+		if (memcachedClient == null) {
 			throw new NullPointerException(
 					"Null MemcachedClient,please check memcached has been started");
+		}
 		try {
 			memcachedClient.set("hello", 0, "Hello,xmemcached");
-
+			memcachedClient.set("hello2", 0, "Hello,xmemcached");
 			String value = memcachedClient.get("hello");
 			System.out.println("hello=" + value);
 
 			memcachedClient.delete("hello");
 			value = memcachedClient.get("hello");
 			System.out.println("hello=" + value);
+			
+			//iterate all keys
+			KeyIterator it=memcachedClient.getKeyIterator(AddrUtil.getOneAddress(args[0]));
+			while(it.hasNext()){
+				System.out.println(it.next());
+			}
+			
+			
 
 		} catch (MemcachedException e) {
 			System.err.println("MemcachedClient operation fail");

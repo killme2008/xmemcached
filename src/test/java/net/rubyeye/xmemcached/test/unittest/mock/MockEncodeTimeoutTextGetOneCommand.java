@@ -3,7 +3,6 @@ package net.rubyeye.xmemcached.test.unittest.mock;
 import java.nio.ByteBuffer;
 import java.util.concurrent.CountDownLatch;
 
-import net.rubyeye.xmemcached.buffer.BufferAllocator;
 import net.rubyeye.xmemcached.command.CommandType;
 import net.rubyeye.xmemcached.command.text.TextGetOneCommand;
 
@@ -17,14 +16,14 @@ public class MockEncodeTimeoutTextGetOneCommand extends TextGetOneCommand {
 		this.sleepTime = sleepTime;
 	}
 
-	public void encode(BufferAllocator bufferAllocator) {
+	public void encode() {
 		// Sleep,then encode timeout
 		try {
 			Thread.sleep(sleepTime);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
-		super.encode(bufferAllocator);
+		super.encode();
 	}
 
 }

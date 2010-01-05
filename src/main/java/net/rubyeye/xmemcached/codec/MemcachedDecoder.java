@@ -11,8 +11,6 @@
  */
 package net.rubyeye.xmemcached.codec;
 
-import java.nio.ByteBuffer;
-
 import net.rubyeye.xmemcached.command.Command;
 import net.rubyeye.xmemcached.impl.MemcachedTCPSession;
 import net.rubyeye.xmemcached.utils.ByteUtils;
@@ -20,6 +18,7 @@ import net.rubyeye.xmemcached.utils.ByteUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.code.yanf4j.buffer.IoBuffer;
 import com.google.code.yanf4j.core.Session;
 import com.google.code.yanf4j.core.CodecFactory.Decoder;
 import com.google.code.yanf4j.util.ByteBufferMatcher;
@@ -44,9 +43,9 @@ public class MemcachedDecoder implements Decoder {
 	 * shift-and algorithm for ByteBuffer's match
 	 */
 	public static final ByteBufferMatcher SPLIT_MATCHER = new ShiftAndByteBufferMatcher(
-			ByteUtils.SPLIT);
+			IoBuffer.wrap(ByteUtils.SPLIT));
 
-	public Object decode(ByteBuffer buffer, Session origSession) {
+	public Object decode(IoBuffer buffer, Session origSession) {
 		MemcachedTCPSession session = (MemcachedTCPSession) origSession;
 		if (session.getCurrentCommand() != null) {
 			return decode0(buffer, session);
@@ -56,8 +55,8 @@ public class MemcachedDecoder implements Decoder {
 		}
 	}
 
-	private Object decode0(ByteBuffer buffer, MemcachedTCPSession session) {
-		if (session.getCurrentCommand().decode(session, buffer)) {
+	private Object decode0(IoBuffer buffer, MemcachedTCPSession session) {
+		if (session.getCurrentCommand().decode(session, buffer.buf())) {
 			final Command command = session.getCurrentCommand();
 			session.setCurrentCommand(null);
 			return command;
