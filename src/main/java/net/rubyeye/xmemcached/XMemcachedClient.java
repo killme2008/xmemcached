@@ -2246,6 +2246,9 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 	@SuppressWarnings("unchecked")
 	public KeyIterator getKeyIterator(InetSocketAddress address)
 			throws MemcachedException, TimeoutException, InterruptedException {
+		if(address==null) {
+			throw new IllegalArgumentException("null address");
+		}
 		Queue<Session> sessions = this.connector.getSessionByAddress(address);
 		if (sessions == null || sessions.size() == 0) {
 			throw new MemcachedException(

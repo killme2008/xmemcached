@@ -20,7 +20,7 @@ import com.google.code.yanf4j.core.Session;
  * @author dennis
  * 
  */
-public class KeyIteratorImpl implements KeyIterator {
+public final class KeyIteratorImpl implements KeyIterator {
 	private final LinkedList<Integer> itemNumbersList;
 	private LinkedList<String> currentKeyList;
 	private final MemcachedClient memcachedClient;
