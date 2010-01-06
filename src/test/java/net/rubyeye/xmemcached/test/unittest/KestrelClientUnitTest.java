@@ -244,7 +244,8 @@ public class KestrelClientUnitTest extends TestCase {
 		}
 	}
 
-	public void testConcurrentAccess() throws Exception {
+	
+	public void ignoreTestConcurrentAccess() throws Exception {
 		int threadCount = 100;
 		CyclicBarrier cyclicBarrier = new CyclicBarrier(threadCount + 1);
 		for (int i = 0; i < threadCount; i++) {
@@ -256,7 +257,7 @@ public class KestrelClientUnitTest extends TestCase {
 	}
 	
 	public void testHearBeat()throws Exception{
-		Thread.sleep(60*1000);
+		Thread.sleep(30*1000);
 		this.memcachedClient.set("queue1", 0, "hello");
 		assertEquals("hello",this.memcachedClient.get("queue1"));
 	}

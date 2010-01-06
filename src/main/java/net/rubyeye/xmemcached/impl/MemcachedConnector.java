@@ -19,9 +19,11 @@ import java.nio.channels.SocketChannel;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Queue;
+import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -132,6 +134,16 @@ public class MemcachedConnector extends SocketChannelController implements
 				}
 			}
 		}
+	}
+
+	@Override
+	public Set<Session> getSessionSet() {
+		Collection<Queue<Session>> sessionQueues=this.sessionMap.values();
+		Set<Session> result=new HashSet<Session>();
+		for(Queue<Session> queue:sessionQueues){
+			result.addAll(queue);
+		}
+		return result;
 	}
 
 	public final void setHealSessionInterval(long healConnectionInterval) {
