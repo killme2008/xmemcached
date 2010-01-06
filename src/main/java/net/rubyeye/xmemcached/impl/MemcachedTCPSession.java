@@ -42,7 +42,7 @@ public class MemcachedTCPSession extends NioTCPSession implements
 	/**
 	 * Command which are already sent
 	 */
-	protected BlockingQueue<Command> executingCmds;
+	protected BlockingQueue<Command> commandAlreadySent;
 
 	private volatile int weight;
 
@@ -77,7 +77,7 @@ public class MemcachedTCPSession extends NioTCPSession implements
 				this.sendBufferSize = 8 * 1024;
 			}
 		}
-		this.executingCmds = new LinkedTransferQueue<Command>();
+		this.commandAlreadySent = new LinkedTransferQueue<Command>();
 	}
 
 	@Override
@@ -106,7 +106,7 @@ public class MemcachedTCPSession extends NioTCPSession implements
 			 * optimieze commands
 			 */
 			currentCommand = this.optimiezer.optimize(currentCommand,
-					this.writeQueue, this.executingCmds, this.sendBufferSize);
+					this.writeQueue, this.commandAlreadySent, this.sendBufferSize);
 		}
 		currentCommand.setStatus(OperationStatus.WRITING);
 		return currentCommand;
@@ -140,7 +140,7 @@ public class MemcachedTCPSession extends NioTCPSession implements
 	 */
 	private final Command takeExecutingCommand() {
 		try {
-			return this.executingCmds.take();
+			return this.commandAlreadySent.take();
 		} catch (InterruptedException e) {
 			Thread.currentThread().interrupt();
 		}
@@ -161,7 +161,7 @@ public class MemcachedTCPSession extends NioTCPSession implements
 	}
 
 	public final void addCommand(Command command) {
-		this.executingCmds.add(command);
+		this.commandAlreadySent.add(command);
 	}
 
 	public final void setCurrentCommand(Command cmd) {
@@ -173,7 +173,6 @@ public class MemcachedTCPSession extends NioTCPSession implements
 	}
 
 	public final void takeCurrentCommand() {
-		final Command command = takeExecutingCommand();
-		setCurrentCommand(command);
+		setCurrentCommand(takeExecutingCommand());
 	}
 }

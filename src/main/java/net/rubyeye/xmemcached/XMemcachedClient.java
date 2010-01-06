@@ -102,6 +102,14 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 		this.connector.setMergeFactor(mergeFactor);
 	}
 
+	public final MemcachedSessionLocator getSessionLocator() {
+		return this.sessionLocator;
+	}
+
+	public final CommandFactory getCommandFactory() {
+		return this.commandFactory;
+	}
+
 	/*
 	 * (non-Javadoc)
 	 * 

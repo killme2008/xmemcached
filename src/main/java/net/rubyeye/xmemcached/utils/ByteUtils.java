@@ -203,6 +203,9 @@ public final class ByteUtils {
 	 * @param buffer
 	 */
 	public static final String nextLine(ByteBuffer buffer) {
+		if(buffer==null) {
+			return null;
+		}
 		/**
 		 * 测试表明采用 Shift-And算法匹配 >BM算法匹配效率 > 朴素匹配 > KMP匹配，
 		 * 如果你有更好的建议，请email给我(killme2008@gmail.com)

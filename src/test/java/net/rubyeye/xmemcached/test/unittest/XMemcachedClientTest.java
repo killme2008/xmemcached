@@ -1335,32 +1335,38 @@ public abstract class XMemcachedClientTest extends TestCase {
 	}
 
 	public void testKeyIterator() throws Exception {
-		Collection<InetSocketAddress> avaliableServers = this.memcachedClient
-				.getAvaliableServers();
-		InetSocketAddress address = avaliableServers.iterator().next();
-		KeyIterator it = this.memcachedClient.getKeyIterator(address);
-		while(it.hasNext()){
-			this.memcachedClient.delete(it.next());
+		if (this.memcachedClient.getProtocol() == Protocol.Text) {
+			Collection<InetSocketAddress> avaliableServers = this.memcachedClient
+					.getAvaliableServers();
+			InetSocketAddress address = avaliableServers.iterator().next();
+			KeyIterator it = this.memcachedClient.getKeyIterator(address);
+			while (it.hasNext()) {
+				this.memcachedClient.delete(it.next());
+			}
+			it = this.memcachedClient.getKeyIterator(address);
+			Assert.assertFalse(it.hasNext());
+			try {
+				it.next();
+				Assert.fail();
+			} catch (ArrayIndexOutOfBoundsException e) {
+				Assert.assertTrue(true);
+			}
+			for (int i = 0; i < 10; i++) {
+				this.memcachedClient.set(String.valueOf(i), 0, i);
+			}
+			it = this.memcachedClient.getKeyIterator(address);
+			Assert.assertTrue(it.hasNext());
+			Assert.assertEquals(address, it.getServerAddress());
+			while (it.hasNext()) {
+				String key = it.next();
+				Assert.assertEquals(Integer.parseInt(key), this.memcachedClient
+						.get(key));
+			}
+			Assert.assertFalse(it.hasNext());
+		} else {
+			// ignore
 		}
-		it = this.memcachedClient.getKeyIterator(address);
-		Assert.assertFalse(it.hasNext());
-		try {
-			it.next();
-			Assert.fail();
-		} catch (ArrayIndexOutOfBoundsException e) {
-			Assert.assertTrue(true);
-		}
-		for(int i=0;i<10;i++){
-			this.memcachedClient.set(String.valueOf(i), 0, i);
-		}
-		it = this.memcachedClient.getKeyIterator(address);
-		Assert.assertTrue(it.hasNext());
-		Assert.assertEquals(address,it.getServerAddress());
-		while(it.hasNext()){
-			String key=it.next();
-			Assert.assertEquals(Integer.parseInt(key),this.memcachedClient.get(key));
-		}
-		Assert.assertFalse(it.hasNext());
+
 	}
 
 }

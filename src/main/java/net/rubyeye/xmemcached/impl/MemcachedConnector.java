@@ -81,7 +81,7 @@ public class MemcachedConnector extends SocketChannelController implements
 
 		@Override
 		public void run() {
-			while (isStarted() && !Thread.currentThread().isInterrupted()) {
+			while (isStarted()) {
 
 				try {
 					ReconnectRequest request = MemcachedConnector.this.waitingQueue
@@ -126,9 +126,7 @@ public class MemcachedConnector extends SocketChannelController implements
 						MemcachedConnector.this.waitingQueue.add(request);
 					}
 				} catch (InterruptedException e) {
-					Thread.currentThread().interrupt();
-					break;
-					// log.info("Stoping session monitor ...");
+					//ignore,check status
 				} catch (Exception e) {
 					log.error("SessionMonitor connect error", e);
 				}
@@ -150,7 +148,7 @@ public class MemcachedConnector extends SocketChannelController implements
 	}
 
 	public Protocol getProtocol() {
-		return protocol;
+		return this.protocol;
 	}
 
 	protected MemcachedSessionLocator sessionLocator;
@@ -239,17 +237,17 @@ public class MemcachedConnector extends SocketChannelController implements
 		}
 		try {
 			if (!((SocketChannel) key.channel()).finishConnect()) {
-				future.setException(new IOException("Connect to "
+				future.failure(new IOException("Connect to "
 						+ future.getInetSocketAddress().getHostName() + ":"
 						+ future.getInetSocketAddress().getPort() + " fail"));
 			} else {
 				key.attach(null);
 				addSession(createSession((SocketChannel) key.channel(), future
 						.getWeight()));
-				future.setConnected(true);
+				future.setResult(Boolean.TRUE);
 			}
 		} catch (Exception e) {
-			future.setException(e);
+			future.failure(e);
 			throw new IOException("Connect to "
 					+ future.getInetSocketAddress().getHostName() + ":"
 					+ future.getInetSocketAddress().getPort() + " fail,"
@@ -284,7 +282,7 @@ public class MemcachedConnector extends SocketChannelController implements
 					SelectionKey.OP_CONNECT, future);
 		} else {
 			addSession(createSession(socketChannel, weight));
-			future.setConnected(true);
+			future.setResult(true);
 		}
 		return future;
 	}
