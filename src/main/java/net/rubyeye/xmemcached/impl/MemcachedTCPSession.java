@@ -46,6 +46,8 @@ public class MemcachedTCPSession extends NioTCPSession implements
 
 	private volatile int weight;
 
+	private int order;
+
 	private final AtomicReference<Command> currentCommand = new AtomicReference<Command>();
 
 	private SocketAddress remoteSocketAddress; // prevent channel is closed
@@ -80,6 +82,20 @@ public class MemcachedTCPSession extends NioTCPSession implements
 		this.commandAlreadySent = new LinkedTransferQueue<Command>();
 	}
 
+	public final int getOrder() {
+		return this.order;
+	}
+
+	public final void setOrder(int order) {
+		this.order = order;
+	}
+
+	@Override
+	public String toString() {
+		return getRemoteSocketAddress().getHostName() + ":"
+				+ getRemoteSocketAddress().getPort();
+	}
+
 	@Override
 	public InetSocketAddress getRemoteSocketAddress() {
 		InetSocketAddress result = super.getRemoteSocketAddress();
@@ -106,7 +122,8 @@ public class MemcachedTCPSession extends NioTCPSession implements
 			 * optimieze commands
 			 */
 			currentCommand = this.optimiezer.optimize(currentCommand,
-					this.writeQueue, this.commandAlreadySent, this.sendBufferSize);
+					this.writeQueue, this.commandAlreadySent,
+					this.sendBufferSize);
 		}
 		currentCommand.setStatus(OperationStatus.WRITING);
 		return currentCommand;

@@ -28,6 +28,7 @@ import net.rubyeye.xmemcached.command.binary.BinaryVersionCommand;
 import net.rubyeye.xmemcached.command.text.TextGetOneCommand;
 import net.rubyeye.xmemcached.command.text.TextVersionCommand;
 import net.rubyeye.xmemcached.monitor.StatisticsHandler;
+import net.rubyeye.xmemcached.utils.InetSocketAddressWrapper;
 import net.rubyeye.xmemcached.utils.Protocol;
 
 import org.slf4j.Logger;
@@ -122,7 +123,7 @@ public class MemcachedHandler extends HandlerAdapter {
 	 */
 	@Override
 	public final void onSessionClosed(Session session) {
-		this.client.getConnector().removeSession((MemcachedTCPSession) session);
+		this.client.getConnector().removeSession(session);
 		if (this.client.getConnector().isStarted()
 				&& ((MemcachedTCPSession) session).isAllowReconnect()) {
 			reconnect(session);
@@ -217,9 +218,13 @@ public class MemcachedHandler extends HandlerAdapter {
 		if (!this.client.isShutdown()) {
 			log.debug("Add reconnectRequest to connector "
 					+ session.getRemoteSocketAddress());
+			MemcachedTCPSession memcachedTCPSession = (MemcachedTCPSession) session;
+			InetSocketAddressWrapper inetSocketAddressWrapper = new InetSocketAddressWrapper(session
+					.getRemoteSocketAddress(), memcachedTCPSession
+					.getOrder());
 			this.client.getConnector().addToWatingQueue(
-					new ReconnectRequest(session.getRemoteSocketAddress(), 0,
-							((MemcachedTCPSession) session).getWeight()));
+					new ReconnectRequest(inetSocketAddressWrapper, 0, ((MemcachedTCPSession) session)
+							.getWeight()));
 		}
 	}
 

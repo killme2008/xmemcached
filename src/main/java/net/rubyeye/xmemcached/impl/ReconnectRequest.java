@@ -22,7 +22,7 @@
  */
 package net.rubyeye.xmemcached.impl;
 
-import java.net.InetSocketAddress;
+import net.rubyeye.xmemcached.utils.InetSocketAddressWrapper;
 
 /**
  * Auto reconnect request
@@ -30,38 +30,42 @@ import java.net.InetSocketAddress;
  * @author dennis
  * 
  */
-public class ReconnectRequest {
+public final class ReconnectRequest {
 
-	private InetSocketAddress address;
+	private InetSocketAddressWrapper inetSocketAddressWrapper;
 	private int tries;
 
 	private int weight;
 
-	public ReconnectRequest(InetSocketAddress address, int tries, int weight) {
+	public ReconnectRequest(InetSocketAddressWrapper inetSocketAddressWrapper, int tries, int weight) {
 		super();
-		this.setAddress(address);
+		this.setInetSocketAddressWrapper(inetSocketAddressWrapper);
 		this.setTries(tries); // record reconnect times
 		this.weight = weight;
 	}
 
-	public final void setAddress(InetSocketAddress address) {
-		this.address = address;
+
+	public final InetSocketAddressWrapper getInetSocketAddressWrapper() {
+		return this.inetSocketAddressWrapper;
 	}
 
-	public final InetSocketAddress getAddress() {
-		return address;
+
+	public final void setInetSocketAddressWrapper(
+			InetSocketAddressWrapper inetSocketAddressWrapper) {
+		this.inetSocketAddressWrapper = inetSocketAddressWrapper;
 	}
+
 
 	public final void setTries(int tries) {
 		this.tries = tries;
 	}
 
 	public final int getTries() {
-		return tries;
+		return this.tries;
 	}
 
 	public final int getWeight() {
-		return weight;
+		return this.weight;
 	}
 
 	public final void setWeight(int weight) {

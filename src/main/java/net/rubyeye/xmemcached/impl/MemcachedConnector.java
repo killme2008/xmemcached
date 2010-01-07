@@ -41,6 +41,7 @@ import net.rubyeye.xmemcached.command.Command;
 import net.rubyeye.xmemcached.exception.MemcachedException;
 import net.rubyeye.xmemcached.networking.Connector;
 import net.rubyeye.xmemcached.networking.MemcachedSession;
+import net.rubyeye.xmemcached.utils.InetSocketAddressWrapper;
 import net.rubyeye.xmemcached.utils.Protocol;
 
 import com.google.code.yanf4j.config.Configuration;
@@ -88,11 +89,14 @@ public class MemcachedConnector extends SocketChannelController implements
 				try {
 					ReconnectRequest request = MemcachedConnector.this.waitingQueue
 							.take();
-					InetSocketAddress address = request.getAddress();
+					InetSocketAddress address = request
+							.getInetSocketAddressWrapper()
+							.getInetSocketAddress();
 					boolean connected = false;
 					int tries = 0;
 					while (tries < 1) {
-						Future<Boolean> future = connect(address, request
+						Future<Boolean> future = connect(request
+								.getInetSocketAddressWrapper(), request
 								.getWeight());
 						tries++;
 						request.setTries(request.getTries() + 1);
@@ -128,7 +132,7 @@ public class MemcachedConnector extends SocketChannelController implements
 						MemcachedConnector.this.waitingQueue.add(request);
 					}
 				} catch (InterruptedException e) {
-					//ignore,check status
+					// ignore,check status
 				} catch (Exception e) {
 					log.error("SessionMonitor connect error", e);
 				}
@@ -138,9 +142,9 @@ public class MemcachedConnector extends SocketChannelController implements
 
 	@Override
 	public Set<Session> getSessionSet() {
-		Collection<Queue<Session>> sessionQueues=this.sessionMap.values();
-		Set<Session> result=new HashSet<Session>();
-		for(Queue<Session> queue:sessionQueues){
+		Collection<Queue<Session>> sessionQueues = this.sessionMap.values();
+		Set<Session> result = new HashSet<Session>();
+		for (Queue<Session> queue : sessionQueues) {
 			result.addAll(queue);
 		}
 		return result;
@@ -203,11 +207,14 @@ public class MemcachedConnector extends SocketChannelController implements
 		Iterator<ReconnectRequest> it = this.waitingQueue.iterator();
 		while (it.hasNext()) {
 			ReconnectRequest request = it.next();
-			if (request.getAddress().equals(inetSocketAddress)) {
+			if (request.getInetSocketAddressWrapper().getInetSocketAddress()
+					.equals(inetSocketAddress)) {
 				it.remove();
 			}
 		}
 	}
+
+	private static final MemcachedTCPSessionComparator sessionComparator = new MemcachedTCPSessionComparator();
 
 	public final void updateSessions() {
 		Collection<Queue<Session>> sessionCollection = this.sessionMap.values();
@@ -215,6 +222,9 @@ public class MemcachedConnector extends SocketChannelController implements
 		for (Queue<Session> sessions : sessionCollection) {
 			sessionList.addAll(sessions);
 		}
+		// sort the sessions to keep order
+		Collections.sort(sessionList, sessionComparator);
+		System.out.println(sessionList);
 		this.sessionLocator.updateSessions(sessionList);
 	}
 
@@ -255,7 +265,7 @@ public class MemcachedConnector extends SocketChannelController implements
 			} else {
 				key.attach(null);
 				addSession(createSession((SocketChannel) key.channel(), future
-						.getWeight()));
+						.getWeight(), future.getOrder()));
 				future.setResult(Boolean.TRUE);
 			}
 		} catch (Exception e) {
@@ -268,9 +278,10 @@ public class MemcachedConnector extends SocketChannelController implements
 	}
 
 	protected MemcachedTCPSession createSession(SocketChannel socketChannel,
-			int weight) {
+			int weight, int order) {
 		MemcachedTCPSession session = (MemcachedTCPSession) buildSession(socketChannel);
 		session.setWeight(weight);
+		session.setOrder(order);
 		this.selectorManager.registerSession(session, EventType.ENABLE_READ);
 		session.start();
 		session.onEvent(EventType.CONNECTED, null);
@@ -281,19 +292,20 @@ public class MemcachedConnector extends SocketChannelController implements
 		this.waitingQueue.add(request);
 	}
 
-	public Future<Boolean> connect(InetSocketAddress address, int weight)
-			throws IOException {
-		if (address == null) {
+	public Future<Boolean> connect(InetSocketAddressWrapper addressWrapper,
+			int weight) throws IOException {
+		if (addressWrapper == null) {
 			throw new NullPointerException("Null Address");
 		}
 		SocketChannel socketChannel = SocketChannel.open();
 		configureSocketChannel(socketChannel);
-		ConnectFuture future = new ConnectFuture(address, weight);
-		if (!socketChannel.connect(address)) {
+		ConnectFuture future = new ConnectFuture(addressWrapper, weight);
+		if (!socketChannel.connect(addressWrapper.getInetSocketAddress())) {
 			this.selectorManager.registerChannel(socketChannel,
 					SelectionKey.OP_CONNECT, future);
 		} else {
-			addSession(createSession(socketChannel, weight));
+			addSession(createSession(socketChannel, weight, addressWrapper
+					.getOrder()));
 			future.setResult(true);
 		}
 		return future;

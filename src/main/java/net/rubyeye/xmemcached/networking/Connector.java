@@ -34,6 +34,7 @@ import net.rubyeye.xmemcached.buffer.BufferAllocator;
 import net.rubyeye.xmemcached.command.Command;
 import net.rubyeye.xmemcached.exception.MemcachedException;
 import net.rubyeye.xmemcached.impl.ReconnectRequest;
+import net.rubyeye.xmemcached.utils.InetSocketAddressWrapper;
 
 import com.google.code.yanf4j.core.Controller;
 import com.google.code.yanf4j.core.Session;
@@ -74,7 +75,7 @@ public interface Connector extends Controller {
 	@SuppressWarnings("unchecked")
 	public void setSocketOptions(Map<SocketOption, Object> options);
 
-	public Future<Boolean> connect(InetSocketAddress address, int weight)
+	public Future<Boolean> connect(InetSocketAddressWrapper addressWrapper, int weight)
 			throws IOException;
 
 	public void updateSessions();

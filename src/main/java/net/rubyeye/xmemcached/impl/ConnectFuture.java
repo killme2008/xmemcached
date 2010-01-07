@@ -24,6 +24,8 @@ package net.rubyeye.xmemcached.impl;
 
 import java.net.InetSocketAddress;
 
+import net.rubyeye.xmemcached.utils.InetSocketAddressWrapper;
+
 import com.google.code.yanf4j.core.impl.FutureImpl;
 
 /**
@@ -35,16 +37,20 @@ import com.google.code.yanf4j.core.impl.FutureImpl;
 public class ConnectFuture extends FutureImpl<Boolean> {
 
 	private final int weight;
-	private final InetSocketAddress inetSocketAddress;
+	private final InetSocketAddressWrapper inetSocketAddressWrapper;
 
-	public ConnectFuture(InetSocketAddress inetSocketAddress, int weight) {
+	public ConnectFuture(InetSocketAddressWrapper inetSocketAddressWrapper, int weight) {
 		super();
-		this.inetSocketAddress = inetSocketAddress;
+		this.inetSocketAddressWrapper = inetSocketAddressWrapper;
 		this.weight = weight;
 	}
 
 	public final InetSocketAddress getInetSocketAddress() {
-		return this.inetSocketAddress;
+		return this.inetSocketAddressWrapper.getInetSocketAddress();
+	}
+	
+	public final int getOrder(){
+		return this.inetSocketAddressWrapper.getOrder();
 	}
 
 	public final int getWeight() {

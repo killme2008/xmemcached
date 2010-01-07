@@ -56,7 +56,7 @@ public class SimpleExample {
 		}
 		try {
 			memcachedClient.shutdown();
-		} catch (IOException e) {
+		} catch (Exception e) {
 			System.err.println("Shutdown MemcachedClient fail");
 			e.printStackTrace();
 		}
