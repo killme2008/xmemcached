@@ -28,6 +28,7 @@ import java.util.List;
 
 import net.rubyeye.xmemcached.HashAlgorithm;
 import net.rubyeye.xmemcached.MemcachedSessionLocator;
+import net.rubyeye.xmemcached.networking.MemcachedSession;
 
 import com.google.code.yanf4j.core.Session;
 /**
@@ -69,7 +70,7 @@ public class ElectionMemcachedSessionLocator implements MemcachedSessionLocator 
 		for (Session session : copySessionList) {
 			long hash = 0;
 			if (session instanceof MemcachedTCPSession) {
-				MemcachedTCPSession tcpSession = (MemcachedTCPSession) session;
+				MemcachedSession tcpSession = (MemcachedSession) session;
 				for (int i = 0; i < tcpSession.getWeight(); i++) {
 					hash = this.hashAlgorithm.hash(session
 							.getRemoteSocketAddress().toString()

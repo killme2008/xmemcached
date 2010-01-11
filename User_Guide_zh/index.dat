@@ -1,8 +1,8 @@
-id	20091201142222
+id	20100111191959
 type	
-title	用户指南
+title	User_Guide_zh  
 chars	UTF-8
 icon	favicon.ico
-source	http://code.google.com/p/xmemcached/wiki/User_Guide_zh
+source	http://code.google.com/p/xmemcached/wiki/User_Guide_zh?ts=1263208811&updated=User_Guide_zh
 comment	
-folder	xmemcached
+folder	

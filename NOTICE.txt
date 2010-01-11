@@ -7,6 +7,36 @@ Xmemcached Change log
 
 *******************************************
 
+2010-01-11
+
+-----Xmemcached 1.2.2 released----------------
+
+1.Add KeyIterator for iterate keys in memcached.It is avaliable only when using text protocol.You can get a KeyIterator through:
+
+MemcachedClient client=...
+KeyIterator it=client.getKeyIterator(AddrUtil.getOneAddress("localhost:11211"));
+while(it.hasNext())
+{
+   String key=it.next();
+}
+2.Add a new class "net.rubyeye.xmemcached.Counter",which encapsulate the incr/decr methods for easy using,just like AtomicLong.
+
+Counter counter=client.getCounter("counter",0);
+counter.incrementAndGet();
+counter.decrementAndGet();
+counter.addAndGet(-10);
+
+3.Fix bugs,issue 71,issue 72,issue 70 etc.
+
+4.Deprecated net.rubyeye.xmemcached.buffer.BufferAllocator.It is useless now even if you configure it.
+
+5.Upgrade yanf4j to 1.1.0, yanf4j also fix some bugs and introduce mina's IoBuffer.
+
+----------------------------------------------------------
+
+
+
+
 2009-12-03
 
 ------Xmemcached 1.2.1 Released----------------

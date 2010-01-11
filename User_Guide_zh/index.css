@@ -1,4 +1,4 @@
-/* ::::: http://www.gstatic.com/codesite/ph/2429932258724909799/css/ph_core.css ::::: */
+/* ::::: http://www.gstatic.com/codesite/ph/1676283234471223295/css/ph_core.css ::::: */
 
 a:link { color: rgb(0, 0, 204); }
 body { margin: 3px 8px; background: rgb(255, 255, 255) none repeat scroll 0% 0%; }
@@ -49,6 +49,7 @@ table.st span { padding: 0pt 4px; }
 #pname { font-size: 180%; font-weight: bold; }
 #psum { font-style: italic; margin-top: 3px; }
 .vt { vertical-align: top; }
+.indicator { font-size: x-small; color: rgb(0, 0, 204); }
 div.h4, table.h4 { border-top: 1px solid rgb(51, 102, 204); padding: 2px; background-color: rgb(229, 236, 249); margin-bottom: 2px; font-weight: bold; position: relative; margin-top: 2px; }
 .mainhdr { border-top: 1px solid rgb(51, 102, 204); padding: 2px; background-color: rgb(229, 236, 249); font-weight: bold; font-size: 133%; }
 h1 { font-size: x-large; margin-top: 0px; }
@@ -113,7 +114,7 @@ div#keys_help th { color: yellow; text-align: left; }
 div#keys_help td { font-weight: normal; color: white; }
 td.shortcut { text-align: right; }
 span.letter { color: rgb(136, 221, 0); font-weight: bold; font-family: monospace; font-size: medium; }
-/* ::::: http://www.gstatic.com/codesite/ph/2429932258724909799/css/ph_detail.css ::::: */
+/* ::::: http://www.gstatic.com/codesite/ph/1676283234471223295/css/ph_detail.css ::::: */
 
 .pmeta_bubble_bg { background: rgb(229, 236, 249) none repeat scroll 0% 0%; margin-bottom: 0.6em; }
 .pmeta { text-align: left; }
@@ -178,7 +179,6 @@ div td .exclconflict { color: rgb(170, 0, 51); }
 .menuIcon.off { background: transparent url('dropdown_sprite.gif') no-repeat scroll 0pt -42px; }
 .menuIcon.on { background: transparent url('dropdown_sprite.gif') no-repeat scroll 0pt -28px; }
 .menuIcon.down { background: transparent url('dropdown_sprite.gif') no-repeat scroll 0pt 0pt; }
-.results th a, .results th a:visited { background: transparent url('downarrow.gif') no-repeat scroll right top; }
 #wikimaincol { padding-top: 6px; padding-left: 1em; }
 #sidebarcontainer { padding: 4px 2px 2px; overflow: hidden; width: 20em; }
 .sidebartop ul { margin: 0pt 0pt 0pt 0.5em; padding-left: 0pt ! important; list-style-type: none; list-style-image: none; list-style-position: outside; }

@@ -52,6 +52,7 @@ import net.rubyeye.xmemcached.impl.MemcachedTCPSession;
 import net.rubyeye.xmemcached.impl.ReconnectRequest;
 import net.rubyeye.xmemcached.monitor.XMemcachedMbeanServer;
 import net.rubyeye.xmemcached.networking.Connector;
+import net.rubyeye.xmemcached.networking.MemcachedSession;
 import net.rubyeye.xmemcached.transcoders.CachedData;
 import net.rubyeye.xmemcached.transcoders.SerializingTranscoder;
 import net.rubyeye.xmemcached.transcoders.Transcoder;
@@ -353,7 +354,7 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 		final List<String> result = new ArrayList<String>();
 		for (Session session : this.connector.getSessionSet()) {
 			InetSocketAddress socketAddress = session.getRemoteSocketAddress();
-			int weight = ((MemcachedTCPSession) session).getWeight();
+			int weight = ((MemcachedSession) session).getWeight();
 			result.add(socketAddress.getHostName() + ":"
 					+ socketAddress.getPort() + "(weight=" + weight + ")");
 		}
@@ -390,7 +391,7 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 				for (Session session : sessionQueue) {
 					if (session != null) {
 						// Disable auto reconnection
-						((MemcachedTCPSession) session)
+						((MemcachedSession) session)
 								.setAllowReconnect(false);
 						// Close connection
 						session.close();

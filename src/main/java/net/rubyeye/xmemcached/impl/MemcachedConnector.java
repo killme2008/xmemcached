@@ -214,7 +214,7 @@ public class MemcachedConnector extends SocketChannelController implements
 		}
 	}
 
-	private static final MemcachedTCPSessionComparator sessionComparator = new MemcachedTCPSessionComparator();
+	private static final MemcachedSessionComparator sessionComparator = new MemcachedSessionComparator();
 
 	public final void updateSessions() {
 		Collection<Queue<Session>> sessionCollection = this.sessionMap.values();

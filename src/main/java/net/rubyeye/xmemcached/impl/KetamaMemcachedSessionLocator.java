@@ -20,6 +20,7 @@ import java.util.TreeMap;
 
 import net.rubyeye.xmemcached.HashAlgorithm;
 import net.rubyeye.xmemcached.MemcachedSessionLocator;
+import net.rubyeye.xmemcached.networking.MemcachedSession;
 
 import com.google.code.yanf4j.core.Session;
 
@@ -80,7 +81,7 @@ public class KetamaMemcachedSessionLocator implements MemcachedSessionLocator {
 			 */
 			int numReps = NUM_REPS;
 			if (session instanceof MemcachedTCPSession) {
-				numReps *= ((MemcachedTCPSession) session).getWeight();
+				numReps *= ((MemcachedSession) session).getWeight();
 			}
 			if (alg == HashAlgorithm.KETAMA_HASH) {
 				for (int i = 0; i < numReps / 4; i++) {

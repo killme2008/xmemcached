@@ -33,4 +33,5 @@ public interface MemcachedSession {
 	public void setAllowReconnect(boolean allow);
 	public boolean isAllowReconnect();
 	public void setBufferAllocator(BufferAllocator allocator);
+	public int getOrder();
 }

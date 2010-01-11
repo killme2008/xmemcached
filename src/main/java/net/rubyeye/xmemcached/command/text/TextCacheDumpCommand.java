@@ -8,6 +8,7 @@ import java.util.concurrent.CountDownLatch;
 import net.rubyeye.xmemcached.command.Command;
 import net.rubyeye.xmemcached.command.CommandType;
 import net.rubyeye.xmemcached.impl.MemcachedTCPSession;
+import net.rubyeye.xmemcached.networking.MemcachedSession;
 import net.rubyeye.xmemcached.utils.ByteUtils;
 
 import com.google.code.yanf4j.buffer.IoBuffer;
@@ -48,7 +49,7 @@ public class TextCacheDumpCommand extends Command {
 		return false;
 	}
 
-	private final boolean done(MemcachedTCPSession session) {
+	private final boolean done(MemcachedSession session) {
 		countDownLatch();
 		return true;
 	}

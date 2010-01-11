@@ -17,6 +17,7 @@ import java.util.List;
 
 import net.rubyeye.xmemcached.HashAlgorithm;
 import net.rubyeye.xmemcached.MemcachedSessionLocator;
+import net.rubyeye.xmemcached.networking.MemcachedSession;
 
 import com.google.code.yanf4j.core.Session;
 
@@ -84,7 +85,7 @@ public class ArrayMemcachedSessionLocator implements MemcachedSessionLocator {
 				copySessions.size() * 2);
 		for (Session session : copySessions) {
 			if (session instanceof MemcachedTCPSession) {
-				int weight = ((MemcachedTCPSession) session).getWeight();
+				int weight = ((MemcachedSession) session).getWeight();
 				for (int i = 0; i < weight; i++) {
 					newSessions.add(session);
 				}
