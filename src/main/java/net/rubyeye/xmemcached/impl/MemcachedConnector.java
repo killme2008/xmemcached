@@ -224,7 +224,6 @@ public class MemcachedConnector extends SocketChannelController implements
 		}
 		// sort the sessions to keep order
 		Collections.sort(sessionList, sessionComparator);
-		System.out.println(sessionList);
 		this.sessionLocator.updateSessions(sessionList);
 	}
 
