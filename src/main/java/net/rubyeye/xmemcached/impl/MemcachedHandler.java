@@ -51,6 +51,8 @@ public class MemcachedHandler extends HandlerAdapter {
 
 	private ExecutorService heartBeatThreadPool;
 
+	
+	
 	/**
 	 * On receive message from memcached server
 	 */

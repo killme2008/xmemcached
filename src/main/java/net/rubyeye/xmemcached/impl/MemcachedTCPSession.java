@@ -112,11 +112,6 @@ public class MemcachedTCPSession extends NioTCPSession implements
 		if (currentCommand.getIoBuffer() == null) {
 			currentCommand.encode();
 		}
-		// Check if it is canceled.
-		if (currentCommand.isCancel()) {
-			this.writeQueue.remove();
-			return null;
-		}
 		if (currentCommand.getStatus() == OperationStatus.SENDING) {
 			/**
 			 * optimieze commands
