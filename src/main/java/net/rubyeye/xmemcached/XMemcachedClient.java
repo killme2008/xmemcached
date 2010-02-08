@@ -2191,7 +2191,7 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 
 	public final Collection<InetSocketAddress> getAvaliableServers() {
 		Set<Session> sessionSet = this.connector.getSessionSet();
-		Set<InetSocketAddress> result = new HashSet<InetSocketAddress>();
+ 		Set<InetSocketAddress> result = new HashSet<InetSocketAddress>();
 		for (Session session : sessionSet) {
 			result.add(session.getRemoteSocketAddress());
 		}

@@ -56,8 +56,13 @@ public class MemcachedClientStateListenerUnitTest extends TestCase {
 	public void testConnected() throws Exception {
 		Properties properties = ResourcesUtils
 				.getResourceAsProperties("test.properties");
-		memcachedClient.addServer(properties
-				.getProperty("test.memcached.servers"));
+		String serversString = properties.getProperty("test.memcached.servers");
+		List<InetSocketAddress> list = AddrUtil.getAddresses(serversString);
+		memcachedClient.addServer(serversString);
+		synchronized (this) {
+			while (memcachedClient.getAvaliableServers().size() < list.size())
+				wait(1000);
+		}
 		assertEquals(1 + memcachedClient.getAvaliableServers().size(), listener
 				.getNum());
 	}
@@ -73,10 +78,14 @@ public class MemcachedClientStateListenerUnitTest extends TestCase {
 				wait(1000);
 		}
 		int serverCount = memcachedClient.getAvaliableServers().size();
+		Thread.sleep(2000);
 		memcachedClient.shutdown();
 		synchronized (this) {
-			while (memcachedClient.getAvaliableServers().size() > 0)
+			
+			while (memcachedClient.getAvaliableServers().size() > 0){
+				//System.out.println(memcachedClient.getAvaliableServers().size());
 				wait(1000);
+			}
 		}
 		assertEquals(2 + 2 * serverCount, listener.getNum());
 	}
