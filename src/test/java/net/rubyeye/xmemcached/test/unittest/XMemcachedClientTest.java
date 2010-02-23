@@ -1332,6 +1332,16 @@ public abstract class XMemcachedClientTest extends TestCase {
 		Assert.assertEquals(100, counter.incrementAndGet());
 		Assert.assertEquals(101, counter.incrementAndGet());
 		Assert.assertEquals(100, counter.decrementAndGet());
+
+		// test issue 74
+		counter = this.memcachedClient.getCounter("issue74", 0);
+		for (int i = 0; i < 100; i++) {
+			Assert.assertEquals(i, counter.incrementAndGet());
+		}
+		for (int i = 0; i < 100; i++) {
+			counter.decrementAndGet();
+		}
+		Assert.assertEquals(0, counter.get());
 	}
 
 	public void testKeyIterator() throws Exception {
