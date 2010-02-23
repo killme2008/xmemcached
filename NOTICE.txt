@@ -7,6 +7,13 @@ Xmemcached Change log
 
 *******************************************
 
+2010-02-08
+
+-----XMemcached 1.2.3. Released--------------
+This is a bug-fixed version,and recommended to upgrade.
+
+----------------------------------------------------
+
 2010-01-11
 
 -----Xmemcached 1.2.2 released----------------
@@ -44,7 +51,7 @@ counter.addAndGet(-10);
 1.Add delete method support for Kestrel 1.2
 
 2.Add TokyoTyrantTranscoder for talking with Tokyo Tyrant.This transcoder add four bytes before value as flag.
-  
+
 3.Add new methods:
 (1)Transcoder.setCompressionThreshold(threshold) Used to set compress threshold,default is 16k.
 (2)MemcachedClient.setSanitizeKeys(true|false)   Enables/disables sanitizing keys by URLEncoding.
@@ -70,19 +77,19 @@ memcachedClient.setEnableHeartBeat(false);
 
 2.Add new methods for incr/decr,you can pass initial value as parameter now:
 public long incr(final String key, final long num, final long initValue)
-			throws TimeoutException, InterruptedException, MemcachedException;
+            throws TimeoutException, InterruptedException, MemcachedException;
 public abstract long decr(final String key, final long num, long initValue)
-			throws TimeoutException, InterruptedException, MemcachedException;
-			
+            throws TimeoutException, InterruptedException, MemcachedException;
+
 3.Bug fixed.This release has fixed some bug that is very important,included issue 57,issue 59 etc.
 
-4.Recommend upgrade. 
+4.Recommend upgrade.
 
 
 *******************************************
 
 
-2009-09-17 
+2009-09-17
 
 --------xmemcached 1.2.0-RC2-Released----------
 1.Add KestrelCommandFactory for using xmemcached to talk with kestrel(a MQ written in scala).
@@ -106,13 +113,13 @@ public void setPrimitiveAsString(boolean primitiveAsString);
 2009-09-08
 --------xmemcached 1.2.0-RC1-Released-----------
 
-1.Supports all binary protcol of memcached.Add BinaryCommandFactory class to support it.if you want to use 
+1.Supports all binary protcol of memcached.Add BinaryCommandFactory class to support it.if you want to use
 that,just add one line code:
 
-memcachedClientbuilder.setCommandFactory(new BinaryCommandFactory()); 
+memcachedClientbuilder.setCommandFactory(new BinaryCommandFactory());
 
-2.Supports hibernate-memcached,about the detail please see wiki page 
-http://code.google.com/p/xmemcached/wiki/Hibernate_memcached_integration 
+2.Supports hibernate-memcached,about the detail please see wiki page
+http://code.google.com/p/xmemcached/wiki/Hibernate_memcached_integration
 
 3.Compatible with jdk5.
 
@@ -145,7 +152,7 @@ public void addStateListener(MemcachedClientStateListener listener);
 public void removeStateListener(MemcachedClientStateListener listener);
 public Collection<MemcachedClientStateListener> getStateListeners();
 
-4.Make a new benchmark,please see 
+4.Make a new benchmark,please see
 http://xmemcached.googlecode.com/svn/trunk/benchmark/benchmark.html
 
 5.Refactoring and bug fixed.Issue 39 etc.
@@ -157,10 +164,10 @@ http://xmemcached.googlecode.com/svn/trunk/benchmark/benchmark.html
 1.Supports integrating to spring framework.for example:
 
  <bean name="memcachedClient"
-		class="net.rubyeye.xmemcached.utils.XMemcachedClientFactoryBean">
-		<property name="servers">
-			<value>localhost:12000 localhost:12001</value>
-		</property>
+        class="net.rubyeye.xmemcached.utils.XMemcachedClientFactoryBean">
+        <property name="servers">
+            <value>localhost:12000 localhost:12001</value>
+        </property>
  </bean>
 Then you can use memcachedClient bean in other beans.More information is on wiki.
 
@@ -194,13 +201,13 @@ The older version set the interval between reconnecting is 10 seconds,now set it
 
 7.Improve JMX supports.Add a new method to XMemcachedClientMBean:
      /**
-	 * Set a memcached server's weight
-	 * 
-	 * @param server
-	 * @param weight
-	 */
-	public void setServerWeight(String server, int weight);
-	
+     * Set a memcached server's weight
+     *
+     * @param server
+     * @param weight
+     */
+    public void setServerWeight(String server, int weight);
+
 Change the getServersDescription method's result,add weight to description.
 
 --------------------End--------------------------
@@ -210,23 +217,23 @@ Change the getServersDescription method's result,add weight to description.
 2009-06-07
 --------xmemcached 1.1.1-Released-----------
 1.Migrate yanf4j to 0.61
-2.Add many unit tests.Refactoring for a good Structure,It is ready to introduce 
+2.Add many unit tests.Refactoring for a good Structure,It is ready to introduce
   the memcached binary protocol support.
 3.Deprecated some classes and interfaces.Include:
   net.rubyeye.xmemcached.MemcachedProtocolHandler
   net.rubyeye.xmemcached.buffer.ArrayIoBuffer
-  
+
 4.Deprecated some methods.Includes:
                      Deprecated                                                Instead
-                     
+
     net.rubyeye.xmemcached.utils.AddrUtil.getAddress(String server) =====> getOneAddress(server)
-    net.rubyeye.xmemcached.MemcachedClient.version()                =====>  getVersions()       
+    net.rubyeye.xmemcached.MemcachedClient.version()                =====>  getVersions()
     net.rubyeye.xmemcached.MemcachedClientMemcachedClient.stats(String host, long timeout)
     net.rubyeye.xmemcached.MemcachedClientMemcachedClient.stats(String host)
-    
-5.Add some new methods.Includes:  
+
+5.Add some new methods.Includes:
       net.rubyeye.xmemcached.MemcachedClientBuilder.getCommandFactory  => CommandFactory getter/setter
-      net.rubyeye.xmemcached.MemcachedClientBuilder.setCommandFactory  
+      net.rubyeye.xmemcached.MemcachedClientBuilder.setCommandFactory
       net.rubyeye.xmemcached.MemcachedClientBuilder.setTranscoder      => Transcoder getter/setter
       net.rubyeye.xmemcached.MemcachedClientBuilder.getTranscoder
       net.rubyeye.xmemcached.MemcachedClient.getVersions()   => get all connected memcached servers's versions
@@ -241,11 +248,11 @@ Change the getServersDescription method's result,add weight to description.
                                    MemcachedDecoder
                                    MemcachedEncoder          => decode/encode commands
       net.rubyeye.xmemcached.command.text.*
-      net.rubyeye.xmemcached.command.*                       => Commmands implemented memcached text protocol   
+      net.rubyeye.xmemcached.command.*                       => Commmands implemented memcached text protocol
 7.Change CommandFactory from class to interface,TextCommandFactory implement it for creating text protocol based commands.
-      
-                                  
--------------------End--------------------- 
+
+
+-------------------End---------------------
 
 2009-05-22
 --------xmemcached 1.1.0-Released----------
@@ -253,9 +260,9 @@ Change the getServersDescription method's result,add weight to description.
 2.Refactoring:
    Move classes such as MemcachedTCPSession,MemcachedHandler,MemcachedConnector etc. from package net.rubyeye.xmemcached to  net.rubyeye.xmemcached.impl
    Introduce interfaces: MemcachedClient,MemcachedClientBuilder
-3.More Unit tests 
-4.Move 1.10 from svn trunk to branches/xmemcached-1.10 
+3.More Unit tests
+4.Move 1.10 from svn trunk to branches/xmemcached-1.10
 
--------------------End--------------------- 
+-------------------End---------------------
 
 *******************************************

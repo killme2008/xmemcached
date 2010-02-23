@@ -71,7 +71,7 @@ public class TextIncrDecrCommand extends Command {
 				countDownLatch();
 				return true;
 			} else {
-				setResult(Long.parseLong(line));
+				setResult(Long.valueOf(line.trim()));
 				countDownLatch();
 				return true;
 			}
