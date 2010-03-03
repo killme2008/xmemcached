@@ -1475,7 +1475,7 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 		if (result == null) {
 			throw new MemcachedException("Null GetsResponse");
 		}
-		while (tryCount < operation.getMaxTries()
+		while (tryCount <= operation.getMaxTries()
 				&& result != null
 				&& !sendStoreCommand(this.commandFactory.createCASCommand(key,
 						keyBytes, exp, operation.getNewValue(result.getCas(),
