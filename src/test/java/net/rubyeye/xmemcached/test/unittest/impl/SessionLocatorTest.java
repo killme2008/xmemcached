@@ -56,9 +56,11 @@ public class SessionLocatorTest extends TestCase {
 		for (int i = 1; i <= 10; i++) {
 			String key = String.valueOf(i);
 
+			Session session = sessionLocator.getSessionByKey(key);
 			assertSame(((KetamaMemcachedSessionLocator) sessionLocator)
-					.getSessionByHash(key.hashCode()), sessionLocator
-					.getSessionByKey(key));
+					.getSessionByHash(key.hashCode()), session);
+			assertSame(sessionLocator.getSessionByKey(key), session);
+			assertSame(sessionLocator.getSessionByKey(key), session);
 		}
 
 	}
