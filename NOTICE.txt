@@ -9,6 +9,10 @@ Xmemcached Change log
 
 2010-03-15
 
+-----XMemcached 1.2.4-bugfixed. Released--------------
+This is a bug fix version for some user to store more than 1M data to memcached.
+1.Fix issue 77.
+
 -----XMemcached 1.2.4. Released--------------
 
 1.Fix bugs,issue 74,issue 68.Using xmemcached to talk with TokyoTyrant is all right now.

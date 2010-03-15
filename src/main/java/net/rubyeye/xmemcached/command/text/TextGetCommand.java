@@ -40,12 +40,15 @@ import net.rubyeye.xmemcached.transcoders.CachedData;
 import net.rubyeye.xmemcached.utils.ByteUtils;
 
 import com.google.code.yanf4j.buffer.IoBuffer;
+
 /**
  * Abstract get command for text protocol
+ * 
  * @author dennis
- *
+ * 
  */
-public abstract class TextGetCommand extends Command implements MergeCommandsAware,AssocCommandAware, MapReturnValueAware{
+public abstract class TextGetCommand extends Command implements
+		MergeCommandsAware, AssocCommandAware, MapReturnValueAware {
 	protected Map<String, CachedData> returnValues;
 	private String currentReturnKey;
 	private int offset;
@@ -83,7 +86,7 @@ public abstract class TextGetCommand extends Command implements MergeCommandsAwa
 	private ParseStatus parseStatus = ParseStatus.NULL;
 
 	public static enum ParseStatus {
-		NULL, VALUE, KEY, FLAG, DATA_LEN, DATA_LEN_DONE, CAS, DATA, END
+		NULL, VALUE, KEY, FLAG, DATA_LEN, DATA_LEN_DONE, CAS, CAS_DONE, DATA, END
 	}
 
 	protected boolean wasFirst = true;
@@ -108,7 +111,7 @@ public abstract class TextGetCommand extends Command implements MergeCommandsAwa
 				byte first = buffer.get(buffer.position());
 				if (first == 'E') {
 					this.parseStatus = ParseStatus.END;
-					//dispatch result
+					// dispatch result
 					dispatch();
 					this.currentReturnKey = null;
 					continue;
@@ -170,7 +173,7 @@ public abstract class TextGetCommand extends Command implements MergeCommandsAwa
 					return false;
 				} else {
 					first = buffer.get(buffer.position());
-					//check if buffer has cas value
+					// check if buffer has cas value
 					if (first == '\n') {
 						// skip '\n'
 						buffer.position(buffer.position() + 1);
@@ -190,6 +193,13 @@ public abstract class TextGetCommand extends Command implements MergeCommandsAwa
 					final CachedData cachedData = this.returnValues
 							.get(this.currentReturnKey);
 					cachedData.setCas(Long.parseLong(item));
+					this.parseStatus = ParseStatus.CAS_DONE;
+					continue;
+				}
+			case CAS_DONE:
+				if (buffer.remaining() < 1) {
+					return false;
+				} else {
 					this.parseStatus = ParseStatus.DATA;
 					// skip '\n'
 					buffer.position(buffer.position() + 1);
@@ -280,8 +290,11 @@ public abstract class TextGetCommand extends Command implements MergeCommandsAwa
 		}
 	}
 
-	/* (non-Javadoc)
-	 * @see net.rubyeye.xmemcached.command.text.MapReturnValueAware#getReturnValues()
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * net.rubyeye.xmemcached.command.text.MapReturnValueAware#getReturnValues()
 	 */
 	public final Map<String, CachedData> getReturnValues() {
 		return this.returnValues;
@@ -296,7 +309,8 @@ public abstract class TextGetCommand extends Command implements MergeCommandsAwa
 	@Override
 	public void encode() {
 		byte[] cmdBytes = this.commandType == CommandType.GET_ONE
-				|| this.commandType == CommandType.GET_MANY ? Constants.GET : Constants.GETS;
+				|| this.commandType == CommandType.GET_MANY ? Constants.GET
+				: Constants.GETS;
 		this.ioBuffer = IoBuffer.allocate(cmdBytes.length
 				+ Constants.CRLF.length + 1 + this.keyBytes.length);
 		ByteUtils.setArguments(this.ioBuffer, cmdBytes, this.keyBytes);

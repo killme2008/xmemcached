@@ -33,6 +33,11 @@ import net.rubyeye.xmemcached.exception.MemcachedDecodeException;
 public class TokyoTyrantTranscoder implements Transcoder<Object> {
 	private SerializingTranscoder serializingTranscoder;
 
+	public TokyoTyrantTranscoder(int maxSize) {
+		serializingTranscoder = new SerializingTranscoder(maxSize);
+		serializingTranscoder.setPackZeros(false);
+	}
+	
 	public TokyoTyrantTranscoder() {
 		serializingTranscoder = new SerializingTranscoder();
 		serializingTranscoder.setPackZeros(false);
