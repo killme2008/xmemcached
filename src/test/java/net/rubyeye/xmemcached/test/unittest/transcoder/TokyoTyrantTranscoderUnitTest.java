@@ -12,7 +12,7 @@ public class TokyoTyrantTranscoderUnitTest extends TestCase {
 	TokyoTyrantTranscoder tokyoTyrantTranscoder;
 
 	public void setUp() {
-		tokyoTyrantTranscoder = new TokyoTyrantTranscoder();
+		tokyoTyrantTranscoder = new TokyoTyrantTranscoder(5*1024*1024);
 
 	}
 
@@ -48,6 +48,22 @@ public class TokyoTyrantTranscoderUnitTest extends TestCase {
 			return true;
 		}
 
+	}
+	
+	public void testEncodeDecodeLargeValue(){
+		List<Long> list=new ArrayList<Long>(1000000);
+		for(long i=0;i<1000000;i++){
+			list.add(i);
+		}
+		CachedData cachedData = tokyoTyrantTranscoder.encode(list);
+		List<Long> decodeList = (List<Long>) tokyoTyrantTranscoder.decode(cachedData);
+		assertNotSame(list, decodeList);
+		assertEquals(list, decodeList);
+		
+		List<Long> decodeList2 = (List<Long>) tokyoTyrantTranscoder.decode(cachedData);
+		assertNotSame(list, decodeList2);
+		assertNotSame(decodeList2, decodeList);
+		assertEquals(list, decodeList2);
 	}
 
 	public void testDecodeManayTimes() {
