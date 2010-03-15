@@ -7,10 +7,24 @@ Xmemcached Change log
 
 *******************************************
 
+2010-03-15
+
+-----XMemcached 1.2.4. Released--------------
+
+1.Fix bugs,issue 74,issue 68.Using xmemcached to talk with TokyoTyrant is all right now.
+2.Add unit test for bug fixed.
+3.Modify chinese user guide,fix some errors.
+
+----------------------------------------------------
+
+
 2010-02-08
 
 -----XMemcached 1.2.3. Released--------------
 This is a bug-fixed version,and recommended to upgrade.
+
+1.Fix bug issue 73
+2.Add more test.
 
 ----------------------------------------------------
 
