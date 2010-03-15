@@ -44,8 +44,6 @@ public class SerializingTranscoder extends BaseSerializingTranscoder implements
 
 	private final TranscoderUtils transcoderUtils = new TranscoderUtils(true);
 
-	
-	
 	public TranscoderUtils getTranscoderUtils() {
 		return transcoderUtils;
 	}
@@ -63,6 +61,7 @@ public class SerializingTranscoder extends BaseSerializingTranscoder implements
 	public SerializingTranscoder(int max) {
 		this.maxSize = max;
 	}
+
 	public boolean isPackZeros() {
 		return this.transcoderUtils.isPackZeros();
 	}
@@ -78,23 +77,30 @@ public class SerializingTranscoder extends BaseSerializingTranscoder implements
 	 */
 	public final Object decode(CachedData d) {
 		byte[] data = d.getData();
-		Object rv = null;
-		if ((d.getFlag() & COMPRESSED) != 0) {
+
+		int flags = d.getFlag();
+		if ((flags & COMPRESSED) != 0) {
 			data = decompress(d.getData());
 		}
-		int flags = d.getFlag() & SPECIAL_MASK;
-		if ((d.getFlag() & SERIALIZED) != 0 && data != null) {
+		flags = flags & SPECIAL_MASK;
+		return decode0(data, flags);
+	}
+
+	protected final Object decode0(byte[] data, int flags) {
+		Object rv = null;
+		if ((flags & SERIALIZED) != 0 && data != null) {
 			rv = deserialize(data);
 		} else {
 			if (this.primitiveAsString) {
 				if (flags == 0) {
-					return decodeString(d.getData());
+					return decodeString(data);
 				}
 			}
 			if (flags != 0 && data != null) {
 				switch (flags) {
 				case SPECIAL_BOOLEAN:
-					rv = Boolean.valueOf(this.transcoderUtils.decodeBoolean(data));
+					rv = Boolean.valueOf(this.transcoderUtils
+							.decodeBoolean(data));
 					break;
 				case SPECIAL_INT:
 					rv = Integer.valueOf(this.transcoderUtils.decodeInt(data));
@@ -106,12 +112,13 @@ public class SerializingTranscoder extends BaseSerializingTranscoder implements
 					rv = Byte.valueOf(this.transcoderUtils.decodeByte(data));
 					break;
 				case SPECIAL_FLOAT:
-					rv = new Float(Float
-							.intBitsToFloat(this.transcoderUtils.decodeInt(data)));
+					rv = new Float(Float.intBitsToFloat(this.transcoderUtils
+							.decodeInt(data)));
 					break;
 				case SPECIAL_DOUBLE:
-					rv = new Double(Double.longBitsToDouble(this.transcoderUtils
-							.decodeLong(data)));
+					rv = new Double(Double
+							.longBitsToDouble(this.transcoderUtils
+									.decodeLong(data)));
 					break;
 				case SPECIAL_DATE:
 					rv = new Date(this.transcoderUtils.decodeLong(data));
@@ -176,14 +183,16 @@ public class SerializingTranscoder extends BaseSerializingTranscoder implements
 			if (this.primitiveAsString) {
 				b = encodeString(o.toString());
 			} else {
-				b = this.transcoderUtils.encodeInt(Float.floatToRawIntBits((Float) o));
+				b = this.transcoderUtils.encodeInt(Float
+						.floatToRawIntBits((Float) o));
 			}
 			flags |= SPECIAL_FLOAT;
 		} else if (o instanceof Double) {
 			if (this.primitiveAsString) {
 				b = encodeString(o.toString());
 			} else {
-				b = this.transcoderUtils.encodeLong(Double.doubleToRawLongBits((Double) o));
+				b = this.transcoderUtils.encodeLong(Double
+						.doubleToRawLongBits((Double) o));
 			}
 			flags |= SPECIAL_DOUBLE;
 		} else if (o instanceof byte[]) {

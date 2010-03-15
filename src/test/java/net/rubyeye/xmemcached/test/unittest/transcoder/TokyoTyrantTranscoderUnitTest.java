@@ -50,6 +50,22 @@ public class TokyoTyrantTranscoderUnitTest extends TestCase {
 
 	}
 
+	public void testDecodeManayTimes() {
+		Person p = new Person();
+		p.name = "xmc";
+		p.age = 1;
+		CachedData cachedData = tokyoTyrantTranscoder.encode(p);
+		Person decodePerson = (Person) tokyoTyrantTranscoder.decode(cachedData);
+		assertNotSame(p, decodePerson);
+		assertEquals(p, decodePerson);
+		
+		Person decodePerson2 = (Person) tokyoTyrantTranscoder.decode(cachedData);
+		assertNotSame(p, decodePerson2);
+		assertNotSame(decodePerson, decodePerson2);
+		assertEquals(p, decodePerson2);
+
+	}
+
 	public void testEncodeDecode() {
 		// simple type
 		CachedData cachedData = tokyoTyrantTranscoder.encode(1);

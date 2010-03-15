@@ -51,8 +51,7 @@ public class TokyoTyrantTranscoder implements Transcoder<Object> {
 		int flag = serializingTranscoder.getTranscoderUtils().decodeInt(
 				flagBytes);
 		d.setFlag(flag);
-		d.setData(realData);
-		return serializingTranscoder.decode(d);
+		return serializingTranscoder.decode0(realData, flag);
 	}
 
 	public final CachedData encode(Object o) {
