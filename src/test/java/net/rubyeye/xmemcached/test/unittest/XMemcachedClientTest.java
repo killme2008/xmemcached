@@ -582,7 +582,7 @@ public abstract class XMemcachedClientTest extends TestCase {
 				new CASOperation<Integer>() {
 
 					public int getMaxTries() {
-						return 1;
+						return 100;
 					}
 
 					public Integer getNewValue(long currentCAS,

@@ -1480,7 +1480,7 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 				&& !sendStoreCommand(this.commandFactory.createCASCommand(key,
 						keyBytes, exp, operation.getNewValue(result.getCas(),
 								result.getValue()), result.getCas(), noreply,
-						transcoder), this.opTimeout)) {
+						transcoder), this.opTimeout)&&!noreply) {
 			tryCount++;
 			result = gets0(key, keyBytes, transcoder);
 			if (result == null) {
