@@ -11,6 +11,9 @@ import net.rubyeye.xmemcached.CommandFactory;
 import net.rubyeye.xmemcached.buffer.BufferAllocator;
 import net.rubyeye.xmemcached.buffer.SimpleBufferAllocator;
 import net.rubyeye.xmemcached.command.binary.BinaryAppendPrependCommand;
+import net.rubyeye.xmemcached.command.binary.BinaryAuthListMechanismsCommand;
+import net.rubyeye.xmemcached.command.binary.BinaryAuthStartCommand;
+import net.rubyeye.xmemcached.command.binary.BinaryAuthStepCommand;
 import net.rubyeye.xmemcached.command.binary.BinaryCASCommand;
 import net.rubyeye.xmemcached.command.binary.BinaryDeleteCommand;
 import net.rubyeye.xmemcached.command.binary.BinaryFlushAllCommand;
@@ -36,21 +39,18 @@ import com.google.code.yanf4j.buffer.IoBuffer;
 @SuppressWarnings("unchecked")
 public class BinaryCommandFactory implements CommandFactory {
 
-	private BufferAllocator bufferAllocator=new SimpleBufferAllocator();
+	private BufferAllocator bufferAllocator = new SimpleBufferAllocator();
 
-	
 	public void setBufferAllocator(BufferAllocator bufferAllocator) {
 		this.bufferAllocator = bufferAllocator;
 	}
 
-	
 	public Command createAddCommand(String key, byte[] keyBytes, int exp,
 			Object value, boolean noreply, Transcoder transcoder) {
 		return createStoreCommand(key, keyBytes, exp, value, CommandType.ADD,
 				noreply, transcoder);
 	}
 
-	
 	public Command createAppendCommand(String key, byte[] keyBytes,
 			Object value, boolean noreply, Transcoder transcoder) {
 		return new BinaryAppendPrependCommand(key, keyBytes,
@@ -58,34 +58,29 @@ public class BinaryCommandFactory implements CommandFactory {
 				noreply, transcoder);
 	}
 
-	
 	public Command createCASCommand(String key, byte[] keyBytes, int exp,
 			Object value, long cas, boolean noreply, Transcoder transcoder) {
 		return new BinaryCASCommand(key, keyBytes, CommandType.CAS,
 				new CountDownLatch(1), exp, cas, value, noreply, transcoder);
 	}
 
-	
 	public Command createDeleteCommand(String key, byte[] keyBytes, int time,
 			boolean noreply) {
 		return new BinaryDeleteCommand(key, keyBytes, CommandType.DELETE,
 				new CountDownLatch(1), noreply);
 	}
 
-	
 	public Command createFlushAllCommand(CountDownLatch latch, int delay,
 			boolean noreply) {
 		return new BinaryFlushAllCommand(latch, delay, noreply);
 	}
 
-	
 	public Command createGetCommand(String key, byte[] keyBytes,
 			CommandType cmdType, Transcoder transcoder) {
 		return new BinaryGetCommand(key, keyBytes, cmdType, new CountDownLatch(
 				1), OpCode.GET, false);
 	}
 
-	
 	public <T> Command createGetMultiCommand(Collection<String> keys,
 			CountDownLatch latch, CommandType cmdType, Transcoder<T> transcoder) {
 		Iterator<String> it = keys.iterator();
@@ -112,7 +107,7 @@ public class BinaryCommandFactory implements CommandFactory {
 		bufferList.add(lastCommand.getIoBuffer());
 		totalLength += lastCommand.getIoBuffer().remaining();
 
-		IoBuffer mergedBuffer =IoBuffer.allocate(totalLength);
+		IoBuffer mergedBuffer = IoBuffer.allocate(totalLength);
 		for (IoBuffer buffer : bufferList) {
 			mergedBuffer.put(buffer.buf());
 		}
@@ -122,7 +117,6 @@ public class BinaryCommandFactory implements CommandFactory {
 		return resultCommand;
 	}
 
-	
 	public Command createIncrDecrCommand(String key, byte[] keyBytes,
 			long amount, long initial, int expTime, CommandType cmdType,
 			boolean noreply) {
@@ -130,7 +124,6 @@ public class BinaryCommandFactory implements CommandFactory {
 				expTime, cmdType, noreply);
 	}
 
-	
 	public Command createPrependCommand(String key, byte[] keyBytes,
 			Object value, boolean noreply, Transcoder transcoder) {
 		return new BinaryAppendPrependCommand(key, keyBytes,
@@ -138,7 +131,6 @@ public class BinaryCommandFactory implements CommandFactory {
 				noreply, transcoder);
 	}
 
-	
 	public Command createReplaceCommand(String key, byte[] keyBytes, int exp,
 			Object value, boolean noreply, Transcoder transcoder) {
 		return createStoreCommand(key, keyBytes, exp, value,
@@ -152,33 +144,44 @@ public class BinaryCommandFactory implements CommandFactory {
 				new CountDownLatch(1), exp, -1, value, noreply, transcoder);
 	}
 
-	
 	public Command createSetCommand(String key, byte[] keyBytes, int exp,
 			Object value, boolean noreply, Transcoder transcoder) {
 		return createStoreCommand(key, keyBytes, exp, value, CommandType.SET,
 				noreply, transcoder);
 	}
 
-	
 	public Command createStatsCommand(InetSocketAddress server,
 			CountDownLatch latch, String itemName) {
 		return new BinaryStatsCommand(server, latch, itemName);
 	}
 
-	
 	public Command createVerbosityCommand(CountDownLatch latch, int level,
 			boolean noreply) {
 		throw new UnsupportedOperationException(
 				"Binary protocol doesn't support verbosity");
 	}
 
-	
 	public Command createVersionCommand(CountDownLatch latch,
 			InetSocketAddress server) {
 		return new BinaryVersionCommand(latch, server);
 	}
 
-	
+	public Command createAuthListMechanismsCommand(CountDownLatch latch) {
+		return new BinaryAuthListMechanismsCommand(latch);
+	}
+
+	public Command createAuthStartCommand(String mechanism,
+			CountDownLatch latch, String authData) {
+		return new BinaryAuthStartCommand(mechanism, ByteUtils
+				.getBytes(mechanism), latch, authData);
+	}
+
+	public Command createAuthStepCommand(String mechanism,
+			CountDownLatch latch, String authData) {
+		return new BinaryAuthStepCommand(mechanism, ByteUtils
+				.getBytes(mechanism), latch, authData);
+	}
+
 	public Protocol getProtocol() {
 		return Protocol.Binary;
 	}

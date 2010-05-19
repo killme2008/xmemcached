@@ -83,14 +83,16 @@ public interface CommandFactory {
 	 * @param keyBytes
 	 * @param cmdType
 	 *            命令类型
-	 * @param transcoder TODO
+	 * @param transcoder
+	 *            TODO
 	 * @param cmdBytes
 	 *            命令的字节数组，如"get".getBytes()
 	 * @return
 	 */
 	@SuppressWarnings("unchecked")
 	public abstract Command createGetCommand(final String key,
-			final byte[] keyBytes, final CommandType cmdType, Transcoder transcoder);
+			final byte[] keyBytes, final CommandType cmdType,
+			Transcoder transcoder);
 
 	/**
 	 * 创建批量获取 command
@@ -151,6 +153,36 @@ public interface CommandFactory {
 	public Command createVerbosityCommand(CountDownLatch latch, int level,
 			boolean noreply);
 
+	/**
+	 * Create command for listing authentication mechanisms
+	 * 
+	 * @param latch
+	 * @return
+	 */
+	public Command createAuthListMechanismsCommand(CountDownLatch latch);
+
+	/**
+	 * Create command for starting authentication
+	 * 
+	 * @param mechanism
+	 * @param latch
+	 * @param authData
+	 * @return
+	 */
+	public Command createAuthStartCommand(String mechanism,
+			CountDownLatch latch, String authData);
+
+	/**
+	 * Create command for stepping authentication
+	 * 
+	 * @param mechanism
+	 * @param latch
+	 * @param authData
+	 * @return
+	 */
+	public Command createAuthStepCommand(String mechanism,
+			CountDownLatch latch, String authData);
+
 	public Protocol getProtocol();
-	
+
 }

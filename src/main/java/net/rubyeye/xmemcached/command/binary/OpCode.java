@@ -203,6 +203,28 @@ public enum OpCode {
 			return 0x18;
 
 		}
+	},
+	AUTH_LIST_MECHANISMS {
+		@Override
+		public byte fieldValue() {
+			return 0x20;
+
+		}
+	},
+	AUTH_START {
+		@Override
+		public byte fieldValue() {
+			return 0x21;
+
+		}
+	},
+	AUTH_STEP {
+		@Override
+		public byte fieldValue() {
+			return 0x22;
+
+		}
 	};
+
 	public abstract byte fieldValue();
 }

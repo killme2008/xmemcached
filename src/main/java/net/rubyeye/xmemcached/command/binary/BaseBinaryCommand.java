@@ -28,6 +28,8 @@ import java.util.concurrent.CountDownLatch;
 import net.rubyeye.xmemcached.command.Command;
 import net.rubyeye.xmemcached.command.CommandType;
 import net.rubyeye.xmemcached.exception.MemcachedDecodeException;
+import net.rubyeye.xmemcached.exception.MemcachedException;
+import net.rubyeye.xmemcached.exception.MemcachedServerException;
 import net.rubyeye.xmemcached.exception.UnknownCommandException;
 import net.rubyeye.xmemcached.impl.MemcachedTCPSession;
 import net.rubyeye.xmemcached.transcoders.CachedData;
@@ -246,6 +248,14 @@ public abstract class BaseBinaryCommand extends Command {
 		this.responseStatus = ResponseStatus.parseShort(buffer.getShort());
 		if (this.responseStatus == ResponseStatus.UNKNOWN_COMMAND) {
 			setException(new UnknownCommandException());
+		}
+		if (this.responseStatus == ResponseStatus.AUTH_REQUIRED) {
+			setException(new MemcachedServerException(this.responseStatus
+					.errorMessage()));
+		}
+		if (this.responseStatus == ResponseStatus.FUTHER_AUTH_REQUIRED) {
+			setException(new MemcachedServerException(this.responseStatus
+					.errorMessage()));
 		}
 	}
 

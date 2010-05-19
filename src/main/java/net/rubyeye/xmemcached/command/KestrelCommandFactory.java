@@ -59,7 +59,7 @@ public class KestrelCommandFactory implements CommandFactory {
 	public Command createGetCommand(String key, byte[] keyBytes,
 			CommandType cmdType, Transcoder transcoder) {
 		return new KestrelGetCommand(key, keyBytes, cmdType,
-				new CountDownLatch(1),transcoder);
+				new CountDownLatch(1), transcoder);
 	}
 
 	public <T> Command createGetMultiCommand(Collection<String> keys,
@@ -118,8 +118,22 @@ public class KestrelCommandFactory implements CommandFactory {
 		return Protocol.Kestrel;
 	}
 
+	public Command createAuthListMechanismsCommand(CountDownLatch latch) {
+		throw new UnsupportedOperationException("Kestrel doesn't support SASL");
+	}
+
+	public Command createAuthStartCommand(String mechanism,
+			CountDownLatch latch, String authData) {
+		throw new UnsupportedOperationException("Kestrel doesn't support SASL");
+	}
+
+	public Command createAuthStepCommand(String mechanism,
+			CountDownLatch latch, String authData) {
+		throw new UnsupportedOperationException("Kestrel doesn't support SASL");
+	}
+
 	public void setBufferAllocator(BufferAllocator bufferAllocator) {
-		// TODO Auto-generated method stub
+
 	}
 
 }

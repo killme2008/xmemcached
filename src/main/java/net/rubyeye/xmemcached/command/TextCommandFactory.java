@@ -165,7 +165,8 @@ public final class TextCommandFactory implements CommandFactory {
 	 */
 	@SuppressWarnings("unchecked")
 	public final Command createGetCommand(final String key,
-			final byte[] keyBytes, final CommandType cmdType, Transcoder transcoder) {
+			final byte[] keyBytes, final CommandType cmdType,
+			Transcoder transcoder) {
 		return new TextGetOneCommand(key, keyBytes, cmdType,
 				new CountDownLatch(1));
 	}
@@ -201,13 +202,29 @@ public final class TextCommandFactory implements CommandFactory {
 	 * .String, byte[], int, net.rubyeye.xmemcached.command.CommandType)
 	 */
 	public final Command createIncrDecrCommand(final String key,
-			final byte[] keyBytes, final long amount, long initial, int exptime,
-			CommandType cmdType, boolean noreply) {
+			final byte[] keyBytes, final long amount, long initial,
+			int exptime, CommandType cmdType, boolean noreply) {
 		return new TextIncrDecrCommand(key, keyBytes, cmdType,
 				new CountDownLatch(1), amount, initial, noreply);
 	}
 
-	
+	public Command createAuthListMechanismsCommand(CountDownLatch latch) {
+		throw new UnsupportedOperationException(
+				"SASL is only supported by binary protocol");
+	}
+
+	public Command createAuthStartCommand(String mechanism,
+			CountDownLatch latch, String authData) {
+		throw new UnsupportedOperationException(
+				"SASL is only supported by binary protocol");
+	}
+
+	public Command createAuthStepCommand(String mechanism,
+			CountDownLatch latch, String authData) {
+		throw new UnsupportedOperationException(
+				"SASL is only supported by binary protocol");
+	}
+
 	public Protocol getProtocol() {
 		return Protocol.Text;
 	}

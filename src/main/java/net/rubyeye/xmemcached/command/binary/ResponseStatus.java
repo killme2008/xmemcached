@@ -106,6 +106,29 @@ public enum ResponseStatus {
 		public String errorMessage() {
 			return "Unknown command error.";
 		}
+	},
+
+	AUTH_REQUIRED {
+		@Override
+		public short fieldValue() {
+			return 0x20;
+		}
+
+		@Override
+		public String errorMessage() {
+			return "Authentication required or not successful";
+		}
+	},
+	FUTHER_AUTH_REQUIRED {
+		@Override
+		public short fieldValue() {
+			return 0x21;
+		}
+
+		@Override
+		public String errorMessage() {
+			return "Further authentication steps required. ";
+		}
 	};
 	abstract short fieldValue();
 
@@ -131,6 +154,10 @@ public enum ResponseStatus {
 			return ITEM_NOT_STORED;
 		case 0x0081:
 			return UNKNOWN_COMMAND;
+		case 0x20:
+			return AUTH_REQUIRED;
+		case 0x21:
+			return FUTHER_AUTH_REQUIRED;
 		default:
 			throw new IllegalArgumentException("Unknow Response status:"
 					+ value);
