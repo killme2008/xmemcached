@@ -170,7 +170,7 @@ public interface CommandFactory {
 	 * @return
 	 */
 	public Command createAuthStartCommand(String mechanism,
-			CountDownLatch latch, String authData);
+			CountDownLatch latch, byte[] authData);
 
 	/**
 	 * Create command for stepping authentication
@@ -181,7 +181,7 @@ public interface CommandFactory {
 	 * @return
 	 */
 	public Command createAuthStepCommand(String mechanism,
-			CountDownLatch latch, String authData);
+			CountDownLatch latch, byte[] authData);
 
 	public Protocol getProtocol();
 

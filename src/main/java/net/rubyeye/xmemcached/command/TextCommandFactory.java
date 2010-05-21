@@ -214,13 +214,13 @@ public final class TextCommandFactory implements CommandFactory {
 	}
 
 	public Command createAuthStartCommand(String mechanism,
-			CountDownLatch latch, String authData) {
+			CountDownLatch latch, byte[] authData) {
 		throw new UnsupportedOperationException(
 				"SASL is only supported by binary protocol");
 	}
 
 	public Command createAuthStepCommand(String mechanism,
-			CountDownLatch latch, String authData) {
+			CountDownLatch latch, byte[] authData) {
 		throw new UnsupportedOperationException(
 				"SASL is only supported by binary protocol");
 	}

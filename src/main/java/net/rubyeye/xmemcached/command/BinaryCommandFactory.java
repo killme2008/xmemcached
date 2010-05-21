@@ -171,13 +171,13 @@ public class BinaryCommandFactory implements CommandFactory {
 	}
 
 	public Command createAuthStartCommand(String mechanism,
-			CountDownLatch latch, String authData) {
+			CountDownLatch latch, byte[] authData) {
 		return new BinaryAuthStartCommand(mechanism, ByteUtils
 				.getBytes(mechanism), latch, authData);
 	}
 
 	public Command createAuthStepCommand(String mechanism,
-			CountDownLatch latch, String authData) {
+			CountDownLatch latch, byte[] authData) {
 		return new BinaryAuthStepCommand(mechanism, ByteUtils
 				.getBytes(mechanism), latch, authData);
 	}

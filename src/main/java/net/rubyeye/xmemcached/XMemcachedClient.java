@@ -35,6 +35,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import net.rubyeye.xmemcached.auth.AuthInfo;
 import net.rubyeye.xmemcached.buffer.BufferAllocator;
 import net.rubyeye.xmemcached.buffer.SimpleBufferAllocator;
 import net.rubyeye.xmemcached.codec.MemcachedCodecFactory;
@@ -92,6 +93,8 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 	protected int connectionPoolSize = DEFAULT_CONNECTION_POOL_SIZE;
 
 	protected final AtomicInteger serverOrderCount = new AtomicInteger();
+
+	private Map<InetSocketAddress, AuthInfo> authInfoMap = new HashMap<InetSocketAddress, AuthInfo>();
 
 	private final CopyOnWriteArrayList<MemcachedClientStateListenerAdapter> stateListenerAdapters = new CopyOnWriteArrayList<MemcachedClientStateListenerAdapter>();
 
@@ -166,6 +169,14 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 			this.connector.setHealSessionInterval(healConnectionInterval);
 		}
 
+	}
+
+	public Map<InetSocketAddress, AuthInfo> getAuthInfoMap() {
+		return this.authInfoMap;
+	}
+
+	public void setAuthInfoMap(Map<InetSocketAddress, AuthInfo> map) {
+		this.authInfoMap = map;
 	}
 
 	/*
@@ -650,7 +661,7 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 			Map<SocketOption, Object> socketOptions,
 			CommandFactory commandFactory, Transcoder transcoder,
 			List<InetSocketAddress> addressList,
-			List<MemcachedClientStateListener> stateListeners, int poolSize)
+			List<MemcachedClientStateListener> stateListeners,Map<InetSocketAddress, AuthInfo> map, int poolSize)
 			throws IOException {
 		super();
 		optimiezeSetReadThreadCount(conf, addressList);
@@ -661,6 +672,7 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 				addStateListener(stateListener);
 			}
 		}
+		setAuthInfoMap(map);
 		setConnectionPoolSize(poolSize);
 		start0();
 		if (addressList != null) {
@@ -691,7 +703,7 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 			Map<SocketOption, Object> socketOptions,
 			CommandFactory commandFactory, Transcoder transcoder,
 			List<InetSocketAddress> addressList, int[] weights,
-			List<MemcachedClientStateListener> stateListeners, int poolSize)
+			List<MemcachedClientStateListener> stateListeners,Map<InetSocketAddress,AuthInfo> infoMap, int poolSize)
 			throws IOException {
 		super();
 		if (weights == null && addressList != null) {
@@ -721,6 +733,7 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 				addStateListener(stateListener);
 			}
 		}
+		setAuthInfoMap(infoMap);
 		setConnectionPoolSize(poolSize);
 		start0();
 		if (addressList != null && weights != null) {
@@ -1480,7 +1493,7 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 				&& !sendStoreCommand(this.commandFactory.createCASCommand(key,
 						keyBytes, exp, operation.getNewValue(result.getCas(),
 								result.getValue()), result.getCas(), noreply,
-						transcoder), this.opTimeout)&&!noreply) {
+						transcoder), this.opTimeout) && !noreply) {
 			tryCount++;
 			result = gets0(key, keyBytes, transcoder);
 			if (result == null) {
@@ -2191,7 +2204,7 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 
 	public final Collection<InetSocketAddress> getAvaliableServers() {
 		Set<Session> sessionSet = this.connector.getSessionSet();
- 		Set<InetSocketAddress> result = new HashSet<InetSocketAddress>();
+		Set<InetSocketAddress> result = new HashSet<InetSocketAddress>();
 		for (Session session : sessionSet) {
 			result.add(session.getRemoteSocketAddress());
 		}

@@ -19,6 +19,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import net.rubyeye.xmemcached.MemcachedClient;
 import net.rubyeye.xmemcached.MemcachedClientStateListener;
+import net.rubyeye.xmemcached.auth.AuthMemcachedConnectListener;
 import net.rubyeye.xmemcached.command.Command;
 import net.rubyeye.xmemcached.command.CommandType;
 import net.rubyeye.xmemcached.command.MapReturnValueAware;
@@ -29,6 +30,7 @@ import net.rubyeye.xmemcached.command.text.TextGetOneCommand;
 import net.rubyeye.xmemcached.command.text.TextVersionCommand;
 import net.rubyeye.xmemcached.monitor.StatisticsHandler;
 import net.rubyeye.xmemcached.networking.MemcachedSession;
+import net.rubyeye.xmemcached.networking.MemcachedSessionConnectListener;
 import net.rubyeye.xmemcached.utils.InetSocketAddressWrapper;
 import net.rubyeye.xmemcached.utils.Protocol;
 
@@ -51,8 +53,8 @@ public class MemcachedHandler extends HandlerAdapter {
 
 	private ExecutorService heartBeatThreadPool;
 
-	
-	
+	private final MemcachedSessionConnectListener listener;
+
 	/**
 	 * On receive message from memcached server
 	 */
@@ -119,6 +121,7 @@ public class MemcachedHandler extends HandlerAdapter {
 				.getStateListeners()) {
 			listener.onConnected(this.client, session.getRemoteSocketAddress());
 		}
+		listener.onConnect((MemcachedTCPSession) session, client);
 	}
 
 	/**
@@ -222,12 +225,12 @@ public class MemcachedHandler extends HandlerAdapter {
 			log.debug("Add reconnectRequest to connector "
 					+ session.getRemoteSocketAddress());
 			MemcachedSession memcachedTCPSession = (MemcachedSession) session;
-			InetSocketAddressWrapper inetSocketAddressWrapper = new InetSocketAddressWrapper(session
-					.getRemoteSocketAddress(), memcachedTCPSession
-					.getOrder());
+			InetSocketAddressWrapper inetSocketAddressWrapper = new InetSocketAddressWrapper(
+					session.getRemoteSocketAddress(), memcachedTCPSession
+							.getOrder());
 			this.client.getConnector().addToWatingQueue(
-					new ReconnectRequest(inetSocketAddressWrapper, 0, ((MemcachedSession) session)
-							.getWeight()));
+					new ReconnectRequest(inetSocketAddressWrapper, 0,
+							((MemcachedSession) session).getWeight()));
 		}
 	}
 
@@ -251,6 +254,7 @@ public class MemcachedHandler extends HandlerAdapter {
 	public MemcachedHandler(MemcachedClient client) {
 		super();
 		this.client = client;
+		listener = new AuthMemcachedConnectListener();
 		this.statisticsHandler = new StatisticsHandler();
 
 	}

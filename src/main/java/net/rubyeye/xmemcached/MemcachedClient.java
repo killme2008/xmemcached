@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeoutException;
 
+import net.rubyeye.xmemcached.auth.AuthInfo;
 import net.rubyeye.xmemcached.buffer.BufferAllocator;
 import net.rubyeye.xmemcached.exception.MemcachedException;
 import net.rubyeye.xmemcached.networking.Connector;
@@ -1148,5 +1149,22 @@ public interface MemcachedClient {
 	 */
 	public KeyIterator getKeyIterator(InetSocketAddress address)
 			throws MemcachedException, InterruptedException, TimeoutException;
+
+	/**
+	 * Configure auth info
+	 * 
+	 * @param map
+	 *            Auth info map,key is memcached server address,and value is the
+	 *            auth info for the key.
+	 */
+	public void setAuthInfoMap(Map<InetSocketAddress, AuthInfo> map);
+
+	/**
+	 * return current all auth info
+	 * 
+	 * @return Auth info map,key is memcached server address,and value is the
+	 *         auth info for the key.
+	 */
+	public Map<InetSocketAddress, AuthInfo> getAuthInfoMap();
 
 }

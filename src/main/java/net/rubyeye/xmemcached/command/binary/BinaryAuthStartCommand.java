@@ -10,7 +10,7 @@ import net.rubyeye.xmemcached.utils.ByteUtils;
 public class BinaryAuthStartCommand extends BaseBinaryCommand {
 
 	public BinaryAuthStartCommand(String mechanism, byte[] keyBytes,
-			CountDownLatch latch, String authData) {
+			CountDownLatch latch, byte[] authData) {
 		super(mechanism, keyBytes, CommandType.AUTH_START, latch, 0, 0,
 				authData, false, null);
 		this.opCode = OpCode.AUTH_START;
@@ -25,7 +25,7 @@ public class BinaryAuthStartCommand extends BaseBinaryCommand {
 	@Override
 	protected void fillValue(CachedData data) {
 		if (this.value != null)
-			this.ioBuffer.put(ByteUtils.getBytes((String) this.value));
+			this.ioBuffer.put((byte[]) this.value);
 	}
 
 	@Override
@@ -33,7 +33,7 @@ public class BinaryAuthStartCommand extends BaseBinaryCommand {
 		if (this.value == null)
 			return 0;
 		else
-			return ByteUtils.getBytes((String) this.value).length;
+			return ((byte[])this.value).length;
 	}
 
 	@Override

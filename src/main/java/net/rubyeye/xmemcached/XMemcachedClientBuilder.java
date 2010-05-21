@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import net.rubyeye.xmemcached.auth.AuthInfo;
 import net.rubyeye.xmemcached.buffer.BufferAllocator;
 import net.rubyeye.xmemcached.buffer.SimpleBufferAllocator;
 import net.rubyeye.xmemcached.command.TextCommandFactory;
@@ -40,6 +41,8 @@ public class XMemcachedClientBuilder implements MemcachedClientBuilder {
 	final Map<SocketOption, Object> socketOptions = getDefaultSocketOptions();
 
 	private List<MemcachedClientStateListener> stateListeners = new ArrayList<MemcachedClientStateListener>();
+
+	private Map<InetSocketAddress, AuthInfo> authInfoMap = new HashMap<InetSocketAddress, AuthInfo>();
 
 	public void addStateListener(MemcachedClientStateListener stateListener) {
 		this.stateListeners.add(stateListener);
@@ -217,8 +220,9 @@ public class XMemcachedClientBuilder implements MemcachedClientBuilder {
 			memcachedClient = new XMemcachedClient(this.sessionLocator,
 					this.bufferAllocator, this.configuration,
 					this.socketOptions, this.commandFactory, this.transcoder,
-					this.addressList, this.stateListeners,
+					this.addressList, this.stateListeners,this.authInfoMap,
 					this.connectionPoolSize);
+
 		} else {
 			if (this.addressList == null) {
 				throw new IllegalArgumentException("Null Address List");
@@ -230,7 +234,7 @@ public class XMemcachedClientBuilder implements MemcachedClientBuilder {
 			memcachedClient = new XMemcachedClient(this.sessionLocator,
 					this.bufferAllocator, this.configuration,
 					this.socketOptions, this.commandFactory, this.transcoder,
-					this.addressList, this.weights, this.stateListeners,
+					this.addressList, this.weights, this.stateListeners,this.authInfoMap,
 					this.connectionPoolSize);
 		}
 		if (this.commandFactory.getProtocol() == Protocol.Kestrel) {
@@ -250,6 +254,14 @@ public class XMemcachedClientBuilder implements MemcachedClientBuilder {
 			throw new IllegalArgumentException("Null Transcoder");
 		}
 		this.transcoder = transcoder;
+	}
+
+	public Map<InetSocketAddress, AuthInfo> getAuthInfoMap() {
+		return authInfoMap;
+	}
+
+	public void setAuthInfoMap(Map<InetSocketAddress, AuthInfo> authInfoMap) {
+		this.authInfoMap = authInfoMap;
 	}
 
 }

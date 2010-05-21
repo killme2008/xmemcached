@@ -123,12 +123,12 @@ public class KestrelCommandFactory implements CommandFactory {
 	}
 
 	public Command createAuthStartCommand(String mechanism,
-			CountDownLatch latch, String authData) {
+			CountDownLatch latch, byte[] authData) {
 		throw new UnsupportedOperationException("Kestrel doesn't support SASL");
 	}
 
 	public Command createAuthStepCommand(String mechanism,
-			CountDownLatch latch, String authData) {
+			CountDownLatch latch, byte[] authData) {
 		throw new UnsupportedOperationException("Kestrel doesn't support SASL");
 	}
 

@@ -1,9 +1,11 @@
 package net.rubyeye.xmemcached;
 
 import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.util.List;
 import java.util.Map;
 
+import net.rubyeye.xmemcached.auth.AuthInfo;
 import net.rubyeye.xmemcached.buffer.BufferAllocator;
 import net.rubyeye.xmemcached.transcoders.Transcoder;
 
@@ -137,7 +139,29 @@ public interface MemcachedClientBuilder {
 	@SuppressWarnings("unchecked")
 	public void setSocketOption(SocketOption socketOption, Object value);
 
+	/**
+	 * Get all tcp socket options
+	 * 
+	 * @return
+	 */
 	@SuppressWarnings("unchecked")
 	public Map<SocketOption, Object> getSocketOptions();
+
+	/**
+	 * Configure auth info
+	 * 
+	 * @param map
+	 *            Auth info map,key is memcached server address,and value is the
+	 *            auth info for the key.
+	 */
+	public void setAuthInfoMap(Map<InetSocketAddress, AuthInfo> map);
+
+	/**
+	 * return current all auth info
+	 * 
+	 * @return Auth info map,key is memcached server address,and value is the
+	 *         auth info for the key.
+	 */
+	public Map<InetSocketAddress, AuthInfo> getAuthInfoMap();
 
 }
