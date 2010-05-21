@@ -318,7 +318,7 @@ public class MemcachedConnector extends SocketChannelController implements
 		Session session = findSessionByKey(msg.getKey());
 		if (session == null) {
 			throw new MemcachedException(
-					"There is no avriable session at this moment");
+					"There is no available session at this moment");
 		}
 		session.write(msg);
 	}
