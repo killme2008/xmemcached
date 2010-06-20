@@ -17,6 +17,12 @@ import net.rubyeye.xmemcached.command.binary.ResponseStatus;
 import net.rubyeye.xmemcached.impl.MemcachedTCPSession;
 import net.rubyeye.xmemcached.utils.ByteUtils;
 
+/**
+ * Authentication task
+ * 
+ * @author dennis
+ * 
+ */
 public class AuthTask extends Thread {
 	private AuthInfo authInfo;
 	private CommandFactory commandFactory;
