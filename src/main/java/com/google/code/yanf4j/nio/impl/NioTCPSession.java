@@ -30,8 +30,6 @@ import com.google.code.yanf4j.core.impl.ByteBufferCodecFactory;
 import com.google.code.yanf4j.core.impl.FutureImpl;
 import com.google.code.yanf4j.core.impl.WriteMessageImpl;
 import com.google.code.yanf4j.nio.NioSessionConfig;
-import com.google.code.yanf4j.nio.input.ChannelInputStream;
-import com.google.code.yanf4j.nio.output.ChannelOutputStream;
 import com.google.code.yanf4j.util.ByteBufferUtils;
 import com.google.code.yanf4j.util.SelectorFactory;
 
@@ -316,37 +314,6 @@ public class NioTCPSession extends AbstractNioSession {
 
 	public Socket socket() {
 		return ((SocketChannel) this.selectableChannel).socket();
-	}
-
-	public ChannelInputStream getInputStream(Object msg) throws IOException {
-		if (this.decoder instanceof ByteBufferCodecFactory.ByteBufferDecoder) {
-			return new ChannelInputStream(((IoBuffer) msg).buf());
-		} else {
-			throw new IOException(
-					"If you want to use ChannelInputStream,please set CodecFactory to ByteBufferCodecFactory");
-		}
-	}
-
-	public ChannelOutputStream getOutputStream() throws IOException {
-		if (this.encoder instanceof ByteBufferCodecFactory.ByteBufferEncoder) {
-			return new ChannelOutputStream(this, 0, false);
-		} else {
-			throw new IOException(
-					"If you want to use ChannelOutputStream,please set CodecFactory to ByteBufferCodecFactory");
-		}
-	}
-
-	public ChannelOutputStream getOutputStream(int capacity, boolean direct)
-			throws IOException {
-		if (capacity < 0) {
-			throw new IllegalArgumentException("capacity<0");
-		}
-		if (this.encoder instanceof ByteBufferCodecFactory.ByteBufferEncoder) {
-			return new ChannelOutputStream(this, capacity, direct);
-		} else {
-			throw new IOException(
-					"If you want to use ChannelOutputStream,please set CodecFactory to ByteBufferCodecFactory");
-		}
 	}
 
 	@Override
