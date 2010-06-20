@@ -221,28 +221,23 @@ public abstract class AbstractSession implements Session {
 						- start);
 			}
 		} else {
-			try {
-				this.dispatchMessageDispatcher.dispatch(new Runnable() {
-					public void run() {
-						long start = -1;
-						if (AbstractSession.this.statistics != null
-								&& AbstractSession.this.statistics
-										.isStatistics()) {
-							start = System.currentTimeMillis();
-						}
-						onMessage(message, AbstractSession.this);
-						if (start != -1) {
-							AbstractSession.this.statistics
-									.statisticsProcess(System
-											.currentTimeMillis()
-											- start);
-						}
-					}
 
-				});
-			} catch (RejectedExecutionException e) {
-				this.handler.onMessageReject(AbstractSession.this, message);
-			}
+			this.dispatchMessageDispatcher.dispatch(new Runnable() {
+				public void run() {
+					long start = -1;
+					if (AbstractSession.this.statistics != null
+							&& AbstractSession.this.statistics.isStatistics()) {
+						start = System.currentTimeMillis();
+					}
+					onMessage(message, AbstractSession.this);
+					if (start != -1) {
+						AbstractSession.this.statistics
+								.statisticsProcess(System.currentTimeMillis()
+										- start);
+					}
+				}
+
+			});
 		}
 
 	}

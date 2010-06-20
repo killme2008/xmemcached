@@ -359,7 +359,7 @@ public abstract class AbstractController implements Controller, ControllerLifeCy
         setWriteEventDispatcher(DispatcherFactory.newDispatcher(getWriteThreadCount(),
             new ThreadPoolExecutor.CallerRunsPolicy()));
         setDispatchMessageDispatcher(DispatcherFactory.newDispatcher(getDispatchMessageThreadCount(),
-            new ThreadPoolExecutor.AbortPolicy()));
+            new ThreadPoolExecutor.CallerRunsPolicy()));
         startStatistics();
         start0();
         notifyStarted();

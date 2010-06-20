@@ -31,17 +31,14 @@ import com.google.code.yanf4j.util.LinkedTransferQueue;
 import com.google.code.yanf4j.util.SystemUtils;
 
 /**
+ * Reactor pattern
  * 
+ * @author dennis
  * 
- * Reactorģʽʵ��
- * @author boyan
- * 
- * @since 1.0, 2009-12-24 ����01:25:19
  */
-
 public final class Reactor extends Thread {
 	/**
-	 * JVM bug����	
+	 * JVM bug threshold
 	 */
 	public static final int JVMBUG_THRESHHOLD = Integer.getInteger(
 			"com.googlecode.yanf4j.nio.JVMBUG_THRESHHOLD", 128);
@@ -86,6 +83,7 @@ public final class Reactor extends Thread {
 		this.controller = selectorManager.getController();
 		this.selector = SystemUtils.openSelector();
 		this.configuration = configuration;
+		setName("Xmemcached-Reactor-" + index);
 	}
 
 	public final Selector getSelector() {
@@ -104,7 +102,7 @@ public final class Reactor extends Thread {
 				beforeSelect();
 				this.wakenUp.set(false);
 				long before = -1;
-				//�Ƿ���Ҫ�鿴jvm bug
+				// Wether to look jvm bug
 				if (isNeedLookingJVMBug()) {
 					before = System.currentTimeMillis();
 				}
@@ -118,7 +116,7 @@ public final class Reactor extends Thread {
 						lookJVMBug(before, selected, wait);
 					}
 					this.selectTries++;
-                    //��ȡ�´γ�ʱʱ��
+					// check tmeout and idle
 					this.nextTimeout = checkSessionTimeout();
 					continue;
 				} else {
@@ -159,7 +157,8 @@ public final class Reactor extends Thread {
 	}
 
 	/**
-	 * ���JVM bug�Ƿ���
+	 * Look jvm bug
+	 * 
 	 * @param before
 	 * @param selected
 	 * @param wait
@@ -253,7 +252,8 @@ public final class Reactor extends Thread {
 	}
 
 	/**
-	 * �ɷ�IO�¼�
+	 * Dispatch selected event
+	 * 
 	 * @param selectedKeySet
 	 */
 	public final void dispatchEvent(Set<SelectionKey> selectedKeySet) {
@@ -342,7 +342,8 @@ public final class Reactor extends Thread {
 	}
 
 	/**
-	 * ��������Ƿ���ڻ���idle
+	 * Check session timeout or idle
+	 * 
 	 * @return
 	 */
 	private final long checkSessionTimeout() {
