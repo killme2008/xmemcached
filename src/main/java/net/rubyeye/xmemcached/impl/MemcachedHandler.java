@@ -236,12 +236,6 @@ public class MemcachedHandler extends HandlerAdapter {
 
 	public void stop() {
 		this.heartBeatThreadPool.shutdown();
-		try {
-			this.heartBeatThreadPool.awaitTermination(5000,
-					TimeUnit.MILLISECONDS);
-		} catch (InterruptedException e) {
-			Thread.currentThread().interrupt();
-		}
 	}
 
 	public void start() {

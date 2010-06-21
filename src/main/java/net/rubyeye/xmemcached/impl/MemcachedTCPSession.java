@@ -55,6 +55,8 @@ public class MemcachedTCPSession extends NioTCPSession implements
 	private final MemcachedOptimizer optimiezer;
 	private volatile boolean allowReconnect;
 
+	private volatile boolean authFailed;
+
 	public final int getWeight() {
 		return this.weight;
 	}
@@ -123,6 +125,18 @@ public class MemcachedTCPSession extends NioTCPSession implements
 		currentCommand.setStatus(OperationStatus.WRITING);
 		return currentCommand;
 	}
+
+	
+	
+	public boolean isAuthFailed() {
+		return authFailed;
+	}
+
+	public void setAuthFailed(boolean authFailed) {
+		this.authFailed = authFailed;
+	}
+
+
 
 	private BufferAllocator bufferAllocator;
 

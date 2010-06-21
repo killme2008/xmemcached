@@ -31,12 +31,10 @@ public class SimpleExample {
 					"Null MemcachedClient,please check memcached has been started");
 		}
 		try {
-			Thread.sleep(1000);
 			memcachedClient.set("hello", 0, "Hello,xmemcached");
 			memcachedClient.set("hello2", 0, "Hello,xmemcached");
 			String value = memcachedClient.get("hello");
 			System.out.println("hello=" + value);
-
 			memcachedClient.delete("hello");
 			value = memcachedClient.get("hello");
 			System.out.println("hello=" + value);
@@ -71,7 +69,7 @@ public class SimpleExample {
 					AddrUtil.getAddresses(servers));
 			builder.getAuthInfoMap().put(
 					new InetSocketAddress("192.168.207.140", 11211),
-					AuthInfo.typical("cacheuser", "test"));
+					AuthInfo.typical("cacheuser", "123456"));
 			builder.setCommandFactory(new BinaryCommandFactory());
 			return builder.build();
 		} catch (IOException e) {

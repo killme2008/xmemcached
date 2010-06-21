@@ -172,7 +172,7 @@ public class MemcachedConnector extends SocketChannelController implements
 	protected final ConcurrentHashMap<InetSocketAddress, Queue<Session>> sessionMap = new ConcurrentHashMap<InetSocketAddress, Queue<Session>>();
 
 	public void addSession(Session session) {
-		log.warn("add session: " + session.getRemoteSocketAddress().toString());
+		log.warn("add session: " + session.getRemoteSocketAddress());
 		Queue<Session> sessions = this.sessionMap.get(session
 				.getRemoteSocketAddress());
 		if (sessions == null) {
@@ -228,9 +228,7 @@ public class MemcachedConnector extends SocketChannelController implements
 	}
 
 	public void removeSession(Session session) {
-		log.warn("remove session "
-				+ session.getRemoteSocketAddress().getHostName() + ":"
-				+ session.getRemoteSocketAddress().getPort());
+		log.warn("remove session " + session.getRemoteSocketAddress());
 		Queue<Session> sessionQueue = this.sessionMap.get(session
 				.getRemoteSocketAddress());
 		if (null != sessionQueue) {
@@ -238,8 +236,8 @@ public class MemcachedConnector extends SocketChannelController implements
 			if (sessionQueue.size() == 0) {
 				this.sessionMap.remove(session.getRemoteSocketAddress());
 			}
+			updateSessions();
 		}
-		updateSessions();
 	}
 
 	@Override
@@ -315,11 +313,15 @@ public class MemcachedConnector extends SocketChannelController implements
 	}
 
 	public void send(final Command msg) throws MemcachedException {
-		Session session = findSessionByKey(msg.getKey());
-		if (session == null) {
+		MemcachedTCPSession session = (MemcachedTCPSession) findSessionByKey(msg
+				.getKey());
+		if (session == null || session.isClosed()) {
 			throw new MemcachedException(
-					"There is no available session at this moment");
+					"There is no available connection at this moment");
 		}
+		if (session.isAuthFailed())
+			throw new MemcachedException("Auth failed to connection "
+					+ session.getRemoteSocketAddress());
 		session.write(msg);
 	}
 
