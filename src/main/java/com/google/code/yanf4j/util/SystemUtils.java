@@ -70,8 +70,7 @@ public final class SystemUtils {
 	}
 
 	public static final int getSystemThreadCount() {
-		int cpus = getCpuProcessorCount();
-		return cpus - 1 > 0 ? cpus - 1 : cpus;
+		return getCpuProcessorCount();
 	}
 
 	public static final int getCpuProcessorCount() {
