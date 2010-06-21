@@ -1,11 +1,18 @@
 ******************************************
 
 
-
 Xmemcached Change log
 
 
 *******************************************
+2010-06-21
+-----Xmemcached 1.2.5 Released------------------------
+This is a minor version,main changes:
+1.Merge yanf4j into xmemcached,so there is no need for yanf4j anymore.
+2.Support SASL authentication for memcached 1.4.3
+3.Speed up MemcachedClient.shutdown method.
+4.Add a chapter  about memcached distribute to chinese user guide.
+-------------------------------------------------------
 
 2010-03-15
 
