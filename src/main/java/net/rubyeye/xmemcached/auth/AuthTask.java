@@ -97,6 +97,8 @@ public class AuthTask extends Thread {
 							+ this.memcachedTCPSession.getRemoteSocketAddress()
 							+ ",beacause auth fail");
 					this.memcachedTCPSession.setAuthFailed(true);
+
+					// It it is not first time,try to sleep 1 second
 					if (!this.authInfo.isFirstTime()) {
 						Thread.sleep(1000);
 					}

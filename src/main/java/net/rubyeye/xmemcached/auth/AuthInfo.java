@@ -12,7 +12,7 @@ public class AuthInfo {
 	private final CallbackHandler callbackHandler;
 	private final String[] mechanisms;
 	private final int maxAttempts = Integer.parseInt(System.getProperty(
-			"net.rubyeye.xmemcached.auth_attempts", "-1"));
+			"net.rubyeye.xmemcached.auth_max_attempts", "-1"));
 	private int attempts;
 
 	public synchronized boolean isValid() {

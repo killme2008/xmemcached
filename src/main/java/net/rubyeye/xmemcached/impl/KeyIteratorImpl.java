@@ -73,7 +73,7 @@ public final class KeyIteratorImpl implements KeyIterator {
 				.getSessionByAddress(this.inetSocketAddress);
 		if (sessions == null || sessions.size() == 0) {
 			throw new MemcachedException(
-					"The memcached server is not connected,"
+					"The memcached server is not connected,address="
 							+ this.inetSocketAddress);
 		}
 		Session session = sessions.peek();

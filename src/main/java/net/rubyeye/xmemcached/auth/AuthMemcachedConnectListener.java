@@ -29,6 +29,7 @@ public class AuthMemcachedConnectListener implements
 				AuthTask task = new AuthTask(authInfo, xMemcachedClient
 						.getCommandFactory(), tcpSession);
 				task.start();
+				// First time,try to wait
 				if (authInfo.isFirstTime()) {
 					try {
 						task.join(1000);

@@ -15,7 +15,7 @@ public class DispatcherFactoryUnitTest {
 	@Test
 	public void testNewDispatcher() throws Exception {
 		Dispatcher dispatcher = DispatcherFactory.newDispatcher(1,
-				new ThreadPoolExecutor.AbortPolicy());
+				new ThreadPoolExecutor.AbortPolicy(),"test");
 		Assert.assertNotNull(dispatcher);
 		final CountDownLatch latch = new CountDownLatch(1);
 		final AtomicInteger count = new AtomicInteger();
@@ -29,9 +29,9 @@ public class DispatcherFactoryUnitTest {
 		Assert.assertEquals(1, count.get());
 
 		Assert.assertNull(DispatcherFactory.newDispatcher(0,
-				new ThreadPoolExecutor.AbortPolicy()));
+				new ThreadPoolExecutor.AbortPolicy(),"test"));
 		Assert.assertNull(DispatcherFactory.newDispatcher(-1,
-				new ThreadPoolExecutor.AbortPolicy()));
+				new ThreadPoolExecutor.AbortPolicy(),"test"));
 		dispatcher.stop();
 		try {
 			dispatcher.dispatch(new Runnable() {

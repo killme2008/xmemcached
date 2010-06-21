@@ -18,7 +18,7 @@ import com.google.code.yanf4j.core.impl.PoolDispatcher;
  * 
  * @author boyan
  * 
- * @since 1.0, 2009-12-24 ÉÏÎç11:34:43
+ * @since 1.0, 2009-12-24 ï¿½ï¿½ï¿½ï¿½11:34:43
  */
 
 public class PoolDispatcherUnitTest {
@@ -27,7 +27,7 @@ public class PoolDispatcherUnitTest {
 
     @Before
     public void setUp() {
-        this.dispatcher = new PoolDispatcher(10, 60, TimeUnit.SECONDS, new ThreadPoolExecutor.AbortPolicy());
+        this.dispatcher = new PoolDispatcher(10, 60, TimeUnit.SECONDS, new ThreadPoolExecutor.AbortPolicy(),"test");
     }
 
     private static final class TestRunner implements Runnable {
@@ -78,7 +78,7 @@ public class PoolDispatcherUnitTest {
         this.dispatcher.stop();
         PoolDispatcher.MAX_POOL_SIZE_FACTOR = 1;
         PoolDispatcher.POOL_QUEUE_SIZE_FACTOR = 1;
-        this.dispatcher = new PoolDispatcher(1, 60, TimeUnit.SECONDS, new ThreadPoolExecutor.AbortPolicy());
+        this.dispatcher = new PoolDispatcher(1, 60, TimeUnit.SECONDS, new ThreadPoolExecutor.AbortPolicy(),"test");
         this.dispatcher.dispatch(new Runnable() {
             public void run() {
                 while (!Thread.currentThread().isInterrupted()) {
