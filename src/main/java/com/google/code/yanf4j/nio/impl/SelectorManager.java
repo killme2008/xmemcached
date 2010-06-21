@@ -13,13 +13,10 @@ import com.google.code.yanf4j.core.EventType;
 import com.google.code.yanf4j.core.Session;
 
 /**
- * Selector��������������reactor������һ��reactor����accept������reactor��������IO�¼�
+ * Selector manager
  * 
+ * @author dennis
  * 
- * 
- * @author boyan
- * 
- * @since 1.0, 2009-12-16 ����06:10:59
  */
 public class SelectorManager {
 	private final Reactor[] reactorSet;
@@ -28,7 +25,7 @@ public class SelectorManager {
 	private final int dividend;
 
 	/**
-	 * Reactor��������
+	 * Reactor count which are ready
 	 */
 	private int reactorReadyCount;
 
@@ -40,7 +37,6 @@ public class SelectorManager {
 		log.info("Creating " + selectorPoolSize + " rectors...");
 		this.reactorSet = new Reactor[selectorPoolSize];
 		this.controller = controller;
-		// ����selectorPoolSize��reactor
 		for (int i = 0; i < selectorPoolSize; i++) {
 			this.reactorSet[i] = new Reactor(this, conf, i);
 		}
@@ -64,7 +60,7 @@ public class SelectorManager {
 	}
 
 	/**
-	 * ��������ȡreactor
+	 * Find reactor by index
 	 * 
 	 * @param index
 	 * @return
@@ -90,7 +86,7 @@ public class SelectorManager {
 			+ "_Reactor_Attribute";
 
 	/**
-	 * ע��channel
+	 * Register channel
 	 * 
 	 * @param channel
 	 * @param ops
@@ -101,7 +97,7 @@ public class SelectorManager {
 			Object attachment) {
 		awaitReady();
 		int index = 0;
-		// Accept����һ��reactor����
+		// Accept event used index 0 reactor
 		if (ops == SelectionKey.OP_ACCEPT || ops == SelectionKey.OP_CONNECT) {
 			index = 0;
 		} else {
@@ -127,16 +123,21 @@ public class SelectorManager {
 	}
 
 	/**
-	 * ��һ��reactor
+	 * Get next reactor
 	 * 
 	 * @return
 	 */
 	public final Reactor nextReactor() {
-		return this.reactorSet[this.sets.incrementAndGet() % this.dividend + 1];
+		if (this.dividend > 0) {
+			return this.reactorSet[this.sets.incrementAndGet() % this.dividend
+					+ 1];
+		} else {
+			return this.reactorSet[0];
+		}
 	}
 
 	/**
-	 * ע�������¼�
+	 * Register session
 	 * 
 	 * @param session
 	 * @param event
@@ -162,6 +163,9 @@ public class SelectorManager {
 		return this.controller;
 	}
 
+	/**
+	 * Notify all reactor have been ready
+	 */
 	synchronized void notifyReady() {
 		this.reactorReadyCount++;
 		if (this.reactorReadyCount == this.reactorSet.length) {

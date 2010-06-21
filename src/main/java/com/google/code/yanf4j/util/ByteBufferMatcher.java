@@ -4,23 +4,16 @@ import java.util.List;
 
 import com.google.code.yanf4j.buffer.IoBuffer;
 
-
-
-
 /**
- * ByteBufferƥ�����ӿ�
+ * ByteBuffer matcher
  * 
+ * @author dennis
  * 
- * 
- * @author boyan
- * 
- * @since 1.0, 2009-12-16 ����06:19:40
  */
 public interface ByteBufferMatcher {
 
-    public int matchFirst(IoBuffer buffer);
+	public int matchFirst(IoBuffer buffer);
 
-
-    public List<Integer> matchAll(final IoBuffer buffer);
+	public List<Integer> matchAll(final IoBuffer buffer);
 
 }

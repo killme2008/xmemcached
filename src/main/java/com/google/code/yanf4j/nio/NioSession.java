@@ -18,14 +18,14 @@ import com.google.code.yanf4j.core.EventType;
 import com.google.code.yanf4j.core.Session;
 
 /**
- * Nio���ӷ�װ
+ * Nio connection
  * 
- * @author boyan
+ * @author dennis
  * 
  */
 public interface NioSession extends Session {
 	/**
-	 * �ɷ��¼�
+	 * When io event occured
 	 * 
 	 * @param event
 	 * @param selector
@@ -33,23 +33,24 @@ public interface NioSession extends Session {
 	public void onEvent(EventType event, Selector selector);
 
 	/**
-	 * ʹ����ע��OP_READ
+	 * Enable read event
 	 * 
 	 * @param selector
 	 */
 	public void enableRead(Selector selector);
 
 	/**
-	 * ����ע��OP_WRITE
+	 * Enable write event
 	 * 
 	 * @param selector
 	 */
 	public void enableWrite(Selector selector);
 
 	/**
-	 * ��ȡ��ǰchannel
+	 * return the channel for this connection
 	 * 
 	 * @return
 	 */
+
 	public SelectableChannel channel();
 }

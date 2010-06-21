@@ -2,8 +2,7 @@ package com.google.code.yanf4j.core;
 
 /**
  * 
- * 
- * Controller״̬������
+ * Controller state listener
  * 
  * @author boyan
  * 
@@ -12,36 +11,32 @@ package com.google.code.yanf4j.core;
 public interface ControllerStateListener {
 
 	/**
-	 * ������ʱ����
+	 * When controller is started
 	 * 
 	 * @param controller
 	 */
 	public void onStarted(final Controller controller);
 
 	/**
-	 * ����ʱ����
+	 * When controller is ready
 	 * 
 	 * @param controller
 	 */
 	public void onReady(final Controller controller);
 
 	/**
-	 * �������ӱ��رյ�ʱ����ã��������������ȷ���벻Ҫ�����˷�������ȷ�ؿ���
+	 * When all connections are closed
 	 * 
 	 * @param controller
 	 */
 	public void onAllSessionClosed(final Controller controller);
 
 	/**
-	 * ���ر�ʱ����
+	 * When controller has been stopped
+	 * 
 	 * @param controller
 	 */
 	public void onStopped(final Controller controller);
 
-	/**
-	 * �����쳣ʱ����
-	 * @param controller
-	 * @param t
-	 */
 	public void onException(final Controller controller, Throwable t);
 }

@@ -26,7 +26,6 @@ import com.google.code.yanf4j.buffer.IoBuffer;
 import com.google.code.yanf4j.config.Configuration;
 import com.google.code.yanf4j.core.EventType;
 import com.google.code.yanf4j.core.WriteMessage;
-import com.google.code.yanf4j.core.impl.ByteBufferCodecFactory;
 import com.google.code.yanf4j.core.impl.FutureImpl;
 import com.google.code.yanf4j.core.impl.WriteMessageImpl;
 import com.google.code.yanf4j.nio.NioSessionConfig;
@@ -34,13 +33,10 @@ import com.google.code.yanf4j.util.ByteBufferUtils;
 import com.google.code.yanf4j.util.SelectorFactory;
 
 /**
- * Nio tcp���ӷ�װ
+ * Nio tcp connection
  * 
+ * @author dennis
  * 
- * 
- * @author boyan
- * 
- * @since 1.0, 2009-12-16 ����06:09:15
  */
 public class NioTCPSession extends AbstractNioSession {
 	private InetSocketAddress remoteAddress;
@@ -115,7 +111,7 @@ public class NioTCPSession extends AbstractNioSession {
 	}
 
 	/**
-	 * ������ʱSelector����д
+	 * Blocking write using temp selector
 	 * 
 	 * @param channel
 	 * @param message
@@ -237,7 +233,7 @@ public class NioTCPSession extends AbstractNioSession {
 	}
 
 	/**
-	 * ������ʱselector�����
+	 * Blocking read using temp selector
 	 * 
 	 * @return
 	 * @throws ClosedChannelException
@@ -284,7 +280,7 @@ public class NioTCPSession extends AbstractNioSession {
 	}
 
 	/**
-	 * ���벢�ɷ���Ϣ
+	 * Decode buffer
 	 */
 	@Override
 	public void decode() {
@@ -319,7 +315,7 @@ public class NioTCPSession extends AbstractNioSession {
 	@Override
 	protected final void closeChannel() throws IOException {
 		flush0();
-		// ���ȹر�output
+		// try to close output first
 		Socket socket = ((SocketChannel) this.selectableChannel).socket();
 		try {
 			if (!socket.isClosed() && !socket.isOutputShutdown()) {

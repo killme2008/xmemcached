@@ -2,10 +2,12 @@ package com.google.code.yanf4j.util;
 
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
+
 /**
- * �̹߳���
+ * Thread factory for worker thread
+ * 
  * @author dennis
- *
+ * 
  */
 public class WorkerThreadFactory implements ThreadFactory {
 	private static final AtomicInteger poolNumber = new AtomicInteger(1);
@@ -31,7 +33,7 @@ public class WorkerThreadFactory implements ThreadFactory {
 	}
 
 	public WorkerThreadFactory() {
-		this(null,null);
+		this(null, null);
 	}
 
 	public Thread newThread(Runnable r) {

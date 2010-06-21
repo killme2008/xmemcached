@@ -9,13 +9,10 @@ import com.google.code.yanf4j.buffer.IoBuffer;
 
 
 /**
- * Shift orƥ���㷨ʵ��
+ * ByteBuffer matcher based on shift-or algorithm
  * 
+ * @author dennis
  * 
- * 
- * @author boyan
- * 
- * @since 1.0, 2009-12-16 ����06:22:44
  */
 public class ShiftOrByteBufferMatcher implements ByteBufferMatcher {
 

@@ -12,7 +12,7 @@
 package com.google.code.yanf4j.config;
 
 /**
- * Yanf4j ���ö���
+ * Networking configuration
  * 
  * @author dennis
  * 
@@ -20,52 +20,52 @@ package com.google.code.yanf4j.config;
 public class Configuration {
 
 	/**
-	 * ���ӵ�read buffer��С
+	 * Read buffer size per connection
 	 */
 	private int sessionReadBufferSize = 32 * 1024;
 
 	/**
-	 * Socket��soTimeout����
+	 * Socket SO_TIMEOUT option
 	 */
 	private int soTimeout = 0;
 
 	/**
-	 * �ɷ�OP_WRITE���߳���
+	 * Thread count for processing WRITABLE event
 	 */
 	private int writeThreadCount = 0;
 
 	/**
-	 * �Ƿ�����ͳ��
+	 * Whether to enable statistics
 	 */
 	private boolean statisticsServer = false;
 
 	/**
-	 * �Ƿ������д����
+	 * Whether to handle read write concurrently,default is true
 	 */
 	private boolean handleReadWriteConcurrently = true;
 
 	/**
-	 * �ɷ���Ϣ�߳���
+	 * Thread coount for processing message dispatching
 	 */
 	private int dispatchMessageThreadCount = 0;
 
 	/**
-	 * ���߳���
+	 * THread count for processing READABLE event
 	 */
 	private int readThreadCount = 1;
 
 	/**
-	 * Ĭ��read buffer�������
+	 * Increasing buffer size per time
 	 */
 	public static final int DEFAULT_INCREASE_BUFF_SIZE = 32 * 1024;
 
 	/**
-	 * ���read buffer��С
+	 * Max read buffer size for connection
 	 */
 	public static int MAX_READ_BUFFER_SIZE = 128 * 1024;
 
 	/**
-	 * ���Session idle������ʱ����
+	 * check session idle interval
 	 */
 	private volatile long checkSessionTimeoutInterval = 1000L;
 

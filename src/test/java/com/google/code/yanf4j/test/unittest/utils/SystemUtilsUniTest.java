@@ -23,15 +23,4 @@ public class SystemUtilsUniTest extends TestCase {
 		selector2.close();
 	}
 
-	public void testSystemThreadCount() {
-		int cpus = Runtime.getRuntime().availableProcessors();
-		int n = SystemUtils.getSystemThreadCount();
-
-		assertTrue(n <= cpus + 1);
-		if (cpus <= 8) {
-			assertEquals(n, cpus + 1);
-		} else {
-			assertEquals(n, 4 + cpus * 5 / 8);
-		}
-	}
 }

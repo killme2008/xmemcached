@@ -3,35 +3,24 @@ package com.google.code.yanf4j.core;
 import com.google.code.yanf4j.buffer.IoBuffer;
 import com.google.code.yanf4j.core.impl.FutureImpl;
 
-
-
-
 /**
- * ������Ϣ��װ
+ * Write message with a buffer
  * 
+ * @author dennis
  * 
- * 
- * @author boyan
- * 
- * @since 1.0, 2009-12-16 ����06:02:37
  */
 public interface WriteMessage {
 
-    public void writing();
+	public void writing();
 
+	public boolean isWriting();
 
-    public boolean isWriting();
+	public IoBuffer getWriteBuffer();
 
+	public Object getMessage();
 
-    public IoBuffer getWriteBuffer();
+	public void setWriteBuffer(IoBuffer buffers);
 
-
-    public Object getMessage();
-
-
-    public void setWriteBuffer(IoBuffer buffers);
-
-
-    public FutureImpl<Boolean> getWriteFuture();
+	public FutureImpl<Boolean> getWriteFuture();
 
 }

@@ -11,28 +11,28 @@ import com.google.code.yanf4j.core.WriteMessage;
 import com.google.code.yanf4j.nio.impl.SelectorManager;
 import com.google.code.yanf4j.statistics.Statistics;
 
-
-
-
 /**
- * Nio session���ö���
+ * Nio session configuration
  * 
- * @author boyan
+ * @author dennis
  * 
  */
 public class NioSessionConfig extends SessionConfig {
 
-    public final SelectableChannel selectableChannel;
-    public final SelectorManager selectorManager;
+	public final SelectableChannel selectableChannel;
+	public final SelectorManager selectorManager;
 
-
-    public NioSessionConfig(SelectableChannel sc, Handler handler, SelectorManager reactor, CodecFactory codecFactory,
-            Statistics statistics, Queue<WriteMessage> queue, Dispatcher dispatchMessageDispatcher,
-            boolean handleReadWriteConcurrently, long sessionTimeout, long sessionIdleTimeout) {
-        super(handler, codecFactory, statistics, queue, dispatchMessageDispatcher, handleReadWriteConcurrently,
-            sessionTimeout, sessionIdleTimeout);
-        this.selectableChannel = sc;
-        this.selectorManager = reactor;
-    }
+	public NioSessionConfig(SelectableChannel sc, Handler handler,
+			SelectorManager reactor, CodecFactory codecFactory,
+			Statistics statistics, Queue<WriteMessage> queue,
+			Dispatcher dispatchMessageDispatcher,
+			boolean handleReadWriteConcurrently, long sessionTimeout,
+			long sessionIdleTimeout) {
+		super(handler, codecFactory, statistics, queue,
+				dispatchMessageDispatcher, handleReadWriteConcurrently,
+				sessionTimeout, sessionIdleTimeout);
+		this.selectableChannel = sc;
+		this.selectorManager = reactor;
+	}
 
 }

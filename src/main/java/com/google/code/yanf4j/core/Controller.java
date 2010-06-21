@@ -5,112 +5,78 @@ import java.net.InetSocketAddress;
 
 import com.google.code.yanf4j.statistics.Statistics;
 
-
-
 /**
- * Controller���Ľӿ�
- * 
+ * Networking Controller
  * 
  * 
  * @author boyan
  * 
- * @since 1.0, 2009-12-16 ����05:57:49
  */
 public interface Controller {
 
-    public abstract long getSessionTimeout();
+	public abstract long getSessionTimeout();
 
+	public long getSessionIdleTimeout();
 
-    public long getSessionIdleTimeout();
+	public void setSessionIdleTimeout(long sessionIdleTimeout);
 
+	public abstract void setSessionTimeout(long sessionTimeout);
 
-    public void setSessionIdleTimeout(long sessionIdleTimeout);
+	public abstract int getSoTimeout();
 
+	public abstract void setSoTimeout(int timeout);
 
-    public abstract void setSessionTimeout(long sessionTimeout);
+	public abstract void addStateListener(ControllerStateListener listener);
 
+	public void removeStateListener(ControllerStateListener listener);
 
-    public abstract int getSoTimeout();
+	public abstract boolean isHandleReadWriteConcurrently();
 
+	public abstract void setHandleReadWriteConcurrently(
+			boolean handleReadWriteConcurrently);
 
-    public abstract void setSoTimeout(int timeout);
+	public abstract int getReadThreadCount();
 
+	public abstract void setReadThreadCount(int readThreadCount);
 
-    public abstract void addStateListener(ControllerStateListener listener);
+	public abstract Handler getHandler();
 
+	public abstract void setHandler(Handler handler);
 
-    public void removeStateListener(ControllerStateListener listener);
+	public abstract int getPort();
 
+	public abstract void start() throws IOException;
 
-    public abstract boolean isHandleReadWriteConcurrently();
+	public abstract boolean isStarted();
 
+	public abstract Statistics getStatistics();
 
-    public abstract void setHandleReadWriteConcurrently(boolean handleReadWriteConcurrently);
+	public abstract CodecFactory getCodecFactory();
 
+	public abstract void setCodecFactory(CodecFactory codecFactory);
 
-    public abstract int getReadThreadCount();
+	public abstract void stop() throws IOException;
 
+	public void setReceiveThroughputLimit(double receivePacketRate);
 
-    public abstract void setReadThreadCount(int readThreadCount);
+	public double getReceiveThroughputLimit();
 
+	public double getSendThroughputLimit();
 
-    public abstract Handler getHandler();
+	public void setSendThroughputLimit(double sendThroughputLimit);
 
+	public InetSocketAddress getLocalSocketAddress();
 
-    public abstract void setHandler(Handler handler);
+	public void setLocalSocketAddress(InetSocketAddress inetAddress);
 
+	public int getDispatchMessageThreadCount();
 
-    public abstract int getPort();
+	public void setDispatchMessageThreadCount(int dispatchMessageThreadPoolSize);
 
+	public int getWriteThreadCount();
 
-    public abstract void start() throws IOException;
+	public void setWriteThreadCount(int writeThreadCount);
 
-
-    public abstract boolean isStarted();
-
-
-    public abstract Statistics getStatistics();
-
-
-    public abstract CodecFactory getCodecFactory();
-
-
-    public abstract void setCodecFactory(CodecFactory codecFactory);
-
-
-    public abstract void stop() throws IOException;
-
-
-    public void setReceiveThroughputLimit(double receivePacketRate);
-
-
-    public double getReceiveThroughputLimit();
-
-
-    public double getSendThroughputLimit();
-
-
-    public void setSendThroughputLimit(double sendThroughputLimit);
-
-
-    public InetSocketAddress getLocalSocketAddress();
-
-
-    public void setLocalSocketAddress(InetSocketAddress inetAddress);
-
-
-    public int getDispatchMessageThreadCount();
-
-
-    public void setDispatchMessageThreadCount(int dispatchMessageThreadPoolSize);
-
-
-    public int getWriteThreadCount();
-
-
-    public void setWriteThreadCount(int writeThreadCount);
-
-
-    public <T> void setSocketOption(SocketOption<T> socketOption, T value);
+	public <T> void setSocketOption(SocketOption<T> socketOption, T value);
 
 }

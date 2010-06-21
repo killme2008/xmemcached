@@ -16,9 +16,8 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 
 /**
- * SelectionKey������
+ * SelectionKey handler
  * 
- * @see com.taobao.notify.remoting.core.core.impl.AbstractController
  * @author dennis
  * 
  */

@@ -28,7 +28,7 @@ import com.google.code.yanf4j.nio.SelectionKeyHandler;
 import com.google.code.yanf4j.util.SystemUtils;
 
 /**
- * Nio������������
+ * Base nio controller
  * 
  * @author dennis
  * 
@@ -39,7 +39,7 @@ public abstract class NioController extends AbstractController implements
 	protected SelectorManager selectorManager;
 
 	/**
-	 * Ĭ�ϵ�Selector�ش�С
+	 * Reactor count
 	 */
 	protected int selectorPoolSize = SystemUtils.getSystemThreadCount();
 
@@ -130,7 +130,7 @@ public abstract class NioController extends AbstractController implements
 	}
 
 	/**
-	 * ����selectorManager
+	 * Start selector manager
 	 * 
 	 * @throws IOException
 	 */
@@ -150,7 +150,7 @@ public abstract class NioController extends AbstractController implements
 	protected abstract void doStart() throws IOException;
 
 	/**
-	 * ���ɶ���ʱ��
+	 * Read event occured
 	 */
 	public void onRead(SelectionKey key) {
 		if (this.readEventDispatcher == null) {
@@ -161,7 +161,7 @@ public abstract class NioController extends AbstractController implements
 	}
 
 	/**
-	 * ����д��ʱ��
+	 * Writable event occured
 	 */
 	public void onWrite(final SelectionKey key) {
 		if (this.writeEventDispatcher == null) {
@@ -172,7 +172,7 @@ public abstract class NioController extends AbstractController implements
 	}
 
 	/**
-	 * �ر�ĳ��selectKey
+	 * Cancel selection key
 	 */
 	public void closeSelectionKey(SelectionKey key) {
 		if (key.attachment() instanceof Session) {

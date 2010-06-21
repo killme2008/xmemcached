@@ -24,7 +24,6 @@ import com.google.code.yanf4j.config.Configuration;
 import com.google.code.yanf4j.core.CodecFactory;
 import com.google.code.yanf4j.core.EventType;
 import com.google.code.yanf4j.core.Handler;
-import com.google.code.yanf4j.core.ServerController;
 import com.google.code.yanf4j.core.Session;
 import com.google.code.yanf4j.core.impl.StandardSocketOption;
 import com.google.code.yanf4j.nio.impl.SocketChannelController;
@@ -34,8 +33,8 @@ import com.google.code.yanf4j.nio.impl.SocketChannelController;
  * 
  * @author dennis
  */
-public class TCPController extends SocketChannelController implements
-		ServerController {
+public class TCPController extends SocketChannelController 
+		 {
 
 	private ServerSocketChannel serverSocketChannel;
 
