@@ -164,4 +164,19 @@ public interface MemcachedClientBuilder {
 	 */
 	public Map<InetSocketAddress, AuthInfo> getAuthInfoMap();
 
+	/**
+	 * Add auth info for memcached server
+	 * 
+	 * @param address
+	 * @param authInfo
+	 */
+	public void addAuthInfo(InetSocketAddress address, AuthInfo authInfo);
+
+	/**
+	 * Remove auth info for memcached server
+	 * 
+	 * @param address
+	 */
+	public void removeAuthInfo(InetSocketAddress address);
+
 }

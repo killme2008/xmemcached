@@ -42,7 +42,7 @@ public class XMemcachedClientBuilder implements MemcachedClientBuilder {
 
 	private List<MemcachedClientStateListener> stateListeners = new ArrayList<MemcachedClientStateListener>();
 
-	private Map<InetSocketAddress, AuthInfo> authInfoMap = new HashMap<InetSocketAddress, AuthInfo>();
+	Map<InetSocketAddress, AuthInfo> authInfoMap = new HashMap<InetSocketAddress, AuthInfo>();
 
 	public void addStateListener(MemcachedClientStateListener stateListener) {
 		this.stateListeners.add(stateListener);
@@ -220,7 +220,7 @@ public class XMemcachedClientBuilder implements MemcachedClientBuilder {
 			memcachedClient = new XMemcachedClient(this.sessionLocator,
 					this.bufferAllocator, this.configuration,
 					this.socketOptions, this.commandFactory, this.transcoder,
-					this.addressList, this.stateListeners,this.authInfoMap,
+					this.addressList, this.stateListeners, this.authInfoMap,
 					this.connectionPoolSize);
 
 		} else {
@@ -234,8 +234,8 @@ public class XMemcachedClientBuilder implements MemcachedClientBuilder {
 			memcachedClient = new XMemcachedClient(this.sessionLocator,
 					this.bufferAllocator, this.configuration,
 					this.socketOptions, this.commandFactory, this.transcoder,
-					this.addressList, this.weights, this.stateListeners,this.authInfoMap,
-					this.connectionPoolSize);
+					this.addressList, this.weights, this.stateListeners,
+					this.authInfoMap, this.connectionPoolSize);
 		}
 		if (this.commandFactory.getProtocol() == Protocol.Kestrel) {
 			memcachedClient.setOptimizeGet(false);
@@ -258,6 +258,14 @@ public class XMemcachedClientBuilder implements MemcachedClientBuilder {
 
 	public Map<InetSocketAddress, AuthInfo> getAuthInfoMap() {
 		return authInfoMap;
+	}
+
+	public void addAuthInfo(InetSocketAddress address, AuthInfo authInfo) {
+		this.authInfoMap.put(address, authInfo);
+	}
+
+	public void removeAuthInfo(InetSocketAddress address) {
+		this.authInfoMap.remove(address);
 	}
 
 	public void setAuthInfoMap(Map<InetSocketAddress, AuthInfo> authInfoMap) {

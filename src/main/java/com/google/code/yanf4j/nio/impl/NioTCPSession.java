@@ -329,7 +329,6 @@ public class NioTCPSession extends AbstractNioSession {
 				socket.shutdownInput();
 			}
 		} catch (IOException e) {
-			onException(e);
 		}
 		unregisterSession();
 		unregisterChannel();
