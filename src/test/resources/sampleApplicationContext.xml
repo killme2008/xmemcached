@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+	<!--  Sample spring configuration for xmemcached -->
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd">
+
+
+	<bean name="server1" class="java.net.InetSocketAddress">
+		<constructor-arg>
+			<value>192.168.207.140</value>
+		</constructor-arg>
+		<constructor-arg>
+			<value>11211</value>
+		</constructor-arg>
+	</bean>
+
+
+	<!-- XMemcachedClientFactoryBean configuration -->
+	<bean name="memcachedClient1"
+		class="net.rubyeye.xmemcached.utils.XMemcachedClientFactoryBean"
+		destroy-method="shutdown">
+		<property name="servers">
+			<value>192.168.207.140:11211</value>
+		</property>
+		<property name="weights">
+			<list>
+				<value>1</value>
+				<value>2</value>
+			</list>
+		</property>
+		<!-- AuthInfo map -->
+		<property name="authInfoMap">
+			<map>
+				<entry key-ref="server1">
+					<bean class="net.rubyeye.xmemcached.auth.AuthInfo"
+						factory-method="typical">
+						<constructor-arg index="0">
+							<value>cacheuser</value>
+						</constructor-arg>
+						<constructor-arg index="1">
+							<value>123456</value>
+						</constructor-arg>
+					</bean>
+				</entry>
+			</map>
+		</property>
+		<property name="connectionPoolSize" value="1"></property>
+		<property name="commandFactory">
+			<bean class="net.rubyeye.xmemcached.command.BinaryCommandFactory"></bean>
+		</property>
+		<property name="sessionLocator">
+			<bean class="net.rubyeye.xmemcached.impl.KetamaMemcachedSessionLocator"></bean>
+		</property>
+		<property name="transcoder">
+			<bean class="net.rubyeye.xmemcached.transcoders.SerializingTranscoder" />
+		</property>
+		<property name="bufferAllocator">
+			<bean class="net.rubyeye.xmemcached.buffer.SimpleBufferAllocator"></bean>
+		</property>
+	</bean>
+
+
+
+	<!-- XMemcachedClientBuilder configuration -->
+
+
+	<bean name="memcachedClientBuilder" class="net.rubyeye.xmemcached.XMemcachedClientBuilder">
+		<!--
+			XMemcachedClientBuilder have two arguments.First is server list,and
+			second is weights array.
+		-->
+		<constructor-arg>
+			<list>
+				<ref bean="server1"/>
+			</list>
+		</constructor-arg>
+		<constructor-arg>
+			<list>
+				<value>1</value>
+				<value>2</value>
+			</list>
+		</constructor-arg>
+		<property name="authInfoMap">
+			<map>
+				<entry key-ref="server1">
+					<bean class="net.rubyeye.xmemcached.auth.AuthInfo"
+						factory-method="typical">
+						<constructor-arg index="0">
+							<value>cacheuser</value>
+						</constructor-arg>
+						<constructor-arg index="1">
+							<value>123456</value>
+						</constructor-arg>
+					</bean>
+				</entry>
+			</map>
+		</property>
+		<property name="connectionPoolSize" value="2"></property>
+		<property name="commandFactory">
+			<bean class="net.rubyeye.xmemcached.command.BinaryCommandFactory"></bean>
+		</property>
+		<property name="sessionLocator">
+			<bean class="net.rubyeye.xmemcached.impl.KetamaMemcachedSessionLocator"></bean>
+		</property>
+		<property name="transcoder">
+			<bean class="net.rubyeye.xmemcached.transcoders.SerializingTranscoder" />
+		</property>
+	</bean>
+	<!-- build it by factory-method -->
+	<bean name="memcachedClient2" factory-bean="memcachedClientBuilder"
+		factory-method="build" destroy-method="shutdown" />
+</beans>

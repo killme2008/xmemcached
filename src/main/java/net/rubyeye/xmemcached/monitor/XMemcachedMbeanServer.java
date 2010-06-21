@@ -38,12 +38,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * jmx MBeanServer锛岄�杩嘡MI鍙戝竷锛屼綘鍙互閫氳繃service:jmx:rmi:///jndi/rmi://[host]:[port]/[
- * name]璁块棶姝ゆ湇鍔�/br>
+ * Enable JMX supports,default is false: </br>
  * 
- * 榛樿JMX鏈紑鍚紝浣犲彲浠ラ�杩囧惎鍔ㄥ弬鏁癹ava
- * -Dxmemcached.jmx.enable=true鏉ュ惎鐢紝榛樿鐨刾ort鏄�077锛岄粯璁ょ殑name鏄痻memcachedServer
- * 杩欎簺鍙傛暟鍙互閫氳繃涓嬪垪鍙傛暟鏉ヤ慨鏀�</br>
+ * &nbsp;&nbsp;java -Dxmemcached.jmx.enable=true -Dxmemcached.rmi.port=7077
+ * -Dxmemcached.rmi.name=xmemcachedServer </br>
+ * 
+ * Access MBean through: </br>
+ * 
+ * &nbsp;&nbsp;service:jmx:rmi:///jndi/rmi://[host]:7077/xmemcachedServer </br>
+ * 
+ * You can add or remove memcached server dynamically and monitor
+ * XmemcachedClient?'s behavior through MBeans.Other options: </br>
  * <ul>
  * <li>-Dxmemcached.rmi.port</li>
  * <li>-Dxmemcached.rmi.name</li>
@@ -112,12 +117,15 @@ public final class XMemcachedMbeanServer {
 					public void run() {
 						try {
 
-							if (XMemcachedMbeanServer.this.connectorServer.isActive()) {
-								XMemcachedMbeanServer.this.connectorServer.stop();
+							if (XMemcachedMbeanServer.this.connectorServer
+									.isActive()) {
+								XMemcachedMbeanServer.this.connectorServer
+										.stop();
 								log.warn("JMXConnector stop");
 							}
 						} catch (IOException e) {
-							log.error("Shutdown Xmemcached MBean server error",e);
+							log.error("Shutdown Xmemcached MBean server error",
+									e);
 						}
 					}
 				});
@@ -139,7 +147,7 @@ public final class XMemcachedMbeanServer {
 				log.warn("JMXConnector stop");
 			}
 		} catch (IOException e) {
-			log.error("Shutdown Xmemcached MBean server error",e);
+			log.error("Shutdown Xmemcached MBean server error", e);
 		}
 	}
 

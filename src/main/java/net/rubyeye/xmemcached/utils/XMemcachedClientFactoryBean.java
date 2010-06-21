@@ -23,13 +23,16 @@
 package net.rubyeye.xmemcached.utils;
 
 import java.net.InetSocketAddress;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import net.rubyeye.xmemcached.CommandFactory;
 import net.rubyeye.xmemcached.MemcachedClient;
 import net.rubyeye.xmemcached.MemcachedClientBuilder;
 import net.rubyeye.xmemcached.MemcachedSessionLocator;
 import net.rubyeye.xmemcached.XMemcachedClientBuilder;
+import net.rubyeye.xmemcached.auth.AuthInfo;
 import net.rubyeye.xmemcached.buffer.BufferAllocator;
 import net.rubyeye.xmemcached.buffer.SimpleBufferAllocator;
 import net.rubyeye.xmemcached.command.TextCommandFactory;
@@ -59,6 +62,8 @@ public class XMemcachedClientFactoryBean implements FactoryBean {
 			.getDefaultConfiguration();
 	private CommandFactory commandFactory = new TextCommandFactory();
 
+	private Map<InetSocketAddress, AuthInfo> authInfoMap = new HashMap<InetSocketAddress, AuthInfo>();
+
 	private int connectionPoolSize = MemcachedClient.DEFAULT_CONNECTION_POOL_SIZE;
 
 	public final CommandFactory getCommandFactory() {
@@ -71,6 +76,18 @@ public class XMemcachedClientFactoryBean implements FactoryBean {
 
 	public XMemcachedClientFactoryBean() {
 
+	}
+
+	public Map<InetSocketAddress, AuthInfo> getAuthInfoMap() {
+		return authInfoMap;
+	}
+
+	public void setAuthInfoMap(Map<InetSocketAddress, AuthInfo> authInfoMap) {
+		this.authInfoMap = authInfoMap;
+	}
+
+	public int getConnectionPoolSize() {
+		return connectionPoolSize;
 	}
 
 	public final void setConnectionPoolSize(int poolSize) {
@@ -127,7 +144,6 @@ public class XMemcachedClientFactoryBean implements FactoryBean {
 		return this.configuration;
 	}
 
-	
 	public Object getObject() throws Exception {
 		checkAttribute();
 		List<InetSocketAddress> serverList = getServerList();
@@ -155,6 +171,7 @@ public class XMemcachedClientFactoryBean implements FactoryBean {
 		builder.setTranscoder(this.transcoder);
 		builder.setCommandFactory(this.commandFactory);
 		builder.setConnectionPoolSize(this.connectionPoolSize);
+		builder.setAuthInfoMap(this.authInfoMap);
 	}
 
 	private int[] getWeightsArray(List<InetSocketAddress> serverList) {
@@ -200,13 +217,11 @@ public class XMemcachedClientFactoryBean implements FactoryBean {
 		}
 	}
 
-	
 	@SuppressWarnings("unchecked")
 	public Class getObjectType() {
 		return MemcachedClient.class;
 	}
 
-	
 	public boolean isSingleton() {
 		return true;
 	}

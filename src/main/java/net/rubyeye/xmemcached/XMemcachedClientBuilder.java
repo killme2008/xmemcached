@@ -42,7 +42,7 @@ public class XMemcachedClientBuilder implements MemcachedClientBuilder {
 
 	private List<MemcachedClientStateListener> stateListeners = new ArrayList<MemcachedClientStateListener>();
 
-	Map<InetSocketAddress, AuthInfo> authInfoMap = new HashMap<InetSocketAddress, AuthInfo>();
+	private Map<InetSocketAddress, AuthInfo> authInfoMap = new HashMap<InetSocketAddress, AuthInfo>();
 
 	public void addStateListener(MemcachedClientStateListener stateListener) {
 		this.stateListeners.add(stateListener);
