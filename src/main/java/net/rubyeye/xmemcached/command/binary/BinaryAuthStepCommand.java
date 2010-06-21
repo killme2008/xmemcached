@@ -5,9 +5,13 @@ import java.util.concurrent.CountDownLatch;
 
 import net.rubyeye.xmemcached.command.CommandType;
 import net.rubyeye.xmemcached.transcoders.CachedData;
-import net.rubyeye.xmemcached.transcoders.Transcoder;
-import net.rubyeye.xmemcached.utils.ByteUtils;
 
+/**
+ * Auth step command
+ * 
+ * @author dennis
+ * 
+ */
 public class BinaryAuthStepCommand extends BaseBinaryCommand {
 
 	public BinaryAuthStepCommand(String mechanism, byte[] keyBytes,

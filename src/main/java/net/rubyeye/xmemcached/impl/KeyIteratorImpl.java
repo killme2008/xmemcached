@@ -71,7 +71,7 @@ public final class KeyIteratorImpl implements KeyIterator {
 		int itemNumber = this.itemNumbersList.remove();
 		Queue<Session> sessions = this.memcachedClient.getConnector()
 				.getSessionByAddress(this.inetSocketAddress);
-		if (sessions == null | sessions.size() == 0) {
+		if (sessions == null || sessions.size() == 0) {
 			throw new MemcachedException(
 					"The memcached server is not connected,"
 							+ this.inetSocketAddress);
@@ -88,11 +88,10 @@ public final class KeyIteratorImpl implements KeyIterator {
 			this.currentKeyList = (LinkedList<String>) textCacheDumpCommand
 					.getResult();
 		} else {
-			throw new MemcachedException(this.memcachedClient.getProtocol()
-					.name()
-					+ " protocol doesn't support iterating all keys in memcached");
+			throw new MemcachedException(
+					this.memcachedClient.getProtocol().name()
+							+ " protocol doesn't support iterating all keys in memcached");
 		}
 		return next();
 	}
-
 }

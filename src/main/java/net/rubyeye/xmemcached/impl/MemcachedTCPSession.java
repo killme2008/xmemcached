@@ -101,7 +101,7 @@ public class MemcachedTCPSession extends NioTCPSession implements
 	@Override
 	public InetSocketAddress getRemoteSocketAddress() {
 		InetSocketAddress result = super.getRemoteSocketAddress();
-		if (result == null) {
+		if (result == null && this.remoteSocketAddress != null) {
 			result = (InetSocketAddress) this.remoteSocketAddress;
 		}
 		return result;
@@ -126,8 +126,6 @@ public class MemcachedTCPSession extends NioTCPSession implements
 		return currentCommand;
 	}
 
-	
-	
 	public boolean isAuthFailed() {
 		return authFailed;
 	}
@@ -135,8 +133,6 @@ public class MemcachedTCPSession extends NioTCPSession implements
 	public void setAuthFailed(boolean authFailed) {
 		this.authFailed = authFailed;
 	}
-
-
 
 	private BufferAllocator bufferAllocator;
 

@@ -195,9 +195,9 @@ public class MemcachedConnector extends SocketChannelController implements
 
 	public List<Session> getSessionListBySocketAddress(
 			InetSocketAddress inetSocketAddress) {
-		if (this.sessionMap.get(inetSocketAddress) != null) {
-			return new ArrayList<Session>(this.sessionMap
-					.get(inetSocketAddress));
+		Queue<Session> queue = this.sessionMap.get(inetSocketAddress);
+		if (queue != null) {
+			return new ArrayList<Session>(queue);
 		} else {
 			return null;
 		}

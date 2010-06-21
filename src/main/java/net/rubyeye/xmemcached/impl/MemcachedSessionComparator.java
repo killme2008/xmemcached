@@ -1,12 +1,21 @@
 package net.rubyeye.xmemcached.impl;
 
+import java.io.Serializable;
 import java.util.Comparator;
 
 import net.rubyeye.xmemcached.networking.MemcachedSession;
 
 import com.google.code.yanf4j.core.Session;
 
-public class MemcachedSessionComparator implements Comparator<Session> {
+/**
+ * Connection comparator,compare with index
+ * 
+ * @author dennis
+ * 
+ */
+public class MemcachedSessionComparator implements Comparator<Session>,
+		Serializable {
+	static final long serialVersionUID = -1L;
 
 	public int compare(Session o1, Session o2) {
 		MemcachedSession session1 = (MemcachedSession) o1;

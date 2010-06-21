@@ -32,7 +32,7 @@ public final class IntegerTranscoder extends PrimitiveTypeTranscoder<Integer> {
 					}
 				}
 			}
-			return new CachedData(0, b, b.length, -1);
+			return new CachedData(flags, b, b.length, -1);
 		}
 		return new CachedData(SerializingTranscoder.SPECIAL_INT, this.tu
 				.encodeInt(l));

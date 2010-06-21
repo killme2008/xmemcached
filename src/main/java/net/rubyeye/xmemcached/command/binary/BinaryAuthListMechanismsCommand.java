@@ -6,11 +6,17 @@ import java.util.concurrent.CountDownLatch;
 import net.rubyeye.xmemcached.command.CommandType;
 import net.rubyeye.xmemcached.transcoders.CachedData;
 
+/**
+ * List auth mechanisms command
+ * 
+ * @author dennis
+ * 
+ */
 public class BinaryAuthListMechanismsCommand extends BaseBinaryCommand {
 
 	public BinaryAuthListMechanismsCommand(CountDownLatch latch) {
 		super(null, null, CommandType.AUTH_LIST, latch, 0, 0, null, false, null);
-		this.opCode=OpCode.AUTH_LIST_MECHANISMS;
+		this.opCode = OpCode.AUTH_LIST_MECHANISMS;
 	}
 
 	@Override

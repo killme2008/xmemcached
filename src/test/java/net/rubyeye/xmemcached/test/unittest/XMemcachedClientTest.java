@@ -1148,7 +1148,7 @@ public abstract class XMemcachedClientTest extends TestCase {
 			this.memcachedClient.get("name");
 			fail();
 		} catch (MemcachedException e) {
-			assertEquals("There is no avriable session at this moment", e
+			assertEquals("There is no available connection at this moment", e
 					.getMessage());
 		}
 

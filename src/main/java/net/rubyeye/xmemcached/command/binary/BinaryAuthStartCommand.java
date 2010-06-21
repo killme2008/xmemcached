@@ -5,8 +5,13 @@ import java.util.concurrent.CountDownLatch;
 
 import net.rubyeye.xmemcached.command.CommandType;
 import net.rubyeye.xmemcached.transcoders.CachedData;
-import net.rubyeye.xmemcached.utils.ByteUtils;
 
+/**
+ * Auth start command
+ * 
+ * @author dennis
+ * 
+ */
 public class BinaryAuthStartCommand extends BaseBinaryCommand {
 
 	public BinaryAuthStartCommand(String mechanism, byte[] keyBytes,
@@ -33,7 +38,7 @@ public class BinaryAuthStartCommand extends BaseBinaryCommand {
 		if (this.value == null)
 			return 0;
 		else
-			return ((byte[])this.value).length;
+			return ((byte[]) this.value).length;
 	}
 
 	@Override

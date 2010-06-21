@@ -282,7 +282,7 @@ public class Optimizer implements OptimizerMBean, MemcachedOptimizer {
 
 	}
 
-	class BinaryGetQCollector implements CommandCollector {
+	private static class BinaryGetQCollector implements CommandCollector {
 		LinkedList<IoBuffer> bufferList = new LinkedList<IoBuffer>();
 		int totalLength;
 		Command prevCommand;

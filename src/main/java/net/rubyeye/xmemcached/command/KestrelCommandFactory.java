@@ -99,7 +99,7 @@ public class KestrelCommandFactory implements CommandFactory {
 			throw new UnsupportedOperationException(
 					"Kestrel doesn't support 'stats itemName'");
 		}
-		return new TextStatsCommand(server, latch, itemName);
+		return new TextStatsCommand(server, latch, null);
 	}
 
 	public Command createVerbosityCommand(CountDownLatch latch, int level,
