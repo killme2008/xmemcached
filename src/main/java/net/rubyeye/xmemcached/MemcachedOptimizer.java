@@ -28,7 +28,7 @@ import net.rubyeye.xmemcached.buffer.BufferAllocator;
 import net.rubyeye.xmemcached.command.Command;
 
 /**
- * xmemcached优化器，决定优化策略
+ * xmemcached Optimizer
  * 
  * @author dennis
  */
