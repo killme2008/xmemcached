@@ -28,7 +28,7 @@
 				<value>2</value>
 			</list>
 		</property>
-		<!-- AuthInfo map -->
+		<!-- AuthInfo map,only valid on 1.2.5 or later version -->
 		<property name="authInfoMap">
 			<map>
 				<entry key-ref="server1">
@@ -71,7 +71,7 @@
 		-->
 		<constructor-arg>
 			<list>
-				<ref bean="server1"/>
+				<ref bean="server1" />
 			</list>
 		</constructor-arg>
 		<constructor-arg>
