@@ -1,4 +1,4 @@
-/* ::::: http://www.gstatic.com/codesite/ph/14658776014687933997/css/ph_core.css ::::: */
+/* ::::: http://www.gstatic.com/codesite/ph/13637207143931721394/css/ph_core.css ::::: */
 
 a:link { color: rgb(0, 0, 204); }
 body { margin: 3px 8px; background: rgb(255, 255, 255) none repeat scroll 0% 0%; -moz-background-clip: border; -moz-background-origin: padding; -moz-background-inline-policy: continuous; }
@@ -48,12 +48,15 @@ input { padding-left: 1px; padding-right: 1px; }
 .menuDiv .menuCategory, .menuDiv .categoryTitle { margin-top: 4px; }
 .menuDiv .menuSeparator { border-style: solid none none; border-color: rgb(201, 215, 241) -moz-use-text-color -moz-use-text-color; border-width: 1px 0pt 0pt; margin: 0pt 0.5em; }
 .hostedBy { text-align: center; }
-/* ::::: http://www.gstatic.com/codesite/ph/14658776014687933997/css/ph_detail.css ::::: */
+/* ::::: http://www.gstatic.com/codesite/ph/13637207143931721394/css/ph_detail.css ::::: */
 
 .pmeta_bubble_bg { background: rgb(229, 236, 249) none repeat scroll 0% 0%; -moz-background-clip: border; -moz-background-origin: padding; -moz-background-inline-policy: continuous; margin-bottom: 0.6em; }
 #wikicontent h3, #wikipreview h3 { border: 0pt none ; margin: 0pt; background: transparent none repeat scroll 0% 0%; -moz-background-clip: border; -moz-background-origin: padding; -moz-background-inline-policy: continuous; padding-left: 0pt; }
 #wikicontent p, #wikicontent ul, #wikicontent ol, #wikicontent blockquote { max-width: 65em; }
 #wikicontent ul, #wikicontent ol { padding-left: 40px; }
+a.section_anchor { display: none; text-decoration: none; margin-left: 0.7em; font-weight: lighter; font-size: 85%; }
+h1:hover a.section_anchor, h2:hover a.section_anchor, h3:hover a.section_anchor, h4:hover a.section_anchor, h5:hover a.section_anchor, h6:hover a.section_anchor { display: inline; color: rgb(187, 187, 187); }
+h1 a.section_anchor:hover, h2 a.section_anchor:hover, h3 a.section_anchor:hover, h4 a.section_anchor:hover, h5 a.section_anchor:hover, h6 a.section_anchor:hover { color: rgb(51, 51, 204); }
 pre.prettyprint { border-left: 3px solid rgb(204, 204, 204); padding: 0.5em; margin-left: 2em; }
 .prettyprint .str { color: rgb(0, 136, 0); }
 .prettyprint .kwd { color: rgb(0, 0, 136); }
@@ -69,5 +72,13 @@ pre.prettyprint { border-left: 3px solid rgb(204, 204, 204); padding: 0.5em; mar
 .author { padding-left: 0.7em; }
 #wikimaincol { padding-top: 6px; padding-left: 1em; }
 #sidebarcontainer { padding: 4px 2px 2px; overflow: hidden; width: 20em; }
-.artifactcomment, #commentform { border-top: 3px solid rgb(195, 217, 255); margin: 0.5em 0pt 0pt; padding: 0.3em 0pt 0.3em 0.3em; }
+.sidebartop ul { margin: 0pt 0pt 0pt 0.5em; padding-left: 0pt ! important; list-style-type: none; list-style-image: none; list-style-position: outside; }
+.sidebartop li { margin: 0pt 0pt 2px; padding: 1px 1px 1px 14px; cursor: pointer; }
+.sidebartop li a { padding: 2px; }
+.sidebartop li { background: transparent url('plus.gif') no-repeat scroll 1px 3px; -moz-background-clip: border; -moz-background-origin: padding; -moz-background-inline-policy: continuous; }
+.sidebartop li.treeleaf { background: transparent none repeat scroll 0% 0%; -moz-background-clip: border; -moz-background-origin: padding; -moz-background-inline-policy: continuous; }
+.currentpagelink { background: rgb(204, 221, 255) none repeat scroll 0% 0%; -moz-background-clip: border; -moz-background-origin: padding; -moz-background-inline-policy: continuous; }
+.sidebartop ul.treeleafcontainer { display: block; }
+.artifactcomment { border-top: 3px solid rgb(195, 217, 255); margin: 0.5em 0pt 0pt; padding: 0.3em 0pt 0.3em 0.3em; }
+#commentlist { border-bottom: 3px solid rgb(195, 217, 255); }
 .commentcontent { margin: 1em 0pt; }

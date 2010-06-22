@@ -1,8 +1,8 @@
-id	20100315115725
+id	20100622170844
 type	
 title	User_Guide_zh  
 chars	UTF-8
 icon	phosting.ico
-source	http://code.google.com/p/xmemcached/wiki/User_Guide_zh
+source	http://code.google.com/p/xmemcached/wiki/User_Guide_zh?ts=1277197687&updated=User_Guide_zh
 comment	
-folder	jbossmq
+folder	xmemcached
