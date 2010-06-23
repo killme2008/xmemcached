@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.junit.Ignore;
+
 import junit.framework.TestCase;
 
 import com.google.code.yanf4j.core.Session;
@@ -11,7 +13,7 @@ import com.google.code.yanf4j.core.impl.HandlerAdapter;
 import com.google.code.yanf4j.core.impl.TextLineCodecFactory;
 import com.google.code.yanf4j.nio.TCPConnectorController;
 import com.google.code.yanf4j.nio.TCPController;
-
+@Ignore
 public class TCPControllerTest extends TestCase {
 	private static final int PORT = 11931;
 	private static final int SENT_COUNT = 10000;

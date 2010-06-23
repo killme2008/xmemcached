@@ -2,6 +2,8 @@ package net.rubyeye.xmemcached.test.unittest.commands.binary;
 
 import java.nio.ByteBuffer;
 
+import org.junit.Ignore;
+
 import junit.framework.TestCase;
 import net.rubyeye.xmemcached.CommandFactory;
 import net.rubyeye.xmemcached.buffer.BufferAllocator;
@@ -11,10 +13,11 @@ import net.rubyeye.xmemcached.transcoders.SerializingTranscoder;
 import net.rubyeye.xmemcached.transcoders.Transcoder;
 import net.rubyeye.xmemcached.transcoders.TranscoderUtils;
 
+@Ignore
 public class BaseBinaryCommandUnitTest extends TestCase {
 	protected CommandFactory commandFactory;
 	protected Transcoder transcoder;
-	TranscoderUtils transcoderUtils=new TranscoderUtils(false);
+	TranscoderUtils transcoderUtils = new TranscoderUtils(false);
 	protected BufferAllocator bufferAllocator = new SimpleBufferAllocator();
 
 	@Override

@@ -8,6 +8,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.After;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.google.code.yanf4j.buffer.IoBuffer;
@@ -24,9 +25,9 @@ import com.google.code.yanf4j.test.unittest.core.impl.AbstractControllerUnitTest
  * 
  * @author boyan
  * 
- * @since 1.0, 2009-12-25 ионГ11:24:30
+ * @since 1.0, 2009-12-25 О©╫О©╫О©╫О©╫11:24:30
  */
-
+@Ignore
 public class TCPConnectorControllerUnitTest extends AbstractControllerUnitTest {
 
     private static final int PORT = 8080;

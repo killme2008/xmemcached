@@ -65,7 +65,7 @@ class CASThread extends Thread {
 	}
 }
 
-public class CASTest {
+public class CASExample {
 
 	public static void main(String[] args) throws Exception {
 		if (args.length < 2) {
