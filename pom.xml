@@ -1,8 +1,14 @@
 <?xml version="1.0"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<parent>
+		<groupId>org.sonatype.oss</groupId>
+		<artifactId>oss-parent</artifactId>
+		<version>2</version>
+	</parent>
+
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>com.googlecode</groupId>
+	<groupId>com.googlecode.xmemcached</groupId>
 	<artifactId>xmemcached</artifactId>
 	<version>1.2.5</version>
 	<name>xmemcached</name>
@@ -23,36 +29,12 @@
 			<url>http://www.apache.org/licenses/LICENSE-2.0</url>
 		</license>
 	</licenses>
+	<scm>
+		<connection>scm:svn:http://xmemcached.googlecode.com/svn/trunk/</connection>
+		<developerConnection>scm:svn:http://xmemcached.googlecode.com/svn/trunk/</developerConnection>
+		<url>http://xmemcached.googlecode.com/svn/trunk/</url>
+	</scm>
 
-	<repositories>
-		<repository>
-			<id>hibernate-memcached</id>
-			<name>hibernate-memcached</name>
-			<url>http://raykrueger.googlecode.com/svn/repository</url>
-		</repository>
-		<repository>
-			<id>maven2-repository</id>
-			<name>Java.net Repository for Maven</name>
-			<url>http://download.java.net/maven/2/</url>
-		</repository>
-	</repositories>
-
-	<distributionManagement>
-		<!-- use the following if you're not using a snapshot version. -->
-		<repository>
-			<uniqueVersion>false</uniqueVersion>
-			<id>googlecode</id>
-			<url>svn:https://denniszhuang.googlecode.com/svn/repository</url>
-			<!--<url>file://distribution</url>-->
-		</repository>
-		<!-- use the following if you ARE using a snapshot version. -->
-		<snapshotRepository>
-			<uniqueVersion>false</uniqueVersion>
-			<id>googlecode</id>
-			<url>svn:https://denniszhuang.googlecode.com/svn/repository</url>
-			<!--<url>file://distribution</url>-->
-		</snapshotRepository>
-	</distributionManagement>
 	<build>
 		<extensions>
 			<extension>
@@ -64,13 +46,13 @@
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-source-plugin</artifactId>
+				<artifactId>maven-gpg-plugin</artifactId>
 				<executions>
 					<execution>
-						<id>attach-sources</id>
+						<id>sign-artifacts</id>
 						<phase>verify</phase>
 						<goals>
-							<goal>jar</goal>
+							<goal>sign</goal>
 						</goals>
 					</execution>
 				</executions>
@@ -121,6 +103,11 @@
 			<version>1.5.6</version>
 		</dependency>
 		<dependency>
+			<groupId>log4j</groupId>
+			<artifactId>log4j</artifactId>
+			<version>1.2.16</version>
+		</dependency>
+		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-log4j12</artifactId>
 			<version>1.5.6</version>
@@ -137,7 +124,7 @@
 			<version>1.2</version>
 			<scope>provided</scope>
 		</dependency>
-			<dependency>
+		<dependency>
 			<groupId>org.easymock</groupId>
 			<artifactId>easymock</artifactId>
 			<version>2.4</version>
