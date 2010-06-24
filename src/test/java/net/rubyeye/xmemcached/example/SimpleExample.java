@@ -26,6 +26,7 @@ public class SimpleExample {
 			System.exit(1);
 		}
 		MemcachedClient memcachedClient = getMemcachedClient(args[0]);
+		MemcachedClient memcachedClient2 = getMemcachedClient(args[0]);
 		if (memcachedClient == null) {
 			throw new NullPointerException(
 					"Null MemcachedClient,please check memcached has been started");
@@ -65,6 +66,7 @@ public class SimpleExample {
 		}
 		try {
 			memcachedClient.shutdown();
+			memcachedClient2.shutdown();
 		} catch (Exception e) {
 			System.err.println("Shutdown MemcachedClient fail");
 			e.printStackTrace();

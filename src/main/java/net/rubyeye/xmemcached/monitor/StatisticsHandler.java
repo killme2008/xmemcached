@@ -27,10 +27,12 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 
 import net.rubyeye.xmemcached.command.CommandType;
+
 /**
  * Statistics helper
+ * 
  * @author dennis
- *
+ * 
  */
 public class StatisticsHandler implements StatisticsHandlerMBean {
 	private Map<CommandType, AtomicLong> counterMap = new HashMap<CommandType, AtomicLong>();
@@ -40,7 +42,8 @@ public class StatisticsHandler implements StatisticsHandlerMBean {
 		XMemcachedMbeanServer.getInstance().registMBean(
 				this,
 				this.getClass().getPackage().getName() + ":type="
-						+ this.getClass().getSimpleName());
+						+ this.getClass().getSimpleName() + "-"
+						+ MemcachedClientNameHolder.getName());
 	}
 
 	private boolean statistics = Boolean.valueOf(System.getProperty(
@@ -66,91 +69,76 @@ public class StatisticsHandler implements StatisticsHandlerMBean {
 		}
 	}
 
-	
 	public final boolean isStatistics() {
 		return this.statistics;
 	}
 
 	public final void statistics(CommandType cmdType) {
-		if (this.statistics&&this.counterMap.get(cmdType)!=null) {
+		if (this.statistics && this.counterMap.get(cmdType) != null) {
 			this.counterMap.get(cmdType).incrementAndGet();
 		}
 	}
-	
-	public final void statistics(CommandType cmdType,int count) {
-		if (this.statistics&&this.counterMap.get(cmdType)!=null) {
+
+	public final void statistics(CommandType cmdType, int count) {
+		if (this.statistics && this.counterMap.get(cmdType) != null) {
 			this.counterMap.get(cmdType).addAndGet(count);
 		}
 	}
 
-	
 	public final void setStatistics(boolean statistics) {
 		this.statistics = statistics;
 		buildCounterMap();
 
 	}
 
-	
 	public long getAppendCount() {
 		return this.counterMap.get(CommandType.APPEND).get();
 	}
 
-	
 	public long getCASCount() {
 		return this.counterMap.get(CommandType.CAS).get();
 	}
 
-	
 	public long getDecrCount() {
 		return this.counterMap.get(CommandType.DECR).get();
 	}
 
-	
 	public long getDeleteCount() {
 		return this.counterMap.get(CommandType.DELETE).get();
 	}
 
-	
 	public long getGetHitCount() {
 		return this.counterMap.get(CommandType.GET_HIT).get();
 	}
 
-	
 	public long getGetMissCount() {
 		return this.counterMap.get(CommandType.GET_MISS).get();
 	}
 
-	
 	public long getIncrCount() {
 		return this.counterMap.get(CommandType.INCR).get();
 	}
 
-	
 	public long getMultiGetCount() {
 		return this.counterMap.get(CommandType.GET_MANY).get();
 	}
 
-	
 	public long getMultiGetsCount() {
 		return this.counterMap.get(CommandType.GETS_MANY).get();
 	}
 
-	
 	public long getPrependCount() {
 		return this.counterMap.get(CommandType.PREPEND).get();
 	}
 
-	
 	public long getSetCount() {
 		return this.counterMap.get(CommandType.SET).get();
 	}
 
-	
 	public long getAddCount() {
 		return this.counterMap.get(CommandType.ADD).get();
 	}
 
-	
 	public long getReplaceCount() {
 		return this.counterMap.get(CommandType.REPLACE).get();
 	}

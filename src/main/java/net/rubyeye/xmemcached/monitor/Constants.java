@@ -22,6 +22,8 @@
  */
 package net.rubyeye.xmemcached.monitor;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 /**
  * Constants
  * 
@@ -35,11 +37,17 @@ public class Constants {
 	public static final String XMEMCACHED_STATISTICS_ENABLE = "xmemcached.statistics.enable";
 	/**
 	 * JMX RMI service name
+	 * 
+	 * @deprecated This field is deprecated,no instead.
 	 */
+	@Deprecated
 	public static final String XMEMCACHED_RMI_NAME = "xmemcached.rmi.name";
 	/**
 	 * JMX RMI port
+	 * 
+	 * @deprecated This field is deprecated,no instead.
 	 */
+	@Deprecated
 	public static final String XMEMCACHED_RMI_PORT = "xmemcached.rmi.port";
 	/**
 	 * Whether to enable jmx supports
@@ -57,4 +65,9 @@ public class Constants {
 	 */
 	public static final int MAX_SESSION_READ_BUFFER_SIZE = 768 * 1024;
 	public static final String NO_REPLY = "noreply".intern();
+	/**
+	 * Client instance counter
+	 */
+	public static final AtomicInteger MEMCACHED_CLIENT_COUNTER = new AtomicInteger(
+			0);
 }

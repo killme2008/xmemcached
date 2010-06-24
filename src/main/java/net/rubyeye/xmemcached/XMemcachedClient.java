@@ -51,6 +51,8 @@ import net.rubyeye.xmemcached.impl.MemcachedConnector;
 import net.rubyeye.xmemcached.impl.MemcachedHandler;
 import net.rubyeye.xmemcached.impl.MemcachedTCPSession;
 import net.rubyeye.xmemcached.impl.ReconnectRequest;
+import net.rubyeye.xmemcached.monitor.Constants;
+import net.rubyeye.xmemcached.monitor.MemcachedClientNameHolder;
 import net.rubyeye.xmemcached.monitor.XMemcachedMbeanServer;
 import net.rubyeye.xmemcached.networking.Connector;
 import net.rubyeye.xmemcached.networking.MemcachedSession;
@@ -96,6 +98,8 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 
 	private Map<InetSocketAddress, AuthInfo> authInfoMap = new HashMap<InetSocketAddress, AuthInfo>();
 
+	private String name; // cache name
+
 	private final CopyOnWriteArrayList<MemcachedClientStateListenerAdapter> stateListenerAdapters = new CopyOnWriteArrayList<MemcachedClientStateListenerAdapter>();
 
 	/*
@@ -116,6 +120,14 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 
 	public final CommandFactory getCommandFactory() {
 		return this.commandFactory;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
 	}
 
 	/*
@@ -508,6 +520,7 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 	private final void start0() throws IOException {
 		registerMBean();
 		startConnector();
+		MemcachedClientNameHolder.clear();
 	}
 
 	private final void startConnector() throws IOException {
@@ -549,6 +562,11 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 		if (commandFactory == null) {
 			commandFactory = new TextCommandFactory();
 		}
+		if (this.name == null) {
+			this.name = "MemcachedClient-"
+					+ Constants.MEMCACHED_CLIENT_COUNTER.getAndIncrement();
+			MemcachedClientNameHolder.setName(this.name);
+		}
 		this.commandFactory = commandFactory;
 		ByteUtils.setProtocol(this.commandFactory.getProtocol());
 		log.warn("XMemcachedClient use "
@@ -582,7 +600,8 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 			XMemcachedMbeanServer.getInstance().registMBean(
 					this,
 					this.getClass().getPackage().getName() + ":type="
-							+ this.getClass().getSimpleName());
+							+ this.getClass().getSimpleName() + "-"
+							+ MemcachedClientNameHolder.getName());
 		}
 	}
 
@@ -661,7 +680,8 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 			Map<SocketOption, Object> socketOptions,
 			CommandFactory commandFactory, Transcoder transcoder,
 			List<InetSocketAddress> addressList,
-			List<MemcachedClientStateListener> stateListeners,Map<InetSocketAddress, AuthInfo> map, int poolSize)
+			List<MemcachedClientStateListener> stateListeners,
+			Map<InetSocketAddress, AuthInfo> map, int poolSize)
 			throws IOException {
 		super();
 		optimiezeSetReadThreadCount(conf, addressList);
@@ -703,7 +723,8 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 			Map<SocketOption, Object> socketOptions,
 			CommandFactory commandFactory, Transcoder transcoder,
 			List<InetSocketAddress> addressList, int[] weights,
-			List<MemcachedClientStateListener> stateListeners,Map<InetSocketAddress,AuthInfo> infoMap, int poolSize)
+			List<MemcachedClientStateListener> stateListeners,
+			Map<InetSocketAddress, AuthInfo> infoMap, int poolSize)
 			throws IOException {
 		super();
 		if (weights == null && addressList != null) {

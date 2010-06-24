@@ -25,6 +25,9 @@ package net.rubyeye.xmemcached.monitor;
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.net.InetAddress;
+import java.net.MalformedURLException;
+import java.rmi.AccessException;
+import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 
@@ -75,66 +78,62 @@ public final class XMemcachedMbeanServer {
 				&& this.connectorServer.isActive()) {
 			return;
 		}
-		// 鍒涘缓MBServer
-		String hostName = null;
-		try {
-			InetAddress addr = InetAddress.getLocalHost();
-
-			hostName = addr.getHostName();
-		} catch (IOException e) {
-			log.error("Get HostName Error", e);
-			hostName = "localhost";
-		}
-		String host = System.getProperty("hostName", hostName);
 		try {
 			boolean enableJMX = Boolean.parseBoolean(System.getProperty(
 					Constants.XMEMCACHED_JMX_ENABLE, "false"));
 			if (enableJMX) {
+				// Use platform MBeanServer
 				this.mbserver = ManagementFactory.getPlatformMBeanServer();
-				int port = Integer.parseInt(System.getProperty(
-						Constants.XMEMCACHED_RMI_PORT, "7077"));
-				String rmiName = System.getProperty(
-						Constants.XMEMCACHED_RMI_NAME, "xmemcachedServer");
-				Registry registry = null;
-				try {
-					registry = LocateRegistry.getRegistry(port);
-					registry.list();
-				} catch (Exception e) {
-					registry = null;
-				}
-				if (null == registry) {
-					registry = LocateRegistry.createRegistry(port);
-				}
-				registry.list();
-				String serverURL = "service:jmx:rmi:///jndi/rmi://" + host
-						+ ":" + port + "/" + rmiName;
-				JMXServiceURL url = new JMXServiceURL(serverURL);
-				this.connectorServer = JMXConnectorServerFactory
-						.newJMXConnectorServer(url, null, this.mbserver);
-				this.connectorServer.start();
-				Runtime.getRuntime().addShutdownHook(new Thread() {
-					@Override
-					public void run() {
-						try {
-
-							if (XMemcachedMbeanServer.this.connectorServer
-									.isActive()) {
-								XMemcachedMbeanServer.this.connectorServer
-										.stop();
-								log.warn("JMXConnector stop");
-							}
-						} catch (IOException e) {
-							log.error("Shutdown Xmemcached MBean server error",
-									e);
-						}
-					}
-				});
-				log.warn("jmx url: " + serverURL);
+				log
+						.warn("Enable Xmemcached JMX,using platform MBeanServer....");
+				// initXmemcachedMBeanServer(host);
 			}
 		} catch (Exception e) {
 			log.error("create MBServer error", e);
 		}
 	}
+
+	// private void initXmemcachedMBeanServer() throws
+	// RemoteException,
+	// AccessException, MalformedURLException, IOException {
+	// String host = System.getProperty("hostName", hostName);
+	// int port = Integer.parseInt(System.getProperty(
+	// Constants.XMEMCACHED_RMI_PORT, "7077"));
+	// String rmiName = System.getProperty(Constants.XMEMCACHED_RMI_NAME,
+	// "xmemcachedServer");
+	// Registry registry = null;
+	// try {
+	// registry = LocateRegistry.getRegistry(port);
+	// registry.list();
+	// } catch (Exception e) {
+	// registry = null;
+	// }
+	// if (null == registry) {
+	// registry = LocateRegistry.createRegistry(port);
+	// }
+	// registry.list();
+	// String serverURL = "service:jmx:rmi:///jndi/rmi://" + host + ":" + port
+	// + "/" + rmiName;
+	// JMXServiceURL url = new JMXServiceURL(serverURL);
+	// this.connectorServer = JMXConnectorServerFactory.newJMXConnectorServer(
+	// url, null, this.mbserver);
+	// this.connectorServer.start();
+	// Runtime.getRuntime().addShutdownHook(new Thread() {
+	// @Override
+	// public void run() {
+	// try {
+	//
+	// if (XMemcachedMbeanServer.this.connectorServer.isActive()) {
+	// XMemcachedMbeanServer.this.connectorServer.stop();
+	// log.warn("JMXConnector stop");
+	// }
+	// } catch (IOException e) {
+	// log.error("Shutdown Xmemcached MBean server error", e);
+	// }
+	// }
+	// });
+	// log.warn("jmx url: " + serverURL);
+	// }
 
 	public static XMemcachedMbeanServer getInstance() {
 		return instance;
@@ -177,7 +176,6 @@ public final class XMemcachedMbeanServer {
 		if (isRegistered(name)) {
 			return;
 		}
-		// 娉ㄥ唽MBean
 		if (this.mbserver != null) {
 			try {
 				this.mbserver.registerMBean(o, new ObjectName(name));

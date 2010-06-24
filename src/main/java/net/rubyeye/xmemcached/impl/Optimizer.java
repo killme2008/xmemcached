@@ -42,6 +42,7 @@ import net.rubyeye.xmemcached.command.binary.BinaryGetMultiCommand;
 import net.rubyeye.xmemcached.command.binary.OpCode;
 import net.rubyeye.xmemcached.command.text.TextGetOneCommand;
 import net.rubyeye.xmemcached.monitor.Constants;
+import net.rubyeye.xmemcached.monitor.MemcachedClientNameHolder;
 import net.rubyeye.xmemcached.monitor.XMemcachedMbeanServer;
 import net.rubyeye.xmemcached.utils.ByteUtils;
 import net.rubyeye.xmemcached.utils.Protocol;
@@ -72,7 +73,7 @@ public class Optimizer implements OptimizerMBean, MemcachedOptimizer {
 		XMemcachedMbeanServer.getInstance().registMBean(
 				this,
 				this.getClass().getPackage().getName() + ":type="
-						+ this.getClass().getSimpleName());
+						+ this.getClass().getSimpleName()+"-"+MemcachedClientNameHolder.getName());
 		this.protocol = protocol;
 	}
 
