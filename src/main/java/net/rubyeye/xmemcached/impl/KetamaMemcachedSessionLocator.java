@@ -11,10 +11,11 @@
  */
 package net.rubyeye.xmemcached.impl;
 
+import java.security.SecureRandom;
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
-import java.util.Map;
+import java.util.Random;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
@@ -49,30 +50,27 @@ import com.google.code.yanf4j.core.Session;
 public class KetamaMemcachedSessionLocator implements MemcachedSessionLocator {
 
 	static final int NUM_REPS = 160;
-	private transient volatile TreeMap<Long, Session> ketamaSessions = new TreeMap<Long, Session>();
+	private transient volatile TreeMap<Long, List<Session>> ketamaSessions = new TreeMap<Long, List<Session>>();
 	private final HashAlgorithm hashAlg;
 	private volatile int maxTries;
+	private final Random random = new SecureRandom();
 
 	public KetamaMemcachedSessionLocator() {
-		this.hashAlg = HashAlgorithm.KETAMA_HASH;
-	}
-
-	public final Map<Long, Session> getSessionMap() {
-		return Collections.unmodifiableMap(this.ketamaSessions);
+		hashAlg = HashAlgorithm.KETAMA_HASH;
 	}
 
 	public KetamaMemcachedSessionLocator(HashAlgorithm alg) {
-		this.hashAlg = alg;
+		hashAlg = alg;
 	}
 
 	public KetamaMemcachedSessionLocator(List<Session> list, HashAlgorithm alg) {
 		super();
-		this.hashAlg = alg;
+		hashAlg = alg;
 		buildMap(list, alg);
 	}
 
 	private final void buildMap(Collection<Session> list, HashAlgorithm alg) {
-		TreeMap<Long, Session> sessionMap = new TreeMap<Long, Session>();
+		TreeMap<Long, List<Session>> sessionMap = new TreeMap<Long, List<Session>>();
 
 		for (Session session : list) {
 			String sockStr = String.valueOf(session.getRemoteSocketAddress());
@@ -91,28 +89,39 @@ public class KetamaMemcachedSessionLocator implements MemcachedSessionLocator {
 								| (long) (digest[2 + h * 4] & 0xFF) << 16
 								| (long) (digest[1 + h * 4] & 0xFF) << 8
 								| digest[h * 4] & 0xFF;
-						sessionMap.put(k, session);
+						getSessionList(sessionMap, k).add(session);
 					}
 
 				}
 			} else {
 				for (int i = 0; i < numReps; i++) {
-					sessionMap.put(alg.hash(sockStr + "-" + i), session);
+					long key = alg.hash(sockStr + "-" + i);
+					getSessionList(sessionMap, key).add(session);
 				}
 			}
 		}
-		this.ketamaSessions = sessionMap;
-		this.maxTries = list.size();
+		ketamaSessions = sessionMap;
+		maxTries = list.size();
+	}
+
+	private List<Session> getSessionList(
+			TreeMap<Long, List<Session>> sessionMap, long k) {
+		List<Session> sessionList = sessionMap.get(k);
+		if (sessionList == null) {
+			sessionList = new ArrayList<Session>();
+			sessionMap.put(k, sessionList);
+		}
+		return sessionList;
 	}
 
 	public final Session getSessionByKey(final String key) {
-		if (this.ketamaSessions == null || this.ketamaSessions.size() == 0) {
+		if (ketamaSessions == null || ketamaSessions.size() == 0) {
 			return null;
 		}
-		long hash = this.hashAlg.hash(key);
+		long hash = hashAlg.hash(key);
 		Session rv = getSessionByHash(hash);
 		int tries = 0;
-		while ((rv == null || rv.isClosed()) && tries++ < this.maxTries) {
+		while ((rv == null || rv.isClosed()) && tries++ < maxTries) {
 			hash = nextHash(hash, key, tries);
 			rv = getSessionByHash(hash);
 		}
@@ -120,14 +129,14 @@ public class KetamaMemcachedSessionLocator implements MemcachedSessionLocator {
 	}
 
 	public final Session getSessionByHash(final long hash) {
-		TreeMap<Long, Session> sessionMap = this.ketamaSessions;
+		TreeMap<Long, List<Session>> sessionMap = ketamaSessions;
 		if (sessionMap.size() == 0)
 			return null;
 		Long resultHash = hash;
 		if (!sessionMap.containsKey(hash)) {
 			// Java 1.6 adds a ceilingKey method, but xmemcached is compatible
 			// with jdk5,So use tailMap method to do this.
-			SortedMap<Long, Session> tailMap = sessionMap.tailMap(hash);
+			SortedMap<Long, List<Session>> tailMap = sessionMap.tailMap(hash);
 			if (tailMap.isEmpty()) {
 				resultHash = sessionMap.firstKey();
 			} else {
@@ -141,17 +150,21 @@ public class KetamaMemcachedSessionLocator implements MemcachedSessionLocator {
 		// resultHash = sessionMap.firstKey();
 		// }
 		// }
-		return sessionMap.get(resultHash);
+		List<Session> sessionList = sessionMap.get(resultHash);
+		if (sessionList == null || sessionList.size() == 0)
+			return null;
+		int size = sessionList.size();
+		return sessionList.get(random.nextInt(size));
 	}
 
 	public final long nextHash(long hashVal, String key, int tries) {
-		long tmpKey = this.hashAlg.hash(tries + key);
+		long tmpKey = hashAlg.hash(tries + key);
 		hashVal += (int) (tmpKey ^ tmpKey >>> 32);
 		hashVal &= 0xffffffffL; /* truncate to 32-bits */
 		return hashVal;
 	}
 
 	public final void updateSessions(final Collection<Session> list) {
-		buildMap(list, this.hashAlg);
+		buildMap(list, hashAlg);
 	}
 }
