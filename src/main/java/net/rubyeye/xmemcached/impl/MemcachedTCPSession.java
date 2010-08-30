@@ -23,6 +23,7 @@ import net.rubyeye.xmemcached.MemcachedOptimizer;
 import net.rubyeye.xmemcached.buffer.BufferAllocator;
 import net.rubyeye.xmemcached.command.Command;
 import net.rubyeye.xmemcached.command.OperationStatus;
+import net.rubyeye.xmemcached.exception.MemcachedException;
 import net.rubyeye.xmemcached.networking.MemcachedSession;
 
 import com.google.code.yanf4j.core.WriteMessage;
@@ -58,7 +59,7 @@ public class MemcachedTCPSession extends NioTCPSession implements
 	private volatile boolean authFailed;
 
 	public final int getWeight() {
-		return this.weight;
+		return weight;
 	}
 
 	public final void setWeight(int weight) {
@@ -70,22 +71,22 @@ public class MemcachedTCPSession extends NioTCPSession implements
 			int readThreadCount) {
 		super(sessionConfig, readRecvBufferSize);
 		this.optimiezer = optimiezer;
-		if (this.selectableChannel != null) {
-			this.remoteSocketAddress = ((SocketChannel) this.selectableChannel)
-					.socket().getRemoteSocketAddress();
-			this.allowReconnect = true;
+		if (selectableChannel != null) {
+			remoteSocketAddress = ((SocketChannel) selectableChannel).socket()
+					.getRemoteSocketAddress();
+			allowReconnect = true;
 			try {
-				this.sendBufferSize = ((SocketChannel) this.selectableChannel)
-						.socket().getSendBufferSize();
+				sendBufferSize = ((SocketChannel) selectableChannel).socket()
+						.getSendBufferSize();
 			} catch (SocketException e) {
-				this.sendBufferSize = 8 * 1024;
+				sendBufferSize = 8 * 1024;
 			}
 		}
-		this.commandAlreadySent = new LinkedTransferQueue<Command>();
+		commandAlreadySent = new LinkedTransferQueue<Command>();
 	}
 
 	public final int getOrder() {
-		return this.order;
+		return order;
 	}
 
 	public final void setOrder(int order) {
@@ -98,11 +99,26 @@ public class MemcachedTCPSession extends NioTCPSession implements
 				+ getRemoteSocketAddress().getPort();
 	}
 
+	public void destroy() {
+		Command command = currentCommand.get();
+		if (command != null) {
+			command.setException(new MemcachedException(
+					"Session has been closed"));
+			command.getLatch().countDown();
+		}
+		while ((command = commandAlreadySent.poll()) != null) {
+			command.setException(new MemcachedException(
+					"Session has been closed"));
+			command.getLatch().countDown();
+		}
+
+	}
+
 	@Override
 	public InetSocketAddress getRemoteSocketAddress() {
 		InetSocketAddress result = super.getRemoteSocketAddress();
-		if (result == null && this.remoteSocketAddress != null) {
-			result = (InetSocketAddress) this.remoteSocketAddress;
+		if (result == null && remoteSocketAddress != null) {
+			result = (InetSocketAddress) remoteSocketAddress;
 		}
 		return result;
 	}
@@ -118,9 +134,8 @@ public class MemcachedTCPSession extends NioTCPSession implements
 			/**
 			 * optimieze commands
 			 */
-			currentCommand = this.optimiezer.optimize(currentCommand,
-					this.writeQueue, this.commandAlreadySent,
-					this.sendBufferSize);
+			currentCommand = optimiezer.optimize(currentCommand, writeQueue,
+					commandAlreadySent, sendBufferSize);
 		}
 		currentCommand.setStatus(OperationStatus.WRITING);
 		return currentCommand;
@@ -137,7 +152,7 @@ public class MemcachedTCPSession extends NioTCPSession implements
 	private BufferAllocator bufferAllocator;
 
 	public final BufferAllocator getBufferAllocator() {
-		return this.bufferAllocator;
+		return bufferAllocator;
 	}
 
 	public final void setBufferAllocator(BufferAllocator bufferAllocator) {
@@ -162,7 +177,7 @@ public class MemcachedTCPSession extends NioTCPSession implements
 	 */
 	private final Command takeExecutingCommand() {
 		try {
-			return this.commandAlreadySent.take();
+			return commandAlreadySent.take();
 		} catch (InterruptedException e) {
 			Thread.currentThread().interrupt();
 		}
@@ -175,23 +190,23 @@ public class MemcachedTCPSession extends NioTCPSession implements
 	 * @return
 	 */
 	public boolean isAllowReconnect() {
-		return this.allowReconnect;
+		return allowReconnect;
 	}
 
 	public void setAllowReconnect(boolean reconnected) {
-		this.allowReconnect = reconnected;
+		allowReconnect = reconnected;
 	}
 
 	public final void addCommand(Command command) {
-		this.commandAlreadySent.add(command);
+		commandAlreadySent.add(command);
 	}
 
 	public final void setCurrentCommand(Command cmd) {
-		this.currentCommand.set(cmd);
+		currentCommand.set(cmd);
 	}
 
 	public final Command getCurrentCommand() {
-		return this.currentCommand.get();
+		return currentCommand.get();
 	}
 
 	public final void takeCurrentCommand() {

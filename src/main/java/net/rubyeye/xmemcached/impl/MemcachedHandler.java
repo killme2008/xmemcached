@@ -61,23 +61,23 @@ public class MemcachedHandler extends HandlerAdapter {
 	@Override
 	public final void onMessageReceived(final Session session, final Object msg) {
 		Command command = (Command) msg;
-		if (this.statisticsHandler.isStatistics()) {
+		if (statisticsHandler.isStatistics()) {
 			if (command.getMergeCount() > 0) {
 				int size = ((MapReturnValueAware) command).getReturnValues()
 						.size();
-				this.statisticsHandler.statistics(CommandType.GET_HIT, size);
-				this.statisticsHandler.statistics(CommandType.GET_MISS, command
+				statisticsHandler.statistics(CommandType.GET_HIT, size);
+				statisticsHandler.statistics(CommandType.GET_MISS, command
 						.getMergeCount()
 						- size);
 			} else if (command instanceof TextGetOneCommand
 					|| command instanceof BinaryGetCommand) {
 				if (command.getResult() != null) {
-					this.statisticsHandler.statistics(CommandType.GET_HIT);
+					statisticsHandler.statistics(CommandType.GET_HIT);
 				} else {
-					this.statisticsHandler.statistics(CommandType.GET_MISS);
+					statisticsHandler.statistics(CommandType.GET_MISS);
 				}
 			} else {
-				this.statisticsHandler.statistics(command.getCommandType());
+				statisticsHandler.statistics(command.getCommandType());
 			}
 		}
 	}
@@ -99,8 +99,7 @@ public class MemcachedHandler extends HandlerAdapter {
 	public final void onMessageSent(Session session, Object msg) {
 		Command command = (Command) msg;
 		command.setStatus(OperationStatus.SENT);
-		if (!command.isNoreply()
-				|| this.client.getProtocol() == Protocol.Binary) {
+		if (!command.isNoreply() || client.getProtocol() == Protocol.Binary) {
 			((MemcachedTCPSession) session).addCommand(command);
 		}
 	}
@@ -117,9 +116,8 @@ public class MemcachedHandler extends HandlerAdapter {
 	public void onSessionStarted(Session session) {
 		session.setUseBlockingRead(true);
 		session.setAttribute(HEART_BEAT_FAIL_COUNT_ATTR, new AtomicInteger(0));
-		for (MemcachedClientStateListener listener : this.client
-				.getStateListeners()) {
-			listener.onConnected(this.client, session.getRemoteSocketAddress());
+		for (MemcachedClientStateListener listener : client.getStateListeners()) {
+			listener.onConnected(client, session.getRemoteSocketAddress());
 		}
 		listener.onConnect((MemcachedTCPSession) session, client);
 	}
@@ -129,15 +127,16 @@ public class MemcachedHandler extends HandlerAdapter {
 	 */
 	@Override
 	public final void onSessionClosed(Session session) {
-		this.client.getConnector().removeSession(session);
-		if (this.client.getConnector().isStarted()
-				&& ((MemcachedSession) session).isAllowReconnect()) {
+		client.getConnector().removeSession(session);
+		MemcachedSession memcachedSession = (MemcachedSession) session;
+		// destroy memached session
+		memcachedSession.destroy();
+		if (client.getConnector().isStarted()
+				&& memcachedSession.isAllowReconnect()) {
 			reconnect(session);
 		}
-		for (MemcachedClientStateListener listener : this.client
-				.getStateListeners()) {
-			listener.onDisconnected(this.client, session
-					.getRemoteSocketAddress());
+		for (MemcachedClientStateListener listener : client.getStateListeners()) {
+			listener.onDisconnected(client, session.getRemoteSocketAddress());
 		}
 	}
 
@@ -146,13 +145,13 @@ public class MemcachedHandler extends HandlerAdapter {
 	 */
 	@Override
 	public void onSessionIdle(Session session) {
-		if (this.enableHeartBeat) {
+		if (enableHeartBeat) {
 			log.debug("Session (%s) is idle,send heartbeat", session
 					.getRemoteSocketAddress() == null ? "unknown" : session
 					.getRemoteSocketAddress().toString());
 			Command versionCommand = null;
 			CountDownLatch latch = new CountDownLatch(1);
-			if (this.client.getProtocol() == Protocol.Binary) {
+			if (client.getProtocol() == Protocol.Binary) {
 				versionCommand = new BinaryVersionCommand(latch, session
 						.getRemoteSocketAddress());
 
@@ -162,8 +161,8 @@ public class MemcachedHandler extends HandlerAdapter {
 			}
 			session.write(versionCommand);
 			// Start a check thread,avoid blocking reactor thread
-			if (this.heartBeatThreadPool != null) {
-				this.heartBeatThreadPool.execute(new CheckHeartResultThread(
+			if (heartBeatThreadPool != null) {
+				heartBeatThreadPool.execute(new CheckHeartResultThread(
 						versionCommand, session));
 			}
 		}
@@ -186,14 +185,14 @@ public class MemcachedHandler extends HandlerAdapter {
 
 		public void run() {
 			try {
-				AtomicInteger heartBeatFailCount = (AtomicInteger) this.session
+				AtomicInteger heartBeatFailCount = (AtomicInteger) session
 						.getAttribute(HEART_BEAT_FAIL_COUNT_ATTR);
 				if (heartBeatFailCount != null) {
-					if (!this.versionCommand.getLatch().await(2000,
+					if (!versionCommand.getLatch().await(2000,
 							TimeUnit.MILLISECONDS)) {
 						heartBeatFailCount.incrementAndGet();
 					}
-					if (this.versionCommand.getResult() == null) {
+					if (versionCommand.getResult() == null) {
 						heartBeatFailCount.incrementAndGet();
 					} else {
 						// reset
@@ -203,9 +202,9 @@ public class MemcachedHandler extends HandlerAdapter {
 					if (heartBeatFailCount.get() > MAX_HEART_BEAT_FAIL_COUNT) {
 						log
 								.warn("Session("
-										+ this.session.getRemoteSocketAddress()
+										+ session.getRemoteSocketAddress()
 										+ ") heartbeat fail 10 times,close session and try to heal it");
-						this.session.close();// close session
+						session.close();// close session
 						heartBeatFailCount.set(0);
 					}
 				}
@@ -221,26 +220,26 @@ public class MemcachedHandler extends HandlerAdapter {
 	 * @param session
 	 */
 	protected void reconnect(Session session) {
-		if (!this.client.isShutdown()) {
+		if (!client.isShutdown()) {
 			log.debug("Add reconnectRequest to connector "
 					+ session.getRemoteSocketAddress());
 			MemcachedSession memcachedTCPSession = (MemcachedSession) session;
 			InetSocketAddressWrapper inetSocketAddressWrapper = new InetSocketAddressWrapper(
 					session.getRemoteSocketAddress(), memcachedTCPSession
 							.getOrder());
-			this.client.getConnector().addToWatingQueue(
+			client.getConnector().addToWatingQueue(
 					new ReconnectRequest(inetSocketAddressWrapper, 0,
 							((MemcachedSession) session).getWeight()));
 		}
 	}
 
 	public void stop() {
-		this.heartBeatThreadPool.shutdown();
+		heartBeatThreadPool.shutdown();
 	}
 
 	public void start() {
-		int serverSize = this.client.getAvaliableServers().size();
-		this.heartBeatThreadPool = Executors
+		int serverSize = client.getAvaliableServers().size();
+		heartBeatThreadPool = Executors
 				.newFixedThreadPool(serverSize == 0 ? Runtime.getRuntime()
 						.availableProcessors() : serverSize);
 	}
@@ -249,7 +248,7 @@ public class MemcachedHandler extends HandlerAdapter {
 		super();
 		this.client = client;
 		listener = new AuthMemcachedConnectListener();
-		this.statisticsHandler = new StatisticsHandler();
+		statisticsHandler = new StatisticsHandler();
 
 	}
 

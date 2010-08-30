@@ -20,7 +20,7 @@ import com.google.code.yanf4j.core.CodecFactory.Encoder;
 
 public class MemcachedSessionComparatorUnitTest extends TestCase {
 	static private class MockSession implements MemcachedSession, Session {
-		private int order;
+		private final int order;
 
 		public MockSession(int order) {
 			super();
@@ -33,6 +33,11 @@ public class MemcachedSessionComparatorUnitTest extends TestCase {
 		}
 
 		public void clearAttributes() {
+			// TODO Auto-generated method stub
+
+		}
+
+		public void destroy() {
 			// TODO Auto-generated method stub
 
 		}
@@ -204,7 +209,7 @@ public class MemcachedSessionComparatorUnitTest extends TestCase {
 		}
 
 		public int getOrder() {
-			return this.order;
+			return order;
 		}
 
 		public int getWeight() {
@@ -242,8 +247,7 @@ public class MemcachedSessionComparatorUnitTest extends TestCase {
 				int next = i + 1;
 				MockSession nextSession = (MockSession) sessionList.get(next);
 				MockSession currentSession = (MockSession) sessionList.get(i);
-				assertTrue(currentSession.getOrder() < nextSession
-						.getOrder());
+				assertTrue(currentSession.getOrder() < nextSession.getOrder());
 			}
 		}
 
