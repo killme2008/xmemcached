@@ -44,19 +44,19 @@ public class NioTCPSession extends AbstractNioSession {
 	@Override
 	public final boolean isExpired() {
 		if (log.isDebugEnabled()) {
-			log.debug("sessionTimeout=" + this.sessionTimeout
-					+ ",this.timestamp=" + this.lastOperationTimeStamp.get()
+			log.debug("sessionTimeout=" + sessionTimeout
+					+ ",this.timestamp=" + lastOperationTimeStamp.get()
 					+ ",current=" + System.currentTimeMillis());
 		}
-		return this.sessionTimeout <= 0 ? false : System.currentTimeMillis()
-				- this.lastOperationTimeStamp.get() >= this.sessionTimeout;
+		return sessionTimeout <= 0 ? false : System.currentTimeMillis()
+				- lastOperationTimeStamp.get() >= sessionTimeout;
 	}
 
 	public NioTCPSession(NioSessionConfig sessionConfig, int readRecvBufferSize) {
 		super(sessionConfig);
-		if (this.selectableChannel != null
-				&& this.getRemoteSocketAddress() != null) {
-			this.loopback = getRemoteSocketAddress().getAddress()
+		if (selectableChannel != null
+				&& getRemoteSocketAddress() != null) {
+			loopback = getRemoteSocketAddress().getAddress()
 					.isLoopbackAddress();
 		}
 		setReadBuffer(IoBuffer.allocate(readRecvBufferSize));
@@ -78,14 +78,14 @@ public class NioTCPSession extends AbstractNioSession {
 		IoBuffer writeBuffer = message.getWriteBuffer();
 		// begin writing
 		message.writing();
-		if (this.useBlockingWrite) {
-			return blockingWrite(this.selectableChannel, message, writeBuffer);
+		if (useBlockingWrite) {
+			return blockingWrite(selectableChannel, message, writeBuffer);
 		} else {
 			while (true) {
-				long n = doRealWrite(this.selectableChannel, writeBuffer);
+				long n = doRealWrite(selectableChannel, writeBuffer);
 				if (n > 0) {
-					this.statistics.statisticsWrite(n);
-					this.scheduleWritenBytes.addAndGet(0 - n);
+					statistics.statisticsWrite(n);
+					scheduleWritenBytes.addAndGet(0 - n);
 				}
 				if (writeBuffer == null || !writeBuffer.hasRemaining()) {
 					if (message.getWriteFuture() != null) {
@@ -103,11 +103,11 @@ public class NioTCPSession extends AbstractNioSession {
 	}
 
 	public InetSocketAddress getRemoteSocketAddress() {
-		if (this.remoteAddress == null) {
-			this.remoteAddress = (InetSocketAddress) ((SocketChannel) this.selectableChannel)
+		if (remoteAddress == null) {
+			remoteAddress = (InetSocketAddress) ((SocketChannel) selectableChannel)
 					.socket().getRemoteSocketAddress();
 		}
-		return this.remoteAddress;
+		return remoteAddress;
 	}
 
 	/**
@@ -133,7 +133,7 @@ public class NioTCPSession extends AbstractNioSession {
 				if (len > 0) {
 					attempts = 0;
 					bytesProduced += len;
-					this.statistics.statisticsWrite(len);
+					statistics.statisticsWrite(len);
 				} else {
 					attempts++;
 					if (writeSelector == null) {
@@ -166,7 +166,7 @@ public class NioTCPSession extends AbstractNioSession {
 				SelectorFactory.returnSelector(writeSelector);
 			}
 		}
-		this.scheduleWritenBytes.addAndGet(0 - bytesProduced);
+		scheduleWritenBytes.addAndGet(0 - bytesProduced);
 		return message.getMessage();
 	}
 
@@ -175,7 +175,7 @@ public class NioTCPSession extends AbstractNioSession {
 		WriteMessage message = new WriteMessageImpl(msg,
 				(FutureImpl<Boolean>) writeFuture);
 		if (message.getWriteBuffer() == null) {
-			message.setWriteBuffer(this.encoder.encode(message.getMessage(),
+			message.setWriteBuffer(encoder.encode(message.getMessage(),
 					this));
 		}
 		return message;
@@ -183,32 +183,32 @@ public class NioTCPSession extends AbstractNioSession {
 
 	@Override
 	protected void readFromBuffer() {
-		if (!this.readBuffer.hasRemaining()) {
-			if (this.readBuffer.capacity() < Configuration.MAX_READ_BUFFER_SIZE) {
-				this.readBuffer = IoBuffer.wrap(ByteBufferUtils
-						.increaseBufferCapatity(this.readBuffer.buf()));
+		if (!readBuffer.hasRemaining()) {
+			if (readBuffer.capacity() < Configuration.MAX_READ_BUFFER_SIZE) {
+				readBuffer = IoBuffer.wrap(ByteBufferUtils
+						.increaseBufferCapatity(readBuffer.buf()));
 			} else {
 				// buffer's capacity is greater than maxium
 				return;
 			}
 		}
-		if (this.closed) {
+		if (closed) {
 			return;
 		}
 		int n = -1;
 		int readCount = 0;
 		try {
-			while ((n = ((ReadableByteChannel) this.selectableChannel)
-					.read(this.readBuffer.buf())) > 0) {
+			while ((n = ((ReadableByteChannel) selectableChannel)
+					.read(readBuffer.buf())) > 0) {
 				readCount += n;
 			}
 			if (readCount > 0) {
-				this.readBuffer.flip();
+				readBuffer.flip();
 				decode();
-				this.readBuffer.compact();
+				readBuffer.compact();
 			} else if (readCount == 0
-					&& !((SocketChannel) this.selectableChannel).socket()
-							.isInputShutdown() && this.useBlockingRead) {
+					&& !((SocketChannel) selectableChannel).socket()
+							.isInputShutdown() && useBlockingRead) {
 				n = blockingRead();
 				if (n > 0) {
 					readCount += n;
@@ -217,7 +217,7 @@ public class NioTCPSession extends AbstractNioSession {
 			if (n < 0) { // Connection closed
 				close();
 			} else {
-				this.selectorManager.registerSession(this,
+				selectorManager.registerSession(this,
 						EventType.ENABLE_READ);
 			}
 			if (log.isDebugEnabled()) {
@@ -245,8 +245,8 @@ public class NioTCPSession extends AbstractNioSession {
 		Selector readSelector = SelectorFactory.getSelector();
 		SelectionKey tmpKey = null;
 		try {
-			if (this.selectableChannel.isOpen()) {
-				tmpKey = this.selectableChannel.register(readSelector, 0);
+			if (selectableChannel.isOpen()) {
+				tmpKey = selectableChannel.register(readSelector, 0);
 				tmpKey.interestOps(tmpKey.interestOps() | SelectionKey.OP_READ);
 				int code = readSelector.select(500);
 				tmpKey
@@ -254,15 +254,15 @@ public class NioTCPSession extends AbstractNioSession {
 								& ~SelectionKey.OP_READ);
 				if (code > 0) {
 					do {
-						n = ((ReadableByteChannel) this.selectableChannel)
-								.read(this.readBuffer.buf());
+						n = ((ReadableByteChannel) selectableChannel)
+								.read(readBuffer.buf());
 						if (log.isDebugEnabled()) {
 							log.debug("use temp selector read " + n + " bytes");
 						}
-					} while (n > 0 && this.readBuffer.hasRemaining());
-					this.readBuffer.flip();
+					} while (n > 0 && readBuffer.hasRemaining());
+					readBuffer.flip();
 					decode();
-					this.readBuffer.compact();
+					readBuffer.compact();
 				}
 			}
 		} finally {
@@ -285,17 +285,17 @@ public class NioTCPSession extends AbstractNioSession {
 	@Override
 	public void decode() {
 		Object message;
-		int size = this.readBuffer.remaining();
-		while (this.readBuffer.hasRemaining()) {
+		int size = readBuffer.remaining();
+		while (readBuffer.hasRemaining()) {
 			try {
-				message = this.decoder.decode(this.readBuffer, this);
+				message = decoder.decode(readBuffer, this);
 				if (message == null) {
 					break;
 				} else {
-					if (this.statistics.isStatistics()) {
-						this.statistics.statisticsRead(size
-								- this.readBuffer.remaining());
-						size = this.readBuffer.remaining();
+					if (statistics.isStatistics()) {
+						statistics.statisticsRead(size
+								- readBuffer.remaining());
+						size = readBuffer.remaining();
 					}
 				}
 				dispatchReceivedMessage(message);
@@ -309,14 +309,14 @@ public class NioTCPSession extends AbstractNioSession {
 	}
 
 	public Socket socket() {
-		return ((SocketChannel) this.selectableChannel).socket();
+		return ((SocketChannel) selectableChannel).socket();
 	}
 
 	@Override
 	protected final void closeChannel() throws IOException {
 		flush0();
 		// try to close output first
-		Socket socket = ((SocketChannel) this.selectableChannel).socket();
+		Socket socket = ((SocketChannel) selectableChannel).socket();
 		try {
 			if (!socket.isClosed() && !socket.isOutputShutdown()) {
 				socket.shutdownOutput();
@@ -325,6 +325,11 @@ public class NioTCPSession extends AbstractNioSession {
 				socket.shutdownInput();
 			}
 		} catch (IOException e) {
+		}
+		try {
+			socket.close();
+		} catch (IOException e) {
+
 		}
 		unregisterSession();
 		unregisterChannel();
