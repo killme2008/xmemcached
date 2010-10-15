@@ -68,7 +68,7 @@ public abstract class AbstractSession implements Session {
 	protected volatile long sessionTimeout;
 
 	public long getSessionIdleTimeout() {
-		return this.sessionIdleTimeout;
+		return sessionIdleTimeout;
 	}
 
 	public void setSessionIdleTimeout(long sessionIdleTimeout) {
@@ -76,7 +76,7 @@ public abstract class AbstractSession implements Session {
 	}
 
 	public long getSessionTimeout() {
-		return this.sessionTimeout;
+		return sessionTimeout;
 	}
 
 	public void setSessionTimeout(long sessionTimeout) {
@@ -84,23 +84,23 @@ public abstract class AbstractSession implements Session {
 	}
 
 	public Queue<WriteMessage> getWriteQueue() {
-		return this.writeQueue;
+		return writeQueue;
 	}
 
 	public Statistics getStatistics() {
-		return this.statistics;
+		return statistics;
 	}
 
 	public Handler getHandler() {
-		return this.handler;
+		return handler;
 	}
 
 	public Dispatcher getDispatchMessageDispatcher() {
-		return this.dispatchMessageDispatcher;
+		return dispatchMessageDispatcher;
 	}
 
 	public ReentrantLock getWriteLock() {
-		return this.writeLock;
+		return writeLock;
 	}
 
 	protected CodecFactory.Encoder encoder;
@@ -126,15 +126,15 @@ public abstract class AbstractSession implements Session {
 	public abstract void decode();
 
 	public void updateTimeStamp() {
-		this.lastOperationTimeStamp.set(System.currentTimeMillis());
+		lastOperationTimeStamp.set(System.currentTimeMillis());
 	}
 
 	public long getLastOperationTimeStamp() {
-		return this.lastOperationTimeStamp.get();
+		return lastOperationTimeStamp.get();
 	}
 
 	public final boolean isHandleReadWriteConcurrently() {
-		return this.handleReadWriteConcurrently;
+		return handleReadWriteConcurrently;
 	}
 
 	public final void setHandleReadWriteConcurrently(
@@ -143,11 +143,11 @@ public abstract class AbstractSession implements Session {
 	}
 
 	public long getScheduleWritenBytes() {
-		return this.scheduleWritenBytes.get();
+		return scheduleWritenBytes.get();
 	}
 
 	public CodecFactory.Encoder getEncoder() {
-		return this.encoder;
+		return encoder;
 	}
 
 	public void setEncoder(CodecFactory.Encoder encoder) {
@@ -155,11 +155,11 @@ public abstract class AbstractSession implements Session {
 	}
 
 	public CodecFactory.Decoder getDecoder() {
-		return this.decoder;
+		return decoder;
 	}
 
 	public IoBuffer getReadBuffer() {
-		return this.readBuffer;
+		return readBuffer;
 	}
 
 	public void setReadBuffer(IoBuffer readBuffer) {
@@ -171,17 +171,17 @@ public abstract class AbstractSession implements Session {
 	}
 
 	public final ByteOrder getReadBufferByteOrder() {
-		if (this.readBuffer == null) {
+		if (readBuffer == null) {
 			throw new IllegalStateException();
 		}
-		return this.readBuffer.order();
+		return readBuffer.order();
 	}
 
 	public final void setReadBufferByteOrder(ByteOrder readBufferByteOrder) {
-		if (this.readBuffer == null) {
+		if (readBuffer == null) {
 			throw new NullPointerException("Null ReadBuffer");
 		}
-		this.readBuffer.order(readBufferByteOrder);
+		readBuffer.order(readBufferByteOrder);
 	}
 
 	// synchronized,prevent reactors invoking this method concurrently.
@@ -190,7 +190,7 @@ public abstract class AbstractSession implements Session {
 			// check twice
 			if (isIdle()) {
 				updateTimeStamp();
-				this.handler.onSessionIdle(this);
+				handler.onSessionIdle(this);
 			}
 		} catch (Throwable e) {
 			onException(e);
@@ -199,7 +199,7 @@ public abstract class AbstractSession implements Session {
 
 	protected void onConnected() {
 		try {
-			this.handler.onSessionConnected(this);
+			handler.onSessionConnected(this);
 		} catch (Throwable e) {
 			onException(e);
 		}
@@ -208,7 +208,7 @@ public abstract class AbstractSession implements Session {
 	public void onExpired() {
 		try {
 			if (isExpired()) {
-				this.handler.onSessionExpired(this);
+				handler.onSessionExpired(this);
 			}
 		} catch (Throwable e) {
 			onException(e);
@@ -229,28 +229,28 @@ public abstract class AbstractSession implements Session {
 	}
 
 	protected void dispatchReceivedMessage(final Object message) {
-		if (this.dispatchMessageDispatcher == null) {
+		if (dispatchMessageDispatcher == null) {
 			long start = -1;
-			if (this.statistics != null && this.statistics.isStatistics()) {
+			if (statistics != null && statistics.isStatistics()) {
 				start = System.currentTimeMillis();
 			}
 			onMessage(message, this);
 			if (start != -1) {
-				this.statistics.statisticsProcess(System.currentTimeMillis()
+				statistics.statisticsProcess(System.currentTimeMillis()
 						- start);
 			}
 		} else {
 
-			this.dispatchMessageDispatcher.dispatch(new Runnable() {
+			dispatchMessageDispatcher.dispatch(new Runnable() {
 				public void run() {
 					long start = -1;
-					if (AbstractSession.this.statistics != null
-							&& AbstractSession.this.statistics.isStatistics()) {
+					if (statistics != null
+							&& statistics.isStatistics()) {
 						start = System.currentTimeMillis();
 					}
 					onMessage(message, AbstractSession.this);
 					if (start != -1) {
-						AbstractSession.this.statistics
+						statistics
 								.statisticsProcess(System.currentTimeMillis()
 										- start);
 					}
@@ -263,14 +263,14 @@ public abstract class AbstractSession implements Session {
 
 	private void onMessage(final Object message, Session session) {
 		try {
-			this.handler.onMessageReceived(session, message);
+			handler.onMessageReceived(session, message);
 		} catch (Throwable e) {
 			onException(e);
 		}
 	}
 
 	public final boolean isClosed() {
-		return this.closed;
+		return closed;
 	}
 
 	public final void setClosed(boolean closed) {
@@ -278,10 +278,12 @@ public abstract class AbstractSession implements Session {
 	}
 
 	public final void close() {
-		if (isClosed()) {
-			return;
+		synchronized (this) {
+			if (isClosed()) {
+				return;
+			}
+			setClosed(true);
 		}
-		setClosed(true);
 		try {
 			closeChannel();
 			clearAttributes();
@@ -297,35 +299,35 @@ public abstract class AbstractSession implements Session {
 	protected abstract void closeChannel() throws IOException;
 
 	public void onException(Throwable e) {
-		this.handler.onExceptionCaught(this, e);
+		handler.onExceptionCaught(this, e);
 	}
 
 	protected void onClosed() {
 		try {
-			this.handler.onSessionClosed(this);
+			handler.onSessionClosed(this);
 		} catch (Throwable e) {
 			onException(e);
 		}
 	}
 
 	public void setAttribute(String key, Object value) {
-		this.attributes.put(key, value);
+		attributes.put(key, value);
 	}
 
 	public Object setAttributeIfAbsent(String key, Object value) {
-		return this.attributes.putIfAbsent(key, value);
+		return attributes.putIfAbsent(key, value);
 	}
 
 	public void removeAttribute(String key) {
-		this.attributes.remove(key);
+		attributes.remove(key);
 	}
 
 	public Object getAttribute(String key) {
-		return this.attributes.get(key);
+		return attributes.get(key);
 	}
 
 	public void clearAttributes() {
-		this.attributes.clear();
+		attributes.clear();
 	}
 
 	public synchronized void start() {
@@ -338,7 +340,7 @@ public abstract class AbstractSession implements Session {
 
 	protected void onStarted() {
 		try {
-			this.handler.onSessionStarted(this);
+			handler.onSessionStarted(this);
 		} catch (Throwable e) {
 			onException(e);
 		}
@@ -375,35 +377,35 @@ public abstract class AbstractSession implements Session {
 	}
 
 	public Future<Boolean> asyncWrite(Object packet) {
-		if (this.closed) {
+		if (closed) {
 			FutureImpl<Boolean> writeFuture = new FutureImpl<Boolean>();
 			writeFuture.failure(new IOException("�����Ѿ����ر�"));
 			return writeFuture;
 		}
-		if (this.statistics.isSendOverFlow()) {
-			if (!this.handler.onSessionWriteOverFlow(this, packet)) {
+		if (statistics.isSendOverFlow()) {
+			if (!handler.onSessionWriteOverFlow(this, packet)) {
 				return new FailFuture();
 			}
 		}
 		FutureImpl<Boolean> writeFuture = new FutureImpl<Boolean>();
 		WriteMessage message = wrapMessage(packet, writeFuture);
-		this.scheduleWritenBytes
+		scheduleWritenBytes
 				.addAndGet(message.getWriteBuffer().remaining());
 		write0(message);
 		return writeFuture;
 	}
 
 	public void write(Object packet) {
-		if (this.closed) {
+		if (closed) {
 			return;
 		}
-		if (this.statistics.isSendOverFlow()) {
-			if (!this.handler.onSessionWriteOverFlow(this, packet)) {
+		if (statistics.isSendOverFlow()) {
+			if (!handler.onSessionWriteOverFlow(this, packet)) {
 				return;
 			}
 		}
 		WriteMessage message = wrapMessage(packet, null);
-		this.scheduleWritenBytes
+		scheduleWritenBytes
 				.addAndGet(message.getWriteBuffer().remaining());
 		write0(message);
 	}
@@ -411,11 +413,11 @@ public abstract class AbstractSession implements Session {
 	protected abstract void write0(WriteMessage message);
 
 	public final boolean isLoopbackConnection() {
-		return this.loopback;
+		return loopback;
 	}
 
 	public boolean isUseBlockingWrite() {
-		return this.useBlockingWrite;
+		return useBlockingWrite;
 	}
 
 	public void setUseBlockingWrite(boolean useBlockingWrite) {
@@ -423,7 +425,7 @@ public abstract class AbstractSession implements Session {
 	}
 
 	public boolean isUseBlockingRead() {
-		return this.useBlockingRead;
+		return useBlockingRead;
 	}
 
 	public void setUseBlockingRead(boolean useBlockingRead) {
@@ -431,7 +433,7 @@ public abstract class AbstractSession implements Session {
 	}
 
 	public void clearWriteQueue() {
-		this.writeQueue.clear();
+		writeQueue.clear();
 	}
 
 	public boolean isExpired() {
@@ -439,23 +441,23 @@ public abstract class AbstractSession implements Session {
 	}
 
 	public boolean isIdle() {
-		long lastOpTimestamp = this.getLastOperationTimeStamp();
+		long lastOpTimestamp = getLastOperationTimeStamp();
 		return lastOpTimestamp > 0
-				&& System.currentTimeMillis() - lastOpTimestamp > this.sessionIdleTimeout;
+				&& System.currentTimeMillis() - lastOpTimestamp > sessionIdleTimeout;
 	}
 
 	public AbstractSession(SessionConfig sessionConfig) {
 		super();
-		this.lastOperationTimeStamp.set(System.currentTimeMillis());
-		this.statistics = sessionConfig.statistics;
-		this.handler = sessionConfig.handler;
-		this.writeQueue = sessionConfig.queue;
-		this.encoder = sessionConfig.codecFactory.getEncoder();
-		this.decoder = sessionConfig.codecFactory.getDecoder();
-		this.dispatchMessageDispatcher = sessionConfig.dispatchMessageDispatcher;
-		this.handleReadWriteConcurrently = sessionConfig.handleReadWriteConcurrently;
-		this.sessionTimeout = sessionConfig.sessionTimeout;
-		this.sessionIdleTimeout = sessionConfig.sessionIdelTimeout;
+		lastOperationTimeStamp.set(System.currentTimeMillis());
+		statistics = sessionConfig.statistics;
+		handler = sessionConfig.handler;
+		writeQueue = sessionConfig.queue;
+		encoder = sessionConfig.codecFactory.getEncoder();
+		decoder = sessionConfig.codecFactory.getDecoder();
+		dispatchMessageDispatcher = sessionConfig.dispatchMessageDispatcher;
+		handleReadWriteConcurrently = sessionConfig.handleReadWriteConcurrently;
+		sessionTimeout = sessionConfig.sessionTimeout;
+		sessionIdleTimeout = sessionConfig.sessionIdelTimeout;
 	}
 
 	public long transferTo(long position, long count, FileChannel target)
@@ -470,7 +472,7 @@ public abstract class AbstractSession implements Session {
 
 	protected void onCreated() {
 		try {
-			this.handler.onSessionCreated(this);
+			handler.onSessionCreated(this);
 		} catch (Throwable e) {
 			onException(e);
 		}
