@@ -39,7 +39,7 @@ public abstract class BaseSerializingTranscoder {
 	 *            the number of bytes
 	 */
 	public void setCompressionThreshold(int to) {
-		this.compressionThreshold = to;
+		compressionThreshold = to;
 	}
 
 	/**
@@ -52,7 +52,7 @@ public abstract class BaseSerializingTranscoder {
 		} catch (UnsupportedEncodingException e) {
 			throw new RuntimeException(e);
 		}
-		this.charset = to;
+		charset = to;
 	}
 
 	/**
@@ -145,7 +145,7 @@ public abstract class BaseSerializingTranscoder {
 		if (in != null) {
 			ByteArrayInputStream bis = new ByteArrayInputStream(in);
 			bos = new ByteArrayOutputStream();
-			GZIPInputStream gis;
+			GZIPInputStream gis = null;
 			try {
 				gis = new GZIPInputStream(bis);
 
@@ -157,6 +157,13 @@ public abstract class BaseSerializingTranscoder {
 			} catch (IOException e) {
 				log.error("Failed to decompress data", e);
 				bos = null;
+			} finally {
+				if (gis != null)
+					try {
+						gis.close();
+					} catch (IOException e) {
+						log.error("Close GZIPInputStream error", e);
+					}
 			}
 		}
 		return bos == null ? null : bos.toByteArray();
@@ -169,7 +176,7 @@ public abstract class BaseSerializingTranscoder {
 		String rv = null;
 		try {
 			if (data != null) {
-				rv = new String(data, this.charset);
+				rv = new String(data, charset);
 			}
 		} catch (UnsupportedEncodingException e) {
 			throw new RuntimeException(e);
@@ -183,7 +190,7 @@ public abstract class BaseSerializingTranscoder {
 	protected byte[] encodeString(String in) {
 		byte[] rv = null;
 		try {
-			rv = in.getBytes(this.charset);
+			rv = in.getBytes(charset);
 		} catch (UnsupportedEncodingException e) {
 			throw new RuntimeException(e);
 		}
