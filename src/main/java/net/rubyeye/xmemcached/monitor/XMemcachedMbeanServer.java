@@ -25,9 +25,6 @@ package net.rubyeye.xmemcached.monitor;
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.net.InetAddress;
-import java.net.MalformedURLException;
-import java.rmi.AccessException;
-import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 
@@ -74,66 +71,70 @@ public final class XMemcachedMbeanServer {
 	}
 
 	private void initialize() {
-		if (this.mbserver != null && this.connectorServer != null
-				&& this.connectorServer.isActive()) {
+		if (mbserver != null && connectorServer != null
+				&& connectorServer.isActive()) {
 			return;
 		}
+		// 鍒涘缓MBServer
+		String hostName = null;
+		try {
+			InetAddress addr = InetAddress.getLocalHost();
+
+			hostName = addr.getHostName();
+		} catch (IOException e) {
+			log.error("Get HostName Error", e);
+			hostName = "localhost";
+		}
+		String host = System.getProperty("hostName", hostName);
 		try {
 			boolean enableJMX = Boolean.parseBoolean(System.getProperty(
 					Constants.XMEMCACHED_JMX_ENABLE, "false"));
 			if (enableJMX) {
-				// Use platform MBeanServer
-				this.mbserver = ManagementFactory.getPlatformMBeanServer();
-				log
-						.warn("Enable Xmemcached JMX,using platform MBeanServer....");
-				// initXmemcachedMBeanServer(host);
+				mbserver = ManagementFactory.getPlatformMBeanServer();
+				int port = Integer.parseInt(System.getProperty(
+						Constants.XMEMCACHED_RMI_PORT, "7077"));
+				String rmiName = System.getProperty(
+						Constants.XMEMCACHED_RMI_NAME, "xmemcachedServer");
+				Registry registry = null;
+				try {
+					registry = LocateRegistry.getRegistry(port);
+					registry.list();
+				} catch (Exception e) {
+					registry = null;
+				}
+				if (null == registry) {
+					registry = LocateRegistry.createRegistry(port);
+				}
+				registry.list();
+				String serverURL = "service:jmx:rmi:///jndi/rmi://" + host
+						+ ":" + port + "/" + rmiName;
+				JMXServiceURL url = new JMXServiceURL(serverURL);
+				connectorServer = JMXConnectorServerFactory
+						.newJMXConnectorServer(url, null, mbserver);
+				connectorServer.start();
+				Runtime.getRuntime().addShutdownHook(new Thread() {
+					@Override
+					public void run() {
+						try {
+
+							if (connectorServer
+									.isActive()) {
+								connectorServer
+										.stop();
+								log.warn("JMXConnector stop");
+							}
+						} catch (IOException e) {
+							log.error("Shutdown Xmemcached MBean server error",
+									e);
+						}
+					}
+				});
+				log.warn("jmx url: " + serverURL);
 			}
 		} catch (Exception e) {
 			log.error("create MBServer error", e);
 		}
 	}
-
-	// private void initXmemcachedMBeanServer() throws
-	// RemoteException,
-	// AccessException, MalformedURLException, IOException {
-	// String host = System.getProperty("hostName", hostName);
-	// int port = Integer.parseInt(System.getProperty(
-	// Constants.XMEMCACHED_RMI_PORT, "7077"));
-	// String rmiName = System.getProperty(Constants.XMEMCACHED_RMI_NAME,
-	// "xmemcachedServer");
-	// Registry registry = null;
-	// try {
-	// registry = LocateRegistry.getRegistry(port);
-	// registry.list();
-	// } catch (Exception e) {
-	// registry = null;
-	// }
-	// if (null == registry) {
-	// registry = LocateRegistry.createRegistry(port);
-	// }
-	// registry.list();
-	// String serverURL = "service:jmx:rmi:///jndi/rmi://" + host + ":" + port
-	// + "/" + rmiName;
-	// JMXServiceURL url = new JMXServiceURL(serverURL);
-	// this.connectorServer = JMXConnectorServerFactory.newJMXConnectorServer(
-	// url, null, this.mbserver);
-	// this.connectorServer.start();
-	// Runtime.getRuntime().addShutdownHook(new Thread() {
-	// @Override
-	// public void run() {
-	// try {
-	//
-	// if (XMemcachedMbeanServer.this.connectorServer.isActive()) {
-	// XMemcachedMbeanServer.this.connectorServer.stop();
-	// log.warn("JMXConnector stop");
-	// }
-	// } catch (IOException e) {
-	// log.error("Shutdown Xmemcached MBean server error", e);
-	// }
-	// }
-	// });
-	// log.warn("jmx url: " + serverURL);
-	// }
 
 	public static XMemcachedMbeanServer getInstance() {
 		return instance;
@@ -141,8 +142,8 @@ public final class XMemcachedMbeanServer {
 
 	public final void shutdown() {
 		try {
-			if (this.connectorServer != null && this.connectorServer.isActive()) {
-				this.connectorServer.stop();
+			if (connectorServer != null && connectorServer.isActive()) {
+				connectorServer.stop();
 				log.warn("JMXConnector stop");
 			}
 		} catch (IOException e) {
@@ -152,21 +153,21 @@ public final class XMemcachedMbeanServer {
 
 	public boolean isRegistered(String name) {
 		try {
-			return this.mbserver != null
-					&& this.mbserver.isRegistered(new ObjectName(name));
+			return mbserver != null
+					&& mbserver.isRegistered(new ObjectName(name));
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
 	}
 
 	public boolean isActive() {
-		return this.mbserver != null && this.connectorServer != null
-				&& this.connectorServer.isActive();
+		return mbserver != null && connectorServer != null
+				&& connectorServer.isActive();
 	}
 
 	public int getMBeanCount() {
-		if (this.mbserver != null) {
-			return this.mbserver.getMBeanCount();
+		if (mbserver != null) {
+			return mbserver.getMBeanCount();
 		} else {
 			return 0;
 		}
@@ -176,9 +177,10 @@ public final class XMemcachedMbeanServer {
 		if (isRegistered(name)) {
 			return;
 		}
-		if (this.mbserver != null) {
+		// 娉ㄥ唽MBean
+		if (mbserver != null) {
 			try {
-				this.mbserver.registerMBean(o, new ObjectName(name));
+				mbserver.registerMBean(o, new ObjectName(name));
 			} catch (Exception e) {
 				throw new RuntimeException(e);
 			}

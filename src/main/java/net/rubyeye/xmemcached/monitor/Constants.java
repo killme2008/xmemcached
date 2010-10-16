@@ -38,16 +38,13 @@ public class Constants {
 	/**
 	 * JMX RMI service name
 	 * 
-	 * @deprecated This field is deprecated,no instead.
 	 */
-	@Deprecated
 	public static final String XMEMCACHED_RMI_NAME = "xmemcached.rmi.name";
 	/**
 	 * JMX RMI port
 	 * 
-	 * @deprecated This field is deprecated,no instead.
+	 * 
 	 */
-	@Deprecated
 	public static final String XMEMCACHED_RMI_PORT = "xmemcached.rmi.port";
 	/**
 	 * Whether to enable jmx supports

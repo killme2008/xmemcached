@@ -7,7 +7,7 @@
 
 	<bean name="server1" class="java.net.InetSocketAddress">
 		<constructor-arg>
-			<value>192.168.207.140</value>
+			<value>localhost</value>
 		</constructor-arg>
 		<constructor-arg>
 			<value>11211</value>
@@ -20,7 +20,7 @@
 		class="net.rubyeye.xmemcached.utils.XMemcachedClientFactoryBean"
 		destroy-method="shutdown">
 		<property name="servers">
-			<value>192.168.207.140:11211</value>
+			<value>localhost:11211</value>
 		</property>
 		<property name="weights">
 			<list>

@@ -37,6 +37,7 @@ import net.rubyeye.xmemcached.command.AssocCommandAware;
 import net.rubyeye.xmemcached.command.Command;
 import net.rubyeye.xmemcached.command.CommandType;
 import net.rubyeye.xmemcached.command.OperationStatus;
+import net.rubyeye.xmemcached.command.binary.BaseBinaryCommand;
 import net.rubyeye.xmemcached.command.binary.BinaryGetCommand;
 import net.rubyeye.xmemcached.command.binary.BinaryGetMultiCommand;
 import net.rubyeye.xmemcached.command.binary.OpCode;
@@ -73,12 +74,13 @@ public class Optimizer implements OptimizerMBean, MemcachedOptimizer {
 		XMemcachedMbeanServer.getInstance().registMBean(
 				this,
 				this.getClass().getPackage().getName() + ":type="
-						+ this.getClass().getSimpleName()+"-"+MemcachedClientNameHolder.getName());
+						+ this.getClass().getSimpleName() + "-"
+						+ MemcachedClientNameHolder.getName());
 		this.protocol = protocol;
 	}
 
 	public BufferAllocator getBufferAllocator() {
-		return this.bufferAllocator;
+		return bufferAllocator;
 	}
 
 	public void setBufferAllocator(BufferAllocator bufferAllocator) {
@@ -86,7 +88,7 @@ public class Optimizer implements OptimizerMBean, MemcachedOptimizer {
 	}
 
 	public int getMergeFactor() {
-		return this.mergeFactor;
+		return mergeFactor;
 	}
 
 	public void setMergeFactor(int mergeFactor) {
@@ -97,7 +99,7 @@ public class Optimizer implements OptimizerMBean, MemcachedOptimizer {
 	}
 
 	public boolean isOptimizeGet() {
-		return this.optimiezeGet;
+		return optimiezeGet;
 	}
 
 	public void setOptimizeGet(boolean optimiezeGet) {
@@ -107,7 +109,7 @@ public class Optimizer implements OptimizerMBean, MemcachedOptimizer {
 	}
 
 	public boolean isOptimizeMergeBuffer() {
-		return this.optimiezeMergeBuffer;
+		return optimiezeMergeBuffer;
 	}
 
 	public void setOptimizeMergeBuffer(boolean optimiezeMergeBuffer) {
@@ -142,7 +144,7 @@ public class Optimizer implements OptimizerMBean, MemcachedOptimizer {
 		if (log.isDebugEnabled()) {
 			log.debug("Optimieze merge buffer:" + optimiezeCommand.toString());
 		}
-		if (this.optimiezeMergeBuffer
+		if (optimiezeMergeBuffer
 				&& optimiezeCommand.getIoBuffer().remaining() < sendBufferSize) {
 			optimiezeCommand = mergeBuffer(optimiezeCommand, writeQueue,
 					executingCmds, sendBufferSize);
@@ -164,7 +166,7 @@ public class Optimizer implements OptimizerMBean, MemcachedOptimizer {
 		if (optimiezeCommand.getCommandType() == CommandType.GET_ONE
 				|| optimiezeCommand.getCommandType() == CommandType.GETS_ONE) {
 			// 优化get操作
-			if (this.optimiezeGet) {
+			if (optimiezeGet) {
 				optimiezeCommand = mergeGetCommands(optimiezeCommand,
 						writeQueue, executingCmds, optimiezeCommand
 								.getCommandType());
@@ -207,7 +209,7 @@ public class Optimizer implements OptimizerMBean, MemcachedOptimizer {
 			// if it is get_one command,try to merge get commands
 			if ((nextCmd.getCommandType() == CommandType.GET_ONE || nextCmd
 					.getCommandType() == CommandType.GETS_ONE)
-					&& this.optimiezeGet) {
+					&& optimiezeGet) {
 				nextCmd = mergeGetCommands(nextCmd, writeQueue, executingCmds,
 						nextCmd.getCommandType());
 			}
@@ -225,7 +227,8 @@ public class Optimizer implements OptimizerMBean, MemcachedOptimizer {
 			IoBuffer gatherBuffer = IoBuffer.allocate(totalBytes);
 			for (Command command : commands) {
 				gatherBuffer.put(command.getIoBuffer());
-				if (command != lastCommand && !command.isNoreply()) {
+				if (command != lastCommand
+						&& (!command.isNoreply() || command instanceof BaseBinaryCommand)) {
 					executingCmds.add(command);
 				}
 			}
@@ -241,12 +244,12 @@ public class Optimizer implements OptimizerMBean, MemcachedOptimizer {
 
 		@Override
 		protected List<Command> initialValue() {
-			return new ArrayList<Command>(Optimizer.this.mergeFactor);
+			return new ArrayList<Command>(mergeFactor);
 		}
 	};
 
 	public final List<Command> getLocalList() {
-		List<Command> list = this.threadLocal.get();
+		List<Command> list = threadLocal.get();
 		list.clear();
 		return list;
 	}
@@ -264,15 +267,15 @@ public class Optimizer implements OptimizerMBean, MemcachedOptimizer {
 		boolean wasFirst = true;
 
 		public Object getResult() {
-			return this.key.toString();
+			return key.toString();
 		}
 
 		public void visit(Command command) {
-			if (this.wasFirst) {
-				this.key.append(command.getKey());
-				this.wasFirst = false;
+			if (wasFirst) {
+				key.append(command.getKey());
+				wasFirst = false;
 			} else {
-				this.key.append(" ").append(command.getKey());
+				key.append(" ").append(command.getKey());
 			}
 		}
 
@@ -289,8 +292,8 @@ public class Optimizer implements OptimizerMBean, MemcachedOptimizer {
 		Command prevCommand;
 
 		public Object getResult() {
-			IoBuffer mergedBuffer = IoBuffer.allocate(this.totalLength);
-			for (IoBuffer buffer : this.bufferList) {
+			IoBuffer mergedBuffer = IoBuffer.allocate(totalLength);
+			for (IoBuffer buffer : bufferList) {
 				mergedBuffer.put(buffer);
 			}
 			mergedBuffer.flip();
@@ -302,28 +305,28 @@ public class Optimizer implements OptimizerMBean, MemcachedOptimizer {
 
 		public void visit(Command command) {
 			// Encode prev command
-			if (this.prevCommand != null) {
+			if (prevCommand != null) {
 				// first n-1 send getq command
-				Command getqCommand = new BinaryGetCommand(this.prevCommand
-						.getKey(), this.prevCommand.getKeyBytes(), null, null,
+				Command getqCommand = new BinaryGetCommand(prevCommand
+						.getKey(), prevCommand.getKeyBytes(), null, null,
 						OpCode.GET_KEY_QUIETLY, true);
 				getqCommand.encode();
-				this.totalLength += getqCommand.getIoBuffer().remaining();
-				this.bufferList.add(getqCommand.getIoBuffer());
+				totalLength += getqCommand.getIoBuffer().remaining();
+				bufferList.add(getqCommand.getIoBuffer());
 			}
-			this.prevCommand = command;
+			prevCommand = command;
 		}
 
 		public void finish() {
 			// prev command is the last command,last command must be getk,ensure
 			// getq commands send response back
-			Command lastGetKCommand = new BinaryGetCommand(this.prevCommand
-					.getKey(), this.prevCommand.getKeyBytes(),
+			Command lastGetKCommand = new BinaryGetCommand(prevCommand
+					.getKey(), prevCommand.getKeyBytes(),
 					CommandType.GET_ONE, new CountDownLatch(1), OpCode.GET_KEY,
 					false);
 			lastGetKCommand.encode();
-			this.bufferList.add(lastGetKCommand.getIoBuffer());
-			this.totalLength += lastGetKCommand.getIoBuffer().remaining();
+			bufferList.add(lastGetKCommand.getIoBuffer());
+			totalLength += lastGetKCommand.getIoBuffer().remaining();
 		}
 
 	}
@@ -338,7 +341,7 @@ public class Optimizer implements OptimizerMBean, MemcachedOptimizer {
 		currentCmd.setStatus(OperationStatus.WRITING);
 
 		commandCollector.visit(currentCmd);
-		while (mergeCount < this.mergeFactor) {
+		while (mergeCount < mergeFactor) {
 			Command nextCmd = (Command) writeQueue.peek();
 			if (nextCmd == null) {
 				break;
@@ -350,7 +353,7 @@ public class Optimizer implements OptimizerMBean, MemcachedOptimizer {
 			if (nextCmd.getCommandType() == expectedCommandType) {
 				if (mergeCommands == null) { // lazy initialize
 					mergeCommands = new HashMap<Object, Command>(
-							this.mergeFactor / 2);
+							mergeFactor / 2);
 					mergeCommands.put(currentCmd.getKey(), currentCmd);
 				}
 				if (log.isDebugEnabled()) {
@@ -391,7 +394,7 @@ public class Optimizer implements OptimizerMBean, MemcachedOptimizer {
 
 	private CommandCollector creatCommandCollector() {
 		CommandCollector commandCollector = null;
-		if (this.protocol == Protocol.Text) {
+		if (protocol == Protocol.Text) {
 			commandCollector = new KeyStringCollector();
 		} else {
 			commandCollector = new BinaryGetQCollector();
@@ -402,7 +405,7 @@ public class Optimizer implements OptimizerMBean, MemcachedOptimizer {
 	private Command newMergedCommand(final Map<Object, Command> mergeCommands,
 			int mergeCount, final CommandCollector commandCollector,
 			final CommandType commandType) {
-		if (this.protocol == Protocol.Text) {
+		if (protocol == Protocol.Text) {
 			String resultKey = (String) commandCollector.getResult();
 
 			byte[] keyBytes = ByteUtils.getBytes(resultKey);

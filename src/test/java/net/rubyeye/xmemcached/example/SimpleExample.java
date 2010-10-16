@@ -1,15 +1,12 @@
 package net.rubyeye.xmemcached.example;
 
 import java.io.IOException;
-import java.net.InetSocketAddress;
 import java.util.concurrent.TimeoutException;
 
 import net.rubyeye.xmemcached.KeyIterator;
 import net.rubyeye.xmemcached.MemcachedClient;
 import net.rubyeye.xmemcached.MemcachedClientBuilder;
 import net.rubyeye.xmemcached.XMemcachedClientBuilder;
-import net.rubyeye.xmemcached.auth.AuthInfo;
-import net.rubyeye.xmemcached.command.BinaryCommandFactory;
 import net.rubyeye.xmemcached.exception.MemcachedException;
 import net.rubyeye.xmemcached.utils.AddrUtil;
 
@@ -26,7 +23,6 @@ public class SimpleExample {
 			System.exit(1);
 		}
 		MemcachedClient memcachedClient = getMemcachedClient(args[0]);
-		MemcachedClient memcachedClient2 = getMemcachedClient(args[0]);
 		if (memcachedClient == null) {
 			throw new NullPointerException(
 					"Null MemcachedClient,please check memcached has been started");
@@ -66,7 +62,6 @@ public class SimpleExample {
 		}
 		try {
 			memcachedClient.shutdown();
-			memcachedClient2.shutdown();
 		} catch (Exception e) {
 			System.err.println("Shutdown MemcachedClient fail");
 			e.printStackTrace();
