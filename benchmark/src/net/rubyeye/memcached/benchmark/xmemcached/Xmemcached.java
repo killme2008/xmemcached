@@ -6,13 +6,25 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import net.rubyeye.memcached.BaseTest;
 import net.rubyeye.xmemcached.MemcachedClient;
-import net.rubyeye.xmemcached.XMemcachedClient;
+import net.rubyeye.xmemcached.MemcachedClientBuilder;
+import net.rubyeye.xmemcached.XMemcachedClientBuilder;
+import net.rubyeye.xmemcached.command.BinaryCommandFactory;
 import net.rubyeye.xmemcached.utils.AddrUtil;
 
 import com.google.code.yanf4j.util.ResourcesUtils;
 
-public class Xmemcached extends BaseTest{
+public class Xmemcached extends BaseTest {
 	public static void main(String[] args) throws Exception {
+		boolean useBinaryProtocl = false;
+		int connCount = 1;
+		if (args.length >= 1) {
+			if (args[0].equals("binary")) {
+				useBinaryProtocl = true;
+			}
+		}
+		if (args.length >= 2) {
+			connCount = Integer.parseInt(args[1]);
+		}
 		Properties properties = ResourcesUtils
 				.getResourceAsProperties("memcached.properties");
 		if (properties.get("servers") == null) {
@@ -20,8 +32,14 @@ public class Xmemcached extends BaseTest{
 			System.exit(1);
 		}
 		String servers = (String) properties.get("servers");
-		MemcachedClient memcachedClient = new XMemcachedClient(AddrUtil
+		MemcachedClientBuilder builder = new XMemcachedClientBuilder(AddrUtil
 				.getAddresses(servers));
+		builder.setConnectionPoolSize(connCount);
+		if (useBinaryProtocl) {
+			builder.setCommandFactory(new BinaryCommandFactory());
+		}
+
+		MemcachedClient memcachedClient = builder.build();
 		System.out.println("Xmemcached startup");
 		warmUp(memcachedClient);
 

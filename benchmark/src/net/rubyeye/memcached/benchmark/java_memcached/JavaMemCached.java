@@ -4,9 +4,10 @@ import java.util.Properties;
 import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.atomic.AtomicLong;
 
-import org.apache.log4j.BasicConfigurator;
 import net.rubyeye.memcached.BaseTest;
 import net.rubyeye.memcached.benchmark.Constants;
+
+import org.apache.log4j.BasicConfigurator;
 
 import com.danga.MemCached.MemCachedClient;
 import com.danga.MemCached.SockIOPool;
@@ -25,6 +26,9 @@ public class JavaMemCached extends BaseTest implements Constants {
 		String servers = (String) properties.get("servers");
 		BasicConfigurator.configure();
 		SockIOPool pool = SockIOPool.getInstance();
+		pool.setMinConn(10);
+		pool.setMaxConn(250);
+		pool.setMaxIdle(60 * 60 * 1000);
 		pool.setServers(servers.split(" "));
 		pool.initialize();
 

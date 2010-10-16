@@ -22,19 +22,17 @@ import java.util.regex.Pattern;
 
 import net.rubyeye.memcached.benchmark.Constants;
 
-import org.jfree.chart.*;
-
+import org.jfree.chart.ChartFactory;
+import org.jfree.chart.ChartUtilities;
+import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.CategoryAxis;
 import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.plot.CategoryPlot;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.renderer.category.LineAndShapeRenderer;
-import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 import org.jfree.chart.title.LegendTitle;
 import org.jfree.chart.title.TextTitle;
-
 import org.jfree.data.category.CategoryDataset;
-
 import org.jfree.data.general.DatasetUtilities;
 
 /**
@@ -89,10 +87,11 @@ public class ResultAnalyser {
 						valueLength);
 				if (list != null) {
 					for (int j = 0; j < data[i].length; j++) {
-						if (j >= list.size())
+						if (j >= list.size()) {
 							data[i][j] = 0;
-						else
+						} else {
 							data[i][j] = list.get(j);
+						}
 					}
 
 				}
@@ -120,10 +119,11 @@ public class ResultAnalyser {
 				final List<Double> list = result.get(rowKeys[i]).get(threads);
 				if (list != null) {
 					for (int j = 0; j < data[i].length; j++) {
-						if (j >= list.size())
+						if (j >= list.size()) {
 							data[i][j] = 0;
-						else
+						} else {
 							data[i][j] = list.get(j);
+						}
 					}
 
 				}
@@ -143,8 +143,9 @@ public class ResultAnalyser {
 			if (wasFirst) {
 				sb.append(rowKey);
 				wasFirst = false;
-			} else
+			} else {
 				sb.append(" VS. ").append(rowKey);
+			}
 
 		}
 		return sb;
@@ -283,6 +284,7 @@ public class ResultAnalyser {
 		render.setSeriesPaint(1, Color.GREEN);
 		render.setSeriesPaint(2, Color.YELLOW);
 		render.setSeriesPaint(3, Color.BLUE);
+		render.setSeriesPaint(4, Color.CYAN);
 		render.setShapesFilled(Boolean.TRUE);// 在数据点显示实心的小图标
 		render.setShapesVisible(true);// 设置显示小图标
 
