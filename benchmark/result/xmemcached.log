@@ -1,3 +1,4 @@
+Xmemcached startup
 threads=1,repeats=40000,valueLength=64,tps=5995,miss=0,fail=0,hit=32004,all=40000,hitRate=1.00
 threads=1,repeats=40000,valueLength=512,tps=5610,miss=0,fail=0,hit=32004,all=40000,hitRate=1.00
 threads=1,repeats=40000,valueLength=1024,tps=4463,miss=0,fail=0,hit=32004,all=40000,hitRate=1.00
