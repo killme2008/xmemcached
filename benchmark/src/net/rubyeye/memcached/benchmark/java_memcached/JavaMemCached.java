@@ -27,7 +27,7 @@ public class JavaMemCached extends BaseTest implements Constants {
 		BasicConfigurator.configure();
 		SockIOPool pool = SockIOPool.getInstance();
 		pool.setMinConn(10);
-		pool.setMaxConn(250);
+		pool.setMaxConn(500);
 		pool.setMaxIdle(60 * 60 * 1000);
 		pool.setServers(servers.split(" "));
 		pool.initialize();
