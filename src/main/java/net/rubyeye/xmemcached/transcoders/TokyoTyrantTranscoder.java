@@ -31,7 +31,7 @@ import net.rubyeye.xmemcached.exception.MemcachedDecodeException;
  * 
  */
 public class TokyoTyrantTranscoder implements Transcoder<Object> {
-	private SerializingTranscoder serializingTranscoder;
+	private final SerializingTranscoder serializingTranscoder;
 
 	public TokyoTyrantTranscoder(int maxSize) {
 		serializingTranscoder = new SerializingTranscoder(maxSize);
@@ -57,7 +57,7 @@ public class TokyoTyrantTranscoder implements Transcoder<Object> {
 				flagBytes);
 		d.setFlag(flag);
 		if ((flag & SerializingTranscoder.COMPRESSED) != 0) {
-			realData = this.serializingTranscoder.decompress(realData);
+			realData = serializingTranscoder.decompress(realData);
 		}
 		flag = flag & SerializingTranscoder.SPECIAL_MASK;
 		return serializingTranscoder.decode0(d, realData, flag);
@@ -78,16 +78,8 @@ public class TokyoTyrantTranscoder implements Transcoder<Object> {
 		return result;
 	}
 
-	public boolean equals(Object obj) {
-		return serializingTranscoder.equals(obj);
-	}
-
 	public final int getMaxSize() {
 		return serializingTranscoder.getMaxSize();
-	}
-
-	public int hashCode() {
-		return serializingTranscoder.hashCode();
 	}
 
 	public boolean isPackZeros() {

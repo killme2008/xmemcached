@@ -13,8 +13,10 @@ public class SystemUtilsUniTest extends TestCase {
 		assertNotNull(selector);
 		assertTrue(selector.isOpen());
 		if (SystemUtils.isLinuxPlatform()) {
-			assertEquals(selector.provider().getClass().getCanonicalName(),
-					"sun.nio.ch.EPollSelectorProvider");
+			final String pollClassName = selector.provider().getClass()
+					.getCanonicalName();
+			assertTrue(pollClassName.equals("sun.nio.ch.EPollSelectorProvider")
+					|| pollClassName.equals("sun.nio.ch.PollSelectorProvider"));
 		}
 		Selector selector2 = SystemUtils.openSelector();
 		;
