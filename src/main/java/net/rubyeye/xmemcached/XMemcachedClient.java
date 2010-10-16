@@ -70,6 +70,7 @@ import org.slf4j.LoggerFactory;
 import com.google.code.yanf4j.config.Configuration;
 import com.google.code.yanf4j.core.Session;
 import com.google.code.yanf4j.core.SocketOption;
+import com.google.code.yanf4j.util.SystemUtils;
 
 /**
  * Memcached Client for connecting to memcached server and do operations.
@@ -694,6 +695,7 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 			Map<InetSocketAddress, AuthInfo> map, int poolSize)
 			throws IOException {
 		super();
+		optimiezeSetReadThreadCount(conf, addressList);
 		buildConnector(locator, allocator, conf, socketOptions, commandFactory,
 				transcoder);
 		if (stateListeners != null) {
@@ -755,6 +757,7 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 			throw new IllegalArgumentException(
 					"weights.length is less than addressList.size()");
 		}
+		optimiezeSetReadThreadCount(conf, addressList);
 		buildConnector(locator, allocator, conf, socketOptions, commandFactory,
 				transcoder);
 		if (stateListeners != null) {
@@ -770,6 +773,28 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 				connect(new InetSocketAddressWrapper(addressList.get(i),
 						this.serverOrderCount.incrementAndGet()), weights[i]);
 			}
+		}
+	}
+
+	private final void optimiezeSetReadThreadCount(Configuration conf,
+			List<InetSocketAddress> addressList) {
+		if (conf != null && addressList != null) {
+			if (isLinuxPlatform() && addressList.size() > 1
+					&& conf.getReadThreadCount() == DEFAULT_READ_THREAD_COUNT) {
+				int threadCount = 2 * SystemUtils.getSystemThreadCount();
+				conf
+						.setReadThreadCount(addressList.size() > threadCount ? threadCount
+								: addressList.size());
+			}
+		}
+	}
+
+	private final boolean isLinuxPlatform() {
+		String osName = System.getProperty("os.name");
+		if (osName != null && osName.toLowerCase().indexOf("linux") >= 0) {
+			return true;
+		} else {
+			return false;
 		}
 	}
 

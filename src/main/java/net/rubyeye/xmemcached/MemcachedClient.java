@@ -40,7 +40,7 @@ public interface MemcachedClient {
 	/**
 	 * Default socket's send buffer size,8k
 	 */
-	public static final int DEFAULT_TCP_SEND_BUFF_SIZE = 8 * 1024;
+	public static final int DEFAULT_TCP_SEND_BUFF_SIZE = 32 * 1024;
 	/**
 	 * Disable Nagle algorithm by default
 	 */
@@ -48,7 +48,7 @@ public interface MemcachedClient {
 	/**
 	 * Default session read buffer size,16k
 	 */
-	public static final int DEFAULT_SESSION_READ_BUFF_SIZE = 64 * 1024;
+	public static final int DEFAULT_SESSION_READ_BUFF_SIZE = 128 * 1024;
 	/**
 	 * Default socket's receive buffer size,16k
 	 */
