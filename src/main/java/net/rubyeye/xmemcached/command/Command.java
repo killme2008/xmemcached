@@ -40,17 +40,14 @@ public abstract class Command implements WriteMessage {
 
 	public static final byte RESPONSE_MAGIC_NUMBER = (byte) (0x81 & 0xFF);
 
-	
 	public final Object getMessage() {
 		return this;
 	}
 
-	
 	public synchronized final com.google.code.yanf4j.buffer.IoBuffer getWriteBuffer() {
-		return  getIoBuffer();
+		return getIoBuffer();
 	}
 
-	
 	public void setWriteBuffer(com.google.code.yanf4j.buffer.IoBuffer buffers) {
 		// throw new UnsupportedOperationException();
 	}
@@ -71,7 +68,7 @@ public abstract class Command implements WriteMessage {
 	protected FutureImpl<Boolean> writeFuture;
 
 	public final byte[] getKeyBytes() {
-		return this.keyBytes;
+		return keyBytes;
 	}
 
 	public final void setKeyBytes(byte[] keyBytes) {
@@ -83,12 +80,12 @@ public abstract class Command implements WriteMessage {
 	}
 
 	public int getMergeCount() {
-		return this.mergeCount;
+		return mergeCount;
 	}
 
 	@SuppressWarnings("unchecked")
 	public Transcoder getTranscoder() {
-		return this.transcoder;
+		return transcoder;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -97,19 +94,19 @@ public abstract class Command implements WriteMessage {
 	}
 
 	public void setMergeCount(final int mergetCount) {
-		this.mergeCount = mergetCount;
+		mergeCount = mergetCount;
 	}
 
 	public Command() {
 		super();
-		this.status = OperationStatus.SENDING;
+		status = OperationStatus.SENDING;
 	}
 
 	public Command(String key, byte[] keyBytes, CountDownLatch latch) {
 		super();
 		this.key = key;
 		this.keyBytes = keyBytes;
-		this.status = OperationStatus.SENDING;
+		status = OperationStatus.SENDING;
 		this.latch = latch;
 	}
 
@@ -118,20 +115,20 @@ public abstract class Command implements WriteMessage {
 		super();
 		this.key = key;
 		this.keyBytes = keyBytes;
-		this.status = OperationStatus.SENDING;
+		status = OperationStatus.SENDING;
 		this.latch = latch;
-		this.commandType = cmdType;
+		commandType = cmdType;
 	}
 
 	public Command(final CommandType cmdType) {
-		this.commandType = cmdType;
-		this.status = OperationStatus.SENDING;
+		commandType = cmdType;
+		status = OperationStatus.SENDING;
 	}
 
 	public Command(final CommandType cmdType, final CountDownLatch latch) {
-		this.commandType = cmdType;
+		commandType = cmdType;
 		this.latch = latch;
-		this.status = OperationStatus.SENDING;
+		status = OperationStatus.SENDING;
 	}
 
 	public Command(final String key, final CommandType commandType,
@@ -140,34 +137,31 @@ public abstract class Command implements WriteMessage {
 		this.key = key;
 		this.commandType = commandType;
 		this.latch = latch;
-		this.status = OperationStatus.SENDING;
+		status = OperationStatus.SENDING;
 	}
 
 	public OperationStatus getStatus() {
-		return this.status;
+		return status;
 	}
 
 	public final void setStatus(OperationStatus status) {
 		this.status = status;
 	}
 
-
-
 	public final void setIoBuffer(IoBuffer ioBuffer) {
 		this.ioBuffer = ioBuffer;
 	}
 
-
 	public Exception getException() {
-		return this.exception;
+		return exception;
 	}
 
 	public void setException(Exception throwable) {
-		this.exception = throwable;
+		exception = throwable;
 	}
 
 	public final String getKey() {
-		return this.key;
+		return key;
 	}
 
 	public final void setKey(String key) {
@@ -175,56 +169,52 @@ public abstract class Command implements WriteMessage {
 	}
 
 	public final Object getResult() {
-		return this.result;
+		return result;
 	}
 
 	public final void setResult(Object result) {
 		this.result = result;
 	}
 
-
-
-	
 	public final IoBuffer getIoBuffer() {
-		return this.ioBuffer;
+		return ioBuffer;
 	}
-
 
 	@Override
 	public String toString() {
 		try {
-			return new String(this.ioBuffer.buf().array(), "utf-8");
+			return new String(ioBuffer.buf().array(), "utf-8");
 		} catch (UnsupportedEncodingException e) {
 		}
 		return "[error]";
 	}
 
 	public boolean isCancel() {
-		return this.status == OperationStatus.SENDING && this.cancel;
+		return status == OperationStatus.SENDING && cancel;
 	}
 
 	public final void cancel() {
-		this.cancel = true;
-		if (this.ioBuffer != null) {
-			this.ioBuffer.free();
+		cancel = true;
+		if (ioBuffer != null) {
+			ioBuffer.free();
 		}
 	}
 
 	public final CountDownLatch getLatch() {
-		return this.latch;
+		return latch;
 	}
 
 	public final void countDownLatch() {
-		if (this.latch != null) {
-			this.latch.countDown();
-			if (this.latch.getCount() == 0) {
-				this.status = OperationStatus.DONE;
+		if (latch != null) {
+			latch.countDown();
+			if (latch.getCount() == 0) {
+				status = OperationStatus.DONE;
 			}
 		}
 	}
 
 	public final CommandType getCommandType() {
-		return this.commandType;
+		return commandType;
 	}
 
 	public final void setLatch(CountDownLatch latch) {
@@ -247,10 +237,13 @@ public abstract class Command implements WriteMessage {
 	}
 
 	protected final boolean decodeError(String line) {
-		if (line.equals("ERROR")) {
+		if (line.startsWith("ERROR")) {
+			String[] splits = line.split("ERROR");
+			String errorMsg = splits.length >= 2 ? splits[1]
+					: "Unknow command " + getCommandType();
 			setException(new UnknownCommandException(
-					"Nonexist command,check your memcached version please."));
-			this.countDownLatch();
+					"Response error,error message:" + errorMsg));
+			countDownLatch();
 			return true;
 		} else if (line.startsWith("CLIENT_ERROR")) {
 			setException(new MemcachedClientException(getErrorMsg(line,
@@ -282,28 +275,25 @@ public abstract class Command implements WriteMessage {
 	}
 
 	public final boolean isNoreply() {
-		return this.noreply;
+		return noreply;
 	}
 
 	public final void setNoreply(boolean noreply) {
 		this.noreply = noreply;
 	}
 
-	
 	public FutureImpl<Boolean> getWriteFuture() {
-		return this.writeFuture;
+		return writeFuture;
 	}
 
 	public final void setWriteFuture(FutureImpl<Boolean> writeFuture) {
 		this.writeFuture = writeFuture;
 	}
 
-	
 	public final boolean isWriting() {
 		return true;
 	}
 
-	
 	public final void writing() {
 		// do nothing
 	}
