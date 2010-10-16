@@ -1,35 +1,20 @@
-Xmemcached-1.1 startup
-warm up
-threads=1,repeats=20000,valueLength=64,tps=4890,miss=0,fail=0,hit=15003,all=20000,hitRate=1.00
-threads=1,repeats=20000,valueLength=128,tps=4762,miss=0,fail=0,hit=15003,all=20000,hitRate=1.00
-threads=1,repeats=20000,valueLength=512,tps=3935,miss=0,fail=0,hit=15003,all=20000,hitRate=1.00
-threads=1,repeats=20000,valueLength=1024,tps=3273,miss=0,fail=0,hit=15003,all=20000,hitRate=1.00
-threads=1,repeats=20000,valueLength=4096,tps=1763,miss=0,fail=0,hit=15003,all=20000,hitRate=1.00
-threads=1,repeats=20000,valueLength=8192,tps=1106,miss=0,fail=0,hit=15003,all=20000,hitRate=1.00
-threads=10,repeats=20000,valueLength=64,tps=21664,miss=0,fail=0,hit=150030,all=200000,hitRate=1.00
-threads=10,repeats=20000,valueLength=128,tps=20869,miss=0,fail=0,hit=150030,all=200000,hitRate=1.00
-threads=10,repeats=20000,valueLength=512,tps=16702,miss=0,fail=0,hit=150030,all=200000,hitRate=1.00
-threads=10,repeats=20000,valueLength=1024,tps=13605,miss=0,fail=0,hit=150030,all=200000,hitRate=1.00
-threads=10,repeats=20000,valueLength=4096,tps=5195,miss=0,fail=0,hit=150030,all=200000,hitRate=1.00
-threads=10,repeats=20000,valueLength=8192,tps=2489,miss=0,fail=0,hit=150030,all=200000,hitRate=1.00
-threads=50,repeats=20000,valueLength=64,tps=33919,miss=0,fail=0,hit=750150,all=1000000,hitRate=1.00
-threads=50,repeats=20000,valueLength=128,tps=30344,miss=0,fail=0,hit=750150,all=1000000,hitRate=1.00
-threads=50,repeats=20000,valueLength=512,tps=20028,miss=0,fail=0,hit=750150,all=1000000,hitRate=1.00
-threads=50,repeats=20000,valueLength=1024,tps=12338,miss=0,fail=0,hit=750150,all=1000000,hitRate=1.00
-threads=50,repeats=20000,valueLength=4096,tps=3797,miss=0,fail=0,hit=750150,all=1000000,hitRate=1.00
-threads=50,repeats=20000,valueLength=8192,tps=2114,miss=0,fail=0,hit=750150,all=1000000,hitRate=1.00
-threads=100,repeats=20000,valueLength=64,tps=34127,miss=0,fail=0,hit=1500300,all=2000000,hitRate=1.00
-threads=100,repeats=20000,valueLength=128,tps=29385,miss=0,fail=0,hit=1500300,all=2000000,hitRate=1.00
-threads=100,repeats=20000,valueLength=512,tps=15962,miss=0,fail=0,hit=1500300,all=2000000,hitRate=1.00
-threads=100,repeats=20000,valueLength=1024,tps=9584,miss=0,fail=0,hit=1500300,all=2000000,hitRate=1.00
-threads=100,repeats=20000,valueLength=4096,tps=3790,miss=0,fail=0,hit=1500300,all=2000000,hitRate=1.00
-threads=100,repeats=20000,valueLength=8192,tps=2335,miss=275736,fail=0,hit=1224564,all=2000000,hitRate=0.82
-threads=150,repeats=20000,valueLength=64,tps=33460,miss=360720,fail=0,hit=1889730,all=3000000,hitRate=0.84
-threads=150,repeats=20000,valueLength=128,tps=28401,miss=708978,fail=0,hit=1541472,all=3000000,hitRate=0.68
-threads=150,repeats=20000,valueLength=512,tps=14870,miss=741498,fail=0,hit=1508952,all=3000000,hitRate=0.67
-threads=150,repeats=20000,valueLength=1024,tps=9799,miss=742029,fail=0,hit=1508421,all=3000000,hitRate=0.67
-threads=150,repeats=20000,valueLength=4096,tps=4211,miss=749466,fail=0,hit=1500984,all=3000000,hitRate=0.67
-threads=150,repeats=20000,valueLength=8192,tps=2636,miss=1025886,fail=0,hit=1224564,all=3000000,hitRate=0.54
-[WARN ]2009-07-02 10:39:22383 com.google.code.yanf4j.nio.impl.AbstractController[282] remove session 192.168.207.101:12000
-[WARN ]2009-07-02 10:39:22384 com.google.code.yanf4j.nio.impl.AbstractController[282] remove session 192.168.207.163:12000
-[WARN ]2009-07-02 10:39:22385 com.google.code.yanf4j.nio.impl.Reactor[231] Stopped reactor
+threads=1,repeats=40000,valueLength=64,tps=5995,miss=0,fail=0,hit=32004,all=40000,hitRate=1.00
+threads=1,repeats=40000,valueLength=512,tps=5610,miss=0,fail=0,hit=32004,all=40000,hitRate=1.00
+threads=1,repeats=40000,valueLength=1024,tps=4463,miss=0,fail=0,hit=32004,all=40000,hitRate=1.00
+threads=1,repeats=40000,valueLength=4096,tps=2294,miss=0,fail=0,hit=32004,all=40000,hitRate=1.00
+threads=1,repeats=40000,valueLength=16384,tps=827,miss=0,fail=0,hit=32004,all=40000,hitRate=1.00
+threads=10,repeats=40000,valueLength=64,tps=41453,miss=0,fail=0,hit=320040,all=400000,hitRate=1.00
+threads=10,repeats=40000,valueLength=512,tps=33504,miss=0,fail=0,hit=320040,all=400000,hitRate=1.00
+threads=10,repeats=40000,valueLength=1024,tps=28663,miss=0,fail=0,hit=320040,all=400000,hitRate=1.00
+threads=10,repeats=40000,valueLength=4096,tps=13067,miss=0,fail=0,hit=320040,all=400000,hitRate=1.00
+threads=10,repeats=40000,valueLength=16384,tps=6483,miss=0,fail=0,hit=320040,all=400000,hitRate=1.00
+threads=50,repeats=40000,valueLength=64,tps=101996,miss=0,fail=0,hit=1600200,all=2000000,hitRate=1.00
+threads=50,repeats=40000,valueLength=512,tps=84401,miss=0,fail=0,hit=1600200,all=2000000,hitRate=1.00
+threads=50,repeats=40000,valueLength=1024,tps=70524,miss=0,fail=0,hit=1600200,all=2000000,hitRate=1.00
+threads=50,repeats=40000,valueLength=4096,tps=28095,miss=0,fail=0,hit=1600200,all=2000000,hitRate=1.00
+threads=50,repeats=40000,valueLength=16384,tps=7439,miss=151248,fail=0,hit=1448952,all=2000000,hitRate=0.91
+threads=100,repeats=40000,valueLength=64,tps=124501,miss=1023360,fail=0,hit=2177040,all=4000000,hitRate=0.68
+threads=100,repeats=40000,valueLength=512,tps=103948,miss=1061328,fail=0,hit=2139072,all=4000000,hitRate=0.67
+threads=100,repeats=40000,valueLength=1024,tps=87904,miss=1062880,fail=0,hit=2137520,all=4000000,hitRate=0.67
+threads=100,repeats=40000,valueLength=4096,tps=33579,miss=1084432,fail=0,hit=2115968,all=4000000,hitRate=0.66
+threads=100,repeats=40000,valueLength=16384,tps=8761,miss=1218048,fail=0,hit=1982352,all=4000000,hitRate=0.62
