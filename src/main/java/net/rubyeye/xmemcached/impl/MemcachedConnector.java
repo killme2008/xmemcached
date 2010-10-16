@@ -135,6 +135,9 @@ public class MemcachedConnector extends SocketChannelController implements
 							waitingQueue.add(request);
 						}
 					} else {
+						log
+								.warn("Remove invalid reconnect task for "
+										+ address);
 						// remove reconnect task
 					}
 				} catch (InterruptedException e) {
@@ -217,6 +220,9 @@ public class MemcachedConnector extends SocketChannelController implements
 			if (request.getInetSocketAddressWrapper().getInetSocketAddress()
 					.equals(inetSocketAddress)) {
 				it.remove();
+				log.warn("Remove invalid reconnect task for "
+						+ request.getInetSocketAddressWrapper()
+								.getInetSocketAddress());
 			}
 		}
 	}

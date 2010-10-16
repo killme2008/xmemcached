@@ -61,6 +61,7 @@ public class SimpleExample {
 			// ignore
 		}
 		try {
+			Thread.sleep(Integer.MAX_VALUE);
 			memcachedClient.shutdown();
 		} catch (Exception e) {
 			System.err.println("Shutdown MemcachedClient fail");
