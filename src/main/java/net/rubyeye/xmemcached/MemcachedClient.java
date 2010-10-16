@@ -48,11 +48,11 @@ public interface MemcachedClient {
 	/**
 	 * Default session read buffer size,16k
 	 */
-	public static final int DEFAULT_SESSION_READ_BUFF_SIZE = 16 * 1024;
+	public static final int DEFAULT_SESSION_READ_BUFF_SIZE = 64 * 1024;
 	/**
 	 * Default socket's receive buffer size,16k
 	 */
-	public static final int DEFAULT_TCP_RECV_BUFF_SIZE = 16 * 1024;
+	public static final int DEFAULT_TCP_RECV_BUFF_SIZE = 64 * 1024;
 	/**
 	 * Default operation timeout,if the operation is not returned in 1
 	 * second,throw TimeoutException
