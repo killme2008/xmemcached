@@ -24,12 +24,11 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Queue;
 import java.util.Set;
-import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.DelayQueue;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
-import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
@@ -63,7 +62,7 @@ import com.google.code.yanf4j.util.ConcurrentHashSet;
 public class MemcachedConnector extends SocketChannelController implements
 		Connector {
 
-	private final BlockingQueue<ReconnectRequest> waitingQueue = new LinkedBlockingQueue<ReconnectRequest>();
+	private final DelayQueue<ReconnectRequest> waitingQueue = new DelayQueue<ReconnectRequest>();
 	private BufferAllocator bufferAllocator;
 
 	private final Set<InetSocketAddress> removedAddrSet = new ConcurrentHashSet<InetSocketAddress>();
@@ -84,6 +83,9 @@ public class MemcachedConnector extends SocketChannelController implements
 	 * 
 	 */
 	class SessionMonitor extends Thread {
+		public SessionMonitor() {
+			setName("Heal-Session-Thread");
+		}
 
 		@Override
 		public void run() {
@@ -91,48 +93,47 @@ public class MemcachedConnector extends SocketChannelController implements
 
 				try {
 					ReconnectRequest request = waitingQueue.take();
+
 					InetSocketAddress address = request
 							.getInetSocketAddressWrapper()
 							.getInetSocketAddress();
 
 					if (!removedAddrSet.contains(address)) {
 						boolean connected = false;
-						int tries = 0;
-						while (tries < 1) {
-							Future<Boolean> future = connect(request
-									.getInetSocketAddressWrapper(), request
-									.getWeight());
-							tries++;
-							request.setTries(request.getTries() + 1);
-							try {
-								log.warn("Trying to connect to "
-										+ address.getHostName() + ":"
-										+ address.getPort() + " for "
-										+ request.getTries() + " times");
-								if (!future
-										.get(
-												MemcachedClient.DEFAULT_CONNECT_TIMEOUT,
-												TimeUnit.MILLISECONDS)) {
-									Thread.sleep(healSessionInterval);
-									continue;
-								} else {
-									connected = true;
-									break;
-								}
-							} catch (TimeoutException e) {
-								future.cancel(true);
-								continue;
-							} catch (ExecutionException e) {
-								future.cancel(true);
-								Thread.sleep(healSessionInterval);
-								continue;
+						Future<Boolean> future = connect(request
+								.getInetSocketAddressWrapper(), request
+								.getWeight());
+						request.setTries(request.getTries() + 1);
+						try {
+							log.warn("Trying to connect to "
+									+ address.getHostName() + ":"
+									+ address.getPort() + " for "
+									+ request.getTries() + " times");
+							if (!future.get(
+									MemcachedClient.DEFAULT_CONNECT_TIMEOUT,
+									TimeUnit.MILLISECONDS)) {
+								connected = false;
+							} else {
+								connected = true;
+								break;
 							}
-						}
-						if (!connected) {
-							log.error("Reconnect to " + address.getHostName()
-									+ ":" + address.getPort() + " fail");
-							// add to tail
-							waitingQueue.add(request);
+						} catch (TimeoutException e) {
+							future.cancel(true);
+						} catch (ExecutionException e) {
+							future.cancel(true);
+						} finally {
+							if (!connected) {
+								// update timestamp for next reconnect
+								request
+										.updateNextReconnectTimeStamp(healSessionInterval
+												* request.getTries());
+								log.error("Reconnect to "
+										+ address.getHostName() + ":"
+										+ address.getPort() + " fail");
+								// add to tail
+								waitingQueue.offer(request);
+							} else
+								continue;
 						}
 					} else {
 						log
@@ -161,6 +162,10 @@ public class MemcachedConnector extends SocketChannelController implements
 
 	public final void setHealSessionInterval(long healConnectionInterval) {
 		healSessionInterval = healConnectionInterval;
+	}
+
+	public long getHealSessionInterval() {
+		return healSessionInterval;
 	}
 
 	public void setOptimizeGet(boolean optimiezeGet) {

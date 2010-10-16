@@ -22,7 +22,7 @@ public class ConnectionPoolMemcachedClientTest extends XMemcachedClientTest {
 	@Override
 	public MemcachedClientBuilder createBuilder() throws Exception {
 		MemcachedClientBuilder builder = new XMemcachedClientBuilder(AddrUtil
-				.getAddresses(this.properties
+				.getAddresses(properties
 						.getProperty("test.memcached.servers")));
 		builder.setConnectionPoolSize(CONNECTION_POOL_SIZE);
 		return builder;
@@ -67,7 +67,7 @@ public class ConnectionPoolMemcachedClientTest extends XMemcachedClientTest {
 
 		public void stop() {
 			try {
-				this.controller.stop();
+				controller.stop();
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
@@ -100,7 +100,7 @@ public class ConnectionPoolMemcachedClientTest extends XMemcachedClientTest {
 		// new server start
 		server = new MockServer();
 		server.start();
-		Thread.sleep(10000);
+		Thread.sleep(30000);
 		assertEquals(1, client.getAvaliableServers().size());
 		assertEquals(5, client.getConnectionSizeBySocketAddress(serverAddress));
 		assertEquals(5, server.sessionCounter.get());
@@ -113,7 +113,7 @@ public class ConnectionPoolMemcachedClientTest extends XMemcachedClientTest {
 	@Override
 	public MemcachedClientBuilder createWeightedBuilder() throws Exception {
 		List<InetSocketAddress> addressList = AddrUtil
-				.getAddresses(this.properties
+				.getAddresses(properties
 						.getProperty("test.memcached.servers"));
 		int[] weights = new int[addressList.size()];
 		for (int i = 0; i < weights.length; i++) {

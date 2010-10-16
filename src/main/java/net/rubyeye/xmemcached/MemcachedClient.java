@@ -846,6 +846,7 @@ public interface MemcachedClient {
 	 * @throws InterruptedException
 	 * @throws MemcachedException
 	 */
+	@Deprecated
 	public abstract void flushAll(String host) throws TimeoutException,
 			InterruptedException, MemcachedException;
 
@@ -1081,6 +1082,13 @@ public interface MemcachedClient {
 	 *            MILLISECONDS
 	 */
 	public void setHealSessionInterval(long healConnectionInterval);
+
+	/**
+	 * Return the default heal session interval in milliseconds
+	 * 
+	 * @return
+	 */
+	public long getHealSessionInterval();
 
 	public Protocol getProtocol();
 

@@ -229,7 +229,8 @@ public class MemcachedHandler extends HandlerAdapter {
 							.getOrder());
 			client.getConnector().addToWatingQueue(
 					new ReconnectRequest(inetSocketAddressWrapper, 0,
-							((MemcachedSession) session).getWeight()));
+							((MemcachedSession) session).getWeight(), client
+									.getHealSessionInterval()));
 		}
 	}
 

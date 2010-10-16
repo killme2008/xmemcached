@@ -22,6 +22,9 @@
  */
 package net.rubyeye.xmemcached.impl;
 
+import java.util.concurrent.Delayed;
+import java.util.concurrent.TimeUnit;
+
 import net.rubyeye.xmemcached.utils.InetSocketAddressWrapper;
 
 /**
@@ -30,42 +33,74 @@ import net.rubyeye.xmemcached.utils.InetSocketAddressWrapper;
  * @author dennis
  * 
  */
-public final class ReconnectRequest {
+public final class ReconnectRequest implements Delayed {
 
 	private InetSocketAddressWrapper inetSocketAddressWrapper;
 	private int tries;
 
 	private int weight;
 
-	public ReconnectRequest(InetSocketAddressWrapper inetSocketAddressWrapper, int tries, int weight) {
+	private static final long MIN_RECONNECT_INTERVAL = 1000;
+
+	private static final long MAX_RECONNECT_INTERVAL = 60 * 1000;
+
+	private volatile long nextReconnectTimestamp;
+
+	public ReconnectRequest(InetSocketAddressWrapper inetSocketAddressWrapper,
+			int tries, int weight, long reconnectInterval) {
 		super();
-		this.setInetSocketAddressWrapper(inetSocketAddressWrapper);
-		this.setTries(tries); // record reconnect times
+		setInetSocketAddressWrapper(inetSocketAddressWrapper);
+		setTries(tries); // record reconnect times
 		this.weight = weight;
+		if (reconnectInterval < MIN_RECONNECT_INTERVAL)
+			reconnectInterval = MIN_RECONNECT_INTERVAL;
+		if (reconnectInterval > MAX_RECONNECT_INTERVAL) {
+			reconnectInterval = MAX_RECONNECT_INTERVAL;
+		}
+		nextReconnectTimestamp = System.currentTimeMillis() + reconnectInterval;
 	}
 
+	public long getDelay(TimeUnit unit) {
+		return nextReconnectTimestamp - System.currentTimeMillis();
+	}
+
+	public int compareTo(Delayed o) {
+		ReconnectRequest other = (ReconnectRequest) o;
+		if (nextReconnectTimestamp > other.nextReconnectTimestamp)
+			return 1;
+		else
+			return -1;
+	}
 
 	public final InetSocketAddressWrapper getInetSocketAddressWrapper() {
-		return this.inetSocketAddressWrapper;
+		return inetSocketAddressWrapper;
 	}
 
+	public void updateNextReconnectTimeStamp(long interval) {
+		if (interval < MIN_RECONNECT_INTERVAL) {
+			interval = MIN_RECONNECT_INTERVAL;
+		}
+		if (interval > MAX_RECONNECT_INTERVAL) {
+			interval = MAX_RECONNECT_INTERVAL;
+		}
+		nextReconnectTimestamp = System.currentTimeMillis() + interval;
+	}
 
 	public final void setInetSocketAddressWrapper(
 			InetSocketAddressWrapper inetSocketAddressWrapper) {
 		this.inetSocketAddressWrapper = inetSocketAddressWrapper;
 	}
 
-
 	public final void setTries(int tries) {
 		this.tries = tries;
 	}
 
 	public final int getTries() {
-		return this.tries;
+		return tries;
 	}
 
 	public final int getWeight() {
-		return this.weight;
+		return weight;
 	}
 
 	public final void setWeight(int weight) {

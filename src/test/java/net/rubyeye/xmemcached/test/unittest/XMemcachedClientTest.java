@@ -981,7 +981,7 @@ public abstract class XMemcachedClientTest extends TestCase {
 		latch.await(MemcachedClient.DEFAULT_OP_TIMEOUT, TimeUnit.MILLISECONDS);
 		assertTrue(errorCommand.isDecoded());
 		// wait for reconnecting
-		Thread.sleep(2000);
+		Thread.sleep(2000*3);
 		assertEquals(currentServerCount, memcachedClient.getAvaliableServers()
 				.size());
 		// It works
