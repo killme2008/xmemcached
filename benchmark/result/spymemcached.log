@@ -1,32 +1,29 @@
+2010-10-16 22:24:16.078 INFO net.spy.memcached.MemcachedConnection:  Added {QA sa=/10.232.36.82:12000, #Rops=0, #Wops=0, #iq=0, topRop=null, topWop=null, toWrite=0, interested=0} to connect queue
+2010-10-16 22:24:16.079 INFO net.spy.memcached.MemcachedConnection:  Added {QA sa=/10.232.36.86:12000, #Rops=0, #Wops=0, #iq=0, topRop=null, topWop=null, toWrite=0, interested=0} to connect queue
+2010-10-16 22:24:16.080 INFO net.spy.memcached.MemcachedConnection:  Added {QA sa=/10.232.36.90:12000, #Rops=0, #Wops=0, #iq=0, topRop=null, topWop=null, toWrite=0, interested=0} to connect queue
 Spymemcached startup
+2010-10-16 22:24:16.085 INFO net.spy.memcached.MemcachedConnection:  Connection state changed for sun.nio.ch.SelectionKeyImpl@578088c0
+2010-10-16 22:24:16.086 INFO net.spy.memcached.MemcachedConnection:  Connection state changed for sun.nio.ch.SelectionKeyImpl@5afec107
+2010-10-16 22:24:16.086 INFO net.spy.memcached.MemcachedConnection:  Connection state changed for sun.nio.ch.SelectionKeyImpl@37922221
 warm up
-threads=1,repeats=20000,valueLength=64,tps=4410,miss=0,fail=0,hit=15003,all=20000,hitRate=1.00
-threads=1,repeats=20000,valueLength=128,tps=4304,miss=0,fail=0,hit=15003,all=20000,hitRate=1.00
-threads=1,repeats=20000,valueLength=512,tps=3712,miss=0,fail=0,hit=15003,all=20000,hitRate=1.00
-threads=1,repeats=20000,valueLength=1024,tps=3088,miss=0,fail=0,hit=15003,all=20000,hitRate=1.00
-threads=1,repeats=20000,valueLength=4096,tps=1742,miss=0,fail=0,hit=15003,all=20000,hitRate=1.00
-threads=1,repeats=20000,valueLength=8192,tps=1118,miss=0,fail=0,hit=15003,all=20000,hitRate=1.00
-threads=10,repeats=20000,valueLength=64,tps=18898,miss=0,fail=0,hit=150030,all=200000,hitRate=1.00
-threads=10,repeats=20000,valueLength=128,tps=18353,miss=0,fail=0,hit=150030,all=200000,hitRate=1.00
-threads=10,repeats=20000,valueLength=512,tps=14819,miss=0,fail=0,hit=150030,all=200000,hitRate=1.00
-threads=10,repeats=20000,valueLength=1024,tps=11981,miss=0,fail=0,hit=150030,all=200000,hitRate=1.00
-threads=10,repeats=20000,valueLength=4096,tps=5327,miss=0,fail=0,hit=150030,all=200000,hitRate=1.00
-threads=10,repeats=20000,valueLength=8192,tps=2586,miss=0,fail=0,hit=150030,all=200000,hitRate=1.00
-threads=50,repeats=20000,valueLength=64,tps=31611,miss=0,fail=0,hit=750150,all=1000000,hitRate=1.00
-threads=50,repeats=20000,valueLength=128,tps=29508,miss=0,fail=0,hit=750150,all=1000000,hitRate=1.00
-threads=50,repeats=20000,valueLength=512,tps=19598,miss=0,fail=0,hit=750150,all=1000000,hitRate=1.00
-threads=50,repeats=20000,valueLength=1024,tps=12948,miss=0,fail=0,hit=750150,all=1000000,hitRate=1.00
-threads=50,repeats=20000,valueLength=4096,tps=4092,miss=0,fail=0,hit=750150,all=1000000,hitRate=1.00
-threads=50,repeats=20000,valueLength=8192,tps=2055,miss=0,fail=0,hit=750150,all=1000000,hitRate=1.00
-threads=100,repeats=20000,valueLength=64,tps=31726,miss=0,fail=0,hit=1500300,all=2000000,hitRate=1.00
-threads=100,repeats=20000,valueLength=128,tps=28955,miss=0,fail=0,hit=1500300,all=2000000,hitRate=1.00
-threads=100,repeats=20000,valueLength=512,tps=16807,miss=0,fail=0,hit=1500300,all=2000000,hitRate=1.00
-threads=100,repeats=20000,valueLength=1024,tps=10773,miss=0,fail=0,hit=1500300,all=2000000,hitRate=1.00
-threads=100,repeats=20000,valueLength=4096,tps=3380,miss=0,fail=0,hit=1500300,all=2000000,hitRate=1.00
-threads=100,repeats=20000,valueLength=8192,tps=2128,miss=275736,fail=0,hit=1224564,all=2000000,hitRate=0.82
-threads=150,repeats=20000,valueLength=64,tps=29752,miss=360720,fail=0,hit=1889730,all=3000000,hitRate=0.84
-threads=150,repeats=20000,valueLength=128,tps=28301,miss=708978,fail=0,hit=1541472,all=3000000,hitRate=0.68
-threads=150,repeats=20000,valueLength=512,tps=16755,miss=741498,fail=0,hit=1508952,all=3000000,hitRate=0.67
-threads=150,repeats=20000,valueLength=1024,tps=10727,miss=742029,fail=0,hit=1508421,all=3000000,hitRate=0.67
-threads=150,repeats=20000,valueLength=4096,tps=3617,miss=749466,fail=0,hit=1500984,all=3000000,hitRate=0.67
-threads=150,repeats=20000,valueLength=8192,tps=2448,miss=1025886,fail=0,hit=1224564,all=3000000,hitRate=0.54
+threads=1,repeats=40000,valueLength=64,tps=6302,miss=0,fail=0,hit=32004,all=40000,hitRate=1.00
+threads=1,repeats=40000,valueLength=512,tps=5675,miss=0,fail=0,hit=32004,all=40000,hitRate=1.00
+threads=1,repeats=40000,valueLength=1024,tps=4674,miss=0,fail=0,hit=32004,all=40000,hitRate=1.00
+threads=1,repeats=40000,valueLength=4096,tps=2360,miss=0,fail=0,hit=32004,all=40000,hitRate=1.00
+threads=1,repeats=40000,valueLength=16384,tps=843,miss=0,fail=0,hit=32004,all=40000,hitRate=1.00
+threads=10,repeats=40000,valueLength=64,tps=34909,miss=0,fail=0,hit=320040,all=400000,hitRate=1.00
+threads=10,repeats=40000,valueLength=512,tps=30799,miss=0,fail=0,hit=320040,all=400000,hitRate=1.00
+threads=10,repeats=40000,valueLength=1024,tps=25364,miss=0,fail=0,hit=320040,all=400000,hitRate=1.00
+threads=10,repeats=40000,valueLength=4096,tps=13197,miss=0,fail=0,hit=320040,all=400000,hitRate=1.00
+threads=10,repeats=40000,valueLength=16384,tps=6200,miss=0,fail=0,hit=320040,all=400000,hitRate=1.00
+threads=50,repeats=40000,valueLength=64,tps=63240,miss=0,fail=0,hit=1600200,all=2000000,hitRate=1.00
+threads=50,repeats=40000,valueLength=512,tps=53305,miss=0,fail=0,hit=1600200,all=2000000,hitRate=1.00
+threads=50,repeats=40000,valueLength=1024,tps=47028,miss=0,fail=0,hit=1600200,all=2000000,hitRate=1.00
+threads=50,repeats=40000,valueLength=4096,tps=26280,miss=0,fail=0,hit=1600200,all=2000000,hitRate=1.00
+threads=50,repeats=40000,valueLength=16384,tps=7217,miss=150432,fail=0,hit=1449768,all=2000000,hitRate=0.91
+threads=100,repeats=40000,valueLength=64,tps=68620,miss=1023360,fail=0,hit=2177040,all=4000000,hitRate=0.68
+threads=100,repeats=40000,valueLength=512,tps=60970,miss=1061328,fail=0,hit=2139072,all=4000000,hitRate=0.67
+threads=100,repeats=40000,valueLength=1024,tps=57310,miss=1062880,fail=0,hit=2137520,all=4000000,hitRate=0.67
+threads=100,repeats=40000,valueLength=4096,tps=30679,miss=1084432,fail=0,hit=2115968,all=4000000,hitRate=0.66
+threads=100,repeats=40000,valueLength=16384,tps=7451,miss=1217232,fail=0,hit=1983168,all=4000000,hitRate=0.62
+2010-10-16 22:50:20.805 INFO net.spy.memcached.MemcachedClient:  Shut down memcached client
