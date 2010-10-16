@@ -49,13 +49,4 @@ public interface Handler {
 
 	public void onSessionConnected(Session session);
 
-	/**
-	 * �������˷����������ƣ������������Ƶ���Ϣ���ص��˷��������Ƿ������,����true������
-	 * ��
-	 * 
-	 * @param session
-	 * @param message
-	 * @return
-	 */
-	public boolean onSessionWriteOverFlow(Session session, Object message);
 }

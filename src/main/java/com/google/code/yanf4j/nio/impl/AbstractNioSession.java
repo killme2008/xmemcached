@@ -20,7 +20,7 @@ import com.google.code.yanf4j.nio.NioSessionConfig;
 import com.google.code.yanf4j.util.SelectorFactory;
 
 /**
- * Base nio session
+ * Abstract nio session
  * 
  * @author dennis
  * 
@@ -29,7 +29,7 @@ public abstract class AbstractNioSession extends AbstractSession implements
 		NioSession {
 
 	public SelectableChannel channel() {
-		return this.selectableChannel;
+		return selectableChannel;
 	}
 
 	protected SelectorManager selectorManager;
@@ -37,24 +37,22 @@ public abstract class AbstractNioSession extends AbstractSession implements
 
 	public AbstractNioSession(NioSessionConfig sessionConfig) {
 		super(sessionConfig);
-		this.selectorManager = sessionConfig.selectorManager;
-		this.selectableChannel = sessionConfig.selectableChannel;
+		selectorManager = sessionConfig.selectorManager;
+		selectableChannel = sessionConfig.selectableChannel;
 	}
 
 	public final void enableRead(Selector selector) {
-		SelectionKey key = this.selectableChannel.keyFor(selector);
+		SelectionKey key = selectableChannel.keyFor(selector);
 		if (key != null && key.isValid()) {
 			interestRead(key);
 		} else {
 			try {
-				this.selectableChannel.register(selector, SelectionKey.OP_READ,
-						this);
+				selectableChannel
+						.register(selector, SelectionKey.OP_READ, this);
 			} catch (ClosedChannelException e) {
-				onException(e);
+				// ignore
 			} catch (CancelledKeyException e) {
-				onException(e);
-				this.selectorManager.registerSession(this,
-						EventType.ENABLE_READ);
+				// ignore
 			}
 		}
 	}
@@ -72,8 +70,7 @@ public abstract class AbstractNioSession extends AbstractSession implements
 	}
 
 	public InetAddress getLocalAddress() {
-		return ((SocketChannel) this.selectableChannel).socket()
-				.getLocalAddress();
+		return ((SocketChannel) selectableChannel).socket().getLocalAddress();
 	}
 
 	protected abstract Object writeToChannel(WriteMessage msg)
@@ -81,18 +78,18 @@ public abstract class AbstractNioSession extends AbstractSession implements
 
 	protected void onWrite(SelectionKey key) {
 		boolean isLockedByMe = false;
-		if (this.currentMessage.get() == null) {
+		if (currentMessage.get() == null) {
 			// get next message
-			WriteMessage nextMessage = this.writeQueue.peek();
-			if (nextMessage != null && this.writeLock.tryLock()) {
-				if (!this.writeQueue.isEmpty()
-						&& this.currentMessage.compareAndSet(null, nextMessage)) {
-					this.writeQueue.remove();
+			WriteMessage nextMessage = writeQueue.peek();
+			if (nextMessage != null && writeLock.tryLock()) {
+				if (!writeQueue.isEmpty()
+						&& currentMessage.compareAndSet(null, nextMessage)) {
+					writeQueue.remove();
 				}
 			} else {
 				return;
 			}
-		} else if (!this.writeLock.tryLock()) {
+		} else if (!writeLock.tryLock()) {
 			return;
 		}
 		updateTimeStamp();
@@ -100,8 +97,7 @@ public abstract class AbstractNioSession extends AbstractSession implements
 		isLockedByMe = true;
 		WriteMessage currentMessage = null;
 		// make read/write fail, write/read=3/2
-		final long maxWritten = this.readBuffer.capacity()
-				+ this.readBuffer.capacity() >>> 1;
+		final long maxWritten = readBuffer.capacity() + readBuffer.capacity() >>> 1;
 		try {
 			long written = 0;
 			while (this.currentMessage.get() != null) {
@@ -114,30 +110,30 @@ public abstract class AbstractNioSession extends AbstractSession implements
 
 				if (written < maxWritten) {
 					writeResult = writeToChannel(currentMessage);
-					written += (this.currentMessage.get().getWriteBuffer()
-							.remaining() - before);
+					written += this.currentMessage.get().getWriteBuffer()
+							.remaining()
+							- before;
 				} else {
 					// wait for next time to write
 				}
 				// write complete
 				if (writeResult != null) {
-					this.currentMessage.set(this.writeQueue.poll());
-					this.handler.onMessageSent(this, currentMessage
-							.getMessage());
+					this.currentMessage.set(writeQueue.poll());
+					handler.onMessageSent(this, currentMessage.getMessage());
 					// try to get next message
 					if (this.currentMessage.get() == null) {
 						if (isLockedByMe) {
 							isLockedByMe = false;
-							this.writeLock.unlock();
+							writeLock.unlock();
 						}
 						// get next message
-						WriteMessage nextMessage = this.writeQueue.peek();
-						if (nextMessage != null && this.writeLock.tryLock()) {
+						WriteMessage nextMessage = writeQueue.peek();
+						if (nextMessage != null && writeLock.tryLock()) {
 							isLockedByMe = true;
-							if (!this.writeQueue.isEmpty()
+							if (!writeQueue.isEmpty()
 									&& this.currentMessage.compareAndSet(null,
 											nextMessage)) {
-								this.writeQueue.remove();
+								writeQueue.remove();
 							}
 							continue;
 						} else {
@@ -148,46 +144,44 @@ public abstract class AbstractNioSession extends AbstractSession implements
 					// does't write complete
 					if (isLockedByMe) {
 						isLockedByMe = false;
-						this.writeLock.unlock();
+						writeLock.unlock();
 					}
 					// register OP_WRITE event
-					this.selectorManager.registerSession(this,
+					selectorManager.registerSession(this,
 							EventType.ENABLE_WRITE);
 					break;
 				}
 			}
 		} catch (IOException e) {
-			this.handler.onExceptionCaught(this, e);
+			handler.onExceptionCaught(this, e);
 			if (currentMessage != null
 					&& currentMessage.getWriteFuture() != null) {
 				currentMessage.getWriteFuture().failure(e);
 			}
 			if (isLockedByMe) {
 				isLockedByMe = false;
-				this.writeLock.unlock();
+				writeLock.unlock();
 			}
 			close();
 		} finally {
 			if (isLockedByMe) {
-				this.writeLock.unlock();
+				writeLock.unlock();
 			}
 		}
 	}
 
 	public final void enableWrite(Selector selector) {
-		SelectionKey key = this.selectableChannel.keyFor(selector);
+		SelectionKey key = selectableChannel.keyFor(selector);
 		if (key != null && key.isValid()) {
 			interestWrite(key);
 		} else {
 			try {
-				this.selectableChannel.register(selector,
+				selectableChannel.register(selector,
 						SelectionKey.OP_WRITE, this);
 			} catch (ClosedChannelException e) {
-				onException(e);
+				// ignore
 			} catch (CancelledKeyException e) {
-				onException(e);
-				this.selectorManager.registerSession(this,
-						EventType.ENABLE_READ);
+				// ignore
 			}
 		}
 	}
@@ -214,106 +208,47 @@ public abstract class AbstractNioSession extends AbstractSession implements
 	}
 
 	protected final void unregisterChannel() throws IOException {
-		this.writeLock.lock();
+		writeLock.lock();
 		try {
-			if (this.getAttribute(SelectorManager.REACTOR_ATTRIBUTE) != null) {
-				((Reactor) (this
-						.getAttribute(SelectorManager.REACTOR_ATTRIBUTE)))
-						.unregisterChannel(this.selectableChannel);
+			if (getAttribute(SelectorManager.REACTOR_ATTRIBUTE) != null) {
+				((Reactor) getAttribute(SelectorManager.REACTOR_ATTRIBUTE))
+						.unregisterChannel(selectableChannel);
 			}
-			if (this.selectableChannel.isOpen()) {
-				this.selectableChannel.close();
+			if (selectableChannel.isOpen()) {
+				selectableChannel.close();
 			}
 		} finally {
-			this.writeLock.unlock();
+			writeLock.unlock();
 		}
 	}
 
 	protected final void registerSession() {
-		this.selectorManager.registerSession(this, EventType.REGISTER);
+		selectorManager.registerSession(this, EventType.REGISTER);
 	}
 
 	protected void unregisterSession() {
-		this.selectorManager.registerSession(this, EventType.UNREGISTER);
+		selectorManager.registerSession(this, EventType.UNREGISTER);
 	}
 
 	@Override
-	protected final void write0(WriteMessage message) {
-		boolean isLockedByMe = false;
-		Object writeResult = null;
-		try {
-			// No message is writing
-			if (this.currentMessage.get() == null && this.writeLock.tryLock()) {
-				isLockedByMe = true;
-				// try to write current message
-				if (this.currentMessage.compareAndSet(null, message)) {
-					message = preprocessWriteMessage(message);
-					this.currentMessage.set(message);
-					try {
-						writeResult = writeToChannel(message);
-					} catch (IOException e) {
-						if (message.getWriteFuture() != null) {
-							message.getWriteFuture().failure(e);
-						}
-						close();
-					}
-				} else {
-					isLockedByMe = false;
-					this.writeLock.unlock();
-				}
-			}
-			// lock success,and write complete
-			if (isLockedByMe && writeResult != null) {
-				this.handler.onMessageSent(this, message.getMessage());
-				// get next message
-				WriteMessage nextElement = this.writeQueue.poll();
-				if (nextElement != null) {
-					this.currentMessage.set(nextElement);
-					isLockedByMe = false;
-					this.writeLock.unlock();
-					// next message is not null,register OP_WRITE
-					this.selectorManager.registerSession(this,
-							EventType.ENABLE_WRITE);
-				} else {
-					this.currentMessage.set(null);
-					isLockedByMe = false;
-					this.writeLock.unlock();
-					// try again to get next message
-					if (this.writeQueue.peek() != null) {
-						this.selectorManager.registerSession(this,
-								EventType.ENABLE_WRITE);
-					}
-				}
-			} else {
-				// lock fail
-				boolean isRegisterForWriting = false;
-				if (this.currentMessage.get() != message) {
-					// current message is not this message,add it to queue
-					this.writeQueue.offer(message);
-					// register OP_WRITE
-					if (!this.writeLock.isLocked()) {
-						isRegisterForWriting = true;
-					}
-				} else {
-					// Current message is this message,it doesn't write complete
-					isRegisterForWriting = true;
-					if (isLockedByMe) {
-						isLockedByMe = false;
-						this.writeLock.unlock();
-					}
-				}
-				// register OP_WRITE
-				if (isRegisterForWriting) {
-					this.selectorManager.registerSession(this,
-							EventType.ENABLE_WRITE);
-				}
-			}
-		} finally {
-			// release lock finally
-			if (isLockedByMe) {
-				this.writeLock.unlock();
-			}
+	public void writeFromUserCode(WriteMessage message) {
+		if (schduleWriteMessage(message)) {
+			return;
 		}
+		// 到这里，当前线程一定是IO线程
+		onWrite(null);
+
+	}
+
+	protected boolean schduleWriteMessage(WriteMessage writeMessage) {
+		boolean offered = writeQueue.offer(writeMessage);
+		assert offered;
+		final Reactor reactor = selectorManager.getReactorFromSession(this);
+		if (Thread.currentThread() != reactor) {
+			selectorManager.registerSession(this, EventType.ENABLE_WRITE);
+			return true;
+		}
+		return false;
 	}
 
 	public void flush() {
@@ -334,20 +269,19 @@ public abstract class AbstractNioSession extends AbstractSession implements
 					if (writeSelector == null) {
 						return;
 					}
-					tmpKey = this.selectableChannel.register(writeSelector,
+					tmpKey = selectableChannel.register(writeSelector,
 							SelectionKey.OP_WRITE);
 				}
 				if (writeSelector.select(1000) == 0) {
 					attempts++;
-					if (attempts > 2)
-					{
+					if (attempts > 2) {
 						return;
 					}
 				} else {
 					break;
 				}
 			}
-			onWrite(this.selectableChannel.keyFor(writeSelector));
+			onWrite(selectableChannel.keyFor(writeSelector));
 		} catch (ClosedChannelException cce) {
 			onException(cce);
 			log.error("Flush error", cce);
@@ -396,7 +330,7 @@ public abstract class AbstractNioSession extends AbstractSession implements
 		if (isClosed()) {
 			return;
 		}
-		SelectionKey key = this.selectableChannel.keyFor(selector);
+		SelectionKey key = selectableChannel.keyFor(selector);
 
 		switch (event) {
 		case EXPIRED:

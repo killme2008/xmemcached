@@ -35,28 +35,42 @@ public class SelectorManager {
 			throw new IllegalArgumentException("selectorPoolSize<=0");
 		}
 		log.info("Creating " + selectorPoolSize + " rectors...");
-		this.reactorSet = new Reactor[selectorPoolSize];
+		reactorSet = new Reactor[selectorPoolSize];
 		this.controller = controller;
 		for (int i = 0; i < selectorPoolSize; i++) {
-			this.reactorSet[i] = new Reactor(this, conf, i);
+			reactorSet[i] = new Reactor(this, conf, i);
 		}
-		this.dividend = this.reactorSet.length - 1;
+		dividend = reactorSet.length - 1;
 	}
 
 	private volatile boolean started;
 
 	public int getSelectorCount() {
-		return this.reactorSet == null ? 0 : this.reactorSet.length;
+		return reactorSet == null ? 0 : reactorSet.length;
 	}
 
 	public synchronized void start() {
-		if (this.started) {
+		if (started) {
 			return;
 		}
-		this.started = true;
-		for (Reactor reactor : this.reactorSet) {
+		started = true;
+		for (Reactor reactor : reactorSet) {
 			reactor.start();
 		}
+	}
+
+	Reactor getReactorFromSession(Session session) {
+		Reactor reactor = (Reactor) session.getAttribute(REACTOR_ATTRIBUTE);
+
+		if (reactor == null) {
+			reactor = nextReactor();
+			final Reactor oldReactor = (Reactor) session.setAttributeIfAbsent(
+					REACTOR_ATTRIBUTE, reactor);
+			if (oldReactor != null) {
+				reactor = oldReactor;
+			}
+		}
+		return reactor;
 	}
 
 	/**
@@ -66,18 +80,18 @@ public class SelectorManager {
 	 * @return
 	 */
 	public Reactor getReactorByIndex(int index) {
-		if (index < 0 || index > this.reactorSet.length - 1) {
+		if (index < 0 || index > reactorSet.length - 1) {
 			throw new ArrayIndexOutOfBoundsException();
 		}
-		return this.reactorSet[index];
+		return reactorSet[index];
 	}
 
 	public synchronized void stop() {
-		if (!this.started) {
+		if (!started) {
 			return;
 		}
-		this.started = false;
-		for (Reactor reactor : this.reactorSet) {
+		started = false;
+		for (Reactor reactor : reactorSet) {
 			reactor.interrupt();
 		}
 	}
@@ -101,9 +115,9 @@ public class SelectorManager {
 		if (ops == SelectionKey.OP_ACCEPT || ops == SelectionKey.OP_CONNECT) {
 			index = 0;
 		} else {
-			index = this.sets.incrementAndGet() % this.dividend + 1;
+			index = sets.incrementAndGet() % dividend + 1;
 		}
-		final Reactor reactor = this.reactorSet[index];
+		final Reactor reactor = reactorSet[index];
 		reactor.registerChannel(channel, ops, attachment);
 		return reactor;
 
@@ -111,8 +125,8 @@ public class SelectorManager {
 
 	void awaitReady() {
 		synchronized (this) {
-			while (!this.started
-					|| this.reactorReadyCount != this.reactorSet.length) {
+			while (!started
+					|| reactorReadyCount != reactorSet.length) {
 				try {
 					this.wait(1000);
 				} catch (InterruptedException e) {
@@ -128,11 +142,11 @@ public class SelectorManager {
 	 * @return
 	 */
 	public final Reactor nextReactor() {
-		if (this.dividend > 0) {
-			return this.reactorSet[this.sets.incrementAndGet() % this.dividend
+		if (dividend > 0) {
+			return reactorSet[sets.incrementAndGet() % dividend
 					+ 1];
 		} else {
-			return this.reactorSet[0];
+			return reactorSet[0];
 		}
 	}
 
@@ -160,17 +174,17 @@ public class SelectorManager {
 	}
 
 	public NioController getController() {
-		return this.controller;
+		return controller;
 	}
 
 	/**
 	 * Notify all reactor have been ready
 	 */
 	synchronized void notifyReady() {
-		this.reactorReadyCount++;
-		if (this.reactorReadyCount == this.reactorSet.length) {
-			this.controller.notifyReady();
-			this.notifyAll();
+		reactorReadyCount++;
+		if (reactorReadyCount == reactorSet.length) {
+			controller.notifyReady();
+			notifyAll();
 		}
 
 	}
@@ -179,6 +193,6 @@ public class SelectorManager {
 			.getLogger(SelectorManager.class);
 
 	public final boolean isStarted() {
-		return this.started;
+		return started;
 	}
 }

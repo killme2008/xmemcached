@@ -72,12 +72,6 @@ public class HandlerAdapter implements Handler {
 
 	}
 
-	public boolean onSessionWriteOverFlow(Session session, Object message) {
-		log.warn("Session(" + session.getRemoteSocketAddress()
-				+ ") send bytes over flow,discard message:" + message);
-		return false;
-	}
-
 	public void onSessionExpired(Session session) {
 		log.warn("Session(" + session.getRemoteSocketAddress()
 				+ ") is expired.");

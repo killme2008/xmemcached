@@ -5,6 +5,7 @@
 package com.google.code.yanf4j.nio.impl;
 
 import java.io.IOException;
+import java.nio.channels.CancelledKeyException;
 import java.nio.channels.ClosedChannelException;
 import java.nio.channels.ClosedSelectorException;
 import java.nio.channels.SelectableChannel;
@@ -78,77 +79,77 @@ public final class Reactor extends Thread {
 	Reactor(SelectorManager selectorManager, Configuration configuration,
 			int index) throws IOException {
 		super();
-		this.reactorIndex = index;
+		reactorIndex = index;
 		this.selectorManager = selectorManager;
-		this.controller = selectorManager.getController();
-		this.selector = SystemUtils.openSelector();
+		controller = selectorManager.getController();
+		selector = SystemUtils.openSelector();
 		this.configuration = configuration;
 		setName("Xmemcached-Reactor-" + index);
 	}
 
 	public final Selector getSelector() {
-		return this.selector;
+		return selector;
 	}
 
 	public int getReactorIndex() {
-		return this.reactorIndex;
+		return reactorIndex;
 	}
 
 	@Override
 	public void run() {
-		this.selectorManager.notifyReady();
-		while (this.selectorManager.isStarted() && this.selector.isOpen()) {
+		selectorManager.notifyReady();
+		while (selectorManager.isStarted() && selector.isOpen()) {
 			try {
 				beforeSelect();
-				this.wakenUp.set(false);
+				wakenUp.set(false);
 				long before = -1;
 				// Wether to look jvm bug
 				if (isNeedLookingJVMBug()) {
 					before = System.currentTimeMillis();
 				}
 				long wait = DEFAULT_WAIT;
-				if (this.nextTimeout > 0) {
-					wait = this.nextTimeout;
+				if (nextTimeout > 0) {
+					wait = nextTimeout;
 				}
-				int selected = this.selector.select(wait);
+				int selected = selector.select(wait);
 				if (selected == 0) {
 					if (before != -1) {
 						lookJVMBug(before, selected, wait);
 					}
-					this.selectTries++;
+					selectTries++;
 					// check tmeout and idle
-					this.nextTimeout = checkSessionTimeout();
+					nextTimeout = checkSessionTimeout();
 					continue;
 				} else {
-					this.selectTries = 0;
+					selectTries = 0;
 				}
 
 			} catch (ClosedSelectorException e) {
 				break;
 			} catch (IOException e) {
 				log.error("Reactor select error", e);
-				if (this.selector.isOpen()) {
+				if (selector.isOpen()) {
 					continue;
 				} else {
 					break;
 				}
 			}
-			Set<SelectionKey> selectedKeys = this.selector.selectedKeys();
-			this.gate.lock();
+			Set<SelectionKey> selectedKeys = selector.selectedKeys();
+			gate.lock();
 			try {
-				postSelect(selectedKeys, this.selector.keys());
+				postSelect(selectedKeys, selector.keys());
 				dispatchEvent(selectedKeys);
 			} finally {
-				this.gate.unlock();
+				gate.unlock();
 			}
 		}
-		if (this.selector != null) {
-			if (this.selector.isOpen()) {
+		if (selector != null) {
+			if (selector.isOpen()) {
 				try {
-					this.controller.closeChannel(this.selector);
-					this.selector.close();
+					controller.closeChannel(selector);
+					selector.close();
 				} catch (IOException e) {
-					this.controller.notifyException(e);
+					controller.notifyException(e);
 					log.error("stop reactor error", e);
 				}
 			}
@@ -171,32 +172,32 @@ public final class Reactor extends Thread {
 		long now = System.currentTimeMillis();
 
 		if (JVMBUG_THRESHHOLD > 0 && selected == 0 && wait > JVMBUG_THRESHHOLD
-				&& now - before < wait / 4 && !this.wakenUp.get() /* waken up */
+				&& now - before < wait / 4 && !wakenUp.get() /* waken up */
 				&& !Thread.currentThread().isInterrupted()/* Interrupted */) {
-			this.jvmBug.incrementAndGet();
-			if (this.jvmBug.get() >= JVMBUG_THRESHHOLD2) {
-				this.gate.lock();
+			jvmBug.incrementAndGet();
+			if (jvmBug.get() >= JVMBUG_THRESHHOLD2) {
+				gate.lock();
 				try {
-					this.lastJVMBug = now;
+					lastJVMBug = now;
 					log
 							.warn("JVM bug occured at "
-									+ new Date(this.lastJVMBug)
+									+ new Date(lastJVMBug)
 									+ ",http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6403933,reactIndex="
-									+ this.reactorIndex);
-					if (this.jvmBug1) {
+									+ reactorIndex);
+					if (jvmBug1) {
 						log
 								.debug("seeing JVM BUG(s) - recreating selector,reactIndex="
-										+ this.reactorIndex);
+										+ reactorIndex);
 					} else {
-						this.jvmBug1 = true;
+						jvmBug1 = true;
 						log
 								.info("seeing JVM BUG(s) - recreating selector,reactIndex="
-										+ this.reactorIndex);
+										+ reactorIndex);
 					}
 					seeing = true;
 					final Selector new_selector = SystemUtils.openSelector();
 
-					for (SelectionKey k : this.selector.keys()) {
+					for (SelectionKey k : selector.keys()) {
 						if (!k.isValid() || k.interestOps() == 0) {
 							continue;
 						}
@@ -208,40 +209,40 @@ public final class Reactor extends Thread {
 								attachment);
 					}
 
-					this.selector.close();
-					this.selector = new_selector;
+					selector.close();
+					selector = new_selector;
 
 				} finally {
-					this.gate.unlock();
+					gate.unlock();
 				}
-				this.jvmBug.set(0);
+				jvmBug.set(0);
 
-			} else if (this.jvmBug.get() == JVMBUG_THRESHHOLD
-					|| this.jvmBug.get() == JVMBUG_THRESHHOLD1) {
-				if (this.jvmBug0) {
+			} else if (jvmBug.get() == JVMBUG_THRESHHOLD
+					|| jvmBug.get() == JVMBUG_THRESHHOLD1) {
+				if (jvmBug0) {
 					log
 							.debug("seeing JVM BUG(s) - cancelling interestOps==0,reactIndex="
-									+ this.reactorIndex);
+									+ reactorIndex);
 				} else {
-					this.jvmBug0 = true;
+					jvmBug0 = true;
 					log
 							.info("seeing JVM BUG(s) - cancelling interestOps==0,reactIndex="
-									+ this.reactorIndex);
+									+ reactorIndex);
 				}
-				this.gate.lock();
+				gate.lock();
 				seeing = true;
 				try {
-					for (SelectionKey k : this.selector.keys()) {
+					for (SelectionKey k : selector.keys()) {
 						if (k.isValid() && k.interestOps() == 0) {
 							k.cancel();
 						}
 					}
 				} finally {
-					this.gate.unlock();
+					gate.unlock();
 				}
 			}
 		} else {
-			this.jvmBug.set(0);
+			jvmBug.set(0);
 		}
 		return seeing;
 	}
@@ -264,7 +265,7 @@ public final class Reactor extends Thread {
 			it.remove();
 			if (!key.isValid()) {
 				if (key.attachment() != null) {
-					this.controller.closeSelectionKey(key);
+					controller.closeSelectionKey(key);
 				} else {
 					key.cancel();
 				}
@@ -272,15 +273,15 @@ public final class Reactor extends Thread {
 			}
 			try {
 				if (key.isValid() && key.isAcceptable()) {
-					this.controller.onAccept(key);
+					controller.onAccept(key);
 					continue;
 				}
 				if (key.isValid()
 						&& (key.readyOps() & SelectionKey.OP_WRITE) == SelectionKey.OP_WRITE) {
 					// Remove write interest
 					key.interestOps(key.interestOps() & ~SelectionKey.OP_WRITE);
-					this.controller.onWrite(key);
-					if (!this.controller.isHandleReadWriteConcurrently()) {
+					controller.onWrite(key);
+					if (!controller.isHandleReadWriteConcurrently()) {
 						skipOpRead = true;
 					}
 				}
@@ -288,9 +289,9 @@ public final class Reactor extends Thread {
 						&& key.isValid()
 						&& (key.readyOps() & SelectionKey.OP_READ) == SelectionKey.OP_READ) {
 					key.interestOps(key.interestOps() & ~SelectionKey.OP_READ);
-					if (!this.controller.getStatistics().isReceiveOverFlow()) {
+					if (!controller.getStatistics().isReceiveOverFlow()) {
 						// Remove read interest
-						this.controller.onRead(key);
+						controller.onRead(key);
 					} else {
 						key.interestOps(key.interestOps()
 								| SelectionKey.OP_READ);
@@ -298,16 +299,18 @@ public final class Reactor extends Thread {
 
 				}
 				if ((key.readyOps() & SelectionKey.OP_CONNECT) == SelectionKey.OP_CONNECT) {
-					this.controller.onConnect(key);
+					controller.onConnect(key);
 				}
 
+			} catch (CancelledKeyException e) {
+				// ignore
 			} catch (RejectedExecutionException e) {
 
 				if (key.attachment() instanceof AbstractNioSession) {
 					((AbstractNioSession) key.attachment()).onException(e);
 				}
-				this.controller.notifyException(e);
-				if (this.selector.isOpen()) {
+				controller.notifyException(e);
+				if (selector.isOpen()) {
 					continue;
 				} else {
 					break;
@@ -316,10 +319,10 @@ public final class Reactor extends Thread {
 				if (key.attachment() instanceof AbstractNioSession) {
 					((AbstractNioSession) key.attachment()).onException(e);
 				}
-				this.controller.closeSelectionKey(key);
-				this.controller.notifyException(e);
+				controller.closeSelectionKey(key);
+				controller.notifyException(e);
 				log.error("Reactor dispatch events error", e);
-				if (this.selector.isOpen()) {
+				if (selector.isOpen()) {
 					continue;
 				} else {
 					break;
@@ -348,14 +351,14 @@ public final class Reactor extends Thread {
 	 */
 	private final long checkSessionTimeout() {
 		long nextTimeout = 0;
-		if (this.configuration.getCheckSessionTimeoutInterval() > 0) {
-			this.gate.lock();
+		if (configuration.getCheckSessionTimeoutInterval() > 0) {
+			gate.lock();
 			try {
-				if (this.selectTries * 1000 >= this.configuration
+				if (selectTries * 1000 >= configuration
 						.getCheckSessionTimeoutInterval()) {
-					nextTimeout = this.configuration
+					nextTimeout = configuration
 							.getCheckSessionTimeoutInterval();
-					for (SelectionKey key : this.selector.keys()) {
+					for (SelectionKey key : selector.keys()) {
 
 						if (key.attachment() != null) {
 							long n = checkExpiredIdle(key,
@@ -363,10 +366,10 @@ public final class Reactor extends Thread {
 							nextTimeout = n < nextTimeout ? n : nextTimeout;
 						}
 					}
-					this.selectTries = 0;
+					selectTries = 0;
 				}
 			} finally {
-				this.gate.unlock();
+				gate.unlock();
 			}
 		}
 		return nextTimeout;
@@ -384,7 +387,7 @@ public final class Reactor extends Thread {
 		if (isReactorThread() && selector != null) {
 			dispatchSessionEvent(session, event, selector);
 		} else {
-			this.register.offer(new Object[] { session, event });
+			register.offer(new Object[] { session, event });
 			wakeup();
 		}
 	}
@@ -394,28 +397,28 @@ public final class Reactor extends Thread {
 	}
 
 	final void beforeSelect() {
-		this.controller.checkStatisticsForRestart();
+		controller.checkStatisticsForRestart();
 		processRegister();
 	}
 
 	private final void processRegister() {
 		Object[] object = null;
-		while ((object = this.register.poll()) != null) {
+		while ((object = register.poll()) != null) {
 			switch (object.length) {
 			case 2:
 				dispatchSessionEvent((Session) object[0],
-						(EventType) object[1], this.selector);
+						(EventType) object[1], selector);
 				break;
 			case 3:
 				registerChannelNow((SelectableChannel) object[0],
-						(Integer) object[1], object[2], this.selector);
+						(Integer) object[1], object[2], selector);
 				break;
 			}
 		}
 	}
 
 	Configuration getConfiguration() {
-		return this.configuration;
+		return configuration;
 	}
 
 	private final void dispatchSessionEvent(Session session, EventType event,
@@ -424,9 +427,9 @@ public final class Reactor extends Thread {
 			return;
 		}
 		if (EventType.REGISTER.equals(event)) {
-			this.controller.registerSession(session);
+			controller.registerSession(session);
 		} else if (EventType.UNREGISTER.equals(event)) {
-			this.controller.unregisterSession(session);
+			controller.unregisterSession(session);
 		} else {
 			((NioSession) session).onEvent(event, selector);
 		}
@@ -434,8 +437,8 @@ public final class Reactor extends Thread {
 
 	public final void postSelect(Set<SelectionKey> selectedKeys,
 			Set<SelectionKey> allKeys) {
-		if (this.controller.getSessionTimeout() > 0
-				|| this.controller.getSessionIdleTimeout() > 0) {
+		if (controller.getSessionTimeout() > 0
+				|| controller.getSessionIdleTimeout() > 0) {
 			for (SelectionKey key : allKeys) {
 
 				if (!selectedKeys.contains(key)) {
@@ -453,29 +456,29 @@ public final class Reactor extends Thread {
 		}
 		long nextTimeout = 0;
 		boolean expired = false;
-		if (this.controller.getSessionTimeout() > 0) {
+		if (controller.getSessionTimeout() > 0) {
 			expired = checkExpired(key, session);
-			nextTimeout = this.controller.getSessionTimeout();
+			nextTimeout = controller.getSessionTimeout();
 		}
-		if (this.controller.getSessionIdleTimeout() > 0 && !expired) {
+		if (controller.getSessionIdleTimeout() > 0 && !expired) {
 			checkIdle(session);
-			nextTimeout = this.controller.getSessionIdleTimeout();
+			nextTimeout = controller.getSessionIdleTimeout();
 		}
 		return nextTimeout;
 	}
 
 	private final void checkIdle(Session session) {
-		if (this.controller.getSessionIdleTimeout() > 0) {
+		if (controller.getSessionIdleTimeout() > 0) {
 			if (session.isIdle()) {
-				((NioSession) session).onEvent(EventType.IDLE, this.selector);
+				((NioSession) session).onEvent(EventType.IDLE, selector);
 			}
 		}
 	}
 
 	private final boolean checkExpired(SelectionKey key, Session session) {
 		if (session != null && session.isExpired()) {
-			((NioSession) session).onEvent(EventType.EXPIRED, this.selector);
-			this.controller.closeSelectionKey(key);
+			((NioSession) session).onEvent(EventType.EXPIRED, selector);
+			controller.closeSelectionKey(key);
 			return true;
 		}
 		return false;
@@ -487,7 +490,7 @@ public final class Reactor extends Thread {
 		if (isReactorThread() && selector != null) {
 			registerChannelNow(channel, ops, attachment, selector);
 		} else {
-			this.register.offer(new Object[] { channel, ops, attachment });
+			register.offer(new Object[] { channel, ops, attachment });
 			wakeup();
 		}
 
@@ -495,21 +498,21 @@ public final class Reactor extends Thread {
 
 	private void registerChannelNow(SelectableChannel channel, int ops,
 			Object attachment, Selector selector) {
-		this.gate.lock();
+		gate.lock();
 		try {
 			if (channel.isOpen()) {
 				channel.register(selector, ops, attachment);
 			}
 		} catch (ClosedChannelException e) {
 			log.error("Register channel error", e);
-			this.controller.notifyException(e);
+			controller.notifyException(e);
 		} finally {
-			this.gate.unlock();
+			gate.unlock();
 		}
 	}
 
 	final void wakeup() {
-		if (this.wakenUp.compareAndSet(false, true)) {
+		if (wakenUp.compareAndSet(false, true)) {
 			final Selector selector = this.selector;
 			if (selector != null) {
 				selector.wakeup();

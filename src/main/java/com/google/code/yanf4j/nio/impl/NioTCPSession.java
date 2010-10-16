@@ -44,9 +44,9 @@ public class NioTCPSession extends AbstractNioSession {
 	@Override
 	public final boolean isExpired() {
 		if (log.isDebugEnabled()) {
-			log.debug("sessionTimeout=" + sessionTimeout
-					+ ",this.timestamp=" + lastOperationTimeStamp.get()
-					+ ",current=" + System.currentTimeMillis());
+			log.debug("sessionTimeout=" + sessionTimeout + ",this.timestamp="
+					+ lastOperationTimeStamp.get() + ",current="
+					+ System.currentTimeMillis());
 		}
 		return sessionTimeout <= 0 ? false : System.currentTimeMillis()
 				- lastOperationTimeStamp.get() >= sessionTimeout;
@@ -54,8 +54,7 @@ public class NioTCPSession extends AbstractNioSession {
 
 	public NioTCPSession(NioSessionConfig sessionConfig, int readRecvBufferSize) {
 		super(sessionConfig);
-		if (selectableChannel != null
-				&& getRemoteSocketAddress() != null) {
+		if (selectableChannel != null && getRemoteSocketAddress() != null) {
 			loopback = getRemoteSocketAddress().getAddress()
 					.isLoopbackAddress();
 		}
@@ -175,8 +174,7 @@ public class NioTCPSession extends AbstractNioSession {
 		WriteMessage message = new WriteMessageImpl(msg,
 				(FutureImpl<Boolean>) writeFuture);
 		if (message.getWriteBuffer() == null) {
-			message.setWriteBuffer(encoder.encode(message.getMessage(),
-					this));
+			message.setWriteBuffer(encoder.encode(message.getMessage(), this));
 		}
 		return message;
 	}
@@ -217,14 +215,13 @@ public class NioTCPSession extends AbstractNioSession {
 			if (n < 0) { // Connection closed
 				close();
 			} else {
-				selectorManager.registerSession(this,
-						EventType.ENABLE_READ);
+				selectorManager.registerSession(this, EventType.ENABLE_READ);
 			}
 			if (log.isDebugEnabled()) {
 				log.debug("read " + readCount + " bytes from channel");
 			}
-		} catch (IOException e) {
-			onException(e);
+		} catch (ClosedChannelException e) {
+			// ignore exception
 			close();
 		} catch (Throwable e) {
 			onException(e);
@@ -293,8 +290,8 @@ public class NioTCPSession extends AbstractNioSession {
 					break;
 				} else {
 					if (statistics.isStatistics()) {
-						statistics.statisticsRead(size
-								- readBuffer.remaining());
+						statistics
+								.statisticsRead(size - readBuffer.remaining());
 						size = readBuffer.remaining();
 					}
 				}

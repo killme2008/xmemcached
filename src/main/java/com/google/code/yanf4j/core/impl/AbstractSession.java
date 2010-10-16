@@ -236,23 +236,21 @@ public abstract class AbstractSession implements Session {
 			}
 			onMessage(message, this);
 			if (start != -1) {
-				statistics.statisticsProcess(System.currentTimeMillis()
-						- start);
+				statistics
+						.statisticsProcess(System.currentTimeMillis() - start);
 			}
 		} else {
 
 			dispatchMessageDispatcher.dispatch(new Runnable() {
 				public void run() {
 					long start = -1;
-					if (statistics != null
-							&& statistics.isStatistics()) {
+					if (statistics != null && statistics.isStatistics()) {
 						start = System.currentTimeMillis();
 					}
 					onMessage(message, AbstractSession.this);
 					if (start != -1) {
-						statistics
-								.statisticsProcess(System.currentTimeMillis()
-										- start);
+						statistics.statisticsProcess(System.currentTimeMillis()
+								- start);
 					}
 				}
 
@@ -376,41 +374,17 @@ public abstract class AbstractSession implements Session {
 
 	}
 
-	public Future<Boolean> asyncWrite(Object packet) {
-		if (closed) {
-			FutureImpl<Boolean> writeFuture = new FutureImpl<Boolean>();
-			writeFuture.failure(new IOException("�����Ѿ����ر�"));
-			return writeFuture;
-		}
-		if (statistics.isSendOverFlow()) {
-			if (!handler.onSessionWriteOverFlow(this, packet)) {
-				return new FailFuture();
-			}
-		}
-		FutureImpl<Boolean> writeFuture = new FutureImpl<Boolean>();
-		WriteMessage message = wrapMessage(packet, writeFuture);
-		scheduleWritenBytes
-				.addAndGet(message.getWriteBuffer().remaining());
-		write0(message);
-		return writeFuture;
-	}
-
 	public void write(Object packet) {
 		if (closed) {
 			return;
 		}
-		if (statistics.isSendOverFlow()) {
-			if (!handler.onSessionWriteOverFlow(this, packet)) {
-				return;
-			}
-		}
 		WriteMessage message = wrapMessage(packet, null);
-		scheduleWritenBytes
-				.addAndGet(message.getWriteBuffer().remaining());
-		write0(message);
+		scheduleWritenBytes.addAndGet(message.getWriteBuffer().remaining());
+		writeFromUserCode(message);
 	}
 
-	protected abstract void write0(WriteMessage message);
+	public abstract void writeFromUserCode(WriteMessage message);
+
 
 	public final boolean isLoopbackConnection() {
 		return loopback;

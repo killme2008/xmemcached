@@ -25,7 +25,6 @@ package com.google.code.yanf4j.core;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.nio.ByteOrder;
-import java.util.concurrent.Future;
 
 /**
  * Abstract connection
@@ -43,14 +42,6 @@ public interface Session {
 	 * Start session
 	 */
 	public void start();
-
-	/**
-	 * Async write a message to socket,return a future
-	 * 
-	 * @param packet
-	 * @return
-	 */
-	public Future<Boolean> asyncWrite(Object packet);
 
 	/**
 	 * Write a message,if you don't care when the message is written
@@ -78,11 +69,6 @@ public interface Session {
 	 */
 	public InetSocketAddress getRemoteSocketAddress();
 
-	/**
-	 * ��ȡ����ip��ַ
-	 * 
-	 * @return
-	 */
 	public InetAddress getLocalAddress();
 
 	/**

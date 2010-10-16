@@ -41,18 +41,18 @@ public abstract class NioController extends AbstractController implements
 	/**
 	 * Reactor count
 	 */
-	protected int selectorPoolSize = SystemUtils.getSystemThreadCount();
+	protected int selectorPoolSize = SystemUtils.getSystemThreadCount() * 2;
 
 	/**
 	 * @see setSelectorPoolSize
 	 * @return
 	 */
 	public int getSelectorPoolSize() {
-		return this.selectorPoolSize;
+		return selectorPoolSize;
 	}
 
 	public void setSelectorPoolSize(int selectorPoolSize) {
-		if (this.isStarted()) {
+		if (isStarted()) {
 			throw new IllegalStateException("Controller has been started");
 		}
 		this.selectorPoolSize = selectorPoolSize;
@@ -89,7 +89,7 @@ public abstract class NioController extends AbstractController implements
 		}
 
 		public final void run() {
-			dispatchWriteEvent(this.key);
+			dispatchWriteEvent(key);
 		}
 	}
 
@@ -107,12 +107,12 @@ public abstract class NioController extends AbstractController implements
 		}
 
 		public final void run() {
-			dispatchReadEvent(this.key);
+			dispatchReadEvent(key);
 		}
 	}
 
 	public final SelectorManager getSelectorManager() {
-		return this.selectorManager;
+		return selectorManager;
 	}
 
 	@Override
@@ -135,10 +135,10 @@ public abstract class NioController extends AbstractController implements
 	 * @throws IOException
 	 */
 	protected void initialSelectorManager() throws IOException {
-		if (this.selectorManager == null) {
-			this.selectorManager = new SelectorManager(this.selectorPoolSize,
-					this, this.configuration);
-			this.selectorManager.start();
+		if (selectorManager == null) {
+			selectorManager = new SelectorManager(selectorPoolSize,
+					this, configuration);
+			selectorManager.start();
 		}
 	}
 
@@ -153,10 +153,10 @@ public abstract class NioController extends AbstractController implements
 	 * Read event occured
 	 */
 	public void onRead(SelectionKey key) {
-		if (this.readEventDispatcher == null) {
+		if (readEventDispatcher == null) {
 			dispatchReadEvent(key);
 		} else {
-			this.readEventDispatcher.dispatch(new ReadTask(key));
+			readEventDispatcher.dispatch(new ReadTask(key));
 		}
 	}
 
@@ -164,10 +164,10 @@ public abstract class NioController extends AbstractController implements
 	 * Writable event occured
 	 */
 	public void onWrite(final SelectionKey key) {
-		if (this.writeEventDispatcher == null) {
+		if (writeEventDispatcher == null) {
 			dispatchWriteEvent(key);
 		} else {
-			this.writeEventDispatcher.dispatch(new WriteTask(key));
+			writeEventDispatcher.dispatch(new WriteTask(key));
 		}
 	}
 
@@ -201,16 +201,16 @@ public abstract class NioController extends AbstractController implements
 
 	@Override
 	protected void stop0() throws IOException {
-		if (this.selectorManager == null || !this.selectorManager.isStarted()) {
+		if (selectorManager == null || !selectorManager.isStarted()) {
 			return;
 		}
-		this.selectorManager.stop();
+		selectorManager.stop();
 	}
 
 	public synchronized void bind(int port) throws IOException {
 		if (isStarted()) {
 			throw new IllegalStateException("Server has been bind to "
-					+ this.getLocalSocketAddress());
+					+ getLocalSocketAddress());
 		}
 		bind(new InetSocketAddress(port));
 	}
@@ -224,11 +224,10 @@ public abstract class NioController extends AbstractController implements
 	 */
 	protected final NioSessionConfig buildSessionConfig(SelectableChannel sc,
 			Queue<WriteMessage> queue) {
-		final NioSessionConfig sessionConfig = new NioSessionConfig(sc, this
-				.getHandler(), this.selectorManager, this.getCodecFactory(),
-				this.getStatistics(), queue, this.dispatchMessageDispatcher,
-				this.isHandleReadWriteConcurrently(), this.sessionTimeout,
-				this.configuration.getSessionIdleTimeout());
+		final NioSessionConfig sessionConfig = new NioSessionConfig(sc, getHandler(), selectorManager, getCodecFactory(),
+				getStatistics(), queue, dispatchMessageDispatcher,
+				isHandleReadWriteConcurrently(), sessionTimeout,
+				configuration.getSessionIdleTimeout());
 		return sessionConfig;
 	}
 
