@@ -20,3 +20,18 @@ threads=100,repeats=40000,valueLength=512,tps=108523,miss=1061328,fail=0,hit=213
 threads=100,repeats=40000,valueLength=1024,tps=92084,miss=1062880,fail=0,hit=2137520,all=4000000,hitRate=0.67
 threads=100,repeats=40000,valueLength=4096,tps=35196,miss=1084432,fail=0,hit=2115968,all=4000000,hitRate=0.66
 threads=100,repeats=40000,valueLength=16384,tps=9536,miss=1219068,fail=0,hit=1981332,all=4000000,hitRate=0.62
+com.schooner.MemCached.SchoonerSockIOPool Sun Oct 17 11:09:05 GMT+08:00 2010 - ++++ failed to get SockIO obj for: 10.232.36.82:12000
+com.schooner.MemCached.SchoonerSockIOPool Sun Oct 17 11:09:05 GMT+08:00 2010 - ++++ failed to get SockIO obj for: 10.232.36.82:12000
+com.schooner.MemCached.SchoonerSockIOPool Sun Oct 17 11:09:05 GMT+08:00 2010 - ++++ failed to get SockIO obj for: 10.232.36.90:12000
+com.schooner.MemCached.SchoonerSockIOPool Sun Oct 17 11:09:05 GMT+08:00 2010 - ++++ failed to get SockIO obj for: 10.232.36.82:12000
+com.schooner.MemCached.SchoonerSockIOPool Sun Oct 17 11:09:05 GMT+08:00 2010 - ++++ failed to get SockIO obj for: 10.232.36.90:12000
+com.schooner.MemCached.SchoonerSockIOPool Sun Oct 17 11:09:05 GMT+08:00 2010 - ++++ failed to get SockIO obj for: 10.232.36.82:12000
+com.schooner.MemCached.SchoonerSockIOPool Sun Oct 17 11:09:05 GMT+08:00 2010 - ++++ failed to get SockIO obj for: 10.232.36.90:12000
+com.schooner.MemCached.SchoonerSockIOPool Sun Oct 17 11:09:05 GMT+08:00 2010 - ++++ failed to get SockIO obj for: 10.232.36.90:12000
+com.schooner.MemCached.SchoonerSockIOPool Sun Oct 17 11:09:05 GMT+08:00 2010 - ++++ failed to get SockIO obj for: 10.232.36.82:12000
+com.schooner.MemCached.SchoonerSockIOPool Sun Oct 17 11:09:05 GMT+08:00 2010 - ++++ failed to get SockIO obj for: 10.232.36.86:12000
+com.schooner.MemCached.SchoonerSockIOPool Sun Oct 17 11:09:05 GMT+08:00 2010 - ++++ failed to get SockIO obj for: 10.232.36.90:12000
+com.schooner.MemCached.SchoonerSockIOPool Sun Oct 17 11:09:05 GMT+08:00 2010 - ++++ failed to get SockIO obj for: 10.232.36.90:12000
+com.schooner.MemCached.SchoonerSockIOPool Sun Oct 17 11:09:05 GMT+08:00 2010 - ++++ failed to get SockIO obj for: 10.232.36.82:12000
+com.schooner.MemCached.SchoonerSockIOPool Sun Oct 17 11:09:05 GMT+08:00 2010 - ++++ failed to get SockIO obj for: 10.232.36.90:12000
+com.schooner.MemCached.SchoonerSockIOPool Sun Oct 17 11:09:05 GMT+08:00 2010 - ++++ failed to get SockIO obj for: 10.232.36.82:12000

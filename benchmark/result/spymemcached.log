@@ -26,4 +26,10 @@ threads=100,repeats=40000,valueLength=512,tps=60970,miss=1061328,fail=0,hit=2139
 threads=100,repeats=40000,valueLength=1024,tps=57310,miss=1062880,fail=0,hit=2137520,all=4000000,hitRate=0.67
 threads=100,repeats=40000,valueLength=4096,tps=30679,miss=1084432,fail=0,hit=2115968,all=4000000,hitRate=0.66
 threads=100,repeats=40000,valueLength=16384,tps=7451,miss=1217232,fail=0,hit=1983168,all=4000000,hitRate=0.62
+threads=300,repeats=20000,valueLength=64,tps=70912,miss=0,fail=0,hit=4801200,all=6000000,hitRate=1.00
+threads=300,repeats=20000,valueLength=512,tps=57615,miss=0,fail=0,hit=4801200,all=6000000,hitRate=1.00
+threads=300,repeats=20000,valueLength=1024,tps=17624,miss=0,fail=0,hit=4801200,all=6000000,hitRate=1.00
+threads=300,repeats=20000,valueLength=4096,tps=7689,miss=0,fail=0,hit=4801200,all=6000000,hitRate=1.00
+threads=300,repeats=20000,valueLength=16384,tps=4074,miss=2935596,fail=0,hit=1865604,all=6000000,hitRate=0.39
+2010-10-17 10:58:35.913 INFO net.spy.memcached.MemcachedClient:  Shut down memcached client
 2010-10-16 22:50:20.805 INFO net.spy.memcached.MemcachedClient:  Shut down memcached client
