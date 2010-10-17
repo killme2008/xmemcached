@@ -5,6 +5,26 @@ Xmemcached Change log
 
 
 *******************************************
+2010-10-17
+-----Xmemcached 1.2.6 Released------------------------
+This is a minor version,trying to fix some bugs and turnning for performance:
+1.Add english user guide
+2.Fix bugs,include:
+#issue 85 
+#issue 87
+#issue 90
+#issue 94
+#issue 95
+#issue 96
+#issue 97
+3.Change the way to heal connection,increased heal connection interval step by step,and then one minute at last.
+4.Make stopping xmemcached client instance more friendly by sending a quit command to memcached instead of closing socket channel directly.
+5.Every xmemcached instance has a name to identify itself.You could setter/getter it's name by MemcachedClient.setName/getName methods.
+If you don't configure a cache name,xmemcached will choose a name by default.
+
+-------------------------------------------------------
+
+
 2010-06-21
 -----Xmemcached 1.2.5 Released------------------------
 This is a minor version,main changes:

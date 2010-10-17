@@ -127,6 +127,9 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 	}
 
 	public void setName(String name) {
+		if (!isShutdown())
+			throw new IllegalStateException(
+					"Could not set name when xmc has been started");
 		this.name = name;
 	}
 
@@ -690,9 +693,10 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 			CommandFactory commandFactory, Transcoder transcoder,
 			List<InetSocketAddress> addressList,
 			List<MemcachedClientStateListener> stateListeners,
-			Map<InetSocketAddress, AuthInfo> map, int poolSize)
+			Map<InetSocketAddress, AuthInfo> map, int poolSize, String name)
 			throws IOException {
 		super();
+		setName(name);
 		optimiezeSetReadThreadCount(conf, addressList);
 		buildConnector(locator, allocator, conf, socketOptions, commandFactory,
 				transcoder);
@@ -733,9 +737,10 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 			CommandFactory commandFactory, Transcoder transcoder,
 			List<InetSocketAddress> addressList, int[] weights,
 			List<MemcachedClientStateListener> stateListeners,
-			Map<InetSocketAddress, AuthInfo> infoMap, int poolSize)
+			Map<InetSocketAddress, AuthInfo> infoMap, int poolSize,final String name)
 			throws IOException {
 		super();
+		setName(name);
 		if (weights == null && addressList != null) {
 			throw new IllegalArgumentException("Null weights");
 		}

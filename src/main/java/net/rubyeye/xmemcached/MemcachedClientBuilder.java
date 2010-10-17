@@ -179,4 +179,18 @@ public interface MemcachedClientBuilder {
 	 */
 	public void removeAuthInfo(InetSocketAddress address);
 
+	/**
+	 * Return the cache instance name
+	 * 
+	 * @return
+	 */
+	public String getName();
+
+	/**
+	 * Set cache instance name
+	 * 
+	 * @param name
+	 */
+	public void setName(String name);
+
 }

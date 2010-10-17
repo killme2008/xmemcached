@@ -1175,4 +1175,18 @@ public interface MemcachedClient {
 	 */
 	public Map<InetSocketAddress, AuthInfo> getAuthInfoMap();
 
+	/**
+	 * Return the cache instance name
+	 * 
+	 * @return
+	 */
+	public String getName();
+
+	/**
+	 * Set cache instance name
+	 * 
+	 * @param name
+	 */
+	public void setName(String name);
+
 }
