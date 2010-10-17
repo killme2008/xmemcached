@@ -32,6 +32,7 @@ import net.rubyeye.xmemcached.command.CommandType;
 import net.rubyeye.xmemcached.transcoders.Transcoder;
 import net.rubyeye.xmemcached.utils.Protocol;
 
+@SuppressWarnings("unchecked")
 public interface CommandFactory {
 
 	/**
@@ -43,41 +44,41 @@ public interface CommandFactory {
 	public void setBufferAllocator(BufferAllocator bufferAllocator);
 
 	/**
-	 * 创建delete命令
+	 * create a delete command
 	 * 
 	 * @param key
 	 * @param time
 	 * @return
 	 */
-	public abstract Command createDeleteCommand(final String key,
-			final byte[] keyBytes, final int time, boolean noreply);
+	public Command createDeleteCommand(final String key, final byte[] keyBytes,
+			final int time, boolean noreply);
 
 	/**
-	 * 创建version command
+	 * create a version command
 	 * 
 	 * @return
 	 */
-	public abstract Command createVersionCommand(CountDownLatch latch,
+	public Command createVersionCommand(CountDownLatch latch,
 			InetSocketAddress server);
 
 	/**
-	 * create flush_all command
+	 * create a flush_all command
 	 * 
 	 * @return
 	 */
-	public abstract Command createFlushAllCommand(CountDownLatch latch,
-			int delay, boolean noreply);
+	public Command createFlushAllCommand(CountDownLatch latch, int delay,
+			boolean noreply);
 
 	/**
-	 * create flush_all command
+	 * create a stats command
 	 * 
 	 * @return
 	 */
-	public abstract Command createStatsCommand(InetSocketAddress server,
+	public Command createStatsCommand(InetSocketAddress server,
 			CountDownLatch latch, String itemName);
 
 	/**
-	 *创建get,gets命令
+	 *create a get/gets command
 	 * 
 	 * @param key
 	 * @param keyBytes
@@ -89,13 +90,12 @@ public interface CommandFactory {
 	 *            命令的字节数组，如"get".getBytes()
 	 * @return
 	 */
-	@SuppressWarnings("unchecked")
-	public abstract Command createGetCommand(final String key,
-			final byte[] keyBytes, final CommandType cmdType,
-			Transcoder transcoder);
+
+	public Command createGetCommand(final String key, final byte[] keyBytes,
+			final CommandType cmdType, Transcoder transcoder);
 
 	/**
-	 * 创建批量获取 command
+	 * Create a multi-get command
 	 * 
 	 * @param <T>
 	 * @param keys
@@ -106,44 +106,115 @@ public interface CommandFactory {
 	 * @param transcoder
 	 * @return
 	 */
-	public abstract <T> Command createGetMultiCommand(Collection<String> keys,
+	public <T> Command createGetMultiCommand(Collection<String> keys,
 			CountDownLatch latch, CommandType cmdType, Transcoder<T> transcoder);
 
-	public abstract Command createIncrDecrCommand(final String key,
+	/**
+	 * create a incr/decr command
+	 * 
+	 * @param key
+	 * @param keyBytes
+	 * @param delta
+	 * @param initial
+	 * @param expTime
+	 * @param cmdType
+	 * @param noreply
+	 * @return
+	 */
+	public Command createIncrDecrCommand(final String key,
 			final byte[] keyBytes, final long delta, long initial, int expTime,
 			CommandType cmdType, boolean noreply);
 
-	@SuppressWarnings("unchecked")
+	/**
+	 * Create a cas command
+	 * 
+	 * @param key
+	 * @param keyBytes
+	 * @param exp
+	 * @param value
+	 * @param cas
+	 * @param noreply
+	 * @param transcoder
+	 * @return
+	 */
 	public Command createCASCommand(final String key, final byte[] keyBytes,
 			final int exp, final Object value, long cas, boolean noreply,
 			Transcoder transcoder);
 
-	@SuppressWarnings("unchecked")
+	/**
+	 * Create a set command
+	 * 
+	 * @param key
+	 * @param keyBytes
+	 * @param exp
+	 * @param value
+	 * @param noreply
+	 * @param transcoder
+	 * @return
+	 */
 	public Command createSetCommand(final String key, final byte[] keyBytes,
 			final int exp, final Object value, boolean noreply,
 			Transcoder transcoder);
 
-	@SuppressWarnings("unchecked")
+	/**
+	 * create a add command
+	 * 
+	 * @param key
+	 * @param keyBytes
+	 * @param exp
+	 * @param value
+	 * @param noreply
+	 * @param transcoder
+	 * @return
+	 */
 	public Command createAddCommand(final String key, final byte[] keyBytes,
 			final int exp, final Object value, boolean noreply,
 			Transcoder transcoder);
 
-	@SuppressWarnings("unchecked")
+	/**
+	 * create a replace command
+	 * 
+	 * @param key
+	 * @param keyBytes
+	 * @param exp
+	 * @param value
+	 * @param noreply
+	 * @param transcoder
+	 * @return
+	 */
 	public Command createReplaceCommand(final String key,
 			final byte[] keyBytes, final int exp, final Object value,
 			boolean noreply, Transcoder transcoder);
 
-	@SuppressWarnings("unchecked")
+	/**
+	 * create a append command
+	 * 
+	 * @param key
+	 * @param keyBytes
+	 * @param value
+	 * @param noreply
+	 * @param transcoder
+	 * @return
+	 */
 	public Command createAppendCommand(final String key, final byte[] keyBytes,
 			final Object value, boolean noreply, Transcoder transcoder);
 
-	@SuppressWarnings("unchecked")
+	/**
+	 * Create a prepend command
+	 * 
+	 * @param key
+	 * @param keyBytes
+	 * @param value
+	 * @param noreply
+	 * @param transcoder
+	 * @return
+	 */
 	public Command createPrependCommand(final String key,
 			final byte[] keyBytes, final Object value, boolean noreply,
 			Transcoder transcoder);
 
 	/**
-	 * Create verbosity command
+	 * Create a verbosity command
 	 * 
 	 * @param latch
 	 * @param level
@@ -154,7 +225,7 @@ public interface CommandFactory {
 			boolean noreply);
 
 	/**
-	 * Create command for listing authentication mechanisms
+	 * Create a command for listing authentication mechanisms
 	 * 
 	 * @param latch
 	 * @return
@@ -173,7 +244,7 @@ public interface CommandFactory {
 			CountDownLatch latch, byte[] authData);
 
 	/**
-	 * Create command for stepping authentication
+	 * Create a command for stepping authentication
 	 * 
 	 * @param mechanism
 	 * @param latch
@@ -183,6 +254,18 @@ public interface CommandFactory {
 	public Command createAuthStepCommand(String mechanism,
 			CountDownLatch latch, byte[] authData);
 
+	/**
+	 * create a quit command
+	 * 
+	 * @return
+	 */
+	public Command createQuitCommand();
+
+	/**
+	 * Get this client's protocol version
+	 * 
+	 * @return
+	 */
 	public Protocol getProtocol();
 
 }

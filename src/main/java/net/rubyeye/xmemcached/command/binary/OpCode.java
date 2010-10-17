@@ -148,6 +148,13 @@ public enum OpCode {
 
 		}
 	},
+	QUITQ {
+		@Override
+		public byte fieldValue() {
+			return 0x17;
+
+		}
+	},
 	STAT {
 		@Override
 		public byte fieldValue() {

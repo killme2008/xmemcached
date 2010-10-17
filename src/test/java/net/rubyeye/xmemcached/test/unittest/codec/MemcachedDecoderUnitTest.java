@@ -19,13 +19,13 @@ public class MemcachedDecoderUnitTest extends TestCase {
 	private Decoder decoder;
 
 	public void testDecode() {
-		this.decoder = new MemcachedCodecFactory().getDecoder();
+		decoder = new MemcachedCodecFactory().getDecoder();
 		MemcachedTCPSession session = buildSession();
 		Command versionCommand = new TextCommandFactory().createVersionCommand(
 				new CountDownLatch(1), null);
 		session.addCommand(versionCommand);
-		Command decodedCommand = (Command) this.decoder.decode(IoBuffer.wrap(ByteBuffer
-				.wrap("VERSION 1.28\r\n".getBytes())), session);
+		Command decodedCommand = (Command) decoder.decode(IoBuffer
+				.wrap(ByteBuffer.wrap("VERSION 1.28\r\n".getBytes())), session);
 		assertSame(decodedCommand, versionCommand);
 		assertEquals("1.28", decodedCommand.getResult());
 	}
@@ -34,6 +34,7 @@ public class MemcachedDecoderUnitTest extends TestCase {
 		NioSessionConfig sessionConfig = new NioSessionConfig(null,
 				new HandlerAdapter(), null, new ByteBufferCodecFactory(), null,
 				null, null, true, 0, 0);
-		return new MemcachedTCPSession(sessionConfig, 16 * 1024, null, 0);
+		return new MemcachedTCPSession(sessionConfig, 16 * 1024, null, 0,
+				new TextCommandFactory());
 	}
 }

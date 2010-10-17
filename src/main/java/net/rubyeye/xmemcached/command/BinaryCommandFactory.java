@@ -20,6 +20,7 @@ import net.rubyeye.xmemcached.command.binary.BinaryFlushAllCommand;
 import net.rubyeye.xmemcached.command.binary.BinaryGetCommand;
 import net.rubyeye.xmemcached.command.binary.BinaryGetMultiCommand;
 import net.rubyeye.xmemcached.command.binary.BinaryIncrDecrCommand;
+import net.rubyeye.xmemcached.command.binary.BinaryQuitCommand;
 import net.rubyeye.xmemcached.command.binary.BinaryStatsCommand;
 import net.rubyeye.xmemcached.command.binary.BinaryStoreCommand;
 import net.rubyeye.xmemcached.command.binary.BinaryVersionCommand;
@@ -180,6 +181,10 @@ public class BinaryCommandFactory implements CommandFactory {
 			CountDownLatch latch, byte[] authData) {
 		return new BinaryAuthStepCommand(mechanism, ByteUtils
 				.getBytes(mechanism), latch, authData);
+	}
+
+	public Command createQuitCommand() {
+		return new BinaryQuitCommand();
 	}
 
 	public Protocol getProtocol() {

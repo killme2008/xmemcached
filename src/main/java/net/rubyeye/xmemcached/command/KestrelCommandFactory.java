@@ -10,6 +10,7 @@ import net.rubyeye.xmemcached.command.kestrel.KestrelDeleteCommand;
 import net.rubyeye.xmemcached.command.kestrel.KestrelFlushAllCommand;
 import net.rubyeye.xmemcached.command.kestrel.KestrelGetCommand;
 import net.rubyeye.xmemcached.command.kestrel.KestrelSetCommand;
+import net.rubyeye.xmemcached.command.text.TextQuitCommand;
 import net.rubyeye.xmemcached.command.text.TextStatsCommand;
 import net.rubyeye.xmemcached.transcoders.Transcoder;
 import net.rubyeye.xmemcached.utils.Protocol;
@@ -112,6 +113,10 @@ public class KestrelCommandFactory implements CommandFactory {
 			InetSocketAddress server) {
 		throw new UnsupportedOperationException(
 				"Kestrel doesn't support this operation");
+	}
+
+	public Command createQuitCommand() {
+		return new TextQuitCommand();
 	}
 
 	public Protocol getProtocol() {

@@ -27,6 +27,11 @@ public class MemcachedSessionComparatorUnitTest extends TestCase {
 			this.order = order;
 		}
 
+		public void quit() {
+			// TODO Auto-generated method stub
+			
+		}
+
 		public Future<Boolean> asyncWrite(Object packet) {
 			// TODO Auto-generated method stub
 			return null;

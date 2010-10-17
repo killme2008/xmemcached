@@ -12,6 +12,7 @@ import net.rubyeye.xmemcached.command.text.TextFlushAllCommand;
 import net.rubyeye.xmemcached.command.text.TextGetMultiCommand;
 import net.rubyeye.xmemcached.command.text.TextGetOneCommand;
 import net.rubyeye.xmemcached.command.text.TextIncrDecrCommand;
+import net.rubyeye.xmemcached.command.text.TextQuitCommand;
 import net.rubyeye.xmemcached.command.text.TextStatsCommand;
 import net.rubyeye.xmemcached.command.text.TextStoreCommand;
 import net.rubyeye.xmemcached.command.text.TextVerbosityCommand;
@@ -223,6 +224,10 @@ public final class TextCommandFactory implements CommandFactory {
 			CountDownLatch latch, byte[] authData) {
 		throw new UnsupportedOperationException(
 				"SASL is only supported by binary protocol");
+	}
+
+	public Command createQuitCommand() {
+		return new TextQuitCommand();
 	}
 
 	public Protocol getProtocol() {

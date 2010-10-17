@@ -20,28 +20,39 @@
  *WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
  *either express or implied. See the License for the specific language governing permissions and limitations under the License
  */
-package net.rubyeye.xmemcached.networking;
+package net.rubyeye.xmemcached.command.text;
 
-import net.rubyeye.xmemcached.buffer.BufferAllocator;
+import java.nio.ByteBuffer;
+
+import net.rubyeye.xmemcached.command.Command;
+import net.rubyeye.xmemcached.command.CommandType;
+import net.rubyeye.xmemcached.impl.MemcachedTCPSession;
+
+import com.google.code.yanf4j.buffer.IoBuffer;
 
 /**
- * Abstract interface for memcached connection.
+ * Quit command for text protocol
  * 
  * @author dennis
  * 
  */
-public interface MemcachedSession {
-	public int getWeight();
+public class TextQuitCommand extends Command {
+	public TextQuitCommand() {
+		super("quit", (byte[]) null, null);
+		commandType = CommandType.QUIT;
+	}
 
-	public void setAllowReconnect(boolean allow);
+	static final IoBuffer QUIT = IoBuffer.wrap("quit\r\n".getBytes());
 
-	public boolean isAllowReconnect();
+	@Override
+	public final boolean decode(MemcachedTCPSession session, ByteBuffer buffer) {
+		// do nothing
+		return true;
+	}
 
-	public void setBufferAllocator(BufferAllocator allocator);
+	@Override
+	public final void encode() {
+		ioBuffer = QUIT.slice();
+	}
 
-	public int getOrder();
-
-	public void destroy();
-	
-	public void quit();
 }

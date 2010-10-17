@@ -119,26 +119,26 @@ public abstract class AbstractController implements Controller,
 	/**
 	 * Connected session set
 	 */
-	private Set<Session> sessionSet = new HashSet<Session>();
+	protected Set<Session> sessionSet = new HashSet<Session>();
 
 	public final int getDispatchMessageThreadCount() {
-		return this.dispatchMessageThreadCount;
+		return dispatchMessageThreadCount;
 	}
 
 	public final void setDispatchMessageThreadCount(
 			int dispatchMessageThreadPoolSize) {
-		if (this.started) {
+		if (started) {
 			throw new IllegalStateException("Controller is started");
 		}
 		if (dispatchMessageThreadPoolSize < 0) {
 			throw new IllegalArgumentException(
 					"dispatchMessageThreadPoolSize<0");
 		}
-		this.dispatchMessageThreadCount = dispatchMessageThreadPoolSize;
+		dispatchMessageThreadCount = dispatchMessageThreadPoolSize;
 	}
 
 	public long getSessionIdleTimeout() {
-		return this.configuration.getSessionIdleTimeout();
+		return configuration.getSessionIdleTimeout();
 	}
 
 	/**
@@ -151,12 +151,12 @@ public abstract class AbstractController implements Controller,
 	}
 
 	public void setSessionIdleTimeout(long sessionIdleTimeout) {
-		this.configuration.setSessionIdleTimeout(sessionIdleTimeout);
+		configuration.setSessionIdleTimeout(sessionIdleTimeout);
 
 	}
 
 	public long getSessionTimeout() {
-		return this.sessionTimeout;
+		return sessionTimeout;
 	}
 
 	public void setSessionTimeout(long sessionTimeout) {
@@ -164,11 +164,11 @@ public abstract class AbstractController implements Controller,
 	}
 
 	public int getSoTimeout() {
-		return this.soTimeout;
+		return soTimeout;
 	}
 
 	public void setSoTimeout(int timeout) {
-		this.soTimeout = timeout;
+		soTimeout = timeout;
 	}
 
 	public AbstractController() {
@@ -176,20 +176,20 @@ public abstract class AbstractController implements Controller,
 	}
 
 	public double getReceiveThroughputLimit() {
-		return this.statistics.getReceiveThroughputLimit();
+		return statistics.getReceiveThroughputLimit();
 	}
 
 	public double getSendThroughputLimit() {
-		return this.statistics.getSendThroughputLimit();
+		return statistics.getSendThroughputLimit();
 	}
 
 	public void setReceiveThroughputLimit(double receiveThroughputLimit) {
-		this.statistics.setReceiveThroughputLimit(receiveThroughputLimit);
+		statistics.setReceiveThroughputLimit(receiveThroughputLimit);
 
 	}
 
 	public void setSendThroughputLimit(double sendThroughputLimit) {
-		this.statistics.setSendThroughputLimit(sendThroughputLimit);
+		statistics.setSendThroughputLimit(sendThroughputLimit);
 	}
 
 	public AbstractController(Configuration configuration) {
@@ -230,17 +230,17 @@ public abstract class AbstractController implements Controller,
 
 	private void setStatisticsConfig(Configuration configuration) {
 		if (configuration.isStatisticsServer()) {
-			this.statistics = new SimpleStatistics();
-			this.statisticsInterval = configuration.getStatisticsInterval();
+			statistics = new SimpleStatistics();
+			statisticsInterval = configuration.getStatisticsInterval();
 
 		} else {
-			this.statistics = new DefaultStatistics();
-			this.statisticsInterval = -1;
+			statistics = new DefaultStatistics();
+			statisticsInterval = -1;
 		}
 	}
 
 	public Configuration getConfiguration() {
-		return this.configuration;
+		return configuration;
 	}
 
 	public void setConfiguration(Configuration configuration) {
@@ -251,15 +251,15 @@ public abstract class AbstractController implements Controller,
 	}
 
 	public InetSocketAddress getLocalSocketAddress() {
-		return this.localSocketAddress;
+		return localSocketAddress;
 	}
 
 	public void setLocalSocketAddress(InetSocketAddress inetSocketAddress) {
-		this.localSocketAddress = inetSocketAddress;
+		localSocketAddress = inetSocketAddress;
 	}
 
 	public void onAccept(SelectionKey sk) throws IOException {
-		this.statistics.statisticsAccept();
+		statistics.statisticsAccept();
 	}
 
 	public void onConnect(SelectionKey key) throws IOException {
@@ -267,15 +267,15 @@ public abstract class AbstractController implements Controller,
 	}
 
 	public void addStateListener(ControllerStateListener listener) {
-		this.stateListeners.add(listener);
+		stateListeners.add(listener);
 	}
 
 	public void removeStateListener(ControllerStateListener listener) {
-		this.stateListeners.remove(listener);
+		stateListeners.remove(listener);
 	}
 
 	public boolean isHandleReadWriteConcurrently() {
-		return this.handleReadWriteConcurrently;
+		return handleReadWriteConcurrently;
 	}
 
 	public void setHandleReadWriteConcurrently(
@@ -284,11 +284,11 @@ public abstract class AbstractController implements Controller,
 	}
 
 	public int getReadThreadCount() {
-		return this.readThreadCount;
+		return readThreadCount;
 	}
 
 	public void setReadThreadCount(int readThreadCount) {
-		if (this.started) {
+		if (started) {
 			throw new IllegalStateException();
 		}
 		if (readThreadCount < 0) {
@@ -298,11 +298,11 @@ public abstract class AbstractController implements Controller,
 	}
 
 	public final int getWriteThreadCount() {
-		return this.writeThreadCount;
+		return writeThreadCount;
 	}
 
 	public final void setWriteThreadCount(int writeThreadCount) {
-		if (this.started) {
+		if (started) {
 			throw new IllegalStateException();
 		}
 		if (writeThreadCount < 0) {
@@ -312,19 +312,19 @@ public abstract class AbstractController implements Controller,
 	}
 
 	public Handler getHandler() {
-		return this.handler;
+		return handler;
 	}
 
 	public void setHandler(Handler handler) {
-		if (this.started) {
+		if (started) {
 			throw new IllegalStateException("The Controller have started");
 		}
 		this.handler = handler;
 	}
 
 	public int getPort() {
-		if (this.localSocketAddress != null) {
-			return this.localSocketAddress.getPort();
+		if (localSocketAddress != null) {
+			return localSocketAddress.getPort();
 		}
 		throw new NullPointerException("Controller is not binded");
 	}
@@ -365,60 +365,59 @@ public abstract class AbstractController implements Controller,
 				}
 			}
 		});
-		log.warn("The Controller started at " + this.localSocketAddress
-				+ " ...");
+		log.warn("The Controller started at " + localSocketAddress + " ...");
 	}
 
 	protected abstract void start0() throws IOException;
 
 	void setDispatchMessageDispatcher(Dispatcher dispatcher) {
-		Dispatcher oldDispatcher = this.dispatchMessageDispatcher;
-		this.dispatchMessageDispatcher = dispatcher;
+		Dispatcher oldDispatcher = dispatchMessageDispatcher;
+		dispatchMessageDispatcher = dispatcher;
 		if (oldDispatcher != null) {
 			oldDispatcher.stop();
 		}
 	}
 
 	Dispatcher getReadEventDispatcher() {
-		return this.readEventDispatcher;
+		return readEventDispatcher;
 	}
 
 	void setReadEventDispatcher(Dispatcher dispatcher) {
-		Dispatcher oldDispatcher = this.readEventDispatcher;
-		this.readEventDispatcher = dispatcher;
+		Dispatcher oldDispatcher = readEventDispatcher;
+		readEventDispatcher = dispatcher;
 		if (oldDispatcher != null) {
 			oldDispatcher.stop();
 		}
 	}
 
 	void setWriteEventDispatcher(Dispatcher dispatcher) {
-		Dispatcher oldDispatcher = this.writeEventDispatcher;
-		this.writeEventDispatcher = dispatcher;
+		Dispatcher oldDispatcher = writeEventDispatcher;
+		writeEventDispatcher = dispatcher;
 		if (oldDispatcher != null) {
 			oldDispatcher.stop();
 		}
 	}
 
 	private final void startStatistics() {
-		this.statistics.start();
+		statistics.start();
 	}
 
 	public void notifyStarted() {
-		for (ControllerStateListener stateListener : this.stateListeners) {
+		for (ControllerStateListener stateListener : stateListeners) {
 			stateListener.onStarted(this);
 		}
 	}
 
 	public boolean isStarted() {
-		return this.started;
+		return started;
 	}
 
 	public final Statistics getStatistics() {
-		return this.statistics;
+		return statistics;
 	}
 
 	public final CodecFactory getCodecFactory() {
-		return this.codecFactory;
+		return codecFactory;
 	}
 
 	public final void setCodecFactory(CodecFactory codecFactory) {
@@ -426,29 +425,29 @@ public abstract class AbstractController implements Controller,
 	}
 
 	public void notifyReady() {
-		for (ControllerStateListener stateListener : this.stateListeners) {
+		for (ControllerStateListener stateListener : stateListeners) {
 			stateListener.onReady(this);
 		}
 	}
 
 	public final synchronized void unregisterSession(Session session) {
-		this.sessionSet.remove(session);
-		if (this.sessionSet.size() == 0) {
+		sessionSet.remove(session);
+		if (sessionSet.size() == 0) {
 			notifyAllSessionClosed();
+			notifyAll();
 		}
 	}
 
 	public void checkStatisticsForRestart() {
-		if (this.statisticsInterval > 0
-				&& System.currentTimeMillis()
-						- this.statistics.getStartedTime() > this.statisticsInterval * 1000) {
-			this.statistics.restart();
+		if (statisticsInterval > 0
+				&& System.currentTimeMillis() - statistics.getStartedTime() > statisticsInterval * 1000) {
+			statistics.restart();
 		}
 	}
 
 	public final synchronized void registerSession(Session session) {
-		if (this.started) {
-			this.sessionSet.add(session);
+		if (started) {
+			sessionSet.add(session);
 		} else {
 			session.close();
 		}
@@ -460,12 +459,12 @@ public abstract class AbstractController implements Controller,
 			return;
 		}
 		setStarted(false);
-		for (Session session : this.sessionSet) {
+		for (Session session : sessionSet) {
 			session.close();
 		}
 		stopStatistics();
 		stopDispatcher();
-		this.sessionSet.clear();
+		sessionSet.clear();
 		notifyStopped();
 		clearStateListeners();
 		stop0();
@@ -476,45 +475,45 @@ public abstract class AbstractController implements Controller,
 	protected abstract void stop0() throws IOException;
 
 	private final void stopDispatcher() {
-		if (this.readEventDispatcher != null) {
-			this.readEventDispatcher.stop();
+		if (readEventDispatcher != null) {
+			readEventDispatcher.stop();
 		}
-		if (this.dispatchMessageDispatcher != null) {
-			this.dispatchMessageDispatcher.stop();
+		if (dispatchMessageDispatcher != null) {
+			dispatchMessageDispatcher.stop();
 		}
-		if (this.writeEventDispatcher != null) {
-			this.writeEventDispatcher.stop();
+		if (writeEventDispatcher != null) {
+			writeEventDispatcher.stop();
 		}
 	}
 
 	private final void stopStatistics() {
-		this.statistics.stop();
+		statistics.stop();
 	}
 
 	private final void clearStateListeners() {
-		this.stateListeners.clear();
+		stateListeners.clear();
 	}
 
 	public final void notifyException(Throwable t) {
-		for (ControllerStateListener stateListener : this.stateListeners) {
+		for (ControllerStateListener stateListener : stateListeners) {
 			stateListener.onException(this, t);
 		}
 	}
 
 	public final void notifyStopped() {
-		for (ControllerStateListener stateListener : this.stateListeners) {
+		for (ControllerStateListener stateListener : stateListeners) {
 			stateListener.onStopped(this);
 		}
 	}
 
 	public final void notifyAllSessionClosed() {
-		for (ControllerStateListener stateListener : this.stateListeners) {
+		for (ControllerStateListener stateListener : stateListeners) {
 			stateListener.onAllSessionClosed(this);
 		}
 	}
 
 	public Set<Session> getSessionSet() {
-		return Collections.unmodifiableSet(this.sessionSet);
+		return Collections.unmodifiableSet(sessionSet);
 	}
 
 	public <T> void setSocketOption(SocketOption<T> socketOption, T value) {
@@ -529,12 +528,12 @@ public abstract class AbstractController implements Controller,
 					+ socketOption.type().getSimpleName()
 					+ " value,but givend " + value.getClass().getSimpleName());
 		}
-		this.socketOptions.put(socketOption, value);
+		socketOptions.put(socketOption, value);
 	}
 
 	@SuppressWarnings("unchecked")
 	public <T> T getSocketOption(SocketOption<T> socketOption) {
-		return (T) this.socketOptions.get(socketOption);
+		return (T) socketOptions.get(socketOption);
 	}
 
 	/**

@@ -275,7 +275,7 @@ public abstract class AbstractSession implements Session {
 		this.closed = closed;
 	}
 
-	public final void close() {
+	public void close() {
 		synchronized (this) {
 			if (isClosed()) {
 				return;

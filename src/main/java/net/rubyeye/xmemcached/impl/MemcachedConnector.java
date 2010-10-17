@@ -32,6 +32,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+import net.rubyeye.xmemcached.CommandFactory;
 import net.rubyeye.xmemcached.MemcachedClient;
 import net.rubyeye.xmemcached.MemcachedOptimizer;
 import net.rubyeye.xmemcached.MemcachedSessionLocator;
@@ -71,6 +72,8 @@ public class MemcachedConnector extends SocketChannelController implements
 	private volatile long healSessionInterval = 2000L;
 	private int connectionPoolSize; // session pool size
 	protected Protocol protocol;
+
+	private final CommandFactory commandFactory;
 
 	public void setSessionLocator(MemcachedSessionLocator sessionLocator) {
 		this.sessionLocator = sessionLocator;
@@ -392,7 +395,7 @@ public class MemcachedConnector extends SocketChannelController implements
 
 	public MemcachedConnector(Configuration configuration,
 			MemcachedSessionLocator locator, BufferAllocator allocator,
-			Protocol protocol, int poolSize) {
+			CommandFactory commandFactory, int poolSize) {
 		super(configuration, null);
 		sessionLocator = locator;
 		addStateListener(new InnerControllerStateListener());
@@ -401,8 +404,9 @@ public class MemcachedConnector extends SocketChannelController implements
 		optimiezer = new Optimizer(protocol);
 		optimiezer.setBufferAllocator(bufferAllocator);
 		connectionPoolSize = poolSize;
-		this.protocol = protocol;
+		protocol = commandFactory.getProtocol();
 		soLingerOn = true;
+		this.commandFactory = commandFactory;
 		// setDispatchMessageThreadPoolSize(Runtime.getRuntime().
 		// availableProcessors());
 	}
@@ -421,13 +425,28 @@ public class MemcachedConnector extends SocketChannelController implements
 		final NioSessionConfig sessionCofig = buildSessionConfig(sc, queue);
 		MemcachedTCPSession session = new MemcachedTCPSession(sessionCofig,
 				configuration.getSessionReadBufferSize(), optimiezer,
-				getReadThreadCount());
+				getReadThreadCount(), commandFactory);
 		session.setBufferAllocator(bufferAllocator);
 		return session;
 	}
 
 	public BufferAllocator getBufferAllocator() {
 		return bufferAllocator;
+	}
+
+	public synchronized void quitAllSessions() {
+		for (Session session : sessionSet) {
+			((MemcachedSession) session).quit();
+		}
+		int sleepCount = 0;
+		while (sleepCount++ < 5 && sessionSet.size() > 0) {
+			try {
+				this.wait(1000);
+			} catch (InterruptedException e) {
+				Thread.currentThread().interrupt();
+			}
+		}
+
 	}
 
 	public void setBufferAllocator(BufferAllocator allocator) {

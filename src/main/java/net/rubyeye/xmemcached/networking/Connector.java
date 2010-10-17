@@ -40,7 +40,6 @@ import com.google.code.yanf4j.core.Controller;
 import com.google.code.yanf4j.core.Session;
 import com.google.code.yanf4j.core.SocketOption;
 
-
 /**
  * Connector which is used to connect to memcached server.
  * 
@@ -61,7 +60,7 @@ public interface Connector extends Controller {
 	public Set<Session> getSessionSet();
 
 	public void setHealSessionInterval(long interval);
-	
+
 	public long getHealSessionInterval();
 
 	public void send(Command packet) throws MemcachedException;
@@ -77,10 +76,15 @@ public interface Connector extends Controller {
 	@SuppressWarnings("unchecked")
 	public void setSocketOptions(Map<SocketOption, Object> options);
 
-	public Future<Boolean> connect(InetSocketAddressWrapper addressWrapper, int weight)
-			throws IOException;
+	public Future<Boolean> connect(InetSocketAddressWrapper addressWrapper,
+			int weight) throws IOException;
 
 	public void updateSessions();
 
 	public void setSessionLocator(MemcachedSessionLocator sessionLocator);
+
+	/**
+	 * Make all connection sending a quit command to memcached
+	 */
+	public void quitAllSessions();
 }
