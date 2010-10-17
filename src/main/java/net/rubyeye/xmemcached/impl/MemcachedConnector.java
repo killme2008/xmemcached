@@ -408,13 +408,13 @@ public class MemcachedConnector extends SocketChannelController implements
 			CommandFactory commandFactory, int poolSize) {
 		super(configuration, null);
 		sessionLocator = locator;
+		protocol = commandFactory.getProtocol();
 		addStateListener(new InnerControllerStateListener());
 		updateSessions();
 		bufferAllocator = allocator;
 		optimiezer = new Optimizer(protocol);
 		optimiezer.setBufferAllocator(bufferAllocator);
 		connectionPoolSize = poolSize;
-		protocol = commandFactory.getProtocol();
 		soLingerOn = true;
 		this.commandFactory = commandFactory;
 		// setDispatchMessageThreadPoolSize(Runtime.getRuntime().
