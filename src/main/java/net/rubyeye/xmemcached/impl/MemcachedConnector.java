@@ -54,6 +54,7 @@ import com.google.code.yanf4j.nio.NioSession;
 import com.google.code.yanf4j.nio.NioSessionConfig;
 import com.google.code.yanf4j.nio.impl.SocketChannelController;
 import com.google.code.yanf4j.util.ConcurrentHashSet;
+import com.google.code.yanf4j.util.SystemUtils;
 
 /**
  * Connected session manager
@@ -109,8 +110,8 @@ public class MemcachedConnector extends SocketChannelController implements
 						request.setTries(request.getTries() + 1);
 						try {
 							log.warn("Trying to connect to "
-									+ address.getHostName() + ":"
-									+ address.getPort() + " for "
+									+ address.getAddress().getHostAddress()
+									+ ":" + address.getPort() + " for "
 									+ request.getTries() + " times");
 							if (!future.get(
 									MemcachedClient.DEFAULT_CONNECT_TIMEOUT,
@@ -131,8 +132,8 @@ public class MemcachedConnector extends SocketChannelController implements
 										.updateNextReconnectTimeStamp(healSessionInterval
 												* request.getTries());
 								log.error("Reconnect to "
-										+ address.getHostName() + ":"
-										+ address.getPort() + " fail");
+										+ address.getAddress().getHostAddress()
+										+ ":" + address.getPort() + " fail");
 								// add to tail
 								waitingQueue.offer(request);
 							} else
@@ -189,13 +190,16 @@ public class MemcachedConnector extends SocketChannelController implements
 	protected final ConcurrentHashMap<InetSocketAddress, Queue<Session>> sessionMap = new ConcurrentHashMap<InetSocketAddress, Queue<Session>>();
 
 	public void addSession(Session session) {
-		log.warn("add session: " + session.getRemoteSocketAddress());
-		Queue<Session> sessions = sessionMap.get(session
-				.getRemoteSocketAddress());
+		InetSocketAddress remoteSocketAddress = session
+				.getRemoteSocketAddress();
+		log.warn("Add a session: "
+				+ SystemUtils.getRawAddress(remoteSocketAddress) + ":"
+				+ remoteSocketAddress.getPort());
+		Queue<Session> sessions = sessionMap.get(remoteSocketAddress);
 		if (sessions == null) {
 			sessions = new ConcurrentLinkedQueue<Session>();
-			Queue<Session> oldSessions = sessionMap.putIfAbsent(session
-					.getRemoteSocketAddress(), sessions);
+			Queue<Session> oldSessions = sessionMap.putIfAbsent(
+					remoteSocketAddress, sessions);
 			if (null != oldSessions) {
 				sessions = oldSessions;
 			}
@@ -249,7 +253,11 @@ public class MemcachedConnector extends SocketChannelController implements
 	}
 
 	public void removeSession(Session session) {
-		log.warn("remove session " + session.getRemoteSocketAddress());
+		InetSocketAddress remoteSocketAddress = session
+				.getRemoteSocketAddress();
+		log.warn("Remove a session: "
+				+ SystemUtils.getRawAddress(remoteSocketAddress) + ":"
+				+ remoteSocketAddress.getPort());
 		Queue<Session> sessionQueue = sessionMap.get(session
 				.getRemoteSocketAddress());
 		if (null != sessionQueue) {
@@ -278,7 +286,8 @@ public class MemcachedConnector extends SocketChannelController implements
 		try {
 			if (!((SocketChannel) key.channel()).finishConnect()) {
 				future.failure(new IOException("Connect to "
-						+ future.getInetSocketAddress().getHostName() + ":"
+						+ SystemUtils.getRawAddress(future
+								.getInetSocketAddress()) + ":"
 						+ future.getInetSocketAddress().getPort() + " fail"));
 			} else {
 				key.attach(null);
@@ -290,8 +299,8 @@ public class MemcachedConnector extends SocketChannelController implements
 			future.failure(e);
 			key.cancel();
 			throw new IOException("Connect to "
-					+ future.getInetSocketAddress().getHostName() + ":"
-					+ future.getInetSocketAddress().getPort() + " fail,"
+					+ SystemUtils.getRawAddress(future.getInetSocketAddress())
+					+ ":" + future.getInetSocketAddress().getPort() + " fail,"
 					+ e.getMessage());
 		}
 	}

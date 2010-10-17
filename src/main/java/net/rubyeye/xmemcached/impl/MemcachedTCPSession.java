@@ -32,6 +32,7 @@ import com.google.code.yanf4j.core.impl.FutureImpl;
 import com.google.code.yanf4j.nio.NioSessionConfig;
 import com.google.code.yanf4j.nio.impl.NioTCPSession;
 import com.google.code.yanf4j.util.LinkedTransferQueue;
+import com.google.code.yanf4j.util.SystemUtils;
 
 /**
  * Connected session for a memcached server
@@ -99,7 +100,7 @@ public class MemcachedTCPSession extends NioTCPSession implements
 
 	@Override
 	public String toString() {
-		return getRemoteSocketAddress().getHostName() + ":"
+		return SystemUtils.getRawAddress(getRemoteSocketAddress()) + ":"
 				+ getRemoteSocketAddress().getPort();
 	}
 

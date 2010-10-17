@@ -24,6 +24,8 @@ package com.google.code.yanf4j.util;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.nio.channels.Selector;
 import java.nio.channels.spi.SelectorProvider;
 
@@ -131,4 +133,9 @@ public final class SystemUtils {
 
 	}
 
+	public static final String getRawAddress(InetSocketAddress inetSocketAddress) {
+		InetAddress address = inetSocketAddress.getAddress();
+		return address != null ? address.getHostAddress() : inetSocketAddress
+				.getHostName();
+	}
 }

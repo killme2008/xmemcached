@@ -390,7 +390,7 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 		for (Session session : connector.getSessionSet()) {
 			InetSocketAddress socketAddress = session.getRemoteSocketAddress();
 			int weight = ((MemcachedSession) session).getWeight();
-			result.add(socketAddress.getHostName() + ":"
+			result.add(SystemUtils.getRawAddress(socketAddress) + ":"
 					+ socketAddress.getPort() + "(weight=" + weight + ")");
 		}
 		return result;
@@ -460,7 +460,7 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 				future = connector.connect(inetSocketAddressWrapper, weight);
 
 				if (!future.get(connectTimeout, TimeUnit.MILLISECONDS)) {
-					log.error("connect to " + inetSocketAddress.getHostName()
+					log.error("connect to " + SystemUtils.getRawAddress(inetSocketAddress)
 							+ ":" + inetSocketAddress.getPort() + " fail");
 				} else {
 					connected = true;
@@ -472,21 +472,21 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 					future.cancel(true);
 				}
 				throwable = e;
-				log.error("connect to " + inetSocketAddress.getHostName() + ":"
+				log.error("connect to " + SystemUtils.getRawAddress(inetSocketAddress)+ ":"
 						+ inetSocketAddress.getPort() + " error", e);
 			} catch (TimeoutException e) {
 				if (future != null) {
 					future.cancel(true);
 				}
 				throwable = e;
-				log.error("connect to " + inetSocketAddress.getHostName() + ":"
+				log.error("connect to " + SystemUtils.getRawAddress(inetSocketAddress) + ":"
 						+ inetSocketAddress.getPort() + " timeout", e);
 			} catch (Exception e) {
 				if (future != null) {
 					future.cancel(true);
 				}
 				throwable = e;
-				log.error("connect to " + inetSocketAddress.getHostName() + ":"
+				log.error("connect to " + SystemUtils.getRawAddress(inetSocketAddress) + ":"
 						+ inetSocketAddress.getPort() + " error", e);
 			}
 			// If it is not connected,it will be added to waiting queue for
@@ -495,7 +495,7 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 				connector.addToWatingQueue(new ReconnectRequest(
 						inetSocketAddressWrapper, 0, weight,
 						getHealSessionInterval()));
-				log.error("Connect to " + inetSocketAddress.getHostName() + ":"
+				log.error("Connect to " + SystemUtils.getRawAddress(inetSocketAddress) + ":"
 						+ inetSocketAddress.getPort() + " fail", throwable);
 				// throw new IOException(throwable);
 			}
@@ -1897,7 +1897,7 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 		Queue<Session> sessionQueue = connector.getSessionByAddress(address);
 		if (sessionQueue == null || sessionQueue.peek() == null) {
 			throw new MemcachedException("could not find session for "
-					+ address.getHostName() + ":" + address.getPort()
+					+SystemUtils.getRawAddress(address) + ":" + address.getPort()
 					+ ",maybe it have not been connected");
 		}
 
@@ -1960,7 +1960,7 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 		Queue<Session> sessionQueue = connector.getSessionByAddress(address);
 		if (sessionQueue == null || sessionQueue.peek() == null) {
 			throw new MemcachedException("could not find session for "
-					+ address.getHostName() + ":" + address.getPort()
+					+ SystemUtils.getRawAddress(address) + ":" + address.getPort()
 					+ ",maybe it have not been connected");
 		}
 		Command command = commandFactory.createFlushAllCommand(latch, exptime,
@@ -2011,7 +2011,7 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 		Queue<Session> sessionQueue = connector.getSessionByAddress(address);
 		if (sessionQueue == null || sessionQueue.peek() == null) {
 			throw new MemcachedException("could not find session for "
-					+ address.getHostName() + ":" + address.getPort()
+					+ SystemUtils.getRawAddress(address) + ":" + address.getPort()
 					+ ",maybe it have not been connected");
 		}
 		Command command = commandFactory.createStatsCommand(address, latch,
