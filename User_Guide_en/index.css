@@ -1,0 +1,90 @@
+/* ::::: http://www.gstatic.com/codesite/ph/18091280713519311357/css/ph_core.css ::::: */
+
+a:link { color: rgb(0, 0, 204); }
+body { background: none repeat scroll 0% 0% rgb(255, 255, 255); margin: 3px 8px; }
+body, select, input { font-family: arial,sans-serif; }
+body { font-size: 83%; }
+td td, th th, th td, td th { font-size: 100%; }
+pre { font-size: 110%; }
+form { padding: 0pt; margin: 0pt; }
+table { border-collapse: separate; }
+.tab { margin: 0pt; padding: 0pt; }
+.box-inner { margin: 0pt; padding: 0pt 13px; }
+.round1 { border-left: 1px solid rgb(255, 255, 255); border-right: 1px solid rgb(255, 255, 255); }
+.round2 { border-left: 2px solid rgb(255, 255, 255); border-right: 2px solid rgb(255, 255, 255); }
+.round4 { border-left: 4px solid rgb(255, 255, 255); border-right: 4px solid rgb(255, 255, 255); }
+.round1, .round2, .round4 { font-size: 0pt; margin: 0pt; padding: 0pt; height: 1px; }
+.bevel-left, .bevel-right { padding: 0pt; }
+.bevel-right .round4, .bevel-right .round2, .bevel-right .round1 { border-left: medium none; }
+.active { background: none repeat scroll 0% 0% rgb(195, 217, 255); }
+.active a:link { color: rgb(0, 0, 204); }
+.inactive { background: none repeat scroll 0% 0% rgb(229, 236, 249); }
+#mt { margin-top: 0.5ex; }
+table#mt th { cursor: pointer; text-align: center; font-weight: bold; }
+table#mt th a { text-decoration: none; color: black; }
+table.st { background-color: rgb(195, 217, 255); }
+table.st span { padding: 0pt 4px; }
+#maincol { margin-top: 3px; padding: 3px; }
+.isf, .at { padding: 4px 3px 3px 4px; background: none repeat scroll 0% 0% rgb(195, 217, 255); }
+.isf a, .at a, .isf a:visited, .at a:visited { color: rgb(0, 0, 204); }
+.tip { background: none repeat scroll 0% 0% rgb(229, 236, 249); font-size: 92%; margin: 5px; width: 14em; }
+.tip .box-inner { padding: 6px; }
+.gbh { border-top: 1px solid rgb(201, 215, 241); font-size: 1px; height: 0pt; position: absolute; top: 24px; width: 100%; }
+#pname { font-size: 180%; font-weight: bold; }
+#psum { font-style: italic; margin-top: 3px; }
+.vt { vertical-align: top; }
+h1 { font-size: x-large; margin-top: 0px; }
+h2 { font-size: large; }
+h3 { font-size: medium; background: none repeat scroll 0% 0% rgb(229, 236, 249); border-top: 1px solid rgb(51, 102, 204); padding: 0.5ex 0.5em; margin-right: 2em; }
+h4 { font-size: small; }
+img { border: 0pt none; }
+#gaia { text-align: right; }
+#gaia a { color: rgb(0, 0, 204); text-decoration: none; }
+#footer { clear: both; text-align: center; margin-top: 3.5em; margin-bottom: 1em; height: 53px; background-repeat: no-repeat; background-position: left center; }
+#footer .text { padding-top: 20px; }
+.opened .ifClosed { display: none; }
+input { padding-left: 1px; padding-right: 1px; }
+textarea { padding-left: 1px; padding-right: 1px; }
+.author { margin-bottom: 1em; }
+.menuDiv { margin-top: 5px; border-color: rgb(201, 215, 241) rgb(51, 102, 204) rgb(51, 102, 204) rgb(162, 186, 231); border-style: solid; border-width: 1px; z-index: 1001; padding: 0pt; width: 175px; background: none repeat scroll 0% 0% rgb(255, 255, 255); overflow: hidden; }
+.menuDiv .menuItem { color: rgb(0, 0, 204); padding: 3px; text-decoration: none; background: none repeat scroll 0% 0% rgb(255, 255, 255); }
+.menuDiv .menuItem:hover { color: rgb(255, 255, 255); background: none repeat scroll 0% 0% rgb(51, 102, 204); }
+.menuDiv .categoryTitle { padding-left: 1px; }
+.menuDiv .menuCategory, .menuDiv .categoryTitle { margin-top: 4px; }
+.menuDiv .menuSeparator { margin: 0pt 0.5em; border-right: 0pt none; border-width: 1px 0pt 0pt; border-style: solid none none; border-color: rgb(201, 215, 241) -moz-use-text-color -moz-use-text-color; }
+.hostedBy { text-align: center; }
+/* ::::: http://www.gstatic.com/codesite/ph/18091280713519311357/css/ph_detail.css ::::: */
+
+.pmeta_bubble_bg { background: none repeat scroll 0% 0% rgb(229, 236, 249); margin-bottom: 0.6em; }
+#wikicontent h3, #wikipreview h3 { background: none repeat scroll 0% 0% transparent; border: 0pt none; padding-left: 0pt; margin: 0pt; }
+#wikicontent p, #wikicontent ul, #wikicontent ol, #wikicontent blockquote { max-width: 65em; }
+#wikicontent ul, #wikicontent ol { padding-left: 40px; }
+a.section_anchor { display: none; text-decoration: none; margin-left: 0.7em; font-weight: lighter; font-size: 85%; }
+h1:hover a.section_anchor, h2:hover a.section_anchor, h3:hover a.section_anchor, h4:hover a.section_anchor, h5:hover a.section_anchor, h6:hover a.section_anchor { display: inline; color: rgb(187, 187, 187); }
+h1 a.section_anchor:hover, h2 a.section_anchor:hover, h3 a.section_anchor:hover, h4 a.section_anchor:hover, h5 a.section_anchor:hover, h6 a.section_anchor:hover { color: rgb(51, 51, 204); }
+pre.prettyprint { margin-left: 2em; padding: 0.5em; border-left: 3px solid rgb(204, 204, 204); }
+.prettyprint .str { color: rgb(0, 136, 0); }
+.prettyprint .kwd { color: rgb(0, 0, 136); }
+.prettyprint .com { color: rgb(136, 0, 0); }
+.prettyprint .typ { color: rgb(102, 0, 102); }
+.prettyprint .lit { color: rgb(0, 102, 102); }
+.prettyprint .pun { color: rgb(102, 102, 0); }
+.prettyprint .pln { color: rgb(0, 0, 0); }
+.prettyprint .tag { color: rgb(0, 0, 136); }
+.prettyprint .atn { color: rgb(102, 0, 102); }
+.prettyprint .atv { color: rgb(0, 136, 0); }
+.expand .ifCollapse { display: none; }
+.author { padding-left: 0.7em; }
+#wikimaincol { padding-top: 6px; padding-left: 1em; }
+#sidebarcontainer { padding: 4px 2px 2px; width: 20em; overflow: hidden; }
+.sidebartop ul { margin: 0pt 0pt 0pt 0.5em; padding-left: 0pt ! important; list-style: none outside none; }
+.sidebartop li { margin: 0pt 0pt 2px; padding: 1px 1px 1px 14px; cursor: pointer; }
+.sidebartop li a { padding: 2px; }
+.sidebartop li { background: url('plus.gif') no-repeat scroll 1px 3px transparent; }
+.sidebartop li.treeleaf { background: none repeat scroll 0% 0% transparent; }
+.currentpagelink { background: none repeat scroll 0% 0% rgb(204, 221, 255); }
+.sidebartop ul.treeleafcontainer { display: block; }
+.artifactcomment { margin: 0.5em 0pt 0pt; padding: 0.3em 0pt 0.3em 0.3em; border-top: 3px solid rgb(195, 217, 255); }
+#commentlist { border-bottom: 3px solid rgb(195, 217, 255); }
+#commentform { padding-top: 1em; }
+.commentcontent { margin: 1em 0pt; }

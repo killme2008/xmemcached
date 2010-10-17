@@ -9,6 +9,10 @@
 			<outputDirectory>/User_Guide_zh</outputDirectory>
 		</fileSet>
 		<fileSet>
+			<directory>User_Guide_en</directory>
+			<outputDirectory>/User_Guide_en</outputDirectory>
+		</fileSet>
+		<fileSet>
 			<directory>${project.build.directory}
 			</directory>
 			<includes>
