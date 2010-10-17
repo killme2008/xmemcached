@@ -9,7 +9,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.googlecode.xmemcached</groupId>
 	<artifactId>xmemcached</artifactId>
-	<version>1.2.6.1</version>
+	<version>1.2.6.2-SNAPSHOT</version>
 	<name>xmemcached</name>
 	<description>Extreme performance modern memcached client for java</description>
 	<url>http://code.google.com/p/xmemcached/</url>
@@ -29,9 +29,9 @@
 		</license>
 	</licenses>
 	<scm>
-		<connection>scm:svn:https://xmemcached.googlecode.com/svn/tags/xmemcached-1.2.6.1</connection>
-		<developerConnection>scm:svn:https://xmemcached.googlecode.com/svn/tags/xmemcached-1.2.6.1</developerConnection>
-		<url>https://xmemcached.googlecode.com/svn/tags/xmemcached-1.2.6.1</url>
+		<connection>scm:svn:https://xmemcached.googlecode.com/svn/trunk</connection>
+		<developerConnection>scm:svn:https://xmemcached.googlecode.com/svn/trunk</developerConnection>
+		<url>https://xmemcached.googlecode.com/svn/trunk</url>
 	</scm>
 
 	<build>
