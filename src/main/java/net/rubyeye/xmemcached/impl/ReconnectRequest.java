@@ -52,12 +52,17 @@ public final class ReconnectRequest implements Delayed {
 		setInetSocketAddressWrapper(inetSocketAddressWrapper);
 		setTries(tries); // record reconnect times
 		this.weight = weight;
+		reconnectInterval = normalInterval(reconnectInterval);
+		nextReconnectTimestamp = System.currentTimeMillis() + reconnectInterval;
+	}
+
+	private long normalInterval(long reconnectInterval) {
 		if (reconnectInterval < MIN_RECONNECT_INTERVAL)
 			reconnectInterval = MIN_RECONNECT_INTERVAL;
 		if (reconnectInterval > MAX_RECONNECT_INTERVAL) {
 			reconnectInterval = MAX_RECONNECT_INTERVAL;
 		}
-		nextReconnectTimestamp = System.currentTimeMillis() + reconnectInterval;
+		return reconnectInterval;
 	}
 
 	public long getDelay(TimeUnit unit) {
@@ -77,12 +82,7 @@ public final class ReconnectRequest implements Delayed {
 	}
 
 	public void updateNextReconnectTimeStamp(long interval) {
-		if (interval < MIN_RECONNECT_INTERVAL) {
-			interval = MIN_RECONNECT_INTERVAL;
-		}
-		if (interval > MAX_RECONNECT_INTERVAL) {
-			interval = MAX_RECONNECT_INTERVAL;
-		}
+		interval = normalInterval(interval);
 		nextReconnectTimestamp = System.currentTimeMillis() + interval;
 	}
 

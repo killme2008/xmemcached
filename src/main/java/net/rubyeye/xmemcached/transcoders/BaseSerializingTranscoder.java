@@ -149,7 +149,7 @@ public abstract class BaseSerializingTranscoder {
 			try {
 				gis = new GZIPInputStream(bis);
 
-				byte[] buf = new byte[8192];
+				byte[] buf = new byte[16 * 1024];
 				int r = -1;
 				while ((r = gis.read(buf)) > 0) {
 					bos.write(buf, 0, r);
@@ -164,6 +164,13 @@ public abstract class BaseSerializingTranscoder {
 					} catch (IOException e) {
 						log.error("Close GZIPInputStream error", e);
 					}
+				if (bis != null) {
+					try {
+						bis.close();
+					} catch (IOException e) {
+						log.error("Close ByteArrayInputStream error", e);
+					}
+				}
 			}
 		}
 		return bos == null ? null : bos.toByteArray();

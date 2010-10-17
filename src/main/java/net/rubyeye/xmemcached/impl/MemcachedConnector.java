@@ -126,7 +126,7 @@ public class MemcachedConnector extends SocketChannelController implements
 							future.cancel(true);
 						} finally {
 							if (!connected) {
-								// update timestamp for next reconnect
+								// update timestamp for next reconnecting
 								request
 										.updateNextReconnectTimeStamp(healSessionInterval
 												* request.getTries());
@@ -316,6 +316,7 @@ public class MemcachedConnector extends SocketChannelController implements
 		if (addressWrapper == null) {
 			throw new NullPointerException("Null Address");
 		}
+		// Remove addr from removed set
 		removedAddrSet.remove(addressWrapper.getInetSocketAddress());
 		SocketChannel socketChannel = SocketChannel.open();
 		configureSocketChannel(socketChannel);
