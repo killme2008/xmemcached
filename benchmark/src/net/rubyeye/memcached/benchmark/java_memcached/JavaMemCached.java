@@ -16,6 +16,10 @@ import com.google.code.yanf4j.util.ResourcesUtils;
 public class JavaMemCached extends BaseTest implements Constants {
 
 	public static void main(String[] args) throws Exception {
+		int maxConn=500;
+		if(args.length>1){
+			maxConn=Integer.parseInt(args[0]);
+		}
 		Properties properties = ResourcesUtils
 				.getResourceAsProperties("memcached.properties");
 		if (properties.get("servers") == null) {
@@ -27,7 +31,7 @@ public class JavaMemCached extends BaseTest implements Constants {
 		BasicConfigurator.configure();
 		SockIOPool pool = SockIOPool.getInstance();
 		pool.setMinConn(10);
-		pool.setMaxConn(500);
+		pool.setMaxConn(maxConn);
 		pool.setMaxIdle(60 * 60 * 1000);
 		pool.setServers(servers.split(" "));
 		pool.initialize();
