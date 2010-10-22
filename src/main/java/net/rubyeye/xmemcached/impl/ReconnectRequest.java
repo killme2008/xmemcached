@@ -66,7 +66,9 @@ public final class ReconnectRequest implements Delayed {
 	}
 
 	public long getDelay(TimeUnit unit) {
-		return nextReconnectTimestamp - System.currentTimeMillis();
+		return unit.convert(
+				nextReconnectTimestamp - System.currentTimeMillis(),
+				TimeUnit.MILLISECONDS);
 	}
 
 	public int compareTo(Delayed o) {
