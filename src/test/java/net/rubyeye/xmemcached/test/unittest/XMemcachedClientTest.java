@@ -771,6 +771,11 @@ public abstract class XMemcachedClientTest extends TestCase {
 		assertEquals(6, memcachedClient.incr("a", 5));
 		assertEquals(10, memcachedClient.incr("a", 4));
 
+		// test incr with initValue and expire time
+		memcachedClient.delete("a");
+		assertEquals(1, memcachedClient.incr("a", 5, 1, 1000, 1));
+		Thread.sleep(2000);
+		assertNull(memcachedClient.get("a"));
 		// blank key
 		new BlankKeyChecker() {
 			@Override
@@ -837,6 +842,12 @@ public abstract class XMemcachedClientTest extends TestCase {
 		assertEquals(100, memcachedClient.decr("a", 5, 100));
 		assertEquals(50, memcachedClient.decr("a", 50));
 		assertEquals(46, memcachedClient.decr("a", 4));
+
+		// test decr with initValue and expire time
+		memcachedClient.delete("a");
+		assertEquals(1, memcachedClient.decr("a", 5, 1, 1000, 1));
+		Thread.sleep(2000);
+		assertNull(memcachedClient.get("a"));
 
 		// blank key
 		new BlankKeyChecker() {
@@ -981,7 +992,7 @@ public abstract class XMemcachedClientTest extends TestCase {
 		latch.await(MemcachedClient.DEFAULT_OP_TIMEOUT, TimeUnit.MILLISECONDS);
 		assertTrue(errorCommand.isDecoded());
 		// wait for reconnecting
-		Thread.sleep(2000*3);
+		Thread.sleep(2000 * 3);
 		assertEquals(currentServerCount, memcachedClient.getAvaliableServers()
 				.size());
 		// It works

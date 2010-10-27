@@ -1176,6 +1176,57 @@ public interface MemcachedClient {
 	public Map<InetSocketAddress, AuthInfo> getAuthInfoMap();
 
 	/**
+	 * "incr" are used to change data for some item in-place, incrementing it.
+	 * The data for the item is treated as decimal representation of a 64-bit
+	 * unsigned integer. If the current data value does not conform to such a
+	 * representation, the commands behave as if the value were 0. Also, the
+	 * item must already exist for incr to work; these commands won't pretend
+	 * that a non-existent key exists with value 0; instead, it will fail.This
+	 * method doesn't wait for reply.
+	 * 
+	 * @param key
+	 * @param delta
+	 * @param initValue
+	 *            the initial value to be added when value is not found
+	 * @param timeout
+	 * @param exp
+	 *            the initial vlaue expire time
+	 * @return
+	 * @throws TimeoutException
+	 * @throws InterruptedException
+	 * @throws MemcachedException
+	 */
+	long decr(String key, long delta, long initValue, long timeout, int exp)
+			throws TimeoutException, InterruptedException, MemcachedException;
+
+	/**
+	 * "incr" are used to change data for some item in-place, incrementing it.
+	 * The data for the item is treated as decimal representation of a 64-bit
+	 * unsigned integer. If the current data value does not conform to such a
+	 * representation, the commands behave as if the value were 0. Also, the
+	 * item must already exist for incr to work; these commands won't pretend
+	 * that a non-existent key exists with value 0; instead, it will fail.This
+	 * method doesn't wait for reply.
+	 * 
+	 * @param key
+	 *            key
+	 * @param delta
+	 *            increment delta
+	 * @param initValue
+	 *            the initial value to be added when value is not found
+	 * @param timeout
+	 *            operation timeout
+	 * @param exp
+	 *            the initial vlaue expire time
+	 * @return
+	 * @throws TimeoutException
+	 * @throws InterruptedException
+	 * @throws MemcachedException
+	 */
+	long incr(String key, long delta, long initValue, long timeout, int exp)
+			throws TimeoutException, InterruptedException, MemcachedException;
+
+	/**
 	 * Return the cache instance name
 	 * 
 	 * @return

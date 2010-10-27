@@ -460,7 +460,8 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 				future = connector.connect(inetSocketAddressWrapper, weight);
 
 				if (!future.get(connectTimeout, TimeUnit.MILLISECONDS)) {
-					log.error("connect to " + SystemUtils.getRawAddress(inetSocketAddress)
+					log.error("connect to "
+							+ SystemUtils.getRawAddress(inetSocketAddress)
 							+ ":" + inetSocketAddress.getPort() + " fail");
 				} else {
 					connected = true;
@@ -472,21 +473,24 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 					future.cancel(true);
 				}
 				throwable = e;
-				log.error("connect to " + SystemUtils.getRawAddress(inetSocketAddress)+ ":"
+				log.error("connect to "
+						+ SystemUtils.getRawAddress(inetSocketAddress) + ":"
 						+ inetSocketAddress.getPort() + " error", e);
 			} catch (TimeoutException e) {
 				if (future != null) {
 					future.cancel(true);
 				}
 				throwable = e;
-				log.error("connect to " + SystemUtils.getRawAddress(inetSocketAddress) + ":"
+				log.error("connect to "
+						+ SystemUtils.getRawAddress(inetSocketAddress) + ":"
 						+ inetSocketAddress.getPort() + " timeout", e);
 			} catch (Exception e) {
 				if (future != null) {
 					future.cancel(true);
 				}
 				throwable = e;
-				log.error("connect to " + SystemUtils.getRawAddress(inetSocketAddress) + ":"
+				log.error("connect to "
+						+ SystemUtils.getRawAddress(inetSocketAddress) + ":"
 						+ inetSocketAddress.getPort() + " error", e);
 			}
 			// If it is not connected,it will be added to waiting queue for
@@ -495,7 +499,8 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 				connector.addToWatingQueue(new ReconnectRequest(
 						inetSocketAddressWrapper, 0, weight,
 						getHealSessionInterval()));
-				log.error("Connect to " + SystemUtils.getRawAddress(inetSocketAddress) + ":"
+				log.error("Connect to "
+						+ SystemUtils.getRawAddress(inetSocketAddress) + ":"
 						+ inetSocketAddress.getPort() + " fail", throwable);
 				// throw new IOException(throwable);
 			}
@@ -1728,21 +1733,29 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 			throws TimeoutException, InterruptedException, MemcachedException {
 		key = sanitizeKey(key);
 		return sendIncrOrDecrCommand(key, delta, 0, CommandType.INCR, false,
-				opTimeout);
+				opTimeout, 0);
 	}
 
 	public long incr(String key, long delta, long initValue)
 			throws TimeoutException, InterruptedException, MemcachedException {
 		key = sanitizeKey(key);
 		return sendIncrOrDecrCommand(key, delta, initValue, CommandType.INCR,
-				false, opTimeout);
+				false, opTimeout, 0);
 	}
 
 	public long incr(String key, long delta, long initValue, long timeout)
 			throws TimeoutException, InterruptedException, MemcachedException {
 		key = sanitizeKey(key);
 		return sendIncrOrDecrCommand(key, delta, initValue, CommandType.INCR,
-				false, timeout);
+				false, timeout, 0);
+	}
+
+	public long incr(String key, long delta, long initValue, long timeout,
+			int exp) throws TimeoutException, InterruptedException,
+			MemcachedException {
+		key = sanitizeKey(key);
+		return sendIncrOrDecrCommand(key, delta, initValue, CommandType.INCR,
+				false, timeout, exp);
 	}
 
 	public final void incrWithNoReply(String key, long delta)
@@ -1750,7 +1763,7 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 		key = sanitizeKey(key);
 		try {
 			sendIncrOrDecrCommand(key, delta, 0, CommandType.INCR, true,
-					opTimeout);
+					opTimeout, 0);
 		} catch (TimeoutException e) {
 			throw new MemcachedException(e);
 		}
@@ -1761,7 +1774,7 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 		key = sanitizeKey(key);
 		try {
 			sendIncrOrDecrCommand(key, delta, 0, CommandType.DECR, true,
-					opTimeout);
+					opTimeout, 0);
 		} catch (TimeoutException e) {
 			throw new MemcachedException(e);
 		}
@@ -1776,21 +1789,29 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 			throws TimeoutException, InterruptedException, MemcachedException {
 		key = sanitizeKey(key);
 		return sendIncrOrDecrCommand(key, delta, 0, CommandType.DECR, false,
-				opTimeout);
+				opTimeout, 0);
 	}
 
 	public long decr(String key, long delta, long initValue)
 			throws TimeoutException, InterruptedException, MemcachedException {
 		key = sanitizeKey(key);
 		return sendIncrOrDecrCommand(key, delta, initValue, CommandType.DECR,
-				false, opTimeout);
+				false, opTimeout, 0);
 	}
 
 	public long decr(String key, long delta, long initValue, long timeout)
 			throws TimeoutException, InterruptedException, MemcachedException {
 		key = sanitizeKey(key);
 		return sendIncrOrDecrCommand(key, delta, initValue, CommandType.DECR,
-				false, timeout);
+				false, timeout, 0);
+	}
+
+	public long decr(String key, long delta, long initValue, long timeout,
+			int exp) throws TimeoutException, InterruptedException,
+			MemcachedException {
+		key = sanitizeKey(key);
+		return sendIncrOrDecrCommand(key, delta, initValue, CommandType.DECR,
+				false, timeout, exp);
 	}
 
 	/*
@@ -1897,8 +1918,8 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 		Queue<Session> sessionQueue = connector.getSessionByAddress(address);
 		if (sessionQueue == null || sessionQueue.peek() == null) {
 			throw new MemcachedException("could not find session for "
-					+SystemUtils.getRawAddress(address) + ":" + address.getPort()
-					+ ",maybe it have not been connected");
+					+ SystemUtils.getRawAddress(address) + ":"
+					+ address.getPort() + ",maybe it have not been connected");
 		}
 
 		Command command = commandFactory.createVerbosityCommand(latch, level,
@@ -1960,8 +1981,8 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 		Queue<Session> sessionQueue = connector.getSessionByAddress(address);
 		if (sessionQueue == null || sessionQueue.peek() == null) {
 			throw new MemcachedException("could not find session for "
-					+ SystemUtils.getRawAddress(address) + ":" + address.getPort()
-					+ ",maybe it have not been connected");
+					+ SystemUtils.getRawAddress(address) + ":"
+					+ address.getPort() + ",maybe it have not been connected");
 		}
 		Command command = commandFactory.createFlushAllCommand(latch, exptime,
 				noreply);
@@ -2011,8 +2032,8 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 		Queue<Session> sessionQueue = connector.getSessionByAddress(address);
 		if (sessionQueue == null || sessionQueue.peek() == null) {
 			throw new MemcachedException("could not find session for "
-					+ SystemUtils.getRawAddress(address) + ":" + address.getPort()
-					+ ",maybe it have not been connected");
+					+ SystemUtils.getRawAddress(address) + ":"
+					+ address.getPort() + ",maybe it have not been connected");
 		}
 		Command command = commandFactory.createStatsCommand(address, latch,
 				null);
@@ -2124,12 +2145,12 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 
 	private long sendIncrOrDecrCommand(final String key, final long delta,
 			long initValue, final CommandType cmdType, boolean noreply,
-			long operationTimeout) throws InterruptedException,
+			long operationTimeout, int exp) throws InterruptedException,
 			TimeoutException, MemcachedException {
 		final byte[] keyBytes = ByteUtils.getBytes(key);
 		ByteUtils.checkKey(keyBytes);
 		final Command command = commandFactory.createIncrDecrCommand(key,
-				keyBytes, delta, initValue, 0, cmdType, noreply);
+				keyBytes, delta, initValue, exp, cmdType, noreply);
 		sendCommand(command);
 		if (!command.isNoreply()) {
 			latchWait(command, operationTimeout);
@@ -2142,11 +2163,11 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 			final Object result = command.getResult();
 			if (result instanceof String) {
 				if (((String) result).equals("NOT_FOUND")) {
-					if (add(key, 0, String.valueOf(initValue), opTimeout)) {
+					if (add(key, exp, String.valueOf(initValue), opTimeout)) {
 						return initValue;
 					} else {
 						return sendIncrOrDecrCommand(key, delta, initValue,
-								cmdType, noreply, operationTimeout);
+								cmdType, noreply, operationTimeout, exp);
 					}
 				} else {
 					throw new MemcachedException(
