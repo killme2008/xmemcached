@@ -87,4 +87,6 @@ public interface Connector extends Controller {
 	 * Make all connection sending a quit command to memcached
 	 */
 	public void quitAllSessions();
+
+	public Queue<ReconnectRequest> getReconnectRequestQueue();
 }

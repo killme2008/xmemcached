@@ -5,11 +5,13 @@ import java.net.InetSocketAddress;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Queue;
 import java.util.concurrent.TimeoutException;
 
 import net.rubyeye.xmemcached.auth.AuthInfo;
 import net.rubyeye.xmemcached.buffer.BufferAllocator;
 import net.rubyeye.xmemcached.exception.MemcachedException;
+import net.rubyeye.xmemcached.impl.ReconnectRequest;
 import net.rubyeye.xmemcached.networking.Connector;
 import net.rubyeye.xmemcached.transcoders.Transcoder;
 import net.rubyeye.xmemcached.utils.Protocol;
@@ -1239,5 +1241,14 @@ public interface MemcachedClient {
 	 * @param name
 	 */
 	public void setName(String name);
+
+	/**
+	 * Returns reconnecting task queue,the result is thread-safe,but maybe you
+	 * should not modify it at all
+	 * 
+	 * @return The reconnecting task queue,if the client has not been
+	 *         started,returns null.
+	 */
+	public Queue<ReconnectRequest> getReconnectRequestQueue();
 
 }

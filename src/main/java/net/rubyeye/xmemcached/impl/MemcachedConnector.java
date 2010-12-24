@@ -88,23 +88,23 @@ public class MemcachedConnector extends SocketChannelController implements
 	 */
 	class SessionMonitor extends Thread {
 		public SessionMonitor() {
-			setName("Heal-Session-Thread");
+			this.setName("Heal-Session-Thread");
 		}
 
 		@Override
 		public void run() {
-			while (isStarted()) {
+			while (MemcachedConnector.this.isStarted()) {
 
 				try {
-					ReconnectRequest request = waitingQueue.take();
+					ReconnectRequest request = MemcachedConnector.this.waitingQueue.take();
 
 					InetSocketAddress address = request
 							.getInetSocketAddressWrapper()
 							.getInetSocketAddress();
 
-					if (!removedAddrSet.contains(address)) {
+					if (!MemcachedConnector.this.removedAddrSet.contains(address)) {
 						boolean connected = false;
-						Future<Boolean> future = connect(request
+						Future<Boolean> future = MemcachedConnector.this.connect(request
 								.getInetSocketAddressWrapper(), request
 								.getWeight());
 						request.setTries(request.getTries() + 1);
@@ -129,15 +129,16 @@ public class MemcachedConnector extends SocketChannelController implements
 							if (!connected) {
 								// update timestamp for next reconnecting
 								request
-										.updateNextReconnectTimeStamp(healSessionInterval
+										.updateNextReconnectTimeStamp(MemcachedConnector.this.healSessionInterval
 												* request.getTries());
 								log.error("Reconnect to "
 										+ address.getAddress().getHostAddress()
 										+ ":" + address.getPort() + " fail");
 								// add to tail
-								waitingQueue.offer(request);
-							} else
+								MemcachedConnector.this.waitingQueue.offer(request);
+							} else {
 								continue;
+							}
 						}
 					} else {
 						log
@@ -154,9 +155,13 @@ public class MemcachedConnector extends SocketChannelController implements
 		}
 	}
 
+	public Queue<ReconnectRequest> getReconnectRequestQueue() {
+		return this.waitingQueue;
+	}
+
 	@Override
 	public Set<Session> getSessionSet() {
-		Collection<Queue<Session>> sessionQueues = sessionMap.values();
+		Collection<Queue<Session>> sessionQueues = this.sessionMap.values();
 		Set<Session> result = new HashSet<Session>();
 		for (Queue<Session> queue : sessionQueues) {
 			result.addAll(queue);
@@ -165,24 +170,24 @@ public class MemcachedConnector extends SocketChannelController implements
 	}
 
 	public final void setHealSessionInterval(long healConnectionInterval) {
-		healSessionInterval = healConnectionInterval;
+		this.healSessionInterval = healConnectionInterval;
 	}
 
 	public long getHealSessionInterval() {
-		return healSessionInterval;
+		return this.healSessionInterval;
 	}
 
 	public void setOptimizeGet(boolean optimiezeGet) {
-		((OptimizerMBean) optimiezer).setOptimizeGet(optimiezeGet);
+		((OptimizerMBean) this.optimiezer).setOptimizeGet(optimiezeGet);
 	}
 
 	public void setOptimizeMergeBuffer(boolean optimizeMergeBuffer) {
-		((OptimizerMBean) optimiezer)
+		((OptimizerMBean) this.optimiezer)
 				.setOptimizeMergeBuffer(optimizeMergeBuffer);
 	}
 
 	public Protocol getProtocol() {
-		return protocol;
+		return this.protocol;
 	}
 
 	protected MemcachedSessionLocator sessionLocator;
@@ -195,10 +200,10 @@ public class MemcachedConnector extends SocketChannelController implements
 		log.warn("Add a session: "
 				+ SystemUtils.getRawAddress(remoteSocketAddress) + ":"
 				+ remoteSocketAddress.getPort());
-		Queue<Session> sessions = sessionMap.get(remoteSocketAddress);
+		Queue<Session> sessions = this.sessionMap.get(remoteSocketAddress);
 		if (sessions == null) {
 			sessions = new ConcurrentLinkedQueue<Session>();
-			Queue<Session> oldSessions = sessionMap.putIfAbsent(
+			Queue<Session> oldSessions = this.sessionMap.putIfAbsent(
 					remoteSocketAddress, sessions);
 			if (null != oldSessions) {
 				sessions = oldSessions;
@@ -206,17 +211,17 @@ public class MemcachedConnector extends SocketChannelController implements
 		}
 		sessions.offer(session);
 		// Remove old session and close it
-		while (sessions.size() > connectionPoolSize) {
+		while (sessions.size() > this.connectionPoolSize) {
 			Session oldSession = sessions.poll();
 			((MemcachedSession) oldSession).setAllowReconnect(false);
 			oldSession.close();
 		}
-		updateSessions();
+		this.updateSessions();
 	}
 
 	public List<Session> getSessionListBySocketAddress(
 			InetSocketAddress inetSocketAddress) {
-		Queue<Session> queue = sessionMap.get(inetSocketAddress);
+		Queue<Session> queue = this.sessionMap.get(inetSocketAddress);
 		if (queue != null) {
 			return new ArrayList<Session>(queue);
 		} else {
@@ -225,8 +230,8 @@ public class MemcachedConnector extends SocketChannelController implements
 	}
 
 	public void removeReconnectRequest(InetSocketAddress inetSocketAddress) {
-		removedAddrSet.add(inetSocketAddress);
-		Iterator<ReconnectRequest> it = waitingQueue.iterator();
+		this.removedAddrSet.add(inetSocketAddress);
+		Iterator<ReconnectRequest> it = this.waitingQueue.iterator();
 		while (it.hasNext()) {
 			ReconnectRequest request = it.next();
 			if (request.getInetSocketAddressWrapper().getInetSocketAddress()
@@ -242,14 +247,14 @@ public class MemcachedConnector extends SocketChannelController implements
 	private static final MemcachedSessionComparator sessionComparator = new MemcachedSessionComparator();
 
 	public final void updateSessions() {
-		Collection<Queue<Session>> sessionCollection = sessionMap.values();
+		Collection<Queue<Session>> sessionCollection = this.sessionMap.values();
 		List<Session> sessionList = new ArrayList<Session>(20);
 		for (Queue<Session> sessions : sessionCollection) {
 			sessionList.addAll(sessions);
 		}
 		// sort the sessions to keep order
 		Collections.sort(sessionList, sessionComparator);
-		sessionLocator.updateSessions(sessionList);
+		this.sessionLocator.updateSessions(sessionList);
 	}
 
 	public void removeSession(Session session) {
@@ -258,20 +263,20 @@ public class MemcachedConnector extends SocketChannelController implements
 		log.warn("Remove a session: "
 				+ SystemUtils.getRawAddress(remoteSocketAddress) + ":"
 				+ remoteSocketAddress.getPort());
-		Queue<Session> sessionQueue = sessionMap.get(session
+		Queue<Session> sessionQueue = this.sessionMap.get(session
 				.getRemoteSocketAddress());
 		if (null != sessionQueue) {
 			sessionQueue.remove(session);
 			if (sessionQueue.size() == 0) {
-				sessionMap.remove(session.getRemoteSocketAddress());
+				this.sessionMap.remove(session.getRemoteSocketAddress());
 			}
-			updateSessions();
+			this.updateSessions();
 		}
 	}
 
 	@Override
 	protected void doStart() throws IOException {
-		setLocalSocketAddress(new InetSocketAddress("localhost", 0));
+		this.setLocalSocketAddress(new InetSocketAddress("localhost", 0));
 	}
 
 	@Override
@@ -291,7 +296,7 @@ public class MemcachedConnector extends SocketChannelController implements
 						+ future.getInetSocketAddress().getPort() + " fail"));
 			} else {
 				key.attach(null);
-				addSession(createSession((SocketChannel) key.channel(), future
+				this.addSession(this.createSession((SocketChannel) key.channel(), future
 						.getWeight(), future.getOrder()));
 				future.setResult(Boolean.TRUE);
 			}
@@ -307,17 +312,17 @@ public class MemcachedConnector extends SocketChannelController implements
 
 	protected MemcachedTCPSession createSession(SocketChannel socketChannel,
 			int weight, int order) {
-		MemcachedTCPSession session = (MemcachedTCPSession) buildSession(socketChannel);
+		MemcachedTCPSession session = (MemcachedTCPSession) this.buildSession(socketChannel);
 		session.setWeight(weight);
 		session.setOrder(order);
-		selectorManager.registerSession(session, EventType.ENABLE_READ);
+		this.selectorManager.registerSession(session, EventType.ENABLE_READ);
 		session.start();
 		session.onEvent(EventType.CONNECTED, null);
 		return session;
 	}
 
 	public void addToWatingQueue(ReconnectRequest request) {
-		waitingQueue.add(request);
+		this.waitingQueue.add(request);
 	}
 
 	public Future<Boolean> connect(InetSocketAddressWrapper addressWrapper,
@@ -326,15 +331,15 @@ public class MemcachedConnector extends SocketChannelController implements
 			throw new NullPointerException("Null Address");
 		}
 		// Remove addr from removed set
-		removedAddrSet.remove(addressWrapper.getInetSocketAddress());
+		this.removedAddrSet.remove(addressWrapper.getInetSocketAddress());
 		SocketChannel socketChannel = SocketChannel.open();
-		configureSocketChannel(socketChannel);
+		this.configureSocketChannel(socketChannel);
 		ConnectFuture future = new ConnectFuture(addressWrapper, weight);
 		if (!socketChannel.connect(addressWrapper.getInetSocketAddress())) {
-			selectorManager.registerChannel(socketChannel,
+			this.selectorManager.registerChannel(socketChannel,
 					SelectionKey.OP_CONNECT, future);
 		} else {
-			addSession(createSession(socketChannel, weight, addressWrapper
+			this.addSession(this.createSession(socketChannel, weight, addressWrapper
 					.getOrder()));
 			future.setResult(true);
 		}
@@ -346,15 +351,16 @@ public class MemcachedConnector extends SocketChannelController implements
 	}
 
 	public void send(final Command msg) throws MemcachedException {
-		MemcachedTCPSession session = (MemcachedTCPSession) findSessionByKey(msg
+		MemcachedTCPSession session = (MemcachedTCPSession) this.findSessionByKey(msg
 				.getKey());
 		if (session == null || session.isClosed()) {
 			throw new MemcachedException(
 					"There is no available connection at this moment");
 		}
-		if (session.isAuthFailed())
+		if (session.isAuthFailed()) {
 			throw new MemcachedException("Auth failed to connection "
 					+ session.getRemoteSocketAddress());
+		}
 		session.write(msg);
 	}
 
@@ -376,7 +382,7 @@ public class MemcachedConnector extends SocketChannelController implements
 		}
 
 		public void onReady(Controller controller) {
-			sessionMonitor.start();
+			this.sessionMonitor.start();
 		}
 
 		public void onStarted(Controller controller) {
@@ -384,13 +390,13 @@ public class MemcachedConnector extends SocketChannelController implements
 		}
 
 		public void onStopped(Controller controller) {
-			sessionMonitor.interrupt();
+			this.sessionMonitor.interrupt();
 		}
 
 	}
 
 	public final Session findSessionByKey(String key) {
-		return sessionLocator.getSessionByKey(key);
+		return this.sessionLocator.getSessionByKey(key);
 	}
 
 	/**
@@ -400,56 +406,56 @@ public class MemcachedConnector extends SocketChannelController implements
 	 * @return
 	 */
 	public final Queue<Session> getSessionByAddress(InetSocketAddress addr) {
-		return sessionMap.get(addr);
+		return this.sessionMap.get(addr);
 	}
 
 	public MemcachedConnector(Configuration configuration,
 			MemcachedSessionLocator locator, BufferAllocator allocator,
 			CommandFactory commandFactory, int poolSize) {
 		super(configuration, null);
-		sessionLocator = locator;
-		protocol = commandFactory.getProtocol();
-		addStateListener(new InnerControllerStateListener());
-		updateSessions();
-		bufferAllocator = allocator;
-		optimiezer = new Optimizer(protocol);
-		optimiezer.setBufferAllocator(bufferAllocator);
-		connectionPoolSize = poolSize;
-		soLingerOn = true;
+		this.sessionLocator = locator;
+		this.protocol = commandFactory.getProtocol();
+		this.addStateListener(new InnerControllerStateListener());
+		this.updateSessions();
+		this.bufferAllocator = allocator;
+		this.optimiezer = new Optimizer(this.protocol);
+		this.optimiezer.setBufferAllocator(this.bufferAllocator);
+		this.connectionPoolSize = poolSize;
+		this.soLingerOn = true;
 		this.commandFactory = commandFactory;
 		// setDispatchMessageThreadPoolSize(Runtime.getRuntime().
 		// availableProcessors());
 	}
 
 	public final void setConnectionPoolSize(int poolSize) {
-		connectionPoolSize = poolSize;
+		this.connectionPoolSize = poolSize;
 	}
 
 	public void setMergeFactor(int mergeFactor) {
-		((OptimizerMBean) optimiezer).setMergeFactor(mergeFactor);
+		((OptimizerMBean) this.optimiezer).setMergeFactor(mergeFactor);
 	}
 
 	@Override
 	protected NioSession buildSession(SocketChannel sc) {
-		Queue<WriteMessage> queue = buildQueue();
-		final NioSessionConfig sessionCofig = buildSessionConfig(sc, queue);
+		Queue<WriteMessage> queue = this.buildQueue();
+		final NioSessionConfig sessionCofig = this.buildSessionConfig(sc, queue);
 		MemcachedTCPSession session = new MemcachedTCPSession(sessionCofig,
-				configuration.getSessionReadBufferSize(), optimiezer,
-				getReadThreadCount(), commandFactory);
-		session.setBufferAllocator(bufferAllocator);
+				this.configuration.getSessionReadBufferSize(), this.optimiezer,
+				this.getReadThreadCount(), this.commandFactory);
+		session.setBufferAllocator(this.bufferAllocator);
 		return session;
 	}
 
 	public BufferAllocator getBufferAllocator() {
-		return bufferAllocator;
+		return this.bufferAllocator;
 	}
 
 	public synchronized void quitAllSessions() {
-		for (Session session : sessionSet) {
+		for (Session session : this.sessionSet) {
 			((MemcachedSession) session).quit();
 		}
 		int sleepCount = 0;
-		while (sleepCount++ < 5 && sessionSet.size() > 0) {
+		while (sleepCount++ < 5 && this.sessionSet.size() > 0) {
 			try {
 				this.wait(1000);
 			} catch (InterruptedException e) {
@@ -460,13 +466,13 @@ public class MemcachedConnector extends SocketChannelController implements
 	}
 
 	public void setBufferAllocator(BufferAllocator allocator) {
-		bufferAllocator = allocator;
-		for (Session session : getSessionSet()) {
+		this.bufferAllocator = allocator;
+		for (Session session : this.getSessionSet()) {
 			((MemcachedSession) session).setBufferAllocator(allocator);
 		}
 	}
 
 	public Collection<InetSocketAddress> getServerAddresses() {
-		return Collections.unmodifiableCollection(sessionMap.keySet());
+		return Collections.unmodifiableCollection(this.sessionMap.keySet());
 	}
 }
