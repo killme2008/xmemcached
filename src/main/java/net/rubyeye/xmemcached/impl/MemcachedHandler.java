@@ -55,29 +55,33 @@ public class MemcachedHandler extends HandlerAdapter {
 
 	private final MemcachedSessionConnectListener listener;
 
+	private final MemcachedClient client;
+	private static final Logger log = LoggerFactory
+			.getLogger(MemcachedHandler.class);
+
 	/**
 	 * On receive message from memcached server
 	 */
 	@Override
 	public final void onMessageReceived(final Session session, final Object msg) {
 		Command command = (Command) msg;
-		if (statisticsHandler.isStatistics()) {
+		if (this.statisticsHandler.isStatistics()) {
 			if (command.getMergeCount() > 0) {
 				int size = ((MapReturnValueAware) command).getReturnValues()
 						.size();
-				statisticsHandler.statistics(CommandType.GET_HIT, size);
-				statisticsHandler.statistics(CommandType.GET_MISS, command
+				this.statisticsHandler.statistics(CommandType.GET_HIT, size);
+				this.statisticsHandler.statistics(CommandType.GET_MISS, command
 						.getMergeCount()
 						- size);
 			} else if (command instanceof TextGetOneCommand
 					|| command instanceof BinaryGetCommand) {
 				if (command.getResult() != null) {
-					statisticsHandler.statistics(CommandType.GET_HIT);
+					this.statisticsHandler.statistics(CommandType.GET_HIT);
 				} else {
-					statisticsHandler.statistics(CommandType.GET_MISS);
+					this.statisticsHandler.statistics(CommandType.GET_MISS);
 				}
 			} else {
-				statisticsHandler.statistics(command.getCommandType());
+				this.statisticsHandler.statistics(command.getCommandType());
 			}
 		}
 	}
@@ -88,10 +92,6 @@ public class MemcachedHandler extends HandlerAdapter {
 		this.enableHeartBeat = enableHeartBeat;
 	}
 
-	private final MemcachedClient client;
-	private static final Logger log = LoggerFactory
-			.getLogger(MemcachedHandler.class);
-
 	/**
 	 * put command which have been sent to queue
 	 */
@@ -99,7 +99,8 @@ public class MemcachedHandler extends HandlerAdapter {
 	public final void onMessageSent(Session session, Object msg) {
 		Command command = (Command) msg;
 		command.setStatus(OperationStatus.SENT);
-		if (!command.isNoreply() || client.getProtocol() == Protocol.Binary) {
+		if (!command.isNoreply()
+				|| this.client.getProtocol() == Protocol.Binary) {
 			((MemcachedTCPSession) session).addCommand(command);
 		}
 	}
@@ -116,10 +117,11 @@ public class MemcachedHandler extends HandlerAdapter {
 	public void onSessionStarted(Session session) {
 		session.setUseBlockingRead(true);
 		session.setAttribute(HEART_BEAT_FAIL_COUNT_ATTR, new AtomicInteger(0));
-		for (MemcachedClientStateListener listener : client.getStateListeners()) {
-			listener.onConnected(client, session.getRemoteSocketAddress());
+		for (MemcachedClientStateListener listener : this.client
+				.getStateListeners()) {
+			listener.onConnected(this.client, session.getRemoteSocketAddress());
 		}
-		listener.onConnect((MemcachedTCPSession) session, client);
+		this.listener.onConnect((MemcachedTCPSession) session, this.client);
 	}
 
 	/**
@@ -127,16 +129,18 @@ public class MemcachedHandler extends HandlerAdapter {
 	 */
 	@Override
 	public final void onSessionClosed(Session session) {
-		client.getConnector().removeSession(session);
-		MemcachedSession memcachedSession = (MemcachedSession) session;
+		this.client.getConnector().removeSession(session);
+		MemcachedTCPSession memcachedSession = (MemcachedTCPSession) session;
 		// destroy memached session
 		memcachedSession.destroy();
-		if (client.getConnector().isStarted()
+		if (this.client.getConnector().isStarted()
 				&& memcachedSession.isAllowReconnect()) {
-			reconnect(session);
+			this.reconnect(memcachedSession);
 		}
-		for (MemcachedClientStateListener listener : client.getStateListeners()) {
-			listener.onDisconnected(client, session.getRemoteSocketAddress());
+		for (MemcachedClientStateListener listener : this.client
+				.getStateListeners()) {
+			listener.onDisconnected(this.client, session
+					.getRemoteSocketAddress());
 		}
 	}
 
@@ -145,13 +149,13 @@ public class MemcachedHandler extends HandlerAdapter {
 	 */
 	@Override
 	public void onSessionIdle(Session session) {
-		if (enableHeartBeat) {
+		if (this.enableHeartBeat) {
 			log.debug("Session (%s) is idle,send heartbeat", session
 					.getRemoteSocketAddress() == null ? "unknown" : session
 					.getRemoteSocketAddress().toString());
 			Command versionCommand = null;
 			CountDownLatch latch = new CountDownLatch(1);
-			if (client.getProtocol() == Protocol.Binary) {
+			if (this.client.getProtocol() == Protocol.Binary) {
 				versionCommand = new BinaryVersionCommand(latch, session
 						.getRemoteSocketAddress());
 
@@ -161,8 +165,8 @@ public class MemcachedHandler extends HandlerAdapter {
 			}
 			session.write(versionCommand);
 			// Start a check thread,avoid blocking reactor thread
-			if (heartBeatThreadPool != null) {
-				heartBeatThreadPool.execute(new CheckHeartResultThread(
+			if (this.heartBeatThreadPool != null) {
+				this.heartBeatThreadPool.execute(new CheckHeartResultThread(
 						versionCommand, session));
 			}
 		}
@@ -185,14 +189,14 @@ public class MemcachedHandler extends HandlerAdapter {
 
 		public void run() {
 			try {
-				AtomicInteger heartBeatFailCount = (AtomicInteger) session
+				AtomicInteger heartBeatFailCount = (AtomicInteger) this.session
 						.getAttribute(HEART_BEAT_FAIL_COUNT_ATTR);
 				if (heartBeatFailCount != null) {
-					if (!versionCommand.getLatch().await(2000,
+					if (!this.versionCommand.getLatch().await(2000,
 							TimeUnit.MILLISECONDS)) {
 						heartBeatFailCount.incrementAndGet();
 					}
-					if (versionCommand.getResult() == null) {
+					if (this.versionCommand.getResult() == null) {
 						heartBeatFailCount.incrementAndGet();
 					} else {
 						// reset
@@ -202,9 +206,9 @@ public class MemcachedHandler extends HandlerAdapter {
 					if (heartBeatFailCount.get() > MAX_HEART_BEAT_FAIL_COUNT) {
 						log
 								.warn("Session("
-										+ session.getRemoteSocketAddress()
+										+ this.session.getRemoteSocketAddress()
 										+ ") heartbeat fail 10 times,close session and try to heal it");
-						session.close();// close session
+						this.session.close();// close session
 						heartBeatFailCount.set(0);
 					}
 				}
@@ -219,28 +223,35 @@ public class MemcachedHandler extends HandlerAdapter {
 	 * 
 	 * @param session
 	 */
-	protected void reconnect(Session session) {
-		if (!client.isShutdown()) {
+	protected void reconnect(MemcachedTCPSession session) {
+		if (!this.client.isShutdown()) {
+			// Prevent reconnecting repeatedly
+			synchronized (session) {
+				if (!session.isAllowReconnect()) {
+					return;
+				}
+				session.setAllowReconnect(false);
+			}
 			log.debug("Add reconnectRequest to connector "
 					+ session.getRemoteSocketAddress());
-			MemcachedSession memcachedTCPSession = (MemcachedSession) session;
+			MemcachedSession memcachedTCPSession = session;
 			InetSocketAddressWrapper inetSocketAddressWrapper = new InetSocketAddressWrapper(
 					session.getRemoteSocketAddress(), memcachedTCPSession
 							.getOrder());
-			client.getConnector().addToWatingQueue(
+			this.client.getConnector().addToWatingQueue(
 					new ReconnectRequest(inetSocketAddressWrapper, 0,
-							((MemcachedSession) session).getWeight(), client
-									.getHealSessionInterval()));
+							((MemcachedSession) session).getWeight(),
+							this.client.getHealSessionInterval()));
 		}
 	}
 
 	public void stop() {
-		heartBeatThreadPool.shutdown();
+		this.heartBeatThreadPool.shutdown();
 	}
 
 	public void start() {
-		int serverSize = client.getAvaliableServers().size();
-		heartBeatThreadPool = Executors
+		int serverSize = this.client.getAvaliableServers().size();
+		this.heartBeatThreadPool = Executors
 				.newFixedThreadPool(serverSize == 0 ? Runtime.getRuntime()
 						.availableProcessors() : serverSize);
 	}
@@ -248,8 +259,8 @@ public class MemcachedHandler extends HandlerAdapter {
 	public MemcachedHandler(MemcachedClient client) {
 		super();
 		this.client = client;
-		listener = new AuthMemcachedConnectListener();
-		statisticsHandler = new StatisticsHandler();
+		this.listener = new AuthMemcachedConnectListener();
+		this.statisticsHandler = new StatisticsHandler();
 
 	}
 

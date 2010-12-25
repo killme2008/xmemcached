@@ -27,23 +27,25 @@ import java.util.Collection;
 import java.util.List;
 
 import net.rubyeye.xmemcached.HashAlgorithm;
-import net.rubyeye.xmemcached.MemcachedSessionLocator;
 import net.rubyeye.xmemcached.networking.MemcachedSession;
 
 import com.google.code.yanf4j.core.Session;
+
 /**
  * Election hash strategy
+ * 
  * @author dennis
- *
+ * 
  */
-public class ElectionMemcachedSessionLocator implements MemcachedSessionLocator {
+public class ElectionMemcachedSessionLocator extends
+		AbstractMemcachedSessionLocator {
 
 	private transient volatile List<Session> sessions;
 
 	private final HashAlgorithm hashAlgorithm;
 
 	public ElectionMemcachedSessionLocator() {
-		hashAlgorithm = HashAlgorithm.ELECTION_HASH;
+		this.hashAlgorithm = HashAlgorithm.ELECTION_HASH;
 	}
 
 	public ElectionMemcachedSessionLocator(HashAlgorithm hashAlgorithm) {
@@ -54,11 +56,11 @@ public class ElectionMemcachedSessionLocator implements MemcachedSessionLocator 
 	public Session getSessionByKey(String key) {
 		// copy on write
 		List<Session> copySessionList = new ArrayList<Session>(this.sessions);
-		Session result = getSessionByElection(key, copySessionList);
-		while ((result == null || result.isClosed())
+		Session result = this.getSessionByElection(key, copySessionList);
+		while (!this.failureMode && (result == null || result.isClosed())
 				&& copySessionList.size() > 0) {
 			copySessionList.remove(result);
-			result = getSessionByElection(key, copySessionList);
+			result = this.getSessionByElection(key, copySessionList);
 		}
 		return result;
 	}

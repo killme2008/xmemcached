@@ -89,4 +89,6 @@ public interface Connector extends Controller {
 	public void quitAllSessions();
 
 	public Queue<ReconnectRequest> getReconnectRequestQueue();
+	
+	public void setFailureMode(boolean failureMode);
 }

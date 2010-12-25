@@ -16,7 +16,6 @@ import java.util.Collection;
 import java.util.List;
 
 import net.rubyeye.xmemcached.HashAlgorithm;
-import net.rubyeye.xmemcached.MemcachedSessionLocator;
 import net.rubyeye.xmemcached.networking.MemcachedSession;
 
 import com.google.code.yanf4j.core.Session;
@@ -27,7 +26,8 @@ import com.google.code.yanf4j.core.Session;
  * @author dennis
  * 
  */
-public class ArrayMemcachedSessionLocator implements MemcachedSessionLocator {
+public class ArrayMemcachedSessionLocator extends
+		AbstractMemcachedSessionLocator {
 
 	private HashAlgorithm hashAlgorighm;
 	private transient volatile List<Session> sessions;
@@ -59,13 +59,14 @@ public class ArrayMemcachedSessionLocator implements MemcachedSessionLocator {
 		if (size == 0) {
 			return null;
 		}
-		long start = getHash(size, key);
+		long start = this.getHash(size, key);
 		Session session = sessionList.get((int) start);
-		if (session == null || session.isClosed()) {
-			long next = getNext(size, start);
+		// If it is not failure mode,get next available session
+		if (!this.failureMode && (session == null || session.isClosed())) {
+			long next = this.getNext(size, start);
 			while ((session == null || session.isClosed()) && next != start) {
 				session = sessionList.get((int) next);
-				next = getNext(size, next);
+				next = this.getNext(size, next);
 			}
 		}
 		return session;

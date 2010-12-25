@@ -22,7 +22,27 @@ import com.google.code.yanf4j.core.Session;
  * 
  */
 public interface MemcachedSessionLocator {
+	/**
+	 * Returns a session by special key.
+	 * 
+	 * @param key
+	 * @return
+	 */
 	public Session getSessionByKey(final String key);
 
+	/**
+	 * Update sessions when session was added or removed.
+	 * 
+	 * @param list
+	 *            The newer sessions
+	 */
 	public void updateSessions(final Collection<Session> list);
+
+	/**
+	 * Configure failure mode
+	 * 
+	 * @param failureMode
+	 *            true is using failure mode
+	 */
+	public void setFailureMode(boolean failureMode);
 }
