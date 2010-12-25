@@ -63,7 +63,7 @@ public class MemcachedTCPSession extends NioTCPSession implements
 	private final CommandFactory commandFactory;
 
 	public final int getWeight() {
-		return weight;
+		return this.weight;
 	}
 
 	public final void setWeight(int weight) {
@@ -75,23 +75,23 @@ public class MemcachedTCPSession extends NioTCPSession implements
 			int readThreadCount, CommandFactory commandFactory) {
 		super(sessionConfig, readRecvBufferSize);
 		this.optimiezer = optimiezer;
-		if (selectableChannel != null) {
-			remoteSocketAddress = ((SocketChannel) selectableChannel).socket()
-					.getRemoteSocketAddress();
-			allowReconnect = true;
+		if (this.selectableChannel != null) {
+			this.remoteSocketAddress = ((SocketChannel) this.selectableChannel)
+					.socket().getRemoteSocketAddress();
+			this.allowReconnect = true;
 			try {
-				sendBufferSize = ((SocketChannel) selectableChannel).socket()
-						.getSendBufferSize();
+				this.sendBufferSize = ((SocketChannel) this.selectableChannel)
+						.socket().getSendBufferSize();
 			} catch (SocketException e) {
-				sendBufferSize = 8 * 1024;
+				this.sendBufferSize = 8 * 1024;
 			}
 		}
-		commandAlreadySent = new LinkedTransferQueue<Command>();
+		this.commandAlreadySent = new LinkedTransferQueue<Command>();
 		this.commandFactory = commandFactory;
 	}
 
 	public final int getOrder() {
-		return order;
+		return this.order;
 	}
 
 	public final void setOrder(int order) {
@@ -100,18 +100,18 @@ public class MemcachedTCPSession extends NioTCPSession implements
 
 	@Override
 	public String toString() {
-		return SystemUtils.getRawAddress(getRemoteSocketAddress()) + ":"
-				+ getRemoteSocketAddress().getPort();
+		return SystemUtils.getRawAddress(this.getRemoteSocketAddress()) + ":"
+				+ this.getRemoteSocketAddress().getPort();
 	}
 
 	public void destroy() {
-		Command command = currentCommand.get();
+		Command command = this.currentCommand.get();
 		if (command != null) {
 			command.setException(new MemcachedException(
 					"Session has been closed"));
 			command.getLatch().countDown();
 		}
-		while ((command = commandAlreadySent.poll()) != null) {
+		while ((command = this.commandAlreadySent.poll()) != null) {
 			command.setException(new MemcachedException(
 					"Session has been closed"));
 			if (command.getLatch() != null) {
@@ -124,8 +124,8 @@ public class MemcachedTCPSession extends NioTCPSession implements
 	@Override
 	public InetSocketAddress getRemoteSocketAddress() {
 		InetSocketAddress result = super.getRemoteSocketAddress();
-		if (result == null && remoteSocketAddress != null) {
-			result = (InetSocketAddress) remoteSocketAddress;
+		if (result == null && this.remoteSocketAddress != null) {
+			result = (InetSocketAddress) this.remoteSocketAddress;
 		}
 		return result;
 	}
@@ -141,15 +141,16 @@ public class MemcachedTCPSession extends NioTCPSession implements
 			/**
 			 * optimieze commands
 			 */
-			currentCommand = optimiezer.optimize(currentCommand, writeQueue,
-					commandAlreadySent, sendBufferSize);
+			currentCommand = this.optimiezer.optimize(currentCommand,
+					this.writeQueue, this.commandAlreadySent,
+					this.sendBufferSize);
 		}
 		currentCommand.setStatus(OperationStatus.WRITING);
 		return currentCommand;
 	}
 
 	public boolean isAuthFailed() {
-		return authFailed;
+		return this.authFailed;
 	}
 
 	public void setAuthFailed(boolean authFailed) {
@@ -159,7 +160,7 @@ public class MemcachedTCPSession extends NioTCPSession implements
 	private BufferAllocator bufferAllocator;
 
 	public final BufferAllocator getBufferAllocator() {
-		return bufferAllocator;
+		return this.bufferAllocator;
 	}
 
 	public final void setBufferAllocator(BufferAllocator bufferAllocator) {
@@ -182,9 +183,9 @@ public class MemcachedTCPSession extends NioTCPSession implements
 	 * 
 	 * @return
 	 */
-	private final Command takeExecutingCommand() {
+	private Command takeExecutingCommand() {
 		try {
-			return commandAlreadySent.take();
+			return this.commandAlreadySent.take();
 		} catch (InterruptedException e) {
 			Thread.currentThread().interrupt();
 		}
@@ -197,30 +198,30 @@ public class MemcachedTCPSession extends NioTCPSession implements
 	 * @return
 	 */
 	public boolean isAllowReconnect() {
-		return allowReconnect;
+		return this.allowReconnect;
 	}
 
 	public void setAllowReconnect(boolean reconnected) {
-		allowReconnect = reconnected;
+		this.allowReconnect = reconnected;
 	}
 
-	public final void addCommand(Command command) {
-		commandAlreadySent.add(command);
+	public void addCommand(Command command) {
+		this.commandAlreadySent.add(command);
 	}
 
-	public final void setCurrentCommand(Command cmd) {
-		currentCommand.set(cmd);
+	public void setCurrentCommand(Command cmd) {
+		this.currentCommand.set(cmd);
 	}
 
-	public final Command getCurrentCommand() {
-		return currentCommand.get();
+	public Command getCurrentCommand() {
+		return this.currentCommand.get();
 	}
 
-	public final void takeCurrentCommand() {
-		setCurrentCommand(takeExecutingCommand());
+	public void takeCurrentCommand() {
+		this.setCurrentCommand(this.takeExecutingCommand());
 	}
 
 	public void quit() {
-		write(commandFactory.createQuitCommand());
+		this.write(this.commandFactory.createQuitCommand());
 	}
 }
