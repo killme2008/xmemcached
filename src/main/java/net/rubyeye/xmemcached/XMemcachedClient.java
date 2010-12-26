@@ -601,6 +601,8 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 		this.connector.setCodecFactory(new MemcachedCodecFactory());
 		this.connector.setSessionTimeout(-1);
 		this.connector.setSocketOptions(socketOptions);
+		this.connector.setFailureMode(this.failureMode);
+		this.sessionLocator.setFailureMode(this.failureMode);
 	}
 
 	protected Connector newConnector(BufferAllocator bufferAllocator,
