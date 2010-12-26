@@ -39,7 +39,7 @@ public abstract class BaseSerializingTranscoder {
 	 *            the number of bytes
 	 */
 	public void setCompressionThreshold(int to) {
-		compressionThreshold = to;
+		this.compressionThreshold = to;
 	}
 
 	/**
@@ -52,7 +52,7 @@ public abstract class BaseSerializingTranscoder {
 		} catch (UnsupportedEncodingException e) {
 			throw new RuntimeException(e);
 		}
-		charset = to;
+		this.charset = to;
 	}
 
 	/**
@@ -81,13 +81,14 @@ public abstract class BaseSerializingTranscoder {
 	 */
 	protected Object deserialize(byte[] in) {
 		Object rv = null;
+		ByteArrayInputStream bis = null;
+		ObjectInputStream is = null;
 		try {
 			if (in != null) {
-				ByteArrayInputStream bis = new ByteArrayInputStream(in);
-				ObjectInputStream is = new ObjectInputStream(bis);
+				bis = new ByteArrayInputStream(in);
+				is = new ObjectInputStream(bis);
 				rv = is.readObject();
-				is.close();
-				bis.close();
+
 			}
 		} catch (IOException e) {
 			log.error("Caught IOException decoding " + in.length
@@ -96,6 +97,21 @@ public abstract class BaseSerializingTranscoder {
 			log
 					.error("Caught CNFE decoding " + in.length
 							+ " bytes of data", e);
+		} finally {
+			if (is != null) {
+				try {
+					is.close();
+				} catch (IOException e) {
+					// ignore
+				}
+			}
+			if (bis != null) {
+				try {
+					bis.close();
+				} catch (IOException e) {
+					// ignore
+				}
+			}
 		}
 		return rv;
 	}
@@ -158,12 +174,13 @@ public abstract class BaseSerializingTranscoder {
 				log.error("Failed to decompress data", e);
 				bos = null;
 			} finally {
-				if (gis != null)
+				if (gis != null) {
 					try {
 						gis.close();
 					} catch (IOException e) {
 						log.error("Close GZIPInputStream error", e);
 					}
+				}
 				if (bis != null) {
 					try {
 						bis.close();
@@ -183,7 +200,7 @@ public abstract class BaseSerializingTranscoder {
 		String rv = null;
 		try {
 			if (data != null) {
-				rv = new String(data, charset);
+				rv = new String(data, this.charset);
 			}
 		} catch (UnsupportedEncodingException e) {
 			throw new RuntimeException(e);
@@ -197,7 +214,7 @@ public abstract class BaseSerializingTranscoder {
 	protected byte[] encodeString(String in) {
 		byte[] rv = null;
 		try {
-			rv = in.getBytes(charset);
+			rv = in.getBytes(this.charset);
 		} catch (UnsupportedEncodingException e) {
 			throw new RuntimeException(e);
 		}
