@@ -39,6 +39,7 @@ import org.slf4j.LoggerFactory;
 
 import com.google.code.yanf4j.core.Session;
 import com.google.code.yanf4j.core.impl.HandlerAdapter;
+import com.google.code.yanf4j.util.SystemUtils;
 
 /**
  * Memcached Session Handler,used for dispatching commands and session's
@@ -151,8 +152,9 @@ public class MemcachedHandler extends HandlerAdapter {
 	public void onSessionIdle(Session session) {
 		if (this.enableHeartBeat) {
 			log.debug("Session (%s) is idle,send heartbeat", session
-					.getRemoteSocketAddress() == null ? "unknown" : session
-					.getRemoteSocketAddress().toString());
+					.getRemoteSocketAddress() == null ? "unknown" : SystemUtils
+					.getRawAddress(session.getRemoteSocketAddress())
+					+ ":" + session.getRemoteSocketAddress().getPort());
 			Command versionCommand = null;
 			CountDownLatch latch = new CountDownLatch(1);
 			if (this.client.getProtocol() == Protocol.Binary) {
@@ -206,7 +208,12 @@ public class MemcachedHandler extends HandlerAdapter {
 					if (heartBeatFailCount.get() > MAX_HEART_BEAT_FAIL_COUNT) {
 						log
 								.warn("Session("
+										+ SystemUtils
+												.getRawAddress(this.session
+														.getRemoteSocketAddress())
+										+ ":"
 										+ this.session.getRemoteSocketAddress()
+												.getPort()
 										+ ") heartbeat fail 10 times,close session and try to heal it");
 						this.session.close();// close session
 						heartBeatFailCount.set(0);
@@ -232,8 +239,6 @@ public class MemcachedHandler extends HandlerAdapter {
 				}
 				session.setAllowReconnect(false);
 			}
-			log.debug("Add reconnectRequest to connector "
-					+ session.getRemoteSocketAddress());
 			MemcachedSession memcachedTCPSession = session;
 			InetSocketAddressWrapper inetSocketAddressWrapper = new InetSocketAddressWrapper(
 					session.getRemoteSocketAddress(), memcachedTCPSession
