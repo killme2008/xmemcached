@@ -12,6 +12,7 @@ import junit.framework.TestCase;
 import net.rubyeye.xmemcached.buffer.BufferAllocator;
 import net.rubyeye.xmemcached.impl.MemcachedSessionComparator;
 import net.rubyeye.xmemcached.networking.MemcachedSession;
+import net.rubyeye.xmemcached.utils.InetSocketAddressWrapper;
 
 import com.google.code.yanf4j.core.Handler;
 import com.google.code.yanf4j.core.Session;
@@ -22,6 +23,10 @@ public class MemcachedSessionComparatorUnitTest extends TestCase {
 	static private class MockSession implements MemcachedSession, Session {
 		private final int order;
 
+		public InetSocketAddressWrapper getInetSocketAddressWrapper() {
+			return new InetSocketAddressWrapper(null, this.order, 0, null);
+		}
+
 		public MockSession(int order) {
 			super();
 			this.order = order;
@@ -29,7 +34,7 @@ public class MemcachedSessionComparatorUnitTest extends TestCase {
 
 		public void quit() {
 			// TODO Auto-generated method stub
-			
+
 		}
 
 		public Future<Boolean> asyncWrite(Object packet) {
@@ -214,7 +219,7 @@ public class MemcachedSessionComparatorUnitTest extends TestCase {
 		}
 
 		public int getOrder() {
-			return order;
+			return this.order;
 		}
 
 		public int getWeight() {

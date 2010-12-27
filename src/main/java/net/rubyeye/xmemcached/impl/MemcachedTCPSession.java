@@ -26,6 +26,7 @@ import net.rubyeye.xmemcached.command.Command;
 import net.rubyeye.xmemcached.command.OperationStatus;
 import net.rubyeye.xmemcached.exception.MemcachedException;
 import net.rubyeye.xmemcached.networking.MemcachedSession;
+import net.rubyeye.xmemcached.utils.InetSocketAddressWrapper;
 
 import com.google.code.yanf4j.core.WriteMessage;
 import com.google.code.yanf4j.core.impl.FutureImpl;
@@ -47,10 +48,6 @@ public class MemcachedTCPSession extends NioTCPSession implements
 	 */
 	protected BlockingQueue<Command> commandAlreadySent;
 
-	private volatile int weight;
-
-	private int order;
-
 	private final AtomicReference<Command> currentCommand = new AtomicReference<Command>();
 
 	private SocketAddress remoteSocketAddress; // prevent channel is closed
@@ -62,13 +59,7 @@ public class MemcachedTCPSession extends NioTCPSession implements
 
 	private final CommandFactory commandFactory;
 
-	public final int getWeight() {
-		return this.weight;
-	}
-
-	public final void setWeight(int weight) {
-		this.weight = weight;
-	}
+	private InetSocketAddressWrapper inetSocketAddressWrapper;
 
 	public MemcachedTCPSession(NioSessionConfig sessionConfig,
 			int readRecvBufferSize, MemcachedOptimizer optimiezer,
@@ -90,12 +81,21 @@ public class MemcachedTCPSession extends NioTCPSession implements
 		this.commandFactory = commandFactory;
 	}
 
-	public final int getOrder() {
-		return this.order;
+	public InetSocketAddressWrapper getInetSocketAddressWrapper() {
+		return this.inetSocketAddressWrapper;
 	}
 
-	public final void setOrder(int order) {
-		this.order = order;
+	public int getOrder() {
+		return this.getInetSocketAddressWrapper().getOrder();
+	}
+
+	public int getWeight() {
+		return this.getInetSocketAddressWrapper().getWeight();
+	}
+
+	public void setInetSocketAddressWrapper(
+			InetSocketAddressWrapper inetSocketAddressWrapper) {
+		this.inetSocketAddressWrapper = inetSocketAddressWrapper;
 	}
 
 	@Override

@@ -23,6 +23,7 @@
 package net.rubyeye.xmemcached.networking;
 
 import net.rubyeye.xmemcached.buffer.BufferAllocator;
+import net.rubyeye.xmemcached.utils.InetSocketAddressWrapper;
 
 /**
  * Abstract interface for memcached connection.
@@ -31,7 +32,6 @@ import net.rubyeye.xmemcached.buffer.BufferAllocator;
  * 
  */
 public interface MemcachedSession {
-	public int getWeight();
 
 	public void setAllowReconnect(boolean allow);
 
@@ -39,9 +39,15 @@ public interface MemcachedSession {
 
 	public void setBufferAllocator(BufferAllocator allocator);
 
-	public int getOrder();
+	public InetSocketAddressWrapper getInetSocketAddressWrapper();
 
 	public void destroy();
+	
+	@Deprecated
+	public int getWeight();
+	
+	@Deprecated
+	public int getOrder();
 	
 	public void quit();
 }

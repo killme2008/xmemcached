@@ -240,9 +240,8 @@ public class MemcachedHandler extends HandlerAdapter {
 				session.setAllowReconnect(false);
 			}
 			MemcachedSession memcachedTCPSession = session;
-			InetSocketAddressWrapper inetSocketAddressWrapper = new InetSocketAddressWrapper(
-					session.getRemoteSocketAddress(), memcachedTCPSession
-							.getOrder(), memcachedTCPSession.getWeight(), null);
+			InetSocketAddressWrapper inetSocketAddressWrapper = memcachedTCPSession
+					.getInetSocketAddressWrapper();
 			this.client.getConnector().addToWatingQueue(
 					new ReconnectRequest(inetSocketAddressWrapper, 0,
 							this.client.getHealSessionInterval()));

@@ -23,9 +23,11 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Queue;
+import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.DelayQueue;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -76,6 +78,11 @@ public class MemcachedConnector extends SocketChannelController implements
 
 	private final CommandFactory commandFactory;
 	private volatile boolean failureMode;
+
+	private final ConcurrentHashMap<InetSocketAddress/* Main node address */, List<Session>/*
+																						 * standby
+																						 * sessions
+																						 */> standbySessionMap = new ConcurrentHashMap<InetSocketAddress, List<Session>>();
 
 	public void setSessionLocator(MemcachedSessionLocator sessionLocator) {
 		this.sessionLocator = sessionLocator;
@@ -197,7 +204,24 @@ public class MemcachedConnector extends SocketChannelController implements
 
 	protected final ConcurrentHashMap<InetSocketAddress, Queue<Session>> sessionMap = new ConcurrentHashMap<InetSocketAddress, Queue<Session>>();
 
-	public void addSession(Session session) {
+	public synchronized void addSession(Session session) {
+		MemcachedTCPSession tcpSession = (MemcachedTCPSession) session;
+		InetSocketAddressWrapper addrWrapper = tcpSession
+				.getInetSocketAddressWrapper();
+
+		InetSocketAddress mainNodeAddress = addrWrapper.getMainNodeAddress();
+		if (mainNodeAddress != null) {
+			// It is a standby session
+			this.addStandbySession(session, mainNodeAddress);
+		} else {
+			// It is a main session
+			this.addMainSession(session);
+			// Update main sessions
+			this.updateSessions();
+		}
+	}
+
+	private void addMainSession(Session session) {
 		InetSocketAddress remoteSocketAddress = session
 				.getRemoteSocketAddress();
 		log.warn("Add a session: "
@@ -231,7 +255,27 @@ public class MemcachedConnector extends SocketChannelController implements
 			((MemcachedSession) oldSession).setAllowReconnect(false);
 			oldSession.close();
 		}
-		this.updateSessions();
+	}
+
+	private void addStandbySession(Session session,
+			InetSocketAddress mainNodeAddress) {
+		InetSocketAddress remoteSocketAddress = session
+				.getRemoteSocketAddress();
+		log.warn("Add a standby session: "
+				+ SystemUtils.getRawAddress(remoteSocketAddress) + ":"
+				+ remoteSocketAddress.getPort() + " for "
+				+ SystemUtils.getRawAddress(mainNodeAddress) + ":"
+				+ mainNodeAddress.getPort());
+		List<Session> sessions = this.standbySessionMap.get(mainNodeAddress);
+		if (sessions == null) {
+			sessions = new CopyOnWriteArrayList<Session>();
+			List<Session> oldSessions = this.standbySessionMap.putIfAbsent(
+					mainNodeAddress, sessions);
+			if (null != oldSessions) {
+				sessions = oldSessions;
+			}
+		}
+		sessions.add(session);
 	}
 
 	public List<Session> getSessionListBySocketAddress(
@@ -272,7 +316,19 @@ public class MemcachedConnector extends SocketChannelController implements
 		this.sessionLocator.updateSessions(sessionList);
 	}
 
-	public void removeSession(Session session) {
+	public synchronized void removeSession(Session session) {
+		MemcachedTCPSession tcpSession = (MemcachedTCPSession) session;
+		InetSocketAddressWrapper addrWrapper = tcpSession
+				.getInetSocketAddressWrapper();
+		InetSocketAddress mainNodeAddr = addrWrapper.getMainNodeAddress();
+		if (mainNodeAddr != null) {
+			this.removeStandbySession(session, mainNodeAddr);
+		} else {
+			this.removeMainSession(session);
+		}
+	}
+
+	private void removeMainSession(Session session) {
 		// If it was in failure mode,we don't remove it from list.
 		if (this.failureMode) {
 			return;
@@ -290,6 +346,17 @@ public class MemcachedConnector extends SocketChannelController implements
 				this.sessionMap.remove(session.getRemoteSocketAddress());
 			}
 			this.updateSessions();
+		}
+	}
+
+	private void removeStandbySession(Session session,
+			InetSocketAddress mainNodeAddr) {
+		List<Session> sessionList = this.standbySessionMap.get(mainNodeAddr);
+		if (null != sessionList) {
+			sessionList.remove(session);
+			if (sessionList.size() == 0) {
+				this.standbySessionMap.remove(mainNodeAddr);
+			}
 		}
 	}
 
@@ -311,30 +378,36 @@ public class MemcachedConnector extends SocketChannelController implements
 			if (!((SocketChannel) key.channel()).finishConnect()) {
 				future.failure(new IOException("Connect to "
 						+ SystemUtils.getRawAddress(future
-								.getInetSocketAddress()) + ":"
-						+ future.getInetSocketAddress().getPort() + " fail"));
+								.getInetSocketAddressWrapper()
+								.getInetSocketAddress())
+						+ ":"
+						+ future.getInetSocketAddressWrapper()
+								.getInetSocketAddress().getPort() + " fail"));
 			} else {
 				key.attach(null);
 				this.addSession(this.createSession((SocketChannel) key
-						.channel(), future.getWeight(), future.getOrder()));
+						.channel(), future.getInetSocketAddressWrapper()));
 				future.setResult(Boolean.TRUE);
 			}
 		} catch (Exception e) {
 			future.failure(e);
 			key.cancel();
 			throw new IOException("Connect to "
-					+ SystemUtils.getRawAddress(future.getInetSocketAddress())
-					+ ":" + future.getInetSocketAddress().getPort() + " fail,"
+					+ SystemUtils.getRawAddress(future
+							.getInetSocketAddressWrapper()
+							.getInetSocketAddress())
+					+ ":"
+					+ future.getInetSocketAddressWrapper()
+							.getInetSocketAddress().getPort() + " fail,"
 					+ e.getMessage());
 		}
 	}
 
 	protected MemcachedTCPSession createSession(SocketChannel socketChannel,
-			int weight, int order) {
+			InetSocketAddressWrapper wrapper) {
 		MemcachedTCPSession session = (MemcachedTCPSession) this
 				.buildSession(socketChannel);
-		session.setWeight(weight);
-		session.setOrder(order);
+		session.setInetSocketAddressWrapper(wrapper);
 		this.selectorManager.registerSession(session, EventType.ENABLE_READ);
 		session.start();
 		session.onEvent(EventType.CONNECTED, null);
@@ -345,7 +418,8 @@ public class MemcachedConnector extends SocketChannelController implements
 		this.waitingQueue.add(request);
 	}
 
-	public Future<Boolean> connect(InetSocketAddressWrapper addressWrapper) throws IOException {
+	public Future<Boolean> connect(InetSocketAddressWrapper addressWrapper)
+			throws IOException {
 		if (addressWrapper == null) {
 			throw new NullPointerException("Null Address");
 		}
@@ -358,8 +432,7 @@ public class MemcachedConnector extends SocketChannelController implements
 			this.selectorManager.registerChannel(socketChannel,
 					SelectionKey.OP_CONNECT, future);
 		} else {
-			this.addSession(this.createSession(socketChannel, addressWrapper.getWeight(),
-					addressWrapper.getOrder()));
+			this.addSession(this.createSession(socketChannel, addressWrapper));
 			future.setResult(true);
 		}
 		return future;
@@ -369,12 +442,18 @@ public class MemcachedConnector extends SocketChannelController implements
 		// do nothing
 	}
 
+	private final Random random = new Random();
+
 	public void send(final Command msg) throws MemcachedException {
 		MemcachedTCPSession session = (MemcachedTCPSession) this
 				.findSessionByKey(msg.getKey());
 		if (session == null) {
 			throw new MemcachedException(
 					"There is no available connection at this moment");
+		}
+		// If session was closed,try to use standby memcached node
+		if (session.isClosed()) {
+			session = this.findStandbySession(session);
 		}
 		if (session.isClosed()) {
 			throw new MemcachedException(SystemUtils.getRawAddress(session
@@ -388,6 +467,30 @@ public class MemcachedConnector extends SocketChannelController implements
 					+ session.getRemoteSocketAddress());
 		}
 		session.write(msg);
+	}
+
+	private MemcachedTCPSession findStandbySession(MemcachedTCPSession session) {
+		if (this.failureMode) {
+			List<Session> sessionList = this
+					.getStandbySessionListByMainNodeAddr(session
+							.getRemoteSocketAddress());
+			if (sessionList != null && !sessionList.isEmpty()) {
+				return (MemcachedTCPSession) sessionList.get(this.random
+						.nextInt(sessionList.size()));
+			}
+		}
+		return session;
+	}
+
+	/**
+	 * Returns main node's standby session list.
+	 * 
+	 * @param addr
+	 * @return
+	 */
+	public List<Session> getStandbySessionListByMainNodeAddr(
+			InetSocketAddress addr) {
+		return this.standbySessionMap.get(addr);
 	}
 
 	/**

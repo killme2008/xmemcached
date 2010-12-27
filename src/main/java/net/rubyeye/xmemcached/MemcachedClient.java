@@ -1265,16 +1265,6 @@ public interface MemcachedClient {
 	public void setFailureMode(boolean failureMode);
 
 	/**
-	 * Configure wheather to flush standby memcached node before using
-	 * it,default is true.If you don't use client in failure mode,this flag will
-	 * be ignored.
-	 * 
-	 * @param flush
-	 *            True is to flush standby memcached node before using it.
-	 */
-	public void setFlushBeforeUsingStandby(boolean flush);
-
-	/**
 	 * Returns if client is in failure mode.
 	 * 
 	 * @return

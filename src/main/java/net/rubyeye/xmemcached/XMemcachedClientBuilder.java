@@ -31,7 +31,7 @@ public class XMemcachedClientBuilder implements MemcachedClientBuilder {
 	private MemcachedSessionLocator sessionLocator = new ArrayMemcachedSessionLocator();
 	private BufferAllocator bufferAllocator = new SimpleBufferAllocator();
 	private Configuration configuration = getDefaultConfiguration();
-	private List<InetSocketAddress> addressList = new ArrayList<InetSocketAddress>();
+	private Map<InetSocketAddress, InetSocketAddress> addressMap = new HashMap<InetSocketAddress, InetSocketAddress>();
 
 	private int[] weights;
 
@@ -47,7 +47,7 @@ public class XMemcachedClientBuilder implements MemcachedClientBuilder {
 	private String name;
 
 	public void addStateListener(MemcachedClientStateListener stateListener) {
-		stateListeners.add(stateListener);
+		this.stateListeners.add(stateListener);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -63,23 +63,23 @@ public class XMemcachedClientBuilder implements MemcachedClientBuilder {
 					+ socketOption.type().getSimpleName()
 					+ " value,but givend " + value.getClass().getSimpleName());
 		}
-		socketOptions.put(socketOption, value);
+		this.socketOptions.put(socketOption, value);
 	}
 
 	@SuppressWarnings("unchecked")
 	public Map<SocketOption, Object> getSocketOptions() {
-		return socketOptions;
+		return this.socketOptions;
 	}
 
 	public final void setConnectionPoolSize(int poolSize) {
-		if (connectionPoolSize <= 0) {
+		if (this.connectionPoolSize <= 0) {
 			throw new IllegalArgumentException("poolSize<=0");
 		}
-		connectionPoolSize = poolSize;
+		this.connectionPoolSize = poolSize;
 	}
 
 	public void removeStateListener(MemcachedClientStateListener stateListener) {
-		stateListeners.remove(stateListener);
+		this.stateListeners.remove(stateListener);
 	}
 
 	public void setStateListeners(
@@ -121,7 +121,7 @@ public class XMemcachedClientBuilder implements MemcachedClientBuilder {
 	}
 
 	public final CommandFactory getCommandFactory() {
-		return commandFactory;
+		return this.commandFactory;
 	}
 
 	public final void setCommandFactory(CommandFactory commandFactory) {
@@ -132,17 +132,36 @@ public class XMemcachedClientBuilder implements MemcachedClientBuilder {
 	Transcoder transcoder = new SerializingTranscoder();
 
 	public XMemcachedClientBuilder(List<InetSocketAddress> addressList) {
-		this.addressList = addressList;
+		if (addressList != null) {
+			for (InetSocketAddress addr : addressList) {
+				this.addressMap.put(addr, null);
+			}
+		}
 	}
 
 	public XMemcachedClientBuilder(List<InetSocketAddress> addressList,
 			int[] weights) {
-		this.addressList = addressList;
+		if (addressList != null) {
+			for (InetSocketAddress addr : addressList) {
+				this.addressMap.put(addr, null);
+			}
+		}
+		this.weights = weights;
+	}
+
+	public XMemcachedClientBuilder(
+			Map<InetSocketAddress, InetSocketAddress> addressMap) {
+		this.addressMap = addressMap;
+	}
+
+	public XMemcachedClientBuilder(
+			Map<InetSocketAddress, InetSocketAddress> addressMap, int[] weights) {
+		this.addressMap = addressMap;
 		this.weights = weights;
 	}
 
 	public XMemcachedClientBuilder() {
-		this(null);
+		this((Map<InetSocketAddress, InetSocketAddress>) null);
 	}
 
 	/*
@@ -151,7 +170,7 @@ public class XMemcachedClientBuilder implements MemcachedClientBuilder {
 	 * @see net.rubyeye.xmemcached.MemcachedClientBuilder#getSessionLocator()
 	 */
 	public MemcachedSessionLocator getSessionLocator() {
-		return sessionLocator;
+		return this.sessionLocator;
 	}
 
 	/*
@@ -174,7 +193,7 @@ public class XMemcachedClientBuilder implements MemcachedClientBuilder {
 	 * @see net.rubyeye.xmemcached.MemcachedClientBuilder#getBufferAllocator()
 	 */
 	public BufferAllocator getBufferAllocator() {
-		return bufferAllocator;
+		return this.bufferAllocator;
 	}
 
 	/*
@@ -197,7 +216,7 @@ public class XMemcachedClientBuilder implements MemcachedClientBuilder {
 	 * @see net.rubyeye.xmemcached.MemcachedClientBuilder#getConfiguration()
 	 */
 	public Configuration getConfiguration() {
-		return configuration;
+		return this.configuration;
 	}
 
 	/*
@@ -218,26 +237,28 @@ public class XMemcachedClientBuilder implements MemcachedClientBuilder {
 	 */
 	public MemcachedClient build() throws IOException {
 		XMemcachedClient memcachedClient;
-		if (weights == null) {
-			memcachedClient = new XMemcachedClient(sessionLocator,
-					bufferAllocator, configuration, socketOptions,
-					commandFactory, transcoder, addressList, stateListeners,
-					authInfoMap, connectionPoolSize, name);
+		if (this.weights == null) {
+			memcachedClient = new XMemcachedClient(this.sessionLocator,
+					this.bufferAllocator, this.configuration,
+					this.socketOptions, this.commandFactory, this.transcoder,
+					this.addressMap, this.stateListeners, this.authInfoMap,
+					this.connectionPoolSize, this.name);
 
 		} else {
-			if (addressList == null) {
-				throw new IllegalArgumentException("Null Address List");
+			if (this.addressMap == null) {
+				throw new IllegalArgumentException("Null Address map");
 			}
-			if (addressList.size() > weights.length) {
+			if (this.addressMap.size() > this.weights.length) {
 				throw new IllegalArgumentException(
 						"Weights Array's length is less than server's number");
 			}
-			memcachedClient = new XMemcachedClient(sessionLocator,
-					bufferAllocator, configuration, socketOptions,
-					commandFactory, transcoder, addressList, weights,
-					stateListeners, authInfoMap, connectionPoolSize, name);
+			memcachedClient = new XMemcachedClient(this.sessionLocator,
+					this.bufferAllocator, this.configuration,
+					this.socketOptions, this.commandFactory, this.transcoder,
+					this.addressMap, this.weights, this.stateListeners,
+					this.authInfoMap, this.connectionPoolSize, this.name);
 		}
-		if (commandFactory.getProtocol() == Protocol.Kestrel) {
+		if (this.commandFactory.getProtocol() == Protocol.Kestrel) {
 			memcachedClient.setOptimizeGet(false);
 		}
 		return memcachedClient;
@@ -245,7 +266,7 @@ public class XMemcachedClientBuilder implements MemcachedClientBuilder {
 
 	@SuppressWarnings("unchecked")
 	public Transcoder getTranscoder() {
-		return transcoder;
+		return this.transcoder;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -257,15 +278,15 @@ public class XMemcachedClientBuilder implements MemcachedClientBuilder {
 	}
 
 	public Map<InetSocketAddress, AuthInfo> getAuthInfoMap() {
-		return authInfoMap;
+		return this.authInfoMap;
 	}
 
 	public void addAuthInfo(InetSocketAddress address, AuthInfo authInfo) {
-		authInfoMap.put(address, authInfo);
+		this.authInfoMap.put(address, authInfo);
 	}
 
 	public void removeAuthInfo(InetSocketAddress address) {
-		authInfoMap.remove(address);
+		this.authInfoMap.remove(address);
 	}
 
 	public void setAuthInfoMap(Map<InetSocketAddress, AuthInfo> authInfoMap) {
@@ -273,7 +294,7 @@ public class XMemcachedClientBuilder implements MemcachedClientBuilder {
 	}
 
 	public String getName() {
-		return name;
+		return this.name;
 	}
 
 	public void setName(String name) {

@@ -81,6 +81,16 @@ public class AddrUtilTest extends TestCase {
 	}
 
 	@Test
+	public void testGetAddressMap_OnlyMainAddr() {
+		Map<InetSocketAddress, InetSocketAddress> addressMap = AddrUtil
+				.getAddressMap("localhost:12000 localhost:12001 localhost:12002 ");
+		assertEquals(3, addressMap.size());
+		assertNull(addressMap.get(new InetSocketAddress("localhost", 12002)));
+		assertNull(addressMap.get(new InetSocketAddress("localhost", 12000)));
+		assertNull(addressMap.get(new InetSocketAddress("localhost", 12001)));
+	}
+
+	@Test
 	public void testGetAddressMap() {
 		Map<InetSocketAddress, InetSocketAddress> addressMap = AddrUtil
 				.getAddressMap("localhost:12000,localhost:12001 localhost:12002 localhost:12001,localhost:12003");

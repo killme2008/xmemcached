@@ -22,6 +22,7 @@
  */
 package net.rubyeye.xmemcached.utils;
 
+import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.HashMap;
 import java.util.List;
@@ -68,8 +69,10 @@ public class XMemcachedClientFactoryBean implements FactoryBean {
 
 	private int connectionPoolSize = MemcachedClient.DEFAULT_CONNECTION_POOL_SIZE;
 
+	private MemcachedClient memcachedClient;
+
 	public final CommandFactory getCommandFactory() {
-		return commandFactory;
+		return this.commandFactory;
 	}
 
 	public final void setCommandFactory(CommandFactory commandFactory) {
@@ -81,7 +84,7 @@ public class XMemcachedClientFactoryBean implements FactoryBean {
 	}
 
 	public Map<InetSocketAddress, AuthInfo> getAuthInfoMap() {
-		return authInfoMap;
+		return this.authInfoMap;
 	}
 
 	public void setAuthInfoMap(Map<InetSocketAddress, AuthInfo> authInfoMap) {
@@ -89,7 +92,7 @@ public class XMemcachedClientFactoryBean implements FactoryBean {
 	}
 
 	public String getName() {
-		return name;
+		return this.name;
 	}
 
 	public void setName(String name) {
@@ -97,11 +100,11 @@ public class XMemcachedClientFactoryBean implements FactoryBean {
 	}
 
 	public int getConnectionPoolSize() {
-		return connectionPoolSize;
+		return this.connectionPoolSize;
 	}
 
 	public final void setConnectionPoolSize(int poolSize) {
-		connectionPoolSize = poolSize;
+		this.connectionPoolSize = poolSize;
 	}
 
 	public void setSessionLocator(MemcachedSessionLocator sessionLocator) {
@@ -122,7 +125,7 @@ public class XMemcachedClientFactoryBean implements FactoryBean {
 	}
 
 	public String getServers() {
-		return servers;
+		return this.servers;
 	}
 
 	public void setServers(String servers) {
@@ -130,20 +133,20 @@ public class XMemcachedClientFactoryBean implements FactoryBean {
 	}
 
 	public MemcachedSessionLocator getSessionLocator() {
-		return sessionLocator;
+		return this.sessionLocator;
 	}
 
 	public BufferAllocator getBufferAllocator() {
-		return bufferAllocator;
+		return this.bufferAllocator;
 	}
 
 	@SuppressWarnings("unchecked")
 	public Transcoder getTranscoder() {
-		return transcoder;
+		return this.transcoder;
 	}
 
 	public List<Integer> getWeights() {
-		return weights;
+		return this.weights;
 	}
 
 	public void setWeights(List<Integer> weights) {
@@ -151,81 +154,87 @@ public class XMemcachedClientFactoryBean implements FactoryBean {
 	}
 
 	public Configuration getConfiguration() {
-		return configuration;
+		return this.configuration;
 	}
 
 	public Object getObject() throws Exception {
-		checkAttribute();
-		List<InetSocketAddress> serverList = getServerList();
-		int[] weightsArray = getWeightsArray(serverList);
-		MemcachedClientBuilder builder = newBuilder(serverList, weightsArray);
-		configBuilder(builder);
-		return builder.build();
+		this.checkAttribute();
+		Map<InetSocketAddress,InetSocketAddress> serverMap = this.getServerMap();
+		int[] weightsArray = this.getWeightsArray(serverMap);
+		MemcachedClientBuilder builder = this.newBuilder(serverMap,
+				weightsArray);
+		this.configBuilder(builder);
+		this.memcachedClient = builder.build();
+		return this.memcachedClient;
 	}
 
 	private MemcachedClientBuilder newBuilder(
-			List<InetSocketAddress> serverList, int[] weightsArray) {
+			Map<InetSocketAddress,InetSocketAddress> serverMap, int[] weightsArray) {
 		MemcachedClientBuilder builder;
 		if (weightsArray == null) {
-			builder = new XMemcachedClientBuilder(serverList);
+			builder = new XMemcachedClientBuilder(serverMap);
 		} else {
-			builder = new XMemcachedClientBuilder(serverList, weightsArray);
+			builder = new XMemcachedClientBuilder(serverMap, weightsArray);
 		}
 		return builder;
 	}
 
 	private void configBuilder(MemcachedClientBuilder builder) {
-		builder.setConfiguration(configuration);
-		builder.setBufferAllocator(bufferAllocator);
-		builder.setSessionLocator(sessionLocator);
-		builder.setTranscoder(transcoder);
-		builder.setCommandFactory(commandFactory);
-		builder.setConnectionPoolSize(connectionPoolSize);
-		builder.setAuthInfoMap(authInfoMap);
-		builder.setName(name);
+		builder.setConfiguration(this.configuration);
+		builder.setBufferAllocator(this.bufferAllocator);
+		builder.setSessionLocator(this.sessionLocator);
+		builder.setTranscoder(this.transcoder);
+		builder.setCommandFactory(this.commandFactory);
+		builder.setConnectionPoolSize(this.connectionPoolSize);
+		builder.setAuthInfoMap(this.authInfoMap);
+		builder.setName(this.name);
 	}
 
-	private int[] getWeightsArray(List<InetSocketAddress> serverList) {
+	private int[] getWeightsArray(Map<InetSocketAddress,InetSocketAddress> serverMap) {
 		int[] weightsArray = null;
-		if (serverList != null && serverList.size() > 0 && weights != null) {
-			if (weights.size() < serverList.size()) {
+		if (serverMap != null && serverMap.size() > 0 && this.weights != null) {
+			if (this.weights.size() < serverMap.size()) {
 				throw new IllegalArgumentException(
 						"Weight list's size is less than server list's size");
 			}
-			weightsArray = new int[weights.size()];
+			weightsArray = new int[this.weights.size()];
 			for (int i = 0; i < weightsArray.length; i++) {
-				weightsArray[i] = weights.get(i);
+				weightsArray[i] = this.weights.get(i);
 			}
 		}
 		return weightsArray;
 	}
 
-	private List<InetSocketAddress> getServerList() {
-		List<InetSocketAddress> serverList = null;
+	private Map<InetSocketAddress,InetSocketAddress> getServerMap() {
+		Map<InetSocketAddress,InetSocketAddress> serverMap = null;
 
-		if (servers != null && servers.length() > 0) {
-			serverList = AddrUtil.getAddresses(servers);
+		if (this.servers != null && this.servers.length() > 0) {
+			serverMap = AddrUtil.getAddressMap(this.servers);
 
 		}
-		return serverList;
+		return serverMap;
 	}
 
 	private void checkAttribute() {
-		if (bufferAllocator == null) {
+		if (this.bufferAllocator == null) {
 			throw new NullPointerException("Null BufferAllocator");
 		}
-		if (sessionLocator == null) {
+		if (this.sessionLocator == null) {
 			throw new NullPointerException("Null MemcachedSessionLocator");
 		}
-		if (configuration == null) {
+		if (this.configuration == null) {
 			throw new NullPointerException("Null networking configuration");
 		}
-		if (commandFactory == null) {
+		if (this.commandFactory == null) {
 			throw new NullPointerException("Null command factory");
 		}
-		if (weights != null && servers == null) {
+		if (this.weights != null && this.servers == null) {
 			throw new NullPointerException("Empty server list");
 		}
+	}
+
+	public void shutdown() throws IOException{
+		this.memcachedClient.shutdown();
 	}
 
 	@SuppressWarnings("unchecked")

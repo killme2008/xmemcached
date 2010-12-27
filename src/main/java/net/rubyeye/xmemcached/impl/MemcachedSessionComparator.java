@@ -26,7 +26,8 @@ public class MemcachedSessionComparator implements Comparator<Session>,
 		if (session2 == null) {
 			return 1;
 		}
-		return session1.getOrder() - session2.getOrder();
+		return session1.getInetSocketAddressWrapper().getOrder()
+				- session2.getInetSocketAddressWrapper().getOrder();
 	}
 
 }
