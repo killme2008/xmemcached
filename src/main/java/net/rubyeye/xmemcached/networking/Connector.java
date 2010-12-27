@@ -76,8 +76,7 @@ public interface Connector extends Controller {
 	@SuppressWarnings("unchecked")
 	public void setSocketOptions(Map<SocketOption, Object> options);
 
-	public Future<Boolean> connect(InetSocketAddressWrapper addressWrapper,
-			int weight) throws IOException;
+	public Future<Boolean> connect(InetSocketAddressWrapper addressWrapper) throws IOException;
 
 	public void updateSessions();
 

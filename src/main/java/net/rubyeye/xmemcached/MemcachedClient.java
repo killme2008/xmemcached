@@ -1256,12 +1256,23 @@ public interface MemcachedClient {
 	 * means you want to configure client in failure mode. Failure mode is that
 	 * when a memcached server is down,it would not taken from the server list
 	 * but marked as unavailable,and then further requests to this server will
-	 * throw exception until it comes back up.
+	 * be transformed to standby node if configured or throw an exception until
+	 * it comes back up.
 	 * 
 	 * @param failureMode
 	 *            true is to configure client in failure mode.
 	 */
 	public void setFailureMode(boolean failureMode);
+
+	/**
+	 * Configure wheather to flush standby memcached node before using
+	 * it,default is true.If you don't use client in failure mode,this flag will
+	 * be ignored.
+	 * 
+	 * @param flush
+	 *            True is to flush standby memcached node before using it.
+	 */
+	public void setFlushBeforeUsingStandby(boolean flush);
 
 	/**
 	 * Returns if client is in failure mode.

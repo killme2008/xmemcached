@@ -38,8 +38,6 @@ public final class ReconnectRequest implements Delayed {
 	private InetSocketAddressWrapper inetSocketAddressWrapper;
 	private int tries;
 
-	private int weight;
-
 	private static final long MIN_RECONNECT_INTERVAL = 1000;
 
 	private static final long MAX_RECONNECT_INTERVAL = 60 * 1000;
@@ -47,18 +45,19 @@ public final class ReconnectRequest implements Delayed {
 	private volatile long nextReconnectTimestamp;
 
 	public ReconnectRequest(InetSocketAddressWrapper inetSocketAddressWrapper,
-			int tries, int weight, long reconnectInterval) {
+			int tries, long reconnectInterval) {
 		super();
-		setInetSocketAddressWrapper(inetSocketAddressWrapper);
-		setTries(tries); // record reconnect times
-		this.weight = weight;
-		reconnectInterval = normalInterval(reconnectInterval);
-		nextReconnectTimestamp = System.currentTimeMillis() + reconnectInterval;
+		this.setInetSocketAddressWrapper(inetSocketAddressWrapper);
+		this.setTries(tries); // record reconnect times
+		reconnectInterval = this.normalInterval(reconnectInterval);
+		this.nextReconnectTimestamp = System.currentTimeMillis()
+				+ reconnectInterval;
 	}
 
 	private long normalInterval(long reconnectInterval) {
-		if (reconnectInterval < MIN_RECONNECT_INTERVAL)
+		if (reconnectInterval < MIN_RECONNECT_INTERVAL) {
 			reconnectInterval = MIN_RECONNECT_INTERVAL;
+		}
 		if (reconnectInterval > MAX_RECONNECT_INTERVAL) {
 			reconnectInterval = MAX_RECONNECT_INTERVAL;
 		}
@@ -66,26 +65,26 @@ public final class ReconnectRequest implements Delayed {
 	}
 
 	public long getDelay(TimeUnit unit) {
-		return unit.convert(
-				nextReconnectTimestamp - System.currentTimeMillis(),
-				TimeUnit.MILLISECONDS);
+		return unit.convert(this.nextReconnectTimestamp
+				- System.currentTimeMillis(), TimeUnit.MILLISECONDS);
 	}
 
 	public int compareTo(Delayed o) {
 		ReconnectRequest other = (ReconnectRequest) o;
-		if (nextReconnectTimestamp > other.nextReconnectTimestamp)
+		if (this.nextReconnectTimestamp > other.nextReconnectTimestamp) {
 			return 1;
-		else
+		} else {
 			return -1;
+		}
 	}
 
 	public final InetSocketAddressWrapper getInetSocketAddressWrapper() {
-		return inetSocketAddressWrapper;
+		return this.inetSocketAddressWrapper;
 	}
 
 	public void updateNextReconnectTimeStamp(long interval) {
-		interval = normalInterval(interval);
-		nextReconnectTimestamp = System.currentTimeMillis() + interval;
+		interval = this.normalInterval(interval);
+		this.nextReconnectTimestamp = System.currentTimeMillis() + interval;
 	}
 
 	public final void setInetSocketAddressWrapper(
@@ -98,15 +97,7 @@ public final class ReconnectRequest implements Delayed {
 	}
 
 	public final int getTries() {
-		return tries;
-	}
-
-	public final int getWeight() {
-		return weight;
-	}
-
-	public final void setWeight(int weight) {
-		this.weight = weight;
+		return this.tries;
 	}
 
 }

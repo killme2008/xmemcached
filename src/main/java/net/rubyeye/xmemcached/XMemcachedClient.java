@@ -102,6 +102,8 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 
 	private volatile boolean failureMode;
 
+	private volatile boolean flushBeforeUsingStandby = true;
+
 	private final CopyOnWriteArrayList<MemcachedClientStateListenerAdapter> stateListenerAdapters = new CopyOnWriteArrayList<MemcachedClientStateListenerAdapter>();
 
 	/*
@@ -261,7 +263,7 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 	/**
 	 * XMemcached constructor
 	 * 
-	 * @param server
+	 * @param host
 	 *            server host
 	 * @param port
 	 *            server port
@@ -269,21 +271,21 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 	 *            server weight
 	 * @throws IOException
 	 */
-	public XMemcachedClient(final String server, final int port, int weight)
+	public XMemcachedClient(final String host, final int port, int weight)
 			throws IOException {
 		super();
 		if (weight <= 0) {
 			throw new IllegalArgumentException("weight<=0");
 		}
-		this.checkServerPort(server, port);
+		this.checkServerPort(host, port);
 		this.buildConnector(new ArrayMemcachedSessionLocator(),
 				new SimpleBufferAllocator(), XMemcachedClientBuilder
 						.getDefaultConfiguration(), XMemcachedClientBuilder
 						.getDefaultSocketOptions(), new TextCommandFactory(),
 				new SerializingTranscoder());
 		this.start0();
-		this.connect(new InetSocketAddressWrapper(this.newSocketAddress(server,
-				port), this.serverOrderCount.incrementAndGet()), weight);
+		this.connect(new InetSocketAddressWrapper(this.newSocketAddress(host,
+				port), this.serverOrderCount.incrementAndGet(),weight,null));
 	}
 
 	protected InetSocketAddress newSocketAddress(final String server,
@@ -326,7 +328,7 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 		}
 		this.checkServerPort(server, port);
 		this.connect(new InetSocketAddressWrapper(this.newSocketAddress(server,
-				port), this.serverOrderCount.incrementAndGet()), weight);
+				port), this.serverOrderCount.incrementAndGet(),weight,null));
 	}
 
 	/*
@@ -350,7 +352,7 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 			throw new IllegalArgumentException("weight<=0");
 		}
 		this.connect(new InetSocketAddressWrapper(inetSocketAddress,
-				this.serverOrderCount.incrementAndGet()), weight);
+				this.serverOrderCount.incrementAndGet(),weight,null));
 	}
 
 	/*
@@ -363,7 +365,7 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 		if (addresses != null && addresses.size() > 0) {
 			for (InetSocketAddress address : addresses) {
 				this.connect(new InetSocketAddressWrapper(address,
-						this.serverOrderCount.incrementAndGet()), 1);
+						this.serverOrderCount.incrementAndGet(),1,null));
 			}
 		}
 	}
@@ -378,7 +380,7 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 			throw new IllegalArgumentException("weight<=0");
 		}
 		this.connect(new InetSocketAddressWrapper(address,
-				this.serverOrderCount.incrementAndGet()), weight);
+				this.serverOrderCount.incrementAndGet(),weight,null));
 
 	}
 
@@ -448,7 +450,7 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 	}
 
 	private void connect(
-			final InetSocketAddressWrapper inetSocketAddressWrapper, int weight)
+			final InetSocketAddressWrapper inetSocketAddressWrapper)
 			throws IOException {
 		// creat connection pool
 		InetSocketAddress inetSocketAddress = inetSocketAddressWrapper
@@ -459,8 +461,7 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 			boolean connected = false;
 			Throwable throwable = null;
 			try {
-				future = this.connector.connect(inetSocketAddressWrapper,
-						weight);
+				future = this.connector.connect(inetSocketAddressWrapper);
 
 				if (!future.get(this.connectTimeout, TimeUnit.MILLISECONDS)) {
 					log.error("connect to "
@@ -500,7 +501,7 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 			// reconnecting.
 			if (!connected) {
 				this.connector.addToWatingQueue(new ReconnectRequest(
-						inetSocketAddressWrapper, 0, weight, this
+						inetSocketAddressWrapper, 0,  this
 								.getHealSessionInterval()));
 				log.error("Connect to "
 						+ SystemUtils.getRawAddress(inetSocketAddress) + ":"
@@ -664,7 +665,7 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 				new SerializingTranscoder());
 		this.start0();
 		this.connect(new InetSocketAddressWrapper(inetSocketAddress,
-				this.serverOrderCount.incrementAndGet()), weight);
+				this.serverOrderCount.incrementAndGet(),weight,null));
 	}
 
 	public XMemcachedClient(final InetSocketAddress inetSocketAddress)
@@ -695,6 +696,7 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 	 * @throws IOException
 	 */
 	@SuppressWarnings("unchecked")
+	@Deprecated
 	XMemcachedClient(MemcachedSessionLocator locator,
 			BufferAllocator allocator, Configuration conf,
 			Map<SocketOption, Object> socketOptions,
@@ -719,7 +721,7 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 		if (addressList != null) {
 			for (InetSocketAddress inetSocketAddress : addressList) {
 				this.connect(new InetSocketAddressWrapper(inetSocketAddress,
-						this.serverOrderCount.incrementAndGet()), 1);
+						this.serverOrderCount.incrementAndGet(),1,null));
 			}
 		}
 	}
@@ -782,7 +784,7 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 		if (addressList != null && weights != null) {
 			for (int i = 0; i < addressList.size(); i++) {
 				this.connect(new InetSocketAddressWrapper(addressList.get(i),
-						this.serverOrderCount.incrementAndGet()), weights[i]);
+						this.serverOrderCount.incrementAndGet(),weights[i],null));
 			}
 		}
 	}
@@ -830,7 +832,7 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 		this.start0();
 		for (InetSocketAddress inetSocketAddress : addressList) {
 			this.connect(new InetSocketAddressWrapper(inetSocketAddress,
-					this.serverOrderCount.incrementAndGet()), 1);
+					this.serverOrderCount.incrementAndGet(),1,null));
 
 		}
 	}
@@ -2394,6 +2396,11 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 		if (this.connector != null) {
 			this.connector.setFailureMode(failureMode);
 		}
+	}
+
+	public void setFlushBeforeUsingStandby(boolean flush) {
+		// TODO Auto-generated method stub
+
 	}
 
 	public boolean isFailureMode() {

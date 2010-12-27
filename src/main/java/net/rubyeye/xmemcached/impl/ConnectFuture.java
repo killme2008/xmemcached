@@ -36,24 +36,23 @@ import com.google.code.yanf4j.core.impl.FutureImpl;
  */
 public class ConnectFuture extends FutureImpl<Boolean> {
 
-	private final int weight;
 	private final InetSocketAddressWrapper inetSocketAddressWrapper;
 
-	public ConnectFuture(InetSocketAddressWrapper inetSocketAddressWrapper, int weight) {
+	public ConnectFuture(InetSocketAddressWrapper inetSocketAddressWrapper) {
 		super();
 		this.inetSocketAddressWrapper = inetSocketAddressWrapper;
-		this.weight = weight;
 	}
 
 	public final InetSocketAddress getInetSocketAddress() {
 		return this.inetSocketAddressWrapper.getInetSocketAddress();
 	}
-	
-	public final int getOrder(){
+
+	public final int getOrder() {
 		return this.inetSocketAddressWrapper.getOrder();
 	}
 
 	public final int getWeight() {
-		return this.weight;
+		return this.inetSocketAddressWrapper.getWeight();
 	}
+
 }

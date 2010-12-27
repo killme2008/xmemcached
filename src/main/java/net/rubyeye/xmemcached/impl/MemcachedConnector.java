@@ -108,8 +108,7 @@ public class MemcachedConnector extends SocketChannelController implements
 							.contains(address)) {
 						boolean connected = false;
 						Future<Boolean> future = MemcachedConnector.this
-								.connect(request.getInetSocketAddressWrapper(),
-										request.getWeight());
+								.connect(request.getInetSocketAddressWrapper());
 						request.setTries(request.getTries() + 1);
 						try {
 							log.warn("Trying to connect to "
@@ -346,8 +345,7 @@ public class MemcachedConnector extends SocketChannelController implements
 		this.waitingQueue.add(request);
 	}
 
-	public Future<Boolean> connect(InetSocketAddressWrapper addressWrapper,
-			int weight) throws IOException {
+	public Future<Boolean> connect(InetSocketAddressWrapper addressWrapper) throws IOException {
 		if (addressWrapper == null) {
 			throw new NullPointerException("Null Address");
 		}
@@ -355,12 +353,12 @@ public class MemcachedConnector extends SocketChannelController implements
 		this.removedAddrSet.remove(addressWrapper.getInetSocketAddress());
 		SocketChannel socketChannel = SocketChannel.open();
 		this.configureSocketChannel(socketChannel);
-		ConnectFuture future = new ConnectFuture(addressWrapper, weight);
+		ConnectFuture future = new ConnectFuture(addressWrapper);
 		if (!socketChannel.connect(addressWrapper.getInetSocketAddress())) {
 			this.selectorManager.registerChannel(socketChannel,
 					SelectionKey.OP_CONNECT, future);
 		} else {
-			this.addSession(this.createSession(socketChannel, weight,
+			this.addSession(this.createSession(socketChannel, addressWrapper.getWeight(),
 					addressWrapper.getOrder()));
 			future.setResult(true);
 		}

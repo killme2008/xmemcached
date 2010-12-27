@@ -24,12 +24,73 @@ package net.rubyeye.xmemcached.utils;
 
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Convenience utilities for simplifying common address parsing.
  */
 public class AddrUtil {
+
+	/**
+	 * Split a string in the form of
+	 * "host1:port1,host2:port2 host3:port3,host4:port4" into a Map of
+	 * InetSocketAddress instances suitable for instantiating a
+	 * MemcachedClient,map's key is the main memcached node,and value is the
+	 * standby node. Note that colon-delimited IPv6 is also supported. For
+	 * example: ::1:11211
+	 * 
+	 * @param s
+	 * @return
+	 */
+	public static Map<InetSocketAddress, InetSocketAddress> getAddressMap(
+			String s) {
+		if (s == null) {
+			throw new NullPointerException("Null host list");
+		}
+		if (s.trim().equals("")) {
+			throw new IllegalArgumentException("No hosts in list:  ``" + s
+					+ "''");
+		}
+		Map<InetSocketAddress, InetSocketAddress> result = new HashMap<InetSocketAddress, InetSocketAddress>();
+		for (String hosts : s.split(" ")) {
+			String[] nodes = hosts.split(",");
+
+			if (nodes.length < 1) {
+				throw new IllegalArgumentException("Invalid server ``" + hosts
+						+ "'' in list:  " + s);
+			}
+			String mainHost = nodes[0];
+			InetSocketAddress mainAddress = getInetSocketAddress(s, mainHost);
+			if (nodes.length >= 2) {
+				InetSocketAddress standByAddress = getInetSocketAddress(s,
+						nodes[1]);
+				result.put(mainAddress, standByAddress);
+			} else {
+				result.put(mainAddress, null);
+			}
+
+		}
+		assert !result.isEmpty() : "No addrs found";
+		return result;
+	}
+
+	private static InetSocketAddress getInetSocketAddress(String s,
+			String mainHost) {
+		int finalColon = mainHost.lastIndexOf(':');
+		if (finalColon < 1) {
+			throw new IllegalArgumentException("Invalid server ``" + mainHost
+					+ "'' in list:  " + s);
+
+		}
+		String hostPart = mainHost.substring(0, finalColon);
+		String portNum = mainHost.substring(finalColon + 1);
+
+		InetSocketAddress mainAddress = new InetSocketAddress(hostPart, Integer
+				.parseInt(portNum));
+		return mainAddress;
+	}
 
 	/**
 	 * Split a string in the form of "host:port host2:port" into a List of
