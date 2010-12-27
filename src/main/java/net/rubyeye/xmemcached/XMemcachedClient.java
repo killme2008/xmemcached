@@ -704,11 +704,9 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 			Map<InetSocketAddress, AuthInfo> map, int poolSize, String name)
 			throws IOException {
 		super();
-		if (addressMap == null) {
-			throw new IllegalArgumentException("Null address map");
-		}
 		this.setName(name);
-		this.optimiezeSetReadThreadCount(conf, addressMap.size());
+		this.optimiezeSetReadThreadCount(conf, addressMap == null ? 0
+				: addressMap.size());
 		this.buildConnector(locator, allocator, conf, socketOptions,
 				commandFactory, transcoder);
 		if (stateListeners != null) {
@@ -779,7 +777,8 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 			throw new IllegalArgumentException(
 					"weights.length is less than addressList.size()");
 		}
-		this.optimiezeSetReadThreadCount(conf, addressMap.size());
+		this.optimiezeSetReadThreadCount(conf, addressMap == null ? 0
+				: addressMap.size());
 		this.buildConnector(locator, allocator, conf, socketOptions,
 				commandFactory, transcoder);
 		if (stateListeners != null) {
