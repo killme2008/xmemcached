@@ -193,4 +193,24 @@ public interface MemcachedClientBuilder {
 	 */
 	public void setName(String name);
 
+	/**
+	 * Configure wheather to set client in failure mode.If set it to true,that
+	 * means you want to configure client in failure mode. Failure mode is that
+	 * when a memcached server is down,it would not taken from the server list
+	 * but marked as unavailable,and then further requests to this server will
+	 * be transformed to standby node if configured or throw an exception until
+	 * it comes back up.
+	 * 
+	 * @param failureMode
+	 *            true is to configure client in failure mode.
+	 */
+	public void setFailureMode(boolean failureMode);
+
+	/**
+	 * Returns if client is in failure mode.
+	 * 
+	 * @return
+	 */
+	public boolean isFailureMode();
+
 }

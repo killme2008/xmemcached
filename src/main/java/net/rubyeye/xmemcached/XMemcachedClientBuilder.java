@@ -46,6 +46,8 @@ public class XMemcachedClientBuilder implements MemcachedClientBuilder {
 
 	private String name;
 
+	private boolean failureMode;
+
 	public void addStateListener(MemcachedClientStateListener stateListener) {
 		this.stateListeners.add(stateListener);
 	}
@@ -118,6 +120,14 @@ public class XMemcachedClientBuilder implements MemcachedClientBuilder {
 				.setSessionIdleTimeout(MemcachedClient.DEFAULT_SESSION_IDLE_TIMEOUT);
 		configuration.setWriteThreadCount(0);
 		return configuration;
+	}
+
+	public boolean isFailureMode() {
+		return this.failureMode;
+	}
+
+	public void setFailureMode(boolean failureMode) {
+		this.failureMode = failureMode;
 	}
 
 	public final CommandFactory getCommandFactory() {
@@ -242,7 +252,7 @@ public class XMemcachedClientBuilder implements MemcachedClientBuilder {
 					this.bufferAllocator, this.configuration,
 					this.socketOptions, this.commandFactory, this.transcoder,
 					this.addressMap, this.stateListeners, this.authInfoMap,
-					this.connectionPoolSize, this.name);
+					this.connectionPoolSize, this.name, this.failureMode);
 
 		} else {
 			if (this.addressMap == null) {
@@ -256,7 +266,8 @@ public class XMemcachedClientBuilder implements MemcachedClientBuilder {
 					this.bufferAllocator, this.configuration,
 					this.socketOptions, this.commandFactory, this.transcoder,
 					this.addressMap, this.weights, this.stateListeners,
-					this.authInfoMap, this.connectionPoolSize, this.name);
+					this.authInfoMap, this.connectionPoolSize, this.name,
+					this.failureMode);
 		}
 		if (this.commandFactory.getProtocol() == Protocol.Kestrel) {
 			memcachedClient.setOptimizeGet(false);

@@ -701,9 +701,10 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 			CommandFactory commandFactory, Transcoder transcoder,
 			Map<InetSocketAddress, InetSocketAddress> addressMap,
 			List<MemcachedClientStateListener> stateListeners,
-			Map<InetSocketAddress, AuthInfo> map, int poolSize, String name)
+			Map<InetSocketAddress, AuthInfo> map, int poolSize, String name,boolean failureMode)
 			throws IOException {
 		super();
+		this.setFailureMode(failureMode);
 		this.setName(name);
 		this.optimiezeSetReadThreadCount(conf, addressMap == null ? 0
 				: addressMap.size());
@@ -755,8 +756,9 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 			Map<InetSocketAddress, InetSocketAddress> addressMap,
 			int[] weights, List<MemcachedClientStateListener> stateListeners,
 			Map<InetSocketAddress, AuthInfo> infoMap, int poolSize,
-			final String name) throws IOException {
+			final String name,boolean failureMode) throws IOException {
 		super();
+		this.setFailureMode(failureMode);
 		this.setName(name);
 		if (weights == null && addressMap != null) {
 			throw new IllegalArgumentException("Null weights");

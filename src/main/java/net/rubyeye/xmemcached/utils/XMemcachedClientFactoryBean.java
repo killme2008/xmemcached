@@ -71,6 +71,8 @@ public class XMemcachedClientFactoryBean implements FactoryBean {
 
 	private MemcachedClient memcachedClient;
 
+	private boolean failureMode;
+
 	public final CommandFactory getCommandFactory() {
 		return this.commandFactory;
 	}
@@ -89,6 +91,14 @@ public class XMemcachedClientFactoryBean implements FactoryBean {
 
 	public void setAuthInfoMap(Map<InetSocketAddress, AuthInfo> authInfoMap) {
 		this.authInfoMap = authInfoMap;
+	}
+
+	public boolean isFailureMode() {
+		return this.failureMode;
+	}
+
+	public void setFailureMode(boolean failureMode) {
+		this.failureMode = failureMode;
 	}
 
 	public String getName() {
@@ -159,7 +169,8 @@ public class XMemcachedClientFactoryBean implements FactoryBean {
 
 	public Object getObject() throws Exception {
 		this.checkAttribute();
-		Map<InetSocketAddress,InetSocketAddress> serverMap = this.getServerMap();
+		Map<InetSocketAddress, InetSocketAddress> serverMap = this
+				.getServerMap();
 		int[] weightsArray = this.getWeightsArray(serverMap);
 		MemcachedClientBuilder builder = this.newBuilder(serverMap,
 				weightsArray);
@@ -169,7 +180,8 @@ public class XMemcachedClientFactoryBean implements FactoryBean {
 	}
 
 	private MemcachedClientBuilder newBuilder(
-			Map<InetSocketAddress,InetSocketAddress> serverMap, int[] weightsArray) {
+			Map<InetSocketAddress, InetSocketAddress> serverMap,
+			int[] weightsArray) {
 		MemcachedClientBuilder builder;
 		if (weightsArray == null) {
 			builder = new XMemcachedClientBuilder(serverMap);
@@ -187,10 +199,12 @@ public class XMemcachedClientFactoryBean implements FactoryBean {
 		builder.setCommandFactory(this.commandFactory);
 		builder.setConnectionPoolSize(this.connectionPoolSize);
 		builder.setAuthInfoMap(this.authInfoMap);
+		builder.setFailureMode(this.failureMode);
 		builder.setName(this.name);
 	}
 
-	private int[] getWeightsArray(Map<InetSocketAddress,InetSocketAddress> serverMap) {
+	private int[] getWeightsArray(
+			Map<InetSocketAddress, InetSocketAddress> serverMap) {
 		int[] weightsArray = null;
 		if (serverMap != null && serverMap.size() > 0 && this.weights != null) {
 			if (this.weights.size() < serverMap.size()) {
@@ -205,8 +219,8 @@ public class XMemcachedClientFactoryBean implements FactoryBean {
 		return weightsArray;
 	}
 
-	private Map<InetSocketAddress,InetSocketAddress> getServerMap() {
-		Map<InetSocketAddress,InetSocketAddress> serverMap = null;
+	private Map<InetSocketAddress, InetSocketAddress> getServerMap() {
+		Map<InetSocketAddress, InetSocketAddress> serverMap = null;
 
 		if (this.servers != null && this.servers.length() > 0) {
 			serverMap = AddrUtil.getAddressMap(this.servers);
@@ -233,7 +247,7 @@ public class XMemcachedClientFactoryBean implements FactoryBean {
 		}
 	}
 
-	public void shutdown() throws IOException{
+	public void shutdown() throws IOException {
 		this.memcachedClient.shutdown();
 	}
 
