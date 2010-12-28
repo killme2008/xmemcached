@@ -726,7 +726,7 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 				this.connect(new InetSocketAddressWrapper(mainNodeAddr,
 						this.serverOrderCount.incrementAndGet(), 1, null));
 				if (standbyNodeAddr != null) {
-					this.connect(new InetSocketAddressWrapper(mainNodeAddr,
+					this.connect(new InetSocketAddressWrapper(standbyNodeAddr,
 							this.serverOrderCount.incrementAndGet(), 1,
 							mainNodeAddr));
 				}
@@ -801,7 +801,7 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 						this.serverOrderCount.incrementAndGet(), weights[i],
 						null));
 				if (standbyNodeAddr != null) {
-					this.connect(new InetSocketAddressWrapper(mainNodeAddr,
+					this.connect(new InetSocketAddressWrapper(standbyNodeAddr,
 							this.serverOrderCount.incrementAndGet(),
 							weights[i], mainNodeAddr));
 				}
