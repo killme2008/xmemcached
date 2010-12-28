@@ -359,26 +359,52 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 	 * @see net.rubyeye.xmemcached.MemcachedClient#addServer(java.lang.String)
 	 */
 	public final void addServer(String hostList) throws IOException {
-		List<InetSocketAddress> addresses = AddrUtil.getAddresses(hostList);
+		Map<InetSocketAddress, InetSocketAddress> addresses = AddrUtil
+				.getAddressMap(hostList);
 		if (addresses != null && addresses.size() > 0) {
-			for (InetSocketAddress address : addresses) {
-				this.connect(new InetSocketAddressWrapper(address,
+			for (Map.Entry<InetSocketAddress, InetSocketAddress> entry : addresses
+					.entrySet()) {
+				final InetSocketAddress mainNodeAddr = entry.getKey();
+				final InetSocketAddress standbyNodeAddr = entry.getValue();
+				this.connect(new InetSocketAddressWrapper(mainNodeAddr,
 						this.serverOrderCount.incrementAndGet(), 1, null));
+				if (standbyNodeAddr != null) {
+					this.connect(new InetSocketAddressWrapper(standbyNodeAddr,
+							this.serverOrderCount.incrementAndGet(), 1,
+							mainNodeAddr));
+				}
 			}
 		}
 	}
 
 	public void addOneServerWithWeight(String server, int weight)
 			throws IOException {
-		InetSocketAddress address = AddrUtil.getOneAddress(server);
-		if (address == null) {
+		Map<InetSocketAddress, InetSocketAddress> addresses = AddrUtil
+				.getAddressMap(server);
+		if (addresses == null) {
 			throw new IllegalArgumentException("Null Server");
+		}
+		if (addresses.size() != 1) {
+			throw new IllegalArgumentException(
+					"Please add one server at one time");
 		}
 		if (weight <= 0) {
 			throw new IllegalArgumentException("weight<=0");
 		}
-		this.connect(new InetSocketAddressWrapper(address,
-				this.serverOrderCount.incrementAndGet(), weight, null));
+		if (addresses != null && addresses.size() > 0) {
+			for (Map.Entry<InetSocketAddress, InetSocketAddress> entry : addresses
+					.entrySet()) {
+				final InetSocketAddress mainNodeAddr = entry.getKey();
+				final InetSocketAddress standbyNodeAddr = entry.getValue();
+				this.connect(new InetSocketAddressWrapper(mainNodeAddr,
+						this.serverOrderCount.incrementAndGet(), 1, null));
+				if (standbyNodeAddr != null) {
+					this.connect(new InetSocketAddressWrapper(standbyNodeAddr,
+							this.serverOrderCount.incrementAndGet(), 1,
+							mainNodeAddr));
+				}
+			}
+		}
 
 	}
 
@@ -425,10 +451,27 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 		List<InetSocketAddress> addresses = AddrUtil.getAddresses(hostList);
 		if (addresses != null && addresses.size() > 0) {
 			for (InetSocketAddress address : addresses) {
+				// Close main sessions
 				Queue<Session> sessionQueue = this.connector
 						.getSessionByAddress(address);
 				if (sessionQueue != null) {
 					for (Session session : sessionQueue) {
+						if (session != null) {
+							// Disable auto reconnection
+							((MemcachedSession) session)
+									.setAllowReconnect(false);
+							// Close connection
+							((MemcachedSession) session).quit();
+						}
+					}
+				}
+				// Close standby sessions
+				List<Session> standBySession = this.connector
+						.getStandbySessionListByMainNodeAddr(address);
+				if (standBySession != null) {
+					for (Session session : standBySession) {
+						this.connector.removeReconnectRequest(session
+								.getRemoteSocketAddress());
 						if (session != null) {
 							// Disable auto reconnection
 							((MemcachedSession) session)
@@ -701,8 +744,8 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 			CommandFactory commandFactory, Transcoder transcoder,
 			Map<InetSocketAddress, InetSocketAddress> addressMap,
 			List<MemcachedClientStateListener> stateListeners,
-			Map<InetSocketAddress, AuthInfo> map, int poolSize, String name,boolean failureMode)
-			throws IOException {
+			Map<InetSocketAddress, AuthInfo> map, int poolSize, String name,
+			boolean failureMode) throws IOException {
 		super();
 		this.setFailureMode(failureMode);
 		this.setName(name);
@@ -756,7 +799,7 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 			Map<InetSocketAddress, InetSocketAddress> addressMap,
 			int[] weights, List<MemcachedClientStateListener> stateListeners,
 			Map<InetSocketAddress, AuthInfo> infoMap, int poolSize,
-			final String name,boolean failureMode) throws IOException {
+			final String name, boolean failureMode) throws IOException {
 		super();
 		this.setFailureMode(failureMode);
 		this.setName(name);

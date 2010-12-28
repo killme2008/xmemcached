@@ -15,7 +15,8 @@ public interface XMemcachedClientMBean {
 	 *Add memcached servers
 	 * 
 	 * @param host
-	 *            a String in the form of "[host1]:[port1] [host2]:[port2]"
+	 *            a String in the form of
+	 *            "[host1]:[port1],[host2]:[port2] [host3]:[port3],[host4]:[port4]"
 	 */
 	public void addServer(String hostList) throws IOException;
 
@@ -23,7 +24,7 @@ public interface XMemcachedClientMBean {
 	 * Add a memcached server
 	 * 
 	 * @param server
-	 *            a String in the form of "[host1]:[port1]"
+	 *            a String in the form of "[host1]:[port1],[host2]:[port2]"
 	 * @param weight
 	 *            server's weight
 	 */
@@ -34,7 +35,7 @@ public interface XMemcachedClientMBean {
 	 * Remove memcached servers
 	 * 
 	 * @param host
-	 *            a string in the form of "[host1]:[port1] [host2]:[port2]"
+	 *            a string in the form of "[host1]:[port1],[host2]:[port2] [host3]:[port3],[host4]:[port4]"
 	 */
 	public void removeServer(String hostList);
 

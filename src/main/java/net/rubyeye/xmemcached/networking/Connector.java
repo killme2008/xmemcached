@@ -24,6 +24,7 @@ package net.rubyeye.xmemcached.networking;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
@@ -56,6 +57,8 @@ public interface Connector extends Controller {
 	public void removeSession(Session session);
 
 	public Queue<Session> getSessionByAddress(InetSocketAddress address);
+	
+	public List<Session> getStandbySessionListByMainNodeAddr(InetSocketAddress address);
 
 	public Set<Session> getSessionSet();
 
