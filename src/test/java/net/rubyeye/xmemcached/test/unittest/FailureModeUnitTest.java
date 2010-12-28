@@ -76,6 +76,7 @@ public class FailureModeUnitTest {
 			Thread.sleep(1000);
 			assertEquals("response from server2", client.get("a"));
 		} finally {
+			memServer1.stop();
 			memServer2.stop();
 			client.shutdown();
 		}
@@ -91,7 +92,6 @@ public class FailureModeUnitTest {
 
 		XMemcachedClientBuilder builder = new XMemcachedClientBuilder(AddrUtil
 				.getAddressMap("localhost:4799"));
-		// It must be in failure mode
 		builder.setFailureMode(true);
 		MemcachedClient client = builder.build();
 
@@ -111,6 +111,7 @@ public class FailureModeUnitTest {
 				assertTrue(true);
 			}
 		} finally {
+			memServer1.stop();
 			client.shutdown();
 		}
 
@@ -148,6 +149,7 @@ public class FailureModeUnitTest {
 				assertTrue(true);
 			}
 		} finally {
+			memServer1.stop();
 			memServer2.stop();
 			client.shutdown();
 		}
@@ -181,6 +183,7 @@ public class FailureModeUnitTest {
 				assertTrue(true);
 			}
 		} finally {
+			memServer1.stop();
 			client.shutdown();
 		}
 
@@ -212,6 +215,7 @@ public class FailureModeUnitTest {
 			Thread.sleep(1000);
 			assertEquals("response from server2", client.get("a"));
 		} finally {
+			memServer1.stop();
 			memServer2.stop();
 			client.shutdown();
 		}
