@@ -75,6 +75,72 @@ public class FailureModeUnitTest {
 			memServer1.stop();
 			Thread.sleep(1000);
 			assertEquals("response from server2", client.get("a"));
+			// restart server1
+			memServer1 = new TCPController();
+			memServer1.setHandler(new MockHandler("response from server1"));
+			memServer1.setCodecFactory(new TextLineCodecFactory());
+			memServer1.bind(new InetSocketAddress(4799));
+			Thread.sleep(5000);
+			assertEquals("response from server1", client.get("a"));
+		} finally {
+			memServer1.stop();
+			memServer2.stop();
+			client.shutdown();
+		}
+
+	}
+
+	@Test
+	public void testFailureMode_StandbyNodeDown_Recover() throws Exception {
+		TCPController memServer1 = new TCPController();
+		memServer1.setHandler(new MockHandler("response from server1"));
+		memServer1.setCodecFactory(new TextLineCodecFactory());
+		memServer1.bind(new InetSocketAddress(4799));
+
+		TCPController memServer2 = new TCPController();
+		memServer2.setHandler(new MockHandler("response from server2"));
+		memServer2.setCodecFactory(new TextLineCodecFactory());
+		memServer2.bind(new InetSocketAddress(4798));
+
+		XMemcachedClientBuilder builder = new XMemcachedClientBuilder(AddrUtil
+				.getAddressMap("localhost:4799,localhost:4798"));
+		// It must be in failure mode
+		builder.setFailureMode(true);
+		MemcachedClient client = builder.build();
+
+		client.setEnableHeartBeat(false);
+
+		try {
+			assertEquals("response from server1", client.get("a"));
+			assertEquals("response from server1", client.get("a"));
+			memServer1.stop();
+			Thread.sleep(1000);
+			assertEquals("response from server2", client.get("a"));
+			memServer2.stop();
+			Thread.sleep(1000);
+			try {
+				client.get("a");
+				fail();
+			} catch (MemcachedException e) {
+				assertEquals("127.0.0.1:4799 has been closed", e.getMessage());
+				// e.printStackTrace();
+			}
+			// restart server2
+			memServer2 = new TCPController();
+			memServer2.setHandler(new MockHandler("response from server2"));
+			memServer2.setCodecFactory(new TextLineCodecFactory());
+			memServer2.bind(new InetSocketAddress(4798));
+			Thread.sleep(5000);
+			assertEquals("response from server2", client.get("a"));
+
+			// restart server1
+			memServer1 = new TCPController();
+			memServer1.setHandler(new MockHandler("response from server1"));
+			memServer1.setCodecFactory(new TextLineCodecFactory());
+			memServer1.bind(new InetSocketAddress(4799));
+			Thread.sleep(10000);
+			assertEquals("response from server1", client.get("a"));
+
 		} finally {
 			memServer1.stop();
 			memServer2.stop();
