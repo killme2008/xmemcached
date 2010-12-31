@@ -11,7 +11,6 @@
  */
 package net.rubyeye.xmemcached.impl;
 
-import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -53,7 +52,7 @@ public class KetamaMemcachedSessionLocator extends
 	private transient volatile TreeMap<Long, List<Session>> ketamaSessions = new TreeMap<Long, List<Session>>();
 	private final HashAlgorithm hashAlg;
 	private volatile int maxTries;
-	private final Random random = new SecureRandom();
+	private final Random random = new Random();
 
 	public KetamaMemcachedSessionLocator() {
 		this.hashAlg = HashAlgorithm.KETAMA_HASH;
