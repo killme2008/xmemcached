@@ -248,7 +248,9 @@ public class XMemcachedClientFactoryBean implements FactoryBean {
 	}
 
 	public void shutdown() throws IOException {
-		this.memcachedClient.shutdown();
+		if (this.memcachedClient != null) {
+			this.memcachedClient.shutdown();
+		}
 	}
 
 	@SuppressWarnings("unchecked")
