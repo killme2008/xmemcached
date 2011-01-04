@@ -5,6 +5,15 @@ Xmemcached Change log
 
 
 *******************************************
+2010-01-04
+-----Xmemcached 1.3 released-------------------------
+
+1.Add failure mode for client.
+2.You could configure a standby node for a memcached server now.
+3.Log4j dependencies is optional now.
+4.Fixed issue 107.
+
+
 2010-10-17
 -----Xmemcached 1.2.6 Released------------------------
 This is a minor version,trying to fix some bugs and turnning for performance:
