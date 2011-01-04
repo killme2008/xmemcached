@@ -122,7 +122,7 @@ public class FailureModeUnitTest {
 				client.get("a");
 				fail();
 			} catch (MemcachedException e) {
-				assertEquals("127.0.0.1:4799 has been closed", e.getMessage());
+				assertEquals("Session(127.0.0.1:4799) has been closed", e.getMessage());
 				// e.printStackTrace();
 			}
 			// restart server2
@@ -173,7 +173,7 @@ public class FailureModeUnitTest {
 				client.get("a");
 				fail();
 			} catch (MemcachedException e) {
-				assertEquals("127.0.0.1:4799 has been closed", e.getMessage());
+				assertEquals("Session(127.0.0.1:4799) has been closed", e.getMessage());
 				assertTrue(true);
 			}
 		} finally {

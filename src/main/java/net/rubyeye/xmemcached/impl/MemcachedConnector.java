@@ -459,7 +459,7 @@ public class MemcachedConnector extends SocketChannelController implements
 			session = this.findStandbySession(session);
 		}
 		if (session.isClosed()) {
-			throw new MemcachedException("Session ("
+			throw new MemcachedException("Session("
 					+ SystemUtils.getRawAddress(session
 							.getRemoteSocketAddress()) + ":"
 					+ session.getRemoteSocketAddress().getPort()
