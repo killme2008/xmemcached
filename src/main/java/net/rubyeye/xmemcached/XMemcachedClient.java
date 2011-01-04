@@ -644,6 +644,9 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 		this.connector.setCodecFactory(new MemcachedCodecFactory());
 		this.connector.setSessionTimeout(-1);
 		this.connector.setSocketOptions(socketOptions);
+		if (this.isFailureMode()) {
+			log.warn("XMemcachedClient in failure mode.");
+		}
 		this.connector.setFailureMode(this.failureMode);
 		this.sessionLocator.setFailureMode(this.failureMode);
 	}
@@ -1190,7 +1193,7 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 	}
 
 	/**
-	 * 对key按照hash值进行分类，发送到不同节点
+	 * Hash key to servers
 	 * 
 	 * @param keyCollections
 	 * @return

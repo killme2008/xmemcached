@@ -329,12 +329,15 @@ public class MemcachedConnector extends SocketChannelController implements
 	}
 
 	private void removeMainSession(Session session) {
-		// If it was in failure mode,we don't remove it from list.
-		if (this.failureMode) {
-			return;
-		}
 		InetSocketAddress remoteSocketAddress = session
 				.getRemoteSocketAddress();
+		// If it was in failure mode,we don't remove closed session from list.
+		if (this.failureMode) {
+			log.warn("Client in failure mode,we don't remove session "
+					+ SystemUtils.getRawAddress(remoteSocketAddress) + ":"
+					+ remoteSocketAddress.getPort());
+			return;
+		}
 		log.warn("Remove a session: "
 				+ SystemUtils.getRawAddress(remoteSocketAddress) + ":"
 				+ remoteSocketAddress.getPort());
@@ -456,11 +459,11 @@ public class MemcachedConnector extends SocketChannelController implements
 			session = this.findStandbySession(session);
 		}
 		if (session.isClosed()) {
-			throw new MemcachedException(SystemUtils.getRawAddress(session
-					.getRemoteSocketAddress())
-					+ ":"
+			throw new MemcachedException("Session ("
+					+ SystemUtils.getRawAddress(session
+							.getRemoteSocketAddress()) + ":"
 					+ session.getRemoteSocketAddress().getPort()
-					+ " has been closed");
+					+ ") has been closed");
 		}
 		if (session.isAuthFailed()) {
 			throw new MemcachedException("Auth failed to connection "
