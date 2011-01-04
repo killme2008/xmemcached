@@ -38,7 +38,7 @@ public class AddrUtil {
 	 * "host1:port1,host2:port2 host3:port3,host4:port4" into a Map of
 	 * InetSocketAddress instances suitable for instantiating a
 	 * MemcachedClient,map's key is the main memcached node,and value is the
-	 * standby node. Note that colon-delimited IPv6 is also supported. For
+	 * standby node for main node. Note that colon-delimited IPv6 is also supported. For
 	 * example: ::1:11211
 	 * 
 	 * @param s
