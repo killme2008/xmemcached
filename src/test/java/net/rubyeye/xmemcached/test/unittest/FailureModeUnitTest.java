@@ -275,11 +275,11 @@ public class FailureModeUnitTest {
 
 		try {
 
-			assertEquals("response from server1", client.get("a"));
-			assertEquals("response from server1", client.get("a"));
-			memServer1.stop();
-			Thread.sleep(1000);
 			assertEquals("response from server2", client.get("a"));
+			assertEquals("response from server2", client.get("a"));
+			memServer2.stop();
+			Thread.sleep(1000);
+			assertEquals("response from server1", client.get("a"));
 		} finally {
 			memServer1.stop();
 			memServer2.stop();
