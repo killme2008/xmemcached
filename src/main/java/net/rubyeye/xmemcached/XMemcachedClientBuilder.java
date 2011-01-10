@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -31,7 +32,7 @@ public class XMemcachedClientBuilder implements MemcachedClientBuilder {
 	private MemcachedSessionLocator sessionLocator = new ArrayMemcachedSessionLocator();
 	private BufferAllocator bufferAllocator = new SimpleBufferAllocator();
 	private Configuration configuration = getDefaultConfiguration();
-	private Map<InetSocketAddress, InetSocketAddress> addressMap = new HashMap<InetSocketAddress, InetSocketAddress>();
+	private Map<InetSocketAddress, InetSocketAddress> addressMap = new LinkedHashMap<InetSocketAddress, InetSocketAddress>();
 
 	private int[] weights;
 

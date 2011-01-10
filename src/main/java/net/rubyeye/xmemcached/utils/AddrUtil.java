@@ -25,6 +25,7 @@ package net.rubyeye.xmemcached.utils;
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -53,7 +54,7 @@ public class AddrUtil {
 			throw new IllegalArgumentException("No hosts in list:  ``" + s
 					+ "''");
 		}
-		Map<InetSocketAddress, InetSocketAddress> result = new HashMap<InetSocketAddress, InetSocketAddress>();
+		Map<InetSocketAddress, InetSocketAddress> result = new LinkedHashMap<InetSocketAddress, InetSocketAddress>();
 		for (String hosts : s.split(" ")) {
 			String[] nodes = hosts.split(",");
 
