@@ -1,9 +1,11 @@
 package net.rubyeye.xmemcached;
 
+import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.zip.CRC32;
 
+import net.rubyeye.xmemcached.exception.MemcachedClientException;
 import net.rubyeye.xmemcached.utils.ByteUtils;
 
 /**
@@ -62,7 +64,14 @@ public enum HashAlgorithm {
 	/**
 	 * From lua source,it is used for long key
 	 */
-	LUA_HASH, ELECTION_HASH;
+	LUA_HASH,
+
+	ELECTION_HASH,
+	/**
+	 * The Jenkins One-at-a-time hash ,please see
+	 * http://www.burtleburtle.net/bob/hash/doobs.html
+	 */
+	ONE_AT_A_TIME;
 
 	private static final long FNV_64_INIT = 0xcbf29ce484222325L;
 	private static final long FNV_64_PRIME = 0x100000001b3L;
@@ -163,6 +172,21 @@ public enum HashAlgorithm {
 			rv = k.length();
 			for (int len = k.length(); len >= step; len -= step) {
 				rv = rv ^ (rv << 5) + (rv >> 2) + k.charAt(len - 1);
+			}
+		case ONE_AT_A_TIME:
+			try {
+				int hash = 0;
+				for (byte bt : k.getBytes("utf-8")) {
+					hash += (bt & 0xFF);
+					hash += (hash << 10);
+					hash ^= (hash >>> 6);
+				}
+				hash += (hash << 3);
+				hash ^= (hash >>> 11);
+				hash += (hash << 15);
+				return hash;
+			} catch (UnsupportedEncodingException e) {
+				throw new IllegalStateException("Hash function error", e);
 			}
 		default:
 			assert false;
