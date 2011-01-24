@@ -776,6 +776,12 @@ public abstract class XMemcachedClientTest extends TestCase {
 		assertEquals(1, memcachedClient.incr("a", 5, 1, 1000, 1));
 		Thread.sleep(2000);
 		assertNull(memcachedClient.get("a"));
+		
+		//key is chinese
+		assertEquals(1, memcachedClient.incr("测试", 5, 1, 1000, 0));
+		assertEquals(6, memcachedClient.incr("测试", 5));
+		assertEquals(10, memcachedClient.incr("测试", 4));
+		
 		// blank key
 		new BlankKeyChecker() {
 			@Override

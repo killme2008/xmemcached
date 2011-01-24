@@ -32,10 +32,12 @@ import net.rubyeye.xmemcached.monitor.Constants;
 import net.rubyeye.xmemcached.utils.ByteUtils;
 
 import com.google.code.yanf4j.buffer.IoBuffer;
+
 /**
  * Incr/Decr command for text protocol
+ * 
  * @author dennis
- *
+ * 
  */
 public class TextIncrDecrCommand extends Command {
 
@@ -59,7 +61,6 @@ public class TextIncrDecrCommand extends Command {
 		this.amount = increment;
 	}
 
-
 	@Override
 	public final boolean decode(MemcachedTCPSession session, ByteBuffer buffer) {
 		String line = ByteUtils.nextLine(buffer);
@@ -82,9 +83,10 @@ public class TextIncrDecrCommand extends Command {
 	@Override
 	public final void encode() {
 		byte[] numBytes = ByteUtils.getBytes(String.valueOf(this.getAmount()));
-		byte[] cmdBytes = this.commandType == CommandType.INCR ? Constants.INCR : Constants.DECR;
-		int capacity = cmdBytes.length + 2 + this.key.length()
-				+ numBytes.length + Constants.CRLF.length;
+		byte[] cmdBytes = this.commandType == CommandType.INCR ? Constants.INCR
+				: Constants.DECR;
+		int capacity = cmdBytes.length + 2 + this.keyBytes.length
+				+ +numBytes.length + Constants.CRLF.length;
 		if (isNoreply()) {
 			capacity += 1 + Constants.NO_REPLY.length();
 		}
