@@ -1,5 +1,6 @@
 <?xml version="1.0"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<parent>
 		<groupId>org.sonatype.oss</groupId>
 		<artifactId>oss-parent</artifactId>
@@ -28,20 +29,14 @@
 			<url>http://www.apache.org/licenses/LICENSE-2.0</url>
 		</license>
 	</licenses>
+
 	<scm>
-		<connection>scm:svn:https://xmemcached.googlecode.com/svn/trunk</connection>
-		<developerConnection>scm:svn:https://xmemcached.googlecode.com/svn/trunk</developerConnection>
-		<url>https://xmemcached.googlecode.com/svn/trunk</url>
+		<connection>scm:git:git@github.com:killme2008/xmemcached.git</connection>
+		<developerConnection>scm:git:git@github.com:killme2008/xmemcached.git</developerConnection>
+		<url>git@github.com:killme2008/xmemcached.git</url>
 	</scm>
 
 	<build>
-		<extensions>
-			<extension>
-				<groupId>org.jvnet.wagon-svn</groupId>
-				<artifactId>wagon-svn</artifactId>
-				<version>1.8</version>
-			</extension>
-		</extensions>
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
