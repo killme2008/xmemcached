@@ -555,6 +555,7 @@ public class MemcachedConnector extends SocketChannelController implements
 		this.connectionPoolSize = poolSize;
 		this.soLingerOn = true;
 		this.commandFactory = commandFactory;
+		this.setSelectorPoolSize(2 * Runtime.getRuntime().availableProcessors());
 		// setDispatchMessageThreadPoolSize(Runtime.getRuntime().
 		// availableProcessors());
 	}
