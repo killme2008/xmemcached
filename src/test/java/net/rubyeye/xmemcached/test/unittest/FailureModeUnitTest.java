@@ -1,6 +1,8 @@
 package net.rubyeye.xmemcached.test.unittest;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.net.InetSocketAddress;
 
@@ -91,6 +93,52 @@ public class FailureModeUnitTest {
 	}
 
 	@Test
+	public void testFailureMode_OneServerDownOnStartup() throws Exception {
+
+		TCPController memServer2 = new TCPController();
+		memServer2.setHandler(new MockHandler("response from server2"));
+		memServer2.setCodecFactory(new TextLineCodecFactory());
+		memServer2.bind(new InetSocketAddress(4798));
+
+		XMemcachedClientBuilder builder = new XMemcachedClientBuilder(AddrUtil
+				.getAddressMap("localhost:4799 localhost:4798"));
+		// It must be in failure mode
+		builder.setFailureMode(true);
+		MemcachedClient client = builder.build();
+
+		client.setEnableHeartBeat(false);
+		TCPController memServer1 = null;
+		try {
+
+			assertEquals("response from server2", client.get("a"));
+			try {
+				assertEquals("response from server1", client.get("b"));
+				fail();
+			} catch (MemcachedException e) {
+				assertEquals("Session(127.0.0.1:4799) has been closed", e
+						.getMessage());
+			}
+			assertEquals(1, client.getConnector().getSessionByAddress(
+					AddrUtil.getOneAddress("localhost:4799")).size());
+			memServer1 = new TCPController();
+			memServer1.setHandler(new MockHandler("response from server1"));
+			memServer1.setCodecFactory(new TextLineCodecFactory());
+			memServer1.bind(new InetSocketAddress(4799));
+			Thread.sleep(5000);
+			assertEquals(1, client.getConnector().getSessionByAddress(
+					AddrUtil.getOneAddress("localhost:4799")).size());
+			assertEquals("response from server2", client.get("a"));
+			assertEquals("response from server1", client.get("b"));
+		} finally {
+			if (memServer1 != null)
+				memServer1.stop();
+			memServer2.stop();
+			client.shutdown();
+		}
+
+	}
+
+	@Test
 	public void testFailureMode_StandbyNodeDown_Recover() throws Exception {
 		TCPController memServer1 = new TCPController();
 		memServer1.setHandler(new MockHandler("response from server1"));
@@ -122,7 +170,8 @@ public class FailureModeUnitTest {
 				client.get("a");
 				fail();
 			} catch (MemcachedException e) {
-				assertEquals("Session(127.0.0.1:4799) has been closed", e.getMessage());
+				assertEquals("Session(127.0.0.1:4799) has been closed", e
+						.getMessage());
 				// e.printStackTrace();
 			}
 			// restart server2
@@ -173,7 +222,8 @@ public class FailureModeUnitTest {
 				client.get("a");
 				fail();
 			} catch (MemcachedException e) {
-				assertEquals("Session(127.0.0.1:4799) has been closed", e.getMessage());
+				assertEquals("Session(127.0.0.1:4799) has been closed", e
+						.getMessage());
 				assertTrue(true);
 			}
 		} finally {

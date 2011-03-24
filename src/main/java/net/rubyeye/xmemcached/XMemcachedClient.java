@@ -45,6 +45,7 @@ import net.rubyeye.xmemcached.command.ServerAddressAware;
 import net.rubyeye.xmemcached.command.TextCommandFactory;
 import net.rubyeye.xmemcached.exception.MemcachedException;
 import net.rubyeye.xmemcached.impl.ArrayMemcachedSessionLocator;
+import net.rubyeye.xmemcached.impl.ClosedMemcachedTCPSession;
 import net.rubyeye.xmemcached.impl.KeyIteratorImpl;
 import net.rubyeye.xmemcached.impl.MemcachedClientStateListenerAdapter;
 import net.rubyeye.xmemcached.impl.MemcachedConnector;
@@ -84,7 +85,7 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 			.getLogger(XMemcachedClient.class);
 	protected MemcachedSessionLocator sessionLocator;
 	private volatile boolean shutdown;
-	protected Connector connector;
+	protected MemcachedConnector connector;
 	@SuppressWarnings("unchecked")
 	private Transcoder transcoder;
 	private boolean sanitizeKeys;
@@ -542,6 +543,11 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 			// If it is not connected,it will be added to waiting queue for
 			// reconnecting.
 			if (!connected) {
+				// If we use failure mode, add a mock session at first
+				if (this.failureMode) {
+					this.connector.addSession(new ClosedMemcachedTCPSession(
+							inetSocketAddressWrapper));
+				}
 				this.connector.addToWatingQueue(new ReconnectRequest(
 						inetSocketAddressWrapper, 0, this
 								.getHealSessionInterval()));
@@ -651,7 +657,7 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 		this.sessionLocator.setFailureMode(this.failureMode);
 	}
 
-	protected Connector newConnector(BufferAllocator bufferAllocator,
+	protected MemcachedConnector newConnector(BufferAllocator bufferAllocator,
 			Configuration configuration,
 			MemcachedSessionLocator memcachedSessionLocator,
 			CommandFactory commandFactory, int i) {
@@ -1749,12 +1755,12 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 	 */
 	public final boolean delete(final String key, final int time)
 			throws TimeoutException, InterruptedException, MemcachedException {
-		return this.delete0(key, time, false,this.opTimeout);
+		return this.delete0(key, time, false, this.opTimeout);
 	}
 
 	public boolean delete(String key, long opTimeout) throws TimeoutException,
 			InterruptedException, MemcachedException {
-		return this.delete0(key, 0, false,opTimeout);
+		return this.delete0(key, 0, false, opTimeout);
 	}
 
 	/**
@@ -1768,7 +1774,7 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 	public final void deleteWithNoReply(final String key, final int time)
 			throws InterruptedException, MemcachedException {
 		try {
-			this.delete0(key, time, true,this.opTimeout);
+			this.delete0(key, time, true, this.opTimeout);
 		} catch (TimeoutException e) {
 			throw new MemcachedException(e);
 		}
@@ -1779,8 +1785,9 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 		this.deleteWithNoReply(key, 0);
 	}
 
-	private boolean delete0(String key, final int time, boolean noreply,long opTimeout)
-			throws MemcachedException, InterruptedException, TimeoutException {
+	private boolean delete0(String key, final int time, boolean noreply,
+			long opTimeout) throws MemcachedException, InterruptedException,
+			TimeoutException {
 		key = this.sanitizeKey(key);
 		final byte[] keyBytes = ByteUtils.getBytes(key);
 		ByteUtils.checkKey(keyBytes);

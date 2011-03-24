@@ -205,7 +205,7 @@ public class MemcachedConnector extends SocketChannelController implements
 	protected final ConcurrentHashMap<InetSocketAddress, Queue<Session>> sessionMap = new ConcurrentHashMap<InetSocketAddress, Queue<Session>>();
 
 	public synchronized void addSession(Session session) {
-		MemcachedTCPSession tcpSession = (MemcachedTCPSession) session;
+		MemcachedSession tcpSession = (MemcachedSession) session;
 		InetSocketAddressWrapper addrWrapper = tcpSession
 				.getInetSocketAddressWrapper();
 
@@ -448,7 +448,7 @@ public class MemcachedConnector extends SocketChannelController implements
 	private final Random random = new Random();
 
 	public void send(final Command msg) throws MemcachedException {
-		MemcachedTCPSession session = (MemcachedTCPSession) this
+		MemcachedSession session = (MemcachedSession) this
 				.findSessionByKey(msg.getKey());
 		if (session == null) {
 			throw new MemcachedException(
@@ -472,7 +472,7 @@ public class MemcachedConnector extends SocketChannelController implements
 		session.write(msg);
 	}
 
-	private MemcachedTCPSession findStandbySession(MemcachedTCPSession session) {
+	private MemcachedSession findStandbySession(MemcachedSession session) {
 		if (this.failureMode) {
 			List<Session> sessionList = this
 					.getStandbySessionListByMainNodeAddr(session

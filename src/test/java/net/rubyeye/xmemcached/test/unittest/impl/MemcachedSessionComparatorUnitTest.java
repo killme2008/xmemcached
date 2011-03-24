@@ -37,6 +37,16 @@ public class MemcachedSessionComparatorUnitTest extends TestCase {
 
 		}
 
+		public boolean isAuthFailed() {
+			// TODO Auto-generated method stub
+			return false;
+		}
+
+		public void setAuthFailed(boolean authFailed) {
+			// TODO Auto-generated method stub
+			
+		}
+
 		public Future<Boolean> asyncWrite(Object packet) {
 			// TODO Auto-generated method stub
 			return null;
