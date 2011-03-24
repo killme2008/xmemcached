@@ -677,6 +677,21 @@ public interface MemcachedClient {
 			throws TimeoutException, InterruptedException, MemcachedException;
 
 	/**
+	 * Delete key's date item from memcached
+	 * 
+	 * @param key
+	 * @param opTimeout
+	 *            Operation timeout
+	 * @return
+	 * @throws TimeoutException
+	 * @throws InterruptedException
+	 * @throws MemcachedException
+	 * @since 1.3.2
+	 */
+	public abstract boolean delete(final String key, long opTimeout)
+			throws TimeoutException, InterruptedException, MemcachedException;
+
+	/**
 	 * Get all connected memcached servers's versions.
 	 * 
 	 * @return

@@ -1749,7 +1749,12 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 	 */
 	public final boolean delete(final String key, final int time)
 			throws TimeoutException, InterruptedException, MemcachedException {
-		return this.delete0(key, time, false);
+		return this.delete0(key, time, false,this.opTimeout);
+	}
+
+	public boolean delete(String key, long opTimeout) throws TimeoutException,
+			InterruptedException, MemcachedException {
+		return this.delete0(key, 0, false,opTimeout);
 	}
 
 	/**
@@ -1763,7 +1768,7 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 	public final void deleteWithNoReply(final String key, final int time)
 			throws InterruptedException, MemcachedException {
 		try {
-			this.delete0(key, time, true);
+			this.delete0(key, time, true,this.opTimeout);
 		} catch (TimeoutException e) {
 			throw new MemcachedException(e);
 		}
@@ -1774,7 +1779,7 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 		this.deleteWithNoReply(key, 0);
 	}
 
-	private boolean delete0(String key, final int time, boolean noreply)
+	private boolean delete0(String key, final int time, boolean noreply,long opTimeout)
 			throws MemcachedException, InterruptedException, TimeoutException {
 		key = this.sanitizeKey(key);
 		final byte[] keyBytes = ByteUtils.getBytes(key);
@@ -1783,7 +1788,7 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 				keyBytes, time, noreply);
 		this.sendCommand(command);
 		if (!command.isNoreply()) {
-			this.latchWait(command, this.opTimeout);
+			this.latchWait(command, opTimeout);
 			command.getIoBuffer().free();
 			this.checkException(command);
 			if (command.getResult() == null) {

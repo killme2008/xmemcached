@@ -574,6 +574,11 @@ public abstract class XMemcachedClientTest extends TestCase {
 		assertEquals("dennis", memcachedClient.get("name"));
 		assertTrue(memcachedClient.delete("name"));
 		assertNull(memcachedClient.get("name"));
+		memcachedClient.set("name", 0, "dennis");
+		assertEquals("dennis", memcachedClient.get("name"));
+		assertTrue(memcachedClient.delete("name",2000L));
+		assertNull(memcachedClient.get("name"));
+		
 		// add,replace success
 		assertTrue(memcachedClient.add("name", 0, "zhuang"));
 		assertTrue(memcachedClient.replace("name", 0, "zhuang"));
