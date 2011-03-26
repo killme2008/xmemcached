@@ -31,10 +31,12 @@ import net.rubyeye.xmemcached.monitor.Constants;
 import net.rubyeye.xmemcached.utils.ByteUtils;
 
 import com.google.code.yanf4j.buffer.IoBuffer;
+
 /**
  * Verbosity command for text protocol
+ * 
  * @author dennis
- *
+ * 
  */
 public class TextVerbosityCommand extends VerbosityCommand {
 
@@ -70,8 +72,8 @@ public class TextVerbosityCommand extends VerbosityCommand {
 		final byte[] levelBytes = ByteUtils
 				.getBytes(String.valueOf(this.level));
 		if (isNoreply()) {
-			this.ioBuffer = IoBuffer.allocate(2 + 1 + VERBOSITY.length()
-					+ levelBytes.length + 1 + Constants.NO_REPLY.length());
+			this.ioBuffer = IoBuffer.allocate(4 + VERBOSITY.length()
+					+ levelBytes.length + Constants.NO_REPLY.length);
 			ByteUtils.setArguments(this.ioBuffer, VERBOSITY, levelBytes,
 					Constants.NO_REPLY);
 		} else {

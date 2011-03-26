@@ -66,7 +66,6 @@ public class Optimizer implements OptimizerMBean, MemcachedOptimizer {
 	private int mergeFactor = DEFAULT_MERGE_FACTOR; // default merge factor;
 	private boolean optimiezeGet = true;
 	private boolean optimiezeMergeBuffer = true;
-	private BufferAllocator bufferAllocator;
 	private static final Logger log = LoggerFactory.getLogger(Optimizer.class);
 	private Protocol protocol = Protocol.Binary;
 
@@ -79,12 +78,8 @@ public class Optimizer implements OptimizerMBean, MemcachedOptimizer {
 		this.protocol = protocol;
 	}
 
-	public BufferAllocator getBufferAllocator() {
-		return bufferAllocator;
-	}
-
 	public void setBufferAllocator(BufferAllocator bufferAllocator) {
-		this.bufferAllocator = bufferAllocator;
+
 	}
 
 	public int getMergeFactor() {
@@ -223,19 +218,18 @@ public class Optimizer implements OptimizerMBean, MemcachedOptimizer {
 
 		}
 		if (commands.size() > 1) {
-			// ArrayIoBuffer arrayBuffer = new ArrayIoBuffer(buffers);
-			IoBuffer gatherBuffer = IoBuffer.allocate(totalBytes);
+			byte[] buf = new byte[totalBytes];
+			int offset = 0;
 			for (Command command : commands) {
-				gatherBuffer.put(command.getIoBuffer());
+				byte[] ba = command.getIoBuffer().array();
+				System.arraycopy(ba, 0, buf, offset, ba.length);
+				offset += ba.length;
 				if (command != lastCommand
 						&& (!command.isNoreply() || command instanceof BaseBinaryCommand)) {
 					executingCmds.add(command);
 				}
 			}
-			// arrayBuffer.gathering(gatherBuffer);
-			gatherBuffer.flip();
-			lastCommand.setIoBuffer(gatherBuffer);
-
+			lastCommand.setIoBuffer(IoBuffer.wrap(buf));
 		}
 		return lastCommand;
 	}
@@ -263,20 +257,47 @@ public class Optimizer implements OptimizerMBean, MemcachedOptimizer {
 	}
 
 	static class KeyStringCollector implements CommandCollector {
-		final StringBuilder key = new StringBuilder();
+		char[] buf = new char[64];
+		int count = 0;
 		boolean wasFirst = true;
 
 		public Object getResult() {
-			return key.toString();
+			return new String(buf, 0, count);
 		}
 
 		public void visit(Command command) {
 			if (wasFirst) {
-				key.append(command.getKey());
+				append(command.getKey());
 				wasFirst = false;
 			} else {
-				key.append(" ").append(command.getKey());
+				append(" ");
+				append(command.getKey());
 			}
+		}
+
+		private void expandCapacity(int minimumCapacity) {
+			int newCapacity = (buf.length + 1) * 2;
+			if (newCapacity < 0) {
+				newCapacity = Integer.MAX_VALUE;
+			} else if (minimumCapacity > newCapacity) {
+				newCapacity = minimumCapacity;
+			}
+			char[] copy = new char[newCapacity];
+			System
+					.arraycopy(buf, 0, copy, 0, Math.min(buf.length,
+							newCapacity));
+			buf = copy;
+		}
+
+		private void append(String str) {
+			int len = str.length();
+			if (len == 0)
+				return;
+			int newCount = count + len;
+			if (newCount > buf.length)
+				expandCapacity(newCount);
+			str.getChars(0, len, buf, count);
+			count = newCount;
 		}
 
 		public void finish() {
@@ -288,18 +309,20 @@ public class Optimizer implements OptimizerMBean, MemcachedOptimizer {
 
 	private static class BinaryGetQCollector implements CommandCollector {
 		LinkedList<IoBuffer> bufferList = new LinkedList<IoBuffer>();
-		int totalLength;
+		int totalBytes;
 		Command prevCommand;
 
 		public Object getResult() {
-			IoBuffer mergedBuffer = IoBuffer.allocate(totalLength);
+			byte[] buf = new byte[totalBytes];
+			int offset = 0;
 			for (IoBuffer buffer : bufferList) {
-				mergedBuffer.put(buffer);
+				byte[] ba = buffer.array();
+				System.arraycopy(ba, 0, buf, offset, ba.length);
+				offset += ba.length;
 			}
-			mergedBuffer.flip();
 			BinaryGetMultiCommand resultCommand = new BinaryGetMultiCommand(
 					null, CommandType.GET_MANY, new CountDownLatch(1));
-			resultCommand.setIoBuffer(mergedBuffer);
+			resultCommand.setIoBuffer(IoBuffer.wrap(buf));
 			return resultCommand;
 		}
 
@@ -307,11 +330,11 @@ public class Optimizer implements OptimizerMBean, MemcachedOptimizer {
 			// Encode prev command
 			if (prevCommand != null) {
 				// first n-1 send getq command
-				Command getqCommand = new BinaryGetCommand(prevCommand
-						.getKey(), prevCommand.getKeyBytes(), null, null,
-						OpCode.GET_KEY_QUIETLY, true);
+				Command getqCommand = new BinaryGetCommand(
+						prevCommand.getKey(), prevCommand.getKeyBytes(), null,
+						null, OpCode.GET_KEY_QUIETLY, true);
 				getqCommand.encode();
-				totalLength += getqCommand.getIoBuffer().remaining();
+				totalBytes += getqCommand.getIoBuffer().remaining();
 				bufferList.add(getqCommand.getIoBuffer());
 			}
 			prevCommand = command;
@@ -320,13 +343,13 @@ public class Optimizer implements OptimizerMBean, MemcachedOptimizer {
 		public void finish() {
 			// prev command is the last command,last command must be getk,ensure
 			// getq commands send response back
-			Command lastGetKCommand = new BinaryGetCommand(prevCommand
-					.getKey(), prevCommand.getKeyBytes(),
+			Command lastGetKCommand = new BinaryGetCommand(
+					prevCommand.getKey(), prevCommand.getKeyBytes(),
 					CommandType.GET_ONE, new CountDownLatch(1), OpCode.GET_KEY,
 					false);
 			lastGetKCommand.encode();
 			bufferList.add(lastGetKCommand.getIoBuffer());
-			totalLength += lastGetKCommand.getIoBuffer().remaining();
+			totalBytes += lastGetKCommand.getIoBuffer().remaining();
 		}
 
 	}
@@ -411,16 +434,14 @@ public class Optimizer implements OptimizerMBean, MemcachedOptimizer {
 			byte[] keyBytes = ByteUtils.getBytes(resultKey);
 			byte[] cmdBytes = commandType == CommandType.GET_ONE ? Constants.GET
 					: Constants.GETS;
-			final IoBuffer buffer = IoBuffer.allocate(cmdBytes.length
-					+ Constants.CRLF.length + 1 + keyBytes.length);
-			ByteUtils.setArguments(buffer, cmdBytes, keyBytes);
-			buffer.flip();
-			TextGetOneCommand cmd = new TextGetOneCommand(resultKey.toString(),
-					keyBytes, commandType, null);
+			final byte[] buf = new byte[cmdBytes.length + 3 + keyBytes.length];
+			ByteUtils.setArguments(buf, 0, cmdBytes, keyBytes);
+			TextGetOneCommand cmd = new TextGetOneCommand(resultKey, keyBytes,
+					commandType, null);
 			cmd.setMergeCommands(mergeCommands);
 			cmd.setWriteFuture(new FutureImpl<Boolean>());
 			cmd.setMergeCount(mergeCount);
-			cmd.setIoBuffer(buffer);
+			cmd.setIoBuffer(IoBuffer.wrap(buf));
 			return cmd;
 		} else {
 			BinaryGetMultiCommand result = (BinaryGetMultiCommand) commandCollector

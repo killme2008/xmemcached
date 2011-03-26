@@ -41,24 +41,24 @@ import com.google.code.yanf4j.buffer.IoBuffer;
  */
 public class TextIncrDecrCommand extends Command {
 
-	private long amount;
+	private long delta;
 	private final long initial;
 
 	public TextIncrDecrCommand(String key, byte[] keyBytes,
-			CommandType cmdType, CountDownLatch latch, long increment,
+			CommandType cmdType, CountDownLatch latch, long delta,
 			long initial, boolean noreply) {
 		super(key, keyBytes, cmdType, latch);
-		this.amount = increment;
+		this.delta = delta;
 		this.noreply = noreply;
 		this.initial = initial;
 	}
 
-	public final long getAmount() {
-		return this.amount;
+	public final long getDelta() {
+		return this.delta;
 	}
 
-	public final void setAmount(int increment) {
-		this.amount = increment;
+	public final void setDelta(int delta) {
+		this.delta = delta;
 	}
 
 	@Override
@@ -82,24 +82,22 @@ public class TextIncrDecrCommand extends Command {
 
 	@Override
 	public final void encode() {
-		byte[] numBytes = ByteUtils.getBytes(String.valueOf(this.getAmount()));
 		byte[] cmdBytes = this.commandType == CommandType.INCR ? Constants.INCR
 				: Constants.DECR;
-		int capacity = cmdBytes.length + 2 + this.keyBytes.length
-				+ +numBytes.length + Constants.CRLF.length;
+		int size = 6 + this.keyBytes.length
+				+ ByteUtils.stringSize(this.getDelta()) + Constants.CRLF.length;
 		if (isNoreply()) {
-			capacity += 1 + Constants.NO_REPLY.length();
+			size += 8;
 		}
-		this.ioBuffer = IoBuffer.allocate(capacity);
+		byte[] buf = new byte[size];
 		if (isNoreply()) {
-			ByteUtils.setArguments(this.ioBuffer, cmdBytes, this.keyBytes,
-					numBytes, Constants.NO_REPLY);
+			ByteUtils.setArguments(buf, 0, cmdBytes, this.keyBytes, this
+					.getDelta(), Constants.NO_REPLY);
 		} else {
-			ByteUtils.setArguments(this.ioBuffer, cmdBytes, this.keyBytes,
-					numBytes);
+			ByteUtils.setArguments(buf, 0, cmdBytes, this.keyBytes, this
+					.getDelta());
 		}
-		this.ioBuffer.flip();
-
+		this.ioBuffer = IoBuffer.wrap(buf);
 	}
 
 }

@@ -34,10 +34,12 @@ import net.rubyeye.xmemcached.transcoders.Transcoder;
 import net.rubyeye.xmemcached.utils.ByteUtils;
 
 import com.google.code.yanf4j.buffer.IoBuffer;
+
 /**
  * Store command for text protocol
+ * 
  * @author dennis
- *
+ * 
  */
 public class TextStoreCommand extends Command {
 	protected int expTime;
@@ -122,49 +124,69 @@ public class TextStoreCommand extends Command {
 		}
 	}
 
+	private String getCommandName() {
+		switch (this.commandType) {
+		case ADD:
+			return "add";
+		case SET:
+			return "set";
+		case REPLACE:
+			return "replace";
+		case APPEND:
+			return "append";
+		case PREPEND:
+			return "prepend";
+		case CAS:
+			return "cas";
+		default:
+			throw new IllegalArgumentException(this.commandType.name()
+					+ " is not a store command");
+
+		}
+	}
+
 	@Override
 	public final void encode() {
 		final CachedData data = encodeValue();
-		byte[] flagBytes = ByteUtils.getBytes(String.valueOf(data.getFlag()));
-		byte[] expBytes = ByteUtils.getBytes(String.valueOf(this.expTime));
-		byte[] dataLenBytes = ByteUtils.getBytes(String
-				.valueOf(data.getData().length));
-		byte[] casBytes = ByteUtils.getBytes(String.valueOf(this.cas));
-		String cmdStr = this.commandType.name().toLowerCase();
-		int size = cmdStr.length() + 1 + this.keyBytes.length + 1
-				+ flagBytes.length + 1 + expBytes.length + 1
-				+ data.getData().length + 2 * Constants.CRLF.length
-				+ dataLenBytes.length;
+		String cmdStr = getCommandName();
+		byte[] encodedData = data.getData();
+		int flag = data.getFlag();
+		int size = cmdStr.length() + this.keyBytes.length
+				+ ByteUtils.stringSize(flag)
+				+ ByteUtils.stringSize(this.expTime) + encodedData.length
+				+ ByteUtils.stringSize(encodedData.length) + 8;
 		if (this.commandType == CommandType.CAS) {
-			size += 1 + casBytes.length;
+			size += 1 + ByteUtils.stringSize(this.cas);
 		}
+		byte[] buf;
 		if (isNoreply()) {
-			this.ioBuffer = IoBuffer.allocate(size + 1
-					+ Constants.NO_REPLY.length());
+			buf = new byte[size + 8];
 		} else {
-			this.ioBuffer = IoBuffer.allocate(size);
+			buf = new byte[size];
 		}
+		int offset = 0;
 		if (this.commandType == CommandType.CAS) {
 			if (isNoreply()) {
-				ByteUtils.setArguments(this.ioBuffer, cmdStr, this.keyBytes,
-						flagBytes, expBytes, dataLenBytes, casBytes,
+				offset = ByteUtils.setArguments(buf, offset, cmdStr,
+						this.keyBytes, flag, this.expTime, encodedData.length,
+						this.cas, Constants.NO_REPLY);
+			} else {
+				offset = ByteUtils.setArguments(buf, offset, cmdStr,
+						this.keyBytes, flag, this.expTime, encodedData.length,
+						this.cas);
+			}
+		} else {
+			if (isNoreply()) {
+				offset = ByteUtils.setArguments(buf, offset, cmdStr,
+						this.keyBytes, flag, this.expTime, encodedData.length,
 						Constants.NO_REPLY);
 			} else {
-				ByteUtils.setArguments(this.ioBuffer, cmdStr, this.keyBytes,
-						flagBytes, expBytes, dataLenBytes, casBytes);
-			}
-		} else {
-			if (isNoreply()) {
-				ByteUtils.setArguments(this.ioBuffer, cmdStr, this.keyBytes,
-						flagBytes, expBytes, dataLenBytes, Constants.NO_REPLY);
-			} else {
-				ByteUtils.setArguments(this.ioBuffer, cmdStr, this.keyBytes,
-						flagBytes, expBytes, dataLenBytes);
+				offset = ByteUtils.setArguments(buf, offset, cmdStr,
+						this.keyBytes, flag, this.expTime, encodedData.length);
 			}
 		}
-		ByteUtils.setArguments(this.ioBuffer, data.getData());
-
-		this.ioBuffer.flip();
+		ByteUtils.setArguments(buf, offset, encodedData);
+		this.ioBuffer = IoBuffer.wrap(buf);
 	}
 
 	@SuppressWarnings("unchecked")

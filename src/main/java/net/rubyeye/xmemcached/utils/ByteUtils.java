@@ -76,6 +76,39 @@ public final class ByteUtils {
 		bb.put(Constants.CRLF);
 	}
 
+	public static final int setArguments(byte[] bb, int index, Object... args) {
+		boolean wasFirst = true;
+		int s = index;
+		for (Object o : args) {
+			if (wasFirst) {
+				wasFirst = false;
+			} else {
+				bb[s++] = Constants.SPACE;
+			}
+			if (o instanceof byte[]) {
+				byte[] tmp = (byte[]) o;
+				System.arraycopy(tmp, 0, bb, s, tmp.length);
+				s += tmp.length;
+			} else if (o instanceof Integer) {
+				int v = ((Integer) o).intValue();
+				s += stringSize(v);
+				getBytes(v, s, bb);
+			} else if (o instanceof String) {
+				byte[] tmp = getBytes((String) o);
+				System.arraycopy(tmp, 0, bb, s, tmp.length);
+				s += tmp.length;
+			} else if (o instanceof Long) {
+				long v = ((Long) o).longValue();
+				s += stringSize(v);
+				getBytes(v, s, bb);
+			}
+
+		}
+		System.arraycopy(Constants.CRLF, 0, bb, s, 2);
+		s += 2;
+		return s;
+	}
+
 	public static final void checkKey(final byte[] keyBytes) {
 
 		if (keyBytes.length > ByteUtils.maxKeyLength) {
@@ -83,7 +116,7 @@ public final class ByteUtils {
 					+ ByteUtils.maxKeyLength + ")");
 		}
 		// Validate the key
-		if (memcachedProtocol == Protocol.Text||testing) {
+		if (memcachedProtocol == Protocol.Text || testing) {
 			for (byte b : keyBytes) {
 				if (b == ' ' || b == '\n' || b == '\r' || b == 0) {
 					try {
@@ -108,7 +141,7 @@ public final class ByteUtils {
 			throw new IllegalArgumentException("Key is too long (maxlen = "
 					+ ByteUtils.maxKeyLength + ")");
 		}
-		if (memcachedProtocol == Protocol.Text||testing) {
+		if (memcachedProtocol == Protocol.Text || testing) {
 			// Validate the key
 			for (byte b : keyBytes) {
 				if (b == ' ' || b == '\n' || b == '\r' || b == 0) {
@@ -203,14 +236,15 @@ public final class ByteUtils {
 	 * @param buffer
 	 */
 	public static final String nextLine(ByteBuffer buffer) {
-		if(buffer==null) {
+		if (buffer == null) {
 			return null;
 		}
 		/**
 		 * 测试表明采用 Shift-And算法匹配 >BM算法匹配效率 > 朴素匹配 > KMP匹配，
 		 * 如果你有更好的建议，请email给我(killme2008@gmail.com)
 		 */
-		int index = MemcachedDecoder.SPLIT_MATCHER.matchFirst(com.google.code.yanf4j.buffer.IoBuffer.wrap(buffer));
+		int index = MemcachedDecoder.SPLIT_MATCHER
+				.matchFirst(com.google.code.yanf4j.buffer.IoBuffer.wrap(buffer));
 		if (index >= 0) {
 			int limit = buffer.limit();
 			buffer.limit(index);
@@ -247,5 +281,153 @@ public final class ByteUtils {
 
 	public static void short2hex(int a, StringBuffer str) {
 		str.append(Integer.toHexString(a));
+	}
+
+	public static void getBytes(long i, int index, byte[] buf) {
+		long q;
+		int r;
+		int pos = index;
+		byte sign = 0;
+
+		if (i < 0) {
+			sign = '-';
+			i = -i;
+		}
+
+		// Get 2 digits/iteration using longs until quotient fits into an int
+		while (i > Integer.MAX_VALUE) {
+			q = i / 100;
+			// really: r = i - (q * 100);
+			r = (int) (i - ((q << 6) + (q << 5) + (q << 2)));
+			i = q;
+			buf[--pos] = DigitOnes[r];
+			buf[--pos] = DigitTens[r];
+		}
+
+		// Get 2 digits/iteration using ints
+		int q2;
+		int i2 = (int) i;
+		while (i2 >= 65536) {
+			q2 = i2 / 100;
+			// really: r = i2 - (q * 100);
+			r = i2 - ((q2 << 6) + (q2 << 5) + (q2 << 2));
+			i2 = q2;
+			buf[--pos] = DigitOnes[r];
+			buf[--pos] = DigitTens[r];
+		}
+
+		// Fall thru to fast mode for smaller numbers
+		// assert(i2 <= 65536, i2);
+		for (;;) {
+			q2 = (i2 * 52429) >>> (16 + 3);
+			r = i2 - ((q2 << 3) + (q2 << 1)); // r = i2-(q2*10) ...
+			buf[--pos] = digits[r];
+			i2 = q2;
+			if (i2 == 0)
+				break;
+		}
+		if (sign != 0) {
+			buf[--pos] = sign;
+		}
+	}
+
+	/**
+	 * Places characters representing the integer i into the character array
+	 * buf. The characters are placed into the buffer backwards starting with
+	 * the least significant digit at the specified index (exclusive), and
+	 * working backwards from there.
+	 * 
+	 * Will fail if i == Integer.MIN_VALUE
+	 */
+	static void getBytes(int i, int index, byte[] buf) {
+		int q, r;
+		int pos = index;
+		byte sign = 0;
+
+		if (i < 0) {
+			sign = '-';
+			i = -i;
+		}
+
+		// Generate two digits per iteration
+		while (i >= 65536) {
+			q = i / 100;
+			// really: r = i - (q * 100);
+			r = i - ((q << 6) + (q << 5) + (q << 2));
+			i = q;
+			buf[--pos] = DigitOnes[r];
+			buf[--pos] = DigitTens[r];
+		}
+
+		// Fall thru to fast mode for smaller numbers
+		// assert(i <= 65536, i);
+		for (;;) {
+			q = (i * 52429) >>> (16 + 3);
+			r = i - ((q << 3) + (q << 1)); // r = i-(q*10) ...
+			buf[--pos] = digits[r];
+			i = q;
+			if (i == 0)
+				break;
+		}
+		if (sign != 0) {
+			buf[--pos] = sign;
+		}
+	}
+
+	/**
+	 * All possible chars for representing a number as a String
+	 */
+	final static byte[] digits = { '0', '1', '2', '3', '4', '5', '6', '7', '8',
+			'9', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l',
+			'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y',
+			'z' };
+
+	final static byte[] DigitTens = { '0', '0', '0', '0', '0', '0', '0', '0',
+			'0', '0', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '2',
+			'2', '2', '2', '2', '2', '2', '2', '2', '2', '3', '3', '3', '3',
+			'3', '3', '3', '3', '3', '3', '4', '4', '4', '4', '4', '4', '4',
+			'4', '4', '4', '5', '5', '5', '5', '5', '5', '5', '5', '5', '5',
+			'6', '6', '6', '6', '6', '6', '6', '6', '6', '6', '7', '7', '7',
+			'7', '7', '7', '7', '7', '7', '7', '8', '8', '8', '8', '8', '8',
+			'8', '8', '8', '8', '9', '9', '9', '9', '9', '9', '9', '9', '9',
+			'9', };
+
+	final static byte[] DigitOnes = { '0', '1', '2', '3', '4', '5', '6', '7',
+			'8', '9', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0',
+			'1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '1', '2', '3',
+			'4', '5', '6', '7', '8', '9', '0', '1', '2', '3', '4', '5', '6',
+			'7', '8', '9', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
+			'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '1', '2',
+			'3', '4', '5', '6', '7', '8', '9', '0', '1', '2', '3', '4', '5',
+			'6', '7', '8', '9', '0', '1', '2', '3', '4', '5', '6', '7', '8',
+			'9', };
+
+	final static int[] sizeTable = { 9, 99, 999, 9999, 99999, 999999, 9999999,
+			99999999, 999999999, Integer.MAX_VALUE };
+
+	// Requires positive x
+	public static final int stringSize(int x) {
+		for (int i = 0;; i++)
+			if (x <= sizeTable[i])
+				return i + 1;
+	}
+
+	// Requires positive x
+	public static final int stringSize(long x) {
+		long p = 10;
+		for (int i = 1; i < 19; i++) {
+			if (x < p)
+				return i;
+			p = 10 * p;
+		}
+		return 19;
+	}
+
+	final static int[] byte_len_array = new int[256];
+	static {
+		for (int i = Byte.MIN_VALUE; i <= Byte.MAX_VALUE; ++i) {
+			int size = (i < 0) ? stringSize(-i) + 1 : stringSize(i);
+			byte_len_array[i & 0xFF] = size;
+		}
 	}
 }

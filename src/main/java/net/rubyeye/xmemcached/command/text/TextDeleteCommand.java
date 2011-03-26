@@ -32,10 +32,12 @@ import net.rubyeye.xmemcached.monitor.Constants;
 import net.rubyeye.xmemcached.utils.ByteUtils;
 
 import com.google.code.yanf4j.buffer.IoBuffer;
+
 /**
  * Delete command for text protocol
+ * 
  * @author dennis
- *
+ * 
  */
 public class TextDeleteCommand extends Command {
 
@@ -56,8 +58,6 @@ public class TextDeleteCommand extends Command {
 	public final void setTime(int time) {
 		this.time = time;
 	}
-
-	
 
 	@Override
 	public boolean decode(MemcachedTCPSession session, ByteBuffer buffer) {
@@ -91,34 +91,33 @@ public class TextDeleteCommand extends Command {
 
 	@Override
 	public final void encode() {
-		byte[] timeBytes = ByteUtils.getBytes(String.valueOf(this.time));
-		int capacity = Constants.DELETE.length + 1
-				+ this.keyBytes.length + Constants.CRLF.length;
+
+		int size = Constants.DELETE.length + 1 + this.keyBytes.length
+				+ Constants.CRLF.length;
 		if (this.time > 0) {
-			capacity += 1 + timeBytes.length;
+			size += 1 + ByteUtils.stringSize(this.time);
 		}
 		if (isNoreply()) {
-			capacity += 1 + Constants.NO_REPLY.length();
+			size += 8;
 		}
-		this.ioBuffer = IoBuffer.allocate(capacity);
+		byte[] buf = new byte[size];
 		if (isNoreply()) {
 			if (this.time > 0) {
-				ByteUtils.setArguments(this.ioBuffer, Constants.DELETE,
-						this.keyBytes, timeBytes, Constants.NO_REPLY);
+				ByteUtils.setArguments(buf, 0, Constants.DELETE, this.keyBytes,
+						this.time, Constants.NO_REPLY);
 			} else {
-				ByteUtils.setArguments(this.ioBuffer, Constants.DELETE,
-						this.keyBytes, Constants.NO_REPLY);
+				ByteUtils.setArguments(buf, 0, Constants.DELETE, this.keyBytes,
+						Constants.NO_REPLY);
 			}
 		} else {
 			if (this.time > 0) {
-				ByteUtils.setArguments(this.ioBuffer, Constants.DELETE,
-						this.keyBytes, timeBytes);
+				ByteUtils.setArguments(buf, 0, Constants.DELETE, this.keyBytes,
+						this.time);
 			} else {
-				ByteUtils.setArguments(this.ioBuffer, Constants.DELETE,
-						this.keyBytes);
+				ByteUtils.setArguments(buf, 0, Constants.DELETE, this.keyBytes);
 			}
 		}
-		this.ioBuffer.flip();
+		this.ioBuffer = IoBuffer.wrap(buf);
 	}
 
 }

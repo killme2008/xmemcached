@@ -61,7 +61,7 @@ public class Constants {
 	 * Max session read buffer size,758k
 	 */
 	public static final int MAX_SESSION_READ_BUFFER_SIZE = 768 * 1024;
-	public static final String NO_REPLY = "noreply".intern();
+	public static final byte[] NO_REPLY = { 'n', 'o', 'r', 'e', 'p', 'l', 'y' };
 	/**
 	 * Client instance counter
 	 */
