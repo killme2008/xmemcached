@@ -257,7 +257,7 @@ public class Optimizer implements OptimizerMBean, MemcachedOptimizer {
 	}
 
 	static class KeyStringCollector implements CommandCollector {
-		char[] buf = new char[64];
+		char[] buf = new char[32];
 		int count = 0;
 		boolean wasFirst = true;
 

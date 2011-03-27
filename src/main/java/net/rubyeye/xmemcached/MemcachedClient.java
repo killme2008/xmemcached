@@ -1167,7 +1167,10 @@ public interface MemcachedClient {
 
 	/**
 	 * Get key iterator for special memcached server.You must known that the
-	 * iterator is a snapshot for memcached all keys,it is not real-time.
+	 * iterator is a snapshot for memcached all keys,it is not real-time.The
+	 * 'stats cachedump" has length limitation,so iterator could not visit all
+	 * keys if you have many keys.Your application should not be dependent on
+	 * this feature.
 	 * 
 	 * @param address
 	 * @return

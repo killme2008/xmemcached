@@ -7,7 +7,9 @@ import net.rubyeye.xmemcached.exception.MemcachedException;
 
 /**
  * Key Iterator for memcached,use 'stats items' and 'stats cachedump' to iterate
- * all keys,it is inefficient and not thread-safe.
+ * all keys,it is inefficient and not thread-safe.The 'stats cachedump" has
+ * length limitation,then iterator could not visit all keys if you have many
+ * keys.
  * 
  * @author dennis
  * 

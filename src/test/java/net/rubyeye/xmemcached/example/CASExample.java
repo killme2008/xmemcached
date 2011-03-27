@@ -56,9 +56,10 @@ class CASThread extends Thread {
 	@Override
 	public void run() {
 		try {
-			if (this.mc.cas("a", 0, new IncrmentOperation())) {
-				this.cd.countDown();
-			}
+			for (int i = 0; i < 100; i++)
+				if (this.mc.cas("a", 0, new IncrmentOperation())) {
+					this.cd.countDown();
+				}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -68,6 +69,7 @@ class CASThread extends Thread {
 public class CASExample {
 
 	public static void main(String[] args) throws Exception {
+		//125489
 		if (args.length < 2) {
 			System.err.println("Usage:java CASTest [threadNum] [server]");
 			System.exit(1);
@@ -80,7 +82,7 @@ public class CASExample {
 		MemcachedClient mc = builder.build();
 		// initial value is 0
 		mc.set("a", 0, 0);
-		CountDownLatch cdl = new CountDownLatch(NUM);
+		CountDownLatch cdl = new CountDownLatch(NUM * 100);
 		long start = System.currentTimeMillis();
 		// start Num threads to increase 'a'
 		for (int i = 0; i < NUM; i++) {
