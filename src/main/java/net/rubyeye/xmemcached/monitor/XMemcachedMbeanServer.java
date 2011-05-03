@@ -66,6 +66,9 @@ public final class XMemcachedMbeanServer {
 	private static XMemcachedMbeanServer instance = new XMemcachedMbeanServer();
 	private JMXConnectorServer connectorServer;
 
+	private Thread shutdownHookThread;
+	private volatile boolean isHutdownHookCalled = false;
+
 	private XMemcachedMbeanServer() {
 		initialize();
 	}
@@ -112,11 +115,11 @@ public final class XMemcachedMbeanServer {
 				connectorServer = JMXConnectorServerFactory
 						.newJMXConnectorServer(url, null, mbserver);
 				connectorServer.start();
-				Runtime.getRuntime().addShutdownHook(new Thread() {
+				shutdownHookThread = new Thread() {
 					@Override
 					public void run() {
 						try {
-
+							isHutdownHookCalled = true;
 							if (connectorServer
 									.isActive()) {
 								connectorServer
@@ -128,7 +131,9 @@ public final class XMemcachedMbeanServer {
 									e);
 						}
 					}
-				});
+				};
+				
+				Runtime.getRuntime().addShutdownHook(shutdownHookThread);
 				log.warn("jmx url: " + serverURL);
 			}
 		} catch (Exception e) {
@@ -145,6 +150,9 @@ public final class XMemcachedMbeanServer {
 			if (connectorServer != null && connectorServer.isActive()) {
 				connectorServer.stop();
 				log.warn("JMXConnector stop");
+				if (!isHutdownHookCalled) {
+					Runtime.getRuntime().removeShutdownHook(shutdownHookThread);
+				}
 			}
 		} catch (IOException e) {
 			log.error("Shutdown Xmemcached MBean server error", e);
