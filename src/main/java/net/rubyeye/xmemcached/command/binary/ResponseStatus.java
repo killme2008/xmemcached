@@ -96,6 +96,50 @@ public enum ResponseStatus {
 			return "Item is not stored.";
 		}
 	},
+	INC_DEC_NON_NUM {
+		@Override
+		public short fieldValue() {
+			return 0x0006;
+		}
+
+		@Override
+		public String errorMessage() {
+			return "Incr/Decr on non-numeric value.";
+		}
+	},
+	BELONGS_TO_ANOTHER_SRV {
+		@Override
+		public short fieldValue() {
+			return 0x0007;
+		}
+
+		@Override
+		public String errorMessage() {
+			return "The vbucket belongs to another server.";
+		}
+	},
+	AUTH_ERROR {
+		@Override
+		public short fieldValue() {
+			return 0x0008;
+		}
+
+		@Override
+		public String errorMessage() {
+			return "Authentication error .";
+		}
+	},
+	AUTH_CONTINUE {
+		@Override
+		public short fieldValue() {
+			return 0x0009;
+		}
+
+		@Override
+		public String errorMessage() {
+			return "Authentication continue .";
+		}
+	},
 	UNKNOWN_COMMAND {
 		@Override
 		public short fieldValue() {
@@ -105,6 +149,62 @@ public enum ResponseStatus {
 		@Override
 		public String errorMessage() {
 			return "Unknown command error.";
+		}
+	},
+	OUT_OF_MEMORY {
+		@Override
+		public short fieldValue() {
+			return 0x0082;
+		}
+
+		@Override
+		public String errorMessage() {
+			return "Out of memory .";
+		}
+	},
+	NOT_SUPPORTED {
+		@Override
+		public short fieldValue() {
+			return 0x0083;
+		}
+
+		@Override
+		public String errorMessage() {
+			return "Not supported .";
+		}
+	},
+	INTERNAL_ERROR {
+		@Override
+		public short fieldValue() {
+			return 0x0084;
+		}
+
+		@Override
+		public String errorMessage() {
+			return "Internal error .";
+		}
+	},
+	BUSY {
+		@Override
+		public short fieldValue() {
+			return 0x0085;
+		}
+
+		@Override
+		public String errorMessage() {
+			return "Busy.";
+		}
+	},
+
+	TEMP_FAILURE {
+		@Override
+		public short fieldValue() {
+			return 0x0086;
+		}
+
+		@Override
+		public String errorMessage() {
+			return "Temporary failure .";
 		}
 	},
 
@@ -152,8 +252,26 @@ public enum ResponseStatus {
 			return INVALID_ARGUMENTS;
 		case 0x0005:
 			return ITEM_NOT_STORED;
+		case 0x0006:
+			return INC_DEC_NON_NUM;
+		case 0x0007:
+			return BELONGS_TO_ANOTHER_SRV;
+		case 0x0008:
+			return AUTH_ERROR;
+		case 0x0009:
+			return AUTH_CONTINUE;
 		case 0x0081:
 			return UNKNOWN_COMMAND;
+		case 0x0082:
+			return OUT_OF_MEMORY;
+		case 0x0083:
+			return NOT_SUPPORTED;
+		case 0x0084:
+			return INTERNAL_ERROR;
+		case 0x0085:
+			return BUSY;
+		case 0x0086:
+			return TEMP_FAILURE;
 		case 0x20:
 			return AUTH_REQUIRED;
 		case 0x21:
