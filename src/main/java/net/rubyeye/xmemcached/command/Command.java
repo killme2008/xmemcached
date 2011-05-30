@@ -248,15 +248,18 @@ public abstract class Command implements WriteMessage {
 		} else if (line.startsWith("CLIENT_ERROR")) {
 			setException(new MemcachedClientException(getErrorMsg(line,
 					"Unknown Client Error")));
+			this.countDownLatch();
 			return true;
 		} else if (line.startsWith("SERVER_ERROR")) {
 			setException(new MemcachedServerException(getErrorMsg(line,
 					"Unknown Server Error")));
+			this.countDownLatch();
 			return true;
 		} else {
 			throw new MemcachedDecodeException(
 					"Decode error,session will be closed,line=" + line);
 		}
+
 	}
 
 	protected final boolean decodeError(Session session, ByteBuffer buffer) {

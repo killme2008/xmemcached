@@ -36,17 +36,18 @@ import net.rubyeye.xmemcached.networking.MemcachedSession;
 import net.rubyeye.xmemcached.utils.ByteUtils;
 
 import com.google.code.yanf4j.buffer.IoBuffer;
+
 /**
  * Stats command for text protocol
+ * 
  * @author dennis
- *
+ * 
  */
 public class TextStatsCommand extends Command implements ServerAddressAware {
 	public static final ByteBuffer STATS = ByteBuffer.wrap("stats\r\n"
 			.getBytes());
 	private InetSocketAddress server;
 	private String itemName;
-
 
 	public String getItemName() {
 		return this.itemName;
@@ -63,6 +64,7 @@ public class TextStatsCommand extends Command implements ServerAddressAware {
 	public void setItemName(String item) {
 		this.itemName = item;
 	}
+
 	public TextStatsCommand(InetSocketAddress server, CountDownLatch latch,
 			String itemName) {
 		super("stats", (byte[]) null, latch);
@@ -100,8 +102,7 @@ public class TextStatsCommand extends Command implements ServerAddressAware {
 		if (this.itemName == null) {
 			this.ioBuffer = IoBuffer.wrap(STATS.slice());
 		} else {
-			this.ioBuffer = IoBuffer
-					.allocate(5 + this.itemName.length() + 3);
+			this.ioBuffer = IoBuffer.allocate(5 + this.itemName.length() + 3);
 			ByteUtils.setArguments(this.ioBuffer, "stats", this.itemName);
 			this.ioBuffer.flip();
 		}

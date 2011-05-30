@@ -280,10 +280,10 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 		}
 		this.checkServerPort(host, port);
 		this.buildConnector(new ArrayMemcachedSessionLocator(),
-				new SimpleBufferAllocator(),
-				XMemcachedClientBuilder.getDefaultConfiguration(),
-				XMemcachedClientBuilder.getDefaultSocketOptions(),
-				new TextCommandFactory(), new SerializingTranscoder());
+				new SimpleBufferAllocator(), XMemcachedClientBuilder
+						.getDefaultConfiguration(), XMemcachedClientBuilder
+						.getDefaultSocketOptions(), new TextCommandFactory(),
+				new SerializingTranscoder());
 		this.start0();
 		this.connect(new InetSocketAddressWrapper(this.newSocketAddress(host,
 				port), this.serverOrderCount.incrementAndGet(), weight, null));
@@ -522,31 +522,25 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 					future.cancel(true);
 				}
 				throwable = e;
-				log.error(
-						"connect to "
-								+ SystemUtils.getRawAddress(inetSocketAddress)
-								+ ":" + inetSocketAddress.getPort() + " error",
-						e);
+				log.error("connect to "
+						+ SystemUtils.getRawAddress(inetSocketAddress) + ":"
+						+ inetSocketAddress.getPort() + " error", e);
 			} catch (TimeoutException e) {
 				if (future != null) {
 					future.cancel(true);
 				}
 				throwable = e;
-				log.error(
-						"connect to "
-								+ SystemUtils.getRawAddress(inetSocketAddress)
-								+ ":" + inetSocketAddress.getPort()
-								+ " timeout", e);
+				log.error("connect to "
+						+ SystemUtils.getRawAddress(inetSocketAddress) + ":"
+						+ inetSocketAddress.getPort() + " timeout", e);
 			} catch (Exception e) {
 				if (future != null) {
 					future.cancel(true);
 				}
 				throwable = e;
-				log.error(
-						"connect to "
-								+ SystemUtils.getRawAddress(inetSocketAddress)
-								+ ":" + inetSocketAddress.getPort() + " error",
-						e);
+				log.error("connect to "
+						+ SystemUtils.getRawAddress(inetSocketAddress) + ":"
+						+ inetSocketAddress.getPort() + " error", e);
 			}
 			// If it is not connected,it will be added to waiting queue for
 			// reconnecting.
@@ -559,11 +553,9 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 				this.connector.addToWatingQueue(new ReconnectRequest(
 						inetSocketAddressWrapper, 0, this
 								.getHealSessionInterval()));
-				log.error(
-						"Connect to "
-								+ SystemUtils.getRawAddress(inetSocketAddress)
-								+ ":" + inetSocketAddress.getPort() + " fail",
-						throwable);
+				log.error("Connect to "
+						+ SystemUtils.getRawAddress(inetSocketAddress) + ":"
+						+ inetSocketAddress.getPort() + " fail", throwable);
 				// throw new IOException(throwable);
 			}
 		}
@@ -722,10 +714,10 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 			throw new IllegalArgumentException("weight<=0");
 		}
 		this.buildConnector(new ArrayMemcachedSessionLocator(),
-				new SimpleBufferAllocator(),
-				XMemcachedClientBuilder.getDefaultConfiguration(),
-				XMemcachedClientBuilder.getDefaultSocketOptions(),
-				new TextCommandFactory(), new SerializingTranscoder());
+				new SimpleBufferAllocator(), XMemcachedClientBuilder
+						.getDefaultConfiguration(), XMemcachedClientBuilder
+						.getDefaultSocketOptions(), new TextCommandFactory(),
+				new SerializingTranscoder());
 		this.start0();
 		this.connect(new InetSocketAddressWrapper(inetSocketAddress,
 				this.serverOrderCount.incrementAndGet(), weight, null));
@@ -739,10 +731,10 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 	public XMemcachedClient() throws IOException {
 		super();
 		this.buildConnector(new ArrayMemcachedSessionLocator(),
-				new SimpleBufferAllocator(),
-				XMemcachedClientBuilder.getDefaultConfiguration(),
-				XMemcachedClientBuilder.getDefaultSocketOptions(),
-				new TextCommandFactory(), new SerializingTranscoder());
+				new SimpleBufferAllocator(), XMemcachedClientBuilder
+						.getDefaultConfiguration(), XMemcachedClientBuilder
+						.getDefaultSocketOptions(), new TextCommandFactory(),
+				new SerializingTranscoder());
 		this.start0();
 	}
 
@@ -880,8 +872,9 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 			if (this.isLinuxPlatform()
 					&& conf.getReadThreadCount() == DEFAULT_READ_THREAD_COUNT) {
 				int threadCount = 2 * SystemUtils.getSystemThreadCount();
-				conf.setReadThreadCount(addressCount > threadCount ? threadCount
-						: addressCount);
+				conf
+						.setReadThreadCount(addressCount > threadCount ? threadCount
+								: addressCount);
 			}
 		}
 	}
@@ -909,10 +902,10 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 		}
 		BufferAllocator simpleBufferAllocator = new SimpleBufferAllocator();
 		this.buildConnector(new ArrayMemcachedSessionLocator(),
-				simpleBufferAllocator,
-				XMemcachedClientBuilder.getDefaultConfiguration(),
-				XMemcachedClientBuilder.getDefaultSocketOptions(),
-				new TextCommandFactory(), new SerializingTranscoder());
+				simpleBufferAllocator, XMemcachedClientBuilder
+						.getDefaultConfiguration(), XMemcachedClientBuilder
+						.getDefaultSocketOptions(), new TextCommandFactory(),
+				new SerializingTranscoder());
 		this.start0();
 		for (InetSocketAddress inetSocketAddress : addressList) {
 			this.connect(new InetSocketAddressWrapper(inetSocketAddress,
@@ -1184,11 +1177,11 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 				while (it.hasNext()) {
 					Map.Entry<String, CachedData> entry = it.next();
 					if (this.sanitizeKeys) {
-						result.put(this.decodeKey(entry.getKey()),
-								transcoder.decode(entry.getValue()));
+						result.put(this.decodeKey(entry.getKey()), transcoder
+								.decode(entry.getValue()));
 					} else {
-						result.put(entry.getKey(),
-								transcoder.decode(entry.getValue()));
+						result.put(entry.getKey(), transcoder.decode(entry
+								.getValue()));
 					}
 				}
 
@@ -1621,12 +1614,9 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 		while (tryCount <= operation.getMaxTries()
 				&& result != null
 				&& !this.sendStoreCommand(this.commandFactory.createCASCommand(
-						key,
-						keyBytes,
-						exp,
-						operation.getNewValue(result.getCas(),
-								result.getValue()), result.getCas(), noreply,
-						transcoder), this.opTimeout) && !noreply) {
+						key, keyBytes, exp, operation.getNewValue(result
+								.getCas(), result.getValue()), result.getCas(),
+						noreply, transcoder), this.opTimeout) && !noreply) {
 			tryCount++;
 			result = this.gets0(key, keyBytes, transcoder);
 			if (result == null) {
@@ -2173,8 +2163,8 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 		final CountDownLatch latch = new CountDownLatch(sessionSet.size());
 		List<Command> commands = new ArrayList<Command>(sessionSet.size());
 		for (Session session : sessionSet) {
-			Command command = this.commandFactory.createStatsCommand(
-					session.getRemoteSocketAddress(), latch, itemName);
+			Command command = this.commandFactory.createStatsCommand(session
+					.getRemoteSocketAddress(), latch, itemName);
 
 			session.write(command);
 			commands.add(command);
@@ -2249,7 +2239,7 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 		this.connector.stop();
 		this.memcachedHandler.stop();
 		XMemcachedMbeanServer.getInstance().shutdown();
-		if(!isHutdownHookCalled) {
+		if (!isHutdownHookCalled) {
 			Runtime.getRuntime().removeShutdownHook(shutdownHookThread);
 		}
 	}
@@ -2462,11 +2452,18 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 		}
 		Session session = sessions.peek();
 		CountDownLatch latch = new CountDownLatch(1);
-		Command command = this.commandFactory.createStatsCommand(
-				session.getRemoteSocketAddress(), latch, "items");
+		Command command = this.commandFactory.createStatsCommand(session
+				.getRemoteSocketAddress(), latch, "items");
 		session.write(command);
 		if (!latch.await(5000, TimeUnit.MILLISECONDS)) {
 			throw new TimeoutException("Operation timeout");
+		}
+		if (command.getException() != null) {
+			if (command.getException() instanceof MemcachedException)
+				throw (MemcachedException) command.getException();
+			else
+				throw new MemcachedException("stats items failed", command
+						.getException());
 		}
 		Map<String, String> result = (Map<String, String>) command.getResult();
 		LinkedList<Integer> itemNumberList = new LinkedList<Integer>();
