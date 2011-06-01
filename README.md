@@ -1,6 +1,5 @@
 ##Introduction
 
-xmemcached
   XMemcached is a high performance, easy to use blocking multithreaded memcached client in java.
   It's nio based and was carefully turned to get top performance.
 
