@@ -5,9 +5,32 @@ xmemcached
   It's nio based and was carefully turned to get top performance.
 
 homepage:  http://code.google.com/p/xmemcached/
+
 downloads; http://code.google.com/p/xmemcached/downloads/list
+
 wiki :     http://code.google.com/p/xmemcached/w/list
+
 author : dennis zhuang(killme2008@gmail.com)
+
+##Highlights
+
+1.Supports all memcached text based protocols and binary protocols(Binary protocol supports since version 1.2.0).
+
+2.Supports distributed memcached with standard hash or consistent hash strategy
+
+3.Supports for JMX to allow you to monitor and control the behavior of the XMemcachedClient.Change the optimizer's factor or add/remove memcached server dynamically
+
+4.Supports weighted server.
+
+5.Supports connection pool.You can create more connections to one memcached server with java nio.(since version 1.2.0)
+
+6.Supports failure mode and standby nodes.
+
+7.Supports integrating to spring framework and hibernate-memcached.
+
+8.High performance.
+
+9.Supports talking with kestrel(a MQ written in scala) and TokyoTyrant
 
 ##FAQ
 
@@ -22,6 +45,7 @@ author : dennis zhuang(killme2008@gmail.com)
       Please set test.memcached.servers property,Then run the AllTests class with jvm option "-ea".
 
 3.Is Xmemcached compatible with jdk5?
+
      Yes,since 1.2.0-RC1,Xmemcached is compatible with jdk5.
 
 
@@ -31,7 +55,7 @@ author : dennis zhuang(killme2008@gmail.com)
          XMemcachedClientBuilder builder = new XMemcachedClientBuilder(AddrUtil.getAddresses("localhost:11211"));
          XMemcachedClient client=builder.build();
 
-        //If you want to use binary protocol(use memcached 1.4.0 and xmemcached 1.2.0)
+        //If you want to use binary protocol
          XMemcachedClientBuilder builder = new XMemcachedClientBuilder(AddrUtil.getAddresses("localhost:11211"));
          builder.setCommandFactory(new BinaryCommandFactory());
          XMemcachedClient client=builder.build();
@@ -64,7 +88,7 @@ author : dennis zhuang(killme2008@gmail.com)
         //incr decr
         client.set("a",0,"1");
         client.incr("a",4);
-        client.deccr("a",4);
+        client.decr("a",4);
 
         //cas
         client.cas("a", 0, new CASOperation() {
@@ -75,7 +99,7 @@ author : dennis zhuang(killme2008@gmail.com)
                         @Override
                         public Object getNewValue(long currentCAS, Object currentValue) {
                                     System.out.println("current value " + currentValue);
-                                    return 3;
+                                    return 3; //return new value to update
                         }
         });
 
