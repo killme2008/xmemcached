@@ -31,6 +31,16 @@ author : dennis zhuang(killme2008@gmail.com)
 
 9.Supports talking with kestrel(a MQ written in scala) and TokyoTyrant
 
+##Maven repository
+
+If you use maven,you can use xmemcached by
+
+	 <dependency>
+      <groupId>com.googlecode.xmemcached</groupId>
+      <artifactId>xmemcached</artifactId>
+      <version>1.3.2</version>
+     </dependency>
+
 ##FAQ
 
 1.How to build project by maven?
