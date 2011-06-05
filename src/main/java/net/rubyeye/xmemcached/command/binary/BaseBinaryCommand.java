@@ -48,6 +48,7 @@ import com.google.code.yanf4j.buffer.IoBuffer;
  * 
  */
 public abstract class BaseBinaryCommand extends Command {
+	static final short DEFAULT_VBUCKET_ID = 0;
 	private static final Logger log = LoggerFactory
 			.getLogger(BinaryStoreCommand.class);
 	protected int expTime;
@@ -60,6 +61,7 @@ public abstract class BaseBinaryCommand extends Command {
 			responseTotalBodyLength;
 	protected ResponseStatus responseStatus;
 	protected int opaque;
+	protected short vbucketId = DEFAULT_VBUCKET_ID;
 
 	@SuppressWarnings("unchecked")
 	public BaseBinaryCommand(String key, byte[] keyBytes, CommandType cmdType,
@@ -364,7 +366,7 @@ public abstract class BaseBinaryCommand extends Command {
 		fillKeyLength();
 		fillExtrasLength();
 		fillDataType();
-		fillReserved();
+		fillVbucketId();
 		fillTotalBodyLength(data);
 		fillOpaque();
 		fillCAS();
@@ -388,9 +390,9 @@ public abstract class BaseBinaryCommand extends Command {
 				+ getValueLength(data));
 	}
 
-	private void fillReserved() {
-		// Reserved
-		this.ioBuffer.putShort((short) 0);
+	private void fillVbucketId() {
+		// vbucketId,valid since memcached 1.6
+		this.ioBuffer.putShort(vbucketId);
 	}
 
 	private void fillDataType() {

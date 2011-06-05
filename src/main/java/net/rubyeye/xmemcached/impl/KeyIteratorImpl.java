@@ -2,6 +2,7 @@ package net.rubyeye.xmemcached.impl;
 
 import java.net.InetSocketAddress;
 import java.util.LinkedList;
+import java.util.NoSuchElementException;
 import java.util.Queue;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -11,6 +12,7 @@ import net.rubyeye.xmemcached.KeyIterator;
 import net.rubyeye.xmemcached.XMemcachedClient;
 import net.rubyeye.xmemcached.command.text.TextCacheDumpCommand;
 import net.rubyeye.xmemcached.exception.MemcachedException;
+import net.rubyeye.xmemcached.exception.MemcachedServerException;
 import net.rubyeye.xmemcached.utils.Protocol;
 
 import com.google.code.yanf4j.core.Session;
@@ -61,7 +63,7 @@ public final class KeyIteratorImpl implements KeyIterator {
 	public String next() throws MemcachedException, TimeoutException,
 			InterruptedException {
 		if (!hasNext()) {
-			throw new ArrayIndexOutOfBoundsException();
+			throw new NoSuchElementException();
 		}
 
 		if (this.currentKeyList != null && !this.currentKeyList.isEmpty()) {
@@ -84,6 +86,15 @@ public final class KeyIteratorImpl implements KeyIterator {
 			session.write(textCacheDumpCommand);
 			if (!latch.await(this.opTimeout, TimeUnit.MILLISECONDS)) {
 				throw new TimeoutException("stats cachedump timeout");
+			}
+			if (textCacheDumpCommand.getException() != null) {
+				if (textCacheDumpCommand.getException() instanceof MemcachedException) {
+					throw (MemcachedException) textCacheDumpCommand
+							.getException();
+				} else {
+					throw new MemcachedServerException(textCacheDumpCommand
+							.getException());
+				}
 			}
 			this.currentKeyList = (LinkedList<String>) textCacheDumpCommand
 					.getResult();

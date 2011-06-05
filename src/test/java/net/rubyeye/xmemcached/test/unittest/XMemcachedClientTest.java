@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Properties;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -576,9 +577,9 @@ public abstract class XMemcachedClientTest extends TestCase {
 		assertNull(memcachedClient.get("name"));
 		memcachedClient.set("name", 0, "dennis");
 		assertEquals("dennis", memcachedClient.get("name"));
-		assertTrue(memcachedClient.delete("name",2000L));
+		assertTrue(memcachedClient.delete("name", 2000L));
 		assertNull(memcachedClient.get("name"));
-		
+
 		// add,replace success
 		assertTrue(memcachedClient.add("name", 0, "zhuang"));
 		assertTrue(memcachedClient.replace("name", 0, "zhuang"));
@@ -709,6 +710,12 @@ public abstract class XMemcachedClientTest extends TestCase {
 		System.out.println(memcachedClient.getStatsByItem("items"));
 	}
 
+	public void testIssue126() throws Exception {
+		Map<InetSocketAddress, Map<String, String>> result = this.memcachedClient
+				.getStatsByItem("detail dump");
+		assertNotNull(result);
+	}
+
 	public void testFlushAll() throws Exception {
 		for (int i = 0; i < 50; i++) {
 			assertTrue(memcachedClient.add(String.valueOf(i), 0, i));
@@ -781,12 +788,12 @@ public abstract class XMemcachedClientTest extends TestCase {
 		assertEquals(1, memcachedClient.incr("a", 5, 1, 1000, 1));
 		Thread.sleep(2000);
 		assertNull(memcachedClient.get("a"));
-		
-		//key is chinese
+
+		// key is chinese
 		assertEquals(1, memcachedClient.incr("测试", 5, 1, 1000, 0));
 		assertEquals(6, memcachedClient.incr("测试", 5));
 		assertEquals(10, memcachedClient.incr("测试", 4));
-		
+
 		// blank key
 		new BlankKeyChecker() {
 			@Override
@@ -1288,7 +1295,7 @@ public abstract class XMemcachedClientTest extends TestCase {
 			try {
 				it.next();
 				Assert.fail();
-			} catch (ArrayIndexOutOfBoundsException e) {
+			} catch (NoSuchElementException e) {
 				Assert.assertTrue(true);
 			}
 			for (int i = 0; i < 10; i++) {
