@@ -17,12 +17,15 @@ import net.rubyeye.xmemcached.command.binary.BinaryAuthStepCommand;
 import net.rubyeye.xmemcached.command.binary.BinaryCASCommand;
 import net.rubyeye.xmemcached.command.binary.BinaryDeleteCommand;
 import net.rubyeye.xmemcached.command.binary.BinaryFlushAllCommand;
+import net.rubyeye.xmemcached.command.binary.BinaryGetAndTouchCommand;
 import net.rubyeye.xmemcached.command.binary.BinaryGetCommand;
 import net.rubyeye.xmemcached.command.binary.BinaryGetMultiCommand;
 import net.rubyeye.xmemcached.command.binary.BinaryIncrDecrCommand;
 import net.rubyeye.xmemcached.command.binary.BinaryQuitCommand;
 import net.rubyeye.xmemcached.command.binary.BinaryStatsCommand;
 import net.rubyeye.xmemcached.command.binary.BinaryStoreCommand;
+import net.rubyeye.xmemcached.command.binary.BinaryTouchCommand;
+import net.rubyeye.xmemcached.command.binary.BinaryVerbosityCommand;
 import net.rubyeye.xmemcached.command.binary.BinaryVersionCommand;
 import net.rubyeye.xmemcached.command.binary.OpCode;
 import net.rubyeye.xmemcached.transcoders.Transcoder;
@@ -158,8 +161,7 @@ public class BinaryCommandFactory implements CommandFactory {
 
 	public Command createVerbosityCommand(CountDownLatch latch, int level,
 			boolean noreply) {
-		throw new UnsupportedOperationException(
-				"Binary protocol doesn't support verbosity");
+		return new BinaryVerbosityCommand(latch, level, noreply);
 	}
 
 	public Command createVersionCommand(CountDownLatch latch,
@@ -181,6 +183,19 @@ public class BinaryCommandFactory implements CommandFactory {
 			CountDownLatch latch, byte[] authData) {
 		return new BinaryAuthStepCommand(mechanism, ByteUtils
 				.getBytes(mechanism), latch, authData);
+	}
+
+	public Command createGetAndTouchCommand(String key, byte[] keyBytes,
+			CountDownLatch latch, int exp, boolean noreply) {
+		return new BinaryGetAndTouchCommand(key, keyBytes,
+				noreply ? CommandType.GATQ : CommandType.GAT, latch, exp,
+				noreply);
+	}
+
+	public Command createTouchCommand(String key, byte[] keyBytes,
+			CountDownLatch latch, int exp, boolean noreply) {
+		return new BinaryTouchCommand(key, keyBytes, CommandType.TOUCH, latch,
+				exp, noreply);
 	}
 
 	public Command createQuitCommand() {

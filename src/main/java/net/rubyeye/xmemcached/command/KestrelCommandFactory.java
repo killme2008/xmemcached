@@ -137,6 +137,18 @@ public class KestrelCommandFactory implements CommandFactory {
 		throw new UnsupportedOperationException("Kestrel doesn't support SASL");
 	}
 
+	public Command createGetAndTouchCommand(String key, byte[] keyBytes,
+			CountDownLatch latch, int exp, boolean noreply) {
+		throw new UnsupportedOperationException(
+				"GAT is only supported by binary protocol");
+	}
+
+	public Command createTouchCommand(String key, byte[] keyBytes, CountDownLatch latch,
+			int exp, boolean noreply) {
+		throw new UnsupportedOperationException(
+				"Touch is only supported by binary protocol");
+	}
+
 	public void setBufferAllocator(BufferAllocator bufferAllocator) {
 
 	}

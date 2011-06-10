@@ -262,6 +262,34 @@ public interface CommandFactory {
 	public Command createQuitCommand();
 
 	/**
+	 * Create a touch command
+	 * 
+	 * @since 1.3.3
+	 * @param key
+	 * @param keyBytes
+	 * @param latch TODO
+	 * @param exp
+	 * @param noreply
+	 * @return
+	 */
+	public Command createTouchCommand(final String key, final byte[] keyBytes,
+			CountDownLatch latch, int exp, boolean noreply);
+
+	/**
+	 * Create a get-and-touch command
+	 * 
+	 * @since 1.3.3
+	 * @param key
+	 * @param keyBytes
+	 * @param latch TODO
+	 * @param exp
+	 * @param noreply
+	 * @return
+	 */
+	public Command createGetAndTouchCommand(final String key,
+			final byte[] keyBytes, CountDownLatch latch, int exp, boolean noreply);
+
+	/**
 	 * Get this client's protocol version
 	 * 
 	 * @return

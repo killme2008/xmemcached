@@ -84,28 +84,28 @@ public interface MemcachedClient {
 	 * 
 	 * @param mergeFactor
 	 */
-	public abstract void setMergeFactor(final int mergeFactor);
+	public void setMergeFactor(final int mergeFactor);
 
 	/**
 	 * Get the connect timeout
 	 * 
 	 * @param connectTimeout
 	 */
-	public abstract long getConnectTimeout();
+	public long getConnectTimeout();
 
 	/**
 	 * Set the connect timeout,default is 1 minutes
 	 * 
 	 * @param connectTimeout
 	 */
-	public abstract void setConnectTimeout(long connectTimeout);
+	public void setConnectTimeout(long connectTimeout);
 
 	/**
 	 * return the session manager
 	 * 
 	 * @return
 	 */
-	public abstract Connector getConnector();
+	public Connector getConnector();
 
 	/**
 	 * Enable/Disable merge many get commands to one multi-get command.true is
@@ -114,7 +114,7 @@ public interface MemcachedClient {
 	 * 
 	 * @param optimizeGet
 	 */
-	public abstract void setOptimizeGet(final boolean optimizeGet);
+	public void setOptimizeGet(final boolean optimizeGet);
 
 	/**
 	 * Enable/Disable merge many command's buffers to one big buffer fit
@@ -122,13 +122,12 @@ public interface MemcachedClient {
 	 * 
 	 * @param optimizeMergeBuffer
 	 */
-	public abstract void setOptimizeMergeBuffer(
-			final boolean optimizeMergeBuffer);
+	public void setOptimizeMergeBuffer(final boolean optimizeMergeBuffer);
 
 	/**
 	 * @return
 	 */
-	public abstract boolean isShutdown();
+	public boolean isShutdown();
 
 	/**
 	 * Aadd a memcached server,the thread call this method will be blocked until
@@ -139,7 +138,7 @@ public interface MemcachedClient {
 	 * @param port
 	 *            port number
 	 */
-	public abstract void addServer(final String server, final int port)
+	public void addServer(final String server, final int port)
 			throws IOException;
 
 	/**
@@ -149,7 +148,7 @@ public interface MemcachedClient {
 	 * @param inetSocketAddress
 	 *            memcached server's socket address
 	 */
-	public abstract void addServer(final InetSocketAddress inetSocketAddress)
+	public void addServer(final InetSocketAddress inetSocketAddress)
 			throws IOException;
 
 	/**
@@ -159,12 +158,12 @@ public interface MemcachedClient {
 	 * @param host
 	 *            String like [host1]:[port1] [host2]:[port2] ...
 	 */
-	public abstract void addServer(String hostList) throws IOException;
+	public void addServer(String hostList) throws IOException;
 
 	/**
 	 * Get current server list.You can call this method through JMX or program
 	 */
-	public abstract List<String> getServersDescription();
+	public List<String> getServersDescription();
 
 	/**
 	 * Remove many memcached server
@@ -172,7 +171,7 @@ public interface MemcachedClient {
 	 * @param host
 	 *            String like [host1]:[port1] [host2]:[port2] ...
 	 */
-	public abstract void removeServer(String hostList);
+	public void removeServer(String hostList);
 
 	/**
 	 * Set the nio's ByteBuffer Allocator,use SimpleBufferAllocator by default.
@@ -182,8 +181,7 @@ public interface MemcachedClient {
 	 * @return
 	 */
 	@Deprecated
-	public abstract void setBufferAllocator(
-			final BufferAllocator bufferAllocator);
+	public void setBufferAllocator(final BufferAllocator bufferAllocator);
 
 	/**
 	 * Get value by key
@@ -201,17 +199,17 @@ public interface MemcachedClient {
 	 * @throws InterruptedException
 	 * @throws MemcachedException
 	 */
-	public abstract <T> T get(final String key, final long timeout,
+	public <T> T get(final String key, final long timeout,
 			final Transcoder<T> transcoder) throws TimeoutException,
 			InterruptedException, MemcachedException;
 
-	public abstract <T> T get(final String key, final long timeout)
+	public <T> T get(final String key, final long timeout)
 			throws TimeoutException, InterruptedException, MemcachedException;
 
-	public abstract <T> T get(final String key, final Transcoder<T> transcoder)
+	public <T> T get(final String key, final Transcoder<T> transcoder)
 			throws TimeoutException, InterruptedException, MemcachedException;
 
-	public abstract <T> T get(final String key) throws TimeoutException,
+	public <T> T get(final String key) throws TimeoutException,
 			InterruptedException, MemcachedException;
 
 	/**
@@ -230,81 +228,168 @@ public interface MemcachedClient {
 	 * @throws InterruptedException
 	 * @throws MemcachedException
 	 */
-	public abstract <T> GetsResponse<T> gets(final String key,
-			final long timeout, final Transcoder<T> transcoder)
-			throws TimeoutException, InterruptedException, MemcachedException;
-
-	public abstract <T> GetsResponse<T> gets(final String key)
-			throws TimeoutException, InterruptedException, MemcachedException;
-
-	public abstract <T> GetsResponse<T> gets(final String key,
-			final long timeout) throws TimeoutException, InterruptedException,
-			MemcachedException;
-
-	@SuppressWarnings("unchecked")
-	public abstract <T> GetsResponse<T> gets(final String key,
-			final Transcoder transcoder) throws TimeoutException,
+	public <T> GetsResponse<T> gets(final String key, final long timeout,
+			final Transcoder<T> transcoder) throws TimeoutException,
 			InterruptedException, MemcachedException;
 
 	/**
-	 * memcached的getMulti操作，批量获取一批key对应的数据项
-	 * 
+	 * @see #gets(String, long, Transcoder)
 	 * @param <T>
-	 * @param keyCollections
-	 *            关键字集合
-	 * @param timeout
-	 *            操作超时时间
-	 * @param transcoder
-	 *            数据项的反序列化转换器
-	 * @return map对象，map中是缓存中存在着的数据项，如果不存在将不会在map中出现
+	 * @param key
+	 * @return
 	 * @throws TimeoutException
 	 * @throws InterruptedException
 	 * @throws MemcachedException
 	 */
-	public abstract <T> Map<String, T> get(
-			final Collection<String> keyCollections, final long timeout,
-			final Transcoder<T> transcoder) throws TimeoutException,
+	public <T> GetsResponse<T> gets(final String key) throws TimeoutException,
 			InterruptedException, MemcachedException;
 
-	public abstract <T> Map<String, T> get(
-			final Collection<String> keyCollections,
-			final Transcoder<T> transcoder) throws TimeoutException,
-			InterruptedException, MemcachedException;
-
-	public abstract <T> Map<String, T> get(
-			final Collection<String> keyCollections) throws TimeoutException,
-			InterruptedException, MemcachedException;
-
-	public abstract <T> Map<String, T> get(
-			final Collection<String> keyCollections, final long timeout)
+	/**
+	 * @see #gets(String, long, Transcoder)
+	 * @param <T>
+	 * @param key
+	 * @param timeout
+	 * @return
+	 * @throws TimeoutException
+	 * @throws InterruptedException
+	 * @throws MemcachedException
+	 */
+	public <T> GetsResponse<T> gets(final String key, final long timeout)
 			throws TimeoutException, InterruptedException, MemcachedException;
 
 	/**
-	 * 类似getMulti，但是返回数据项的cas值，返回的map中value存储的是GetsResponse对象
-	 * 
+	 * @see #gets(String, long, Transcoder)
 	 * @param <T>
-	 * @param keyCollections
-	 * @param timeout
+	 * @param key
 	 * @param transcoder
 	 * @return
 	 * @throws TimeoutException
 	 * @throws InterruptedException
 	 * @throws MemcachedException
 	 */
-	public abstract <T> Map<String, GetsResponse<T>> gets(
-			final Collection<String> keyCollections, final long timeout,
+	@SuppressWarnings("unchecked")
+	public <T> GetsResponse<T> gets(final String key,
+			final Transcoder transcoder) throws TimeoutException,
+			InterruptedException, MemcachedException;
+
+	/**
+	 * Bulk get items
+	 * 
+	 * @param <T>
+	 * @param keyCollections
+	 *            key collection
+	 * @param opTimeout
+	 *            opTimeout
+	 * @param transcoder
+	 *            Value transcoder
+	 * @return Exists items map
+	 * @throws TimeoutException
+	 * @throws InterruptedException
+	 * @throws MemcachedException
+	 */
+	public <T> Map<String, T> get(final Collection<String> keyCollections,
+			final long opTimeout, final Transcoder<T> transcoder)
+			throws TimeoutException, InterruptedException, MemcachedException;
+
+	/**
+	 * @see #get(Collection, long, Transcoder)
+	 * @param <T>
+	 * @param keyCollections
+	 * @param transcoder
+	 * @return
+	 * @throws TimeoutException
+	 * @throws InterruptedException
+	 * @throws MemcachedException
+	 */
+	public <T> Map<String, T> get(final Collection<String> keyCollections,
 			final Transcoder<T> transcoder) throws TimeoutException,
 			InterruptedException, MemcachedException;
 
-	public abstract <T> Map<String, GetsResponse<T>> gets(
+	/**
+	 * @see #get(Collection, long, Transcoder)
+	 * @param <T>
+	 * @param keyCollections
+	 * @return
+	 * @throws TimeoutException
+	 * @throws InterruptedException
+	 * @throws MemcachedException
+	 */
+	public <T> Map<String, T> get(final Collection<String> keyCollections)
+			throws TimeoutException, InterruptedException, MemcachedException;
+
+	/**
+	 * @see #get(Collection, long, Transcoder)
+	 * @param <T>
+	 * @param keyCollections
+	 * @param timeout
+	 * @return
+	 * @throws TimeoutException
+	 * @throws InterruptedException
+	 * @throws MemcachedException
+	 */
+	public <T> Map<String, T> get(final Collection<String> keyCollections,
+			final long timeout) throws TimeoutException, InterruptedException,
+			MemcachedException;
+
+	/**
+	 * Bulk gets items
+	 * 
+	 * @param <T>
+	 * @param keyCollections
+	 *            key collection
+	 * @param opTime
+	 *            Operation timeout
+	 * @param transcoder
+	 *            Value transcoder
+	 * @return Exists GetsResponse map
+	 * @see net.rubyeye.xmemcached.GetsResponse
+	 * @throws TimeoutException
+	 * @throws InterruptedException
+	 * @throws MemcachedException
+	 */
+	public <T> Map<String, GetsResponse<T>> gets(
+			final Collection<String> keyCollections, final long opTime,
+			final Transcoder<T> transcoder) throws TimeoutException,
+			InterruptedException, MemcachedException;
+
+	/**
+	 * @see #gets(Collection, long, Transcoder)
+	 * @param <T>
+	 * @param keyCollections
+	 * @return
+	 * @throws TimeoutException
+	 * @throws InterruptedException
+	 * @throws MemcachedException
+	 */
+	public <T> Map<String, GetsResponse<T>> gets(
 			final Collection<String> keyCollections) throws TimeoutException,
 			InterruptedException, MemcachedException;
 
-	public abstract <T> Map<String, GetsResponse<T>> gets(
+	/**
+	 * @see #gets(Collection, long, Transcoder)
+	 * @param <T>
+	 * @param keyCollections
+	 * @param timeout
+	 * @return
+	 * @throws TimeoutException
+	 * @throws InterruptedException
+	 * @throws MemcachedException
+	 */
+	public <T> Map<String, GetsResponse<T>> gets(
 			final Collection<String> keyCollections, final long timeout)
 			throws TimeoutException, InterruptedException, MemcachedException;
 
-	public abstract <T> Map<String, GetsResponse<T>> gets(
+	/**
+	 * @see #gets(Collection, long, Transcoder)
+	 * @param <T>
+	 * @param keyCollections
+	 * @param transcoder
+	 * @return
+	 * @throws TimeoutException
+	 * @throws InterruptedException
+	 * @throws MemcachedException
+	 */
+	public <T> Map<String, GetsResponse<T>> gets(
 			final Collection<String> keyCollections,
 			final Transcoder<T> transcoder) throws TimeoutException,
 			InterruptedException, MemcachedException;
@@ -316,7 +401,8 @@ public interface MemcachedClient {
 	 * @param key
 	 *            stored key
 	 * @param exp
-	 *            expire time
+	 *            An expiration time, in seconds. Can be up to 30 days. After 30
+	 *            days, is treated as a unix timestamp of an exact date.
 	 * @param value
 	 *            stored data
 	 * @param transcoder
@@ -328,21 +414,29 @@ public interface MemcachedClient {
 	 * @throws InterruptedException
 	 * @throws MemcachedException
 	 */
-	public abstract <T> boolean set(final String key, final int exp,
-			final T value, final Transcoder<T> transcoder, final long timeout)
+	public <T> boolean set(final String key, final int exp, final T value,
+			final Transcoder<T> transcoder, final long timeout)
 			throws TimeoutException, InterruptedException, MemcachedException;
 
-	public abstract boolean set(final String key, final int exp,
-			final Object value) throws TimeoutException, InterruptedException,
+	/**
+	 * @see #set(String, int, Object, Transcoder, long)
+	 */
+	public boolean set(final String key, final int exp, final Object value)
+			throws TimeoutException, InterruptedException, MemcachedException;
+
+	/**
+	 * @see #set(String, int, Object, Transcoder, long)
+	 */
+	public boolean set(final String key, final int exp, final Object value,
+			final long timeout) throws TimeoutException, InterruptedException,
 			MemcachedException;
 
-	public abstract boolean set(final String key, final int exp,
-			final Object value, final long timeout) throws TimeoutException,
+	/**
+	 * @see #set(String, int, Object, Transcoder, long)
+	 */
+	public <T> boolean set(final String key, final int exp, final T value,
+			final Transcoder<T> transcoder) throws TimeoutException,
 			InterruptedException, MemcachedException;
-
-	public abstract <T> boolean set(final String key, final int exp,
-			final T value, final Transcoder<T> transcoder)
-			throws TimeoutException, InterruptedException, MemcachedException;
 
 	/**
 	 * Store key-value item to memcached,doesn't wait for reply
@@ -351,7 +445,8 @@ public interface MemcachedClient {
 	 * @param key
 	 *            stored key
 	 * @param exp
-	 *            expire time
+	 *            An expiration time, in seconds. Can be up to 30 days. After 30
+	 *            days, is treated as a unix timestamp of an exact date.
 	 * @param value
 	 *            stored data
 	 * @param transcoder
@@ -360,10 +455,20 @@ public interface MemcachedClient {
 	 * @throws InterruptedException
 	 * @throws MemcachedException
 	 */
-	public abstract void setWithNoReply(final String key, final int exp,
+	public void setWithNoReply(final String key, final int exp,
 			final Object value) throws InterruptedException, MemcachedException;
 
-	public abstract <T> void setWithNoReply(final String key, final int exp,
+	/**
+	 * @see #setWithNoReply(String, int, Object, Transcoder)
+	 * @param <T>
+	 * @param key
+	 * @param exp
+	 * @param value
+	 * @param transcoder
+	 * @throws InterruptedException
+	 * @throws MemcachedException
+	 */
+	public <T> void setWithNoReply(final String key, final int exp,
 			final T value, final Transcoder<T> transcoder)
 			throws InterruptedException, MemcachedException;
 
@@ -374,6 +479,8 @@ public interface MemcachedClient {
 	 * @param <T>
 	 * @param key
 	 * @param exp
+	 *            An expiration time, in seconds. Can be up to 30 days. After 30
+	 *            days, is treated as a unix timestamp of an exact date.
 	 * @param value
 	 * @param transcoder
 	 * @param timeout
@@ -382,25 +489,40 @@ public interface MemcachedClient {
 	 * @throws InterruptedException
 	 * @throws MemcachedException
 	 */
-	public abstract <T> boolean add(final String key, final int exp,
-			final T value, final Transcoder<T> transcoder, final long timeout)
-			throws TimeoutException, InterruptedException, MemcachedException;
-
-	public abstract boolean add(final String key, final int exp,
-			final Object value) throws TimeoutException, InterruptedException,
-			MemcachedException;
-
-	public abstract boolean add(final String key, final int exp,
-			final Object value, final long timeout) throws TimeoutException,
-			InterruptedException, MemcachedException;
-
-	public abstract <T> boolean add(final String key, final int exp,
-			final T value, final Transcoder<T> transcoder)
+	public <T> boolean add(final String key, final int exp, final T value,
+			final Transcoder<T> transcoder, final long timeout)
 			throws TimeoutException, InterruptedException, MemcachedException;
 
 	/**
-	 * Add key-value item to memcached, success only when the key is not exists
-	 * in memcached.This method doesn't wait for reply.
+	 * @see #add(String, int, Object, Transcoder, long)
+	 * @param key
+	 * @param exp
+	 * @param value
+	 * @return
+	 * @throws TimeoutException
+	 * @throws InterruptedException
+	 * @throws MemcachedException
+	 */
+	public boolean add(final String key, final int exp, final Object value)
+			throws TimeoutException, InterruptedException, MemcachedException;
+
+	/**
+	 * @see #add(String, int, Object, Transcoder, long)
+	 * @param key
+	 * @param exp
+	 * @param value
+	 * @param timeout
+	 * @return
+	 * @throws TimeoutException
+	 * @throws InterruptedException
+	 * @throws MemcachedException
+	 */
+	public boolean add(final String key, final int exp, final Object value,
+			final long timeout) throws TimeoutException, InterruptedException,
+			MemcachedException;
+
+	/**
+	 * @see #add(String, int, Object, Transcoder, long)
 	 * 
 	 * @param <T>
 	 * @param key
@@ -412,11 +534,41 @@ public interface MemcachedClient {
 	 * @throws InterruptedException
 	 * @throws MemcachedException
 	 */
+	public <T> boolean add(final String key, final int exp, final T value,
+			final Transcoder<T> transcoder) throws TimeoutException,
+			InterruptedException, MemcachedException;
 
-	public abstract void addWithNoReply(final String key, final int exp,
+	/**
+	 * Add key-value item to memcached, success only when the key is not exists
+	 * in memcached.This method doesn't wait for reply.
+	 * 
+	 * @param <T>
+	 * @param key
+	 * @param exp
+	 *            An expiration time, in seconds. Can be up to 30 days. After 30
+	 *            days, is treated as a unix timestamp of an exact date.
+	 * @param value
+	 * @param transcoder
+	 * @return
+	 * @throws TimeoutException
+	 * @throws InterruptedException
+	 * @throws MemcachedException
+	 */
+
+	public void addWithNoReply(final String key, final int exp,
 			final Object value) throws InterruptedException, MemcachedException;
 
-	public abstract <T> void addWithNoReply(final String key, final int exp,
+	/**
+	 * @see #addWithNoReply(String, int, Object, Transcoder)
+	 * @param <T>
+	 * @param key
+	 * @param exp
+	 * @param value
+	 * @param transcoder
+	 * @throws InterruptedException
+	 * @throws MemcachedException
+	 */
+	public <T> void addWithNoReply(final String key, final int exp,
 			final T value, final Transcoder<T> transcoder)
 			throws InterruptedException, MemcachedException;
 
@@ -427,6 +579,8 @@ public interface MemcachedClient {
 	 * @param <T>
 	 * @param key
 	 * @param exp
+	 *            An expiration time, in seconds. Can be up to 30 days. After 30
+	 *            days, is treated as a unix timestamp of an exact date.
 	 * @param value
 	 * @param transcoder
 	 * @param timeout
@@ -435,21 +589,53 @@ public interface MemcachedClient {
 	 * @throws InterruptedException
 	 * @throws MemcachedException
 	 */
-	public abstract <T> boolean replace(final String key, final int exp,
-			final T value, final Transcoder<T> transcoder, final long timeout)
+	public <T> boolean replace(final String key, final int exp, final T value,
+			final Transcoder<T> transcoder, final long timeout)
 			throws TimeoutException, InterruptedException, MemcachedException;
 
-	public abstract boolean replace(final String key, final int exp,
-			final Object value) throws TimeoutException, InterruptedException,
+	/**
+	 * @see #replace(String, int, Object, Transcoder, long)
+	 * @param key
+	 * @param exp
+	 * @param value
+	 * @return
+	 * @throws TimeoutException
+	 * @throws InterruptedException
+	 * @throws MemcachedException
+	 */
+	public boolean replace(final String key, final int exp, final Object value)
+			throws TimeoutException, InterruptedException, MemcachedException;
+
+	/**
+	 * @see #replace(String, int, Object, Transcoder, long)
+	 * @param key
+	 * @param exp
+	 * @param value
+	 * @param timeout
+	 * @return
+	 * @throws TimeoutException
+	 * @throws InterruptedException
+	 * @throws MemcachedException
+	 */
+	public boolean replace(final String key, final int exp, final Object value,
+			final long timeout) throws TimeoutException, InterruptedException,
 			MemcachedException;
 
-	public abstract boolean replace(final String key, final int exp,
-			final Object value, final long timeout) throws TimeoutException,
+	/**
+	 * @see #replace(String, int, Object, Transcoder, long)
+	 * @param <T>
+	 * @param key
+	 * @param exp
+	 * @param value
+	 * @param transcoder
+	 * @return
+	 * @throws TimeoutException
+	 * @throws InterruptedException
+	 * @throws MemcachedException
+	 */
+	public <T> boolean replace(final String key, final int exp, final T value,
+			final Transcoder<T> transcoder) throws TimeoutException,
 			InterruptedException, MemcachedException;
-
-	public abstract <T> boolean replace(final String key, final int exp,
-			final T value, final Transcoder<T> transcoder)
-			throws TimeoutException, InterruptedException, MemcachedException;
 
 	/**
 	 * Replace the key's data item in memcached,success only when the key's data
@@ -459,20 +645,41 @@ public interface MemcachedClient {
 	 * @param <T>
 	 * @param key
 	 * @param exp
+	 *            An expiration time, in seconds. Can be up to 30 days. After 30
+	 *            days, is treated as a unix timestamp of an exact date.
 	 * @param value
 	 * @param transcoder
 	 * @throws TimeoutException
 	 * @throws InterruptedException
 	 * @throws MemcachedException
 	 */
-	public abstract void replaceWithNoReply(final String key, final int exp,
+	public void replaceWithNoReply(final String key, final int exp,
 			final Object value) throws InterruptedException, MemcachedException;
 
-	public abstract <T> void replaceWithNoReply(final String key,
-			final int exp, final T value, final Transcoder<T> transcoder)
+	/**
+	 * @see #replaceWithNoReply(String, int, Object, Transcoder)
+	 * @param <T>
+	 * @param key
+	 * @param exp
+	 * @param value
+	 * @param transcoder
+	 * @throws InterruptedException
+	 * @throws MemcachedException
+	 */
+	public <T> void replaceWithNoReply(final String key, final int exp,
+			final T value, final Transcoder<T> transcoder)
 			throws InterruptedException, MemcachedException;
 
-	public abstract boolean append(final String key, final Object value)
+	/**
+	 * @see #append(String, Object, long)
+	 * @param key
+	 * @param value
+	 * @return
+	 * @throws TimeoutException
+	 * @throws InterruptedException
+	 * @throws MemcachedException
+	 */
+	public boolean append(final String key, final Object value)
 			throws TimeoutException, InterruptedException, MemcachedException;
 
 	/**
@@ -486,7 +693,7 @@ public interface MemcachedClient {
 	 * @throws InterruptedException
 	 * @throws MemcachedException
 	 */
-	public abstract boolean append(final String key, final Object value,
+	public boolean append(final String key, final Object value,
 			final long timeout) throws TimeoutException, InterruptedException,
 			MemcachedException;
 
@@ -499,10 +706,19 @@ public interface MemcachedClient {
 	 * @throws InterruptedException
 	 * @throws MemcachedException
 	 */
-	public abstract void appendWithNoReply(final String key, final Object value)
+	public void appendWithNoReply(final String key, final Object value)
 			throws InterruptedException, MemcachedException;
 
-	public abstract boolean prepend(final String key, final Object value)
+	/**
+	 * @see #prepend(String, Object, long)
+	 * @param key
+	 * @param value
+	 * @return
+	 * @throws TimeoutException
+	 * @throws InterruptedException
+	 * @throws MemcachedException
+	 */
+	public boolean prepend(final String key, final Object value)
 			throws TimeoutException, InterruptedException, MemcachedException;
 
 	/**
@@ -516,7 +732,7 @@ public interface MemcachedClient {
 	 * @throws InterruptedException
 	 * @throws MemcachedException
 	 */
-	public abstract boolean prepend(final String key, final Object value,
+	public boolean prepend(final String key, final Object value,
 			final long timeout) throws TimeoutException, InterruptedException,
 			MemcachedException;
 
@@ -531,12 +747,23 @@ public interface MemcachedClient {
 	 * @throws InterruptedException
 	 * @throws MemcachedException
 	 */
-	public abstract void prependWithNoReply(final String key, final Object value)
+	public void prependWithNoReply(final String key, final Object value)
 			throws InterruptedException, MemcachedException;
 
-	public abstract boolean cas(final String key, final int exp,
-			final Object value, final long cas) throws TimeoutException,
-			InterruptedException, MemcachedException;
+	/**
+	 * @see #cas(String, int, Object, Transcoder, long, long)
+	 * @param key
+	 * @param exp
+	 * @param value
+	 * @param cas
+	 * @return
+	 * @throws TimeoutException
+	 * @throws InterruptedException
+	 * @throws MemcachedException
+	 */
+	public boolean cas(final String key, final int exp, final Object value,
+			final long cas) throws TimeoutException, InterruptedException,
+			MemcachedException;
 
 	/**
 	 *Cas is a check and set operation which means "store this data but only if
@@ -545,6 +772,8 @@ public interface MemcachedClient {
 	 * @param <T>
 	 * @param key
 	 * @param exp
+	 *            An expiration time, in seconds. Can be up to 30 days. After 30
+	 *            days, is treated as a unix timestamp of an exact date.
 	 * @param value
 	 * @param transcoder
 	 * @param timeout
@@ -554,17 +783,41 @@ public interface MemcachedClient {
 	 * @throws InterruptedException
 	 * @throws MemcachedException
 	 */
-	public abstract <T> boolean cas(final String key, final int exp,
-			final T value, final Transcoder<T> transcoder, final long timeout,
-			final long cas) throws TimeoutException, InterruptedException,
-			MemcachedException;
-
-	public abstract boolean cas(final String key, final int exp,
-			final Object value, final long timeout, final long cas)
+	public <T> boolean cas(final String key, final int exp, final T value,
+			final Transcoder<T> transcoder, final long timeout, final long cas)
 			throws TimeoutException, InterruptedException, MemcachedException;
 
-	public abstract <T> boolean cas(final String key, final int exp,
-			final T value, final Transcoder<T> transcoder, final long cas)
+	/**
+	 * @see #cas(String, int, Object, Transcoder, long, long)
+	 * @param key
+	 * @param exp
+	 * @param value
+	 * @param timeout
+	 * @param cas
+	 * @return
+	 * @throws TimeoutException
+	 * @throws InterruptedException
+	 * @throws MemcachedException
+	 */
+	public boolean cas(final String key, final int exp, final Object value,
+			final long timeout, final long cas) throws TimeoutException,
+			InterruptedException, MemcachedException;
+
+	/**
+	 * @see #cas(String, int, Object, Transcoder, long, long)
+	 * @param <T>
+	 * @param key
+	 * @param exp
+	 * @param value
+	 * @param transcoder
+	 * @param cas
+	 * @return
+	 * @throws TimeoutException
+	 * @throws InterruptedException
+	 * @throws MemcachedException
+	 */
+	public <T> boolean cas(final String key, final int exp, final T value,
+			final Transcoder<T> transcoder, final long cas)
 			throws TimeoutException, InterruptedException, MemcachedException;
 
 	/**
@@ -574,17 +827,18 @@ public interface MemcachedClient {
 	 * @param <T>
 	 * @param key
 	 * @param exp
-	 *            缓存数据项的超时时间
+	 *            An expiration time, in seconds. Can be up to 30 days. After 30
+	 *            days, is treated as a unix timestamp of an exact date.
 	 * @param operation
-	 *            CASOperation对象，包装cas操作
+	 *            CASOperation
 	 * @param transcoder
-	 *            对象转换器
+	 *            object transcoder
 	 * @return
 	 * @throws TimeoutException
 	 * @throws InterruptedException
 	 * @throws MemcachedException
 	 */
-	public abstract <T> boolean cas(final String key, final int exp,
+	public <T> boolean cas(final String key, final int exp,
 			final CASOperation<T> operation, final Transcoder<T> transcoder)
 			throws TimeoutException, InterruptedException, MemcachedException;
 
@@ -595,7 +849,8 @@ public interface MemcachedClient {
 	 * @param <T>
 	 * @param key
 	 * @param exp
-	 *            data item expire time
+	 *            An expiration time, in seconds. Can be up to 30 days. After 30
+	 *            days, is treated as a unix timestamp of an exact date.
 	 * @param getsReponse
 	 *            gets method's result
 	 * @param operation
@@ -606,26 +861,69 @@ public interface MemcachedClient {
 	 * @throws InterruptedException
 	 * @throws MemcachedException
 	 */
-	public abstract <T> boolean cas(final String key, final int exp,
+	public <T> boolean cas(final String key, final int exp,
 			GetsResponse<T> getsReponse, final CASOperation<T> operation,
 			final Transcoder<T> transcoder) throws TimeoutException,
 			InterruptedException, MemcachedException;
 
-	public abstract <T> boolean cas(final String key, final int exp,
+	/**
+	 * @see #cas(String, int, GetsResponse, CASOperation, Transcoder)
+	 * @param <T>
+	 * @param key
+	 * @param exp
+	 * @param getsReponse
+	 * @param operation
+	 * @return
+	 * @throws TimeoutException
+	 * @throws InterruptedException
+	 * @throws MemcachedException
+	 */
+	public <T> boolean cas(final String key, final int exp,
 			GetsResponse<T> getsReponse, final CASOperation<T> operation)
 			throws TimeoutException, InterruptedException, MemcachedException;
 
-	public abstract <T> boolean cas(final String key,
-			GetsResponse<T> getsResponse, final CASOperation<T> operation)
+	/**
+	 * @see #cas(String, int, GetsResponse, CASOperation, Transcoder)
+	 * @param <T>
+	 * @param key
+	 * @param getsResponse
+	 * @param operation
+	 * @return
+	 * @throws TimeoutException
+	 * @throws InterruptedException
+	 * @throws MemcachedException
+	 */
+	public <T> boolean cas(final String key, GetsResponse<T> getsResponse,
+			final CASOperation<T> operation) throws TimeoutException,
+			InterruptedException, MemcachedException;
+
+	/**
+	 * @see #cas(String, int, GetsResponse, CASOperation, Transcoder)
+	 * @param <T>
+	 * @param key
+	 * @param exp
+	 * @param operation
+	 * @return
+	 * @throws TimeoutException
+	 * @throws InterruptedException
+	 * @throws MemcachedException
+	 */
+	public <T> boolean cas(final String key, final int exp,
+			final CASOperation<T> operation) throws TimeoutException,
+			InterruptedException, MemcachedException;
+
+	/**
+	 * @see #cas(String, int, GetsResponse, CASOperation, Transcoder)
+	 * @param <T>
+	 * @param key
+	 * @param operation
+	 * @return
+	 * @throws TimeoutException
+	 * @throws InterruptedException
+	 * @throws MemcachedException
+	 */
+	public <T> boolean cas(final String key, final CASOperation<T> operation)
 			throws TimeoutException, InterruptedException, MemcachedException;
-
-	public abstract <T> boolean cas(final String key, final int exp,
-			final CASOperation<T> operation) throws TimeoutException,
-			InterruptedException, MemcachedException;
-
-	public abstract <T> boolean cas(final String key,
-			final CASOperation<T> operation) throws TimeoutException,
-			InterruptedException, MemcachedException;
 
 	/**
 	 * 
@@ -638,19 +936,50 @@ public interface MemcachedClient {
 	 * @throws InterruptedException
 	 * @throws MemcachedException
 	 */
-	public abstract <T> void casWithNoReply(final String key,
+	public <T> void casWithNoReply(final String key,
 			GetsResponse<T> getsResponse, final CASOperation<T> operation)
 			throws TimeoutException, InterruptedException, MemcachedException;
 
-	public abstract <T> void casWithNoReply(final String key, final int exp,
+	/**
+	 * cas noreply
+	 * 
+	 * @param <T>
+	 * @param key
+	 * @param exp
+	 * @param getsReponse
+	 * @param operation
+	 * @throws TimeoutException
+	 * @throws InterruptedException
+	 * @throws MemcachedException
+	 */
+	public <T> void casWithNoReply(final String key, final int exp,
 			GetsResponse<T> getsReponse, final CASOperation<T> operation)
 			throws TimeoutException, InterruptedException, MemcachedException;
 
-	public abstract <T> void casWithNoReply(final String key, final int exp,
+	/**
+	 * @see #casWithNoReply(String, int, GetsResponse, CASOperation)
+	 * @param <T>
+	 * @param key
+	 * @param exp
+	 * @param operation
+	 * @throws TimeoutException
+	 * @throws InterruptedException
+	 * @throws MemcachedException
+	 */
+	public <T> void casWithNoReply(final String key, final int exp,
 			final CASOperation<T> operation) throws TimeoutException,
 			InterruptedException, MemcachedException;
 
-	public abstract <T> void casWithNoReply(final String key,
+	/**
+	 * @see #casWithNoReply(String, int, GetsResponse, CASOperation)
+	 * @param <T>
+	 * @param key
+	 * @param operation
+	 * @throws TimeoutException
+	 * @throws InterruptedException
+	 * @throws MemcachedException
+	 */
+	public <T> void casWithNoReply(final String key,
 			final CASOperation<T> operation) throws TimeoutException,
 			InterruptedException, MemcachedException;
 
@@ -673,7 +1002,7 @@ public interface MemcachedClient {
 	 * @throws MemcachedException
 	 */
 	@Deprecated
-	public abstract boolean delete(final String key, final int time)
+	public boolean delete(final String key, final int time)
 			throws TimeoutException, InterruptedException, MemcachedException;
 
 	/**
@@ -688,11 +1017,111 @@ public interface MemcachedClient {
 	 * @throws MemcachedException
 	 * @since 1.3.2
 	 */
-	public abstract boolean delete(final String key, long opTimeout)
+	public boolean delete(final String key, long opTimeout)
 			throws TimeoutException, InterruptedException, MemcachedException;
 
 	/**
-	 * Get all connected memcached servers's versions.
+	 * Set a new expiration time for an existing item
+	 * 
+	 * @param key
+	 *            item's key
+	 * @param exp
+	 *            New expiration time, in seconds. Can be up to 30 days. After
+	 *            30 days, is treated as a unix timestamp of an exact date.
+	 * @param opTimeout
+	 *            operation timeout
+	 * @return
+	 * @throws TimeoutException
+	 * @throws InterruptedException
+	 * @throws MemcachedException
+	 */
+	public boolean touch(final String key, int exp, long opTimeout)
+			throws TimeoutException, InterruptedException, MemcachedException;
+
+	/**
+	 * Set a new expiration time for an existing item,using default opTimeout
+	 * second.
+	 * 
+	 * @param key
+	 *            item's key
+	 * @param exp
+	 *            New expiration time, in seconds. Can be up to 30 days. After
+	 *            30 days, is treated as a unix timestamp of an exact date.
+	 * @return
+	 * @throws TimeoutException
+	 * @throws InterruptedException
+	 * @throws MemcachedException
+	 */
+	public boolean touch(final String key, int exp) throws TimeoutException,
+			InterruptedException, MemcachedException;
+
+	/**
+	 * Get item and set a new expiration time for it
+	 * 
+	 * @param <T>
+	 * @param key
+	 *            item's key
+	 * @param newExp
+	 *            New expiration time, in seconds. Can be up to 30 days. After
+	 *            30 days, is treated as a unix timestamp of an exact date.
+	 * @param opTimeout
+	 *            operation timeout
+	 * @return
+	 * @throws TimeoutException
+	 * @throws InterruptedException
+	 * @throws MemcachedException
+	 */
+	public <T> T getAndTouch(final String key, int newExp, long opTimeout)
+			throws TimeoutException, InterruptedException, MemcachedException;
+
+	/**
+	 * Get item and set a new expiration time for it,using default opTimeout
+	 * 
+	 * @param <T>
+	 * @param key
+	 * @param newExp
+	 * @return
+	 * @throws TimeoutException
+	 * @throws InterruptedException
+	 * @throws MemcachedException
+	 */
+	public <T> T getAndTouch(final String key, int newExp)
+			throws TimeoutException, InterruptedException, MemcachedException;
+
+	/**
+	 * Bulk get items and touch them
+	 * 
+	 * @param <T>
+	 * @param keyExpMap
+	 *            A map,key is item's key,and value is a new expiration time for
+	 *            the item.
+	 * @param opTimeout
+	 *            operation timeout
+	 * @return
+	 * @throws TimeoutException
+	 * @throws InterruptedException
+	 * @throws MemcachedException
+	 */
+	// public <T> Map<String, T> getAndTouch(Map<String, Integer> keyExpMap,
+	// long opTimeout) throws TimeoutException, InterruptedException,
+	// MemcachedException;
+
+	/**
+	 * Bulk get items and touch them,using default opTimeout
+	 * 
+	 * @see #getAndTouch(Map, long)
+	 * @param <T>
+	 * @param keyExpMap
+	 * @return
+	 * @throws TimeoutException
+	 * @throws InterruptedException
+	 * @throws MemcachedException
+	 */
+	// public <T> Map<String, T> getAndTouch(Map<String, Integer> keyExpMap)
+	// throws TimeoutException, InterruptedException, MemcachedException;
+
+	/**
+	 * Get all connected memcached servers's version.
 	 * 
 	 * @return
 	 * @throws TimeoutException
@@ -718,7 +1147,7 @@ public interface MemcachedClient {
 	 * @throws InterruptedException
 	 * @throws MemcachedException
 	 */
-	public abstract long incr(final String key, final long delta)
+	public long incr(final String key, final long delta)
 			throws TimeoutException, InterruptedException, MemcachedException;
 
 	public long incr(final String key, final long delta, final long initValue)
@@ -766,7 +1195,7 @@ public interface MemcachedClient {
 	 * @throws InterruptedException
 	 * @throws MemcachedException
 	 */
-	public abstract long decr(final String key, final long delta)
+	public long decr(final String key, final long delta)
 			throws TimeoutException, InterruptedException, MemcachedException;
 
 	/**
@@ -779,7 +1208,7 @@ public interface MemcachedClient {
 	 * @throws InterruptedException
 	 * @throws MemcachedException
 	 */
-	public abstract long decr(final String key, final long delta, long initValue)
+	public long decr(final String key, final long delta, long initValue)
 			throws TimeoutException, InterruptedException, MemcachedException;
 
 	/**
@@ -804,9 +1233,9 @@ public interface MemcachedClient {
 	 * @throws InterruptedException
 	 * @throws MemcachedException
 	 */
-	public abstract long decr(final String key, final long delta,
-			long initValue, long timeout) throws TimeoutException,
-			InterruptedException, MemcachedException;
+	public long decr(final String key, final long delta, long initValue,
+			long timeout) throws TimeoutException, InterruptedException,
+			MemcachedException;
 
 	/**
 	 * Make All connected memcached's data item invalid
@@ -815,10 +1244,10 @@ public interface MemcachedClient {
 	 * @throws InterruptedException
 	 * @throws MemcachedException
 	 */
-	public abstract void flushAll() throws TimeoutException,
-			InterruptedException, MemcachedException;
+	public void flushAll() throws TimeoutException, InterruptedException,
+			MemcachedException;
 
-	public abstract void flushAllWithNoReply() throws InterruptedException,
+	public void flushAllWithNoReply() throws InterruptedException,
 			MemcachedException;
 
 	/**
@@ -830,7 +1259,7 @@ public interface MemcachedClient {
 	 * @throws InterruptedException
 	 * @throws MemcachedException
 	 */
-	public abstract void flushAll(long timeout) throws TimeoutException,
+	public void flushAll(long timeout) throws TimeoutException,
 			InterruptedException, MemcachedException;
 
 	/**
@@ -844,13 +1273,13 @@ public interface MemcachedClient {
 	 * @throws InterruptedException
 	 * @throws MemcachedException
 	 */
-	public abstract void flushAll(InetSocketAddress address)
-			throws MemcachedException, InterruptedException, TimeoutException;
+	public void flushAll(InetSocketAddress address) throws MemcachedException,
+			InterruptedException, TimeoutException;
 
-	public abstract void flushAllWithNoReply(InetSocketAddress address)
+	public void flushAllWithNoReply(InetSocketAddress address)
 			throws MemcachedException, InterruptedException;
 
-	public abstract void flushAll(InetSocketAddress address, long timeout)
+	public void flushAll(InetSocketAddress address, long timeout)
 			throws MemcachedException, InterruptedException, TimeoutException;
 
 	/**
@@ -864,10 +1293,10 @@ public interface MemcachedClient {
 	 * @throws MemcachedException
 	 */
 	@Deprecated
-	public abstract void flushAll(String host) throws TimeoutException,
+	public void flushAll(String host) throws TimeoutException,
 			InterruptedException, MemcachedException;
 
-	public abstract Map<String, String> stats(InetSocketAddress address)
+	public Map<String, String> stats(InetSocketAddress address)
 			throws MemcachedException, InterruptedException, TimeoutException;
 
 	/**
@@ -882,9 +1311,8 @@ public interface MemcachedClient {
 	 * @throws InterruptedException
 	 * @throws TimeoutException
 	 */
-	public abstract Map<String, String> stats(InetSocketAddress address,
-			long timeout) throws MemcachedException, InterruptedException,
-			TimeoutException;
+	public Map<String, String> stats(InetSocketAddress address, long timeout)
+			throws MemcachedException, InterruptedException, TimeoutException;
 
 	/**
 	 * Get stats from all memcached servers
@@ -895,11 +1323,10 @@ public interface MemcachedClient {
 	 * @throws InterruptedException
 	 * @throws TimeoutException
 	 */
-	public abstract Map<InetSocketAddress, Map<String, String>> getStats(
-			long timeout) throws MemcachedException, InterruptedException,
-			TimeoutException;
+	public Map<InetSocketAddress, Map<String, String>> getStats(long timeout)
+			throws MemcachedException, InterruptedException, TimeoutException;
 
-	public abstract Map<InetSocketAddress, Map<String, String>> getStats()
+	public Map<InetSocketAddress, Map<String, String>> getStats()
 			throws MemcachedException, InterruptedException, TimeoutException;
 
 	/**
@@ -912,9 +1339,9 @@ public interface MemcachedClient {
 			String itemName) throws MemcachedException, InterruptedException,
 			TimeoutException;;
 
-	public abstract void shutdown() throws IOException;
+	public void shutdown() throws IOException;
 
-	public abstract boolean delete(final String key) throws TimeoutException,
+	public boolean delete(final String key) throws TimeoutException,
 			InterruptedException, MemcachedException;
 
 	/**
@@ -923,7 +1350,7 @@ public interface MemcachedClient {
 	 * @return
 	 */
 	@SuppressWarnings("unchecked")
-	public abstract Transcoder getTranscoder();
+	public Transcoder getTranscoder();
 
 	/**
 	 * set transcoder
@@ -931,7 +1358,7 @@ public interface MemcachedClient {
 	 * @param transcoder
 	 */
 	@SuppressWarnings("unchecked")
-	public abstract void setTranscoder(final Transcoder transcoder);
+	public void setTranscoder(final Transcoder transcoder);
 
 	public Map<InetSocketAddress, Map<String, String>> getStatsByItem(
 			String itemName, long timeout) throws MemcachedException,
@@ -1210,7 +1637,9 @@ public interface MemcachedClient {
 	 *            the initial value to be added when value is not found
 	 * @param timeout
 	 * @param exp
-	 *            the initial vlaue expire time
+	 *            the initial vlaue expire time, in seconds. Can be up to 30
+	 *            days. After 30 days, is treated as a unix timestamp of an
+	 *            exact date.
 	 * @return
 	 * @throws TimeoutException
 	 * @throws InterruptedException
@@ -1237,7 +1666,9 @@ public interface MemcachedClient {
 	 * @param timeout
 	 *            operation timeout
 	 * @param exp
-	 *            the initial vlaue expire time
+	 *            the initial vlaue expire time, in seconds. Can be up to 30
+	 *            days. After 30 days, is treated as a unix timestamp of an
+	 *            exact date.
 	 * @return
 	 * @throws TimeoutException
 	 * @throws InterruptedException

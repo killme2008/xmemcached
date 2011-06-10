@@ -43,6 +43,7 @@ import net.rubyeye.xmemcached.command.Command;
 import net.rubyeye.xmemcached.command.CommandType;
 import net.rubyeye.xmemcached.command.ServerAddressAware;
 import net.rubyeye.xmemcached.command.TextCommandFactory;
+import net.rubyeye.xmemcached.command.binary.BinaryGetMultiCommand;
 import net.rubyeye.xmemcached.exception.MemcachedException;
 import net.rubyeye.xmemcached.impl.ArrayMemcachedSessionLocator;
 import net.rubyeye.xmemcached.impl.ClosedMemcachedTCPSession;
@@ -68,6 +69,7 @@ import net.rubyeye.xmemcached.utils.Protocol;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.code.yanf4j.buffer.IoBuffer;
 import com.google.code.yanf4j.config.Configuration;
 import com.google.code.yanf4j.core.Session;
 import com.google.code.yanf4j.core.SocketOption;
@@ -1227,6 +1229,31 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 		return catalogKeys;
 	}
 
+	/**
+	 * Hash key to servers
+	 * 
+	 * @param keyExpMap
+	 * @return
+	 */
+	private final Collection<Map<String, Integer>> catalogKeys(
+			final Map<String, Integer> keyExpMap) {
+		final Map<Session, Map<String, Integer>> catalogMap = new HashMap<Session, Map<String, Integer>>();
+		for (Map.Entry<String, Integer> entry : keyExpMap.entrySet()) {
+			final String key = entry.getKey();
+			final Integer expTime = entry.getValue();
+			Session index = this.sessionLocator.getSessionByKey(key);
+			if (!catalogMap.containsKey(index)) {
+				Map<String, Integer> tmpKeyExpMap = new HashMap<String, Integer>(
+						100);
+				tmpKeyExpMap.put(key, expTime);
+				catalogMap.put(index, tmpKeyExpMap);
+			} else {
+				catalogMap.get(index).put(key, expTime);
+			}
+		}
+		return catalogMap.values();
+	}
+
 	private final <T> Command sendGetMultiCommand(
 			final Collection<String> keys, final CountDownLatch latch,
 			final CommandType cmdType, final Transcoder<T> transcoder)
@@ -1814,8 +1841,155 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 
 	void checkException(final Command command) throws MemcachedException {
 		if (command.getException() != null) {
-			throw new MemcachedException(command.getException());
+			if (command.getException() instanceof MemcachedException)
+				throw (MemcachedException) command.getException();
+			else
+				throw new MemcachedException(command.getException());
 		}
+	}
+
+	public boolean touch(String key, int exp, long opTimeout)
+			throws TimeoutException, InterruptedException, MemcachedException {
+		key = this.sanitizeKey(key);
+		final byte[] keyBytes = ByteUtils.getBytes(key);
+		ByteUtils.checkKey(keyBytes);
+		CountDownLatch latch = new CountDownLatch(1);
+		final Command command = this.commandFactory.createTouchCommand(key,
+				keyBytes, latch, exp, false);
+		this.sendCommand(command);
+		this.latchWait(command, opTimeout);
+		command.getIoBuffer().free();
+		this.checkException(command);
+		if (command.getResult() == null) {
+			throw new MemcachedException(
+					"Operation fail,may be caused by networking or timeout");
+		}
+		return (Boolean) command.getResult();
+	}
+
+	public boolean touch(String key, int exp) throws TimeoutException,
+			InterruptedException, MemcachedException {
+		return this.touch(key, exp, this.opTimeout);
+	}
+
+	/**
+	 * This method still has some problems,i will make it public in the future
+	 * 
+	 * @param <T>
+	 * @param keyExpMap
+	 * @param opTimeout
+	 * @return
+	 * @throws TimeoutException
+	 * @throws InterruptedException
+	 * @throws MemcachedException
+	 */
+	private <T> Map<String, T> getAndTouch(Map<String, Integer> keyExpMap,
+			long opTimeout) throws TimeoutException, InterruptedException,
+			MemcachedException {
+		if (keyExpMap == null || keyExpMap.isEmpty())
+			return null;
+
+		Map<String, Integer> innerKeyExpMap = keyExpMap;
+		if (this.sanitizeKeys) {
+			innerKeyExpMap = new HashMap<String, Integer>(keyExpMap.size());
+			for (Map.Entry<String, Integer> entry : keyExpMap.entrySet()) {
+				innerKeyExpMap.put(this.sanitizeKey(entry.getKey()), entry
+						.getValue());
+			}
+		}
+		final CountDownLatch latch;
+		final List<Command> commands;
+		if (this.connector.getSessionSet().size() <= 1) {
+			commands = new ArrayList<Command>(1);
+			latch = new CountDownLatch(1);
+			commands.add(this.sendMultiGATCommand(innerKeyExpMap, latch));
+
+		} else {
+			Collection<Map<String, Integer>> catalogKeyExps = this
+					.catalogKeys(innerKeyExpMap);
+			commands = new ArrayList<Command>(catalogKeyExps.size());
+			latch = new CountDownLatch(catalogKeyExps.size());
+			for (Map<String, Integer> catalogKeyExpMap : catalogKeyExps) {
+				commands.add(this.sendMultiGATCommand(catalogKeyExpMap, latch));
+			}
+		}
+		if (!latch.await(opTimeout, TimeUnit.MILLISECONDS)) {
+			for (Command getCmd : commands) {
+				getCmd.cancel();
+			}
+			throw new TimeoutException("Timed out waiting for operation");
+		}
+		return this.reduceResult(CommandType.GET_MANY, transcoder, commands);
+
+	}
+
+	private Command sendMultiGATCommand(Map<String, Integer> innerKeyExpMap,
+			CountDownLatch latch) throws MemcachedException {
+		Iterator<String> it = innerKeyExpMap.keySet().iterator();
+		String key = null;
+		List<com.google.code.yanf4j.buffer.IoBuffer> bufferList = new ArrayList<com.google.code.yanf4j.buffer.IoBuffer>();
+		int totalLength = 0;
+		while (it.hasNext()) {
+			key = it.next();
+			if (it.hasNext()) {
+				// first n-1 send gatq command
+				Command command = this.commandFactory.createGetAndTouchCommand(
+						key, ByteUtils.getBytes(key), null, innerKeyExpMap
+								.get(key), true);
+				command.encode();
+				totalLength += command.getIoBuffer().remaining();
+				bufferList.add(command.getIoBuffer());
+			}
+		}
+		// last key,create a gat command
+		Command lastCommand = this.commandFactory.createGetAndTouchCommand(key,
+				ByteUtils.getBytes(key), null, innerKeyExpMap.get(key), false);
+		lastCommand.encode();
+		bufferList.add(lastCommand.getIoBuffer());
+		totalLength += lastCommand.getIoBuffer().remaining();
+
+		IoBuffer mergedBuffer = IoBuffer.allocate(totalLength);
+		for (IoBuffer buffer : bufferList) {
+			mergedBuffer.put(buffer.buf());
+		}
+		mergedBuffer.flip();
+
+		Command resultCommand = new BinaryGetMultiCommand(key,
+				CommandType.GET_MANY, latch);
+		resultCommand.setIoBuffer(mergedBuffer);
+		this.sendCommand(resultCommand);
+		return resultCommand;
+	}
+
+	private <T> Map<String, T> getAndTouch(Map<String, Integer> keyExpMap)
+			throws TimeoutException, InterruptedException, MemcachedException {
+		return this.getAndTouch(keyExpMap, this.opTimeout);
+	}
+
+	@SuppressWarnings("unchecked")
+	public <T> T getAndTouch(String key, int newExp, long opTimeout)
+			throws TimeoutException, InterruptedException, MemcachedException {
+		key = this.sanitizeKey(key);
+		final byte[] keyBytes = ByteUtils.getBytes(key);
+		ByteUtils.checkKey(keyBytes);
+		CountDownLatch latch = new CountDownLatch(1);
+		final Command command = this.commandFactory.createGetAndTouchCommand(
+				key, keyBytes, latch, newExp, false);
+		this.sendCommand(command);
+		this.latchWait(command, opTimeout);
+		command.getIoBuffer().free();
+		this.checkException(command);
+		CachedData data = (CachedData) command.getResult();
+		if (data == null) {
+			return null;
+		}
+		return (T) transcoder.decode(data);
+	}
+
+	@SuppressWarnings("unchecked")
+	public <T> T getAndTouch(String key, int newExp) throws TimeoutException,
+			InterruptedException, MemcachedException {
+		return (T) this.getAndTouch(key, newExp, this.opTimeout);
 	}
 
 	/*

@@ -231,6 +231,36 @@ public enum OpCode {
 			return 0x22;
 
 		}
+	},
+
+	VERBOSITY {
+		@Override
+		public byte fieldValue() {
+			return 0x1b;
+
+		}
+	},
+
+	TOUCH {
+		@Override
+		public byte fieldValue() {
+			return 0x1c;
+
+		}
+	},
+	GAT {
+		@Override
+		public byte fieldValue() {
+			return 0x1d;
+
+		}
+	},
+	GATQ {
+		@Override
+		public byte fieldValue() {
+			return 0x1e;
+
+		}
 	};
 
 	public abstract byte fieldValue();
