@@ -1,5 +1,7 @@
 package net.rubyeye.xmemcached.test.unittest.commands.text;
 
+import java.nio.ByteBuffer;
+
 import net.rubyeye.xmemcached.command.Command;
 import net.rubyeye.xmemcached.transcoders.StringTranscoder;
 import net.rubyeye.xmemcached.transcoders.Transcoder;
@@ -30,10 +32,10 @@ public class TextStoreCommandUnitTest extends BaseTextCommandUnitTest {
 		assertNull(command.getIoBuffer());
 		command.encode();
 		checkByteBufferEquals(command, "set test 0 0 2\r\n10\r\n");
-		 command = this.commandFactory.createSetCommand(key, key
-					.getBytes(), exp, value, true, transcoder);
-			command.encode();
-			checkByteBufferEquals(command, "set test 0 0 2 noreply\r\n10\r\n");
+		command = this.commandFactory.createSetCommand(key, key.getBytes(),
+				exp, value, true, transcoder);
+		command.encode();
+		checkByteBufferEquals(command, "set test 0 0 2 noreply\r\n10\r\n");
 	}
 
 	public void testAddEncode() {
@@ -42,9 +44,9 @@ public class TextStoreCommandUnitTest extends BaseTextCommandUnitTest {
 		assertNull(command.getIoBuffer());
 		command.encode();
 		checkByteBufferEquals(command, "add test 0 0 2\r\n10\r\n");
-		
-		command = this.commandFactory.createAddCommand(key, key
-				.getBytes(), exp, value, true, transcoder);
+
+		command = this.commandFactory.createAddCommand(key, key.getBytes(),
+				exp, value, true, transcoder);
 		assertNull(command.getIoBuffer());
 		command.encode();
 		checkByteBufferEquals(command, "add test 0 0 2 noreply\r\n10\r\n");
@@ -56,9 +58,9 @@ public class TextStoreCommandUnitTest extends BaseTextCommandUnitTest {
 		assertNull(command.getIoBuffer());
 		command.encode();
 		checkByteBufferEquals(command, "replace test 0 0 2\r\n10\r\n");
-		
-		command = this.commandFactory.createReplaceCommand(key, key
-				.getBytes(), exp, value, true, transcoder);
+
+		command = this.commandFactory.createReplaceCommand(key, key.getBytes(),
+				exp, value, true, transcoder);
 		assertNull(command.getIoBuffer());
 		command.encode();
 		checkByteBufferEquals(command, "replace test 0 0 2 noreply\r\n10\r\n");
@@ -70,9 +72,9 @@ public class TextStoreCommandUnitTest extends BaseTextCommandUnitTest {
 		assertNull(command.getIoBuffer());
 		command.encode();
 		checkByteBufferEquals(command, "append test 0 0 2\r\n10\r\n");
-		
-		command = this.commandFactory.createAppendCommand(key, key
-				.getBytes(), value, true, transcoder);
+
+		command = this.commandFactory.createAppendCommand(key, key.getBytes(),
+				value, true, transcoder);
 		assertNull(command.getIoBuffer());
 		command.encode();
 		checkByteBufferEquals(command, "append test 0 0 2 noreply\r\n10\r\n");
@@ -84,9 +86,9 @@ public class TextStoreCommandUnitTest extends BaseTextCommandUnitTest {
 		assertNull(command.getIoBuffer());
 		command.encode();
 		checkByteBufferEquals(command, "prepend test 0 0 2\r\n10\r\n");
-		
-		command = this.commandFactory.createPrependCommand(key, key
-				.getBytes(), value, true, transcoder);
+
+		command = this.commandFactory.createPrependCommand(key, key.getBytes(),
+				value, true, transcoder);
 		assertNull(command.getIoBuffer());
 		command.encode();
 		checkByteBufferEquals(command, "prepend test 0 0 2 noreply\r\n10\r\n");
@@ -109,6 +111,29 @@ public class TextStoreCommandUnitTest extends BaseTextCommandUnitTest {
 		command.setResult(null);
 		checkDecodeValidLine(command, "NOT_FOUND\r\n");
 		assertFalse((Boolean) command.getResult());
+
+	}
+
+	public void testIssue128() {
+		// store command
+		Command command = this.commandFactory.createSetCommand(key, key
+				.getBytes(), exp, value, false, transcoder);
+		command.decode(null, ByteBuffer
+				.wrap("SERVER_ERROR out of memory storing object\r\n"
+						.getBytes()));
+		Exception e = command.getException();
+		assertNotNull(e);
+		assertEquals("out of memory storing object", e.getMessage());
+
+		// cas command
+		command = this.commandFactory.createCASCommand(key, key.getBytes(),
+				exp, value, cas, false, transcoder);
+		command.decode(null, ByteBuffer
+				.wrap("SERVER_ERROR out of memory storing object\r\n"
+						.getBytes()));
+		e = command.getException();
+		assertNotNull(e);
+		assertEquals("out of memory storing object", e.getMessage());
 	}
 
 	public void testStoreDecode() {

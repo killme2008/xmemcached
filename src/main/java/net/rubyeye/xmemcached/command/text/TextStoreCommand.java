@@ -96,12 +96,13 @@ public class TextStoreCommand extends Command {
 
 	@Override
 	public boolean decode(MemcachedTCPSession session, ByteBuffer buffer) {
-		if (buffer == null || !buffer.hasRemaining()) {
+		if (buffer == null || buffer.remaining() < 2) {
 			return false;
 		}
 		if (this.result == null) {
 			byte first = buffer.get(buffer.position());
-			if (first == 'S') {
+			byte second = buffer.get(buffer.position() + 1);
+			if (first == 'S' && second == 'T') {
 				setResult(Boolean.TRUE);
 				countDownLatch();
 				// STORED\r\n

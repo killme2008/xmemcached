@@ -735,7 +735,8 @@ public abstract class XMemcachedClientTest extends TestCase {
 	}
 
 	public void testSetLoggingLevelVerbosity() throws Exception {
-		if (memcachedClient.getProtocol() == Protocol.Text) {
+		if (memcachedClient.getProtocol() == Protocol.Text
+				|| memcachedClient.getProtocol() == Protocol.Binary) {
 			memcachedClient
 					.setLoggingLevelVerbosity(AddrUtil.getAddresses(
 							properties.getProperty("test.memcached.servers"))

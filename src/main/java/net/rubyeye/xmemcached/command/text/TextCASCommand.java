@@ -24,14 +24,17 @@ package net.rubyeye.xmemcached.command.text;
 
 import java.nio.ByteBuffer;
 import java.util.concurrent.CountDownLatch;
+
 import net.rubyeye.xmemcached.command.CommandType;
 import net.rubyeye.xmemcached.impl.MemcachedTCPSession;
 import net.rubyeye.xmemcached.transcoders.Transcoder;
 import net.rubyeye.xmemcached.utils.ByteUtils;
+
 /**
  * CAS command for text protocol
+ * 
  * @author dennis
- *
+ * 
  */
 public class TextCASCommand extends TextStoreCommand {
 
@@ -52,11 +55,12 @@ public class TextCASCommand extends TextStoreCommand {
 	@Override
 	public final boolean decode(MemcachedTCPSession session, ByteBuffer buffer) {
 
-		if (buffer == null || !buffer.hasRemaining())
+		if (buffer == null || buffer.remaining() < 2)
 			return false;
 		if (result == null) {
 			byte first = buffer.get(buffer.position());
-			if (first == 'S') {
+			byte second = buffer.get(buffer.position() + 1);
+			if (first == 'S' && second == 'T') {
 				setResult(Boolean.TRUE);
 				countDownLatch();
 				// STORED\r\n

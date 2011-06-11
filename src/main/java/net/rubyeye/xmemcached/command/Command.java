@@ -273,7 +273,7 @@ public abstract class Command implements WriteMessage {
 
 	private String getErrorMsg(String line, String defaultMsg) {
 		int index = line.indexOf(" ");
-		String errorMsg = index > 0 ? line.substring(index) : defaultMsg;
+		String errorMsg = index > 0 ? line.substring(index + 1) : defaultMsg;
 		return errorMsg;
 	}
 
