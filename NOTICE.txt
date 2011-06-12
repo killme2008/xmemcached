@@ -5,6 +5,23 @@ Xmemcached Change log
 
 
 *******************************************
+2010-06-12
+-----Xmemcached 1.3.3 released-------------------------
+1.Implements touch and GAT(get and touch) commands for memcached 1.6.x,adds new methods to MemcachedClient,includes:
+         boolean touch(String key, int exp, long opTimeout);
+         getAndTouch(String key, int newExp, long opTimeout);
+2.Method setLoggingLevelVerbosity works with binary protocol.
+3.Make exception infomation more friendly.
+4.Deprecated KeyIterator and getKeyIterator.
+5.Bug fixed,include:
+issue 126: Error getting memcached Detail Statistics.
+issue 127:Unknow Response status:130
+issue 128: SERVER_ERROR cause session disconnected.
+issue 129: Memory leak after shutdown
+more infomation please see http://code.google.com/p/xmemcached/issues/list 
+
+6.Some changes for future version to implement memcached 1.6.x new commands.
+
 
 2010-03-27
 -----Xmemcached 1.3.2 released-------------------------
