@@ -16,12 +16,13 @@ public class KestrelDeleteCommand extends TextDeleteCommand {
 
 	@Override
 	public boolean decode(MemcachedTCPSession session, ByteBuffer buffer) {
-		if (buffer == null || !buffer.hasRemaining()) {
+		if (buffer == null || buffer.remaining() < 2) {
 			return false;
 		}
 		if (this.result == null) {
 			byte first = buffer.get(buffer.position());
-			if (first == 'E') {
+			byte second = buffer.get(buffer.position() + 1);
+			if (first == 'E' && second == 'N') {
 				setResult(Boolean.TRUE);
 				countDownLatch();
 				// END\r\n

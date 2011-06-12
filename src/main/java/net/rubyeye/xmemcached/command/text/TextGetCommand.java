@@ -102,14 +102,15 @@ public abstract class TextGetCommand extends Command implements
 	@Override
 	public final boolean decode(MemcachedTCPSession session, ByteBuffer buffer) {
 		while (true) {
-			if (buffer == null || !buffer.hasRemaining()) {
+			if (buffer == null || buffer.remaining() < 2) {
 				return false;
 			}
 			switch (this.parseStatus) {
 
 			case NULL:
 				byte first = buffer.get(buffer.position());
-				if (first == 'E') {
+				byte second = buffer.get(buffer.position() + 1);
+				if (first == 'E' && second == 'N') {
 					this.parseStatus = ParseStatus.END;
 					// dispatch result
 					dispatch();

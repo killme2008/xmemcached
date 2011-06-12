@@ -36,9 +36,6 @@ import net.rubyeye.xmemcached.transcoders.Transcoder;
 import net.rubyeye.xmemcached.utils.ByteUtils;
 import net.rubyeye.xmemcached.utils.OpaqueGenerater;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.google.code.yanf4j.buffer.IoBuffer;
 
 /**
@@ -49,8 +46,6 @@ import com.google.code.yanf4j.buffer.IoBuffer;
  */
 public abstract class BaseBinaryCommand extends Command {
 	static final short DEFAULT_VBUCKET_ID = 0;
-	private static final Logger log = LoggerFactory
-			.getLogger(BinaryStoreCommand.class);
 	protected int expTime;
 	protected long cas;
 	protected Object value;
@@ -167,16 +162,6 @@ public abstract class BaseBinaryCommand extends Command {
 			if (this.responseStatus == ResponseStatus.NO_ERROR) {
 				setResult(Boolean.TRUE);
 			} else {
-				switch (this.responseStatus) {
-				case VALUE_TOO_BIG:
-					log.error(ResponseStatus.VALUE_TOO_BIG.errorMessage());
-					break;
-				case INVALID_ARGUMENTS:
-					log.error(ResponseStatus.INVALID_ARGUMENTS.errorMessage());
-					break;
-				default:
-					log.debug(this.responseStatus.errorMessage());
-				}
 				setResult(Boolean.FALSE);
 			}
 		}

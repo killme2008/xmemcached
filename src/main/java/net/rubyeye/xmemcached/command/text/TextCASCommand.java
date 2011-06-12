@@ -71,7 +71,7 @@ public class TextCASCommand extends TextStoreCommand {
 				failStatus = FailStatus.NOT_FOUND;
 				// NOT_FOUND\r\n
 				return ByteUtils.stepBuffer(buffer, 11);
-			} else if (first == 'E') {
+			} else if (first == 'E' && second == 'X') {
 				setResult(Boolean.FALSE);
 				countDownLatch();
 				failStatus = FailStatus.EXISTS;
