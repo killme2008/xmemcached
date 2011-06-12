@@ -55,9 +55,11 @@ public class TextCASCommand extends TextStoreCommand {
 	@Override
 	public final boolean decode(MemcachedTCPSession session, ByteBuffer buffer) {
 
-		if (buffer == null || buffer.remaining() < 2)
+		if (buffer == null || !buffer.hasRemaining())
 			return false;
 		if (result == null) {
+			if (buffer.remaining() < 2)
+				return false;
 			byte first = buffer.get(buffer.position());
 			byte second = buffer.get(buffer.position() + 1);
 			if (first == 'S' && second == 'T') {
