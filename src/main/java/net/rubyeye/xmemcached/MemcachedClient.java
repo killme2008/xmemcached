@@ -1599,9 +1599,12 @@ public interface MemcachedClient {
 	 * keys if you have many keys.Your application should not be dependent on
 	 * this feature.
 	 * 
+	 * @deprecated memcached 1.6.x will remove cachedump stats command,so this
+	 *             method will be removed in the future
 	 * @param address
 	 * @return
 	 */
+	@Deprecated
 	public KeyIterator getKeyIterator(InetSocketAddress address)
 			throws MemcachedException, InterruptedException, TimeoutException;
 

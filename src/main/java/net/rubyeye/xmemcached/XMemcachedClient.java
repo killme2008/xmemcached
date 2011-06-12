@@ -2612,6 +2612,10 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 		return new Counter(this, key, 0);
 	}
 
+	/**
+	 * @deprecated memcached 1.6.x will remove cachedump stats command,so this
+	 *             method will be removed in the future
+	 */
 	@SuppressWarnings("unchecked")
 	public KeyIterator getKeyIterator(InetSocketAddress address)
 			throws MemcachedException, TimeoutException, InterruptedException {

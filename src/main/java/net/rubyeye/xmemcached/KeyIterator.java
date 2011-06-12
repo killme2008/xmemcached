@@ -9,11 +9,19 @@ import net.rubyeye.xmemcached.exception.MemcachedException;
  * Key Iterator for memcached,use 'stats items' and 'stats cachedump' to iterate
  * all keys,it is inefficient and not thread-safe.The 'stats cachedump" has
  * length limitation,then iterator could not visit all keys if you have many
- * keys.
+ * keys.</br>
+ * <p>
+ * <strong>Note</strong>: memcached 1.6.x will remove cachedump stats,so this
+ * feature will be invalid in memcached 1.6.x
+ * </p>
+ * 
+ * @deprecated memcached 1.6.x will remove cachedump stats command,so this
+ *             feature will be removed in the future
  * 
  * @author dennis
  * 
  */
+@Deprecated
 public interface KeyIterator {
 	/**
 	 * Get next key,if iterator has reached the end,throw
