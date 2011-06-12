@@ -1,4 +1,4 @@
-\<assembly>
+<assembly>
     <id>src</id>
     <formats>
         <format>tar.gz</format>
