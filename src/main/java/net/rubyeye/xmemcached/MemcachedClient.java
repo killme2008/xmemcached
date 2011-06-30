@@ -44,9 +44,11 @@ public interface MemcachedClient {
 	 */
 	public static final int DEFAULT_TCP_SEND_BUFF_SIZE = 32 * 1024;
 	/**
-	 * Disable Nagle algorithm by default
+	 * Enable nagle algorithm by default since 1.3.4,disable nagle algorithm
+	 * before 1.3.4
+	 * 
 	 */
-	public static final boolean DEFAULT_TCP_NO_DELAY = true;
+	public static final boolean DEFAULT_TCP_NO_DELAY = false;
 	/**
 	 * Default session read buffer size,16k
 	 */

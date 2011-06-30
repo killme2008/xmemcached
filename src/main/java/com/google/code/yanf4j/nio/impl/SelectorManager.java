@@ -34,7 +34,7 @@ public class SelectorManager {
 		if (selectorPoolSize <= 0) {
 			throw new IllegalArgumentException("selectorPoolSize<=0");
 		}
-		log.info("Creating " + selectorPoolSize + " rectors...");
+		log.info("Creating " + selectorPoolSize + " reactors...");
 		reactorSet = new Reactor[selectorPoolSize];
 		this.controller = controller;
 		for (int i = 0; i < selectorPoolSize; i++) {
@@ -125,8 +125,7 @@ public class SelectorManager {
 
 	void awaitReady() {
 		synchronized (this) {
-			while (!started
-					|| reactorReadyCount != reactorSet.length) {
+			while (!started || reactorReadyCount != reactorSet.length) {
 				try {
 					this.wait(1000);
 				} catch (InterruptedException e) {
@@ -143,8 +142,7 @@ public class SelectorManager {
 	 */
 	public final Reactor nextReactor() {
 		if (dividend > 0) {
-			return reactorSet[sets.incrementAndGet() % dividend
-					+ 1];
+			return reactorSet[sets.incrementAndGet() % dividend + 1];
 		} else {
 			return reactorSet[0];
 		}
