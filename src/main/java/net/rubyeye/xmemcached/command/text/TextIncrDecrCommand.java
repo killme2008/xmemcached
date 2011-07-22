@@ -72,9 +72,14 @@ public class TextIncrDecrCommand extends Command {
 				countDownLatch();
 				return true;
 			} else {
-				setResult(Long.valueOf(line.trim()));
-				countDownLatch();
-				return true;
+				String rt = line.trim();
+				if (Character.isDigit(rt.charAt(0))) {
+					setResult(Long.valueOf(rt));
+					countDownLatch();
+					return true;
+				} else {
+					return decodeError(line);
+				}
 			}
 		}
 		return false;
@@ -91,11 +96,11 @@ public class TextIncrDecrCommand extends Command {
 		}
 		byte[] buf = new byte[size];
 		if (isNoreply()) {
-			ByteUtils.setArguments(buf, 0, cmdBytes, this.keyBytes, this
-					.getDelta(), Constants.NO_REPLY);
+			ByteUtils.setArguments(buf, 0, cmdBytes, this.keyBytes,
+					this.getDelta(), Constants.NO_REPLY);
 		} else {
-			ByteUtils.setArguments(buf, 0, cmdBytes, this.keyBytes, this
-					.getDelta());
+			ByteUtils.setArguments(buf, 0, cmdBytes, this.keyBytes,
+					this.getDelta());
 		}
 		this.ioBuffer = IoBuffer.wrap(buf);
 	}
