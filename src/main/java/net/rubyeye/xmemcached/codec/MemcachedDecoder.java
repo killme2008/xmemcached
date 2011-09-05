@@ -51,6 +51,8 @@ public class MemcachedDecoder implements Decoder {
 			return decode0(buffer, session);
 		} else {
 			session.takeCurrentCommand();
+			if (session.getCurrentCommand() == null)
+				return null;
 			return decode0(buffer, session);
 		}
 	}
