@@ -195,15 +195,20 @@ public enum HashAlgorithm {
 		return rv & 0xffffffffL; /* Truncate to 32-bits */
 	}
 
+	private static ThreadLocal<MessageDigest> md5Local = new ThreadLocal<MessageDigest>();
+
 	/**
 	 * Get the md5 of the given key.
 	 */
 	public static byte[] computeMd5(String k) {
-		MessageDigest md5;
-		try {
-			md5 = MessageDigest.getInstance("MD5");
-		} catch (NoSuchAlgorithmException e) {
-			throw new RuntimeException("MD5 not supported", e);
+		MessageDigest md5 = md5Local.get();
+		if (md5 == null) {
+			try {
+				md5 = MessageDigest.getInstance("MD5");
+				md5Local.set(md5);
+			} catch (NoSuchAlgorithmException e) {
+				throw new RuntimeException("MD5 not supported", e);
+			}
 		}
 		md5.reset();
 		md5.update(ByteUtils.getBytes(k));
