@@ -73,7 +73,7 @@ public class XMemcachedClientFactoryBean implements FactoryBean {
 
 	private boolean failureMode;
 
-	private long opTimeout;
+	private long opTimeout=MemcachedClient.DEFAULT_OP_TIMEOUT;
 
 	public long getOpTimeout() {
 		return opTimeout;
