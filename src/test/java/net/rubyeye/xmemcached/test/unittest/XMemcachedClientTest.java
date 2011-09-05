@@ -99,13 +99,13 @@ public abstract class XMemcachedClientTest extends TestCase {
 
 		memcachedClient.set("name", 1, "dennis", new StringTranscoder(), 1000);
 
-		assertEquals("dennis", memcachedClient.get("name",
-				new StringTranscoder()));
+		assertEquals("dennis",
+				memcachedClient.get("name", new StringTranscoder()));
 		new TranscoderChecker(mockTranscoder, 1) {
 			@Override
 			public void call() throws Exception {
-				assertEquals("dennis", memcachedClient.get("name",
-						mockTranscoder));
+				assertEquals("dennis",
+						memcachedClient.get("name", mockTranscoder));
 			}
 
 		}.check();
@@ -355,8 +355,8 @@ public abstract class XMemcachedClientTest extends TestCase {
 			@Override
 			public void call() throws Exception {
 				memcachedClient.set("name", 0, "xmemcached", mockTranscoder);
-				assertEquals("xmemcached", memcachedClient.get("name",
-						mockTranscoder));
+				assertEquals("xmemcached",
+						memcachedClient.get("name", mockTranscoder));
 
 			}
 		}.check();
@@ -429,8 +429,8 @@ public abstract class XMemcachedClientTest extends TestCase {
 				memcachedClient.set("name", 0, 1);
 				memcachedClient
 						.replace("name", 0, "xmemcached", mockTranscoder);
-				assertEquals("xmemcached", memcachedClient.get("name",
-						mockTranscoder));
+				assertEquals("xmemcached",
+						memcachedClient.get("name", mockTranscoder));
 
 			}
 		}.check();
@@ -737,18 +737,18 @@ public abstract class XMemcachedClientTest extends TestCase {
 	public void testSetLoggingLevelVerbosity() throws Exception {
 		if (memcachedClient.getProtocol() == Protocol.Text
 				|| memcachedClient.getProtocol() == Protocol.Binary) {
-			memcachedClient
-					.setLoggingLevelVerbosity(AddrUtil.getAddresses(
+			memcachedClient.setLoggingLevelVerbosity(
+					AddrUtil.getAddresses(
 							properties.getProperty("test.memcached.servers"))
 							.get(0), 2);
-			memcachedClient.setLoggingLevelVerbosityWithNoReply(AddrUtil
-					.getAddresses(
+			memcachedClient.setLoggingLevelVerbosityWithNoReply(
+					AddrUtil.getAddresses(
 							properties.getProperty("test.memcached.servers"))
-					.get(0), 3);
-			memcachedClient.setLoggingLevelVerbosityWithNoReply(AddrUtil
-					.getAddresses(
+							.get(0), 3);
+			memcachedClient.setLoggingLevelVerbosityWithNoReply(
+					AddrUtil.getAddresses(
 							properties.getProperty("test.memcached.servers"))
-					.get(0), 0);
+							.get(0), 0);
 		} else {
 			// do nothing,binary protocol doesn't have verbosity protocol.
 		}
@@ -791,9 +791,9 @@ public abstract class XMemcachedClientTest extends TestCase {
 		assertNull(memcachedClient.get("a"));
 
 		// key is chinese
-		assertEquals(1, memcachedClient.incr("测试", 5, 1, 1000, 0));
-		assertEquals(6, memcachedClient.incr("测试", 5));
-		assertEquals(10, memcachedClient.incr("测试", 4));
+		assertEquals(1, memcachedClient.incr("娴��", 5, 1, 1000, 0));
+		assertEquals(6, memcachedClient.incr("娴��", 5));
+		assertEquals(10, memcachedClient.incr("娴��", 4));
 
 		// blank key
 		new BlankKeyChecker() {
@@ -943,8 +943,8 @@ public abstract class XMemcachedClientTest extends TestCase {
 		getsResponse = memcachedClient.gets("name");
 		memcachedClient.set("name", 0, "dennis");
 		// cas fail
-		assertFalse(memcachedClient.cas("name", 0, "zhuang", getsResponse
-				.getCas()));
+		assertFalse(memcachedClient.cas("name", 0, "zhuang",
+				getsResponse.getCas()));
 		assertEquals("dennis", memcachedClient.get("name"));
 
 		// blank key
@@ -1052,9 +1052,9 @@ public abstract class XMemcachedClientTest extends TestCase {
 			errorCommand = new MockEncodeTimeoutTextGetOneCommand("name",
 					"name".getBytes(), CommandType.GET_ONE, latch, 1000);
 		} else {
-			errorCommand = new MockEncodeTimeoutBinaryGetCommand("name", "name"
-					.getBytes(), CommandType.GET_ONE, latch, OpCode.GET, false,
-					1000);
+			errorCommand = new MockEncodeTimeoutBinaryGetCommand("name",
+					"name".getBytes(), CommandType.GET_ONE, latch, OpCode.GET,
+					false, 1000);
 		}
 
 		memcachedClient.getConnector().send(errorCommand);
@@ -1088,8 +1088,8 @@ public abstract class XMemcachedClientTest extends TestCase {
 			memcachedClient.get("name");
 			fail();
 		} catch (MemcachedException e) {
-			assertEquals("There is no available connection at this moment", e
-					.getMessage());
+			assertEquals("There is no available connection at this moment",
+					e.getMessage());
 		}
 
 		memcachedClient.addServer(properties
@@ -1186,7 +1186,7 @@ public abstract class XMemcachedClientTest extends TestCase {
 	public void testSanitizeKey() throws Exception {
 		memcachedClient.setSanitizeKeys(true);
 
-		String key = "The string ü@foo-bar";
+		String key = "The string 眉@foo-bar";
 		assertTrue(memcachedClient.add(key, 0, 0));
 		assertEquals(0, memcachedClient.get(key));
 
@@ -1194,8 +1194,8 @@ public abstract class XMemcachedClientTest extends TestCase {
 		assertEquals(1, memcachedClient.get(key, 2000));
 
 		assertTrue(memcachedClient.set(key, 0, 2));
-		assertEquals((Integer) 2, memcachedClient.get(key, 2000,
-				new IntegerTranscoder()));
+		assertEquals((Integer) 2,
+				memcachedClient.get(key, 2000, new IntegerTranscoder()));
 
 		assertTrue(memcachedClient.set(key, 0, "xmemcached",
 				new StringTranscoder()));
@@ -1234,8 +1234,8 @@ public abstract class XMemcachedClientTest extends TestCase {
 			}
 
 		});
-		assertEquals((Integer) 2, memcachedClient.get(key, 2000,
-				new IntegerTranscoder()));
+		assertEquals((Integer) 2,
+				memcachedClient.get(key, 2000, new IntegerTranscoder()));
 
 	}
 
@@ -1267,19 +1267,29 @@ public abstract class XMemcachedClientTest extends TestCase {
 		Assert.assertEquals(1001, counter.incrementAndGet());
 
 		counter = memcachedClient.getCounter("b", 100);
-		Assert.assertEquals(100, counter.incrementAndGet());
 		Assert.assertEquals(101, counter.incrementAndGet());
-		Assert.assertEquals(100, counter.decrementAndGet());
+		Assert.assertEquals(102, counter.incrementAndGet());
+		Assert.assertEquals(101, counter.decrementAndGet());
 
 		// test issue 74
 		counter = memcachedClient.getCounter("issue74", 0);
 		for (int i = 0; i < 100; i++) {
-			Assert.assertEquals(i, counter.incrementAndGet());
+			Assert.assertEquals(i+1, counter.incrementAndGet());
 		}
 		for (int i = 0; i < 100; i++) {
 			counter.decrementAndGet();
 		}
 		Assert.assertEquals(0, counter.get());
+	}
+
+	public void testIssue142() throws Exception {
+		Counter counter = this.memcachedClient.getCounter("counter", 6);
+		counter.get(); //
+		counter.incrementAndGet(); // counter=7
+		counter.decrementAndGet(); // counter=6
+		counter.addAndGet(2);// counter=8
+		assertEquals(8, counter.get()); // counter=8
+		assertTrue(this.memcachedClient.delete("counter"));
 	}
 
 	public void testKeyIterator() throws Exception {
@@ -1307,8 +1317,8 @@ public abstract class XMemcachedClientTest extends TestCase {
 			Assert.assertEquals(address, it.getServerAddress());
 			while (it.hasNext()) {
 				String key = it.next();
-				Assert.assertEquals(Integer.parseInt(key), memcachedClient
-						.get(key));
+				Assert.assertEquals(Integer.parseInt(key),
+						memcachedClient.get(key));
 			}
 			Assert.assertFalse(it.hasNext());
 		} else {

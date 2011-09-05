@@ -76,7 +76,10 @@ public final class Counter {
 		if (result == null) {
 			throw new MemcachedClientException("key is not existed.");
 		} else {
-			return Long.valueOf(((String) result).trim());
+			if (result instanceof Long)
+				return (Long) result;
+			else
+				return Long.valueOf(((String) result).trim());
 		}
 	}
 
@@ -99,6 +102,13 @@ public final class Counter {
 		this.memcachedClient = memcachedClient;
 		this.key = key;
 		this.initialValue = initialValue;
+		try {
+			this.memcachedClient.add(key, 0, String.valueOf(this.initialValue));
+		} catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
+		} catch (Exception e) {
+			throw new IllegalStateException("Initialize counter failed", e);
+		}
 	}
 
 	/**
