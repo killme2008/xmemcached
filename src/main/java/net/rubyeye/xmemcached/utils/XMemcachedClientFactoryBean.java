@@ -73,6 +73,16 @@ public class XMemcachedClientFactoryBean implements FactoryBean {
 
 	private boolean failureMode;
 
+	private long opTimeout;
+
+	public long getOpTimeout() {
+		return opTimeout;
+	}
+
+	public void setOpTimeout(long opTimeout) {
+		this.opTimeout = opTimeout;
+	}
+
 	public final CommandFactory getCommandFactory() {
 		return this.commandFactory;
 	}
@@ -176,6 +186,7 @@ public class XMemcachedClientFactoryBean implements FactoryBean {
 				weightsArray);
 		this.configBuilder(builder);
 		this.memcachedClient = builder.build();
+		this.memcachedClient.setOpTimeout(opTimeout);
 		return this.memcachedClient;
 	}
 
