@@ -80,7 +80,7 @@ public abstract class TextGetCommand extends Command implements
 	public TextGetCommand(String key, byte[] keyBytes, CommandType cmdType,
 			CountDownLatch latch) {
 		super(key, keyBytes, cmdType, latch);
-		this.returnValues = new HashMap<String, CachedData>();
+		this.returnValues = new HashMap<String, CachedData>(32);
 	}
 
 	private ParseStatus parseStatus = ParseStatus.NULL;
