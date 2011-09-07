@@ -5,6 +5,18 @@ Xmemcached Change log
 
 
 *******************************************
+2010-09-07
+-----Xmemcached 1.3.4 released-------------------------
+1.Enable nagle algorithm by default.
+2.Check result returned by inc/dec protocols is number.
+3.Make opTimeout can be configured by XMemcachedClientFactoryBean
+4.Added RoundRobinMemcachedSessionLocator for kestrel or memcacheq cluster
+5.Fixed bug which could cause connection disconnect when decode binary command with error message from memcached.
+6.Add a option in KetamaMemcachedSessionLocator to be be compatible with nginx-upstream-consistent.
+7.Fixed bugs,include issue 132,142,133,139,142,145,150.
+
+Recommend user using xmemcached binary protocol to upgrade.
+
 2010-06-12
 -----Xmemcached 1.3.3 released-------------------------
 1.Implements touch and GAT(get and touch) commands for memcached 1.6.x,adds new methods to MemcachedClient,includes:
