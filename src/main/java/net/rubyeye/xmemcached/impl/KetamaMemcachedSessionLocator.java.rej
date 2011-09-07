@@ -1,0 +1,85 @@
+***************
+*** 53,78 ****
+  	private final HashAlgorithm hashAlg;
+  	private volatile int maxTries;
+  	private final Random random = new Random();
+  
+  	public KetamaMemcachedSessionLocator() {
+  		this.hashAlg = HashAlgorithm.KETAMA_HASH;
+  	}
+  
+- 	public KetamaMemcachedSessionLocator(HashAlgorithm alg) {
+  		this.hashAlg = alg;
+  	}
+  
+- 	public KetamaMemcachedSessionLocator(List<Session> list, HashAlgorithm alg) {
+  		super();
+  		this.hashAlg = alg;
+  		this.buildMap(list, alg);
+  	}
+  
+  	private final void buildMap(Collection<Session> list, HashAlgorithm alg) {
+  		TreeMap<Long, List<Session>> sessionMap = new TreeMap<Long, List<Session>>();
+  
+  		for (Session session : list) {
+- 			String sockStr = String.valueOf(session.getRemoteSocketAddress());
+  			/**
+  			 * Duplicate 160 X weight references
+  			 */
+--- 53,108 ----
+  	private final HashAlgorithm hashAlg;
+  	private volatile int maxTries;
+  	private final Random random = new Random();
++     // is this compatible with nginx_upstream_consistent?
++     private final boolean cwNginxUpstreamConsistent;
+  
+  	public KetamaMemcachedSessionLocator() {
+  		this.hashAlg = HashAlgorithm.KETAMA_HASH;
++         this.cwNginxUpstreamConsistent = false;
+  	}
+  
++     public KetamaMemcachedSessionLocator(boolean cwNginxUpstreamConsistent) {
++ 		this.hashAlg = HashAlgorithm.KETAMA_HASH;
++         this.cwNginxUpstreamConsistent = cwNginxUpstreamConsistent;
++ 	}
++ 
++     public KetamaMemcachedSessionLocator(HashAlgorithm alg) {
+  		this.hashAlg = alg;
++         this.cwNginxUpstreamConsistent = false;
+  	}
+  
++ 	public KetamaMemcachedSessionLocator(HashAlgorithm alg, boolean cwNginxUpstreamConsistent) {
++ 		this.hashAlg = alg;
++         this.cwNginxUpstreamConsistent = cwNginxUpstreamConsistent;
++ 	}
++ 
++     public KetamaMemcachedSessionLocator(List<Session> list, HashAlgorithm alg) {
+  		super();
+  		this.hashAlg = alg;
++         this.cwNginxUpstreamConsistent = false;
+  		this.buildMap(list, alg);
+  	}
+  
++ 	public KetamaMemcachedSessionLocator(List<Session> list, HashAlgorithm alg, boolean cwNginxUpstreamConsistent) {
++ 		super();
++ 		this.hashAlg = alg;
++         this.cwNginxUpstreamConsistent = cwNginxUpstreamConsistent;
++ 		this.buildMap(list, alg);
++ 	}
++ 
+  	private final void buildMap(Collection<Session> list, HashAlgorithm alg) {
+  		TreeMap<Long, List<Session>> sessionMap = new TreeMap<Long, List<Session>>();
+  
+  		for (Session session : list) {
++             String sockStr;
++             if (cwNginxUpstreamConsistent) {
++                 sockStr = String.format("%s:%d",
++                     session.getRemoteSocketAddress().getAddress().getHostAddress(),
++                     session.getRemoteSocketAddress().getPort());
++             } else {
++                 sockStr = String.valueOf(session.getRemoteSocketAddress());
++             }
++ 
+  			/**
+  			 * Duplicate 160 X weight references
+  			 */

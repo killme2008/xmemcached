@@ -54,52 +54,25 @@ public class KetamaMemcachedSessionLocator extends
 	private volatile int maxTries;
 	private final Random random = new Random();
 
-	/**
-	 * compatible with nginx-upstream-consistent,patched by wolfg1969
-	 */
-	private final boolean cwNginxUpstreamConsistent;
-
 	public KetamaMemcachedSessionLocator() {
 		this.hashAlg = HashAlgorithm.KETAMA_HASH;
-		this.cwNginxUpstreamConsistent = false;
-	}
-
-	public KetamaMemcachedSessionLocator(boolean cwNginxUpstreamConsistent) {
-		this.hashAlg = HashAlgorithm.KETAMA_HASH;
-		this.cwNginxUpstreamConsistent = cwNginxUpstreamConsistent;
 	}
 
 	public KetamaMemcachedSessionLocator(HashAlgorithm alg) {
 		this.hashAlg = alg;
-		this.cwNginxUpstreamConsistent = false;
-	}
-
-	public KetamaMemcachedSessionLocator(HashAlgorithm alg,
-			boolean cwNginxUpstreamConsistent) {
-		this.hashAlg = alg;
-		this.cwNginxUpstreamConsistent = cwNginxUpstreamConsistent;
 	}
 
 	public KetamaMemcachedSessionLocator(List<Session> list, HashAlgorithm alg) {
 		super();
 		this.hashAlg = alg;
-		this.cwNginxUpstreamConsistent = false;
 		this.buildMap(list, alg);
 	}
 
 	private final void buildMap(Collection<Session> list, HashAlgorithm alg) {
 		TreeMap<Long, List<Session>> sessionMap = new TreeMap<Long, List<Session>>();
 
-		String sockStr;
 		for (Session session : list) {
-			if (this.cwNginxUpstreamConsistent) {
-				sockStr = String.format("%s:%d",
-						session.getRemoteSocketAddress().getAddress()
-								.getHostAddress(), session
-								.getRemoteSocketAddress().getPort());
-			} else {
-				sockStr = String.valueOf(session.getRemoteSocketAddress());
-			}
+			String sockStr = String.valueOf(session.getRemoteSocketAddress());
 			/**
 			 * Duplicate 160 X weight references
 			 */
@@ -171,7 +144,7 @@ public class KetamaMemcachedSessionLocator extends
 				resultHash = tailMap.firstKey();
 			}
 		}
-		//
+		//		
 		// if (!sessionMap.containsKey(resultHash)) {
 		// resultHash = sessionMap.ceilingKey(resultHash);
 		// if (resultHash == null && sessionMap.size() > 0) {
