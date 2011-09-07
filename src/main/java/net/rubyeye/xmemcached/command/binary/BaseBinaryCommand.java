@@ -135,7 +135,8 @@ public abstract class BaseBinaryCommand extends Command {
 					return false;
 				}
 			case READ_VALUE:
-				if (this.responseStatus == ResponseStatus.NO_ERROR) {
+				if (this.responseStatus == null
+						|| this.responseStatus == ResponseStatus.NO_ERROR) {
 					if (readValue(buffer, this.responseTotalBodyLength,
 							this.responseKeyLength, this.responseExtrasLength)) {
 						this.decodeStatus = BinaryDecodeStatus.DONE;
