@@ -11,6 +11,7 @@ import net.rubyeye.xmemcached.XMemcachedClientBuilder;
 import net.rubyeye.xmemcached.exception.MemcachedException;
 import net.rubyeye.xmemcached.utils.AddrUtil;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.google.code.yanf4j.core.Session;
@@ -24,6 +25,7 @@ import com.google.code.yanf4j.nio.TCPController;
  * @author dennis
  * @date 2010-12-28
  */
+@Ignore
 public class FailureModeUnitTest {
 	/**
 	 * Mock handler for memcached server
