@@ -772,6 +772,19 @@ public abstract class XMemcachedClientTest extends TestCase {
 		assertTrue(result.isEmpty());
 	}
 
+	
+	public void testIssue150()throws Exception{
+		memcachedClient.set("a", 0, 1);
+		try{
+			memcachedClient.incr("a", 1);
+			fail();
+		}catch(MemcachedException e){
+			assertEquals("cannot increment or decrement non-numeric value",e.getMessage());
+		}
+		memcachedClient.set("a", 0, "1");
+		assertEquals(3,memcachedClient.incr("a", 2));
+	}
+	
 	public void testIncr() throws Exception {
 		assertEquals(0, memcachedClient.incr("a", 5));
 		assertTrue(memcachedClient.set("a", 0, "1"));
