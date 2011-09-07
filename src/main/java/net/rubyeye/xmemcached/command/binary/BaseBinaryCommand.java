@@ -135,12 +135,24 @@ public abstract class BaseBinaryCommand extends Command {
 					return false;
 				}
 			case READ_VALUE:
-				if (readValue(buffer, this.responseTotalBodyLength,
-						this.responseKeyLength, this.responseExtrasLength)) {
-					this.decodeStatus = BinaryDecodeStatus.DONE;
-					continue;
+				if (this.responseStatus == ResponseStatus.NO_ERROR) {
+					if (readValue(buffer, this.responseTotalBodyLength,
+							this.responseKeyLength, this.responseExtrasLength)) {
+						this.decodeStatus = BinaryDecodeStatus.DONE;
+						continue;
+					} else {
+						return false;
+					}
 				} else {
-					return false;
+					// Ignore error message
+					if (ByteUtils.stepBuffer(buffer,
+							this.responseTotalBodyLength
+									- this.responseKeyLength
+									- this.responseExtrasLength)) {
+						this.decodeStatus = BinaryDecodeStatus.DONE;
+						continue;
+					} else
+						return false;
 				}
 			case DONE:
 				if (finish()) {
@@ -248,8 +260,8 @@ public abstract class BaseBinaryCommand extends Command {
 		case INTERNAL_ERROR:
 		case BUSY:
 		case TEMP_FAILURE:
-			setException(new MemcachedServerException(this.responseStatus
-					.errorMessage()));
+			setException(new MemcachedServerException(
+					this.responseStatus.errorMessage()));
 			break;
 		}
 
