@@ -102,9 +102,9 @@ public class MemcachedConnector extends SocketChannelController implements
 		@Override
 		public void run() {
 			while (MemcachedConnector.this.isStarted()) {
-
+			    ReconnectRequest request = null;
 				try {
-					ReconnectRequest request = MemcachedConnector.this.waitingQueue
+					request = MemcachedConnector.this.waitingQueue
 							.take();
 
 					InetSocketAddress address = request
@@ -136,16 +136,7 @@ public class MemcachedConnector extends SocketChannelController implements
 							future.cancel(true);
 						} finally {
 							if (!connected) {
-								// update timestamp for next reconnecting
-								request
-										.updateNextReconnectTimeStamp(MemcachedConnector.this.healSessionInterval
-												* request.getTries());
-								log.error("Reconnect to "
-										+ address.getAddress().getHostAddress()
-										+ ":" + address.getPort() + " fail");
-								// add to tail
-								MemcachedConnector.this.waitingQueue
-										.offer(request);
+								rescheduleConnectRequest(request);
 							} else {
 								continue;
 							}
@@ -160,9 +151,24 @@ public class MemcachedConnector extends SocketChannelController implements
 					// ignore,check status
 				} catch (Exception e) {
 					log.error("SessionMonitor connect error", e);
+					rescheduleConnectRequest(request);
 				}
 			}
 		}
+
+        private void rescheduleConnectRequest(ReconnectRequest request) {
+            if (request == null) {
+                return;
+            }
+            InetSocketAddress address = request.getInetSocketAddressWrapper().getInetSocketAddress();
+            // update timestamp for next reconnecting
+            request.updateNextReconnectTimeStamp(MemcachedConnector.this.healSessionInterval * request.getTries());
+            log.error("Reconnect to "
+            		+ address.getAddress().getHostAddress()
+            		+ ":" + address.getPort() + " fail");
+            // add to tail
+            MemcachedConnector.this.waitingQueue.offer(request);
+        }
 	}
 
 	public Queue<ReconnectRequest> getReconnectRequestQueue() {
