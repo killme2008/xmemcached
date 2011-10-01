@@ -408,7 +408,8 @@ public class MemcachedConnector extends SocketChannelController implements Conne
 
     private void cancelKey(SelectionKey key) throws IOException {
         try {
-            key.channel().close();
+            if (key.channel() != null)
+                key.channel().close();
         }
         finally {
             key.cancel();
