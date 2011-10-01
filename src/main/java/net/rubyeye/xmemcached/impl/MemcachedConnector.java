@@ -380,12 +380,12 @@ public class MemcachedConnector extends SocketChannelController implements Conne
         key.interestOps(key.interestOps() & ~SelectionKey.OP_CONNECT);
         ConnectFuture future = (ConnectFuture) key.attachment();
         if (future == null || future.isCancelled()) {
-            key.channel().close();
-            key.cancel();
+            cancelKey(key);
             return;
         }
         try {
             if (!((SocketChannel) key.channel()).finishConnect()) {
+                cancelKey(key);
                 future.failure(new IOException("Connect to "
                         + SystemUtils.getRawAddress(future.getInetSocketAddressWrapper().getInetSocketAddress()) + ":"
                         + future.getInetSocketAddressWrapper().getInetSocketAddress().getPort() + " fail"));
@@ -398,10 +398,20 @@ public class MemcachedConnector extends SocketChannelController implements Conne
         }
         catch (Exception e) {
             future.failure(e);
-            key.cancel();
+            cancelKey(key);
             throw new IOException("Connect to "
                     + SystemUtils.getRawAddress(future.getInetSocketAddressWrapper().getInetSocketAddress()) + ":"
                     + future.getInetSocketAddressWrapper().getInetSocketAddress().getPort() + " fail," + e.getMessage());
+        }
+    }
+
+
+    private void cancelKey(SelectionKey key) throws IOException {
+        try {
+            key.channel().close();
+        }
+        finally {
+            key.cancel();
         }
     }
 
@@ -427,17 +437,26 @@ public class MemcachedConnector extends SocketChannelController implements Conne
         }
         // Remove addr from removed set
         this.removedAddrSet.remove(addressWrapper.getInetSocketAddress());
-        SocketChannel socketChannel = SocketChannel.open();
-        this.configureSocketChannel(socketChannel);
-        ConnectFuture future = new ConnectFuture(addressWrapper);
-        if (!socketChannel.connect(addressWrapper.getInetSocketAddress())) {
-            this.selectorManager.registerChannel(socketChannel, SelectionKey.OP_CONNECT, future);
+        SocketChannel socketChannel = null;
+        try {
+            socketChannel = SocketChannel.open();
+            this.configureSocketChannel(socketChannel);
+            ConnectFuture future = new ConnectFuture(addressWrapper);
+            if (!socketChannel.connect(addressWrapper.getInetSocketAddress())) {
+                this.selectorManager.registerChannel(socketChannel, SelectionKey.OP_CONNECT, future);
+            }
+            else {
+                this.addSession(this.createSession(socketChannel, addressWrapper));
+                future.setResult(true);
+            }
+            return future;
         }
-        else {
-            this.addSession(this.createSession(socketChannel, addressWrapper));
-            future.setResult(true);
+        catch (IOException e) {
+            if (socketChannel != null) {
+                socketChannel.close();
+            }
+            throw e;
         }
-        return future;
     }
 
 
