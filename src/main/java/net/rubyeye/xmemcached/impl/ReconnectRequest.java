@@ -27,77 +27,95 @@ import java.util.concurrent.TimeUnit;
 
 import net.rubyeye.xmemcached.utils.InetSocketAddressWrapper;
 
+
 /**
- * Auto reconnect request
+ * A auto reconnect request,associating a socket address for reconnecting
  * 
  * @author dennis
  * 
  */
 public final class ReconnectRequest implements Delayed {
 
-	private InetSocketAddressWrapper inetSocketAddressWrapper;
-	private int tries;
+    private InetSocketAddressWrapper inetSocketAddressWrapper;
+    private int tries;
 
-	private static final long MIN_RECONNECT_INTERVAL = 1000;
+    private static final long MIN_RECONNECT_INTERVAL = 1000;
 
-	private static final long MAX_RECONNECT_INTERVAL = 60 * 1000;
+    private static final long MAX_RECONNECT_INTERVAL = 60 * 1000;
 
-	private volatile long nextReconnectTimestamp;
+    private volatile long nextReconnectTimestamp;
 
-	public ReconnectRequest(InetSocketAddressWrapper inetSocketAddressWrapper,
-			int tries, long reconnectInterval) {
-		super();
-		this.setInetSocketAddressWrapper(inetSocketAddressWrapper);
-		this.setTries(tries); // record reconnect times
-		reconnectInterval = this.normalInterval(reconnectInterval);
-		this.nextReconnectTimestamp = System.currentTimeMillis()
-				+ reconnectInterval;
-	}
 
-	private long normalInterval(long reconnectInterval) {
-		if (reconnectInterval < MIN_RECONNECT_INTERVAL) {
-			reconnectInterval = MIN_RECONNECT_INTERVAL;
-		}
-		if (reconnectInterval > MAX_RECONNECT_INTERVAL) {
-			reconnectInterval = MAX_RECONNECT_INTERVAL;
-		}
-		return reconnectInterval;
-	}
+    public ReconnectRequest(InetSocketAddressWrapper inetSocketAddressWrapper, int tries, long reconnectInterval) {
+        super();
+        this.setInetSocketAddressWrapper(inetSocketAddressWrapper);
+        this.setTries(tries); // record reconnect times
+        reconnectInterval = this.normalInterval(reconnectInterval);
+        this.nextReconnectTimestamp = System.currentTimeMillis() + reconnectInterval;
+    }
 
-	public long getDelay(TimeUnit unit) {
-		return unit.convert(this.nextReconnectTimestamp
-				- System.currentTimeMillis(), TimeUnit.MILLISECONDS);
-	}
 
-	public int compareTo(Delayed o) {
-		ReconnectRequest other = (ReconnectRequest) o;
-		if (this.nextReconnectTimestamp > other.nextReconnectTimestamp) {
-			return 1;
-		} else {
-			return -1;
-		}
-	}
+    private long normalInterval(long reconnectInterval) {
+        if (reconnectInterval < MIN_RECONNECT_INTERVAL) {
+            reconnectInterval = MIN_RECONNECT_INTERVAL;
+        }
+        if (reconnectInterval > MAX_RECONNECT_INTERVAL) {
+            reconnectInterval = MAX_RECONNECT_INTERVAL;
+        }
+        return reconnectInterval;
+    }
 
-	public final InetSocketAddressWrapper getInetSocketAddressWrapper() {
-		return this.inetSocketAddressWrapper;
-	}
 
-	public void updateNextReconnectTimeStamp(long interval) {
-		interval = this.normalInterval(interval);
-		this.nextReconnectTimestamp = System.currentTimeMillis() + interval;
-	}
+    public long getDelay(TimeUnit unit) {
+        return unit.convert(this.nextReconnectTimestamp - System.currentTimeMillis(), TimeUnit.MILLISECONDS);
+    }
 
-	public final void setInetSocketAddressWrapper(
-			InetSocketAddressWrapper inetSocketAddressWrapper) {
-		this.inetSocketAddressWrapper = inetSocketAddressWrapper;
-	}
 
-	public final void setTries(int tries) {
-		this.tries = tries;
-	}
+    public int compareTo(Delayed o) {
+        ReconnectRequest other = (ReconnectRequest) o;
+        if (this.nextReconnectTimestamp > other.nextReconnectTimestamp) {
+            return 1;
+        }
+        else {
+            return -1;
+        }
+    }
 
-	public final int getTries() {
-		return this.tries;
-	}
+
+    /**
+     * Returns a reconnect socket address wrapper
+     * 
+     * @see InetSocketAddressWrapper
+     * @return
+     */
+    public final InetSocketAddressWrapper getInetSocketAddressWrapper() {
+        return this.inetSocketAddressWrapper;
+    }
+
+
+    public void updateNextReconnectTimeStamp(long interval) {
+        interval = this.normalInterval(interval);
+        this.nextReconnectTimestamp = System.currentTimeMillis() + interval;
+    }
+
+
+    public final void setInetSocketAddressWrapper(InetSocketAddressWrapper inetSocketAddressWrapper) {
+        this.inetSocketAddressWrapper = inetSocketAddressWrapper;
+    }
+
+
+    public final void setTries(int tries) {
+        this.tries = tries;
+    }
+
+
+    /**
+     * Returns retry times
+     * 
+     * @return retry times,it is zero if it does not retry to connect
+     */
+    public final int getTries() {
+        return this.tries;
+    }
 
 }
