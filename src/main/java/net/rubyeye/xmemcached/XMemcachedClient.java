@@ -529,27 +529,18 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
                 Thread.currentThread().interrupt();
             }
             catch (ExecutionException e) {
-                if (future != null) {
-                    future.cancel(true);
-                }
                 throwable = e;
                 log.error(
                     "connect to " + SystemUtils.getRawAddress(inetSocketAddress) + ":" + inetSocketAddress.getPort()
                             + " error", e);
             }
             catch (TimeoutException e) {
-                if (future != null) {
-                    future.cancel(true);
-                }
                 throwable = e;
                 log.error(
                     "connect to " + SystemUtils.getRawAddress(inetSocketAddress) + ":" + inetSocketAddress.getPort()
                             + " timeout", e);
             }
             catch (Exception e) {
-                if (future != null) {
-                    future.cancel(true);
-                }
                 throwable = e;
                 log.error(
                     "connect to " + SystemUtils.getRawAddress(inetSocketAddress) + ":" + inetSocketAddress.getPort()
@@ -558,6 +549,9 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
             // If it is not connected,it will be added to waiting queue for
             // reconnecting.
             if (!connected) {
+                if (future != null) {
+                    future.cancel(true);
+                }
                 // If we use failure mode, add a mock session at first
                 if (this.failureMode) {
                     this.connector.addSession(new ClosedMemcachedTCPSession(inetSocketAddressWrapper));
@@ -764,8 +758,9 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
     XMemcachedClient(MemcachedSessionLocator locator, BufferAllocator allocator, Configuration conf,
             Map<SocketOption, Object> socketOptions, CommandFactory commandFactory, Transcoder transcoder,
             Map<InetSocketAddress, InetSocketAddress> addressMap, List<MemcachedClientStateListener> stateListeners,
-            Map<InetSocketAddress, AuthInfo> map, int poolSize, String name, boolean failureMode) throws IOException {
+            Map<InetSocketAddress, AuthInfo> map, int poolSize,long connectTimeout, String name, boolean failureMode) throws IOException {
         super();
+        this.setConnectTimeout(connectTimeout);
         this.setFailureMode(failureMode);
         this.setName(name);
         this.optimiezeSetReadThreadCount(conf, addressMap == null ? 0 : addressMap.size());
@@ -811,9 +806,10 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
     XMemcachedClient(MemcachedSessionLocator locator, BufferAllocator allocator, Configuration conf,
             Map<SocketOption, Object> socketOptions, CommandFactory commandFactory, Transcoder transcoder,
             Map<InetSocketAddress, InetSocketAddress> addressMap, int[] weights,
-            List<MemcachedClientStateListener> stateListeners, Map<InetSocketAddress, AuthInfo> infoMap, int poolSize,
+            List<MemcachedClientStateListener> stateListeners, Map<InetSocketAddress, AuthInfo> infoMap, int poolSize,long connectTimeout,
             final String name, boolean failureMode) throws IOException {
         super();
+        this.setConnectTimeout(connectTimeout);
         this.setFailureMode(failureMode);
         this.setName(name);
         if (weights == null && addressMap != null) {
