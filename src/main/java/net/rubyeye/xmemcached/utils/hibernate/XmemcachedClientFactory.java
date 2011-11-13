@@ -31,6 +31,7 @@ import net.rubyeye.xmemcached.XMemcachedClientBuilder;
 import net.rubyeye.xmemcached.command.BinaryCommandFactory;
 import net.rubyeye.xmemcached.command.TextCommandFactory;
 import net.rubyeye.xmemcached.impl.ArrayMemcachedSessionLocator;
+import net.rubyeye.xmemcached.impl.PHPMemcacheSessionLocator;
 import net.rubyeye.xmemcached.impl.KetamaMemcachedSessionLocator;
 import net.rubyeye.xmemcached.utils.AddrUtil;
 
@@ -86,6 +87,10 @@ public class XmemcachedClientFactory implements MemcacheClientFactory {
 
 		if (sessionLocatorNameEquals(KetamaMemcachedSessionLocator.class)) {
 			return new KetamaMemcachedSessionLocator(getHashAlgorithm());
+		}
+
+		if (sessionLocatorNameEquals(PHPMemcacheSessionLocator.class)) {
+			return new PHPMemcacheSessionLocator(getHashAlgorithm());
 		}
 
 		throw new IllegalArgumentException("Unsupported "
