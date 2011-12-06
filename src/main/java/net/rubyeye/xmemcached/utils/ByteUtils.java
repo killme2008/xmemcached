@@ -121,8 +121,8 @@ public final class ByteUtils {
 				if (b == ' ' || b == '\n' || b == '\r' || b == 0) {
 					try {
 						throw new IllegalArgumentException(
-								"Key contains invalid characters:  ``"
-										+ new String(keyBytes, "utf-8") + "''");
+								"Key contains invalid characters:"
+										+ new String(keyBytes, "utf-8"));
 
 					} catch (UnsupportedEncodingException e) {
 					}
