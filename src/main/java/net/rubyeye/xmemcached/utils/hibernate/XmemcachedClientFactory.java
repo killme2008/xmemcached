@@ -61,6 +61,12 @@ public class XmemcachedClientFactory implements MemcacheClientFactory {
 
 	public static final String PROP_SESSION_LOCATOR = Config.PROP_PREFIX
 			+ "sessionLocator";
+	
+	public static final String PROP_CONNECTION_POOL_SIZE = Config.PROP_PREFIX
+            + "connectionPoolSize";
+	
+	public static final String PROP_CONNECT_TIMEOUT = Config.PROP_PREFIX
+            + "connectTimeout";
 
 	private final PropertiesHelper properties;
 
@@ -75,6 +81,8 @@ public class XmemcachedClientFactory implements MemcacheClientFactory {
 		builder.setSessionLocator(getSessionLocator());
 		builder.getConfiguration()
 				.setSessionReadBufferSize(getReadBufferSize());
+		builder.setConnectionPoolSize(getConnectionPoolSize());
+		builder.setConnectTimeout(getConnectTimeoutMillis());
 		MemcachedClient client = builder.build();
 		client.setOpTimeout(getOperationTimeoutMillis());
 		return new Xmemcache(client);
@@ -126,12 +134,23 @@ public class XmemcachedClientFactory implements MemcacheClientFactory {
 		return this.properties.getInt(PROP_READ_BUFFER_SIZE,
 				MemcachedClient.DEFAULT_SESSION_READ_BUFF_SIZE);
 	}
+	
+	
+    public int getConnectionPoolSize() {
+        return this.properties.getInt(PROP_CONNECTION_POOL_SIZE,
+                MemcachedClient.DEFAULT_CONNECTION_POOL_SIZE);
+    }
 
 	public long getOperationTimeoutMillis() {
 		return this.properties.getLong(PROP_OPERATION_TIMEOUT,
 				MemcachedClient.DEFAULT_OP_TIMEOUT);
 	}
 
+	public long getConnectTimeoutMillis() {
+        return this.properties.getLong(PROP_CONNECT_TIMEOUT,
+                MemcachedClient.DEFAULT_CONNECT_TIMEOUT);
+    }
+	
 	public HashAlgorithm getHashAlgorithm() {
 		return this.properties.getEnum(PROP_HASH_ALGORITHM,
 				HashAlgorithm.class, HashAlgorithm.NATIVE_HASH);
