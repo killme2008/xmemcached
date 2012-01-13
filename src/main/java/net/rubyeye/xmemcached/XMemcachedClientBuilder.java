@@ -52,9 +52,16 @@ public class XMemcachedClientBuilder implements MemcachedClientBuilder {
     private String name;
 
     private boolean failureMode;
+    
+    private boolean sanitizeKeys;
 
 
-    public void addStateListener(MemcachedClientStateListener stateListener) {
+    public void setSanitizeKeys(boolean sanitizeKeys) {
+		this.sanitizeKeys = sanitizeKeys;
+	}
+
+
+	public void addStateListener(MemcachedClientStateListener stateListener) {
         this.stateListeners.add(stateListener);
     }
 
@@ -297,6 +304,7 @@ public class XMemcachedClientBuilder implements MemcachedClientBuilder {
         if (this.commandFactory.getProtocol() == Protocol.Kestrel) {
             memcachedClient.setOptimizeGet(false);
         }
+        memcachedClient.setSanitizeKeys(sanitizeKeys);
         return memcachedClient;
     }
 
