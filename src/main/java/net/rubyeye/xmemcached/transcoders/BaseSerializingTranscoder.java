@@ -6,8 +6,10 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.UnsupportedEncodingException;
+import java.util.zip.DeflaterOutputStream;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
+import java.util.zip.InflaterInputStream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,6 +29,7 @@ public abstract class BaseSerializingTranscoder {
 
 	protected int compressionThreshold = DEFAULT_COMPRESSION_THRESHOLD;
 	protected String charset = DEFAULT_CHARSET;
+	protected CompressMode compressMode = CompressMode.GZIP;
 	protected static final Logger log = LoggerFactory
 			.getLogger(BaseSerializingTranscoder.class);
 
@@ -40,6 +43,14 @@ public abstract class BaseSerializingTranscoder {
 	 */
 	public void setCompressionThreshold(int to) {
 		this.compressionThreshold = to;
+	}
+
+	public CompressMode getCompressMode() {
+		return compressMode;
+	}
+
+	public void setCompressMode(CompressMode compressMode) {
+		this.compressMode = compressMode;
 	}
 
 	/**
@@ -94,9 +105,7 @@ public abstract class BaseSerializingTranscoder {
 			log.error("Caught IOException decoding " + in.length
 					+ " bytes of data", e);
 		} catch (ClassNotFoundException e) {
-			log
-					.error("Caught CNFE decoding " + in.length
-							+ " bytes of data", e);
+			log.error("Caught CNFE decoding " + in.length + " bytes of data", e);
 		} finally {
 			if (is != null) {
 				try {
@@ -119,7 +128,42 @@ public abstract class BaseSerializingTranscoder {
 	/**
 	 * Compress the given array of bytes.
 	 */
-	public static final byte[] compress(byte[] in) {
+	public final byte[] compress(byte[] in) {
+		switch (this.compressMode) {
+		case GZIP:
+			return gzipCompress(in);
+		case ZIP:
+			return zipCompress(in);
+		default:
+			return gzipCompress(in);
+		}
+
+	}
+
+	private byte[] zipCompress(byte[] in) {
+		ByteArrayOutputStream baos = new ByteArrayOutputStream(in.length);
+		DeflaterOutputStream os = new DeflaterOutputStream(baos);
+		try {
+			os.write(in);
+			os.finish();
+			try {
+				os.close();
+			} catch (IOException e) {
+				log.error("Close DeflaterOutputStream error", e);
+			}
+		} catch (IOException e) {
+			throw new RuntimeException("IO exception compressing data", e);
+		} finally {
+			try {
+				baos.close();
+			} catch (IOException e) {
+				log.error("Close ByteArrayOutputStream error", e);
+			}
+		}
+		return baos.toByteArray();
+	}
+
+	private static byte[] gzipCompress(byte[] in) {
 		if (in == null) {
 			throw new NullPointerException("Can't compress null");
 		}
@@ -151,12 +195,65 @@ public abstract class BaseSerializingTranscoder {
 		return rv;
 	}
 
+	static int COMPRESS_RATIO = 8;
+
 	/**
 	 * Decompress the given array of bytes.
 	 * 
 	 * @return null if the bytes cannot be decompressed
 	 */
 	protected byte[] decompress(byte[] in) {
+		switch (this.compressMode) {
+		case GZIP:
+			return gzipDecompress(in);
+		case ZIP:
+			return zipDecompress(in);
+		default:
+			return gzipDecompress(in);
+		}
+	}
+
+	private byte[] zipDecompress(byte[] in) {
+		int size = in.length * COMPRESS_RATIO;
+		ByteArrayInputStream bais = new ByteArrayInputStream(in);
+		InflaterInputStream is = new InflaterInputStream(bais);
+		ByteArrayOutputStream baos = new ByteArrayOutputStream(size);
+		try {
+			byte[] uncompressMessage = new byte[size];
+			while (true) {
+				int len = is.read(uncompressMessage);
+				if (len <= 0) {
+					break;
+				}
+				baos.write(uncompressMessage, 0, len);
+			}
+			baos.flush();
+			return baos.toByteArray();
+
+		} catch (IOException e) {
+			log.error("Failed to decompress data", e);
+			baos = null;
+		} finally {
+			try {
+				is.close();
+			} catch (IOException e) {
+				log.error("failed to close InflaterInputStream");
+			}
+			try {
+				bais.close();
+			} catch (IOException e) {
+				log.error("failed to close ByteArrayInputStream");
+			}
+			try {
+				baos.close();
+			} catch (IOException e) {
+				log.error("failed to close ByteArrayOutputStream");
+			}
+		}
+		return baos == null ? null : baos.toByteArray();
+	}
+
+	private byte[] gzipDecompress(byte[] in) {
 		ByteArrayOutputStream bos = null;
 		if (in != null) {
 			ByteArrayInputStream bis = new ByteArrayInputStream(in);
