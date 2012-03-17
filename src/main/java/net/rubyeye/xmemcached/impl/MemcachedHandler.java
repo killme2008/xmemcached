@@ -14,6 +14,8 @@ package net.rubyeye.xmemcached.impl;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -59,6 +61,7 @@ public class MemcachedHandler extends HandlerAdapter {
 	private final MemcachedClient client;
 	private static final Logger log = LoggerFactory
 			.getLogger(MemcachedHandler.class);
+	private final ScheduledExecutorService scheduleExecutorService;
 
 	/**
 	 * On receive message from memcached server
@@ -150,8 +153,12 @@ public class MemcachedHandler extends HandlerAdapter {
 	 */
 	@Override
 	public void onSessionIdle(Session session) {
+		//checkHeartBeat(session);
+	}
+
+	private void checkHeartBeat(Session session) {
 		if (this.enableHeartBeat) {
-			log.debug("Session (%s) is idle,send heartbeat", session
+			log.debug("Check session (%s) is alive,send heartbeat", session
 					.getRemoteSocketAddress() == null ? "unknown" : SystemUtils
 					.getRawAddress(session.getRemoteSocketAddress())
 					+ ":" + session.getRemoteSocketAddress().getPort());
@@ -172,7 +179,6 @@ public class MemcachedHandler extends HandlerAdapter {
 						versionCommand, session));
 			}
 		}
-
 	}
 
 	private static final String HEART_BEAT_FAIL_COUNT_ATTR = "heartBeatFailCount";
@@ -250,13 +256,25 @@ public class MemcachedHandler extends HandlerAdapter {
 
 	public void stop() {
 		this.heartBeatThreadPool.shutdown();
+		this.scheduleExecutorService.shutdown();
 	}
 
+	final long HEARTBEAT_PERIOD=Long.parseLong(System.getProperty("xmemcached.heartbeat.period", "5000"));
+	
 	public void start() {
 		int serverSize = this.client.getAvaliableServers().size();
 		this.heartBeatThreadPool = Executors
 				.newFixedThreadPool(serverSize == 0 ? Runtime.getRuntime()
 						.availableProcessors() : serverSize);
+		this.scheduleExecutorService.scheduleAtFixedRate(new Runnable() {			
+			public void run() {
+				//check heartbeat
+				for(Session session:client.getConnector().getSessionSet()){
+					checkHeartBeat(session);
+				}
+				
+			}
+		}, HEARTBEAT_PERIOD, HEARTBEAT_PERIOD, TimeUnit.MILLISECONDS);
 	}
 
 	public MemcachedHandler(MemcachedClient client) {
@@ -264,7 +282,7 @@ public class MemcachedHandler extends HandlerAdapter {
 		this.client = client;
 		this.listener = new AuthMemcachedConnectListener();
 		this.statisticsHandler = new StatisticsHandler();
-
+		this.scheduleExecutorService=Executors.newSingleThreadScheduledExecutor();
 	}
 
 }
