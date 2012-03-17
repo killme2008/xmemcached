@@ -98,8 +98,8 @@ public class TextStoreCommandUnitTest extends BaseTextCommandUnitTest {
 		Command command = this.commandFactory.createCASCommand(key, key
 				.getBytes(), exp, value, cas, false, transcoder);
 		checkDecodeNullAndNotLineByteBuffer(command);
-		checkDecodeInvalidLine(command, "VALUE test 4 0 5\r\n");
-		checkDecodeInvalidLine(command, "DELETED\r\n");
+		checkDecodeInvalidLine(command,key, "VALUE test 4 0 5\r\n");
+		checkDecodeInvalidLine(command,key, "DELETED\r\n");
 		checkDecodeValidLine(command, "STORED\r\n");
 		assertTrue((Boolean) command.getResult());
 		command.setResult(null);
@@ -123,7 +123,7 @@ public class TextStoreCommandUnitTest extends BaseTextCommandUnitTest {
 						.getBytes()));
 		Exception e = command.getException();
 		assertNotNull(e);
-		assertEquals("out of memory storing object", e.getMessage());
+		assertEquals("out of memory storing object,key=test", e.getMessage());
 
 		// cas command
 		command = this.commandFactory.createCASCommand(key, key.getBytes(),
@@ -133,15 +133,15 @@ public class TextStoreCommandUnitTest extends BaseTextCommandUnitTest {
 						.getBytes()));
 		e = command.getException();
 		assertNotNull(e);
-		assertEquals("out of memory storing object", e.getMessage());
+		assertEquals("out of memory storing object,key=test", e.getMessage());
 	}
 
 	public void testStoreDecode() {
 		Command command = this.commandFactory.createSetCommand(key, key
 				.getBytes(), exp, value, false, transcoder);
 		checkDecodeNullAndNotLineByteBuffer(command);
-		checkDecodeInvalidLine(command, "EXISTS\r\n");
-		checkDecodeInvalidLine(command, "END\r\n");
+		checkDecodeInvalidLine(command, key,"EXISTS\r\n");
+		checkDecodeInvalidLine(command, key,"END\r\n");
 		checkDecodeValidLine(command, "STORED\r\n");
 		assertTrue((Boolean) command.getResult());
 		command.setResult(null);

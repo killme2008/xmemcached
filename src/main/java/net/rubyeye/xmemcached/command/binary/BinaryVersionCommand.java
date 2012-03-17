@@ -48,7 +48,7 @@ public class BinaryVersionCommand extends BaseBinaryCommand implements
 
 	public BinaryVersionCommand(final CountDownLatch latch,
 			InetSocketAddress server) {
-		super("version", null, CommandType.VERSION, latch, 0, 0, latch, false,
+		super("[version]", null, CommandType.VERSION, latch, 0, 0, latch, false,
 				null);
 		this.commandType = CommandType.VERSION;
 		this.server = server;

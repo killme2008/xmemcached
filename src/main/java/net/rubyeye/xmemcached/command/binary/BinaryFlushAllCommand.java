@@ -37,7 +37,7 @@ public class BinaryFlushAllCommand extends BaseBinaryCommand {
 
 	public BinaryFlushAllCommand(CountDownLatch latch, int exptime,
 			boolean noreply) {
-		super("flush_all", null, CommandType.FLUSH_ALL, latch, 0, 0, null,
+		super("[flush_all]", null, CommandType.FLUSH_ALL, latch, 0, 0, null,
 				noreply, null);
 		this.opCode=noreply?OpCode.FLUSH_QUIETLY:OpCode.FLUSH;
 		this.expTime = exptime;

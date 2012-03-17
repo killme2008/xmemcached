@@ -52,7 +52,7 @@ public class TextFlushAllCommand extends Command {
 
 	public TextFlushAllCommand(final CountDownLatch latch, int delay,
 			boolean noreply) {
-		super("flush_all", (byte[]) null, latch);
+		super("[flush_all]", (byte[]) null, latch);
 		this.commandType = CommandType.FLUSH_ALL;
 		this.exptime = delay;
 		this.noreply = noreply;

@@ -43,8 +43,8 @@ public class TextFlushAllCommandUnitTest extends BaseTextCommandUnitTest {
 		Command command = this.commandFactory.createFlushAllCommand(
 				new CountDownLatch(1), 0, false);
 		checkDecodeNullAndNotLineByteBuffer(command);
-		checkDecodeInvalidLine(command, "END\r\n");
-		checkDecodeInvalidLine(command, "STORED\r\n");
+		checkDecodeInvalidLine(command,"[flush_all]", "END\r\n");
+		checkDecodeInvalidLine(command,"[flush_all]", "STORED\r\n");
 		checkDecodeValidLine(command, "OK\r\n");
 	}
 }

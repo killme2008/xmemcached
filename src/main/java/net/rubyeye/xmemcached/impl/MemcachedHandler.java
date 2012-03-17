@@ -74,9 +74,8 @@ public class MemcachedHandler extends HandlerAdapter {
 				int size = ((MapReturnValueAware) command).getReturnValues()
 						.size();
 				this.statisticsHandler.statistics(CommandType.GET_HIT, size);
-				this.statisticsHandler.statistics(CommandType.GET_MISS, command
-						.getMergeCount()
-						- size);
+				this.statisticsHandler.statistics(CommandType.GET_MISS,
+						command.getMergeCount() - size);
 			} else if (command instanceof TextGetOneCommand
 					|| command instanceof BinaryGetCommand) {
 				if (command.getResult() != null) {
@@ -143,8 +142,8 @@ public class MemcachedHandler extends HandlerAdapter {
 		}
 		for (MemcachedClientStateListener listener : this.client
 				.getStateListeners()) {
-			listener.onDisconnected(this.client, session
-					.getRemoteSocketAddress());
+			listener.onDisconnected(this.client,
+					session.getRemoteSocketAddress());
 		}
 	}
 
@@ -153,32 +152,34 @@ public class MemcachedHandler extends HandlerAdapter {
 	 */
 	@Override
 	public void onSessionIdle(Session session) {
-		//checkHeartBeat(session);
+		// checkHeartBeat(session);
 	}
 
 	private void checkHeartBeat(Session session) {
-		if (this.enableHeartBeat) {
-			log.debug("Check session (%s) is alive,send heartbeat", session
-					.getRemoteSocketAddress() == null ? "unknown" : SystemUtils
-					.getRawAddress(session.getRemoteSocketAddress())
-					+ ":" + session.getRemoteSocketAddress().getPort());
-			Command versionCommand = null;
-			CountDownLatch latch = new CountDownLatch(1);
-			if (this.client.getProtocol() == Protocol.Binary) {
-				versionCommand = new BinaryVersionCommand(latch, session
-						.getRemoteSocketAddress());
+		log.debug(
+				"Check session (%s) is alive,send heartbeat",
+				session.getRemoteSocketAddress() == null ? "unknown"
+						: SystemUtils.getRawAddress(session
+								.getRemoteSocketAddress())
+								+ ":"
+								+ session.getRemoteSocketAddress().getPort());
+		Command versionCommand = null;
+		CountDownLatch latch = new CountDownLatch(1);
+		if (this.client.getProtocol() == Protocol.Binary) {
+			versionCommand = new BinaryVersionCommand(latch,
+					session.getRemoteSocketAddress());
 
-			} else {
-				versionCommand = new TextVersionCommand(latch, session
-						.getRemoteSocketAddress());
-			}
-			session.write(versionCommand);
-			// Start a check thread,avoid blocking reactor thread
-			if (this.heartBeatThreadPool != null) {
-				this.heartBeatThreadPool.execute(new CheckHeartResultThread(
-						versionCommand, session));
-			}
+		} else {
+			versionCommand = new TextVersionCommand(latch,
+					session.getRemoteSocketAddress());
 		}
+		session.write(versionCommand);
+		// Start a check thread,avoid blocking reactor thread
+		if (this.heartBeatThreadPool != null) {
+			this.heartBeatThreadPool.execute(new CheckHeartResultThread(
+					versionCommand, session));
+		}
+
 	}
 
 	private static final String HEART_BEAT_FAIL_COUNT_ATTR = "heartBeatFailCount";
@@ -212,15 +213,13 @@ public class MemcachedHandler extends HandlerAdapter {
 					}
 					// 10 times fail
 					if (heartBeatFailCount.get() > MAX_HEART_BEAT_FAIL_COUNT) {
-						log
-								.warn("Session("
-										+ SystemUtils
-												.getRawAddress(this.session
-														.getRemoteSocketAddress())
-										+ ":"
-										+ this.session.getRemoteSocketAddress()
-												.getPort()
-										+ ") heartbeat fail 10 times,close session and try to heal it");
+						log.warn("Session("
+								+ SystemUtils.getRawAddress(this.session
+										.getRemoteSocketAddress())
+								+ ":"
+								+ this.session.getRemoteSocketAddress()
+										.getPort()
+								+ ") heartbeat fail 10 times,close session and try to heal it");
 						this.session.close();// close session
 						heartBeatFailCount.set(0);
 					}
@@ -259,20 +258,24 @@ public class MemcachedHandler extends HandlerAdapter {
 		this.scheduleExecutorService.shutdown();
 	}
 
-	final long HEARTBEAT_PERIOD=Long.parseLong(System.getProperty("xmemcached.heartbeat.period", "5000"));
-	
+	final long HEARTBEAT_PERIOD = Long.parseLong(System.getProperty(
+			"xmemcached.heartbeat.period", "5000"));
+
 	public void start() {
 		int serverSize = this.client.getAvaliableServers().size();
 		this.heartBeatThreadPool = Executors
 				.newFixedThreadPool(serverSize == 0 ? Runtime.getRuntime()
 						.availableProcessors() : serverSize);
-		this.scheduleExecutorService.scheduleAtFixedRate(new Runnable() {			
+		this.scheduleExecutorService.scheduleAtFixedRate(new Runnable() {
 			public void run() {
-				//check heartbeat
-				for(Session session:client.getConnector().getSessionSet()){
-					checkHeartBeat(session);
+				if (enableHeartBeat) {
+					// check heartbeat
+					for (Session session : client.getConnector()
+							.getSessionSet()) {
+						checkHeartBeat(session);
+					}
 				}
-				
+
 			}
 		}, HEARTBEAT_PERIOD, HEARTBEAT_PERIOD, TimeUnit.MILLISECONDS);
 	}
@@ -282,7 +285,8 @@ public class MemcachedHandler extends HandlerAdapter {
 		this.client = client;
 		this.listener = new AuthMemcachedConnectListener();
 		this.statisticsHandler = new StatisticsHandler();
-		this.scheduleExecutorService=Executors.newSingleThreadScheduledExecutor();
+		this.scheduleExecutorService = Executors
+				.newSingleThreadScheduledExecutor();
 	}
 
 }

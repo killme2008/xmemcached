@@ -25,8 +25,8 @@ public class TextVerbositylCommandUnitTest extends BaseTextCommandUnitTest {
 		Command command = this.commandFactory.createVerbosityCommand(
 				new CountDownLatch(1), 0, false);
 		checkDecodeNullAndNotLineByteBuffer(command);
-		checkDecodeInvalidLine(command, "END\r\n");
-		checkDecodeInvalidLine(command, "STORED\r\n");
+		checkDecodeInvalidLine(command,"[verbosity]", "END\r\n");
+		checkDecodeInvalidLine(command,"[verbosity]", "STORED\r\n");
 		checkDecodeValidLine(command, "OK\r\n");
 	}
 }

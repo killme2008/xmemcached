@@ -27,10 +27,10 @@ public class TextGetOneCommandUnitTest extends BaseTextCommandUnitTest {
 		Command command = this.commandFactory.createGetCommand("test", "test"
 				.getBytes(), CommandType.GET_ONE, null);
 		checkDecodeNullAndNotLineByteBuffer(command);
-		checkDecodeInvalidLine(command, "STORED\r\n");
-		checkDecodeInvalidLine(command, "NOT_FOUND\r\n");
-		checkDecodeInvalidLine(command, "NOT_STORED\r\n");
-		checkDecodeInvalidLine(command, "DELETED\r\n");
+		checkDecodeInvalidLine(command,"test", "STORED\r\n");
+		checkDecodeInvalidLine(command,"test", "NOT_FOUND\r\n");
+		checkDecodeInvalidLine(command, "test","NOT_STORED\r\n");
+		checkDecodeInvalidLine(command, "test","DELETED\r\n");
 
 		checkDecodeValidLine(command, "END\r\n");
 		assertNull(command.getResult());
@@ -57,10 +57,10 @@ public class TextGetOneCommandUnitTest extends BaseTextCommandUnitTest {
 		Command command = this.commandFactory.createGetCommand("test", "test"
 				.getBytes(), CommandType.GETS_ONE, null);
 		checkDecodeNullAndNotLineByteBuffer(command);
-		checkDecodeInvalidLine(command, "STORED\r\n");
-		checkDecodeInvalidLine(command, "NOT_FOUND\r\n");
-		checkDecodeInvalidLine(command, "NOT_STORED\r\n");
-		checkDecodeInvalidLine(command, "DELETED\r\n");
+		checkDecodeInvalidLine(command, "test","STORED\r\n");
+		checkDecodeInvalidLine(command, "test","NOT_FOUND\r\n");
+		checkDecodeInvalidLine(command, "test","NOT_STORED\r\n");
+		checkDecodeInvalidLine(command, "test","DELETED\r\n");
 
 		checkDecodeValidLine(command, "END\r\n");
 		assertNull(command.getResult());

@@ -8,7 +8,7 @@ import net.rubyeye.xmemcached.XMemcachedClientBuilder;
 import net.rubyeye.xmemcached.impl.KetamaMemcachedSessionLocator;
 import net.rubyeye.xmemcached.utils.AddrUtil;
 
-public class ConsistentHashMemcachedClientTest extends XMemcachedClientTest {
+public class ConsistentHashMemcachedClientTest extends StandardHashMemcachedClientTest {
 	@Override
 	public MemcachedClientBuilder createBuilder() throws Exception {
 		MemcachedClientBuilder builder = new XMemcachedClientBuilder(AddrUtil

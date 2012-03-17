@@ -48,10 +48,10 @@ public class TextGetMultiCommandUnitTest extends BaseTextCommandUnitTest {
 				.createGetMultiCommand(keys, new CountDownLatch(1),
 						CommandType.GET_MANY, transcoder);
 		checkDecodeNullAndNotLineByteBuffer(command);
-		checkDecodeInvalidLine(command, "STORED\r\n");
-		checkDecodeInvalidLine(command, "NOT_FOUND\r\n");
-		checkDecodeInvalidLine(command, "NOT_STORED\r\n");
-		checkDecodeInvalidLine(command, "DELETED\r\n");
+		checkDecodeInvalidLine(command,"test1", "STORED\r\n");
+		checkDecodeInvalidLine(command,"test1", "NOT_FOUND\r\n");
+		checkDecodeInvalidLine(command,"test1", "NOT_STORED\r\n");
+		checkDecodeInvalidLine(command, "test1","DELETED\r\n");
 
 		checkDecodeValidLine(command, "END\r\n");
 		assertEquals(0, ((Map) command.getResult()).size());
@@ -77,10 +77,10 @@ public class TextGetMultiCommandUnitTest extends BaseTextCommandUnitTest {
 				.createGetMultiCommand(keys, new CountDownLatch(1),
 						CommandType.GETS_MANY, transcoder);
 		checkDecodeNullAndNotLineByteBuffer(command);
-		checkDecodeInvalidLine(command, "STORED\r\n");
-		checkDecodeInvalidLine(command, "NOT_FOUND\r\n");
-		checkDecodeInvalidLine(command, "NOT_STORED\r\n");
-		checkDecodeInvalidLine(command, "DELETED\r\n");
+		checkDecodeInvalidLine(command,"test1", "STORED\r\n");
+		checkDecodeInvalidLine(command,"test1", "NOT_FOUND\r\n");
+		checkDecodeInvalidLine(command,"test1", "NOT_STORED\r\n");
+		checkDecodeInvalidLine(command, "test1","DELETED\r\n");
 
 		checkDecodeValidLine(command, "END\r\n");
 		assertEquals(0, ((Map) command.getResult()).size());

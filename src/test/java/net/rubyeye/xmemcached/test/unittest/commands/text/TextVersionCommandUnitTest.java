@@ -17,7 +17,7 @@ public class TextVersionCommandUnitTest extends BaseTextCommandUnitTest {
 	public void testDecode() {
 		Command versionCommand = this.commandFactory.createVersionCommand(new CountDownLatch(1),null);
 		checkDecodeNullAndNotLineByteBuffer(versionCommand);
-		checkDecodeInvalidLine(versionCommand, "test\r\n");
+		checkDecodeInvalidLine(versionCommand, "[version]","test\r\n");
 
 		checkDecodeValidLine(versionCommand, "VERSION\r\n");
 		assertEquals("unknown version", versionCommand.getResult());

@@ -34,7 +34,7 @@ public class TextStatsCommandUnitTest extends BaseTextCommandUnitTest {
 		Command command = this.commandFactory.createStatsCommand(null,
 				new CountDownLatch(1), null);
 		checkDecodeNullAndNotLineByteBuffer(command);
-		checkDecodeInvalidLine(command, "OK\r\n");
+		checkDecodeInvalidLine(command,"stats", "OK\r\n");
 		checkDecodeValidLine(command, "END\r\n");
 		assertFalse(command.decode(null, ByteBuffer
 				.wrap("STAT bytes 100\r\nSTAT threads 1\r\n".getBytes())));
