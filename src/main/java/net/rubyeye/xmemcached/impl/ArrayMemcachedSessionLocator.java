@@ -13,7 +13,9 @@ package net.rubyeye.xmemcached.impl;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
+import java.util.Random;
 
 import net.rubyeye.xmemcached.HashAlgorithm;
 import net.rubyeye.xmemcached.networking.MemcachedSession;
@@ -30,7 +32,7 @@ public class ArrayMemcachedSessionLocator extends
 		AbstractMemcachedSessionLocator {
 
 	private HashAlgorithm hashAlgorighm;
-	private transient volatile List<Session> sessions;
+	private transient volatile List<List<Session>> sessions;
 
 	public ArrayMemcachedSessionLocator() {
 		this.hashAlgorighm = HashAlgorithm.NATIVE_HASH;
@@ -49,27 +51,38 @@ public class ArrayMemcachedSessionLocator extends
 		return hash % size;
 	}
 
+	final Random rand = new Random();
+
 	public final Session getSessionByKey(final String key) {
 		if (this.sessions == null || this.sessions.size() == 0) {
 			return null;
 		}
 		// Copy on read
-		List<Session> sessionList = this.sessions;
+		List<List<Session>> sessionList = this.sessions;
 		int size = sessionList.size();
 		if (size == 0) {
 			return null;
 		}
 		long start = this.getHash(size, key);
-		Session session = sessionList.get((int) start);
+		List<Session> sessions = sessionList.get((int) start);
+		Session session = getRandomSession(sessions);
+
 		// If it is not failure mode,get next available session
 		if (!this.failureMode && (session == null || session.isClosed())) {
 			long next = this.getNext(size, start);
 			while ((session == null || session.isClosed()) && next != start) {
-				session = sessionList.get((int) next);
+				sessions = sessionList.get((int) next);
 				next = this.getNext(size, next);
+				session = getRandomSession(sessions);
 			}
 		}
 		return session;
+	}
+
+	private Session getRandomSession(List<Session> sessions) {
+		if (sessions == null || sessions.isEmpty())
+			return null;
+		return sessions.get(rand.nextInt(sessions.size()));
 	}
 
 	public final long getNext(int size, long start) {
@@ -81,18 +94,52 @@ public class ArrayMemcachedSessionLocator extends
 	}
 
 	public final void updateSessions(final Collection<Session> list) {
+		if (list == null || list.isEmpty()) {
+			this.sessions = Collections.emptyList();
+			return;
+		}
 		Collection<Session> copySessions = list;
-		List<Session> newSessions = new ArrayList<Session>(
-				copySessions.size() * 2);
+		List<List<Session>> tmpList = new ArrayList<List<Session>>();
+		Session target = null;
+		List<Session> subList = null;
 		for (Session session : copySessions) {
-			if (session instanceof MemcachedTCPSession) {
-				int weight = ((MemcachedSession) session).getWeight();
-				for (int i = 0; i < weight; i++) {
-					newSessions.add(session);
-				}
+			if (target == null) {
+				target = session;
+				subList = new ArrayList<Session>();
+				subList.add(target);
 			} else {
-				newSessions.add(session);
+				if (session.getRemoteSocketAddress().equals(
+						target.getRemoteSocketAddress())) {
+					subList.add(session);
+				} else {					
+					tmpList.add(subList);
+					target = session;
+					subList = new ArrayList<Session>();
+					subList.add(target);
+				}
 			}
+		}
+
+		// The last one
+		if (subList != null) {
+			tmpList.add(subList);
+		}
+
+		List<List<Session>> newSessions = new ArrayList<List<Session>>(
+				tmpList.size() * 2);
+		for (List<Session> sessions : tmpList) {
+			if (sessions != null && !sessions.isEmpty()) {
+				Session session = sessions.get(0);
+				if (session instanceof MemcachedTCPSession) {
+					int weight = ((MemcachedSession) session).getWeight();
+					for (int i = 0; i < weight; i++) {
+						newSessions.add(sessions);
+					}
+				} else {
+					newSessions.add(sessions);
+				}
+			}
+
 		}
 		this.sessions = newSessions;
 	}
