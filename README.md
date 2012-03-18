@@ -3,11 +3,11 @@
   XMemcached is a high performance, easy to use blocking multithreaded memcached client in java.
   It's nio based and was carefully turned to get top performance.
 
-* [homepage](http://code.google.com/p/xmemcached/)
+* [Homepage](http://code.google.com/p/xmemcached/)
 
-* [downloads](http://code.google.com/p/xmemcached/downloads/list)
+* [Downloads](http://code.google.com/p/xmemcached/downloads/list)
 
-* [wiki](http://code.google.com/p/xmemcached/w/list)
+* [Wiki](http://code.google.com/p/xmemcached/w/list)
 
 
 ##Highlights
@@ -155,3 +155,6 @@ Access MBean through
 
 
 More information see [wiki pages](http://code.google.com/p/xmemcached/w/list) please.
+
+##License
+Apache License Version 2.0
