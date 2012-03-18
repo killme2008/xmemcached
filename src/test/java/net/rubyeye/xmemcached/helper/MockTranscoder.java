@@ -1,6 +1,7 @@
 package net.rubyeye.xmemcached.helper;
 
 import net.rubyeye.xmemcached.transcoders.CachedData;
+import net.rubyeye.xmemcached.transcoders.CompressionMode;
 import net.rubyeye.xmemcached.transcoders.SerializingTranscoder;
 import net.rubyeye.xmemcached.transcoders.Transcoder;
 
@@ -9,6 +10,11 @@ public class MockTranscoder<T> implements Transcoder<T> {
 	private SerializingTranscoder serializingTranscoder = new SerializingTranscoder();
 
 
+
+	public void setCompressionMode(CompressionMode compressMode) {
+		this.serializingTranscoder.setCompressionMode(compressMode);
+		
+	}
 
 	public int getCount() {
 		return count;
