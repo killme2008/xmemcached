@@ -3,13 +3,12 @@
   XMemcached is a high performance, easy to use blocking multithreaded memcached client in java.
   It's nio based and was carefully turned to get top performance.
 
-homepage:  http://code.google.com/p/xmemcached/
+* [homepage](http://code.google.com/p/xmemcached/)
 
-downloads; http://code.google.com/p/xmemcached/downloads/list
+* [downloads](http://code.google.com/p/xmemcached/downloads/list)
 
-wiki :     http://code.google.com/p/xmemcached/w/list
+* [wiki](http://code.google.com/p/xmemcached/w/list)
 
-author : dennis zhuang(killme2008@gmail.com)
 
 ##Highlights
 
@@ -31,29 +30,29 @@ author : dennis zhuang(killme2008@gmail.com)
 
 9.Supports talking with kestrel(a MQ written in scala) and TokyoTyrant
 
-##Maven repository
+##Maven dependency
 
 If you use maven,you can use xmemcached by
 
 	 <dependency>
       <groupId>com.googlecode.xmemcached</groupId>
       <artifactId>xmemcached</artifactId>
-      <version>1.3.4</version>
+      <version>1.3.6</version>
      </dependency>
 
 ##FAQ
 
-1.How to build project by maven?
+###How to build project by maven?
 
       Type command "mvn -Dtest -DfailIfNoTests=false assembly:assembly" to build the project.Maven will download the dependencies automacly and build project.
 
 
-2.How to run unit tests?
+###How to run unit tests?
 
       The test.properties file under the src/test/resources folder is used for setting memcached test server.
       Please set test.memcached.servers property,Then run the AllTests class with jvm option "-ea".
 
-3.Is Xmemcached compatible with jdk5?
+###Is Xmemcached compatible with jdk5?
 
      Yes,since 1.2.0-RC1,Xmemcached is compatible with jdk5.
 
@@ -155,4 +154,4 @@ Access MBean through
       MemcachedClient memcachedClient=builder.build();
 
 
-More information see wiki pages please.
+More information see [wiki pages](http://code.google.com/p/xmemcached/w/list) please.
