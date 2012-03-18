@@ -29,7 +29,7 @@ public abstract class BaseSerializingTranscoder {
 
 	protected int compressionThreshold = DEFAULT_COMPRESSION_THRESHOLD;
 	protected String charset = DEFAULT_CHARSET;
-	protected CompressMode compressMode = CompressMode.GZIP;
+	protected CompressionMode compressMode = CompressionMode.GZIP;
 	protected static final Logger log = LoggerFactory
 			.getLogger(BaseSerializingTranscoder.class);
 
@@ -45,11 +45,11 @@ public abstract class BaseSerializingTranscoder {
 		this.compressionThreshold = to;
 	}
 
-	public CompressMode getCompressMode() {
+	public CompressionMode getCompressMode() {
 		return compressMode;
 	}
 
-	public void setCompressMode(CompressMode compressMode) {
+	public void setCompressionMode(CompressionMode compressMode) {
 		this.compressMode = compressMode;
 	}
 

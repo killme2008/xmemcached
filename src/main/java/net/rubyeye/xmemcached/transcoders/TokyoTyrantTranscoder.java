@@ -62,6 +62,12 @@ public class TokyoTyrantTranscoder implements Transcoder<Object> {
 		flag = flag & SerializingTranscoder.SPECIAL_MASK;
 		return serializingTranscoder.decode0(d, realData, flag);
 	}
+	
+	
+
+	public void setCompressionMode(CompressionMode compressMode) {
+		this.serializingTranscoder.setCompressionMode(compressMode);		
+	}
 
 	public final CachedData encode(Object o) {
 		CachedData result = serializingTranscoder.encode(o);

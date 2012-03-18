@@ -6,7 +6,7 @@ import java.util.Arrays;
 import java.util.Calendar;
 
 import net.rubyeye.xmemcached.transcoders.CachedData;
-import net.rubyeye.xmemcached.transcoders.CompressMode;
+import net.rubyeye.xmemcached.transcoders.CompressionMode;
 import net.rubyeye.xmemcached.transcoders.SerializingTranscoder;
 import net.rubyeye.xmemcached.transcoders.TranscoderUtils;
 
@@ -74,13 +74,13 @@ public class SerializingTranscoderTest extends BaseTranscoderCase {
 
 	public void testCompressedObjectDecompressZipMode() throws Exception {
 		tc.setCompressionThreshold(8);
-		tc.setCompressMode(CompressMode.ZIP);
+		tc.setCompressionMode(CompressionMode.ZIP);
 		Calendar c = Calendar.getInstance();
 		CachedData cd = tc.encode(c);
 		assertEquals(SerializingTranscoder.SERIALIZED
 				| SerializingTranscoder.COMPRESSED, cd.getFlag());
 		assertEquals(c, tc.decode(cd));
-		tc.setCompressMode(CompressMode.GZIP);
+		tc.setCompressionMode(CompressionMode.GZIP);
 	}
 
 	public void testUnencodeable() throws Exception {
