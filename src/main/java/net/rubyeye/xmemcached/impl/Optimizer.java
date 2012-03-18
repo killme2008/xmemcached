@@ -62,7 +62,7 @@ import com.google.code.yanf4j.core.impl.FutureImpl;
  */
 public class Optimizer implements OptimizerMBean, MemcachedOptimizer {
 
-	public static final int DEFAULT_MERGE_FACTOR = 150;
+	public static final int DEFAULT_MERGE_FACTOR = 50;
 	private int mergeFactor = DEFAULT_MERGE_FACTOR; // default merge factor;
 	private boolean optimiezeGet = true;
 	private boolean optimiezeMergeBuffer = true;
@@ -160,7 +160,7 @@ public class Optimizer implements OptimizerMBean, MemcachedOptimizer {
 			final Queue<Command> executingCmds, Command optimiezeCommand) {
 		if (optimiezeCommand.getCommandType() == CommandType.GET_ONE
 				|| optimiezeCommand.getCommandType() == CommandType.GETS_ONE) {
-			// 优化get操作
+			// 浼��get���
 			if (optimiezeGet) {
 				optimiezeCommand = mergeGetCommands(optimiezeCommand,
 						writeQueue, executingCmds, optimiezeCommand
@@ -174,7 +174,7 @@ public class Optimizer implements OptimizerMBean, MemcachedOptimizer {
 	private final Command mergeBuffer(final Command firstCommand,
 			final Queue writeQueue, final Queue<Command> executingCmds,
 			final int sendBufferSize) {
-		Command lastCommand = firstCommand; // 合并的最后一个command
+		Command lastCommand = firstCommand; // ��苟������涓�ommand
 		Command nextCmd = (Command) writeQueue.peek();
 		if (nextCmd == null) {
 			return lastCommand;
