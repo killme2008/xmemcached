@@ -4,11 +4,9 @@
   It's nio based and was carefully turned to get top performance.
 
 * [Homepage](http://code.google.com/p/xmemcached/)
-
 * [Downloads](http://code.google.com/p/xmemcached/downloads/list)
-
 * [Wiki](http://code.google.com/p/xmemcached/w/list)
-
+* [Javadoc](http://fnil.net/docs/xmemcached/index.html)
 
 ##Highlights
 
