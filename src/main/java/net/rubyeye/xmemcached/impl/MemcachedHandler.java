@@ -183,7 +183,9 @@ public class MemcachedHandler extends HandlerAdapter {
 	}
 
 	private static final String HEART_BEAT_FAIL_COUNT_ATTR = "heartBeatFailCount";
-	private static final int MAX_HEART_BEAT_FAIL_COUNT = 5;
+	private static final int MAX_HEART_BEAT_FAIL_COUNT = Integer
+			.parseInt(System.getProperty("xmemcached.heartbeat.max.fail.times",
+					"3"));
 
 	final static class CheckHeartResultThread implements Runnable {
 
