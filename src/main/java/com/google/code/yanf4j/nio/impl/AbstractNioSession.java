@@ -92,7 +92,6 @@ public abstract class AbstractNioSession extends AbstractSession implements
 		} else if (!writeLock.tryLock()) {
 			return;
 		}
-		updateTimeStamp();
 
 		isLockedByMe = true;
 		WriteMessage currentMessage = null;

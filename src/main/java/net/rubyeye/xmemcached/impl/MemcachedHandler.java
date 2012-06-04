@@ -61,7 +61,6 @@ public class MemcachedHandler extends HandlerAdapter {
 	private final MemcachedClient client;
 	private static final Logger log = LoggerFactory
 			.getLogger(MemcachedHandler.class);
-	private final ScheduledExecutorService scheduleExecutorService;
 
 	/**
 	 * On receive message from memcached server
@@ -152,7 +151,7 @@ public class MemcachedHandler extends HandlerAdapter {
 	 */
 	@Override
 	public void onSessionIdle(Session session) {
-		// checkHeartBeat(session);
+		checkHeartBeat(session);
 	}
 
 	private void checkHeartBeat(Session session) {
@@ -257,7 +256,6 @@ public class MemcachedHandler extends HandlerAdapter {
 
 	public void stop() {
 		this.heartBeatThreadPool.shutdown();
-		this.scheduleExecutorService.shutdown();
 	}
 
 	final long HEARTBEAT_PERIOD = Long.parseLong(System.getProperty(
@@ -268,18 +266,6 @@ public class MemcachedHandler extends HandlerAdapter {
 		this.heartBeatThreadPool = Executors
 				.newFixedThreadPool(serverSize == 0 ? Runtime.getRuntime()
 						.availableProcessors() : serverSize);
-		this.scheduleExecutorService.scheduleAtFixedRate(new Runnable() {
-			public void run() {
-				if (enableHeartBeat) {
-					// check heartbeat
-					for (Session session : client.getConnector()
-							.getSessionSet()) {
-						checkHeartBeat(session);
-					}
-				}
-
-			}
-		}, HEARTBEAT_PERIOD, HEARTBEAT_PERIOD, TimeUnit.MILLISECONDS);
 	}
 
 	public MemcachedHandler(MemcachedClient client) {
@@ -287,8 +273,6 @@ public class MemcachedHandler extends HandlerAdapter {
 		this.client = client;
 		this.listener = new AuthMemcachedConnectListener();
 		this.statisticsHandler = new StatisticsHandler();
-		this.scheduleExecutorService = Executors
-				.newSingleThreadScheduledExecutor();
 	}
 
 }
