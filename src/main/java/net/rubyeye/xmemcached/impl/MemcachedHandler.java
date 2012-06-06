@@ -212,15 +212,15 @@ public class MemcachedHandler extends HandlerAdapter {
 						// reset
 						heartBeatFailCount.set(0);
 					}
-					// 10 times fail
 					if (heartBeatFailCount.get() > MAX_HEART_BEAT_FAIL_COUNT) {
 						log.warn("Session("
 								+ SystemUtils.getRawAddress(this.session
 										.getRemoteSocketAddress())
 								+ ":"
 								+ this.session.getRemoteSocketAddress()
-										.getPort()
-								+ ") heartbeat fail 10 times,close session and try to heal it");
+										.getPort() + ") heartbeat fail "
+								+ heartBeatFailCount.get()
+								+ " times,close session and try to heal it");
 						this.session.close();// close session
 						heartBeatFailCount.set(0);
 					}

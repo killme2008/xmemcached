@@ -193,7 +193,6 @@ public abstract class AbstractNioSession extends AbstractSession implements
 	}
 
 	protected void onRead(SelectionKey key) {
-		updateTimeStamp();
 		readFromBuffer();
 	}
 
