@@ -45,6 +45,7 @@ public class ConnectionPoolMemcachedClientTest extends XMemcachedClientTest {
 
 				@Override
 				public void onSessionClosed(Session session) {
+					sessionCounter.decrementAndGet();
 				}
 
 				@Override
