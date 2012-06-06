@@ -35,8 +35,12 @@ If you use maven,you can use xmemcached by
 	 <dependency>
       <groupId>com.googlecode.xmemcached</groupId>
       <artifactId>xmemcached</artifactId>
-      <version>1.3.6</version>
+      <version>1.3.7</version>
      </dependency>
+	 
+##News
+
+ * Xmemcached 1.3.7 released. [Release Note](https://code.google.com/p/xmemcached/wiki/ReleaseNotes). It may be not synchronized to maven central repository,please wait.
 
 ##FAQ
 
