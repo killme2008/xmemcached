@@ -40,7 +40,7 @@ If you use maven,you can use xmemcached by
 	 
 ##News
 
- * Xmemcached 1.3.7 released. [Release Note](https://code.google.com/p/xmemcached/wiki/ReleaseNotes). It may be not synchronized to maven central repository,please wait.
+ * Xmemcached 1.3.7 released. [Release Note](https://code.google.com/p/xmemcached/wiki/ReleaseNotes). 
 
 ##FAQ
 
