@@ -57,6 +57,7 @@ public class Constants {
 	public static final byte[] INCR = { 'i', 'n', 'c', 'r' };
 	public static final byte[] DECR = { 'd', 'e', 'c', 'r' };
 	public static final byte[] DELETE = { 'd', 'e', 'l', 'e', 't', 'e' };
+	public static final byte[] TOUCH = { 't', 'o', 'u', 'c', 'h' };
 	/**
 	 * Max session read buffer size,758k
 	 */

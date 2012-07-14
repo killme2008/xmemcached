@@ -15,6 +15,7 @@ import net.rubyeye.xmemcached.command.text.TextIncrDecrCommand;
 import net.rubyeye.xmemcached.command.text.TextQuitCommand;
 import net.rubyeye.xmemcached.command.text.TextStatsCommand;
 import net.rubyeye.xmemcached.command.text.TextStoreCommand;
+import net.rubyeye.xmemcached.command.text.TextTouchCommand;
 import net.rubyeye.xmemcached.command.text.TextVerbosityCommand;
 import net.rubyeye.xmemcached.command.text.TextVersionCommand;
 import net.rubyeye.xmemcached.transcoders.Transcoder;
@@ -189,8 +190,8 @@ public final class TextCommandFactory implements CommandFactory {
 			sb.append(tmpKey).append(" ");
 		}
 		String gatherKey = sb.toString();
-		byte[] keyBytes = ByteUtils.getBytes(gatherKey.substring(0, gatherKey
-				.length() - 1));
+		byte[] keyBytes = ByteUtils.getBytes(gatherKey.substring(0,
+				gatherKey.length() - 1));
 		return new TextGetMultiCommand(keys.iterator().next(), keyBytes,
 				cmdType, latch, transcoder);
 	}
@@ -232,10 +233,10 @@ public final class TextCommandFactory implements CommandFactory {
 				"GAT is only supported by binary protocol");
 	}
 
-	public Command createTouchCommand(String key, byte[] keyBytes, CountDownLatch latch,
-			int exp, boolean noreply) {
-		throw new UnsupportedOperationException(
-				"Touch is only supported by binary protocol");
+	public Command createTouchCommand(String key, byte[] keyBytes,
+			CountDownLatch latch, int exp, boolean noreply) {
+		return new TextTouchCommand(key, keyBytes, CommandType.TOUCH, latch,
+				exp, noreply);
 	}
 
 	public Command createQuitCommand() {
