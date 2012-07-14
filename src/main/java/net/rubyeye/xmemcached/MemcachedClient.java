@@ -79,13 +79,18 @@ public interface MemcachedClient {
 	 */
 	public static final int DEFAULT_SESSION_IDLE_TIMEOUT = 5000;
 
+	int MAX_QUEUED_NOPS = 40000;
+	int DYNAMIC_MAX_QUEUED_NOPS = (int) (MAX_QUEUED_NOPS * (Runtime
+			.getRuntime().maxMemory() / 1024.0 / 1024.0 / 1024.0));
+
 	/**
-	 * Default max queued noreply operations number.default is 40000.
+	 * Default max queued noreply operations number.It is calcuated dynamically
+	 * based on your jvm maximum memory.
 	 * 
 	 * @since 1.3.8
 	 */
-	public static final int DEFAULT_MAX_QUEUED_NOPS = (int) (40000 * (Runtime
-			.getRuntime().maxMemory() / 1024.0 / 1024.0 / 1024.0));
+	public static final int DEFAULT_MAX_QUEUED_NOPS = DYNAMIC_MAX_QUEUED_NOPS > MAX_QUEUED_NOPS ? MAX_QUEUED_NOPS
+			: DYNAMIC_MAX_QUEUED_NOPS;
 
 	/**
 	 * Set the merge factor,this factor determins how many 'get' commands would
