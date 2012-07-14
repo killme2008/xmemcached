@@ -56,6 +56,23 @@ public class XMemcachedClientBuilder implements MemcachedClientBuilder {
 
 	private KeyProvider keyProvider = DefaultKeyProvider.INSTANCE;
 
+	private int maxQueuedNoReplyOperations = MemcachedClient.DEFAULT_MAX_QUEUED_NOPS;
+
+	public int getMaxQueuedNoReplyOperations() {
+		return maxQueuedNoReplyOperations;
+	}
+
+	/**
+	 * Set max queued noreply operations number
+	 * 
+	 * @see MemcachedClient#DEFAULT_MAX_QUEUED_NOPS
+	 * @param maxQueuedNoReplyOperations
+	 * @since 1.3.8
+	 */
+	public void setMaxQueuedNoReplyOperations(int maxQueuedNoReplyOperations) {
+		this.maxQueuedNoReplyOperations = maxQueuedNoReplyOperations;
+	}
+
 	public void setSanitizeKeys(boolean sanitizeKeys) {
 		this.sanitizeKeys = sanitizeKeys;
 	}
@@ -295,6 +312,8 @@ public class XMemcachedClientBuilder implements MemcachedClientBuilder {
 		}
 		memcachedClient.setSanitizeKeys(sanitizeKeys);
 		memcachedClient.setKeyProvider(this.keyProvider);
+		memcachedClient
+				.setMaxQueuedNoReplyOperations(this.maxQueuedNoReplyOperations);
 		return memcachedClient;
 	}
 
@@ -303,7 +322,12 @@ public class XMemcachedClientBuilder implements MemcachedClientBuilder {
 		return this.transcoder;
 	}
 
-	@SuppressWarnings("unchecked")
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * net.rubyeye.xmemcached.MemcachedClientBuilder#setTranscoder(transcoder)
+	 */
 	public void setTranscoder(Transcoder transcoder) {
 		if (transcoder == null) {
 			throw new IllegalArgumentException("Null Transcoder");
@@ -315,12 +339,22 @@ public class XMemcachedClientBuilder implements MemcachedClientBuilder {
 		return this.authInfoMap;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see net.rubyeye.xmemcached.MemcachedClientBuilder#setKeyProvider()
+	 */
 	public void setKeyProvider(KeyProvider keyProvider) {
 		if (keyProvider == null)
 			throw new IllegalArgumentException("null key provider");
 		this.keyProvider = keyProvider;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see net.rubyeye.xmemcached.MemcachedClientBuilder#addAuthInfo()
+	 */
 	public void addAuthInfo(InetSocketAddress address, AuthInfo authInfo) {
 		this.authInfoMap.put(address, authInfo);
 	}
@@ -337,6 +371,11 @@ public class XMemcachedClientBuilder implements MemcachedClientBuilder {
 		return this.name;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see net.rubyeye.xmemcached.MemcachedClientBuilder#setName()
+	 */
 	public void setName(String name) {
 		this.name = name;
 

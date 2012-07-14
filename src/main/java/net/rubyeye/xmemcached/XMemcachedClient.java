@@ -31,6 +31,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -97,6 +98,7 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 	private long opTimeout = DEFAULT_OP_TIMEOUT;
 	private long connectTimeout = DEFAULT_CONNECT_TIMEOUT; // 杩��瓒��
 	protected int connectionPoolSize = DEFAULT_CONNECTION_POOL_SIZE;
+	protected int maxQueuedNoReplyOperations = DEFAULT_MAX_QUEUED_NOPS;
 
 	protected final AtomicInteger serverOrderCount = new AtomicInteger();
 
@@ -630,6 +632,17 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 		}
 	}
 
+	/**
+	 * Set max queued noreply operations number
+	 * 
+	 * @param maxQueuedNoReplyOperations
+	 */
+	void setMaxQueuedNoReplyOperations(int maxQueuedNoReplyOperations) {
+		if (maxQueuedNoReplyOperations <= 1)
+			throw new IllegalArgumentException("maxQueuedNoReplyOperations<=1");
+		this.maxQueuedNoReplyOperations = maxQueuedNoReplyOperations;
+	}
+
 	@SuppressWarnings("unchecked")
 	private void buildConnector(MemcachedSessionLocator locator,
 			BufferAllocator bufferAllocator, Configuration configuration,
@@ -666,7 +679,7 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 		this.sessionLocator = locator;
 		this.connector = this.newConnector(bufferAllocator, configuration,
 				this.sessionLocator, this.commandFactory,
-				this.connectionPoolSize);
+				this.connectionPoolSize, maxQueuedNoReplyOperations);
 		this.memcachedHandler = new MemcachedHandler(this);
 		this.connector.setHandler(this.memcachedHandler);
 		this.connector.setCodecFactory(new MemcachedCodecFactory());
@@ -682,11 +695,13 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 	protected MemcachedConnector newConnector(BufferAllocator bufferAllocator,
 			Configuration configuration,
 			MemcachedSessionLocator memcachedSessionLocator,
-			CommandFactory commandFactory, int i) {
+			CommandFactory commandFactory, int poolSize,
+			int maxQueuedNoReplyOperations) {
 		// make sure dispatch message thread count is zero
 		configuration.setDispatchMessageThreadCount(0);
 		return new MemcachedConnector(configuration, memcachedSessionLocator,
-				bufferAllocator, commandFactory, i);
+				bufferAllocator, commandFactory, poolSize,
+				maxQueuedNoReplyOperations);
 	}
 
 	private final void registerMBean() {

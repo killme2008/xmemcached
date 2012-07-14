@@ -246,4 +246,13 @@ public interface MemcachedClientBuilder {
 	 */
 	public void setKeyProvider(KeyProvider keyProvider);
 
+	/**
+	 * Set max queued noreply operations number
+	 * 
+	 * @see MemcachedClient#DEFAULT_MAX_QUEUED_NOPS
+	 * @param maxQueuedNoReplyOperations
+	 * @since 1.3.8
+	 */
+	public void setMaxQueuedNoReplyOperations(int maxQueuedNoReplyOperations);
+
 }

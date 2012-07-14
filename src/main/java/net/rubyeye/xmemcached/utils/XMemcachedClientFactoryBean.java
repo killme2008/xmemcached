@@ -79,6 +79,8 @@ public class XMemcachedClientFactoryBean implements FactoryBean {
 
 	private KeyProvider keyProvider = DefaultKeyProvider.INSTANCE;
 
+	private int maxQueuedNoReplyOperations = MemcachedClient.DEFAULT_MAX_QUEUED_NOPS;
+
 	public long getOpTimeout() {
 		return opTimeout;
 	}
@@ -181,6 +183,19 @@ public class XMemcachedClientFactoryBean implements FactoryBean {
 		return this.weights;
 	}
 
+	/**
+	 * Set max queued noreply operations number
+	 * 
+	 * @see MemcachedClient#DEFAULT_MAX_QUEUED_NOPS
+	 * @param maxQueuedNoReplyOperations
+	 * @since 1.3.8
+	 */
+	public void setMaxQueuedNoReplyOperations(int maxQueuedNoReplyOperations) {
+		if (maxQueuedNoReplyOperations <= 1)
+			throw new IllegalArgumentException("maxQueuedNoReplyOperations<=1");
+		this.maxQueuedNoReplyOperations = maxQueuedNoReplyOperations;
+	}
+
 	public void setWeights(List<Integer> weights) {
 		this.weights = weights;
 	}
@@ -224,6 +239,7 @@ public class XMemcachedClientFactoryBean implements FactoryBean {
 		builder.setAuthInfoMap(this.authInfoMap);
 		builder.setFailureMode(this.failureMode);
 		builder.setKeyProvider(keyProvider);
+		builder.setMaxQueuedNoReplyOperations(this.maxQueuedNoReplyOperations);
 		builder.setName(this.name);
 	}
 
