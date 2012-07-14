@@ -78,9 +78,10 @@ public interface MemcachedClient {
 	 * heartbeat action to check if connection is alive.
 	 */
 	public static final int DEFAULT_SESSION_IDLE_TIMEOUT = 5000;
-	
+
 	/**
 	 * Default max queued noreply operations number.default is 40000.
+	 * 
 	 * @since 1.3.8
 	 */
 	public static final int DEFAULT_MAX_QUEUED_NOPS = 40000;

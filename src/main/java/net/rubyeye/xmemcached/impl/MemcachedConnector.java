@@ -596,6 +596,10 @@ public class MemcachedConnector extends SocketChannelController implements
 		((OptimizerMBean) this.optimiezer).setMergeFactor(mergeFactor);
 	}
 
+	public FlowControl getNoReplyOpsFlowControl() {
+		return this.flowControl;
+	}
+
 	@Override
 	protected NioSession buildSession(SocketChannel sc) {
 		Queue<WriteMessage> queue = this.buildQueue();

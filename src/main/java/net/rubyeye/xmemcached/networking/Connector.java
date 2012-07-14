@@ -30,6 +30,7 @@ import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.Future;
 
+import net.rubyeye.xmemcached.FlowControl;
 import net.rubyeye.xmemcached.MemcachedSessionLocator;
 import net.rubyeye.xmemcached.buffer.BufferAllocator;
 import net.rubyeye.xmemcached.command.Command;
@@ -93,4 +94,11 @@ public interface Connector extends Controller {
 	public Queue<ReconnectRequest> getReconnectRequestQueue();
 	
 	public void setFailureMode(boolean failureMode);
+	
+	/**
+	 * Returns the noreply operations flow control manager.
+	 * 
+	 * @return
+	 */
+	public FlowControl getNoReplyOpsFlowControl();
 }
