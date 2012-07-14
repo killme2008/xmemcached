@@ -142,9 +142,9 @@ public class StandardHashMemcachedClientTest extends XMemcachedClientTest {
 
 		assertTrue(memcachedClient.set("a", 0, "100"));
 		memcachedClient.decrWithNoReply("a", 50);
-		assertEquals("50 ", memcachedClient.get("a"));
+		assertEquals("50", memcachedClient.get("a"));
 		memcachedClient.decrWithNoReply("a", 4);
-		assertEquals("46 ", memcachedClient.get("a"));
+		assertEquals("46", memcachedClient.get("a"));
 	}
 
 	
