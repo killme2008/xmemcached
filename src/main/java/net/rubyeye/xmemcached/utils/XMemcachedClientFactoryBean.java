@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.Map;
 
 import net.rubyeye.xmemcached.CommandFactory;
+import net.rubyeye.xmemcached.KeyProvider;
 import net.rubyeye.xmemcached.MemcachedClient;
 import net.rubyeye.xmemcached.MemcachedClientBuilder;
 import net.rubyeye.xmemcached.MemcachedSessionLocator;
@@ -38,6 +39,7 @@ import net.rubyeye.xmemcached.buffer.BufferAllocator;
 import net.rubyeye.xmemcached.buffer.SimpleBufferAllocator;
 import net.rubyeye.xmemcached.command.TextCommandFactory;
 import net.rubyeye.xmemcached.impl.ArrayMemcachedSessionLocator;
+import net.rubyeye.xmemcached.impl.DefaultKeyProvider;
 import net.rubyeye.xmemcached.transcoders.SerializingTranscoder;
 import net.rubyeye.xmemcached.transcoders.Transcoder;
 
@@ -73,10 +75,20 @@ public class XMemcachedClientFactoryBean implements FactoryBean {
 
 	private boolean failureMode;
 
-	private long opTimeout=MemcachedClient.DEFAULT_OP_TIMEOUT;
+	private long opTimeout = MemcachedClient.DEFAULT_OP_TIMEOUT;
+
+	private KeyProvider keyProvider = DefaultKeyProvider.INSTANCE;
 
 	public long getOpTimeout() {
 		return opTimeout;
+	}
+
+	public KeyProvider getKeyProvider() {
+		return keyProvider;
+	}
+
+	public void setKeyProvider(KeyProvider keyProvider) {
+		this.keyProvider = keyProvider;
 	}
 
 	public void setOpTimeout(long opTimeout) {
@@ -211,6 +223,7 @@ public class XMemcachedClientFactoryBean implements FactoryBean {
 		builder.setConnectionPoolSize(this.connectionPoolSize);
 		builder.setAuthInfoMap(this.authInfoMap);
 		builder.setFailureMode(this.failureMode);
+		builder.setKeyProvider(keyProvider);
 		builder.setName(this.name);
 	}
 

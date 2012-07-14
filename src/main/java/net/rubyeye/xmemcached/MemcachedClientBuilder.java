@@ -237,4 +237,13 @@ public interface MemcachedClientBuilder {
 	 */
 	public void setSanitizeKeys(boolean sanitizeKeys);
 
+	/**
+	 * Set a key provider for pre-processing keys before sending them to
+	 * memcached.
+	 * 
+	 * @since 1.3.8
+	 * @param keyProvider
+	 */
+	public void setKeyProvider(KeyProvider keyProvider);
+
 }
