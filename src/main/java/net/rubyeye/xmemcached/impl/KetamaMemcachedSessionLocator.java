@@ -11,6 +11,7 @@
  */
 package net.rubyeye.xmemcached.impl;
 
+import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -57,6 +58,7 @@ public class KetamaMemcachedSessionLocator extends
 	/**
 	 * compatible with nginx-upstream-consistent,patched by wolfg1969
 	 */
+    static final int DEFAULT_PORT = 11211;
 	private final boolean cwNginxUpstreamConsistent;
 
 	public KetamaMemcachedSessionLocator() {
@@ -93,10 +95,11 @@ public class KetamaMemcachedSessionLocator extends
 		String sockStr;
 		for (Session session : list) {
 			if (this.cwNginxUpstreamConsistent) {
-				sockStr = String.format("%s:%d",
-						session.getRemoteSocketAddress().getAddress()
-								.getHostAddress(), session
-								.getRemoteSocketAddress().getPort());
+                InetSocketAddress serverAddress = session.getRemoteSocketAddress();
+                sockStr = serverAddress.getAddress().getHostAddress();
+                if (serverAddress.getPort() != DEFAULT_PORT) {
+                    sockStr = sockStr + ":" + serverAddress.getPort();
+                }
 			} else {
 				sockStr = String.valueOf(session.getRemoteSocketAddress());
 			}
