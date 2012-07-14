@@ -84,7 +84,8 @@ public interface MemcachedClient {
 	 * 
 	 * @since 1.3.8
 	 */
-	public static final int DEFAULT_MAX_QUEUED_NOPS = 40000;
+	public static final int DEFAULT_MAX_QUEUED_NOPS = (int) (40000 * (Runtime
+			.getRuntime().maxMemory() / 1024.0 / 1024.0 / 1024.0));
 
 	/**
 	 * Set the merge factor,this factor determins how many 'get' commands would
