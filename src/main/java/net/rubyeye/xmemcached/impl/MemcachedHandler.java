@@ -19,6 +19,7 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import net.rubyeye.xmemcached.FlowControl;
 import net.rubyeye.xmemcached.MemcachedClient;
 import net.rubyeye.xmemcached.MemcachedClientStateListener;
 import net.rubyeye.xmemcached.auth.AuthMemcachedConnectListener;
@@ -40,6 +41,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.code.yanf4j.core.Session;
+import com.google.code.yanf4j.core.impl.AbstractSession;
 import com.google.code.yanf4j.core.impl.HandlerAdapter;
 import com.google.code.yanf4j.util.SystemUtils;
 
@@ -132,6 +134,8 @@ public class MemcachedHandler extends HandlerAdapter {
 	@Override
 	public final void onSessionClosed(Session session) {
 		this.client.getConnector().removeSession(session);
+		// Clear write queue to release noreply operations.
+		((AbstractSession) session).clearWriteQueue();
 		MemcachedTCPSession memcachedSession = (MemcachedTCPSession) session;
 		// destroy memached session
 		memcachedSession.destroy();
@@ -144,6 +148,7 @@ public class MemcachedHandler extends HandlerAdapter {
 			listener.onDisconnected(this.client,
 					session.getRemoteSocketAddress());
 		}
+
 	}
 
 	/**
