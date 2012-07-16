@@ -29,6 +29,9 @@ public class FlowControlLinkedTransferQueue extends
 					if (this.flowControl.aquire()) {
 						success = true;
 						break;
+					} else {
+						// reduce consuming cpu
+						Thread.yield();
 					}
 				}
 				if (!success)
