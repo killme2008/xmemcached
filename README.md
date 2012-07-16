@@ -8,6 +8,11 @@
 * [Wiki](http://code.google.com/p/xmemcached/w/list)
 * [Javadoc](http://fnil.net/docs/xmemcached/index.html)
 
+##News
+
+ * Xmemcached 1.3.8 released. [Release Note](https://code.google.com/p/xmemcached/wiki/ReleaseNotes).
+ * Xmemcached 1.3.7 released. [Release Note](https://code.google.com/p/xmemcached/wiki/ReleaseNotes). 
+
 ##Highlights
 
 1.Supports all memcached text based protocols and binary protocols(Binary protocol supports since version 1.2.0).
@@ -38,9 +43,6 @@ If you use maven,you can use xmemcached by
       <version>1.3.7</version>
      </dependency>
 	 
-##News
-
- * Xmemcached 1.3.7 released. [Release Note](https://code.google.com/p/xmemcached/wiki/ReleaseNotes). 
 
 ##FAQ
 

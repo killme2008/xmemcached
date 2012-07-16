@@ -5,6 +5,22 @@ Xmemcached Change log
 
 
 *******************************************
+
+2012-07-16
+-----Xmemcached 1.3.8 released-------------------------
+1.Implemented touch command for text protocol.
+2.Added a new interface KeyProvider to pre-process keys before sending them to memcached.And added a new method "setKeyProvider" to client builder and spring factory bean.
+3.Added flow control for noreply operations and added a new method "setMaxQueuedNoReplyOperations" to to client builder and spring factory bean.
+  It's default value is based on your jvm maximum memory.
+4.Removed "time" field in delete command,it's not valid at all even you pass it.
+5.Changed default operation timeout to five seconds.
+6.Fixed KetamaMemcachedSessionLocator issue when set it to be compatible with nginx upstream consistent hash using memcached default port.Thanks wolfg1969.
+
+2012-6-06
+-----Xmemcached 1.3.7 released-------------------------
+1.Send heartbeat when connection is in read idle instead of sending it periodically.
+2.Added an environment variable xmemcached.heartbeat.max.fail.times to set max heartbeat failure times,default is 3 times.
+
 2012-03-18
 -----Xmemcached 1.3.6 released-------------------------
 1.Fixed issues,includes:161,163,165,169,172,173,176,179,180
