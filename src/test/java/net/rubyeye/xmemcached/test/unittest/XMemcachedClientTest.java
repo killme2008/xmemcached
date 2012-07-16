@@ -1220,21 +1220,18 @@ public abstract class XMemcachedClientTest extends TestCase {
 	public void testTouch() throws Exception {
 		this.memcachedClient.set("x", 1, 0);
 		assertEquals(0, this.memcachedClient.get("x"));
-		long start = System.currentTimeMillis();
-		Thread.sleep(200);
-		System.out.println(System.currentTimeMillis() - start);
+		assertTrue(this.memcachedClient.touch("x", 1));
 		assertEquals(0, this.memcachedClient.get("x"));
-		assertTrue(this.memcachedClient.touch("x", 2));
-		start = System.currentTimeMillis();
-		Thread.sleep(900);
-		System.out.println(System.currentTimeMillis() - start);
-		assertEquals(0, this.memcachedClient.get("x"));
-		Thread.sleep(1000);
+		assertTrue(this.memcachedClient.touch("x", 1));
+		Thread.sleep(1100);
 		assertNull(this.memcachedClient.get("x"));
 		if (memcachedClient.getProtocol() == Protocol.Binary) {
 			this.memcachedClient.set("x", 1, 0);
 			assertEquals(0, this.memcachedClient.getAndTouch("x", 1));
 		}
+
+		// touch not exists
+		assertFalse(memcachedClient.touch("not_exists", 0));
 	}
 
 }

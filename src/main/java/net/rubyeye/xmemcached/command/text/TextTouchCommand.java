@@ -42,6 +42,8 @@ import com.google.code.yanf4j.buffer.IoBuffer;
  */
 public class TextTouchCommand extends Command {
 
+	private static final String NOT_FOUND = "NOT_FOUND\r\n";
+	private static final String TOUCHED = "TOUCHED\r\n";
 	private int expTime;
 
 	public TextTouchCommand(String key, byte[] keyBytes, CommandType cmdType,
@@ -72,21 +74,21 @@ public class TextTouchCommand extends Command {
 				setResult(Boolean.TRUE);
 				countDownLatch();
 				// TOUCHED\r\n
-				return ByteUtils.stepBuffer(buffer, "TOUCHED\r\n".length());
+				return ByteUtils.stepBuffer(buffer, TOUCHED.length());
 			} else if (first == 'N') {
 				setResult(Boolean.FALSE);
 				countDownLatch();
 				// NOT_FOUND\r\n
-				return ByteUtils.stepBuffer(buffer, "NOT_FOUND\r\n".length());
+				return ByteUtils.stepBuffer(buffer, NOT_FOUND.length());
 			} else {
 				return decodeError(session, buffer);
 			}
 		} else {
 			Boolean result = (Boolean) this.result;
 			if (result) {
-				return ByteUtils.stepBuffer(buffer, "TOUCHED\r\n".length());
+				return ByteUtils.stepBuffer(buffer, TOUCHED.length());
 			} else {
-				return ByteUtils.stepBuffer(buffer, "NOT_FOUND\r\n".length());
+				return ByteUtils.stepBuffer(buffer, NOT_FOUND.length());
 			}
 		}
 	}

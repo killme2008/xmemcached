@@ -37,7 +37,7 @@ public class TextCommandFactoryTest extends TestCase {
 		String commandStr = new String(deleteCmd.getIoBuffer().buf()
 				.array());
 
-		String expectedStr = "delete test 10\r\n";
+		String expectedStr = "delete test\r\n";
 
 		assertEquals(expectedStr, commandStr);
 	}

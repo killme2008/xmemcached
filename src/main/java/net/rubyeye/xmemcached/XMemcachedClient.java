@@ -2643,13 +2643,13 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 	}
 
 	private String preProcessKey(String key) throws MemcachedException {
+		key = this.keyProvider.process(key);
 		try {
-			key = this.sanitizeKeys ? URLEncoder.encode(key, "UTF-8") : key;
+			return this.sanitizeKeys ? URLEncoder.encode(key, "UTF-8") : key;
 		} catch (UnsupportedEncodingException e) {
 			throw new MemcachedException(
 					"Unsupport encoding utf-8 when sanitize key", e);
 		}
-		return this.keyProvider.process(key);
 	}
 
 	public Counter getCounter(String key, long initialValue) {

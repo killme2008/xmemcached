@@ -8,13 +8,13 @@ public class TextDeleteCommandUnitTest extends BaseTextCommandUnitTest {
 				"test".getBytes(), 10, false);
 		assertNull(command.getIoBuffer());
 		command.encode();
-		checkByteBufferEquals(command, "delete test 10\r\n");
+		checkByteBufferEquals(command, "delete test\r\n");
 
 		command = this.commandFactory.createDeleteCommand("test",
 				"test".getBytes(), 10, true);
 		assertNull(command.getIoBuffer());
 		command.encode();
-		checkByteBufferEquals(command, "delete test 10 noreply\r\n");
+		checkByteBufferEquals(command, "delete test noreply\r\n");
 	}
 
 	public void testDecode() {
