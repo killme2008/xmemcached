@@ -91,31 +91,17 @@ public class TextDeleteCommand extends Command {
 
 	@Override
 	public final void encode() {
-
 		int size = Constants.DELETE.length + 1 + this.keyBytes.length
 				+ Constants.CRLF.length;
-		if (this.time > 0) {
-			size += 1 + ByteUtils.stringSize(this.time);
-		}
 		if (isNoreply()) {
 			size += 8;
 		}
 		byte[] buf = new byte[size];
 		if (isNoreply()) {
-			if (this.time > 0) {
-				ByteUtils.setArguments(buf, 0, Constants.DELETE, this.keyBytes,
-						this.time, Constants.NO_REPLY);
-			} else {
-				ByteUtils.setArguments(buf, 0, Constants.DELETE, this.keyBytes,
-						Constants.NO_REPLY);
-			}
+			ByteUtils.setArguments(buf, 0, Constants.DELETE, this.keyBytes,
+					Constants.NO_REPLY);
 		} else {
-			if (this.time > 0) {
-				ByteUtils.setArguments(buf, 0, Constants.DELETE, this.keyBytes,
-						this.time);
-			} else {
-				ByteUtils.setArguments(buf, 0, Constants.DELETE, this.keyBytes);
-			}
+			ByteUtils.setArguments(buf, 0, Constants.DELETE, this.keyBytes);
 		}
 		this.ioBuffer = IoBuffer.wrap(buf);
 	}
