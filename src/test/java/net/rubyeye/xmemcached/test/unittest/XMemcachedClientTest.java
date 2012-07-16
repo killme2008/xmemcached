@@ -669,21 +669,18 @@ public abstract class XMemcachedClientTest extends TestCase {
 		}
 	}
 
-
-
-	
-	public void testIssue150()throws Exception{
+	public void testIssue150() throws Exception {
 		memcachedClient.set("a", 0, 1);
-		try{
+		try {
 			memcachedClient.incr("a", 1);
 			fail();
-		}catch(MemcachedException e){
-			//assertEquals("cannot increment or decrement non-numeric value",e.getMessage());
+		} catch (MemcachedException e) {
+			// assertEquals("cannot increment or decrement non-numeric value",e.getMessage());
 		}
 		memcachedClient.set("a", 0, "1");
-		assertEquals(3,memcachedClient.incr("a", 2));
+		assertEquals(3, memcachedClient.incr("a", 2));
 	}
-	
+
 	public void testIncr() throws Exception {
 		assertEquals(0, memcachedClient.incr("a", 5));
 		assertTrue(memcachedClient.set("a", 0, "1"));
@@ -1167,7 +1164,7 @@ public abstract class XMemcachedClientTest extends TestCase {
 		// test issue 74
 		counter = memcachedClient.getCounter("issue74", 0);
 		for (int i = 0; i < 100; i++) {
-			Assert.assertEquals(i+1, counter.incrementAndGet());
+			Assert.assertEquals(i + 1, counter.incrementAndGet());
 		}
 		for (int i = 0; i < 100; i++) {
 			counter.decrementAndGet();
@@ -1218,6 +1215,26 @@ public abstract class XMemcachedClientTest extends TestCase {
 			// ignore
 		}
 
+	}
+
+	public void testTouch() throws Exception {
+		this.memcachedClient.set("x", 1, 0);
+		assertEquals(0, this.memcachedClient.get("x"));
+		long start = System.currentTimeMillis();
+		Thread.sleep(200);
+		System.out.println(System.currentTimeMillis() - start);
+		assertEquals(0, this.memcachedClient.get("x"));
+		assertTrue(this.memcachedClient.touch("x", 2));
+		start = System.currentTimeMillis();
+		Thread.sleep(900);
+		System.out.println(System.currentTimeMillis() - start);
+		assertEquals(0, this.memcachedClient.get("x"));
+		Thread.sleep(1000);
+		assertNull(this.memcachedClient.get("x"));
+		if (memcachedClient.getProtocol() == Protocol.Binary) {
+			this.memcachedClient.set("x", 1, 0);
+			assertEquals(0, this.memcachedClient.getAndTouch("x", 1));
+		}
 	}
 
 }
