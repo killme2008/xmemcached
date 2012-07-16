@@ -40,7 +40,7 @@ If you use maven,you can use xmemcached by
 	 <dependency>
       <groupId>com.googlecode.xmemcached</groupId>
       <artifactId>xmemcached</artifactId>
-      <version>1.3.7</version>
+      <version>1.3.8</version>
      </dependency>
 	 
 
