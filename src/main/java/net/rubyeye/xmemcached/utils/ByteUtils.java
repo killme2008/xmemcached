@@ -174,12 +174,12 @@ public final class ByteUtils {
             throw new NullPointerException("Null Protocol");
         }
         memcachedProtocol = protocol;
-        if (protocol == Protocol.Text) {
-            maxKeyLength = 250;
-        }
-        else {
-            maxKeyLength = 65535;
-        }
+//        if (protocol == Protocol.Text) {
+//            maxKeyLength = 250;
+//        }
+//        else {
+//            maxKeyLength = 65535;
+//        }
     }
 
 
