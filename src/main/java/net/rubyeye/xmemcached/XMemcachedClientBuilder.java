@@ -17,6 +17,7 @@ import net.rubyeye.xmemcached.impl.DefaultKeyProvider;
 import net.rubyeye.xmemcached.transcoders.SerializingTranscoder;
 import net.rubyeye.xmemcached.transcoders.Transcoder;
 import net.rubyeye.xmemcached.utils.Protocol;
+import net.rubyeye.xmemcached.utils.AddrUtil;
 
 import com.google.code.yanf4j.config.Configuration;
 import com.google.code.yanf4j.core.SocketOption;
@@ -177,6 +178,10 @@ public class XMemcachedClientBuilder implements MemcachedClientBuilder {
 
 	private @SuppressWarnings("unchecked")
 	Transcoder transcoder = new SerializingTranscoder();
+
+	public XMemcachedClientBuilder(String addressList) {
+		this(AddrUtil.getAddresses(addressList));
+	}
 
 	public XMemcachedClientBuilder(List<InetSocketAddress> addressList) {
 		if (addressList != null) {
