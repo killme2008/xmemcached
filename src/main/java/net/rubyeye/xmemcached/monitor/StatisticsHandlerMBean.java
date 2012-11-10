@@ -55,18 +55,14 @@ public interface StatisticsHandlerMBean {
 
 	public long getReplaceCount();
 
-	/**
-	 * 是否开启统计
-	 * 
-	 * @return
-	 */
 	public boolean isStatistics();
 
-	/**
-	 * 开启或者关闭统计
-	 * 
-	 * @param statistics
-	 */
 	public void setStatistics(boolean statistics);
+	
+	/**
+	 * Reset the statistics
+	 * @since 1.3.9
+	 */
+	public void resetStats();
 
 }

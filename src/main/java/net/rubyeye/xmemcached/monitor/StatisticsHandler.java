@@ -90,6 +90,12 @@ public class StatisticsHandler implements StatisticsHandlerMBean {
 		buildCounterMap();
 
 	}
+	
+	public void resetStats() {
+		if (this.statistics) {
+			buildCounterMap();
+		}
+	}
 
 	public long getAppendCount() {
 		return this.counterMap.get(CommandType.APPEND).get();
