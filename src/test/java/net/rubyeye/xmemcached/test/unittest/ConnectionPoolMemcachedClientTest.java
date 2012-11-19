@@ -110,6 +110,44 @@ public class ConnectionPoolMemcachedClientTest extends XMemcachedClientTest {
 		client.shutdown();
 
 	}
+	
+	public void testDisableHealSession() throws Exception {
+		MockServer server = new MockServer();
+		server.start();
+		InetSocketAddress serverAddress = server.getServerAddress();
+		XMemcachedClient client = new XMemcachedClient();
+		client.setConnectionPoolSize(5);
+		client.setEnableHeartBeat(false);
+		//disable heal session.
+		client.setEnableHealSession(false);
+		client.addServer(serverAddress);
+		synchronized (this) {
+			while (server.sessionCounter.get() < 5) {
+				this.wait(1000);
+			}
+		}
+		assertEquals(1, client.getAvaliableServers().size());
+		assertEquals(5, client.getConnectionSizeBySocketAddress(serverAddress));
+		assertEquals(5, server.sessionCounter.get());
+
+		// stop mock server,try to heal sessions
+		server.stop();
+
+		Thread.sleep(10000);
+		assertEquals(0, client.getAvaliableServers().size());
+		assertEquals(0, client.getConnectionSizeBySocketAddress(serverAddress));
+		// new server start
+		server = new MockServer();
+		server.start();
+		Thread.sleep(30000);
+		//Still empty.
+		assertEquals(0, client.getAvaliableServers().size());
+		assertEquals(0, client.getConnectionSizeBySocketAddress(serverAddress));
+
+		server.stop();
+		client.shutdown();
+
+	}
 
 	@Override
 	public MemcachedClientBuilder createWeightedBuilder() throws Exception {

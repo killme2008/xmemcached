@@ -78,6 +78,11 @@ public interface MemcachedClient {
 	 * heartbeat action to check if connection is alive.
 	 */
 	public static final int DEFAULT_SESSION_IDLE_TIMEOUT = 5000;
+	
+	/**
+	 * Default heal session interval in milliseconds.
+	 */
+	public static final long DEFAULT_HEAL_SESSION_INTERVAL = 2000;
 
 	int MAX_QUEUED_NOPS = 40000;
 	int DYNAMIC_MAX_QUEUED_NOPS = (int) (MAX_QUEUED_NOPS * (Runtime
@@ -1550,6 +1555,16 @@ public interface MemcachedClient {
 	 *            MILLISECONDS
 	 */
 	public void setHealSessionInterval(long healConnectionInterval);
+	
+	/**
+	 * If the memcached dump or network error cause connection closed,xmemcached
+	 * would try to heal the connection.You can disable this behaviour by using this method:<br/>
+	 * <code> client.setEnableHealSession(false); </code><br/>
+	 * The default value is true.
+	 * @param enableHealSession
+	 * @since 1.3.9
+	 */
+	public void setEnableHealSession(boolean enableHealSession);
 
 	/**
 	 * Return the default heal session interval in milliseconds

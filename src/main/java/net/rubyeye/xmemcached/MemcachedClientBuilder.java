@@ -254,5 +254,28 @@ public interface MemcachedClientBuilder {
 	 * @since 1.3.8
 	 */
 	public void setMaxQueuedNoReplyOperations(int maxQueuedNoReplyOperations);
+	
+	/**
+	 * If the memcached dump or network error cause connection closed,xmemcached
+	 * would try to heal the connection.The interval between reconnections is 2
+	 * seconds by default. You can change that value by this method.
+	 * 
+	 * @since 1.3.9
+	 * @param healConnectionInterval
+	 *            MILLISECONDS
+	 */
+	public void setHealSessionInterval(long healConnectionInterval);
+
+	/**
+	 * If the memcached dump or network error cause connection closed,xmemcached
+	 * would try to heal the connection.You can disable this behaviour by using
+	 * this method:<br/>
+	 * <code> client.setEnableHealSession(false); </code><br/>
+	 * The default value is true.
+	 * 
+	 * @param enableHealSession
+	 * @since 1.3.9
+	 */
+	public void setEnableHealSession(boolean enableHealSession);
 
 }

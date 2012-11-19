@@ -80,6 +80,26 @@ public class XMemcachedClientFactoryBean implements FactoryBean {
 	private KeyProvider keyProvider = DefaultKeyProvider.INSTANCE;
 
 	private int maxQueuedNoReplyOperations = MemcachedClient.DEFAULT_MAX_QUEUED_NOPS;
+	
+	private long healSessionInterval = MemcachedClient.DEFAULT_HEAL_SESSION_INTERVAL;
+
+	private boolean enableHealSession = true;
+
+	public long getHealSessionInterval() {
+		return healSessionInterval;
+	}
+
+	public void setHealSessionInterval(long healSessionInterval) {
+		this.healSessionInterval = healSessionInterval;
+	}
+
+	public boolean isEnableHealSession() {
+		return enableHealSession;
+	}
+
+	public void setEnableHealSession(boolean enableHealSession) {
+		this.enableHealSession = enableHealSession;
+	}
 
 	public long getOpTimeout() {
 		return opTimeout;
@@ -241,6 +261,8 @@ public class XMemcachedClientFactoryBean implements FactoryBean {
 		builder.setKeyProvider(keyProvider);
 		builder.setMaxQueuedNoReplyOperations(this.maxQueuedNoReplyOperations);
 		builder.setName(this.name);
+		builder.setEnableHealSession(this.enableHealSession);
+		builder.setHealSessionInterval(this.healSessionInterval);
 	}
 
 	private int[] getWeightsArray(

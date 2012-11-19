@@ -58,8 +58,9 @@ public interface Connector extends Controller {
 	public void removeSession(Session session);
 
 	public Queue<Session> getSessionByAddress(InetSocketAddress address);
-	
-	public List<Session> getStandbySessionListByMainNodeAddr(InetSocketAddress address);
+
+	public List<Session> getStandbySessionListByMainNodeAddr(
+			InetSocketAddress address);
 
 	public Set<Session> getSessionSet();
 
@@ -75,12 +76,15 @@ public interface Connector extends Controller {
 
 	public void removeReconnectRequest(InetSocketAddress address);
 
+	public void setEnableHealSession(boolean enableHealSession);
+
 	public void addToWatingQueue(ReconnectRequest request);
 
 	@SuppressWarnings("unchecked")
 	public void setSocketOptions(Map<SocketOption, Object> options);
 
-	public Future<Boolean> connect(InetSocketAddressWrapper addressWrapper) throws IOException;
+	public Future<Boolean> connect(InetSocketAddressWrapper addressWrapper)
+			throws IOException;
 
 	public void updateSessions();
 
@@ -92,9 +96,9 @@ public interface Connector extends Controller {
 	public void quitAllSessions();
 
 	public Queue<ReconnectRequest> getReconnectRequestQueue();
-	
+
 	public void setFailureMode(boolean failureMode);
-	
+
 	/**
 	 * Returns the noreply operations flow control manager.
 	 * 

@@ -45,6 +45,7 @@ import net.rubyeye.xmemcached.command.CommandType;
 import net.rubyeye.xmemcached.command.ServerAddressAware;
 import net.rubyeye.xmemcached.command.TextCommandFactory;
 import net.rubyeye.xmemcached.command.binary.BinaryGetMultiCommand;
+import net.rubyeye.xmemcached.exception.MemcachedClientException;
 import net.rubyeye.xmemcached.exception.MemcachedException;
 import net.rubyeye.xmemcached.impl.ArrayMemcachedSessionLocator;
 import net.rubyeye.xmemcached.impl.ClosedMemcachedTCPSession;
@@ -96,7 +97,7 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 	private MemcachedHandler memcachedHandler;
 	protected CommandFactory commandFactory;
 	private long opTimeout = DEFAULT_OP_TIMEOUT;
-	private long connectTimeout = DEFAULT_CONNECT_TIMEOUT; // 杩��瓒��
+	private long connectTimeout = DEFAULT_CONNECT_TIMEOUT; 
 	protected int connectionPoolSize = DEFAULT_CONNECTION_POOL_SIZE;
 	protected int maxQueuedNoReplyOperations = DEFAULT_MAX_QUEUED_NOPS;
 
@@ -200,10 +201,15 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 	}
 
 	public void setHealSessionInterval(long healConnectionInterval) {
+		if (healConnectionInterval <= 0) {
+			throw new IllegalArgumentException("Invalid heal session interval:"
+					+ healConnectionInterval);
+		}
 		if (null != this.connector) {
 			this.connector.setHealSessionInterval(healConnectionInterval);
+		} else {
+			throw new IllegalStateException("The client hasn't been started");
 		}
-
 	}
 
 	public long getHealSessionInterval() {
@@ -2705,6 +2711,14 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 			}
 		}
 		return new KeyIteratorImpl(itemNumberList, this, address);
+	}
+
+	public void setEnableHealSession(boolean enableHealSession) {
+		if (this.connector != null) {
+			this.connector.setEnableHealSession(enableHealSession);
+		} else {
+			throw new IllegalStateException("The client has not been started.");
+		}
 	}
 
 	public void setFailureMode(boolean failureMode) {

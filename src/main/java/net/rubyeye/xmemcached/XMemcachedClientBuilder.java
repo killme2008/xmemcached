@@ -58,8 +58,28 @@ public class XMemcachedClientBuilder implements MemcachedClientBuilder {
 
 	private int maxQueuedNoReplyOperations = MemcachedClient.DEFAULT_MAX_QUEUED_NOPS;
 
+	private long healSessionInterval = MemcachedClient.DEFAULT_HEAL_SESSION_INTERVAL;
+
+	private boolean enableHealSession = true;
+
 	public int getMaxQueuedNoReplyOperations() {
 		return maxQueuedNoReplyOperations;
+	}
+
+	public long getHealSessionInterval() {
+		return healSessionInterval;
+	}
+
+	public void setHealSessionInterval(long healSessionInterval) {
+		this.healSessionInterval = healSessionInterval;
+	}
+
+	public boolean isEnableHealSession() {
+		return enableHealSession;
+	}
+
+	public void setEnableHealSession(boolean enableHealSession) {
+		this.enableHealSession = enableHealSession;
 	}
 
 	/**
@@ -312,6 +332,8 @@ public class XMemcachedClientBuilder implements MemcachedClientBuilder {
 		}
 		memcachedClient.setSanitizeKeys(sanitizeKeys);
 		memcachedClient.setKeyProvider(this.keyProvider);
+		memcachedClient.setHealSessionInterval(this.healSessionInterval);
+		memcachedClient.setEnableHealSession(this.enableHealSession);
 		memcachedClient
 				.setMaxQueuedNoReplyOperations(this.maxQueuedNoReplyOperations);
 		return memcachedClient;

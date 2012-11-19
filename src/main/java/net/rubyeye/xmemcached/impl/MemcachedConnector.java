@@ -74,10 +74,10 @@ public class MemcachedConnector extends SocketChannelController implements
 	private final Set<InetSocketAddress> removedAddrSet = new ConcurrentHashSet<InetSocketAddress>();
 
 	private final MemcachedOptimizer optimiezer;
-	private volatile long healSessionInterval = 2000L;
+	private volatile long healSessionInterval = MemcachedClient.DEFAULT_HEAL_SESSION_INTERVAL;
 	private int connectionPoolSize; // session pool size
 	protected Protocol protocol;
-
+	private volatile boolean enableHealSession = true;
 	private final CommandFactory commandFactory;
 	private volatile boolean failureMode;
 
@@ -105,7 +105,7 @@ public class MemcachedConnector extends SocketChannelController implements
 
 		@Override
 		public void run() {
-			while (MemcachedConnector.this.isStarted()) {
+			while (MemcachedConnector.this.isStarted() && enableHealSession) {
 				ReconnectRequest request = null;
 				try {
 					request = MemcachedConnector.this.waitingQueue.take();
@@ -172,6 +172,14 @@ public class MemcachedConnector extends SocketChannelController implements
 		}
 	}
 
+	public void setEnableHealSession(boolean enableHealSession) {
+		this.enableHealSession = enableHealSession;
+		//wake up session monitor thread.
+		if (sessionMonitor != null && sessionMonitor.isAlive()) {
+			sessionMonitor.interrupt();
+		}
+	}
+
 	public Queue<ReconnectRequest> getReconnectRequestQueue() {
 		return this.waitingQueue;
 	}
@@ -187,7 +195,7 @@ public class MemcachedConnector extends SocketChannelController implements
 	}
 
 	public final void setHealSessionInterval(long healConnectionInterval) {
-		this.healSessionInterval = healConnectionInterval;
+		this.healSessionInterval = healConnectionInterval;		
 	}
 
 	public long getHealSessionInterval() {
@@ -522,6 +530,7 @@ public class MemcachedConnector extends SocketChannelController implements
 		return this.standbySessionMap.get(addr);
 	}
 
+	private final SessionMonitor sessionMonitor = new SessionMonitor();
 	/**
 	 * Inner state listenner,manage session monitor.
 	 * 
@@ -529,7 +538,6 @@ public class MemcachedConnector extends SocketChannelController implements
 	 * 
 	 */
 	class InnerControllerStateListener implements ControllerStateListener {
-		private final SessionMonitor sessionMonitor = new SessionMonitor();
 
 		public void onAllSessionClosed(Controller controller) {
 
@@ -540,7 +548,7 @@ public class MemcachedConnector extends SocketChannelController implements
 		}
 
 		public void onReady(Controller controller) {
-			this.sessionMonitor.start();
+			sessionMonitor.start();
 		}
 
 		public void onStarted(Controller controller) {
@@ -548,7 +556,9 @@ public class MemcachedConnector extends SocketChannelController implements
 		}
 
 		public void onStopped(Controller controller) {
-			this.sessionMonitor.interrupt();
+			if (sessionMonitor.isAlive()) {
+				sessionMonitor.interrupt();
+			}
 		}
 
 	}
