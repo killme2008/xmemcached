@@ -40,12 +40,15 @@ import net.rubyeye.xmemcached.command.OperationStatus;
 import net.rubyeye.xmemcached.command.binary.BaseBinaryCommand;
 import net.rubyeye.xmemcached.command.binary.BinaryGetCommand;
 import net.rubyeye.xmemcached.command.binary.BinaryGetMultiCommand;
+import net.rubyeye.xmemcached.command.binary.BinarySetMultiCommand;
+import net.rubyeye.xmemcached.command.binary.BinaryStoreCommand;
 import net.rubyeye.xmemcached.command.binary.OpCode;
 import net.rubyeye.xmemcached.command.text.TextGetOneCommand;
 import net.rubyeye.xmemcached.monitor.Constants;
 import net.rubyeye.xmemcached.monitor.MemcachedClientNameHolder;
 import net.rubyeye.xmemcached.monitor.XMemcachedMbeanServer;
 import net.rubyeye.xmemcached.utils.ByteUtils;
+import net.rubyeye.xmemcached.utils.OpaqueGenerater;
 import net.rubyeye.xmemcached.utils.Protocol;
 
 import org.slf4j.Logger;
@@ -65,6 +68,7 @@ public class Optimizer implements OptimizerMBean, MemcachedOptimizer {
 	public static final int DEFAULT_MERGE_FACTOR = 50;
 	private int mergeFactor = DEFAULT_MERGE_FACTOR; // default merge factor;
 	private boolean optimiezeGet = true;
+	private boolean optimiezeSet = true;
 	private boolean optimiezeMergeBuffer = true;
 	private static final Logger log = LoggerFactory.getLogger(Optimizer.class);
 	private Protocol protocol = Protocol.Binary;
@@ -120,13 +124,15 @@ public class Optimizer implements OptimizerMBean, MemcachedOptimizer {
 		Command optimiezeCommand = currentCommand;
 		optimiezeCommand = optimiezeGet(writeQueue, executingCmds,
 				optimiezeCommand);
+		optimiezeCommand = optimiezeSet(writeQueue, executingCmds,
+				optimiezeCommand, sendBufferSize);
 		optimiezeCommand = optimiezeMergeBuffer(optimiezeCommand, writeQueue,
 				executingCmds, sendBufferSize);
 		return optimiezeCommand;
 	}
 
 	/**
-	 *merge buffers to fit socket's send buffer size
+	 * merge buffers to fit socket's send buffer size
 	 * 
 	 * @param currentCommand
 	 * @return
@@ -160,11 +166,24 @@ public class Optimizer implements OptimizerMBean, MemcachedOptimizer {
 			final Queue<Command> executingCmds, Command optimiezeCommand) {
 		if (optimiezeCommand.getCommandType() == CommandType.GET_ONE
 				|| optimiezeCommand.getCommandType() == CommandType.GETS_ONE) {
-			// 浼��get���
 			if (optimiezeGet) {
 				optimiezeCommand = mergeGetCommands(optimiezeCommand,
-						writeQueue, executingCmds, optimiezeCommand
-								.getCommandType());
+						writeQueue, executingCmds,
+						optimiezeCommand.getCommandType());
+			}
+		}
+		return optimiezeCommand;
+	}
+
+	public final Command optimiezeSet(final Queue writeQueue,
+			final Queue<Command> executingCmds, Command optimiezeCommand,
+			int sendBufferSize) {
+		if (optimiezeCommand.getCommandType() == CommandType.SET
+				&& !optimiezeCommand.isNoreply() && protocol == Protocol.Binary) {
+			if (optimiezeSet) {
+				optimiezeCommand = mergeSetCommands(optimiezeCommand,
+						writeQueue, executingCmds,
+						optimiezeCommand.getCommandType(), sendBufferSize);
 			}
 		}
 		return optimiezeCommand;
@@ -174,7 +193,7 @@ public class Optimizer implements OptimizerMBean, MemcachedOptimizer {
 	private final Command mergeBuffer(final Command firstCommand,
 			final Queue writeQueue, final Queue<Command> executingCmds,
 			final int sendBufferSize) {
-		Command lastCommand = firstCommand; // ��苟������涓�ommand
+		Command lastCommand = firstCommand;
 		Command nextCmd = (Command) writeQueue.peek();
 		if (nextCmd == null) {
 			return lastCommand;
@@ -203,8 +222,7 @@ public class Optimizer implements OptimizerMBean, MemcachedOptimizer {
 			}
 			// if it is get_one command,try to merge get commands
 			if ((nextCmd.getCommandType() == CommandType.GET_ONE || nextCmd
-					.getCommandType() == CommandType.GETS_ONE)
-					&& optimiezeGet) {
+					.getCommandType() == CommandType.GETS_ONE) && optimiezeGet) {
 				nextCmd = mergeGetCommands(nextCmd, writeQueue, executingCmds,
 						nextCmd.getCommandType());
 			}
@@ -283,9 +301,7 @@ public class Optimizer implements OptimizerMBean, MemcachedOptimizer {
 				newCapacity = minimumCapacity;
 			}
 			char[] copy = new char[newCapacity];
-			System
-					.arraycopy(buf, 0, copy, 0, Math.min(buf.length,
-							newCapacity));
+			System.arraycopy(buf, 0, copy, 0, Math.min(buf.length, newCapacity));
 			buf = copy;
 		}
 
@@ -303,6 +319,79 @@ public class Optimizer implements OptimizerMBean, MemcachedOptimizer {
 		public void finish() {
 			// do nothing
 
+		}
+
+	}
+
+	private static class BinarySetQCollector implements CommandCollector {
+		LinkedList<IoBuffer> bufferList = new LinkedList<IoBuffer>();
+		int totalBytes;
+		BinaryStoreCommand prevCommand;
+		Map<Object, Command> mergeCommands;
+
+		public Object getResult() {
+			byte[] buf = new byte[totalBytes];
+			int offset = 0;
+			for (IoBuffer buffer : bufferList) {
+				byte[] ba = buffer.array();
+				System.arraycopy(ba, 0, buf, offset, ba.length);
+				offset += ba.length;
+			}
+			BinarySetMultiCommand resultCommand = new BinarySetMultiCommand(
+					null, CommandType.SET_MANY, new CountDownLatch(1));
+			resultCommand.setIoBuffer(IoBuffer.wrap(buf));
+			resultCommand.setMergeCommands(mergeCommands);
+			resultCommand.setMergeCount(mergeCommands.size());
+			return resultCommand;
+		}
+
+		public void visit(Command command) {
+
+			// Encode prev command
+			if (prevCommand != null) {
+				// first n-1 send setq command
+				BinaryStoreCommand setqCmd = new BinaryStoreCommand(
+						prevCommand.getKey(), prevCommand.getKeyBytes(),
+						CommandType.SET, null, prevCommand.getExpTime(),
+						prevCommand.getCas(),
+						// set noreply to be true
+						prevCommand.getValue(), true,
+						prevCommand.getTranscoder());
+				// We must set the opaque to get error message.
+				int opaque = OpaqueGenerater.getInstance().getNextValue();
+				setqCmd.setOpaque(opaque);
+				setqCmd.encode();
+				totalBytes += setqCmd.getIoBuffer().remaining();
+				bufferList.add(setqCmd.getIoBuffer());
+				if (mergeCommands == null) {
+					mergeCommands = new HashMap<Object, Command>();
+				}
+				mergeCommands.put(opaque, prevCommand);
+			}
+			prevCommand = (BinaryStoreCommand) command;
+		}
+
+		public void finish() {
+			if (mergeCommands == null) {
+				return;
+			}
+			// prev command is the last command,last command must be set,ensure
+			// setq commands sending response back
+			BinaryStoreCommand setqCmd = new BinaryStoreCommand(
+					prevCommand.getKey(), prevCommand.getKeyBytes(),
+					CommandType.SET, null, prevCommand.getExpTime(),
+					prevCommand.getCas(),
+					// set noreply to be false.
+					prevCommand.getValue(), false, prevCommand.getTranscoder());
+			// We must set the opaque to get error message.
+			int opaque = OpaqueGenerater.getInstance().getNextValue();
+			setqCmd.setOpaque(opaque);
+			setqCmd.encode();
+			bufferList.add(setqCmd.getIoBuffer());
+			totalBytes += setqCmd.getIoBuffer().remaining();
+			if (mergeCommands != null) {
+				mergeCommands.put(opaque, prevCommand);
+			}
 		}
 
 	}
@@ -342,7 +431,7 @@ public class Optimizer implements OptimizerMBean, MemcachedOptimizer {
 
 		public void finish() {
 			// prev command is the last command,last command must be getk,ensure
-			// getq commands send response back
+			// getq commands sending response back
 			Command lastGetKCommand = new BinaryGetCommand(
 					prevCommand.getKey(), prevCommand.getKeyBytes(),
 					CommandType.GET_ONE, new CountDownLatch(1), OpCode.GET_KEY,
@@ -360,7 +449,7 @@ public class Optimizer implements OptimizerMBean, MemcachedOptimizer {
 			CommandType expectedCommandType) {
 		Map<Object, Command> mergeCommands = null;
 		int mergeCount = 1;
-		final CommandCollector commandCollector = creatCommandCollector();
+		final CommandCollector commandCollector = createGetCommandCollector();
 		currentCmd.setStatus(OperationStatus.WRITING);
 
 		commandCollector.visit(currentCmd);
@@ -402,10 +491,10 @@ public class Optimizer implements OptimizerMBean, MemcachedOptimizer {
 				break;
 			}
 		}
-		commandCollector.finish();
 		if (mergeCount == 1) {
 			return currentCmd;
 		} else {
+			commandCollector.finish();
 			if (log.isDebugEnabled()) {
 				log.debug("Merge optimieze:merge " + mergeCount
 						+ " get commands");
@@ -415,14 +504,57 @@ public class Optimizer implements OptimizerMBean, MemcachedOptimizer {
 		}
 	}
 
-	private CommandCollector creatCommandCollector() {
-		CommandCollector commandCollector = null;
-		if (protocol == Protocol.Text) {
-			commandCollector = new KeyStringCollector();
-		} else {
-			commandCollector = new BinaryGetQCollector();
+	private final Command mergeSetCommands(final Command currentCmd,
+			final Queue writeQueue, final Queue<Command> executingCmds,
+			CommandType expectedCommandType, int sendBufferSize) {
+		int mergeCount = 1;
+		final BinarySetQCollector commandCollector = new BinarySetQCollector();
+		currentCmd.setStatus(OperationStatus.WRITING);
+
+		commandCollector.visit(currentCmd);
+		while (mergeCount < this.mergeFactor
+				&& commandCollector.totalBytes <= sendBufferSize) {
+			Command nextCmd = (Command) writeQueue.peek();
+			if (nextCmd == null) {
+				break;
+			}
+			if (nextCmd.isCancel()) {
+				writeQueue.remove();
+				continue;
+			}
+			if (nextCmd.getCommandType() == expectedCommandType
+					&& !nextCmd.isNoreply()) {
+				if (log.isDebugEnabled()) {
+					log.debug("Merge set command:" + nextCmd.toString());
+				}
+				nextCmd.setStatus(OperationStatus.WRITING);
+				writeQueue.remove();
+
+				commandCollector.visit(nextCmd);
+
+				mergeCount++;
+			} else {
+				break;
+			}
 		}
-		return commandCollector;
+		if (mergeCount == 1) {
+			return currentCmd;
+		} else {
+			commandCollector.finish();
+			// if (log.isDebugEnabled()) {
+			log.debug("Merge optimieze:merge " + mergeCount + " get commands");
+			// }
+			return (Command) commandCollector.getResult();
+		}
+	}
+
+	private CommandCollector createGetCommandCollector() {
+		switch (protocol) {
+		case Binary:
+			return new BinaryGetQCollector();
+		default:
+			return new KeyStringCollector();
+		}
 	}
 
 	private Command newMergedCommand(final Map<Object, Command> mergeCommands,

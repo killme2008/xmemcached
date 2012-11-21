@@ -23,8 +23,11 @@
 package net.rubyeye.xmemcached.command.binary;
 
 import java.nio.ByteBuffer;
+import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
+import net.rubyeye.xmemcached.command.AssocCommandAware;
+import net.rubyeye.xmemcached.command.Command;
 import net.rubyeye.xmemcached.command.CommandType;
 import net.rubyeye.xmemcached.transcoders.Transcoder;
 
@@ -34,7 +37,6 @@ import net.rubyeye.xmemcached.transcoders.Transcoder;
  * @author dennis
  * 
  */
-@SuppressWarnings("unchecked")
 public class BinaryStoreCommand extends BaseBinaryCommand {
 
 	public BinaryStoreCommand(String key, byte[] keyBytes, CommandType cmdType,
@@ -52,7 +54,9 @@ public class BinaryStoreCommand extends BaseBinaryCommand {
 		case ADD:
 			this.opCode = noreply ? OpCode.ADD_QUIETLY : OpCode.ADD;
 			break;
-
+		case SET_MANY:
+			//ignore
+			break;
 		default:
 			throw new IllegalArgumentException(
 					"Unknow cmd type for storage commands:" + cmdType);

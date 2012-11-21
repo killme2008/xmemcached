@@ -4,7 +4,11 @@ import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import net.rubyeye.xmemcached.MemcachedClient;
+import net.rubyeye.xmemcached.MemcachedClientBuilder;
 import net.rubyeye.xmemcached.XMemcachedClient;
+import net.rubyeye.xmemcached.XMemcachedClientBuilder;
+import net.rubyeye.xmemcached.command.BinaryCommandFactory;
+import net.rubyeye.xmemcached.test.unittest.commands.binary.BinaryCommandAllTests;
 import net.rubyeye.xmemcached.utils.AddrUtil;
 
 public class MemcachedClientPressureTest {
@@ -97,8 +101,10 @@ public class MemcachedClientPressureTest {
 		String servers = args[0];
 		final AtomicInteger failure = new AtomicInteger();
 		final AtomicInteger success = new AtomicInteger();
-		MemcachedClient client = new XMemcachedClient(
+		MemcachedClientBuilder builder = new XMemcachedClientBuilder(
 				AddrUtil.getAddresses(servers));
+		builder.setCommandFactory(new BinaryCommandFactory());
+		MemcachedClient client = builder.build();
 		ClockWatch watch = new ClockWatch();
 		CyclicBarrier barrier = new CyclicBarrier(threads + 1, watch);
 		for (int i = 0; i < threads; i++) {
@@ -125,7 +131,9 @@ public class MemcachedClientPressureTest {
 		long secs = watch.getDurationInMillis() / 1000;
 		int total = 4 * repeat * threads;
 		long tps = total / secs;
+		client.shutdown();
 		System.out.println("duration:" + secs + " seconds,tps:" + tps
 				+ " op/seconds,total:" + total + " ops");
+
 	}
 }

@@ -21,7 +21,7 @@ public class TooLongKeyChecker extends AbstractChecker {
 			assertEquals(
 					"Key is too long (maxlen = "
 							+ (this.client.getProtocol() == Protocol.Text ? 250
-									: 65535) + ")", e.getMessage());
+									: 250) + ")", e.getMessage());
 		}
 
 	}

@@ -82,6 +82,14 @@ public abstract class BaseBinaryCommand extends Command {
 		return this.cas;
 	}
 
+	public int getOpaque() {
+		return opaque;
+	}
+
+	public void setOpaque(int opaque) {
+		this.opaque = opaque;
+	}
+
 	public final void setCas(long cas) {
 		this.cas = cas;
 	}

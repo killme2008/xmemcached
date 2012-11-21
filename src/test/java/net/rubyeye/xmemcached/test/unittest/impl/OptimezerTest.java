@@ -50,6 +50,11 @@ public class OptimezerTest extends TestCase {
 		this.currentCmd = (Command) this.writeQueue.poll();
 		this.currentCmd.encode();
 	}
+	
+	public void testOptimiezeSet() {
+
+		//TODO
+	}
 
 	public void testOptimiezeGet() {
 
