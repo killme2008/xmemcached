@@ -68,8 +68,10 @@ import com.google.code.yanf4j.util.SystemUtils;
 public class MemcachedConnector extends SocketChannelController implements
 		Connector {
 
-	private final DelayQueue<ReconnectRequest> waitingQueue = new DelayQueue<ReconnectRequest>();
-	private BufferAllocator bufferAllocator;
+    public static final String XMEMCACHED_SELECTOR_POOL_SIZE = "xmemcached.selector.pool.size";
+    public static final int DEFAULT_SELECTOR_POOL_SIZE = System.getProperty(XMEMCACHED_SELECTOR_POOL_SIZE) == null ? 2 * Runtime.getRuntime().availableProcessors() : Integer.parseInt(System.getProperty(XMEMCACHED_SELECTOR_POOL_SIZE));
+    private final DelayQueue<ReconnectRequest> waitingQueue = new DelayQueue<ReconnectRequest>();
+    private BufferAllocator bufferAllocator;
 
 	private final Set<InetSocketAddress> removedAddrSet = new ConcurrentHashSet<InetSocketAddress>();
 
@@ -593,7 +595,7 @@ public class MemcachedConnector extends SocketChannelController implements
 		this.soLingerOn = true;
 		this.commandFactory = commandFactory;
 		this.flowControl = new FlowControl(maxQueuedNoReplyOperations);
-		this.setSelectorPoolSize(2 * Runtime.getRuntime().availableProcessors());
+		this.setSelectorPoolSize(DEFAULT_SELECTOR_POOL_SIZE);
 		// setDispatchMessageThreadPoolSize(Runtime.getRuntime().
 		// availableProcessors());
 	}

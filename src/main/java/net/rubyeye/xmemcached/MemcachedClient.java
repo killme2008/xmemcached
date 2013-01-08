@@ -107,8 +107,7 @@ public interface MemcachedClient {
 
 	/**
 	 * Get the connect timeout
-	 * 
-	 * @param connectTimeout
+	 *
 	 */
 	public long getConnectTimeout();
 
