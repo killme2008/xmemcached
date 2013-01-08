@@ -541,9 +541,10 @@ public class Optimizer implements OptimizerMBean, MemcachedOptimizer {
 			return currentCmd;
 		} else {
 			commandCollector.finish();
-			// if (log.isDebugEnabled()) {
-			log.debug("Merge optimieze:merge " + mergeCount + " get commands");
-			// }
+			if (log.isDebugEnabled()) {
+				log.debug("Merge optimieze:merge " + mergeCount
+						+ " get commands");
+			}
 			return (Command) commandCollector.getResult();
 		}
 	}

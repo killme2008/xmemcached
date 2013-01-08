@@ -62,6 +62,7 @@ public abstract class Command implements WriteMessage {
 	protected volatile boolean cancel;
 	protected volatile OperationStatus status;
 	protected int mergeCount = -1;
+	private int copiedMergeCount = mergeCount;
 	@SuppressWarnings("unchecked")
 	protected Transcoder transcoder;
 	protected boolean noreply;
@@ -95,6 +96,11 @@ public abstract class Command implements WriteMessage {
 
 	public void setMergeCount(final int mergetCount) {
 		mergeCount = mergetCount;
+		this.copiedMergeCount = mergetCount;
+	}
+
+	public int getCopiedMergeCount() {
+		return copiedMergeCount;
 	}
 
 	public Command() {
@@ -228,12 +234,13 @@ public abstract class Command implements WriteMessage {
 
 	protected final void decodeError(String msg, Throwable e) {
 		throw new MemcachedDecodeException(
-				msg == null ? "decode error,session will be closed,key="+this.key : msg, e);
+				msg == null ? "decode error,session will be closed,key="
+						+ this.key : msg, e);
 	}
 
 	protected final void decodeError() {
 		throw new MemcachedDecodeException(
-				"decode error,session will be closed,key="+this.key);
+				"decode error,session will be closed,key=" + this.key);
 	}
 
 	protected final boolean decodeError(String line) {
@@ -242,7 +249,8 @@ public abstract class Command implements WriteMessage {
 			String errorMsg = splits.length >= 2 ? splits[1]
 					: "Unknow command " + getCommandType();
 			setException(new UnknownCommandException(
-					"Response error,error message:" + errorMsg+",key="+this.key));
+					"Response error,error message:" + errorMsg + ",key="
+							+ this.key));
 			countDownLatch();
 			return true;
 		} else if (line.startsWith("CLIENT_ERROR")) {
@@ -257,7 +265,8 @@ public abstract class Command implements WriteMessage {
 			return true;
 		} else {
 			throw new MemcachedDecodeException(
-					"Decode error,session will be closed,key="+this.key+",server returns=" + line);
+					"Decode error,session will be closed,key=" + this.key
+							+ ",server returns=" + line);
 		}
 
 	}
@@ -274,7 +283,7 @@ public abstract class Command implements WriteMessage {
 	private String getErrorMsg(String line, String defaultMsg) {
 		int index = line.indexOf(" ");
 		String errorMsg = index > 0 ? line.substring(index + 1) : defaultMsg;
-		errorMsg+=",key="+this.key;
+		errorMsg += ",key=" + this.key;
 		return errorMsg;
 	}
 

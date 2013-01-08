@@ -11,6 +11,7 @@
  */
 package net.rubyeye.xmemcached.impl;
 
+import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -28,12 +29,15 @@ import net.rubyeye.xmemcached.command.CommandType;
 import net.rubyeye.xmemcached.command.MapReturnValueAware;
 import net.rubyeye.xmemcached.command.OperationStatus;
 import net.rubyeye.xmemcached.command.binary.BinaryGetCommand;
+import net.rubyeye.xmemcached.command.binary.BinaryGetMultiCommand;
 import net.rubyeye.xmemcached.command.binary.BinaryVersionCommand;
+import net.rubyeye.xmemcached.command.text.TextGetMultiCommand;
 import net.rubyeye.xmemcached.command.text.TextGetOneCommand;
 import net.rubyeye.xmemcached.command.text.TextVersionCommand;
 import net.rubyeye.xmemcached.monitor.StatisticsHandler;
 import net.rubyeye.xmemcached.networking.MemcachedSession;
 import net.rubyeye.xmemcached.networking.MemcachedSessionConnectListener;
+import net.rubyeye.xmemcached.transcoders.CachedData;
 import net.rubyeye.xmemcached.utils.InetSocketAddressWrapper;
 import net.rubyeye.xmemcached.utils.Protocol;
 
@@ -71,12 +75,23 @@ public class MemcachedHandler extends HandlerAdapter {
 	public final void onMessageReceived(final Session session, final Object msg) {
 		Command command = (Command) msg;
 		if (this.statisticsHandler.isStatistics()) {
-			if (command.getMergeCount() > 0) {
-				int size = ((MapReturnValueAware) command).getReturnValues()
+			if (command.getCopiedMergeCount() > 0
+					&& command instanceof MapReturnValueAware) {
+				Map<String, CachedData> returnValues = ((MapReturnValueAware) command).getReturnValues();
+				int exists = 0;
+				for(CachedData data:returnValues.values()){
+					if(data!=null){
+						exists++;
+					}
+				}
+				int size = returnValues
 						.size();
+				if(exists!=size){
+					System.out.println("fuck");
+				}
 				this.statisticsHandler.statistics(CommandType.GET_HIT, size);
 				this.statisticsHandler.statistics(CommandType.GET_MISS,
-						command.getMergeCount() - size);
+						command.getCopiedMergeCount() - size);
 			} else if (command instanceof TextGetOneCommand
 					|| command instanceof BinaryGetCommand) {
 				if (command.getResult() != null) {

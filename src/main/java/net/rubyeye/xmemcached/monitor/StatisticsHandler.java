@@ -54,6 +54,7 @@ public class StatisticsHandler implements StatisticsHandlerMBean {
 			Map<CommandType, AtomicLong> map = new HashMap<CommandType, AtomicLong>();
 			map.put(CommandType.APPEND, new AtomicLong());
 			map.put(CommandType.SET, new AtomicLong());
+			map.put(CommandType.SET_MANY, new AtomicLong());
 			map.put(CommandType.PREPEND, new AtomicLong());
 			map.put(CommandType.CAS, new AtomicLong());
 			map.put(CommandType.ADD, new AtomicLong());
@@ -90,7 +91,7 @@ public class StatisticsHandler implements StatisticsHandlerMBean {
 		buildCounterMap();
 
 	}
-	
+
 	public void resetStats() {
 		if (this.statistics) {
 			buildCounterMap();
@@ -138,7 +139,8 @@ public class StatisticsHandler implements StatisticsHandlerMBean {
 	}
 
 	public long getSetCount() {
-		return this.counterMap.get(CommandType.SET).get();
+		return this.counterMap.get(CommandType.SET).get()
+				+ this.counterMap.get(CommandType.SET_MANY).get();
 	}
 
 	public long getAddCount() {
