@@ -1398,17 +1398,21 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 			final Transcoder<T> transcoder, final long timeout)
 			throws TimeoutException, InterruptedException, MemcachedException {
 		key = this.preProcessKey(key);
-		byte[] keyBytes = this.checkStoreArguments(key, exp, value);
-		return this.sendStoreCommand(this.commandFactory.createAddCommand(key,
-				keyBytes, exp, value, false, transcoder), timeout);
+        return add0(key, exp, value, transcoder, timeout);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.rubyeye.xmemcached.MemcachedClient#add(java.lang.String, int,
-	 * java.lang.Object)
-	 */
+    private <T> boolean add0(String key, int exp, T value, Transcoder<T> transcoder, long timeout) throws InterruptedException, TimeoutException, MemcachedException {
+        byte[] keyBytes = this.checkStoreArguments(key, exp, value);
+        return this.sendStoreCommand(this.commandFactory.createAddCommand(key,
+                keyBytes, exp, value, false, transcoder), timeout);
+    }
+
+    /*
+     * (non-Javadoc)
+     *
+     * @see net.rubyeye.xmemcached.MemcachedClient#add(java.lang.String, int,
+     * java.lang.Object)
+     */
 	public final boolean add(final String key, final int exp, final Object value)
 			throws TimeoutException, InterruptedException, MemcachedException {
 		return this.add(key, exp, value, this.opTimeout);
@@ -2481,7 +2485,7 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 			final Object result = command.getResult();
 			if (result instanceof String) {
 				if (((String) result).equals("NOT_FOUND")) {
-					if (this.add(key, exp, String.valueOf(initValue),
+					if (this.add0(key, exp, String.valueOf(initValue),transcoder,
 							this.opTimeout)) {
 						return initValue;
 					} else {
