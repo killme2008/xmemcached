@@ -27,6 +27,7 @@ import java.util.concurrent.CountDownLatch;
 
 import net.rubyeye.xmemcached.command.Command;
 import net.rubyeye.xmemcached.command.CommandType;
+import net.rubyeye.xmemcached.command.StoreCommand;
 import net.rubyeye.xmemcached.impl.MemcachedTCPSession;
 import net.rubyeye.xmemcached.monitor.Constants;
 import net.rubyeye.xmemcached.transcoders.CachedData;
@@ -41,7 +42,7 @@ import com.google.code.yanf4j.buffer.IoBuffer;
  * @author dennis
  * 
  */
-public class TextStoreCommand extends Command {
+public class TextStoreCommand extends Command implements StoreCommand{
 	protected int expTime;
 	protected long cas;
 	protected Object value;

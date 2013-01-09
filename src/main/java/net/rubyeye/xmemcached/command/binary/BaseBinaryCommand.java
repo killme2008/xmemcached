@@ -27,6 +27,7 @@ import java.util.concurrent.CountDownLatch;
 
 import net.rubyeye.xmemcached.command.Command;
 import net.rubyeye.xmemcached.command.CommandType;
+import net.rubyeye.xmemcached.command.StoreCommand;
 import net.rubyeye.xmemcached.exception.MemcachedDecodeException;
 import net.rubyeye.xmemcached.exception.MemcachedServerException;
 import net.rubyeye.xmemcached.exception.UnknownCommandException;
@@ -44,7 +45,7 @@ import com.google.code.yanf4j.buffer.IoBuffer;
  * @author dennis
  * 
  */
-public abstract class BaseBinaryCommand extends Command {
+public abstract class BaseBinaryCommand extends Command implements StoreCommand {
 	static final short DEFAULT_VBUCKET_ID = 0;
 	protected int expTime;
 	protected long cas;

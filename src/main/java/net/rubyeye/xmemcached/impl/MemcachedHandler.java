@@ -28,6 +28,7 @@ import net.rubyeye.xmemcached.command.Command;
 import net.rubyeye.xmemcached.command.CommandType;
 import net.rubyeye.xmemcached.command.MapReturnValueAware;
 import net.rubyeye.xmemcached.command.OperationStatus;
+import net.rubyeye.xmemcached.command.StoreCommand;
 import net.rubyeye.xmemcached.command.binary.BinaryGetCommand;
 import net.rubyeye.xmemcached.command.binary.BinaryGetMultiCommand;
 import net.rubyeye.xmemcached.command.binary.BinaryVersionCommand;
@@ -44,6 +45,7 @@ import net.rubyeye.xmemcached.utils.Protocol;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.code.yanf4j.buffer.IoBuffer;
 import com.google.code.yanf4j.core.Session;
 import com.google.code.yanf4j.core.impl.AbstractSession;
 import com.google.code.yanf4j.core.impl.HandlerAdapter;
@@ -106,6 +108,8 @@ public class MemcachedHandler extends HandlerAdapter {
 		this.enableHeartBeat = enableHeartBeat;
 	}
 
+	private static final IoBuffer EMPTY = IoBuffer.allocate(0);
+
 	/**
 	 * put command which have been sent to queue
 	 */
@@ -116,6 +120,17 @@ public class MemcachedHandler extends HandlerAdapter {
 		if (!command.isNoreply()
 				|| this.client.getProtocol() == Protocol.Binary) {
 			((MemcachedTCPSession) session).addCommand(command);
+		}
+		// After message sent,we can set the buffer to be null for gc friendly.
+
+		command.setIoBuffer(EMPTY);
+		switch (command.getCommandType()) {
+		case SET:
+		case SET_MANY:
+			// After message sent,we can set the value to be null for gc
+			// friendly.
+			((StoreCommand) command).setValue(null);
+			break;
 		}
 	}
 
