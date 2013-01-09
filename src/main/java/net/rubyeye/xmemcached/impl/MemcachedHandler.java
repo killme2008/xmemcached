@@ -79,16 +79,7 @@ public class MemcachedHandler extends HandlerAdapter {
 					&& command instanceof MapReturnValueAware) {
 				Map<String, CachedData> returnValues = ((MapReturnValueAware) command)
 						.getReturnValues();
-				int exists = 0;
-				for (CachedData data : returnValues.values()) {
-					if (data != null) {
-						exists++;
-					}
-				}
 				int size = returnValues.size();
-				if (exists != size) {
-					System.out.println("fuck");
-				}
 				this.statisticsHandler.statistics(CommandType.GET_HIT, size);
 				this.statisticsHandler.statistics(CommandType.GET_MISS,
 						command.getCopiedMergeCount() - size);
