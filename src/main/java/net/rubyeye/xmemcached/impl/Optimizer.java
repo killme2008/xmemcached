@@ -375,8 +375,8 @@ public class Optimizer implements OptimizerMBean, MemcachedOptimizer {
 			if (mergeCommands == null) {
 				return;
 			}
-			// prev command is the last command,last command must be set,ensure
-			// setq commands sending response back
+			// prevCommand is the last command,last command must be a SET command,ensure
+			// previous SETQ commands sending response back
 			BinaryStoreCommand setqCmd = new BinaryStoreCommand(
 					prevCommand.getKey(), prevCommand.getKeyBytes(),
 					CommandType.SET, null, prevCommand.getExpTime(),

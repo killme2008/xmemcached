@@ -77,16 +77,16 @@ public class MemcachedHandler extends HandlerAdapter {
 		if (this.statisticsHandler.isStatistics()) {
 			if (command.getCopiedMergeCount() > 0
 					&& command instanceof MapReturnValueAware) {
-				Map<String, CachedData> returnValues = ((MapReturnValueAware) command).getReturnValues();
+				Map<String, CachedData> returnValues = ((MapReturnValueAware) command)
+						.getReturnValues();
 				int exists = 0;
-				for(CachedData data:returnValues.values()){
-					if(data!=null){
+				for (CachedData data : returnValues.values()) {
+					if (data != null) {
 						exists++;
 					}
 				}
-				int size = returnValues
-						.size();
-				if(exists!=size){
+				int size = returnValues.size();
+				if (exists != size) {
 					System.out.println("fuck");
 				}
 				this.statisticsHandler.statistics(CommandType.GET_HIT, size);
@@ -100,7 +100,11 @@ public class MemcachedHandler extends HandlerAdapter {
 					this.statisticsHandler.statistics(CommandType.GET_MISS);
 				}
 			} else {
-				this.statisticsHandler.statistics(command.getCommandType());
+				if (command.getCopiedMergeCount() > 0) {
+					this.statisticsHandler.statistics(command.getCommandType(),
+							command.getCopiedMergeCount());
+				} else
+					this.statisticsHandler.statistics(command.getCommandType());
 			}
 		}
 	}
