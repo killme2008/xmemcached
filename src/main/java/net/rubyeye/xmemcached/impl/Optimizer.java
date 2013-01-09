@@ -178,13 +178,12 @@ public class Optimizer implements OptimizerMBean, MemcachedOptimizer {
 	public final Command optimiezeSet(final Queue writeQueue,
 			final Queue<Command> executingCmds, Command optimiezeCommand,
 			int sendBufferSize) {
-		if (optimiezeCommand.getCommandType() == CommandType.SET
+		if (optimiezeSet
+				&& optimiezeCommand.getCommandType() == CommandType.SET
 				&& !optimiezeCommand.isNoreply() && protocol == Protocol.Binary) {
-			if (optimiezeSet) {
-				optimiezeCommand = mergeSetCommands(optimiezeCommand,
-						writeQueue, executingCmds,
-						optimiezeCommand.getCommandType(), sendBufferSize);
-			}
+			optimiezeCommand = mergeSetCommands(optimiezeCommand, writeQueue,
+					executingCmds, optimiezeCommand.getCommandType(),
+					sendBufferSize);
 		}
 		return optimiezeCommand;
 	}
@@ -375,7 +374,8 @@ public class Optimizer implements OptimizerMBean, MemcachedOptimizer {
 			if (mergeCommands == null) {
 				return;
 			}
-			// prevCommand is the last command,last command must be a SET command,ensure
+			// prevCommand is the last command,last command must be a SET
+			// command,ensure
 			// previous SETQ commands sending response back
 			BinaryStoreCommand setqCmd = new BinaryStoreCommand(
 					prevCommand.getKey(), prevCommand.getKeyBytes(),
@@ -510,10 +510,9 @@ public class Optimizer implements OptimizerMBean, MemcachedOptimizer {
 		int mergeCount = 1;
 		final BinarySetQCollector commandCollector = new BinarySetQCollector();
 		currentCmd.setStatus(OperationStatus.WRITING);
-
+		int totalBytes = currentCmd.getIoBuffer().remaining();
 		commandCollector.visit(currentCmd);
-		while (mergeCount < this.mergeFactor
-				&& commandCollector.totalBytes <= sendBufferSize) {
+		while (mergeCount < this.mergeFactor && totalBytes <= sendBufferSize) {
 			Command nextCmd = (Command) writeQueue.peek();
 			if (nextCmd == null) {
 				break;
@@ -536,6 +535,7 @@ public class Optimizer implements OptimizerMBean, MemcachedOptimizer {
 			} else {
 				break;
 			}
+			totalBytes += nextCmd.getIoBuffer().remaining();
 		}
 		if (mergeCount == 1) {
 			return currentCmd;

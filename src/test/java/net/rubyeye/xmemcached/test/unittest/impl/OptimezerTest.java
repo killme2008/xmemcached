@@ -7,9 +7,11 @@ import java.util.concurrent.BlockingQueue;
 import junit.framework.TestCase;
 import net.rubyeye.xmemcached.CommandFactory;
 import net.rubyeye.xmemcached.buffer.SimpleBufferAllocator;
+import net.rubyeye.xmemcached.command.BinaryCommandFactory;
 import net.rubyeye.xmemcached.command.Command;
 import net.rubyeye.xmemcached.command.CommandType;
 import net.rubyeye.xmemcached.command.TextCommandFactory;
+import net.rubyeye.xmemcached.command.binary.BinarySetMultiCommand;
 import net.rubyeye.xmemcached.command.text.TextGetOneCommand;
 import net.rubyeye.xmemcached.impl.Optimizer;
 import net.rubyeye.xmemcached.transcoders.CachedData;
@@ -40,8 +42,8 @@ public class OptimezerTest extends TestCase {
 		this.writeQueue = new LinkedTransferQueue<Command>();
 		this.executingCmds = new LinkedTransferQueue<Command>();
 		for (int i = 0; i < 10; i++) {
-			Command cmd = this.commandFactory.createGetCommand(String
-					.valueOf(i), String.valueOf(i).getBytes(),
+			Command cmd = this.commandFactory.createGetCommand(
+					String.valueOf(i), String.valueOf(i).getBytes(),
 					CommandType.GET_ONE, null);
 			cmd.encode();
 			this.writeQueue.add(cmd);
@@ -50,10 +52,54 @@ public class OptimezerTest extends TestCase {
 		this.currentCmd = (Command) this.writeQueue.poll();
 		this.currentCmd.encode();
 	}
-	
-	public void testOptimiezeSet() {
 
-		//TODO
+	public void testOptimiezeSetLimitBuffer() {
+		this.optimiezer = new Optimizer(Protocol.Binary);
+		this.commandFactory = new BinaryCommandFactory();
+		this.writeQueue = new LinkedTransferQueue<Command>();
+		this.executingCmds = new LinkedTransferQueue<Command>();
+		SerializingTranscoder transcoder = new SerializingTranscoder();
+		int oneBufferSize = 0;
+		for (int i = 0; i < 10; i++) {
+			Command cmd = this.commandFactory.createSetCommand(
+					String.valueOf(i), String.valueOf(i).getBytes(), 0, i,
+					false, transcoder);
+			cmd.encode();
+			this.writeQueue.add(cmd);
+			oneBufferSize = cmd.getIoBuffer().remaining();
+			cmd.setWriteFuture(new FutureImpl<Boolean>());
+		}
+		this.currentCmd = (Command) this.writeQueue.poll();
+		this.currentCmd.encode();
+
+		int limit = 100;
+		BinarySetMultiCommand optimiezedCommand = (BinarySetMultiCommand) this.optimiezer
+				.optimiezeSet(writeQueue, executingCmds, this.currentCmd, limit);
+		assertEquals(optimiezedCommand.getMergeCount(),
+				Math.round((double) limit / oneBufferSize));
+	}
+
+	public void testOptimiezeSetAllBuffers() {
+		this.optimiezer = new Optimizer(Protocol.Binary);
+		this.commandFactory = new BinaryCommandFactory();
+		this.writeQueue = new LinkedTransferQueue<Command>();
+		this.executingCmds = new LinkedTransferQueue<Command>();
+		SerializingTranscoder transcoder = new SerializingTranscoder();
+		for (int i = 0; i < 10; i++) {
+			Command cmd = this.commandFactory.createSetCommand(
+					String.valueOf(i), String.valueOf(i).getBytes(), 0, i,
+					false, transcoder);
+			cmd.encode();
+			this.writeQueue.add(cmd);
+			cmd.setWriteFuture(new FutureImpl<Boolean>());
+		}
+		this.currentCmd = (Command) this.writeQueue.poll();
+		this.currentCmd.encode();
+
+		BinarySetMultiCommand optimiezedCommand = (BinarySetMultiCommand) this.optimiezer
+				.optimiezeSet(writeQueue, executingCmds, this.currentCmd,
+						Integer.MAX_VALUE);
+		assertEquals(optimiezedCommand.getMergeCount(), 10);
 	}
 
 	public void testOptimiezeGet() {
@@ -76,8 +122,8 @@ public class OptimezerTest extends TestCase {
 		this.writeQueue.clear();
 		Queue<Command> localQueue = new SimpleQueue<Command>();
 		for (int i = 0; i < 10; i++) {
-			Command cmd = this.commandFactory.createGetCommand(String
-					.valueOf(0), String.valueOf(0).getBytes(),
+			Command cmd = this.commandFactory.createGetCommand(
+					String.valueOf(0), String.valueOf(0).getBytes(),
 					CommandType.GET_ONE, null);
 			cmd.encode();
 			this.writeQueue.add(cmd);
@@ -96,17 +142,17 @@ public class OptimezerTest extends TestCase {
 		assertEquals(11, optimiezeCommand.getMergeCount());
 		assertEquals("get 0\r\n", new String(optimiezeCommand.getIoBuffer()
 				.buf().array()));
-		optimiezeCommand.decode(null, ByteBuffer.wrap("VALUE 0 0 2\r\n10\r\n"
-				.getBytes()));
+		optimiezeCommand.decode(null,
+				ByteBuffer.wrap("VALUE 0 0 2\r\n10\r\n".getBytes()));
 
 		assertEquals(0, this.currentCmd.getLatch().getCount());
 		Transcoder transcoder = new SerializingTranscoder();
-		assertEquals("10", transcoder.decode((CachedData) this.currentCmd
-				.getResult()));
+		assertEquals("10",
+				transcoder.decode((CachedData) this.currentCmd.getResult()));
 		for (Command cmd : localQueue) {
 			assertEquals(0, cmd.getLatch().getCount());
-			assertEquals("10", transcoder.decode((CachedData) this.currentCmd
-					.getResult()));
+			assertEquals("10",
+					transcoder.decode((CachedData) this.currentCmd.getResult()));
 		}
 		assertEquals(0, optimiezeCommand.getMergeCount());
 	}
@@ -162,16 +208,16 @@ public class OptimezerTest extends TestCase {
 		this.writeQueue.clear();
 		// send five get operation,include current command
 		for (int i = 0; i < 5; i++) {
-			Command cmd = this.commandFactory.createGetCommand(String
-					.valueOf(i), String.valueOf(i).getBytes(),
+			Command cmd = this.commandFactory.createGetCommand(
+					String.valueOf(i), String.valueOf(i).getBytes(),
 					CommandType.GET_ONE, null);
 			this.writeQueue.add(cmd);
 			cmd.setWriteFuture(new FutureImpl<Boolean>());
 		}
 		// send five delete operation
 		for (int i = 5; i < 10; i++) {
-			Command cmd = this.commandFactory.createDeleteCommand(String
-					.valueOf(i), String.valueOf(i).getBytes(), 0, false);
+			Command cmd = this.commandFactory.createDeleteCommand(
+					String.valueOf(i), String.valueOf(i).getBytes(), 0, false);
 			this.writeQueue.add(cmd);
 			cmd.setWriteFuture(new FutureImpl<Boolean>());
 		}
