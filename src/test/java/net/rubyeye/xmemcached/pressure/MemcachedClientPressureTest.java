@@ -103,7 +103,7 @@ public class MemcachedClientPressureTest {
 		final AtomicInteger success = new AtomicInteger();
 		MemcachedClientBuilder builder = new XMemcachedClientBuilder(
 				AddrUtil.getAddresses(servers));
-		builder.setCommandFactory(new BinaryCommandFactory());
+		//builder.setCommandFactory(new BinaryCommandFactory());
 		MemcachedClient client = builder.build();
 		ClockWatch watch = new ClockWatch();
 		CyclicBarrier barrier = new CyclicBarrier(threads + 1, watch);
