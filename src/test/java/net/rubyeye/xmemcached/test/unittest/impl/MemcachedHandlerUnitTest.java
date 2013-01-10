@@ -50,7 +50,7 @@ public class MemcachedHandlerUnitTest {
 
 	@Test
 	public void testOnMessageSent_TextCommand_NoReply() {
-		Command cmd = new TextStoreCommand(null, null, null, null, 1, 1, null,
+		Command cmd = new TextStoreCommand(null, null, CommandType.SET, null, 1, 1, null,
 				true, null);
 		EasyMock.expect(this.memcachedClient.getProtocol()).andReturn(
 				Protocol.Text);

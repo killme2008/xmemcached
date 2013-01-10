@@ -361,7 +361,14 @@ public class Optimizer implements OptimizerMBean, MemcachedOptimizer {
 				setqCmd.setOpaque(opaque);
 				setqCmd.encode();
 				totalBytes += setqCmd.getIoBuffer().remaining();
+
+
 				bufferList.add(setqCmd.getIoBuffer());
+				// GC friendly
+				setqCmd.setIoBuffer(MemcachedHandler.EMPTY_BUF);
+				setqCmd.setValue(null);
+				prevCommand.setValue(null);
+				prevCommand.setIoBuffer(MemcachedHandler.EMPTY_BUF);
 				if (mergeCommands == null) {
 					mergeCommands = new HashMap<Object, Command>();
 				}

@@ -95,7 +95,7 @@ public class MemcachedClientPressureTest {
 			throw new RuntimeException("Please provide memcached servers.");
 		}
 		final int threads = 100;
-		final int repeat = 10000;
+		final int repeat = 50000;
 		int size = 1024;
 
 		String servers = args[0];

@@ -108,7 +108,7 @@ public class MemcachedHandler extends HandlerAdapter {
 		this.enableHeartBeat = enableHeartBeat;
 	}
 
-	private static final IoBuffer EMPTY = IoBuffer.allocate(0);
+	public static final IoBuffer EMPTY_BUF = IoBuffer.allocate(0);
 
 	/**
 	 * put command which have been sent to queue
@@ -122,8 +122,7 @@ public class MemcachedHandler extends HandlerAdapter {
 			((MemcachedTCPSession) session).addCommand(command);
 		}
 		// After message sent,we can set the buffer to be null for gc friendly.
-
-		command.setIoBuffer(EMPTY);
+		command.setIoBuffer(EMPTY_BUF);
 		switch (command.getCommandType()) {
 		case SET:
 		case SET_MANY:

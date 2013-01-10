@@ -28,23 +28,25 @@ public class StatisticsHandlerUnitTest extends TestCase {
 			}
 		}
 
-		assertEquals((long) map.get(CommandType.GET_MANY), (long) handler
-				.getMultiGetCount());
-		assertEquals((long) map.get(CommandType.GETS_MANY), (long) handler
-				.getMultiGetsCount());
-		assertEquals((long) map.get(CommandType.SET), (long) handler
-				.getSetCount());
-		assertEquals((long) map.get(CommandType.ADD), (long) handler
-				.getAddCount());
-		assertEquals((long) map.get(CommandType.CAS), (long) handler
-				.getCASCount());
-		assertEquals((long) map.get(CommandType.REPLACE), (long) handler
-				.getReplaceCount());
-		assertEquals((long) map.get(CommandType.APPEND), (long) handler
-				.getAppendCount());
-		assertEquals((long) map.get(CommandType.PREPEND), (long) handler
-				.getPrependCount());
-		assertEquals((long) map.get(CommandType.DELETE), (long) handler
-				.getDeleteCount());
+		assertEquals((long) map.get(CommandType.GET_MANY),
+				(long) handler.getMultiGetCount());
+		assertEquals((long) map.get(CommandType.GETS_MANY),
+				(long) handler.getMultiGetsCount());
+		assertEquals(
+				(long) map.get(CommandType.SET)
+						+ (long) map.get(CommandType.SET_MANY),
+				(long) handler.getSetCount());
+		assertEquals((long) map.get(CommandType.ADD),
+				(long) handler.getAddCount());
+		assertEquals((long) map.get(CommandType.CAS),
+				(long) handler.getCASCount());
+		assertEquals((long) map.get(CommandType.REPLACE),
+				(long) handler.getReplaceCount());
+		assertEquals((long) map.get(CommandType.APPEND),
+				(long) handler.getAppendCount());
+		assertEquals((long) map.get(CommandType.PREPEND),
+				(long) handler.getPrependCount());
+		assertEquals((long) map.get(CommandType.DELETE),
+				(long) handler.getDeleteCount());
 	}
 }
