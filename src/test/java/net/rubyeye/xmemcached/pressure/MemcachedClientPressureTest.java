@@ -5,10 +5,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import net.rubyeye.xmemcached.MemcachedClient;
 import net.rubyeye.xmemcached.MemcachedClientBuilder;
-import net.rubyeye.xmemcached.XMemcachedClient;
 import net.rubyeye.xmemcached.XMemcachedClientBuilder;
-import net.rubyeye.xmemcached.command.BinaryCommandFactory;
-import net.rubyeye.xmemcached.test.unittest.commands.binary.BinaryCommandAllTests;
 import net.rubyeye.xmemcached.utils.AddrUtil;
 
 public class MemcachedClientPressureTest {
