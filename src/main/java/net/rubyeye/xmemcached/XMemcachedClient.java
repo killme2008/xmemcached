@@ -2570,12 +2570,13 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 
 	private void latchWait(final Command cmd, final long timeout)
 			throws InterruptedException, TimeoutException {
-		if (!cmd.getLatch().await(timeout, TimeUnit.MILLISECONDS)) {
-			cmd.cancel();
-			throw new TimeoutException("Timed out(" + timeout
-					+ ") waiting for operation");
-		}
-	}
+        if (!cmd.getLatch().await(timeout, TimeUnit.MILLISECONDS)) {
+            cmd.cancel();
+            throw new TimeoutException("Timed out(" + timeout
+                    + " milliseconds) waiting for operation while connected to \" +\n" +
+                    connector.findSessionByKey(cmd.getKey()));
+        }
+    }
 
 	/**
 	 * Use getAvailableServers() instead
