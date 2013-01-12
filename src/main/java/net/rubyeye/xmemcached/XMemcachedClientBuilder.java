@@ -62,7 +62,19 @@ public class XMemcachedClientBuilder implements MemcachedClientBuilder {
 
 	private boolean enableHealSession = true;
 
-	public int getMaxQueuedNoReplyOperations() {
+    private long opTimeout = MemcachedClient.DEFAULT_OP_TIMEOUT;
+
+    public long getOpTimeout() {
+        return opTimeout;
+    }
+
+    public void setOpTimeout(long opTimeout) {
+        if (opTimeout <= 0)
+            throw new IllegalArgumentException("Invalid opTimeout value:"+opTimeout);
+        this.opTimeout = opTimeout;
+    }
+
+    public int getMaxQueuedNoReplyOperations() {
 		return maxQueuedNoReplyOperations;
 	}
 
@@ -332,6 +344,7 @@ public class XMemcachedClientBuilder implements MemcachedClientBuilder {
 		}
 		memcachedClient.setSanitizeKeys(sanitizeKeys);
 		memcachedClient.setKeyProvider(this.keyProvider);
+        memcachedClient.setOpTimeout(this.opTimeout);
 		memcachedClient.setHealSessionInterval(this.healSessionInterval);
 		memcachedClient.setEnableHealSession(this.enableHealSession);
 		memcachedClient
