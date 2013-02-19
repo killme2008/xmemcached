@@ -6,6 +6,15 @@ Xmemcached Change log
 
 *******************************************
 
+2013-02-19
+-----Xmemcached 1.4.0 released------------------------
+1.Added "setOpTimeout" for client builder.
+2.Monitor timeout request 
+3.Added RandomMemcachedSessionLocaltor for kestrel protocol
+4.When timeout exception happens in a connection continuously,we will close it.The maximum number of timeout exception can be set by "setTimeoutExceptionThreshold" method in client,default value 
+is 1000.
+5.Added a new constructor for client builder that accepts a string server list.Thanks @bmahe.
+
 2013-01-10
 -----Xmemcached 1.3.9 released------------------------
 1.Added "resetStats" method for statistics MBean to reset statstics.
