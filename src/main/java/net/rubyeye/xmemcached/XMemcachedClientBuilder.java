@@ -8,12 +8,16 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import net.rubyeye.xmemcached.auth.AuthInfo;
 import net.rubyeye.xmemcached.buffer.BufferAllocator;
 import net.rubyeye.xmemcached.buffer.SimpleBufferAllocator;
 import net.rubyeye.xmemcached.command.TextCommandFactory;
 import net.rubyeye.xmemcached.impl.ArrayMemcachedSessionLocator;
 import net.rubyeye.xmemcached.impl.DefaultKeyProvider;
+import net.rubyeye.xmemcached.impl.RandomMemcachedSessionLocaltor;
 import net.rubyeye.xmemcached.transcoders.SerializingTranscoder;
 import net.rubyeye.xmemcached.transcoders.Transcoder;
 import net.rubyeye.xmemcached.utils.Protocol;
@@ -29,6 +33,8 @@ import com.google.code.yanf4j.core.impl.StandardSocketOption;
  * 
  */
 public class XMemcachedClientBuilder implements MemcachedClientBuilder {
+	
+	static final Log log = LogFactory.getLog(XMemcachedClientBuilder.class);
 
 	private MemcachedSessionLocator sessionLocator = new ArrayMemcachedSessionLocator();
 	private BufferAllocator bufferAllocator = new SimpleBufferAllocator();
@@ -316,6 +322,12 @@ public class XMemcachedClientBuilder implements MemcachedClientBuilder {
 	 */
 	public MemcachedClient build() throws IOException {
 		XMemcachedClient memcachedClient;
+		// kestrel protocol use random session locator.
+		if (this.commandFactory.getProtocol() == Protocol.Kestrel) {
+			if (!(this.sessionLocator instanceof RandomMemcachedSessionLocaltor)) {
+				log.warn("Recommend to use `net.rubyeye.xmemcached.impl.RandomMemcachedSessionLocaltor` as session locator for kestrel protocol.");
+			}
+		}
 		if (this.weights == null) {
 			memcachedClient = new XMemcachedClient(this.sessionLocator,
 					this.bufferAllocator, this.configuration,
