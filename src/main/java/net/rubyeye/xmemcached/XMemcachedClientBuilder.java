@@ -25,6 +25,8 @@ import net.rubyeye.xmemcached.utils.Protocol;
 import com.google.code.yanf4j.config.Configuration;
 import com.google.code.yanf4j.core.SocketOption;
 import com.google.code.yanf4j.core.impl.StandardSocketOption;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Builder pattern.Configure XmemcachedClient's options,then build it
@@ -33,8 +35,9 @@ import com.google.code.yanf4j.core.impl.StandardSocketOption;
  * 
  */
 public class XMemcachedClientBuilder implements MemcachedClientBuilder {
-	
-	static final Log log = LogFactory.getLog(XMemcachedClientBuilder.class);
+
+    private static final Logger log = LoggerFactory
+            .getLogger(XMemcachedClientBuilder.class);
 
 	private MemcachedSessionLocator sessionLocator = new ArrayMemcachedSessionLocator();
 	private BufferAllocator bufferAllocator = new SimpleBufferAllocator();
