@@ -96,6 +96,13 @@ public interface MemcachedClient {
 	 */
 	public static final int DEFAULT_MAX_QUEUED_NOPS = DYNAMIC_MAX_QUEUED_NOPS > MAX_QUEUED_NOPS ? MAX_QUEUED_NOPS
 			: DYNAMIC_MAX_QUEUED_NOPS;
+	
+	/**
+	 * Maximum number of timeout exception for close connection.
+	 * 
+	 * @since 1.4.0
+	 */
+	public static final int DEFAULT_MAX_TIMEOUTEXCEPTION_THRESHOLD = 1000; 
 
 	/**
 	 * Set the merge factor,this factor determins how many 'get' commands would
@@ -1770,4 +1777,19 @@ public interface MemcachedClient {
 	 */
 	public void setKeyProvider(KeyProvider keyProvider);
 
+	/**
+	 * Returns maximum number of timeout exception for closing connection.
+	 * 
+	 * @return
+	 */
+	public int getTimeoutExceptionThreshold();
+
+	/**
+	 * Set maximum number of timeout exception for closing connection.You can set it to be a large value to disable this feature.
+	 * 
+	 * @see #DEFAULT_MAX_TIMEOUTEXCEPTION_THRESHOLD
+	 * @param timeoutExceptionThreshold
+	 */
+	public void setTimeoutExceptionThreshold(int timeoutExceptionThreshold);
+	
 }

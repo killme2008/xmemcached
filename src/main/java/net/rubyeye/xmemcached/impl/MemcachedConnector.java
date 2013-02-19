@@ -483,7 +483,7 @@ public class MemcachedConnector extends SocketChannelController implements
 
 	private final Random random = new Random();
 
-	public void send(final Command msg) throws MemcachedException {
+	public Session send(final Command msg) throws MemcachedException {
 		MemcachedSession session = (MemcachedSession) this.findSessionByKey(msg
 				.getKey());
 		if (session == null) {
@@ -506,6 +506,7 @@ public class MemcachedConnector extends SocketChannelController implements
 					+ session.getRemoteSocketAddress());
 		}
 		session.write(msg);
+		return session;
 	}
 
 	private MemcachedSession findStandbySession(MemcachedSession session) {

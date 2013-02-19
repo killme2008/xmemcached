@@ -68,7 +68,7 @@ public interface Connector extends Controller {
 
 	public long getHealSessionInterval();
 
-	public void send(Command packet) throws MemcachedException;
+	public Session send(Command packet) throws MemcachedException;
 
 	public void setConnectionPoolSize(int connectionPoolSize);
 
