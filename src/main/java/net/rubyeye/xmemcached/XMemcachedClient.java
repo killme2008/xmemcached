@@ -2618,7 +2618,7 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 					"Timed out("
 							+ timeout
 							+ " milliseconds) waiting for operation while connected to \" +\n"
-							+ connector.findSessionByKey(cmd.getKey()));
+							+ session);
 		}
 	}
 
