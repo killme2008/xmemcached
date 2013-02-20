@@ -10,6 +10,7 @@
 
 ##News
 
+ * Xmemcached 1.4.0 released. [Release Note](https://code.google.com/p/xmemcached/wiki/ReleaseNotes).
  * Xmemcached 1.3.9 released. [Release Note](https://code.google.com/p/xmemcached/wiki/ReleaseNotes).
  * Xmemcached 1.3.8 released. [Release Note](https://code.google.com/p/xmemcached/wiki/ReleaseNotes).
  * Xmemcached 1.3.7 released. [Release Note](https://code.google.com/p/xmemcached/wiki/ReleaseNotes). 
@@ -41,7 +42,7 @@ If you use maven,you can use xmemcached by
 	 <dependency>
       <groupId>com.googlecode.xmemcached</groupId>
       <artifactId>xmemcached</artifactId>
-      <version>1.3.9</version>
+      <version>${version}</version>
      </dependency>
 	 
 
