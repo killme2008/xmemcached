@@ -278,4 +278,18 @@ public interface MemcachedClientBuilder {
 	 */
 	public void setEnableHealSession(boolean enableHealSession);
 
+	/**
+	 * Set default operation timeout.
+	 * @param opTimeout  Operation timeout value in milliseconds.
+	 * @since 1.4.1
+	 */
+	public void setOpTimeout(long opTimeout);
+
+	/**
+	 * Returns the default operation timeout in milliseconds.
+	 * @since 1.4.1
+	 * @return
+	 */
+	public long getOpTimeout();
+
 }

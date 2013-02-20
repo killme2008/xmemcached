@@ -7,6 +7,7 @@ import static org.junit.Assert.fail;
 import java.net.InetSocketAddress;
 
 import net.rubyeye.xmemcached.MemcachedClient;
+import net.rubyeye.xmemcached.MemcachedClientBuilder;
 import net.rubyeye.xmemcached.XMemcachedClientBuilder;
 import net.rubyeye.xmemcached.exception.MemcachedException;
 import net.rubyeye.xmemcached.utils.AddrUtil;
@@ -64,7 +65,7 @@ public class FailureModeUnitTest {
 		memServer2.setCodecFactory(new TextLineCodecFactory());
 		memServer2.bind(new InetSocketAddress(4798));
 
-		XMemcachedClientBuilder builder = new XMemcachedClientBuilder(AddrUtil
+		MemcachedClientBuilder builder = new XMemcachedClientBuilder(AddrUtil
 				.getAddressMap("localhost:4799,localhost:4798"));
 		// It must be in failure mode
 		builder.setFailureMode(true);
@@ -102,7 +103,7 @@ public class FailureModeUnitTest {
 		memServer2.setCodecFactory(new TextLineCodecFactory());
 		memServer2.bind(new InetSocketAddress(4798));
 
-		XMemcachedClientBuilder builder = new XMemcachedClientBuilder(AddrUtil
+		MemcachedClientBuilder builder = new XMemcachedClientBuilder(AddrUtil
 				.getAddressMap("localhost:4799 localhost:4798"));
 		// It must be in failure mode
 		builder.setFailureMode(true);
@@ -152,7 +153,7 @@ public class FailureModeUnitTest {
 		memServer2.setCodecFactory(new TextLineCodecFactory());
 		memServer2.bind(new InetSocketAddress(4798));
 
-		XMemcachedClientBuilder builder = new XMemcachedClientBuilder(AddrUtil
+		MemcachedClientBuilder builder = new XMemcachedClientBuilder(AddrUtil
 				.getAddressMap("localhost:4799,localhost:4798"));
 		// It must be in failure mode
 		builder.setFailureMode(true);
@@ -207,7 +208,7 @@ public class FailureModeUnitTest {
 		memServer1.setCodecFactory(new TextLineCodecFactory());
 		memServer1.bind(new InetSocketAddress(4799));
 
-		XMemcachedClientBuilder builder = new XMemcachedClientBuilder(AddrUtil
+		MemcachedClientBuilder builder = new XMemcachedClientBuilder(AddrUtil
 				.getAddressMap("localhost:4799"));
 		builder.setFailureMode(true);
 		MemcachedClient client = builder.build();
@@ -247,7 +248,7 @@ public class FailureModeUnitTest {
 		memServer2.setCodecFactory(new TextLineCodecFactory());
 		memServer2.bind(new InetSocketAddress(4798));
 
-		XMemcachedClientBuilder builder = new XMemcachedClientBuilder(AddrUtil
+		MemcachedClientBuilder builder = new XMemcachedClientBuilder(AddrUtil
 				.getAddressMap("localhost:4799,localhost:4798"));
 		MemcachedClient client = builder.build();
 
@@ -281,7 +282,7 @@ public class FailureModeUnitTest {
 		memServer1.setCodecFactory(new TextLineCodecFactory());
 		memServer1.bind(new InetSocketAddress(4799));
 
-		XMemcachedClientBuilder builder = new XMemcachedClientBuilder(AddrUtil
+		MemcachedClientBuilder builder = new XMemcachedClientBuilder(AddrUtil
 				.getAddressMap("localhost:4799"));
 		MemcachedClient client = builder.build();
 
@@ -319,7 +320,7 @@ public class FailureModeUnitTest {
 		memServer2.setCodecFactory(new TextLineCodecFactory());
 		memServer2.bind(new InetSocketAddress(4798));
 
-		XMemcachedClientBuilder builder = new XMemcachedClientBuilder(AddrUtil
+		MemcachedClientBuilder builder = new XMemcachedClientBuilder(AddrUtil
 				.getAddressMap("localhost:4799 localhost:4798"));
 		MemcachedClient client = builder.build();
 

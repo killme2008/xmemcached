@@ -2617,7 +2617,7 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 			throw new TimeoutException(
 					"Timed out("
 							+ timeout
-							+ " milliseconds) waiting for operation while connected to \" +\n"
+							+ " milliseconds) waiting for operation while connected to "
 							+ session);
 		}
 	}

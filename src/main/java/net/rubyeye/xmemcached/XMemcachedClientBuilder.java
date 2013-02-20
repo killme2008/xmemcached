@@ -74,11 +74,11 @@ public class XMemcachedClientBuilder implements MemcachedClientBuilder {
 
     private long opTimeout = MemcachedClient.DEFAULT_OP_TIMEOUT;
 
-    public long getOpTimeout() {
+	public long getOpTimeout() {
         return opTimeout;
     }
 
-    public void setOpTimeout(long opTimeout) {
+	public void setOpTimeout(long opTimeout) {
         if (opTimeout <= 0)
             throw new IllegalArgumentException("Invalid opTimeout value:"+opTimeout);
         this.opTimeout = opTimeout;
