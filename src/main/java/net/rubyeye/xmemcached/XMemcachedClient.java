@@ -1366,7 +1366,7 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 		}
 		if (exp < 0) {
 			throw new IllegalArgumentException(
-					"Expire time must be greater than 0");
+					"Expire time must be greater than or equal to 0");
 		}
 		return keyBytes;
 	}
