@@ -1,11 +1,6 @@
 package net.rubyeye.xmemcached.transcoders;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
 import java.util.zip.DeflaterOutputStream;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
@@ -97,8 +92,18 @@ public abstract class BaseSerializingTranscoder {
 		try {
 			if (in != null) {
 				bis = new ByteArrayInputStream(in);
-				is = new ObjectInputStream(bis);
-				rv = is.readObject();
+                is = new ObjectInputStream(bis) {
+                    @Override
+                    protected Class<?> resolveClass(ObjectStreamClass desc) throws IOException, ClassNotFoundException {
+                        try {
+                            //When class is not found,try to load it from context class loader.
+                            return super.resolveClass(desc);
+                        } catch (ClassNotFoundException e) {
+                            return Thread.currentThread().getContextClassLoader().loadClass(desc.getName());
+                        }
+                    }
+                };
+                rv = is.readObject();
 
 			}
 		} catch (IOException e) {
