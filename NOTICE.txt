@@ -6,6 +6,10 @@ Xmemcached Change log
 
 *******************************************
 
+-----Xmemcached 1.4.1 released-----------------------
+1.Fixed some log errors
+2.Fixed could not find class when deserializing in some web containers.
+
 2013-02-19
 -----Xmemcached 1.4.0 released------------------------
 1.Added "setOpTimeout" for client builder.
