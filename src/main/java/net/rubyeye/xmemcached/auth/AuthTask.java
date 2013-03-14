@@ -106,7 +106,8 @@ public class AuthTask extends Thread {
 					done.set(true);
 					break;
 				case FUTHER_AUTH_REQUIRED:
-					String result = (String) command.getResult();
+					System.out.println(command.getResult());
+					String result = String.valueOf(command.getResult());
 					response = saslClient.evaluateChallenge(ByteUtils
 							.getBytes(result));
 					latch = new CountDownLatch(1);
