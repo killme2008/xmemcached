@@ -1,0 +1,178 @@
+<!DOCTYPE html
+PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- 
+  author :dennis zhuang(killme2008@gmail.com)
+  
+ -->
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>Performance Comparison between Java Memcached Client</title>
+
+</head>
+<body>
+<h1>Performance Comparison between Java Memcached Client</h1>
+URL:
+<a
+	href="http://xmemcached.googlecode.com/svn/trunk/benchmark/benchmark.html">http://xmemcached.googlecode.com/svn/trunk/benchmark/benchmark.html</a>
+
+<p style="text-align: justify;">There are several memcached client
+for java,include <a href="http://code.google.com/p/spymemcached">spymemcached</a>,
+&nbsp;<a href="http://github.com/gwhalin/Memcached-Java-Client">Memcached-Java-Client</a> and <a
+	href="http://code.google.com/p/xmemcached/">Xmemcached</a> etc. The performance of the three open
+source memcached client are presented here to help you make choice.</p>
+
+<h2>Where's the Graph?</h2>
+
+<p style="text-align: justify;">If you are in a hurry, please scroll
+down to see the graphs first.</p>
+
+<h2>Test Scenario</h2>
+
+<p style="text-align: justify;">Three memcached server runs on different linux
+machines</p>
+
+<p style="text-align: justify;">A java client connect to three
+memcached servers,then start numbers of threads which use only one memcached client instance to repeat themself to
+store and retrive data from these three memcached servers
+concurrently,write 20% and read 80%,ensure average hit rate above 60%.<br />
+</p>
+
+<h2>Test Environment</h2>
+
+<ul>
+	<li>Software
+	<ul>
+		<li>Memcached Server
+		<ul>
+			<li>Version is 1.4.5,default install configuration.</li>
+			<li>Start with option "-p 12000 -m 1572864"</li>
+		</ul>
+		</li>
+		<li>Java Client
+		<ul>
+			<li>JVM Version: Sun JDK 1.6.0_06</li>
+			<li>All clients use memcached text protocol.
+			<li>xmemcached 1.2.6.1,default configuration</li>
+			<li>Spymemcached 2.5,default configuration</li>
+			<li>Memcached-Java-Client 2.5.1,SockIOPool set minConn  to 10 and maxConn to 500,Max idle time set to one hour,also set compress threshold to 16K.
+			</li>
+			<li>JVM args: -server -Xms1024m -Xmx1024m -XX:NewSize=256m -XX:MaxNewSize=256m -XX:PermSize=64m -XX:MaxPermSize=64m</li>
+			<li>Xmemcached and Spymemcached is nio based.So they have to set
+			operation timeout,both are set to five seconds.</li>
+		</ul>
+		</li>
+	</ul>
+	</li>
+	<li>Hardware
+	<ul>
+		<li>Server1
+		<ul>
+			<li>CPU: 8 x Intel(R) Xeon(R) CPU E5410  @ 2.33GHz</li>
+			<li>O/S: Linux 2.6.9-67.ELsmp #1 SMP GNU/Linux</li>
+			<li>RAM: 16 GiB</li>
+			<li>NIC: Broadcom NetXtreme Gigabit Ethernet PCI express</li>
+		</ul>
+		</li>
+		<li>Server2
+		<ul>
+			<li>CPU: 4 x I Intel(R) Xeon(R) CPU 5120  @ 1.86GHz</li>
+			<li>O/S: Linux 2.6.9-67.ELsmp #1 SMP GNU/Linux</li>
+			<li>RAM: 4 GiB</li>
+			<li>NIC: Broadcom NetXtreme Gigabit Ethernet PCI express</li>
+		</ul>
+		</li>
+		<li>Server3
+		<ul>
+			<li>CPU: 4 x I Intel(R) Xeon(R) CPU 5120  @ 1.86GHz</li>
+			<li>O/S: Linux 2.6.9-67.ELsmp #1 SMP GNU/Linux</li>
+			<li>RAM: 4 GiB</li>
+			<li>NIC: Broadcom NetXtreme Gigabit Ethernet PCI express</li>
+		</ul>
+		</li>
+		<li>Client
+		<ul>
+			<li>CPU: 8 x Intel(R) Xeon(R) CPU  E5410  @ 2.33GHz</li>
+			<li>O/S: 2.6.9-67.ELsmp #1 SMP GNU/Linux</li>
+			<li>RAM: 16 GiB</li>
+			<li>NIC: Broadcom NetXtreme Gigabit Ethernet PCI express</li>
+		</ul>
+		</li>
+	</ul>
+	</li>
+</ul>
+
+<h2>Test Result</h2>
+<p style="text-align: justify;">The result which is zero,it is
+because of some exceptions occured on that condition,make the test
+failed.You can find detail at the Subversion repository's <strong>result</strong> folder<br />
+</p>
+<h3>Client and Server on Different Machines</h3>
+<p>
+<h3>Part1 Compared by threads number</h3>
+<img src="result/images/bytes64.jpg" />
+<br>
+<br>
+<br>
+<br>
+<img src="result/images/bytes512.jpg" />
+<br>
+<br>
+<br>
+<br>
+<img src="result/images/bytes1024.jpg" />
+<br>< 
+<br>
+<br>
+<br>
+<img src="result/images/bytes4096.jpg" />
+<br>
+<br>
+<br>
+<br>
+<img src="result/images/bytes16384.jpg" />
+<br>
+<br>
+<br>
+<br>
+<p>
+<h3>Part2 Compared by value size</h3>
+<img src="result/images/threads1.jpg" />
+<br>
+<br>
+<br>
+<br>
+<img src="result/images/threads10.jpg">
+<br>
+<br>
+<br>
+<br>
+<img src="result/images/threads50.jpg" />
+<br>
+<br>
+<br>
+<br>
+<img src="result/images/threads100.jpg" />
+<br>
+<br>
+<br>
+<br>
+<img src="result/images/threads300.jpg" />
+<br>
+<br>
+<br>
+<br>
+<h2>Running the Tests by Yourself</h2>
+
+<p>The test result should be always reproduceable. Please give me (<a
+	href='mailto:killme2008@gmail.com'>killme2008@gmail.com</a>)your feed
+back to improve the accuracy of the test result. The full source code is
+available at the Subversion repository:
+<p>
+<pre>svn co <a
+	href="http://xmemcached.googlecode.com/svn/trunk/benchmark/">http://xmemcached.googlecode.com/svn/trunk/benchmark/</a></pre>
+
+</body>
+</html>
