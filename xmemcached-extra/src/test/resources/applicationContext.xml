@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd">
+	<bean id="propertyConfigurer"
+		class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer" destroy-method="shutdown">
+		<property name="location">
+			<value>classpath:test.properties</value>
+		</property>
+	</bean>
+	<bean name="memcachedClient1"
+		class="net.rubyeye.xmemcached.utils.XMemcachedClientFactoryBean">
+		<property name="servers">
+			<value>${test.memcached.servers}</value>
+			<!--<value>localhost:12000 localhost:12001</value>-->
+		</property>
+	</bean>
+	<bean name="memcachedClient2"
+		class="net.rubyeye.xmemcached.utils.XMemcachedClientFactoryBean" destroy-method="shutdown">
+		<property name="servers">
+			<value>${test.memcached.servers}</value>
+		</property>
+		<property name="weights">
+			<list>
+				<value>1</value>
+				<value>2</value>
+				<value>3</value>
+				<value>4</value>
+				<value>5</value>
+			</list>
+		</property>
+		<property name="connectionPoolSize" value="2"></property>
+		<property name="commandFactory">
+		   <bean class="net.rubyeye.xmemcached.command.BinaryCommandFactory"></bean>
+		</property>
+		<property name="sessionLocator">
+			<bean class="net.rubyeye.xmemcached.impl.KetamaMemcachedSessionLocator"></bean>
+		</property>
+		<property name="transcoder">
+			<bean class="net.rubyeye.xmemcached.transcoders.SerializingTranscoder" />
+		</property>
+		<property name="bufferAllocator">
+			<bean class="net.rubyeye.xmemcached.buffer.SimpleBufferAllocator"></bean>
+		</property>
+	</bean>
+</beans>

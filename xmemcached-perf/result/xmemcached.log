@@ -1,0 +1,26 @@
+Xmemcached startup
+threads=1,repeats=40000,valueLength=64,tps=5995,miss=0,fail=0,hit=32004,all=40000,hitRate=1.00
+threads=1,repeats=40000,valueLength=512,tps=5610,miss=0,fail=0,hit=32004,all=40000,hitRate=1.00
+threads=1,repeats=40000,valueLength=1024,tps=4463,miss=0,fail=0,hit=32004,all=40000,hitRate=1.00
+threads=1,repeats=40000,valueLength=4096,tps=2294,miss=0,fail=0,hit=32004,all=40000,hitRate=1.00
+threads=1,repeats=40000,valueLength=16384,tps=827,miss=0,fail=0,hit=32004,all=40000,hitRate=1.00
+threads=10,repeats=40000,valueLength=64,tps=41453,miss=0,fail=0,hit=320040,all=400000,hitRate=1.00
+threads=10,repeats=40000,valueLength=512,tps=33504,miss=0,fail=0,hit=320040,all=400000,hitRate=1.00
+threads=10,repeats=40000,valueLength=1024,tps=28663,miss=0,fail=0,hit=320040,all=400000,hitRate=1.00
+threads=10,repeats=40000,valueLength=4096,tps=13067,miss=0,fail=0,hit=320040,all=400000,hitRate=1.00
+threads=10,repeats=40000,valueLength=16384,tps=6483,miss=0,fail=0,hit=320040,all=400000,hitRate=1.00
+threads=50,repeats=40000,valueLength=64,tps=101996,miss=0,fail=0,hit=1600200,all=2000000,hitRate=1.00
+threads=50,repeats=40000,valueLength=512,tps=84401,miss=0,fail=0,hit=1600200,all=2000000,hitRate=1.00
+threads=50,repeats=40000,valueLength=1024,tps=70524,miss=0,fail=0,hit=1600200,all=2000000,hitRate=1.00
+threads=50,repeats=40000,valueLength=4096,tps=28095,miss=0,fail=0,hit=1600200,all=2000000,hitRate=1.00
+threads=50,repeats=40000,valueLength=16384,tps=7439,miss=151248,fail=0,hit=1448952,all=2000000,hitRate=0.91
+threads=100,repeats=40000,valueLength=64,tps=124501,miss=1023360,fail=0,hit=2177040,all=4000000,hitRate=0.68
+threads=100,repeats=40000,valueLength=512,tps=103948,miss=1061328,fail=0,hit=2139072,all=4000000,hitRate=0.67
+threads=100,repeats=40000,valueLength=1024,tps=87904,miss=1062880,fail=0,hit=2137520,all=4000000,hitRate=0.67
+threads=100,repeats=40000,valueLength=4096,tps=33579,miss=1084432,fail=0,hit=2115968,all=4000000,hitRate=0.66
+threads=100,repeats=40000,valueLength=16384,tps=8761,miss=1218048,fail=0,hit=1982352,all=4000000,hitRate=0.62
+threads=300,repeats=20000,valueLength=64,tps=149150,miss=0,fail=0,hit=4801200,all=6000000,hitRate=1.00
+threads=300,repeats=20000,valueLength=512,tps=116174,miss=0,fail=0,hit=4801200,all=6000000,hitRate=1.00
+threads=300,repeats=20000,valueLength=1024,tps=53545,miss=0,fail=0,hit=4801200,all=6000000,hitRate=1.00
+threads=300,repeats=20000,valueLength=4096,tps=14116,miss=0,fail=0,hit=4801200,all=6000000,hitRate=1.00
+threads=300,repeats=20000,valueLength=16384,tps=3816,miss=2936004,fail=0,hit=1865196,all=6000000,hitRate=0.39

@@ -1,0 +1,37 @@
+Java-MemCached startup
+warm up
+threads=1,repeats=40000,valueLength=64,tps=8997,miss=0,fail=0,hit=32004,all=40000,hitRate=1.00
+threads=1,repeats=40000,valueLength=512,tps=7770,miss=0,fail=0,hit=32004,all=40000,hitRate=1.00
+threads=1,repeats=40000,valueLength=1024,tps=5997,miss=0,fail=0,hit=32004,all=40000,hitRate=1.00
+threads=1,repeats=40000,valueLength=4096,tps=3286,miss=0,fail=0,hit=32004,all=40000,hitRate=1.00
+threads=1,repeats=40000,valueLength=16384,tps=1308,miss=0,fail=0,hit=32004,all=40000,hitRate=1.00
+threads=10,repeats=40000,valueLength=64,tps=57807,miss=0,fail=0,hit=320040,all=400000,hitRate=1.00
+threads=10,repeats=40000,valueLength=512,tps=48543,miss=0,fail=0,hit=320040,all=400000,hitRate=1.00
+threads=10,repeats=40000,valueLength=1024,tps=41863,miss=0,fail=0,hit=320040,all=400000,hitRate=1.00
+threads=10,repeats=40000,valueLength=4096,tps=23986,miss=0,fail=0,hit=320040,all=400000,hitRate=1.00
+threads=10,repeats=40000,valueLength=16384,tps=6876,miss=0,fail=0,hit=320040,all=400000,hitRate=1.00
+threads=50,repeats=40000,valueLength=64,tps=144538,miss=0,fail=0,hit=1600200,all=2000000,hitRate=1.00
+threads=50,repeats=40000,valueLength=512,tps=128198,miss=0,fail=0,hit=1600200,all=2000000,hitRate=1.00
+threads=50,repeats=40000,valueLength=1024,tps=99378,miss=0,fail=0,hit=1600200,all=2000000,hitRate=1.00
+threads=50,repeats=40000,valueLength=4096,tps=27820,miss=0,fail=0,hit=1600200,all=2000000,hitRate=1.00
+threads=50,repeats=40000,valueLength=16384,tps=7527,miss=152268,fail=0,hit=1447932,all=2000000,hitRate=0.90
+threads=100,repeats=40000,valueLength=64,tps=127775,miss=1023360,fail=0,hit=2177040,all=4000000,hitRate=0.68
+threads=100,repeats=40000,valueLength=512,tps=108523,miss=1061328,fail=0,hit=2139072,all=4000000,hitRate=0.67
+threads=100,repeats=40000,valueLength=1024,tps=92084,miss=1062880,fail=0,hit=2137520,all=4000000,hitRate=0.67
+threads=100,repeats=40000,valueLength=4096,tps=35196,miss=1084432,fail=0,hit=2115968,all=4000000,hitRate=0.66
+threads=100,repeats=40000,valueLength=16384,tps=9536,miss=1219068,fail=0,hit=1981332,all=4000000,hitRate=0.62
+com.schooner.MemCached.SchoonerSockIOPool Sun Oct 17 11:09:05 GMT+08:00 2010 - ++++ failed to get SockIO obj for: 10.232.36.82:12000
+com.schooner.MemCached.SchoonerSockIOPool Sun Oct 17 11:09:05 GMT+08:00 2010 - ++++ failed to get SockIO obj for: 10.232.36.82:12000
+com.schooner.MemCached.SchoonerSockIOPool Sun Oct 17 11:09:05 GMT+08:00 2010 - ++++ failed to get SockIO obj for: 10.232.36.90:12000
+com.schooner.MemCached.SchoonerSockIOPool Sun Oct 17 11:09:05 GMT+08:00 2010 - ++++ failed to get SockIO obj for: 10.232.36.82:12000
+com.schooner.MemCached.SchoonerSockIOPool Sun Oct 17 11:09:05 GMT+08:00 2010 - ++++ failed to get SockIO obj for: 10.232.36.90:12000
+com.schooner.MemCached.SchoonerSockIOPool Sun Oct 17 11:09:05 GMT+08:00 2010 - ++++ failed to get SockIO obj for: 10.232.36.82:12000
+com.schooner.MemCached.SchoonerSockIOPool Sun Oct 17 11:09:05 GMT+08:00 2010 - ++++ failed to get SockIO obj for: 10.232.36.90:12000
+com.schooner.MemCached.SchoonerSockIOPool Sun Oct 17 11:09:05 GMT+08:00 2010 - ++++ failed to get SockIO obj for: 10.232.36.90:12000
+com.schooner.MemCached.SchoonerSockIOPool Sun Oct 17 11:09:05 GMT+08:00 2010 - ++++ failed to get SockIO obj for: 10.232.36.82:12000
+com.schooner.MemCached.SchoonerSockIOPool Sun Oct 17 11:09:05 GMT+08:00 2010 - ++++ failed to get SockIO obj for: 10.232.36.86:12000
+com.schooner.MemCached.SchoonerSockIOPool Sun Oct 17 11:09:05 GMT+08:00 2010 - ++++ failed to get SockIO obj for: 10.232.36.90:12000
+com.schooner.MemCached.SchoonerSockIOPool Sun Oct 17 11:09:05 GMT+08:00 2010 - ++++ failed to get SockIO obj for: 10.232.36.90:12000
+com.schooner.MemCached.SchoonerSockIOPool Sun Oct 17 11:09:05 GMT+08:00 2010 - ++++ failed to get SockIO obj for: 10.232.36.82:12000
+com.schooner.MemCached.SchoonerSockIOPool Sun Oct 17 11:09:05 GMT+08:00 2010 - ++++ failed to get SockIO obj for: 10.232.36.90:12000
+com.schooner.MemCached.SchoonerSockIOPool Sun Oct 17 11:09:05 GMT+08:00 2010 - ++++ failed to get SockIO obj for: 10.232.36.82:12000
