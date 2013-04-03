@@ -9,7 +9,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import net.rubyeye.xmemcached.KeyIterator;
-import net.rubyeye.xmemcached.XMemcachedClient;
+import net.rubyeye.xmemcached.MemcachedClient;
 import net.rubyeye.xmemcached.command.text.TextCacheDumpCommand;
 import net.rubyeye.xmemcached.exception.MemcachedException;
 import net.rubyeye.xmemcached.exception.MemcachedServerException;
@@ -26,12 +26,12 @@ import com.google.code.yanf4j.core.Session;
 public final class KeyIteratorImpl implements KeyIterator {
 	private final LinkedList<Integer> itemNumbersList;
 	private LinkedList<String> currentKeyList;
-	private final XMemcachedClient memcachedClient;
+	private final MemcachedClient memcachedClient;
 	private final InetSocketAddress inetSocketAddress;
 	private long opTimeout = 1000;
 
 	public KeyIteratorImpl(LinkedList<Integer> itemNumbersList,
-			XMemcachedClient memcachedClient,
+			MemcachedClient memcachedClient,
 			InetSocketAddress inetSocketAddress) {
 		super();
 		this.itemNumbersList = itemNumbersList;

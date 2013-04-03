@@ -78,7 +78,7 @@ public interface MemcachedClient {
 	 * heartbeat action to check if connection is alive.
 	 */
 	public static final int DEFAULT_SESSION_IDLE_TIMEOUT = 5000;
-	
+
 	/**
 	 * Default heal session interval in milliseconds.
 	 */
@@ -96,13 +96,13 @@ public interface MemcachedClient {
 	 */
 	public static final int DEFAULT_MAX_QUEUED_NOPS = DYNAMIC_MAX_QUEUED_NOPS > MAX_QUEUED_NOPS ? MAX_QUEUED_NOPS
 			: DYNAMIC_MAX_QUEUED_NOPS;
-	
+
 	/**
 	 * Maximum number of timeout exception for close connection.
 	 * 
 	 * @since 1.4.0
 	 */
-	public static final int DEFAULT_MAX_TIMEOUTEXCEPTION_THRESHOLD = 1000; 
+	public static final int DEFAULT_MAX_TIMEOUTEXCEPTION_THRESHOLD = 1000;
 
 	/**
 	 * Set the merge factor,this factor determins how many 'get' commands would
@@ -114,7 +114,7 @@ public interface MemcachedClient {
 
 	/**
 	 * Get the connect timeout
-	 *
+	 * 
 	 */
 	public long getConnectTimeout();
 
@@ -1561,12 +1561,14 @@ public interface MemcachedClient {
 	 *            MILLISECONDS
 	 */
 	public void setHealSessionInterval(long healConnectionInterval);
-	
+
 	/**
 	 * If the memcached dump or network error cause connection closed,xmemcached
-	 * would try to heal the connection.You can disable this behaviour by using this method:<br/>
+	 * would try to heal the connection.You can disable this behaviour by using
+	 * this method:<br/>
 	 * <code> client.setEnableHealSession(false); </code><br/>
 	 * The default value is true.
+	 * 
 	 * @param enableHealSession
 	 * @since 1.3.9
 	 */
@@ -1785,11 +1787,94 @@ public interface MemcachedClient {
 	public int getTimeoutExceptionThreshold();
 
 	/**
-	 * Set maximum number of timeout exception for closing connection.You can set it to be a large value to disable this feature.
+	 * Set maximum number of timeout exception for closing connection.You can
+	 * set it to be a large value to disable this feature.
 	 * 
 	 * @see #DEFAULT_MAX_TIMEOUTEXCEPTION_THRESHOLD
 	 * @param timeoutExceptionThreshold
 	 */
 	public void setTimeoutExceptionThreshold(int timeoutExceptionThreshold);
-	
+
+	/**
+	 * Invalidate all namespace under the namespace using the default operation
+	 * timeout.
+	 * 
+	 * @since 1.4.2
+	 * @param ns
+	 *            the namespace
+	 * @throws MemcachedException
+	 * @throws InterruptedException
+	 * @throws TimeoutException
+	 */
+	public abstract void invalidateNamespace(String ns)
+			throws MemcachedException, InterruptedException, TimeoutException;
+
+	/**
+	 * Invalidate all items under the namespace.
+	 * 
+	 * @since 1.4.2
+	 * @param ns
+	 *            the namespace
+	 * @param opTimeout
+	 *            operation timeout in milliseconds.
+	 * @throws MemcachedException
+	 * @throws InterruptedException
+	 * @throws TimeoutException
+	 */
+	public void invalidateNamespace(String ns, long opTimeout)
+			throws MemcachedException, InterruptedException, TimeoutException;
+
+	/**
+	 * Remove current namespace set for this memcached client.It must begin with
+	 * {@link #beginWithNamespace(String)} method.
+	 * @see #beginWithNamespace(String)
+	 */
+	public void endWithNamespace();
+
+	/**
+	 * set current namespace for following operations with memcached client.It
+	 * must be ended with {@link #endWithNamespace()} method.For example:
+	 * <pre>
+	 *    memcachedClient.beginWithNamespace(userId);
+	 *    try{
+	 *      memcachedClient.set("username",0,username);
+	 *      memcachedClient.set("email",0,email);
+	 *    }finally{
+	 *      memcachedClient.endWithNamespace();
+	 *    }
+	 * </pre>
+	 * @see #endWithNamespace()
+	 * @see #withNamespace(String, MemcachedClientCallable)
+	 * @param ns
+	 */
+	public void beginWithNamespace(String ns);
+
+	/**
+	 * With the namespae to do something with current memcached client.All
+	 * operations with memcached client done in callable will be under the
+	 * namespace. {@link #beginWithNamespace(String)} and {@link #endWithNamespace()} will called around automatically.
+	 * For example:
+	 * <pre>
+	 *   memcachedClient.withNamespace(userId,new MemcachedClientCallable<Void>{
+	 *     public Void call(MemcachedClient client) throws MemcachedException,
+			InterruptedException, TimeoutException{
+	 *      client.set("username",0,username);
+	 *      client.set("email",0,email);
+	 *      return null;
+	 *     }
+	 *   }); 
+	 *   //invalidate all items under the namespace.
+	 *   memcachedClient.invalidateNamespace(userId);
+	 * </pre>
+	 * 
+	 * @since 1.4.2
+	 * @param ns
+	 * @param callable
+	 * @see #beginWithNamespace(String)
+	 * @see #endWithNamespace()
+	 * @return
+	 */
+	public <T> T withNamespace(String ns, MemcachedClientCallable<T> callable)
+			throws MemcachedException, InterruptedException, TimeoutException;
+
 }

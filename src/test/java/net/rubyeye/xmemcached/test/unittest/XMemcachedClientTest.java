@@ -23,6 +23,7 @@ import net.rubyeye.xmemcached.GetsResponse;
 import net.rubyeye.xmemcached.KeyIterator;
 import net.rubyeye.xmemcached.MemcachedClient;
 import net.rubyeye.xmemcached.MemcachedClientBuilder;
+import net.rubyeye.xmemcached.MemcachedClientCallable;
 import net.rubyeye.xmemcached.XMemcachedClient;
 import net.rubyeye.xmemcached.XMemcachedClientBuilder;
 import net.rubyeye.xmemcached.command.Command;
@@ -1214,6 +1215,63 @@ public abstract class XMemcachedClientTest extends TestCase {
 		} else {
 			// ignore
 		}
+
+	}
+
+	public void testNamespace() throws Exception {
+		String ns = "user-id";
+		this.memcachedClient.withNamespace(ns,
+				new MemcachedClientCallable<Void>() {
+
+					public Void call(MemcachedClient client)
+							throws MemcachedException, InterruptedException,
+							TimeoutException {
+						assertNull(client.get("a"));
+						assertNull(client.get("b"));
+						assertNull(client.get("c"));
+						return null;
+					}
+				});
+
+		this.memcachedClient.withNamespace(ns,
+				new MemcachedClientCallable<Void>() {
+
+					public Void call(MemcachedClient client)
+							throws MemcachedException, InterruptedException,
+							TimeoutException {
+						assertTrue(client.set("a", 0, 1));
+						assertTrue(client.set("b", 0, 2));
+						assertTrue(client.set("c", 0, 3));
+						return null;
+					}
+				});
+
+		this.memcachedClient.withNamespace(ns,
+				new MemcachedClientCallable<Void>() {
+
+					public Void call(MemcachedClient client)
+							throws MemcachedException, InterruptedException,
+							TimeoutException {
+						assertEquals(1, client.get("a"));
+						assertEquals(2, client.get("b"));
+						assertEquals(3, client.get("c"));
+						return null;
+					}
+				});
+
+		this.memcachedClient.invalidateNamespace(ns);
+		this.memcachedClient.withNamespace(ns,
+				new MemcachedClientCallable<Void>() {
+
+					public Void call(MemcachedClient client)
+							throws MemcachedException, InterruptedException,
+							TimeoutException {
+						assertNull(client.get("a"));
+						assertNull(client.get("b"));
+						assertNull(client.get("c"));
+						return null;
+					}
+				});
 
 	}
 

@@ -77,6 +77,7 @@ import com.google.code.yanf4j.config.Configuration;
 import com.google.code.yanf4j.core.Session;
 import com.google.code.yanf4j.core.SocketOption;
 import com.google.code.yanf4j.util.SystemUtils;
+import com.googlecode.hibernate.memcached.utils.StringUtils;
 
 /**
  * Memcached Client for connecting to memcached server and do operations.
@@ -117,6 +118,10 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 	// key provider for pre-processing keys before sending them to memcached
 	// added by dennis,2012-07-14
 	private KeyProvider keyProvider = DefaultKeyProvider.INSTANCE;
+	/**
+	 * namespace thread local.
+	 */
+	public static final ThreadLocal<String> NAMESPACE_LOCAL = new ThreadLocal<String>();
 
 	/*
 	 * (non-Javadoc)
@@ -143,6 +148,28 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 			log.warn("Too small timeoutExceptionThreshold value may cause connections disconnect/reconnect frequently.");
 		}
 		this.timeoutExceptionThreshold = timeoutExceptionThreshold;
+	}
+
+	public <T> T withNamespace(String ns, MemcachedClientCallable<T> callable)
+			throws MemcachedException, InterruptedException, TimeoutException {
+		beginWithNamespace(ns);
+		try {
+			return callable.call(this);
+		} finally {
+			endWithNamespace();
+		}
+	}
+
+	public void endWithNamespace() {
+		NAMESPACE_LOCAL.remove();
+	}
+
+	public void beginWithNamespace(String ns) {
+		if (ns == null || ns.trim().length() == 0)
+			throw new IllegalArgumentException("Blank namespace");
+		if (NAMESPACE_LOCAL.get() != null)
+			throw new IllegalStateException("Previous namespace wasn't ended.");
+		NAMESPACE_LOCAL.set(ns);
 	}
 
 	public KeyProvider getKeyProvider() {
@@ -281,7 +308,8 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 		return result;
 	}
 
-	private final Session sendCommand(final Command cmd) throws MemcachedException {
+	private final Session sendCommand(final Command cmd)
+			throws MemcachedException {
 		if (this.shutdown) {
 			throw new MemcachedException("Xmemcached is stopped");
 		}
@@ -613,8 +641,8 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 			Transcoder<T> transcoder) throws InterruptedException,
 			TimeoutException, MemcachedException, MemcachedException {
 		final Command command = this.commandFactory.createGetCommand(key,
-				keyBytes, cmdType, this.transcoder);		
-		this.latchWait(command, timeout,this.sendCommand(command));
+				keyBytes, cmdType, this.transcoder);
+		this.latchWait(command, timeout, this.sendCommand(command));
 		command.getIoBuffer().free(); // free buffer
 		this.checkException(command);
 		CachedData data = (CachedData) command.getResult();
@@ -1894,7 +1922,7 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 				keyBytes, time, noreply);
 		final Session session = this.sendCommand(command);
 		if (!command.isNoreply()) {
-			this.latchWait(command, opTimeout,session);
+			this.latchWait(command, opTimeout, session);
 			command.getIoBuffer().free();
 			this.checkException(command);
 			if (command.getResult() == null) {
@@ -1923,8 +1951,8 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 		ByteUtils.checkKey(keyBytes);
 		CountDownLatch latch = new CountDownLatch(1);
 		final Command command = this.commandFactory.createTouchCommand(key,
-				keyBytes, latch, exp, false);	
-		this.latchWait(command, opTimeout,this.sendCommand(command));
+				keyBytes, latch, exp, false);
+		this.latchWait(command, opTimeout, this.sendCommand(command));
 		command.getIoBuffer().free();
 		this.checkException(command);
 		if (command.getResult() == null) {
@@ -2042,7 +2070,7 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 		CountDownLatch latch = new CountDownLatch(1);
 		final Command command = this.commandFactory.createGetAndTouchCommand(
 				key, keyBytes, latch, newExp, false);
-		this.latchWait(command, opTimeout,this.sendCommand(command));
+		this.latchWait(command, opTimeout, this.sendCommand(command));
 		command.getIoBuffer().free();
 		this.checkException(command);
 		CachedData data = (CachedData) command.getResult();
@@ -2263,7 +2291,7 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 		final Session session = sessionQueue.peek();
 		session.write(command);
 		if (!noreply) {
-			this.latchWait(command, this.opTimeout,session);
+			this.latchWait(command, this.opTimeout, session);
 		}
 	}
 
@@ -2379,7 +2407,7 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 				latch, null);
 		final Session session = sessionQueue.peek();
 		session.write(command);
-		this.latchWait(command, timeout,session);
+		this.latchWait(command, timeout, session);
 		return (Map<String, String>) command.getResult();
 	}
 
@@ -2497,7 +2525,7 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 				keyBytes, delta, initValue, exp, cmdType, noreply);
 		final Session session = this.sendCommand(command);
 		if (!command.isNoreply()) {
-			this.latchWait(command, operationTimeout,session);
+			this.latchWait(command, operationTimeout, session);
 			command.getIoBuffer().free();
 			this.checkException(command);
 			if (command.getResult() == null) {
@@ -2577,7 +2605,7 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 
 		final Session session = this.sendCommand(command);
 		if (!command.isNoreply()) {
-			this.latchWait(command, timeout,session);
+			this.latchWait(command, timeout, session);
 			command.getIoBuffer().free();
 			this.checkException(command);
 			if (command.getResult() == null) {
@@ -2597,7 +2625,7 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 			TimeoutException {
 		if (cmd.getLatch().await(timeout, TimeUnit.MILLISECONDS)) {
 			AtomicInteger counter = getContinuousTimeoutCounter(session);
-			//reset counter.
+			// reset counter.
 			if (counter.get() > 0) {
 				counter.set(0);
 			}
@@ -2605,9 +2633,10 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 			cmd.cancel();
 			AtomicInteger counter = getContinuousTimeoutCounter(session);
 			if (counter.incrementAndGet() > this.timeoutExceptionThreshold) {
-				log.warn(session + " exceeded continuous timeout threshold,we will close it.");
+				log.warn(session
+						+ " exceeded continuous timeout threshold,we will close it.");
 				try {
-					//reset counter.
+					// reset counter.
 					counter.set(0);
 					session.close();
 				} catch (Exception e) {
@@ -2711,14 +2740,74 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 		}
 	}
 
-	private String preProcessKey(String key) throws MemcachedException {
+	private String preProcessKey(String key) throws MemcachedException,
+			InterruptedException {
 		key = this.keyProvider.process(key);
 		try {
-			return this.sanitizeKeys ? URLEncoder.encode(key, "UTF-8") : key;
+			key = this.sanitizeKeys ? URLEncoder.encode(key, "UTF-8") : key;
 		} catch (UnsupportedEncodingException e) {
 			throw new MemcachedException(
 					"Unsupport encoding utf-8 when sanitize key", e);
 		}
+		String ns = NAMESPACE_LOCAL.get();
+		if (ns != null && ns.trim().length() > 0) {
+			try {
+				key = getNamespace(ns) + ":" + key;
+			} catch (TimeoutException e) {
+				throw new MemcachedException(
+						"Timeout occured when gettting namespace value.", e);
+			}
+		}
+		return key;
+	}
+
+	public void invalidateNamespace(String ns, long opTimeout)
+			throws MemcachedException, InterruptedException, TimeoutException {
+		String key = getNSKey(ns);
+		incr(key, 1, System.currentTimeMillis(), opTimeout);
+	}
+
+	public void invalidateNamespace(String ns) throws MemcachedException,
+			InterruptedException, TimeoutException {
+		this.invalidateNamespace(ns, this.opTimeout);
+	}
+
+	/**
+	 * Returns the real namespace of ns.
+	 * 
+	 * @param ns
+	 * @return
+	 * @throws TimeoutException
+	 * @throws InterruptedException
+	 * @throws MemcachedException
+	 */
+	public String getNamespace(String ns) throws TimeoutException,
+			InterruptedException, MemcachedException {
+		String key = getNSKey(ns);
+		byte[] keyBytes = ByteUtils.getBytes(key);
+		ByteUtils.checkKey(keyBytes);
+		Object item = this.fetch0(key, keyBytes, CommandType.GET_ONE,
+				this.opTimeout, transcoder);
+		while (item == null) {
+			item = String.valueOf(System.currentTimeMillis());
+			boolean added = add0(key, 0, item, transcoder, this.opTimeout);
+			if (!added) {
+				item = this.fetch0(key, keyBytes, CommandType.GET_ONE,
+						this.opTimeout, transcoder);
+			}
+		}
+		String namespace = item.toString();
+		if (!ByteUtils.isNumber(namespace)) {
+			throw new IllegalStateException(
+					"Namespace key already has value.The key is:" + key
+							+ ",and the value is:" + namespace);
+		}
+		return namespace;
+	}
+
+	private String getNSKey(String ns) {
+		String key = "namespace:" + ns;
+		return key;
 	}
 
 	public Counter getCounter(String key, long initialValue) {
