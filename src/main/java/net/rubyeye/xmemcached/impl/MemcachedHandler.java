@@ -184,30 +184,32 @@ public class MemcachedHandler extends HandlerAdapter {
 	}
 
 	private void checkHeartBeat(Session session) {
-		log.debug(
-				"Check session (%s) is alive,send heartbeat",
-				session.getRemoteSocketAddress() == null ? "unknown"
-						: SystemUtils.getRawAddress(session
-								.getRemoteSocketAddress())
-								+ ":"
-								+ session.getRemoteSocketAddress().getPort());
-		Command versionCommand = null;
-		CountDownLatch latch = new CountDownLatch(1);
-		if (this.client.getProtocol() == Protocol.Binary) {
-			versionCommand = new BinaryVersionCommand(latch,
-					session.getRemoteSocketAddress());
+		if (this.enableHeartBeat) {
+			log.debug(
+					"Check session (%s) is alive,send heartbeat",
+					session.getRemoteSocketAddress() == null ? "unknown"
+							: SystemUtils.getRawAddress(session
+									.getRemoteSocketAddress())
+									+ ":"
+									+ session.getRemoteSocketAddress()
+											.getPort());
+			Command versionCommand = null;
+			CountDownLatch latch = new CountDownLatch(1);
+			if (this.client.getProtocol() == Protocol.Binary) {
+				versionCommand = new BinaryVersionCommand(latch,
+						session.getRemoteSocketAddress());
 
-		} else {
-			versionCommand = new TextVersionCommand(latch,
-					session.getRemoteSocketAddress());
+			} else {
+				versionCommand = new TextVersionCommand(latch,
+						session.getRemoteSocketAddress());
+			}
+			session.write(versionCommand);
+			// Start a check thread,avoid blocking reactor thread
+			if (this.heartBeatThreadPool != null) {
+				this.heartBeatThreadPool.execute(new CheckHeartResultThread(
+						versionCommand, session));
+			}
 		}
-		session.write(versionCommand);
-		// Start a check thread,avoid blocking reactor thread
-		if (this.heartBeatThreadPool != null) {
-			this.heartBeatThreadPool.execute(new CheckHeartResultThread(
-					versionCommand, session));
-		}
-
 	}
 
 	private static final String HEART_BEAT_FAIL_COUNT_ATTR = "heartBeatFailCount";
