@@ -85,6 +85,7 @@ public final class Reactor extends Thread {
 		selector = SystemUtils.openSelector();
 		this.configuration = configuration;
 		setName("Xmemcached-Reactor-" + index);
+		setDaemon(true);
 	}
 
 	public final Selector getSelector() {

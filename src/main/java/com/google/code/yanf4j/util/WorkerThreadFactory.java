@@ -65,9 +65,7 @@ public class WorkerThreadFactory implements ThreadFactory {
 	public Thread newThread(Runnable r) {
 		Thread t = new Thread(this.group, r, this.namePrefix
 				+ this.threadNumber.getAndIncrement(), 0);
-		if (t.isDaemon()) {
-			t.setDaemon(false);
-		}
+		t.setDaemon(true);
 		if (t.getPriority() != Thread.NORM_PRIORITY) {
 			t.setPriority(Thread.NORM_PRIORITY);
 		}
