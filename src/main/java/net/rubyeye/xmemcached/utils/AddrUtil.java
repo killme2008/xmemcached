@@ -54,6 +54,7 @@ public class AddrUtil {
 			throw new IllegalArgumentException("No hosts in list:  ``" + s
 					+ "''");
 		}
+		s=s.trim();
 		Map<InetSocketAddress, InetSocketAddress> result = new LinkedHashMap<InetSocketAddress, InetSocketAddress>();
 		for (String hosts : s.split(" ")) {
 			String[] nodes = hosts.split(",");
@@ -62,11 +63,11 @@ public class AddrUtil {
 				throw new IllegalArgumentException("Invalid server ``" + hosts
 						+ "'' in list:  " + s);
 			}
-			String mainHost = nodes[0];
+			String mainHost = nodes[0].trim();
 			InetSocketAddress mainAddress = getInetSocketAddress(s, mainHost);
 			if (nodes.length >= 2) {
 				InetSocketAddress standByAddress = getInetSocketAddress(s,
-						nodes[1]);
+						nodes[1].trim());
 				result.put(mainAddress, standByAddress);
 			} else {
 				result.put(mainAddress, null);
@@ -85,8 +86,8 @@ public class AddrUtil {
 					+ "'' in list:  " + s);
 
 		}
-		String hostPart = mainHost.substring(0, finalColon);
-		String portNum = mainHost.substring(finalColon + 1);
+		String hostPart = mainHost.substring(0, finalColon).trim();
+		String portNum = mainHost.substring(finalColon + 1).trim();
 
 		InetSocketAddress mainAddress = new InetSocketAddress(hostPart, Integer
 				.parseInt(portNum));
@@ -107,6 +108,7 @@ public class AddrUtil {
 			throw new IllegalArgumentException("No hosts in list:  ``" + s
 					+ "''");
 		}
+		s = s.trim();
 		ArrayList<InetSocketAddress> addrs = new ArrayList<InetSocketAddress>();
 
 		for (String hoststuff : s.split(" ")) {
@@ -116,8 +118,8 @@ public class AddrUtil {
 						+ hoststuff + "'' in list:  " + s);
 
 			}
-			String hostPart = hoststuff.substring(0, finalColon);
-			String portNum = hoststuff.substring(finalColon + 1);
+			String hostPart = hoststuff.substring(0, finalColon).trim();
+			String portNum = hoststuff.substring(finalColon + 1).trim();
 
 			addrs
 					.add(new InetSocketAddress(hostPart, Integer
@@ -135,15 +137,15 @@ public class AddrUtil {
 			throw new IllegalArgumentException("No hosts in:  ``" + server
 					+ "''");
 		}
-
+		server = server.trim();
 		int finalColon = server.lastIndexOf(':');
 		if (finalColon < 1) {
 			throw new IllegalArgumentException("Invalid server ``" + server
 					+ "''");
 
 		}
-		String hostPart = server.substring(0, finalColon);
-		String portNum = server.substring(finalColon + 1);
+		String hostPart = server.substring(0, finalColon).trim();
+		String portNum = server.substring(finalColon + 1).trim();
 		return new InetSocketAddress(hostPart, Integer.parseInt(portNum));
 	}
 }
