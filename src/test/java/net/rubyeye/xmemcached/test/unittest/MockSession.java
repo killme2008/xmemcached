@@ -5,10 +5,10 @@ import java.net.InetSocketAddress;
 import java.nio.ByteOrder;
 import java.util.concurrent.Future;
 
-import com.google.code.yanf4j.core.Handler;
-import com.google.code.yanf4j.core.Session;
 import com.google.code.yanf4j.core.CodecFactory.Decoder;
 import com.google.code.yanf4j.core.CodecFactory.Encoder;
+import com.google.code.yanf4j.core.Handler;
+import com.google.code.yanf4j.core.Session;
 import com.google.code.yanf4j.core.impl.FutureImpl;
 
 public class MockSession implements Session {
@@ -178,6 +178,11 @@ public class MockSession implements Session {
 
 	public Object setAttributeIfAbsent(String key, Object value) {
 		return null;
+	}
+
+	@Override
+	public String toString() {
+		return "localhost:" + this.port;
 	}
 
 }
