@@ -92,8 +92,8 @@ AbstractMemcachedSessionLocator {
 	private final void buildMap(Collection<Session> list, HashAlgorithm alg) {
 		TreeMap<Long, List<Session>> sessionMap = new TreeMap<Long, List<Session>>();
 
-		String sockStr = null;
 		for (Session session : list) {
+			String sockStr = null;
 			if (this.cwNginxUpstreamConsistent) {
 				InetSocketAddress serverAddress = session
 						.getRemoteSocketAddress();
