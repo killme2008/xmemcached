@@ -12,6 +12,7 @@ public class InetSocketAddressWrapper {
 	private InetSocketAddress inetSocketAddress;
 	private int order; // The address order in list
 	private int weight; // The weight of this address
+	private volatile String remoteAddressStr;
 	/**
 	 * Main memcached node address,if this is a main node,then this value is
 	 * null.
@@ -25,6 +26,14 @@ public class InetSocketAddressWrapper {
 		this.order = order;
 		this.weight = weight;
 		this.mainNodeAddress = mainNodeAddress;
+	}
+
+	public String getRemoteAddressStr() {
+		return this.remoteAddressStr;
+	}
+
+	public void setRemoteAddressStr(String remoteAddressStr) {
+		this.remoteAddressStr = remoteAddressStr;
 	}
 
 	public final InetSocketAddress getInetSocketAddress() {
