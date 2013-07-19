@@ -47,6 +47,7 @@ public class KestrelCommandFactory implements CommandFactory {
 	}
 
 	public Command createDeleteCommand(String key, byte[] keyBytes, int time,
+			long cas,
 			boolean noreply) {
 		return new KestrelDeleteCommand(key, keyBytes, -1,
 				new CountDownLatch(1), noreply);

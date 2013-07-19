@@ -5,29 +5,29 @@ import net.rubyeye.xmemcached.command.Command;
 public class TextDeleteCommandUnitTest extends BaseTextCommandUnitTest {
 	public void testEncode() {
 		Command command = this.commandFactory.createDeleteCommand("test",
-				"test".getBytes(), 10, false);
+				"test".getBytes(), 10, 0, false);
 		assertNull(command.getIoBuffer());
 		command.encode();
-		checkByteBufferEquals(command, "delete test\r\n");
+		this.checkByteBufferEquals(command, "delete test\r\n");
 
 		command = this.commandFactory.createDeleteCommand("test",
-				"test".getBytes(), 10, true);
+				"test".getBytes(), 10, 0, true);
 		assertNull(command.getIoBuffer());
 		command.encode();
-		checkByteBufferEquals(command, "delete test noreply\r\n");
+		this.checkByteBufferEquals(command, "delete test noreply\r\n");
 	}
 
 	public void testDecode() {
 		Command command = this.commandFactory.createDeleteCommand("test",
-				"test".getBytes(), 10, false);
-		checkDecodeNullAndNotLineByteBuffer(command);
-		checkDecodeInvalidLine(command, "test", "STORED\r\n");
-		checkDecodeInvalidLine(command, "test", "VALUE test 4 5 1\r\n");
-		checkDecodeInvalidLine(command, "test", "END\r\n");
-		checkDecodeValidLine(command, "NOT_FOUND\r\n");
+				"test".getBytes(), 10, 0, false);
+		this.checkDecodeNullAndNotLineByteBuffer(command);
+		this.checkDecodeInvalidLine(command, "test", "STORED\r\n");
+		this.checkDecodeInvalidLine(command, "test", "VALUE test 4 5 1\r\n");
+		this.checkDecodeInvalidLine(command, "test", "END\r\n");
+		this.checkDecodeValidLine(command, "NOT_FOUND\r\n");
 		assertFalse((Boolean) command.getResult());
 		command.setResult(null);
-		checkDecodeValidLine(command, "DELETED\r\n");
+		this.checkDecodeValidLine(command, "DELETED\r\n");
 		assertTrue((Boolean) command.getResult());
 	}
 }

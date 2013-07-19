@@ -42,7 +42,7 @@ public class TextCommandFactory implements CommandFactory {
 	 * , byte[], int)
 	 */
 	public final Command createDeleteCommand(final String key,
-			final byte[] keyBytes, final int time, boolean noreply) {
+			final byte[] keyBytes, final int time, long cas, boolean noreply) {
 		return new TextDeleteCommand(key, keyBytes, time,
 				new CountDownLatch(1), noreply);
 	}

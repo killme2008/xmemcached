@@ -14,7 +14,7 @@ public class BinaryDeleteCommandUnitTest extends BaseBinaryCommandUnitTest {
 	public void testDeleteEncodeAndDecode() {
 
 		Command command = this.commandFactory.createDeleteCommand(this.key,
-				this.keyBytes, 0, this.noreply);
+				this.keyBytes, 0, 999L, this.noreply);
 		command.encode();
 		ByteBuffer encodeBuffer = command.getIoBuffer().buf();
 		assertNotNull(encodeBuffer);
@@ -23,7 +23,7 @@ public class BinaryDeleteCommandUnitTest extends BaseBinaryCommandUnitTest {
 		byte opCode = encodeBuffer.get(1);
 		assertEquals(OpCode.DELETE.fieldValue(), opCode);
 
-		ByteBuffer buffer = constructResponse(OpCode.DELETE.fieldValue(),
+		ByteBuffer buffer = this.constructResponse(OpCode.DELETE.fieldValue(),
 				(short) 0, (byte) 0, (byte) 0, (short) 0, 0, 0, 1L, null, null,
 				null);
 
@@ -31,9 +31,10 @@ public class BinaryDeleteCommandUnitTest extends BaseBinaryCommandUnitTest {
 		assertTrue((Boolean) command.getResult());
 		assertEquals(0, buffer.remaining());
 
-		buffer = constructResponse(OpCode.DELETE.fieldValue(), (short) 0,
+		buffer = this.constructResponse(OpCode.DELETE.fieldValue(), (short) 0,
 				(byte) 0, (byte) 0, (short) 0x0005, 0, 0, 1L, null, null, null);
-		command = this.commandFactory.createDeleteCommand(this.key, this.keyBytes, 0,
+		command = this.commandFactory.createDeleteCommand(this.key,
+				this.keyBytes, 0, 999L,
 				this.noreply);
 		assertTrue(command.decode(null, buffer));
 		assertFalse((Boolean) command.getResult());

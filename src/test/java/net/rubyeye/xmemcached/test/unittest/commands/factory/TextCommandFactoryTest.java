@@ -31,7 +31,7 @@ public class TextCommandFactoryTest extends TestCase {
 		byte[] keyBytes = ByteUtils.getBytes(key);
 		int time = 10;
 		Command deleteCmd = this.commandFactory.createDeleteCommand("test",
-				keyBytes, time,false);
+				keyBytes, time, 0, false);
 		deleteCmd.encode();
 		assertEquals(CommandType.DELETE, deleteCmd.getCommandType());
 		String commandStr = new String(deleteCmd.getIoBuffer().buf()
