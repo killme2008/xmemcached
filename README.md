@@ -10,9 +10,10 @@
 
 ##News
 
+* Xmemcached 1.4.2 released. 2013-03-02
  * clojure wrapper for xmemached [clj-xmemcached](https://github.com/killme2008/clj-xmemcached).
  * Xmemcached 1.4.1 released. 2013-03-02
- * Xmemcached 1.4.0 released. 
+ * Xmemcached 1.4.0 released.
  * [Release Note](https://code.google.com/p/xmemcached/wiki/ReleaseNotes).
 
 ##Highlights
@@ -44,7 +45,7 @@ If you use maven,you can use xmemcached by
       <artifactId>xmemcached</artifactId>
       <version>${version}</version>
      </dependency>
-	 
+
 
 ##FAQ
 
