@@ -53,6 +53,15 @@ public class BinaryDeleteCommand extends BaseBinaryCommand {
 	}
 
 	@Override
+	protected void fillCAS() {
+		if (this.cas > 0) {
+			this.ioBuffer.putLong(this.cas);
+		} else {
+			super.fillCAS();
+		}
+	}
+
+	@Override
 	protected void fillExtras(CachedData data) {
 		// must not have extras
 	}
