@@ -28,7 +28,7 @@ import net.rubyeye.xmemcached.utils.Protocol;
  * @author dennis
  * 
  */
-public final class TextCommandFactory implements CommandFactory {
+public class TextCommandFactory implements CommandFactory {
 
 	public void setBufferAllocator(BufferAllocator bufferAllocator) {
 
@@ -114,7 +114,7 @@ public final class TextCommandFactory implements CommandFactory {
 	public final Command createSetCommand(final String key,
 			final byte[] keyBytes, final int exp, final Object value,
 			boolean noreply, Transcoder transcoder) {
-		return createStoreCommand(key, keyBytes, exp, value, CommandType.SET,
+		return this.createStoreCommand(key, keyBytes, exp, value, CommandType.SET,
 				noreply, transcoder);
 	}
 
@@ -122,7 +122,7 @@ public final class TextCommandFactory implements CommandFactory {
 	public final Command createAddCommand(final String key,
 			final byte[] keyBytes, final int exp, final Object value,
 			boolean noreply, Transcoder transcoder) {
-		return createStoreCommand(key, keyBytes, exp, value, CommandType.ADD,
+		return this.createStoreCommand(key, keyBytes, exp, value, CommandType.ADD,
 				noreply, transcoder);
 	}
 
@@ -130,7 +130,7 @@ public final class TextCommandFactory implements CommandFactory {
 	public final Command createReplaceCommand(final String key,
 			final byte[] keyBytes, final int exp, final Object value,
 			boolean noreply, Transcoder transcoder) {
-		return createStoreCommand(key, keyBytes, exp, value,
+		return this.createStoreCommand(key, keyBytes, exp, value,
 				CommandType.REPLACE, noreply, transcoder);
 	}
 
@@ -138,7 +138,7 @@ public final class TextCommandFactory implements CommandFactory {
 	public final Command createAppendCommand(final String key,
 			final byte[] keyBytes, final Object value, boolean noreply,
 			Transcoder transcoder) {
-		return createStoreCommand(key, keyBytes, 0, value, CommandType.APPEND,
+		return this.createStoreCommand(key, keyBytes, 0, value, CommandType.APPEND,
 				noreply, transcoder);
 	}
 
@@ -146,7 +146,7 @@ public final class TextCommandFactory implements CommandFactory {
 	public final Command createPrependCommand(final String key,
 			final byte[] keyBytes, final Object value, boolean noreply,
 			Transcoder transcoder) {
-		return createStoreCommand(key, keyBytes, 0, value, CommandType.PREPEND,
+		return this.createStoreCommand(key, keyBytes, 0, value, CommandType.PREPEND,
 				noreply, transcoder);
 	}
 
