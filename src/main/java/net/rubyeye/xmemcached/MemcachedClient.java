@@ -235,7 +235,7 @@ public interface MemcachedClient {
 			throws TimeoutException, InterruptedException, MemcachedException;
 
 	public <T> T get(final String key) throws TimeoutException,
-			InterruptedException, MemcachedException;
+	InterruptedException, MemcachedException;
 
 	/**
 	 * Just like get,But it return a GetsResponse,include cas value for cas
@@ -267,7 +267,7 @@ public interface MemcachedClient {
 	 * @throws MemcachedException
 	 */
 	public <T> GetsResponse<T> gets(final String key) throws TimeoutException,
-			InterruptedException, MemcachedException;
+	InterruptedException, MemcachedException;
 
 	/**
 	 * @see #gets(String, long, Transcoder)
@@ -314,7 +314,7 @@ public interface MemcachedClient {
 	 */
 	public <T> Map<String, T> get(final Collection<String> keyCollections,
 			final long opTimeout, final Transcoder<T> transcoder)
-			throws TimeoutException, InterruptedException, MemcachedException;
+					throws TimeoutException, InterruptedException, MemcachedException;
 
 	/**
 	 * @see #get(Collection, long, Transcoder)
@@ -402,7 +402,7 @@ public interface MemcachedClient {
 	 */
 	public <T> Map<String, GetsResponse<T>> gets(
 			final Collection<String> keyCollections, final long timeout)
-			throws TimeoutException, InterruptedException, MemcachedException;
+					throws TimeoutException, InterruptedException, MemcachedException;
 
 	/**
 	 * @see #gets(Collection, long, Transcoder)
@@ -441,7 +441,7 @@ public interface MemcachedClient {
 	 */
 	public <T> boolean set(final String key, final int exp, final T value,
 			final Transcoder<T> transcoder, final long timeout)
-			throws TimeoutException, InterruptedException, MemcachedException;
+					throws TimeoutException, InterruptedException, MemcachedException;
 
 	/**
 	 * @see #set(String, int, Object, Transcoder, long)
@@ -495,7 +495,7 @@ public interface MemcachedClient {
 	 */
 	public <T> void setWithNoReply(final String key, final int exp,
 			final T value, final Transcoder<T> transcoder)
-			throws InterruptedException, MemcachedException;
+					throws InterruptedException, MemcachedException;
 
 	/**
 	 * Add key-value item to memcached, success only when the key is not exists
@@ -516,7 +516,7 @@ public interface MemcachedClient {
 	 */
 	public <T> boolean add(final String key, final int exp, final T value,
 			final Transcoder<T> transcoder, final long timeout)
-			throws TimeoutException, InterruptedException, MemcachedException;
+					throws TimeoutException, InterruptedException, MemcachedException;
 
 	/**
 	 * @see #add(String, int, Object, Transcoder, long)
@@ -595,7 +595,7 @@ public interface MemcachedClient {
 	 */
 	public <T> void addWithNoReply(final String key, final int exp,
 			final T value, final Transcoder<T> transcoder)
-			throws InterruptedException, MemcachedException;
+					throws InterruptedException, MemcachedException;
 
 	/**
 	 * Replace the key's data item in memcached,success only when the key's data
@@ -616,7 +616,7 @@ public interface MemcachedClient {
 	 */
 	public <T> boolean replace(final String key, final int exp, final T value,
 			final Transcoder<T> transcoder, final long timeout)
-			throws TimeoutException, InterruptedException, MemcachedException;
+					throws TimeoutException, InterruptedException, MemcachedException;
 
 	/**
 	 * @see #replace(String, int, Object, Transcoder, long)
@@ -693,7 +693,7 @@ public interface MemcachedClient {
 	 */
 	public <T> void replaceWithNoReply(final String key, final int exp,
 			final T value, final Transcoder<T> transcoder)
-			throws InterruptedException, MemcachedException;
+					throws InterruptedException, MemcachedException;
 
 	/**
 	 * @see #append(String, Object, long)
@@ -810,7 +810,7 @@ public interface MemcachedClient {
 	 */
 	public <T> boolean cas(final String key, final int exp, final T value,
 			final Transcoder<T> transcoder, final long timeout, final long cas)
-			throws TimeoutException, InterruptedException, MemcachedException;
+					throws TimeoutException, InterruptedException, MemcachedException;
 
 	/**
 	 * @see #cas(String, int, Object, Transcoder, long, long)
@@ -843,7 +843,7 @@ public interface MemcachedClient {
 	 */
 	public <T> boolean cas(final String key, final int exp, final T value,
 			final Transcoder<T> transcoder, final long cas)
-			throws TimeoutException, InterruptedException, MemcachedException;
+					throws TimeoutException, InterruptedException, MemcachedException;
 
 	/**
 	 * Cas is a check and set operation which means "store this data but only if
@@ -865,7 +865,7 @@ public interface MemcachedClient {
 	 */
 	public <T> boolean cas(final String key, final int exp,
 			final CASOperation<T> operation, final Transcoder<T> transcoder)
-			throws TimeoutException, InterruptedException, MemcachedException;
+					throws TimeoutException, InterruptedException, MemcachedException;
 
 	/**
 	 * cas is a check and set operation which means "store this data but only if
@@ -905,7 +905,7 @@ public interface MemcachedClient {
 	 */
 	public <T> boolean cas(final String key, final int exp,
 			GetsResponse<T> getsReponse, final CASOperation<T> operation)
-			throws TimeoutException, InterruptedException, MemcachedException;
+					throws TimeoutException, InterruptedException, MemcachedException;
 
 	/**
 	 * @see #cas(String, int, GetsResponse, CASOperation, Transcoder)
@@ -963,7 +963,7 @@ public interface MemcachedClient {
 	 */
 	public <T> void casWithNoReply(final String key,
 			GetsResponse<T> getsResponse, final CASOperation<T> operation)
-			throws TimeoutException, InterruptedException, MemcachedException;
+					throws TimeoutException, InterruptedException, MemcachedException;
 
 	/**
 	 * cas noreply
@@ -979,7 +979,7 @@ public interface MemcachedClient {
 	 */
 	public <T> void casWithNoReply(final String key, final int exp,
 			GetsResponse<T> getsReponse, final CASOperation<T> operation)
-			throws TimeoutException, InterruptedException, MemcachedException;
+					throws TimeoutException, InterruptedException, MemcachedException;
 
 	/**
 	 * @see #casWithNoReply(String, int, GetsResponse, CASOperation)
@@ -1046,6 +1046,24 @@ public interface MemcachedClient {
 			throws TimeoutException, InterruptedException, MemcachedException;
 
 	/**
+	 * Delete key's date item from memcached only if its cas value is the same
+	 * as what was read.
+	 * 
+	 * @param key
+	 * @cas cas on delete to make sure the key is deleted only if its value is
+	 *      same as what was read.
+	 * @param opTimeout
+	 *            Operation timeout
+	 * @return
+	 * @throws TimeoutException
+	 * @throws InterruptedException
+	 * @throws MemcachedException
+	 * @since 1.3.2
+	 */
+	public boolean delete(final String key, long cas, long opTimeout)
+			throws TimeoutException, InterruptedException, MemcachedException;
+
+	/**
 	 * Set a new expiration time for an existing item
 	 * 
 	 * @param key
@@ -1078,7 +1096,7 @@ public interface MemcachedClient {
 	 * @throws MemcachedException
 	 */
 	public boolean touch(final String key, int exp) throws TimeoutException,
-			InterruptedException, MemcachedException;
+	InterruptedException, MemcachedException;
 
 	/**
 	 * Get item and set a new expiration time for it
@@ -1270,10 +1288,10 @@ public interface MemcachedClient {
 	 * @throws MemcachedException
 	 */
 	public void flushAll() throws TimeoutException, InterruptedException,
-			MemcachedException;
+	MemcachedException;
 
 	public void flushAllWithNoReply() throws InterruptedException,
-			MemcachedException;
+	MemcachedException;
 
 	/**
 	 * Make All connected memcached's data item invalid
@@ -1285,7 +1303,7 @@ public interface MemcachedClient {
 	 * @throws MemcachedException
 	 */
 	public void flushAll(long timeout) throws TimeoutException,
-			InterruptedException, MemcachedException;
+	InterruptedException, MemcachedException;
 
 	/**
 	 * Invalidate all existing items immediately
@@ -1299,7 +1317,7 @@ public interface MemcachedClient {
 	 * @throws MemcachedException
 	 */
 	public void flushAll(InetSocketAddress address) throws MemcachedException,
-			InterruptedException, TimeoutException;
+	InterruptedException, TimeoutException;
 
 	public void flushAllWithNoReply(InetSocketAddress address)
 			throws MemcachedException, InterruptedException;
@@ -1319,7 +1337,7 @@ public interface MemcachedClient {
 	 */
 	@Deprecated
 	public void flushAll(String host) throws TimeoutException,
-			InterruptedException, MemcachedException;
+	InterruptedException, MemcachedException;
 
 	public Map<String, String> stats(InetSocketAddress address)
 			throws MemcachedException, InterruptedException, TimeoutException;
@@ -1364,517 +1382,517 @@ public interface MemcachedClient {
 			String itemName) throws MemcachedException, InterruptedException,
 			TimeoutException;;
 
-	public void shutdown() throws IOException;
+			public void shutdown() throws IOException;
 
-	public boolean delete(final String key) throws TimeoutException,
+			public boolean delete(final String key) throws TimeoutException,
 			InterruptedException, MemcachedException;
 
-	/**
-	 * return default transcoder,default is SerializingTranscoder
-	 * 
-	 * @return
-	 */
-	@SuppressWarnings("unchecked")
-	public Transcoder getTranscoder();
+			/**
+			 * return default transcoder,default is SerializingTranscoder
+			 * 
+			 * @return
+			 */
+			@SuppressWarnings("unchecked")
+			public Transcoder getTranscoder();
 
-	/**
-	 * set transcoder
-	 * 
-	 * @param transcoder
-	 */
-	@SuppressWarnings("unchecked")
-	public void setTranscoder(final Transcoder transcoder);
+			/**
+			 * set transcoder
+			 * 
+			 * @param transcoder
+			 */
+			@SuppressWarnings("unchecked")
+			public void setTranscoder(final Transcoder transcoder);
 
-	public Map<InetSocketAddress, Map<String, String>> getStatsByItem(
-			String itemName, long timeout) throws MemcachedException,
-			InterruptedException, TimeoutException;
+			public Map<InetSocketAddress, Map<String, String>> getStatsByItem(
+					String itemName, long timeout) throws MemcachedException,
+					InterruptedException, TimeoutException;
 
-	/**
-	 * get operation timeout setting
-	 * 
-	 * @return
-	 */
-	public long getOpTimeout();
+			/**
+			 * get operation timeout setting
+			 * 
+			 * @return
+			 */
+			public long getOpTimeout();
 
-	/**
-	 * set operation timeout,default is one second.
-	 * 
-	 * @param opTimeout
-	 */
-	public void setOpTimeout(long opTimeout);
+			/**
+			 * set operation timeout,default is one second.
+			 * 
+			 * @param opTimeout
+			 */
+			public void setOpTimeout(long opTimeout);
 
-	public Map<InetSocketAddress, String> getVersions(long timeout)
-			throws TimeoutException, InterruptedException, MemcachedException;
+			public Map<InetSocketAddress, String> getVersions(long timeout)
+					throws TimeoutException, InterruptedException, MemcachedException;
 
-	/**
-	 * Returns available memcached servers list.This method is drepcated,please
-	 * use getAvailableServers instead.
-	 * 
-	 * @see #getAvailableServers()
-	 * @return
-	 */
-	@Deprecated
-	public Collection<InetSocketAddress> getAvaliableServers();
+			/**
+			 * Returns available memcached servers list.This method is drepcated,please
+			 * use getAvailableServers instead.
+			 * 
+			 * @see #getAvailableServers()
+			 * @return
+			 */
+			@Deprecated
+			public Collection<InetSocketAddress> getAvaliableServers();
 
-	/**
-	 * Returns available memcached servers list.
-	 * 
-	 * @return A available server collection
-	 */
-	public Collection<InetSocketAddress> getAvailableServers();
+			/**
+			 * Returns available memcached servers list.
+			 * 
+			 * @return A available server collection
+			 */
+			public Collection<InetSocketAddress> getAvailableServers();
 
-	/**
-	 * add a memcached server to MemcachedClient
-	 * 
-	 * @param server
-	 * @param port
-	 * @param weight
-	 * @throws IOException
-	 */
-	public void addServer(final String server, final int port, int weight)
-			throws IOException;
+			/**
+			 * add a memcached server to MemcachedClient
+			 * 
+			 * @param server
+			 * @param port
+			 * @param weight
+			 * @throws IOException
+			 */
+			public void addServer(final String server, final int port, int weight)
+					throws IOException;
 
-	public void addServer(final InetSocketAddress inetSocketAddress, int weight)
-			throws IOException;
+			public void addServer(final InetSocketAddress inetSocketAddress, int weight)
+					throws IOException;
 
-	/**
-	 * Delete key's data item from memcached.This method doesn't wait for reply.
-	 * This method does not work on memcached 1.3 or later version.See <a href=
-	 * 'http://code.google.com/p/memcached/issues/detail?id=3&q=delete%20noreply
-	 * ' > i s s u e 3</a> </br><strong>Note: This method is deprecated,because
-	 * memcached 1.4.0 remove the optional argument "time".You can still use
-	 * this method on old version,but is not recommended.</strong>
-	 * 
-	 * @param key
-	 * @param time
-	 * @throws InterruptedException
-	 * @throws MemcachedException
-	 */
-	@Deprecated
-	public void deleteWithNoReply(final String key, final int time)
-			throws InterruptedException, MemcachedException;
+			/**
+			 * Delete key's data item from memcached.This method doesn't wait for reply.
+			 * This method does not work on memcached 1.3 or later version.See <a href=
+			 * 'http://code.google.com/p/memcached/issues/detail?id=3&q=delete%20noreply
+			 * ' > i s s u e 3</a> </br><strong>Note: This method is deprecated,because
+			 * memcached 1.4.0 remove the optional argument "time".You can still use
+			 * this method on old version,but is not recommended.</strong>
+			 * 
+			 * @param key
+			 * @param time
+			 * @throws InterruptedException
+			 * @throws MemcachedException
+			 */
+			@Deprecated
+			public void deleteWithNoReply(final String key, final int time)
+					throws InterruptedException, MemcachedException;
 
-	public void deleteWithNoReply(final String key)
-			throws InterruptedException, MemcachedException;
+			public void deleteWithNoReply(final String key)
+					throws InterruptedException, MemcachedException;
 
-	/**
-	 * "incr" are used to change data for some item in-place, incrementing it.
-	 * The data for the item is treated as decimal representation of a 64-bit
-	 * unsigned integer. If the current data value does not conform to such a
-	 * representation, the commands behave as if the value were 0. Also, the
-	 * item must already exist for incr to work; these commands won't pretend
-	 * that a non-existent key exists with value 0; instead, it will fail.This
-	 * method doesn't wait for reply.
-	 * 
-	 * @param key
-	 * @param num
-	 * @throws InterruptedException
-	 * @throws MemcachedException
-	 */
-	public void incrWithNoReply(final String key, final long delta)
-			throws InterruptedException, MemcachedException;
+			/**
+			 * "incr" are used to change data for some item in-place, incrementing it.
+			 * The data for the item is treated as decimal representation of a 64-bit
+			 * unsigned integer. If the current data value does not conform to such a
+			 * representation, the commands behave as if the value were 0. Also, the
+			 * item must already exist for incr to work; these commands won't pretend
+			 * that a non-existent key exists with value 0; instead, it will fail.This
+			 * method doesn't wait for reply.
+			 * 
+			 * @param key
+			 * @param num
+			 * @throws InterruptedException
+			 * @throws MemcachedException
+			 */
+			public void incrWithNoReply(final String key, final long delta)
+					throws InterruptedException, MemcachedException;
 
-	/**
-	 * "decr" are used to change data for some item in-place, decrementing it.
-	 * The data for the item is treated as decimal representation of a 64-bit
-	 * unsigned integer. If the current data value does not conform to such a
-	 * representation, the commands behave as if the value were 0. Also, the
-	 * item must already exist for decr to work; these commands won't pretend
-	 * that a non-existent key exists with value 0; instead, it will fail.This
-	 * method doesn't wait for reply.
-	 * 
-	 * @param key
-	 * @param num
-	 * @throws InterruptedException
-	 * @throws MemcachedException
-	 */
-	public void decrWithNoReply(final String key, final long delta)
-			throws InterruptedException, MemcachedException;
+			/**
+			 * "decr" are used to change data for some item in-place, decrementing it.
+			 * The data for the item is treated as decimal representation of a 64-bit
+			 * unsigned integer. If the current data value does not conform to such a
+			 * representation, the commands behave as if the value were 0. Also, the
+			 * item must already exist for decr to work; these commands won't pretend
+			 * that a non-existent key exists with value 0; instead, it will fail.This
+			 * method doesn't wait for reply.
+			 * 
+			 * @param key
+			 * @param num
+			 * @throws InterruptedException
+			 * @throws MemcachedException
+			 */
+			public void decrWithNoReply(final String key, final long delta)
+					throws InterruptedException, MemcachedException;
 
-	/**
-	 * Set the verbosity level of the memcached's logging output.This method
-	 * will wait for reply.
-	 * 
-	 * @param address
-	 * @param level
-	 *            logging level
-	 * @throws TimeoutException
-	 * @throws InterruptedException
-	 * @throws MemcachedException
-	 */
-	public void setLoggingLevelVerbosity(InetSocketAddress address, int level)
-			throws TimeoutException, InterruptedException, MemcachedException;
+			/**
+			 * Set the verbosity level of the memcached's logging output.This method
+			 * will wait for reply.
+			 * 
+			 * @param address
+			 * @param level
+			 *            logging level
+			 * @throws TimeoutException
+			 * @throws InterruptedException
+			 * @throws MemcachedException
+			 */
+			public void setLoggingLevelVerbosity(InetSocketAddress address, int level)
+					throws TimeoutException, InterruptedException, MemcachedException;
 
-	/**
-	 * Set the verbosity level of the memcached's logging output.This method
-	 * doesn't wait for reply from server
-	 * 
-	 * @param address
-	 *            memcached server address
-	 * @param level
-	 *            logging level
-	 * @throws InterruptedException
-	 * @throws MemcachedException
-	 */
-	public void setLoggingLevelVerbosityWithNoReply(InetSocketAddress address,
-			int level) throws InterruptedException, MemcachedException;
+			/**
+			 * Set the verbosity level of the memcached's logging output.This method
+			 * doesn't wait for reply from server
+			 * 
+			 * @param address
+			 *            memcached server address
+			 * @param level
+			 *            logging level
+			 * @throws InterruptedException
+			 * @throws MemcachedException
+			 */
+			public void setLoggingLevelVerbosityWithNoReply(InetSocketAddress address,
+					int level) throws InterruptedException, MemcachedException;
 
-	/**
-	 * Add a memcached client listener
-	 * 
-	 * @param listener
-	 */
-	public void addStateListener(MemcachedClientStateListener listener);
+			/**
+			 * Add a memcached client listener
+			 * 
+			 * @param listener
+			 */
+			public void addStateListener(MemcachedClientStateListener listener);
 
-	/**
-	 * Remove a memcached client listener
-	 * 
-	 * @param listener
-	 */
-	public void removeStateListener(MemcachedClientStateListener listener);
+			/**
+			 * Remove a memcached client listener
+			 * 
+			 * @param listener
+			 */
+			public void removeStateListener(MemcachedClientStateListener listener);
 
-	/**
-	 * Get all current state listeners
-	 * 
-	 * @return
-	 */
-	public Collection<MemcachedClientStateListener> getStateListeners();
+			/**
+			 * Get all current state listeners
+			 * 
+			 * @return
+			 */
+			public Collection<MemcachedClientStateListener> getStateListeners();
 
-	public void flushAllWithNoReply(int exptime) throws InterruptedException,
+			public void flushAllWithNoReply(int exptime) throws InterruptedException,
 			MemcachedException;
 
-	public void flushAll(int exptime, long timeout) throws TimeoutException,
+			public void flushAll(int exptime, long timeout) throws TimeoutException,
 			InterruptedException, MemcachedException;
 
-	public void flushAllWithNoReply(InetSocketAddress address, int exptime)
-			throws MemcachedException, InterruptedException;
+			public void flushAllWithNoReply(InetSocketAddress address, int exptime)
+					throws MemcachedException, InterruptedException;
 
-	public void flushAll(InetSocketAddress address, long timeout, int exptime)
-			throws MemcachedException, InterruptedException, TimeoutException;
+			public void flushAll(InetSocketAddress address, long timeout, int exptime)
+					throws MemcachedException, InterruptedException, TimeoutException;
 
-	/**
-	 * If the memcached dump or network error cause connection closed,xmemcached
-	 * would try to heal the connection.The interval between reconnections is 2
-	 * seconds by default. You can change that value by this method.
-	 * 
-	 * @param healConnectionInterval
-	 *            MILLISECONDS
-	 */
-	public void setHealSessionInterval(long healConnectionInterval);
+			/**
+			 * If the memcached dump or network error cause connection closed,xmemcached
+			 * would try to heal the connection.The interval between reconnections is 2
+			 * seconds by default. You can change that value by this method.
+			 * 
+			 * @param healConnectionInterval
+			 *            MILLISECONDS
+			 */
+			public void setHealSessionInterval(long healConnectionInterval);
 
-	/**
-	 * If the memcached dump or network error cause connection closed,xmemcached
-	 * would try to heal the connection.You can disable this behaviour by using
-	 * this method:<br/>
-	 * <code> client.setEnableHealSession(false); </code><br/>
-	 * The default value is true.
-	 * 
-	 * @param enableHealSession
-	 * @since 1.3.9
-	 */
-	public void setEnableHealSession(boolean enableHealSession);
+			/**
+			 * If the memcached dump or network error cause connection closed,xmemcached
+			 * would try to heal the connection.You can disable this behaviour by using
+			 * this method:<br/>
+			 * <code> client.setEnableHealSession(false); </code><br/>
+			 * The default value is true.
+			 * 
+			 * @param enableHealSession
+			 * @since 1.3.9
+			 */
+			public void setEnableHealSession(boolean enableHealSession);
 
-	/**
-	 * Return the default heal session interval in milliseconds
-	 * 
-	 * @return
-	 */
-	public long getHealSessionInterval();
+			/**
+			 * Return the default heal session interval in milliseconds
+			 * 
+			 * @return
+			 */
+			public long getHealSessionInterval();
 
-	public Protocol getProtocol();
+			public Protocol getProtocol();
 
-	/**
-	 * Store all primitive type as string,defualt is false.
-	 */
-	public void setPrimitiveAsString(boolean primitiveAsString);
+			/**
+			 * Store all primitive type as string,defualt is false.
+			 */
+			public void setPrimitiveAsString(boolean primitiveAsString);
 
-	/**
-	 * In a high concurrent enviroment,you may want to pool memcached
-	 * clients.But a xmemcached client has to start a reactor thread and some
-	 * thread pools,if you create too many clients,the cost is very large.
-	 * Xmemcached supports connection pool instreadof client pool.you can create
-	 * more connections to one or more memcached servers,and these connections
-	 * share the same reactor and thread pools,it will reduce the cost of
-	 * system.
-	 * 
-	 * @param poolSize
-	 *            pool size,default is one,every memcached has only one
-	 *            connection.
-	 */
-	public void setConnectionPoolSize(int poolSize);
+			/**
+			 * In a high concurrent enviroment,you may want to pool memcached
+			 * clients.But a xmemcached client has to start a reactor thread and some
+			 * thread pools,if you create too many clients,the cost is very large.
+			 * Xmemcached supports connection pool instreadof client pool.you can create
+			 * more connections to one or more memcached servers,and these connections
+			 * share the same reactor and thread pools,it will reduce the cost of
+			 * system.
+			 * 
+			 * @param poolSize
+			 *            pool size,default is one,every memcached has only one
+			 *            connection.
+			 */
+			public void setConnectionPoolSize(int poolSize);
 
-	/**
-	 * Whether to enable heart beat
-	 * 
-	 * @param enableHeartBeat
-	 *            if true,then enable heartbeat,true by default
-	 */
-	public void setEnableHeartBeat(boolean enableHeartBeat);
+			/**
+			 * Whether to enable heart beat
+			 * 
+			 * @param enableHeartBeat
+			 *            if true,then enable heartbeat,true by default
+			 */
+			public void setEnableHeartBeat(boolean enableHeartBeat);
 
-	/**
-	 * Enables/disables sanitizing keys by URLEncoding.
-	 * 
-	 * @param sanitizeKey
-	 *            if true, then URLEncode all keys
-	 */
-	public void setSanitizeKeys(boolean sanitizeKey);
+			/**
+			 * Enables/disables sanitizing keys by URLEncoding.
+			 * 
+			 * @param sanitizeKey
+			 *            if true, then URLEncode all keys
+			 */
+			public void setSanitizeKeys(boolean sanitizeKey);
 
-	public boolean isSanitizeKeys();
+			public boolean isSanitizeKeys();
 
-	/**
-	 * Get counter for key,and if the key's value is not set,then set it with 0.
-	 * 
-	 * @param key
-	 * @return
-	 */
-	public Counter getCounter(String key);
+			/**
+			 * Get counter for key,and if the key's value is not set,then set it with 0.
+			 * 
+			 * @param key
+			 * @return
+			 */
+			public Counter getCounter(String key);
 
-	/**
-	 * Get counter for key,and if the key's value is not set,then set it with
-	 * initial value.
-	 * 
-	 * @param key
-	 * @param initialValue
-	 * @return
-	 */
-	public Counter getCounter(String key, long initialValue);
+			/**
+			 * Get counter for key,and if the key's value is not set,then set it with
+			 * initial value.
+			 * 
+			 * @param key
+			 * @param initialValue
+			 * @return
+			 */
+			public Counter getCounter(String key, long initialValue);
 
-	/**
-	 * Get key iterator for special memcached server.You must known that the
-	 * iterator is a snapshot for memcached all keys,it is not real-time.The
-	 * 'stats cachedump" has length limitation,so iterator could not visit all
-	 * keys if you have many keys.Your application should not be dependent on
-	 * this feature.
-	 * 
-	 * @deprecated memcached 1.6.x will remove cachedump stats command,so this
-	 *             method will be removed in the future
-	 * @param address
-	 * @return
-	 */
-	@Deprecated
-	public KeyIterator getKeyIterator(InetSocketAddress address)
-			throws MemcachedException, InterruptedException, TimeoutException;
+			/**
+			 * Get key iterator for special memcached server.You must known that the
+			 * iterator is a snapshot for memcached all keys,it is not real-time.The
+			 * 'stats cachedump" has length limitation,so iterator could not visit all
+			 * keys if you have many keys.Your application should not be dependent on
+			 * this feature.
+			 * 
+			 * @deprecated memcached 1.6.x will remove cachedump stats command,so this
+			 *             method will be removed in the future
+			 * @param address
+			 * @return
+			 */
+			@Deprecated
+			public KeyIterator getKeyIterator(InetSocketAddress address)
+					throws MemcachedException, InterruptedException, TimeoutException;
 
-	/**
-	 * Configure auth info
-	 * 
-	 * @param map
-	 *            Auth info map,key is memcached server address,and value is the
-	 *            auth info for the key.
-	 */
-	public void setAuthInfoMap(Map<InetSocketAddress, AuthInfo> map);
+			/**
+			 * Configure auth info
+			 * 
+			 * @param map
+			 *            Auth info map,key is memcached server address,and value is the
+			 *            auth info for the key.
+			 */
+			public void setAuthInfoMap(Map<InetSocketAddress, AuthInfo> map);
 
-	/**
-	 * return current all auth info
-	 * 
-	 * @return Auth info map,key is memcached server address,and value is the
-	 *         auth info for the key.
-	 */
-	public Map<InetSocketAddress, AuthInfo> getAuthInfoMap();
+			/**
+			 * return current all auth info
+			 * 
+			 * @return Auth info map,key is memcached server address,and value is the
+			 *         auth info for the key.
+			 */
+			public Map<InetSocketAddress, AuthInfo> getAuthInfoMap();
 
-	/**
-	 * "incr" are used to change data for some item in-place, incrementing it.
-	 * The data for the item is treated as decimal representation of a 64-bit
-	 * unsigned integer. If the current data value does not conform to such a
-	 * representation, the commands behave as if the value were 0. Also, the
-	 * item must already exist for incr to work; these commands won't pretend
-	 * that a non-existent key exists with value 0; instead, it will fail.This
-	 * method doesn't wait for reply.
-	 * 
-	 * @param key
-	 * @param delta
-	 * @param initValue
-	 *            the initial value to be added when value is not found
-	 * @param timeout
-	 * @param exp
-	 *            the initial vlaue expire time, in seconds. Can be up to 30
-	 *            days. After 30 days, is treated as a unix timestamp of an
-	 *            exact date.
-	 * @return
-	 * @throws TimeoutException
-	 * @throws InterruptedException
-	 * @throws MemcachedException
-	 */
-	long decr(String key, long delta, long initValue, long timeout, int exp)
-			throws TimeoutException, InterruptedException, MemcachedException;
+			/**
+			 * "incr" are used to change data for some item in-place, incrementing it.
+			 * The data for the item is treated as decimal representation of a 64-bit
+			 * unsigned integer. If the current data value does not conform to such a
+			 * representation, the commands behave as if the value were 0. Also, the
+			 * item must already exist for incr to work; these commands won't pretend
+			 * that a non-existent key exists with value 0; instead, it will fail.This
+			 * method doesn't wait for reply.
+			 * 
+			 * @param key
+			 * @param delta
+			 * @param initValue
+			 *            the initial value to be added when value is not found
+			 * @param timeout
+			 * @param exp
+			 *            the initial vlaue expire time, in seconds. Can be up to 30
+			 *            days. After 30 days, is treated as a unix timestamp of an
+			 *            exact date.
+			 * @return
+			 * @throws TimeoutException
+			 * @throws InterruptedException
+			 * @throws MemcachedException
+			 */
+			long decr(String key, long delta, long initValue, long timeout, int exp)
+					throws TimeoutException, InterruptedException, MemcachedException;
 
-	/**
-	 * "incr" are used to change data for some item in-place, incrementing it.
-	 * The data for the item is treated as decimal representation of a 64-bit
-	 * unsigned integer. If the current data value does not conform to such a
-	 * representation, the commands behave as if the value were 0. Also, the
-	 * item must already exist for incr to work; these commands won't pretend
-	 * that a non-existent key exists with value 0; instead, it will fail.This
-	 * method doesn't wait for reply.
-	 * 
-	 * @param key
-	 *            key
-	 * @param delta
-	 *            increment delta
-	 * @param initValue
-	 *            the initial value to be added when value is not found
-	 * @param timeout
-	 *            operation timeout
-	 * @param exp
-	 *            the initial vlaue expire time, in seconds. Can be up to 30
-	 *            days. After 30 days, is treated as a unix timestamp of an
-	 *            exact date.
-	 * @return
-	 * @throws TimeoutException
-	 * @throws InterruptedException
-	 * @throws MemcachedException
-	 */
-	long incr(String key, long delta, long initValue, long timeout, int exp)
-			throws TimeoutException, InterruptedException, MemcachedException;
+			/**
+			 * "incr" are used to change data for some item in-place, incrementing it.
+			 * The data for the item is treated as decimal representation of a 64-bit
+			 * unsigned integer. If the current data value does not conform to such a
+			 * representation, the commands behave as if the value were 0. Also, the
+			 * item must already exist for incr to work; these commands won't pretend
+			 * that a non-existent key exists with value 0; instead, it will fail.This
+			 * method doesn't wait for reply.
+			 * 
+			 * @param key
+			 *            key
+			 * @param delta
+			 *            increment delta
+			 * @param initValue
+			 *            the initial value to be added when value is not found
+			 * @param timeout
+			 *            operation timeout
+			 * @param exp
+			 *            the initial vlaue expire time, in seconds. Can be up to 30
+			 *            days. After 30 days, is treated as a unix timestamp of an
+			 *            exact date.
+			 * @return
+			 * @throws TimeoutException
+			 * @throws InterruptedException
+			 * @throws MemcachedException
+			 */
+			long incr(String key, long delta, long initValue, long timeout, int exp)
+					throws TimeoutException, InterruptedException, MemcachedException;
 
-	/**
-	 * Return the cache instance name
-	 * 
-	 * @return
-	 */
-	public String getName();
+			/**
+			 * Return the cache instance name
+			 * 
+			 * @return
+			 */
+			public String getName();
 
-	/**
-	 * Set cache instance name
-	 * 
-	 * @param name
-	 */
-	public void setName(String name);
+			/**
+			 * Set cache instance name
+			 * 
+			 * @param name
+			 */
+			public void setName(String name);
 
-	/**
-	 * Returns reconnecting task queue,the queue is thread-safe and 'weakly
-	 * consistent',but maybe you <strong>should not modify it</strong> at all.
-	 * 
-	 * @return The reconnecting task queue,if the client has not been
-	 *         started,returns null.
-	 */
-	public Queue<ReconnectRequest> getReconnectRequestQueue();
+			/**
+			 * Returns reconnecting task queue,the queue is thread-safe and 'weakly
+			 * consistent',but maybe you <strong>should not modify it</strong> at all.
+			 * 
+			 * @return The reconnecting task queue,if the client has not been
+			 *         started,returns null.
+			 */
+			public Queue<ReconnectRequest> getReconnectRequestQueue();
 
-	/**
-	 * Configure wheather to set client in failure mode.If set it to true,that
-	 * means you want to configure client in failure mode. Failure mode is that
-	 * when a memcached server is down,it would not taken from the server list
-	 * but marked as unavailable,and then further requests to this server will
-	 * be transformed to standby node if configured or throw an exception until
-	 * it comes back up.
-	 * 
-	 * @param failureMode
-	 *            true is to configure client in failure mode.
-	 */
-	public void setFailureMode(boolean failureMode);
+			/**
+			 * Configure wheather to set client in failure mode.If set it to true,that
+			 * means you want to configure client in failure mode. Failure mode is that
+			 * when a memcached server is down,it would not taken from the server list
+			 * but marked as unavailable,and then further requests to this server will
+			 * be transformed to standby node if configured or throw an exception until
+			 * it comes back up.
+			 * 
+			 * @param failureMode
+			 *            true is to configure client in failure mode.
+			 */
+			public void setFailureMode(boolean failureMode);
 
-	/**
-	 * Returns if client is in failure mode.
-	 * 
-	 * @return
-	 */
-	public boolean isFailureMode();
+			/**
+			 * Returns if client is in failure mode.
+			 * 
+			 * @return
+			 */
+			public boolean isFailureMode();
 
-	/**
-	 * Set a key provider for pre-processing keys before sending them to
-	 * memcached.
-	 * 
-	 * @since 1.3.8
-	 * @param keyProvider
-	 */
-	public void setKeyProvider(KeyProvider keyProvider);
+			/**
+			 * Set a key provider for pre-processing keys before sending them to
+			 * memcached.
+			 * 
+			 * @since 1.3.8
+			 * @param keyProvider
+			 */
+			public void setKeyProvider(KeyProvider keyProvider);
 
-	/**
-	 * Returns maximum number of timeout exception for closing connection.
-	 * 
-	 * @return
-	 */
-	public int getTimeoutExceptionThreshold();
+			/**
+			 * Returns maximum number of timeout exception for closing connection.
+			 * 
+			 * @return
+			 */
+			public int getTimeoutExceptionThreshold();
 
-	/**
-	 * Set maximum number of timeout exception for closing connection.You can
-	 * set it to be a large value to disable this feature.
-	 * 
-	 * @see #DEFAULT_MAX_TIMEOUTEXCEPTION_THRESHOLD
-	 * @param timeoutExceptionThreshold
-	 */
-	public void setTimeoutExceptionThreshold(int timeoutExceptionThreshold);
+			/**
+			 * Set maximum number of timeout exception for closing connection.You can
+			 * set it to be a large value to disable this feature.
+			 * 
+			 * @see #DEFAULT_MAX_TIMEOUTEXCEPTION_THRESHOLD
+			 * @param timeoutExceptionThreshold
+			 */
+			public void setTimeoutExceptionThreshold(int timeoutExceptionThreshold);
 
-	/**
-	 * Invalidate all namespace under the namespace using the default operation
-	 * timeout.
-	 * 
-	 * @since 1.4.2
-	 * @param ns
-	 *            the namespace
-	 * @throws MemcachedException
-	 * @throws InterruptedException
-	 * @throws TimeoutException
-	 */
-	public abstract void invalidateNamespace(String ns)
-			throws MemcachedException, InterruptedException, TimeoutException;
+			/**
+			 * Invalidate all namespace under the namespace using the default operation
+			 * timeout.
+			 * 
+			 * @since 1.4.2
+			 * @param ns
+			 *            the namespace
+			 * @throws MemcachedException
+			 * @throws InterruptedException
+			 * @throws TimeoutException
+			 */
+			public abstract void invalidateNamespace(String ns)
+					throws MemcachedException, InterruptedException, TimeoutException;
 
-	/**
-	 * Invalidate all items under the namespace.
-	 * 
-	 * @since 1.4.2
-	 * @param ns
-	 *            the namespace
-	 * @param opTimeout
-	 *            operation timeout in milliseconds.
-	 * @throws MemcachedException
-	 * @throws InterruptedException
-	 * @throws TimeoutException
-	 */
-	public void invalidateNamespace(String ns, long opTimeout)
-			throws MemcachedException, InterruptedException, TimeoutException;
+			/**
+			 * Invalidate all items under the namespace.
+			 * 
+			 * @since 1.4.2
+			 * @param ns
+			 *            the namespace
+			 * @param opTimeout
+			 *            operation timeout in milliseconds.
+			 * @throws MemcachedException
+			 * @throws InterruptedException
+			 * @throws TimeoutException
+			 */
+			public void invalidateNamespace(String ns, long opTimeout)
+					throws MemcachedException, InterruptedException, TimeoutException;
 
-	/**
-	 * Remove current namespace set for this memcached client.It must begin with
-	 * {@link #beginWithNamespace(String)} method.
-	 * @see #beginWithNamespace(String)
-	 */
-	public void endWithNamespace();
+			/**
+			 * Remove current namespace set for this memcached client.It must begin with
+			 * {@link #beginWithNamespace(String)} method.
+			 * @see #beginWithNamespace(String)
+			 */
+			public void endWithNamespace();
 
-	/**
-	 * set current namespace for following operations with memcached client.It
-	 * must be ended with {@link #endWithNamespace()} method.For example:
-	 * <pre>
-	 *    memcachedClient.beginWithNamespace(userId);
-	 *    try{
-	 *      memcachedClient.set("username",0,username);
-	 *      memcachedClient.set("email",0,email);
-	 *    }finally{
-	 *      memcachedClient.endWithNamespace();
-	 *    }
-	 * </pre>
-	 * @see #endWithNamespace()
-	 * @see #withNamespace(String, MemcachedClientCallable)
-	 * @param ns
-	 */
-	public void beginWithNamespace(String ns);
+			/**
+			 * set current namespace for following operations with memcached client.It
+			 * must be ended with {@link #endWithNamespace()} method.For example:
+			 * <pre>
+			 *    memcachedClient.beginWithNamespace(userId);
+			 *    try{
+			 *      memcachedClient.set("username",0,username);
+			 *      memcachedClient.set("email",0,email);
+			 *    }finally{
+			 *      memcachedClient.endWithNamespace();
+			 *    }
+			 * </pre>
+			 * @see #endWithNamespace()
+			 * @see #withNamespace(String, MemcachedClientCallable)
+			 * @param ns
+			 */
+			public void beginWithNamespace(String ns);
 
-	/**
-	 * With the namespae to do something with current memcached client.All
-	 * operations with memcached client done in callable will be under the
-	 * namespace. {@link #beginWithNamespace(String)} and {@link #endWithNamespace()} will called around automatically.
-	 * For example:
-	 * <pre>
-	 *   memcachedClient.withNamespace(userId,new MemcachedClientCallable<Void>{
-	 *     public Void call(MemcachedClient client) throws MemcachedException,
+			/**
+			 * With the namespae to do something with current memcached client.All
+			 * operations with memcached client done in callable will be under the
+			 * namespace. {@link #beginWithNamespace(String)} and {@link #endWithNamespace()} will called around automatically.
+			 * For example:
+			 * <pre>
+			 *   memcachedClient.withNamespace(userId,new MemcachedClientCallable<Void>{
+			 *     public Void call(MemcachedClient client) throws MemcachedException,
 			InterruptedException, TimeoutException{
-	 *      client.set("username",0,username);
-	 *      client.set("email",0,email);
-	 *      return null;
-	 *     }
-	 *   }); 
-	 *   //invalidate all items under the namespace.
-	 *   memcachedClient.invalidateNamespace(userId);
-	 * </pre>
-	 * 
-	 * @since 1.4.2
-	 * @param ns
-	 * @param callable
-	 * @see #beginWithNamespace(String)
-	 * @see #endWithNamespace()
-	 * @return
-	 */
-	public <T> T withNamespace(String ns, MemcachedClientCallable<T> callable)
-			throws MemcachedException, InterruptedException, TimeoutException;
+			 *      client.set("username",0,username);
+			 *      client.set("email",0,email);
+			 *      return null;
+			 *     }
+			 *   });
+			 *   //invalidate all items under the namespace.
+			 *   memcachedClient.invalidateNamespace(userId);
+			 * </pre>
+			 * 
+			 * @since 1.4.2
+			 * @param ns
+			 * @param callable
+			 * @see #beginWithNamespace(String)
+			 * @see #endWithNamespace()
+			 * @return
+			 */
+			public <T> T withNamespace(String ns, MemcachedClientCallable<T> callable)
+					throws MemcachedException, InterruptedException, TimeoutException;
 
 }

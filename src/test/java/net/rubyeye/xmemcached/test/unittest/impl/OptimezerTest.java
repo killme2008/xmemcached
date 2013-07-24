@@ -74,7 +74,7 @@ public class OptimezerTest extends TestCase {
 
 		int limit = 100;
 		BinarySetMultiCommand optimiezedCommand = (BinarySetMultiCommand) this.optimiezer
-				.optimiezeSet(writeQueue, executingCmds, this.currentCmd, limit);
+				.optimiezeSet(this.writeQueue, this.executingCmds, this.currentCmd, limit);
 		assertEquals(optimiezedCommand.getMergeCount(),
 				Math.round((double) limit / oneBufferSize));
 	}
@@ -97,7 +97,7 @@ public class OptimezerTest extends TestCase {
 		this.currentCmd.encode();
 
 		BinarySetMultiCommand optimiezedCommand = (BinarySetMultiCommand) this.optimiezer
-				.optimiezeSet(writeQueue, executingCmds, this.currentCmd,
+				.optimiezeSet(this.writeQueue, this.executingCmds, this.currentCmd,
 						Integer.MAX_VALUE);
 		assertEquals(optimiezedCommand.getMergeCount(), 10);
 	}
@@ -217,7 +217,8 @@ public class OptimezerTest extends TestCase {
 		// send five delete operation
 		for (int i = 5; i < 10; i++) {
 			Command cmd = this.commandFactory.createDeleteCommand(
-					String.valueOf(i), String.valueOf(i).getBytes(), 0, false);
+					String.valueOf(i), String.valueOf(i).getBytes(), 0, 0,
+					false);
 			this.writeQueue.add(cmd);
 			cmd.setWriteFuture(new FutureImpl<Boolean>());
 		}
@@ -292,7 +293,8 @@ public class OptimezerTest extends TestCase {
 		this.optimiezer.setOptimizeMergeBuffer(true);
 		for (int i = 0; i < 10; i++) {
 			Command deleteCommand = this.commandFactory.createDeleteCommand(
-					String.valueOf(i), String.valueOf(i).getBytes(), 0, false);
+					String.valueOf(i), String.valueOf(i).getBytes(), 0, 0,
+					false);
 			deleteCommand.encode();
 			this.writeQueue.add(deleteCommand);
 			deleteCommand.setWriteFuture(new FutureImpl<Boolean>());

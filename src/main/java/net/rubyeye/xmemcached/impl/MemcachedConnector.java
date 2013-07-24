@@ -57,7 +57,6 @@ import com.google.code.yanf4j.nio.NioSession;
 import com.google.code.yanf4j.nio.NioSessionConfig;
 import com.google.code.yanf4j.nio.impl.SocketChannelController;
 import com.google.code.yanf4j.util.ConcurrentHashSet;
-import com.google.code.yanf4j.util.LinkedTransferQueue;
 import com.google.code.yanf4j.util.SystemUtils;
 
 /**
@@ -66,12 +65,12 @@ import com.google.code.yanf4j.util.SystemUtils;
  * @author dennis
  */
 public class MemcachedConnector extends SocketChannelController implements
-		Connector {
+Connector {
 
-    public static final String XMEMCACHED_SELECTOR_POOL_SIZE = "xmemcached.selector.pool.size";
-    public static final int DEFAULT_SELECTOR_POOL_SIZE = System.getProperty(XMEMCACHED_SELECTOR_POOL_SIZE) == null ? 2 * Runtime.getRuntime().availableProcessors() : Integer.parseInt(System.getProperty(XMEMCACHED_SELECTOR_POOL_SIZE));
-    private final DelayQueue<ReconnectRequest> waitingQueue = new DelayQueue<ReconnectRequest>();
-    private BufferAllocator bufferAllocator;
+	public static final String XMEMCACHED_SELECTOR_POOL_SIZE = "xmemcached.selector.pool.size";
+	public static final int DEFAULT_SELECTOR_POOL_SIZE = System.getProperty(XMEMCACHED_SELECTOR_POOL_SIZE) == null ? 2 * Runtime.getRuntime().availableProcessors() : Integer.parseInt(System.getProperty(XMEMCACHED_SELECTOR_POOL_SIZE));
+	private final DelayQueue<ReconnectRequest> waitingQueue = new DelayQueue<ReconnectRequest>();
+	private BufferAllocator bufferAllocator;
 
 	private final Set<InetSocketAddress> removedAddrSet = new ConcurrentHashSet<InetSocketAddress>();
 
@@ -84,11 +83,11 @@ public class MemcachedConnector extends SocketChannelController implements
 	private volatile boolean failureMode;
 
 	private final ConcurrentHashMap<InetSocketAddress/* Main node address */, List<Session>/*
-																						 * standby
-																						 * sessions
-																						 */> standbySessionMap = new ConcurrentHashMap<InetSocketAddress, List<Session>>();
+	 * standby
+	 * sessions
+	 */> standbySessionMap = new ConcurrentHashMap<InetSocketAddress, List<Session>>();
 
-	private FlowControl flowControl;
+	private final FlowControl flowControl;
 
 	public void setSessionLocator(MemcachedSessionLocator sessionLocator) {
 		this.sessionLocator = sessionLocator;
@@ -107,7 +106,7 @@ public class MemcachedConnector extends SocketChannelController implements
 
 		@Override
 		public void run() {
-			while (MemcachedConnector.this.isStarted() && enableHealSession) {
+			while (MemcachedConnector.this.isStarted() && MemcachedConnector.this.enableHealSession) {
 				ReconnectRequest request = null;
 				try {
 					request = MemcachedConnector.this.waitingQueue.take();
@@ -140,7 +139,7 @@ public class MemcachedConnector extends SocketChannelController implements
 							future.cancel(true);
 						} finally {
 							if (!connected) {
-								rescheduleConnectRequest(request);
+								this.rescheduleConnectRequest(request);
 							} else {
 								continue;
 							}
@@ -153,7 +152,7 @@ public class MemcachedConnector extends SocketChannelController implements
 					// ignore,check status
 				} catch (Exception e) {
 					log.error("SessionMonitor connect error", e);
-					rescheduleConnectRequest(request);
+					this.rescheduleConnectRequest(request);
 				}
 			}
 		}
@@ -177,8 +176,8 @@ public class MemcachedConnector extends SocketChannelController implements
 	public void setEnableHealSession(boolean enableHealSession) {
 		this.enableHealSession = enableHealSession;
 		//wake up session monitor thread.
-		if (sessionMonitor != null && sessionMonitor.isAlive()) {
-			sessionMonitor.interrupt();
+		if (this.sessionMonitor != null && this.sessionMonitor.isAlive()) {
+			this.sessionMonitor.interrupt();
 		}
 	}
 
@@ -197,7 +196,7 @@ public class MemcachedConnector extends SocketChannelController implements
 	}
 
 	public final void setHealSessionInterval(long healConnectionInterval) {
-		this.healSessionInterval = healConnectionInterval;		
+		this.healSessionInterval = healConnectionInterval;
 	}
 
 	public long getHealSessionInterval() {
@@ -210,7 +209,7 @@ public class MemcachedConnector extends SocketChannelController implements
 
 	public void setOptimizeMergeBuffer(boolean optimizeMergeBuffer) {
 		((OptimizerMBean) this.optimiezer)
-				.setOptimizeMergeBuffer(optimizeMergeBuffer);
+		.setOptimizeMergeBuffer(optimizeMergeBuffer);
 	}
 
 	public Protocol getProtocol() {
@@ -219,12 +218,20 @@ public class MemcachedConnector extends SocketChannelController implements
 
 	protected MemcachedSessionLocator sessionLocator;
 
+
 	protected final ConcurrentHashMap<InetSocketAddress, Queue<Session>> sessionMap = new ConcurrentHashMap<InetSocketAddress, Queue<Session>>();
 
 	public synchronized void addSession(Session session) {
 		MemcachedSession tcpSession = (MemcachedSession) session;
+
 		InetSocketAddressWrapper addrWrapper = tcpSession
 				.getInetSocketAddressWrapper();
+		// Remember the first time address resolved and use it in all
+		// application lifecycle.
+		if (addrWrapper.getRemoteAddressStr() == null) {
+			addrWrapper.setRemoteAddressStr(String.valueOf(session
+					.getRemoteSocketAddress()));
+		}
 
 		InetSocketAddress mainNodeAddress = addrWrapper.getMainNodeAddress();
 		if (mainNodeAddress != null) {
@@ -315,7 +322,7 @@ public class MemcachedConnector extends SocketChannelController implements
 				it.remove();
 				log.warn("Remove invalid reconnect task for "
 						+ request.getInetSocketAddressWrapper()
-								.getInetSocketAddress());
+						.getInetSocketAddress());
 			}
 		}
 	}
@@ -390,18 +397,18 @@ public class MemcachedConnector extends SocketChannelController implements
 		key.interestOps(key.interestOps() & ~SelectionKey.OP_CONNECT);
 		ConnectFuture future = (ConnectFuture) key.attachment();
 		if (future == null || future.isCancelled()) {
-			cancelKey(key);
+			this.cancelKey(key);
 			return;
 		}
 		try {
 			if (!((SocketChannel) key.channel()).finishConnect()) {
-				cancelKey(key);
+				this.cancelKey(key);
 				future.failure(new IOException("Connect to "
 						+ SystemUtils.getRawAddress(future
 								.getInetSocketAddressWrapper()
 								.getInetSocketAddress())
-						+ ":"
-						+ future.getInetSocketAddressWrapper()
+								+ ":"
+								+ future.getInetSocketAddressWrapper()
 								.getInetSocketAddress().getPort() + " fail"));
 			} else {
 				key.attach(null);
@@ -412,22 +419,23 @@ public class MemcachedConnector extends SocketChannelController implements
 			}
 		} catch (Exception e) {
 			future.failure(e);
-			cancelKey(key);
+			this.cancelKey(key);
 			throw new IOException("Connect to "
 					+ SystemUtils.getRawAddress(future
 							.getInetSocketAddressWrapper()
 							.getInetSocketAddress())
-					+ ":"
-					+ future.getInetSocketAddressWrapper()
+							+ ":"
+							+ future.getInetSocketAddressWrapper()
 							.getInetSocketAddress().getPort() + " fail,"
-					+ e.getMessage());
+							+ e.getMessage());
 		}
 	}
 
 	private void cancelKey(SelectionKey key) throws IOException {
 		try {
-			if (key.channel() != null)
+			if (key.channel() != null) {
 				key.channel().close();
+			}
 		} finally {
 			key.cancel();
 		}
@@ -498,8 +506,8 @@ public class MemcachedConnector extends SocketChannelController implements
 			throw new MemcachedException("Session("
 					+ SystemUtils.getRawAddress(session
 							.getRemoteSocketAddress()) + ":"
-					+ session.getRemoteSocketAddress().getPort()
-					+ ") has been closed");
+							+ session.getRemoteSocketAddress().getPort()
+							+ ") has been closed");
 		}
 		if (session.isAuthFailed()) {
 			throw new MemcachedException("Auth failed to connection "
@@ -551,7 +559,7 @@ public class MemcachedConnector extends SocketChannelController implements
 		}
 
 		public void onReady(Controller controller) {
-			sessionMonitor.start();
+			MemcachedConnector.this.sessionMonitor.start();
 		}
 
 		public void onStarted(Controller controller) {
@@ -559,8 +567,8 @@ public class MemcachedConnector extends SocketChannelController implements
 		}
 
 		public void onStopped(Controller controller) {
-			if (sessionMonitor.isAlive()) {
-				sessionMonitor.interrupt();
+			if (MemcachedConnector.this.sessionMonitor.isAlive()) {
+				MemcachedConnector.this.sessionMonitor.interrupt();
 			}
 		}
 
@@ -632,7 +640,7 @@ public class MemcachedConnector extends SocketChannelController implements
 	 */
 	@Override
 	protected Queue<WriteMessage> buildQueue() {
-		return new FlowControlLinkedTransferQueue(flowControl);
+		return new FlowControlLinkedTransferQueue(this.flowControl);
 	}
 
 	public BufferAllocator getBufferAllocator() {

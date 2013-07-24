@@ -51,7 +51,7 @@ public class BinaryCommandFactory implements CommandFactory {
 
 	public Command createAddCommand(String key, byte[] keyBytes, int exp,
 			Object value, boolean noreply, Transcoder transcoder) {
-		return createStoreCommand(key, keyBytes, exp, value, CommandType.ADD,
+		return this.createStoreCommand(key, keyBytes, exp, value, CommandType.ADD,
 				noreply, transcoder);
 	}
 
@@ -69,8 +69,9 @@ public class BinaryCommandFactory implements CommandFactory {
 	}
 
 	public Command createDeleteCommand(String key, byte[] keyBytes, int time,
+			long cas,
 			boolean noreply) {
-		return new BinaryDeleteCommand(key, keyBytes, CommandType.DELETE,
+		return new BinaryDeleteCommand(key, keyBytes, cas, CommandType.DELETE,
 				new CountDownLatch(1), noreply);
 	}
 
@@ -137,7 +138,7 @@ public class BinaryCommandFactory implements CommandFactory {
 
 	public Command createReplaceCommand(String key, byte[] keyBytes, int exp,
 			Object value, boolean noreply, Transcoder transcoder) {
-		return createStoreCommand(key, keyBytes, exp, value,
+		return this.createStoreCommand(key, keyBytes, exp, value,
 				CommandType.REPLACE, noreply, transcoder);
 	}
 
@@ -150,7 +151,7 @@ public class BinaryCommandFactory implements CommandFactory {
 
 	public Command createSetCommand(String key, byte[] keyBytes, int exp,
 			Object value, boolean noreply, Transcoder transcoder) {
-		return createStoreCommand(key, keyBytes, exp, value, CommandType.SET,
+		return this.createStoreCommand(key, keyBytes, exp, value, CommandType.SET,
 				noreply, transcoder);
 	}
 
@@ -189,7 +190,7 @@ public class BinaryCommandFactory implements CommandFactory {
 			CountDownLatch latch, int exp, boolean noreply) {
 		return new BinaryGetAndTouchCommand(key, keyBytes,
 				noreply ? CommandType.GATQ : CommandType.GAT, latch, exp,
-				noreply);
+						noreply);
 	}
 
 	public Command createTouchCommand(String key, byte[] keyBytes,

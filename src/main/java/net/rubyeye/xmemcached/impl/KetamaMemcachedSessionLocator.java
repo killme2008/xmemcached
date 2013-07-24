@@ -47,7 +47,7 @@ import com.google.code.yanf4j.core.Session;
  * 
  */
 public class KetamaMemcachedSessionLocator extends
-		AbstractMemcachedSessionLocator {
+AbstractMemcachedSessionLocator {
 
 	static final int NUM_REPS = 160;
 	private transient volatile TreeMap<Long, List<Session>> ketamaSessions = new TreeMap<Long, List<Session>>();
@@ -92,8 +92,8 @@ public class KetamaMemcachedSessionLocator extends
 	private final void buildMap(Collection<Session> list, HashAlgorithm alg) {
 		TreeMap<Long, List<Session>> sessionMap = new TreeMap<Long, List<Session>>();
 
-		String sockStr;
 		for (Session session : list) {
+			String sockStr = null;
 			if (this.cwNginxUpstreamConsistent) {
 				InetSocketAddress serverAddress = session
 						.getRemoteSocketAddress();
@@ -102,7 +102,15 @@ public class KetamaMemcachedSessionLocator extends
 					sockStr = sockStr + ":" + serverAddress.getPort();
 				}
 			} else {
-				sockStr = String.valueOf(session.getRemoteSocketAddress());
+				if (session instanceof MemcachedTCPSession) {
+					// Always use the first time resolved address.
+					sockStr = ((MemcachedTCPSession) session)
+							.getInetSocketAddressWrapper()
+							.getRemoteAddressStr();
+				}
+				if (sockStr == null) {
+					sockStr = String.valueOf(session.getRemoteSocketAddress());
+				}
 			}
 			/**
 			 * Duplicate 160 X weight references

@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import net.rubyeye.xmemcached.GetsResponse;
 import net.rubyeye.xmemcached.MemcachedClientBuilder;
 import net.rubyeye.xmemcached.XMemcachedClientBuilder;
 import net.rubyeye.xmemcached.command.BinaryCommandFactory;
@@ -52,46 +53,47 @@ public class BinaryMemcachedClientUnitTest extends XMemcachedClientTest {
 		return builder;
 	}
 
+	@Override
 	@Test
 	public void testTouch() throws Exception {
-		if (isMemcached1_6()) {
-			assertNull(memcachedClient.get("name"));
-			memcachedClient.set("name", 1, "dennis", new StringTranscoder(),
+		if (this.isMemcached1_6()) {
+			assertNull(this.memcachedClient.get("name"));
+			this.memcachedClient.set("name", 1, "dennis", new StringTranscoder(),
 					1000);
-			assertEquals("dennis", memcachedClient.get("name",
+			assertEquals("dennis", this.memcachedClient.get("name",
 					new StringTranscoder()));
 
 			// touch expiration to three seconds
-			System.out.println(memcachedClient.touch("name", 3));
+			System.out.println(this.memcachedClient.touch("name", 3));
 			Thread.sleep(2000);
-			assertEquals("dennis", memcachedClient.get("name",
+			assertEquals("dennis", this.memcachedClient.get("name",
 					new StringTranscoder()));
 			Thread.sleep(1500);
-			assertNull(memcachedClient.get("name"));
+			assertNull(this.memcachedClient.get("name"));
 		}
 	}
 
 	@Test
 	public void testTouchNotExists() throws Exception {
-		if (isMemcached1_6()) {
-			assertNull(memcachedClient.get("name"));
-			assertFalse(memcachedClient.touch("name", 3));
+		if (this.isMemcached1_6()) {
+			assertNull(this.memcachedClient.get("name"));
+			assertFalse(this.memcachedClient.touch("name", 3));
 		}
 	}
 
 	@Test
 	public void testGetAndTouch_OneKey() throws Exception {
-		if (isMemcached1_6()) {
-			assertNull(memcachedClient.get("name"));
-			memcachedClient.set("name", 1, "dennis", new StringTranscoder(),
+		if (this.isMemcached1_6()) {
+			assertNull(this.memcachedClient.get("name"));
+			this.memcachedClient.set("name", 1, "dennis", new StringTranscoder(),
 					1000);
-			assertEquals("dennis", memcachedClient.getAndTouch("name", 3));
+			assertEquals("dennis", this.memcachedClient.getAndTouch("name", 3));
 
 			Thread.sleep(2000);
-			assertEquals("dennis", memcachedClient.get("name",
+			assertEquals("dennis", this.memcachedClient.get("name",
 					new StringTranscoder()));
 			Thread.sleep(1500);
-			assertNull(memcachedClient.get("name"));
+			assertNull(this.memcachedClient.get("name"));
 		}
 	}
 
@@ -108,12 +110,24 @@ public class BinaryMemcachedClientUnitTest extends XMemcachedClientTest {
 
 	@Test
 	public void testGetAndTouch_NotExistsKey() throws Exception {
-		if (isMemcached1_6()) {
-			assertNull(memcachedClient.get("name"));
-			assertNull(memcachedClient.getAndTouch("name", 3));
-			assertNull(memcachedClient.getAndTouch("name", 3));
-			assertNull(memcachedClient.get("name"));
+		if (this.isMemcached1_6()) {
+			assertNull(this.memcachedClient.get("name"));
+			assertNull(this.memcachedClient.getAndTouch("name", 3));
+			assertNull(this.memcachedClient.getAndTouch("name", 3));
+			assertNull(this.memcachedClient.get("name"));
 		}
+	}
+
+	@Test
+	public void testDeleteWithCAS()throws Exception{
+		this.memcachedClient.set("a", 0, 1);
+		GetsResponse<Integer> gets = this.memcachedClient.gets("a");
+		this.memcachedClient.set("a", 0, 2);
+		assertFalse(this.memcachedClient.delete("a", gets.getCas(), 1000));
+		assertEquals(2, this.memcachedClient.get("a"));
+		gets = this.memcachedClient.gets("a");
+		assertTrue(this.memcachedClient.delete("a", gets.getCas(), 1000));
+		assertNull(this.memcachedClient.get("a"));
 	}
 
 	@Test
