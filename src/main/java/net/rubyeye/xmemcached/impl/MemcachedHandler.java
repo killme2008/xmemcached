@@ -14,13 +14,9 @@ package net.rubyeye.xmemcached.impl;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import net.rubyeye.xmemcached.FlowControl;
 import net.rubyeye.xmemcached.MemcachedClient;
 import net.rubyeye.xmemcached.MemcachedClientStateListener;
 import net.rubyeye.xmemcached.auth.AuthMemcachedConnectListener;
@@ -30,9 +26,7 @@ import net.rubyeye.xmemcached.command.MapReturnValueAware;
 import net.rubyeye.xmemcached.command.OperationStatus;
 import net.rubyeye.xmemcached.command.StoreCommand;
 import net.rubyeye.xmemcached.command.binary.BinaryGetCommand;
-import net.rubyeye.xmemcached.command.binary.BinaryGetMultiCommand;
 import net.rubyeye.xmemcached.command.binary.BinaryVersionCommand;
-import net.rubyeye.xmemcached.command.text.TextGetMultiCommand;
 import net.rubyeye.xmemcached.command.text.TextGetOneCommand;
 import net.rubyeye.xmemcached.command.text.TextVersionCommand;
 import net.rubyeye.xmemcached.monitor.StatisticsHandler;
@@ -50,6 +44,9 @@ import com.google.code.yanf4j.core.Session;
 import com.google.code.yanf4j.core.impl.AbstractSession;
 import com.google.code.yanf4j.core.impl.HandlerAdapter;
 import com.google.code.yanf4j.util.SystemUtils;
+import java.util.concurrent.SynchronousQueue;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.ThreadPoolExecutor;
 
 /**
  * Memcached Session Handler,used for dispatching commands and session's
@@ -292,12 +289,28 @@ public class MemcachedHandler extends HandlerAdapter {
 	final long HEARTBEAT_PERIOD = Long.parseLong(System.getProperty(
 			"xmemcached.heartbeat.period", "5000"));
 
-	public void start() {
-		int serverSize = this.client.getAvaliableServers().size();
-		this.heartBeatThreadPool = Executors
-				.newFixedThreadPool(serverSize == 0 ? Runtime.getRuntime()
-						.availableProcessors() : serverSize);
-	}
+	 public void start() {
+        final String name = "XMemcached-HeartBeatPool[" + client.getName() + "]";
+        final AtomicInteger threadCounter = new AtomicInteger();
+        
+        long keepAliveTime = client.getConnector().getSessionIdleTimeout() * 3 / 2;
+        
+        this.heartBeatThreadPool = new ThreadPoolExecutor(0, Runtime.getRuntime().availableProcessors(),
+                keepAliveTime, TimeUnit.MILLISECONDS,
+                new SynchronousQueue<Runnable>(),
+                new ThreadFactory() {
+            public Thread newThread(Runnable r) {
+                Thread t = new Thread(r, name + "-" + threadCounter.getAndIncrement());
+                if (t.isDaemon()) {
+                    t.setDaemon(false);
+                }
+                if (t.getPriority() != Thread.NORM_PRIORITY) {
+                    t.setPriority(Thread.NORM_PRIORITY);
+                }
+                return t;
+            }
+        }, new ThreadPoolExecutor.DiscardPolicy());
+    }
 
 	public MemcachedHandler(MemcachedClient client) {
 		super();
