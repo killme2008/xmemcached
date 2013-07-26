@@ -57,6 +57,8 @@ import java.util.concurrent.ThreadPoolExecutor;
  */
 public class MemcachedHandler extends HandlerAdapter {
 
+	private static final int MAX_HEARTBEAT_THREADS = Integer.parseInt(System.getProperty("xmemcached.heartbeat.max_threads", String.valueOf(Runtime.getRuntime().availableProcessors())));
+
 	private final StatisticsHandler statisticsHandler;
 
 	private ExecutorService heartBeatThreadPool;
@@ -295,7 +297,7 @@ public class MemcachedHandler extends HandlerAdapter {
         
         long keepAliveTime = client.getConnector().getSessionIdleTimeout() * 3 / 2;
         
-        this.heartBeatThreadPool = new ThreadPoolExecutor(0, Runtime.getRuntime().availableProcessors(),
+        this.heartBeatThreadPool = new ThreadPoolExecutor(1, MAX_HEARTBEAT_THREADS,
                 keepAliveTime, TimeUnit.MILLISECONDS,
                 new SynchronousQueue<Runnable>(),
                 new ThreadFactory() {
