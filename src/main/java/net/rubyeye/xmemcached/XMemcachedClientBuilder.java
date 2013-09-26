@@ -362,9 +362,10 @@ public class XMemcachedClientBuilder implements MemcachedClientBuilder {
 		if (this.commandFactory.getProtocol() == Protocol.Kestrel) {
 			memcachedClient.setOptimizeGet(false);
 		}
+		memcachedClient.setConnectTimeout(connectTimeout);
 		memcachedClient.setSanitizeKeys(sanitizeKeys);
 		memcachedClient.setKeyProvider(this.keyProvider);
-        memcachedClient.setOpTimeout(this.opTimeout);
+		memcachedClient.setOpTimeout(this.opTimeout);
 		memcachedClient.setHealSessionInterval(this.healSessionInterval);
 		memcachedClient.setEnableHealSession(this.enableHealSession);
 		memcachedClient
