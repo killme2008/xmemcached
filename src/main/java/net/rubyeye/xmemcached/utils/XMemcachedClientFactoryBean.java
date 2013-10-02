@@ -76,6 +76,8 @@ public class XMemcachedClientFactoryBean implements FactoryBean {
 	private boolean failureMode;
 
 	private long opTimeout = MemcachedClient.DEFAULT_OP_TIMEOUT;
+	
+	private long connectTimeout = MemcachedClient.DEFAULT_CONNECT_TIMEOUT;
 
 	private KeyProvider keyProvider = DefaultKeyProvider.INSTANCE;
 
@@ -263,6 +265,8 @@ public class XMemcachedClientFactoryBean implements FactoryBean {
 		builder.setName(this.name);
 		builder.setEnableHealSession(this.enableHealSession);
 		builder.setHealSessionInterval(this.healSessionInterval);
+		builder.setConnectTimeout(connectTimeout);
+		builder.setOpTimeout(opTimeout);
 	}
 
 	private int[] getWeightsArray(
@@ -315,13 +319,21 @@ public class XMemcachedClientFactoryBean implements FactoryBean {
 		}
 	}
 
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings("rawtypes")
 	public Class getObjectType() {
 		return MemcachedClient.class;
 	}
 
 	public boolean isSingleton() {
 		return true;
+	}
+
+	public long getConnectTimeout() {
+		return connectTimeout;
+	}
+
+	public void setConnectTimeout(long connectTimeout) {
+		this.connectTimeout = connectTimeout;
 	}
 
 }
