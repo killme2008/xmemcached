@@ -16,6 +16,7 @@ import java.net.SocketAddress;
 import java.net.SocketException;
 import java.nio.channels.SocketChannel;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -105,17 +106,21 @@ public class MemcachedTCPSession extends NioTCPSession implements
 	}
 
 	public void destroy() {
-		Command command = this.currentCommand.get();
+		Command command = this.currentCommand.get();	
 		if (command != null) {
 			command.setException(new MemcachedException(
 					"Session has been closed"));
-			command.getLatch().countDown();
+			CountDownLatch latch = command.getLatch();
+			if (latch != null) {
+				latch.countDown();
+			}
 		}
 		while ((command = this.commandAlreadySent.poll()) != null) {
 			command.setException(new MemcachedException(
 					"Session has been closed"));
-			if (command.getLatch() != null) {
-				command.getLatch().countDown();
+			CountDownLatch latch = command.getLatch();
+			if (latch != null) {
+				latch.countDown();
 			}
 		}
 

@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -1273,6 +1274,27 @@ public abstract class XMemcachedClientTest extends TestCase {
 					}
 				});
 
+	}
+	
+	public void testNamespaceWithGetMulti()throws Exception{
+		String ns="user";
+		this.memcachedClient.withNamespace(ns,
+				new MemcachedClientCallable<Void>() {
+
+					public Void call(MemcachedClient client)
+							throws MemcachedException, InterruptedException,
+							TimeoutException {
+						client.set("a", 0, 1);
+						client.set("b", 0, 2);
+						client.set("c", 0, 3);
+						Map<String, Object> values = client.get(Arrays.asList("a","b","c"));
+						assertEquals(3,values.size());
+						assertEquals(1,values.get("a"));
+						assertEquals(2,values.get("b"));
+						assertEquals(3,values.get("c"));
+						return null;
+					}
+				});
 	}
 
 	public void testTouch() throws Exception {

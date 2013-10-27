@@ -959,7 +959,7 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 	private final void optimiezeSetReadThreadCount(Configuration conf,
 			int addressCount) {
 		if (conf != null && addressCount > 1) {
-			if (this.isLinuxPlatform()
+			if (!this.isWindowsPlatform()
 					&& conf.getReadThreadCount() == DEFAULT_READ_THREAD_COUNT) {
 				int threadCount = 2 * SystemUtils.getSystemThreadCount();
 				conf.setReadThreadCount(addressCount > threadCount ? threadCount
@@ -968,9 +968,9 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 		}
 	}
 
-	private final boolean isLinuxPlatform() {
+	private final boolean isWindowsPlatform() {
 		String osName = System.getProperty("os.name");
-		if (osName != null && osName.toLowerCase().indexOf("linux") >= 0) {
+		if (osName != null && osName.toLowerCase().indexOf("windows") >= 0) {
 			return true;
 		} else {
 			return false;
@@ -1216,12 +1216,9 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 		if (keys == null || keys.size() == 0) {
 			return null;
 		}
-		Collection<String> keyCollections = keys;
-		if (this.sanitizeKeys) {
-			keyCollections = new ArrayList<String>(keys.size());
-			for (String key : keys) {
-				keyCollections.add(this.preProcessKey(key));
-			}
+		Collection<String> keyCollections = new ArrayList<String>(keys.size());
+		for (String key : keys) {
+			keyCollections.add(this.preProcessKey(key));
 		}
 		final CountDownLatch latch;
 		final List<Command> commands;
@@ -1253,7 +1250,7 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 	@SuppressWarnings("unchecked")
 	private <T> Map<String, T> reduceResult(final CommandType cmdType,
 			final Transcoder<T> transcoder, final List<Command> commands)
-			throws MemcachedException {
+			throws MemcachedException,InterruptedException,TimeoutException {
 		final Map<String, T> result = new HashMap<String, T>(commands.size());
 		for (Command getCmd : commands) {
 			getCmd.getIoBuffer().free();
@@ -1265,11 +1262,9 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 						.iterator();
 				while (it.hasNext()) {
 					Map.Entry<String, CachedData> entry = it.next();
-					if (this.sanitizeKeys) {
-						result.put(this.decodeKey(entry.getKey()),
-								transcoder.decode(entry.getValue()));
-					} else {
-						result.put(entry.getKey(),
+					String decodeKey = this.decodeKey(entry.getKey());
+					if (decodeKey != null) {
+						result.put(decodeKey,
 								transcoder.decode(entry.getValue()));
 					}
 				}
@@ -1282,7 +1277,10 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 					GetsResponse getsResponse = new GetsResponse(entry
 							.getValue().getCas(), transcoder.decode(entry
 							.getValue()));
-					result.put(entry.getKey(), (T) getsResponse);
+					String decodeKey = this.decodeKey(entry.getKey());
+					if (decodeKey != null) {
+						result.put(decodeKey, (T) getsResponse);
+					}
 				}
 
 			}
@@ -2624,13 +2622,30 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 		this.sanitizeKeys = sanitizeKeys;
 	}
 
-	private String decodeKey(String key) throws MemcachedException {
+	private String decodeKey(String key) throws MemcachedException,
+			InterruptedException, TimeoutException {
 		try {
-			return this.sanitizeKeys ? URLDecoder.decode(key, "UTF-8") : key;
+			key = this.sanitizeKeys ? URLDecoder.decode(key, "UTF-8") : key;
 		} catch (UnsupportedEncodingException e) {
 			throw new MemcachedException(
 					"Unsupport encoding utf-8 when decodeKey", e);
 		}
+		String ns = NAMESPACE_LOCAL.get();
+		if (ns != null && ns.trim().length() > 0) {
+			String nsValue = this.getNamespace(ns);
+			try {
+				if (nsValue != null && key.startsWith(nsValue)) {
+					//The extra length of ':'
+					key = key.substring(nsValue.length() + 1);
+				} else {
+					return null;
+				}
+			} catch (Exception e) {
+				throw new MemcachedException(
+						"Exception occured when decode key.", e);
+			}
+		}
+		return key;
 	}
 
 	private String preProcessKey(String key) throws MemcachedException,
