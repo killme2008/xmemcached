@@ -10,6 +10,7 @@
 
 ##News
 
+ * Xmemcached 1.4.3 released. 2013-10-27
  * Xmemcached 1.4.2 released. 2013-07-20
  * clojure wrapper for xmemached [clj-xmemcached](https://github.com/killme2008/clj-xmemcached).
  * Xmemcached 1.4.1 released. 2013-03-02
