@@ -2697,7 +2697,7 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 		Object item = this.fetch0(key, keyBytes, CommandType.GET_ONE,
 				this.opTimeout, this.transcoder);
 		while (item == null) {
-			item = String.valueOf(System.currentTimeMillis());
+			item = String.valueOf(System.nanoTime());
 			boolean added = this.add0(key, 0, item, this.transcoder,
 					this.opTimeout);
 			if (!added) {
