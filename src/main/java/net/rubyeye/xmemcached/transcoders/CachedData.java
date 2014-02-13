@@ -21,6 +21,9 @@ public final class CachedData {
 	private int capacity = -1;
 
 	private int size = 0;
+	
+	//cache decoded object.
+	public volatile Object decodedObject;
 
 	public final int getSize() {
 		return this.size;

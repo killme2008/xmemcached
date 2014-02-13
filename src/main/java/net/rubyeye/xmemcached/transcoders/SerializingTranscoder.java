@@ -41,8 +41,6 @@ public class SerializingTranscoder extends BaseSerializingTranscoder implements
 	public static final int SPECIAL_FLOAT = (6 << 8);
 	public static final int SPECIAL_DOUBLE = (7 << 8);
 	public static final int SPECIAL_BYTEARRAY = (8 << 8);
-	//cache the decoded object.
-	private volatile Object decodedObject;
 
 	private final TranscoderUtils transcoderUtils = new TranscoderUtils(true);
 
@@ -78,7 +76,7 @@ public class SerializingTranscoder extends BaseSerializingTranscoder implements
 	 * @see net.spy.memcached.Transcoder#decode(net.spy.memcached.CachedData)
 	 */
 	public final Object decode(CachedData d) {
-		Object obj = this.decodedObject;
+		Object obj = d.decodedObject;
 		if (obj != null) {
 			return obj;
 		}
@@ -90,7 +88,7 @@ public class SerializingTranscoder extends BaseSerializingTranscoder implements
 		}
 		flags = flags & SPECIAL_MASK;
 		obj = decode0(d, data, flags);
-		this.decodedObject = obj;
+		d.decodedObject = obj;
 		return obj;
 	}
 
