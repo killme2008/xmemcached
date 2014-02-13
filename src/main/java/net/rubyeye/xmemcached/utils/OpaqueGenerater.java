@@ -22,6 +22,8 @@
  */
 package net.rubyeye.xmemcached.utils;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 /**
  * Opaque generator for memcached binary xxxq(getq,addq etc.) commands
  * 
@@ -33,7 +35,7 @@ public final class OpaqueGenerater {
 
 	}
 
-	private int counter = 0;
+	private AtomicInteger counter = new AtomicInteger(0);
 
 	static final class SingletonHolder {
 		static final OpaqueGenerater opaqueGenerater = new OpaqueGenerater();
@@ -43,12 +45,24 @@ public final class OpaqueGenerater {
 		return SingletonHolder.opaqueGenerater;
 	}
 
-	public synchronized int getNextValue() {
-		int result = this.counter++;
-		if (result < 0) {
-			this.counter = 0;
+	// just for test.
+	public void setValue(int v) {
+		this.counter.set(v);
+	}
+
+	public int getNextValue() {
+		int val = counter.incrementAndGet();
+		if (val < 0) {
+			while (!counter.compareAndSet(val, 0)) {
+				val = counter.get();
+				if (val > 0) {
+					break;
+				}
+			}
+			return getNextValue();
+		} else {
+			return val;
 		}
-		return result;
 	}
 
 }
