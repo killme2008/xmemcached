@@ -173,6 +173,7 @@ public enum HashAlgorithm {
 			for (int len = k.length(); len >= step; len -= step) {
 				rv = rv ^ (rv << 5) + (rv >> 2) + k.charAt(len - 1);
 			}
+			break;
 		case ONE_AT_A_TIME:
 			try {
 				int hash = 0;
@@ -184,15 +185,16 @@ public enum HashAlgorithm {
 				hash += (hash << 3);
 				hash ^= (hash >>> 11);
 				hash += (hash << 15);
-				return hash;
+				rv = hash;
 			} catch (UnsupportedEncodingException e) {
 				throw new IllegalStateException("Hash function error", e);
 			}
+			break;
 		default:
 			assert false;
 		}
 
-		return rv & 0xffffffffL; /* Truncate to 32-bits */
+		return rv & 0xffffffffL; /* Convert to unsigned 32-bits */
 	}
 
 	private static ThreadLocal<MessageDigest> md5Local = new ThreadLocal<MessageDigest>();
