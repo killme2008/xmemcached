@@ -346,8 +346,7 @@ public class Optimizer implements OptimizerMBean, MemcachedOptimizer {
 			this.bufferList.clear();
 			this.totalBytes = 0;
 			this.prevCommand = null;
-			if (this.mergeCommands != null)
-				this.mergeCommands.clear();
+			this.mergeCommands = null;
 			return this;
 		}
 
