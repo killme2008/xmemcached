@@ -82,7 +82,7 @@ public class TextStatsCommand extends Command implements ServerAddressAware {
 		while ((line = ByteUtils.nextLine(buffer)) != null) {
 			if (line.equals("END")) { // at the end
 				return done(session);
-			} else if (line.startsWith("STAT") || line.startsWith("PREFIX")) {
+			} else if (line.startsWith("STAT") || line.startsWith("PREFIX") || line.startsWith("ITEM") ) {
 				// Fixed issue 126
 				String[] items = line.split(" ");
 				((Map<String, String>) getResult()).put(items[1], items[2]);
