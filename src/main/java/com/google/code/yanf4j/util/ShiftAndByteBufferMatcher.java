@@ -90,7 +90,7 @@ public class ShiftAndByteBufferMatcher implements ByteBufferMatcher {
 		for (int pos = buffer.position(); pos < bufferLimit; pos++) {
 			d <<= 1;
 			d |= 1;
-			d &= this.b[ByteBufferUtils.uByte(buffer.get(pos))];
+			d &= this.b[buffer.get(pos) & 0XFF];
 			if ((d & this.mask) != 0) {
 				return pos - this.patternLen + 1;
 			}

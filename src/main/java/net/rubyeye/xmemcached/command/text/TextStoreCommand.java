@@ -103,8 +103,9 @@ public class TextStoreCommand extends Command implements StoreCommand{
 		if (this.result == null) {
 			if (buffer.remaining() < 2)
 				return false;
-			byte first = buffer.get(buffer.position());
-			byte second = buffer.get(buffer.position() + 1);
+			int pos = buffer.position();
+			byte first = buffer.get(pos);
+			byte second = buffer.get(pos + 1);
 			if (first == 'S' && second == 'T') {
 				setResult(Boolean.TRUE);
 				countDownLatch();

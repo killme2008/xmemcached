@@ -57,9 +57,9 @@ public abstract class TextGetCommand extends Command implements
 	 * key will be merged into one get command.The result command's
 	 * assocCommands contains all these commands with the same key.
 	 */
-	private List<Command> assocCommands;
+	protected List<Command> assocCommands;
 
-	private Map<Object, Command> mergeCommands;
+	protected Map<Object, Command> mergeCommands;
 
 	public final Map<Object, Command> getMergeCommands() {
 		return this.mergeCommands;
@@ -110,8 +110,9 @@ public abstract class TextGetCommand extends Command implements
 			case NULL:
 				if (buffer.remaining() < 2)
 					return false;
-				byte first = buffer.get(buffer.position());
-				byte second = buffer.get(buffer.position() + 1);
+				int pos = buffer.position();
+				byte first = buffer.get(pos);
+				byte second = buffer.get(pos + 1);
 				if (first == 'E' && second == 'N') {
 					this.parseStatus = ParseStatus.END;
 					// dispatch result
@@ -175,11 +176,12 @@ public abstract class TextGetCommand extends Command implements
 				if (buffer.remaining() < 1) {
 					return false;
 				} else {
-					first = buffer.get(buffer.position());
+					pos = buffer.position();
+					first = buffer.get(pos);
 					// check if buffer has cas value
 					if (first == '\n') {
 						// skip '\n'
-						buffer.position(buffer.position() + 1);
+						buffer.position(pos + 1);
 						this.parseStatus = ParseStatus.DATA;
 						continue;
 					} else {

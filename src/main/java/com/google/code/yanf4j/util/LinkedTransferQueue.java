@@ -144,6 +144,7 @@ public class LinkedTransferQueue<E> extends AbstractQueue<E> implements Blocking
         transient volatile QNode next;
         transient volatile Thread waiter;       // to control park/unpark
         final boolean isData;
+        public long p1,p2,p3,p4,p5,p6,p7;
         QNode(Object item, boolean isData) {
             super(item);
             this.isData = isData;
@@ -198,7 +199,7 @@ public class LinkedTransferQueue<E> extends AbstractQueue<E> implements Blocking
 
         // enough padding for 64bytes with 4byte refs
         @SuppressWarnings("unused")
-        Object p0, p1, p2, p3, p4, p5, p6, p7, p8, p9, pa, pb, pc, pd, pe;
+        public Object p0, p1, p2, p3, p4, p5, p6, p7, p8, p9, pa, pb, pc, pd, pe;
         PaddedAtomicReference(T r) { super(r); }
     }
 

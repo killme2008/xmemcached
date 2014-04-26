@@ -28,10 +28,12 @@ import java.util.concurrent.CountDownLatch;
 import net.rubyeye.xmemcached.command.Command;
 import net.rubyeye.xmemcached.command.CommandType;
 import net.rubyeye.xmemcached.transcoders.CachedData;
+
 /**
  * Get command for text protocol
+ * 
  * @author dennis
- *
+ * 
  */
 public class TextGetOneCommand extends TextGetCommand {
 
@@ -57,14 +59,13 @@ public class TextGetOneCommand extends TextGetCommand {
 			}
 		} else {
 			// merge get
-			Collection<Command> mergeCommands = getMergeCommands().values();
+			// Collection<Command> mergeCommands = mergeCommands.values();
 			getIoBuffer().free();
-			for (Command nextCommand : mergeCommands) {
+			for (Command nextCommand : mergeCommands.values()) {
 				TextGetCommand textGetCommand = (TextGetCommand) nextCommand;
 				textGetCommand.countDownLatch();
-				if (textGetCommand.getAssocCommands() != null) {
-					for (Command assocCommand : textGetCommand
-							.getAssocCommands()) {
+				if (textGetCommand.assocCommands != null) {
+					for (Command assocCommand : textGetCommand.assocCommands) {
 						assocCommand.countDownLatch();
 					}
 				}
