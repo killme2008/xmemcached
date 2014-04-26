@@ -1184,40 +1184,40 @@ public abstract class XMemcachedClientTest extends TestCase {
 		assertTrue(this.memcachedClient.delete("counter"));
 	}
 
-	public void testKeyIterator() throws Exception {
-		if (memcachedClient.getProtocol() == Protocol.Text) {
-			Collection<InetSocketAddress> avaliableServers = memcachedClient
-					.getAvaliableServers();
-			InetSocketAddress address = avaliableServers.iterator().next();
-			KeyIterator it = memcachedClient.getKeyIterator(address);
-			while (it.hasNext()) {
-				memcachedClient.delete(it.next());
-			}
-			it = memcachedClient.getKeyIterator(address);
-			Assert.assertFalse(it.hasNext());
-			try {
-				it.next();
-				Assert.fail();
-			} catch (NoSuchElementException e) {
-				Assert.assertTrue(true);
-			}
-			for (int i = 0; i < 10; i++) {
-				memcachedClient.set(String.valueOf(i), 0, i);
-			}
-			it = memcachedClient.getKeyIterator(address);
-			Assert.assertTrue(it.hasNext());
-			Assert.assertEquals(address, it.getServerAddress());
-			while (it.hasNext()) {
-				String key = it.next();
-				Assert.assertEquals(Integer.parseInt(key),
-						memcachedClient.get(key));
-			}
-			Assert.assertFalse(it.hasNext());
-		} else {
-			// ignore
-		}
-
-	}
+//	public void testKeyIterator() throws Exception {
+//		if (memcachedClient.getProtocol() == Protocol.Text) {
+//			Collection<InetSocketAddress> avaliableServers = memcachedClient
+//					.getAvaliableServers();
+//			InetSocketAddress address = avaliableServers.iterator().next();
+//			KeyIterator it = memcachedClient.getKeyIterator(address);
+//			while (it.hasNext()) {
+//				memcachedClient.delete(it.next());
+//			}
+//			it = memcachedClient.getKeyIterator(address);
+//			Assert.assertFalse(it.hasNext());
+//			try {
+//				it.next();
+//				Assert.fail();
+//			} catch (NoSuchElementException e) {
+//				Assert.assertTrue(true);
+//			}
+//			for (int i = 0; i < 10; i++) {
+//				memcachedClient.set(String.valueOf(i), 0, i);
+//			}
+//			it = memcachedClient.getKeyIterator(address);
+//			Assert.assertTrue(it.hasNext());
+//			Assert.assertEquals(address, it.getServerAddress());
+//			while (it.hasNext()) {
+//				String key = it.next();
+//				Assert.assertEquals(Integer.parseInt(key),
+//						memcachedClient.get(key));
+//			}
+//			Assert.assertFalse(it.hasNext());
+//		} else {
+//			// ignore
+//		}
+//
+//	}
 
 	public void testNamespace() throws Exception {
 		String ns = "user-id";

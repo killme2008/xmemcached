@@ -570,7 +570,7 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 				.getInetSocketAddress();
 		this.checkSocketAddress(inetSocketAddress);
 		if (this.connectionPoolSize > 1) {
-			log.warn("You are using connection pool for xmemcached client,it's not recommended unless you have test it that it could increase performance in your app.");
+			log.warn("You are using connection pool for xmemcached client,it's not recommended unless you have test it that it can boost performance in your app.");
 		}
 		for (int i = 0; i < this.connectionPoolSize; i++) {
 			Future<Boolean> future = null;
@@ -724,7 +724,7 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 		}
 		this.commandFactory = commandFactory;
 		ByteUtils.setProtocol(this.commandFactory.getProtocol());
-		log.warn("XMemcachedClient use "
+		log.warn("XMemcachedClient is using "
 				+ this.commandFactory.getProtocol().name() + " protocol");
 		this.commandFactory.setBufferAllocator(bufferAllocator);
 		this.shutdown = true;
