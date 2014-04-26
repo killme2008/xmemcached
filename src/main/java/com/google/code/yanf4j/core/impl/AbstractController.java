@@ -458,11 +458,13 @@ public abstract class AbstractController implements Controller,
 
 	}
 
-	public synchronized void stop() throws IOException {
-		if (!isStarted()) {
-			return;
+	public void stop() throws IOException {
+		synchronized (this) {
+			if (!isStarted()) {
+				return;
+			}
+			setStarted(false);
 		}
-		setStarted(false);
 		for (Session session : sessionSet) {
 			session.close();
 		}
