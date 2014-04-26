@@ -46,6 +46,7 @@ import com.google.code.yanf4j.core.Session;
 import com.google.code.yanf4j.core.SessionConfig;
 import com.google.code.yanf4j.core.WriteMessage;
 import com.google.code.yanf4j.statistics.Statistics;
+import com.google.code.yanf4j.util.LinkedTransferQueue;
 
 /**
  * Base connection
@@ -346,7 +347,7 @@ public abstract class AbstractSession implements Session {
 
 	protected ReentrantLock writeLock = new ReentrantLock();
 
-	protected AtomicReference<WriteMessage> currentMessage = new AtomicReference<WriteMessage>();
+	protected AtomicReference<WriteMessage> currentMessage = new LinkedTransferQueue.PaddedAtomicReference<WriteMessage>(null);
 
 	static final class FailFuture implements Future<Boolean> {
 

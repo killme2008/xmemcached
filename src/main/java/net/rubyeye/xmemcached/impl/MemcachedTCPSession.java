@@ -49,7 +49,7 @@ public class MemcachedTCPSession extends NioTCPSession implements
 	 */
 	protected BlockingQueue<Command> commandAlreadySent;
 
-	private final AtomicReference<Command> currentCommand = new AtomicReference<Command>();
+	private final AtomicReference<Command> currentCommand = new LinkedTransferQueue.PaddedAtomicReference<Command>(null);
 
 	private SocketAddress remoteSocketAddress; // prevent channel is closed
 	private int sendBufferSize;

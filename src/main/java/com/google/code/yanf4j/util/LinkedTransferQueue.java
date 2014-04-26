@@ -194,13 +194,13 @@ public class LinkedTransferQueue<E> extends AbstractQueue<E> implements Blocking
      * cleanMe, to alleviate contention across threads CASing one vs
      * the other.
      */
-    private static final class PaddedAtomicReference<T> extends AtomicReference<T> {
+    public static final class PaddedAtomicReference<T> extends AtomicReference<T> {
         private static final long serialVersionUID = 4684288940772921317L;
 
         // enough padding for 64bytes with 4byte refs
         @SuppressWarnings("unused")
         public Object p0, p1, p2, p3, p4, p5, p6, p7, p8, p9, pa, pb, pc, pd, pe;
-        PaddedAtomicReference(T r) { super(r); }
+        public PaddedAtomicReference(T r) { super(r); }
     }
 
 
