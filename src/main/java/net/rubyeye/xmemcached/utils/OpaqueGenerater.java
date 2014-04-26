@@ -53,11 +53,8 @@ public final class OpaqueGenerater {
 	public int getNextValue() {
 		int val = counter.incrementAndGet();
 		if (val < 0) {
-			while (!counter.compareAndSet(val, 0)) {
+			while (val < 0 && !counter.compareAndSet(val, 0)) {
 				val = counter.get();
-				if (val > 0) {
-					break;
-				}
 			}
 			return getNextValue();
 		} else {
