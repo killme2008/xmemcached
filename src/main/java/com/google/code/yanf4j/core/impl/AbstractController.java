@@ -50,6 +50,7 @@ import com.google.code.yanf4j.core.WriteMessage;
 import com.google.code.yanf4j.statistics.Statistics;
 import com.google.code.yanf4j.statistics.impl.DefaultStatistics;
 import com.google.code.yanf4j.statistics.impl.SimpleStatistics;
+import com.google.code.yanf4j.util.ConcurrentHashSet;
 import com.google.code.yanf4j.util.DispatcherFactory;
 import com.google.code.yanf4j.util.LinkedTransferQueue;
 
@@ -119,7 +120,7 @@ public abstract class AbstractController implements Controller,
 	/**
 	 * Connected session set
 	 */
-	protected Set<Session> sessionSet = new HashSet<Session>();
+	protected Set<Session> sessionSet = new ConcurrentHashSet<Session>();
 	private Thread shutdownHookThread;
 	private volatile boolean isHutdownHookCalled = false;
 
