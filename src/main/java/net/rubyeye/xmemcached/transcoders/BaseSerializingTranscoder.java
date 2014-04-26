@@ -15,6 +15,22 @@ import org.slf4j.LoggerFactory;
  */
 public abstract class BaseSerializingTranscoder {
 
+	private static final class XmcObjectInputStream extends ObjectInputStream {
+		private XmcObjectInputStream(InputStream in) throws IOException {
+			super(in);
+		}
+
+		@Override
+		protected Class<?> resolveClass(ObjectStreamClass desc) throws IOException, ClassNotFoundException {
+		    try {
+		        //When class is not found,try to load it from context class loader.
+		        return super.resolveClass(desc);
+		    } catch (ClassNotFoundException e) {
+		        return Thread.currentThread().getContextClassLoader().loadClass(desc.getName());
+		    }
+		}
+	}
+
 	/**
 	 * Default compression threshold value.
 	 */
@@ -92,17 +108,7 @@ public abstract class BaseSerializingTranscoder {
 		try {
 			if (in != null) {
 				bis = new ByteArrayInputStream(in);
-                is = new ObjectInputStream(bis) {
-                    @Override
-                    protected Class<?> resolveClass(ObjectStreamClass desc) throws IOException, ClassNotFoundException {
-                        try {
-                            //When class is not found,try to load it from context class loader.
-                            return super.resolveClass(desc);
-                        } catch (ClassNotFoundException e) {
-                            return Thread.currentThread().getContextClassLoader().loadClass(desc.getName());
-                        }
-                    }
-                };
+                is = new XmcObjectInputStream(bis);
                 rv = is.readObject();
 
 			}
@@ -237,7 +243,7 @@ public abstract class BaseSerializingTranscoder {
 
 		} catch (IOException e) {
 			log.error("Failed to decompress data", e);
-			baos = null;
+			//baos = null;
 		} finally {
 			try {
 				is.close();
@@ -267,7 +273,7 @@ public abstract class BaseSerializingTranscoder {
 			try {
 				gis = new GZIPInputStream(bis);
 
-				byte[] buf = new byte[16 * 1024];
+				byte[] buf = new byte[64 * 1024];
 				int r = -1;
 				while ((r = gis.read(buf)) > 0) {
 					bos.write(buf, 0, r);

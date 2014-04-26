@@ -15,15 +15,20 @@ public final class CachedData {
 	 */
 	public static int MAX_SIZE = 1024 * 1024;
 
-	private int flag;
-	private byte[] data;
-	private long cas;
+	protected int flag;
+	protected long cas;
 	private int capacity = -1;
 
-	private int size = 0;
+	protected int size = 0;
 	
 	//cache decoded object.
 	public volatile Object decodedObject;
+	
+	//padding fields
+	public long p1,p2,p3,p4;
+	public int p5;
+	
+	protected byte[] data;
 
 	public final int getSize() {
 		return this.size;
