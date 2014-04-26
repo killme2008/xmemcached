@@ -278,7 +278,7 @@ public class Optimizer implements OptimizerMBean, MemcachedOptimizer {
 	}
 
 	static class KeyStringCollector implements CommandCollector {
-		char[] buf = new char[256];
+		char[] buf = new char[1024*2];
 		int count = 0;
 		boolean wasFirst = true;
 
@@ -346,7 +346,8 @@ public class Optimizer implements OptimizerMBean, MemcachedOptimizer {
 			this.bufferList.clear();
 			this.totalBytes = 0;
 			this.prevCommand = null;
-			this.mergeCommands = null;
+			if (this.mergeCommands != null)
+				this.mergeCommands.clear();
 			return this;
 		}
 
