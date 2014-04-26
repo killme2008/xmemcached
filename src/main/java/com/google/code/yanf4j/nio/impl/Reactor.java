@@ -28,7 +28,6 @@ import com.google.code.yanf4j.config.Configuration;
 import com.google.code.yanf4j.core.EventType;
 import com.google.code.yanf4j.core.Session;
 import com.google.code.yanf4j.nio.NioSession;
-import com.google.code.yanf4j.util.LinkedTransferQueue;
 import com.google.code.yanf4j.util.SystemUtils;
 
 /**
@@ -60,19 +59,55 @@ public final class Reactor extends Thread {
 
 	private long lastJVMBug;
 
-	private volatile Selector selector;
+	private Selector selector;
 
 	private final NioController controller;
 
 	private final Configuration configuration;
 
-	private final AtomicBoolean wakenUp = new AtomicBoolean(false);
+	static public class PaddingAtomicBoolean extends AtomicBoolean {
 
-	private final Queue<Object[]> register = new LinkedTransferQueue<Object[]>();
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 5227571972657902891L;
+		public int p1;
+		public long p2, p3, p4, p5, p6, p7, p8;
+
+		PaddingAtomicBoolean(boolean v) {
+			super(v);
+		}
+	}
+
+	private final AtomicBoolean wakenUp = new PaddingAtomicBoolean(false);
+
+	public static class RegisterEvent {
+		SelectableChannel channel;
+		int ops;
+		EventType eventType;
+		Object attachment;
+		Session session;
+
+		public RegisterEvent(SelectableChannel channel, int ops,
+				Object attachment) {
+			super();
+			this.channel = channel;
+			this.ops = ops;
+			this.attachment = attachment;
+		}
+
+		public RegisterEvent(Session session, EventType eventType) {
+			super();
+			this.session = session;
+			this.eventType = eventType;
+		}
+	}
+
+	private Queue<RegisterEvent> register;
 
 	private final Lock gate = new ReentrantLock();
 
-	private volatile int selectTries = 0;
+	private int selectTries = 0;
 
 	private long nextTimeout = 0;
 
@@ -80,6 +115,8 @@ public final class Reactor extends Thread {
 			int index) throws IOException {
 		super();
 		reactorIndex = index;
+		this.register = (Queue<Reactor.RegisterEvent>) SystemUtils
+				.createTransferQueue();
 		this.selectorManager = selectorManager;
 		controller = selectorManager.getController();
 		selector = SystemUtils.openSelector();
@@ -105,7 +142,8 @@ public final class Reactor extends Thread {
 				wakenUp.set(false);
 				long before = -1;
 				// Wether to look jvm bug
-				if (isNeedLookingJVMBug()) {
+				if (SystemUtils.isLinuxPlatform()
+						&& !SystemUtils.isAfterJava6u4Version()) {
 					before = System.currentTimeMillis();
 				}
 				long wait = DEFAULT_WAIT;
@@ -180,20 +218,17 @@ public final class Reactor extends Thread {
 				gate.lock();
 				try {
 					lastJVMBug = now;
-					log
-							.warn("JVM bug occured at "
-									+ new Date(lastJVMBug)
-									+ ",http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6403933,reactIndex="
-									+ reactorIndex);
+					log.warn("JVM bug occured at "
+							+ new Date(lastJVMBug)
+							+ ",http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6403933,reactIndex="
+							+ reactorIndex);
 					if (jvmBug1) {
-						log
-								.debug("seeing JVM BUG(s) - recreating selector,reactIndex="
-										+ reactorIndex);
+						log.debug("seeing JVM BUG(s) - recreating selector,reactIndex="
+								+ reactorIndex);
 					} else {
 						jvmBug1 = true;
-						log
-								.info("seeing JVM BUG(s) - recreating selector,reactIndex="
-										+ reactorIndex);
+						log.info("seeing JVM BUG(s) - recreating selector,reactIndex="
+								+ reactorIndex);
 					}
 					seeing = true;
 					final Selector new_selector = SystemUtils.openSelector();
@@ -221,14 +256,12 @@ public final class Reactor extends Thread {
 			} else if (jvmBug.get() == JVMBUG_THRESHHOLD
 					|| jvmBug.get() == JVMBUG_THRESHHOLD1) {
 				if (jvmBug0) {
-					log
-							.debug("seeing JVM BUG(s) - cancelling interestOps==0,reactIndex="
-									+ reactorIndex);
+					log.debug("seeing JVM BUG(s) - cancelling interestOps==0,reactIndex="
+							+ reactorIndex);
 				} else {
 					jvmBug0 = true;
-					log
-							.info("seeing JVM BUG(s) - cancelling interestOps==0,reactIndex="
-									+ reactorIndex);
+					log.info("seeing JVM BUG(s) - cancelling interestOps==0,reactIndex="
+							+ reactorIndex);
 				}
 				gate.lock();
 				seeing = true;
@@ -246,11 +279,6 @@ public final class Reactor extends Thread {
 			jvmBug.set(0);
 		}
 		return seeing;
-	}
-
-	private boolean isNeedLookingJVMBug() {
-		return SystemUtils.isLinuxPlatform()
-				&& !SystemUtils.isAfterJava6u4Version();
 	}
 
 	/**
@@ -386,9 +414,9 @@ public final class Reactor extends Thread {
 	public final void registerSession(Session session, EventType event) {
 		final Selector selector = this.selector;
 		if (isReactorThread() && selector != null) {
-			dispatchSessionEvent(session, event, selector);
+			dispatchSessionEvent(session, event);
 		} else {
-			register.offer(new Object[] { session, event });
+			register.offer(new RegisterEvent(session, event));
 			wakeup();
 		}
 	}
@@ -403,17 +431,12 @@ public final class Reactor extends Thread {
 	}
 
 	private final void processRegister() {
-		Object[] object = null;
-		while ((object = register.poll()) != null) {
-			switch (object.length) {
-			case 2:
-				dispatchSessionEvent((Session) object[0],
-						(EventType) object[1], selector);
-				break;
-			case 3:
-				registerChannelNow((SelectableChannel) object[0],
-						(Integer) object[1], object[2], selector);
-				break;
+		RegisterEvent event = null;
+		while ((event = register.poll()) != null) {
+			if (event.session != null) {
+				dispatchSessionEvent(event.session, event.eventType);
+			} else {
+				registerChannelNow(event.channel, event.ops, event.attachment);
 			}
 		}
 	}
@@ -422,8 +445,7 @@ public final class Reactor extends Thread {
 		return configuration;
 	}
 
-	private final void dispatchSessionEvent(Session session, EventType event,
-			Selector selector) {
+	private final void dispatchSessionEvent(Session session, EventType event) {
 		if (session.isClosed() && event != EventType.UNREGISTER) {
 			return;
 		}
@@ -487,28 +509,28 @@ public final class Reactor extends Thread {
 
 	public final void registerChannel(SelectableChannel channel, int ops,
 			Object attachment) {
-		final Selector selector = this.selector;
-		if (isReactorThread() && selector != null) {
-			registerChannelNow(channel, ops, attachment, selector);
+		if (isReactorThread()) {
+			registerChannelNow(channel, ops, attachment);
 		} else {
-			register.offer(new Object[] { channel, ops, attachment });
+			register.offer(new RegisterEvent(channel, ops, attachment));
 			wakeup();
 		}
 
 	}
 
 	private void registerChannelNow(SelectableChannel channel, int ops,
-			Object attachment, Selector selector) {
-		gate.lock();
-		try {
-			if (channel.isOpen()) {
+			Object attachment) {
+		if (channel.isOpen()) {
+			gate.lock();
+			try {
 				channel.register(selector, ops, attachment);
+
+			} catch (ClosedChannelException e) {
+				log.error("Register channel error", e);
+				controller.notifyException(e);
+			} finally {
+				gate.unlock();
 			}
-		} catch (ClosedChannelException e) {
-			log.error("Register channel error", e);
-			controller.notifyException(e);
-		} finally {
-			gate.unlock();
 		}
 	}
 

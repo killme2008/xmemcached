@@ -28,6 +28,7 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.nio.channels.Selector;
 import java.nio.channels.spi.SelectorProvider;
+import java.util.Queue;
 
 /**
  * System utils
@@ -137,5 +138,14 @@ public final class SystemUtils {
 		InetAddress address = inetSocketAddress.getAddress();
 		return address != null ? address.getHostAddress() : inetSocketAddress
 				.getHostName();
+	}
+
+	public static final Queue<?> createTransferQueue() {
+		try {
+			return (Queue<?>) Class.forName(
+					"java.util.concurrent.LinkedTransferQueue").newInstance();
+		} catch (Exception e) {
+			return new LinkedTransferQueue<Object>();
+		}
 	}
 }

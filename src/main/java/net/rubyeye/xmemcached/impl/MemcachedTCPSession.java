@@ -78,7 +78,7 @@ public class MemcachedTCPSession extends NioTCPSession implements
 				this.sendBufferSize = 8 * 1024;
 			}
 		}
-		this.commandAlreadySent = new LinkedTransferQueue<Command>();
+		this.commandAlreadySent = (BlockingQueue<Command>)SystemUtils.createTransferQueue();
 		this.commandFactory = commandFactory;
 	}
 
