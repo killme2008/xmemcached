@@ -171,6 +171,8 @@ Thanks to:
 * [bmahe](https://github.com/bmahe)
 * [jovanchohan](https://github.com/jovanchohan)
 * [profondometer](https://github.com/profondometer)
+* [machao9email](https://code.google.com/u/100914576372416966057)
+* [https://github.com/spudone](https://github.com/spudone)
 
 ##License
 Apache License Version 2.0
