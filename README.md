@@ -3,24 +3,14 @@
   XMemcached is a high performance, easy to use blocking multithreaded memcached client in java.
   It's nio based and was carefully turned to get top performance.
 
-* [Homepage](http://code.google.com/p/xmemcached/)
-* [Downloads](http://code.google.com/p/xmemcached/downloads/list)
+* [Homepage](https://github.com/killme2008/xmemcached)
+* [Downloads](https://github.com/killme2008/xmemcached/tags)
 * [Wiki](http://code.google.com/p/xmemcached/w/list)
 * [Javadoc](http://fnil.net/docs/xmemcached/index.html)
 
-##News
+##News and downloads
 
- * Xmemcached 1.4.3 released. 2013-10-27
- * Xmemcached 1.4.2 released. 2013-07-20
- * clojure wrapper for xmemached [clj-xmemcached](https://github.com/killme2008/clj-xmemcached).
- * Xmemcached 1.4.1 released. 2013-03-02
- * Xmemcached 1.4.0 released.
- * [Release Note](https://code.google.com/p/xmemcached/wiki/ReleaseNotes).
-
-##Downloads
-
- * [My home](http://fnil.net/downloads/index.html)
- * [Google code](https://code.google.com/p/xmemcached/downloads/list)
+ * [Xmemcached 2.0.0 released](https://github.com/killme2008/xmemcached/releases/tag/xmemcached-2.0.0).
 
 ##Highlights
 
