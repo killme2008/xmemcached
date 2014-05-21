@@ -2691,7 +2691,7 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 	 */
 	public String getNamespace(String ns) throws TimeoutException,
 			InterruptedException, MemcachedException {
-		String key = this.getNSKey(ns);
+		String key = this.keyProvider.process(this.getNSKey(ns));
 		byte[] keyBytes = ByteUtils.getBytes(key);
 		ByteUtils.checkKey(keyBytes);
 		Object item = this.fetch0(key, keyBytes, CommandType.GET_ONE,
