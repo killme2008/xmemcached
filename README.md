@@ -11,6 +11,16 @@
 ##News and downloads
 
  * [Xmemcached 2.0.0 released](https://github.com/killme2008/xmemcached/releases/tag/xmemcached-2.0.0).
+ 
+ Maven:
+ 
+ ```
+  <dependency>
+      <groupId>com.googlecode.xmemcached</groupId>
+      <artifactId>xmemcached</artifactId>
+      <version>{version}</version>
+ </dependency>
+ ```
 
 ##Highlights
 
@@ -161,8 +171,6 @@ More information see [wiki pages](http://code.google.com/p/xmemcached/w/list) pl
 
 ## Contributors
 
-Thanks to:
-
 * [cnscud](https://code.google.com/u/cnscud/)
 * [wolfg1969](https://code.google.com/u/wolfg1969/)
 * [vadimp](https://github.com/vadimp)
@@ -173,6 +181,7 @@ Thanks to:
 * [profondometer](https://github.com/profondometer)
 * [machao9email](https://code.google.com/u/100914576372416966057)
 * [spudone](https://github.com/spudone)
+* [MikeBily](https://github.com/MikeBily)
 
 ##License
-Apache License Version 2.0
+[Apache License Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.html)
