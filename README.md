@@ -12,7 +12,7 @@
 
  * [Xmemcached 2.0.0 released](https://github.com/killme2008/xmemcached/releases/tag/xmemcached-2.0.0).
  
- Maven:
+ Maven dependency:
  
  ```
   <dependency>
@@ -24,33 +24,15 @@
 
 ##Highlights
 
-1.Supports all memcached text based protocols and binary protocols(Binary protocol supports since version 1.2.0).
-
-2.Supports distributed memcached with standard hash or consistent hash strategy
-
-3.Supports for JMX to allow you to monitor and control the behavior of the XMemcachedClient.Change the optimizer's factor or add/remove memcached server dynamically
-
-4.Supports weighted server.
-
-5.Supports connection pool.You can create more connections to one memcached server with java nio.(since version 1.2.0)
-
-6.Supports failure mode and standby nodes.
-
-7.Supports integrating to spring framework and hibernate-memcached.
-
-8.High performance.
-
-9.Supports talking with kestrel(a MQ written in scala) and TokyoTyrant
-
-##Maven dependency
-
-If you use maven,you can use xmemcached by
-
-	 <dependency>
-      <groupId>com.googlecode.xmemcached</groupId>
-      <artifactId>xmemcached</artifactId>
-      <version>${version}</version>
-     </dependency>
+* Supports all memcached text based protocols and binary protocols(Binary protocol supports since version 1.2.0).
+* Supports distributed memcached with standard hash or consistent hash strategy
+* Supports for JMX to allow you to monitor and control the behavior of the XMemcachedClient.Change the optimizer's factor or add/remove memcached server dynamically
+* Supports weighted server.
+* Supports connection pool.You can create more connections to one memcached server with java nio.(since version 1.2.0)
+* Supports failure mode and standby nodes.
+* Supports integrating to spring framework and hibernate-memcached.
+* High performance.
+* Supports talking with kestrel(a MQ written in scala) and TokyoTyrant
 
 
 ##FAQ
