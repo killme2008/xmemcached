@@ -11,6 +11,10 @@
  */
 package com.google.code.yanf4j.config;
 
+import net.rubyeye.xmemcached.impl.ReconnectRequest;
+
+import java.util.concurrent.DelayQueue;
+
 /**
  * Networking configuration
  * 
@@ -18,6 +22,8 @@ package com.google.code.yanf4j.config;
  * 
  */
 public class Configuration {
+
+    public static final String XMEMCACHED_SELECTOR_POOL_SIZE = "xmemcached.selector.pool.size";
 
 	/**
 	 * Read buffer size per connection
@@ -53,6 +59,8 @@ public class Configuration {
 	 * THread count for processing READABLE event
 	 */
 	private int readThreadCount = 1;
+
+    private int selectorPoolSize = System.getProperty(XMEMCACHED_SELECTOR_POOL_SIZE) == null ? 2 * Runtime.getRuntime().availableProcessors() : Integer.parseInt(System.getProperty(XMEMCACHED_SELECTOR_POOL_SIZE));
 
 	/**
 	 * Increasing buffer size per time
@@ -176,4 +184,11 @@ public class Configuration {
 		return this.checkSessionTimeoutInterval;
 	}
 
+    public void setSelectorPoolSize(int selectorPoolSize) {
+        this.selectorPoolSize = selectorPoolSize;
+    }
+
+    public int getSelectorPoolSize() {
+        return selectorPoolSize;
+    }
 }
