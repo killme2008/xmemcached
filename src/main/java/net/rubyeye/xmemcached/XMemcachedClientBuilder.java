@@ -8,9 +8,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import net.rubyeye.xmemcached.auth.AuthInfo;
 import net.rubyeye.xmemcached.buffer.BufferAllocator;
 import net.rubyeye.xmemcached.buffer.SimpleBufferAllocator;
@@ -20,14 +17,15 @@ import net.rubyeye.xmemcached.impl.DefaultKeyProvider;
 import net.rubyeye.xmemcached.impl.RandomMemcachedSessionLocaltor;
 import net.rubyeye.xmemcached.transcoders.SerializingTranscoder;
 import net.rubyeye.xmemcached.transcoders.Transcoder;
-import net.rubyeye.xmemcached.utils.Protocol;
 import net.rubyeye.xmemcached.utils.AddrUtil;
+import net.rubyeye.xmemcached.utils.Protocol;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.code.yanf4j.config.Configuration;
 import com.google.code.yanf4j.core.SocketOption;
 import com.google.code.yanf4j.core.impl.StandardSocketOption;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Builder pattern.Configure XmemcachedClient's options,then build it
@@ -198,7 +196,7 @@ public class XMemcachedClientBuilder implements MemcachedClientBuilder {
 		configuration
 				.setSessionIdleTimeout(MemcachedClient.DEFAULT_SESSION_IDLE_TIMEOUT);
 		configuration.setWriteThreadCount(0);
-		return configuration;
+        return configuration;
 	}
 
 	public boolean isFailureMode() {
@@ -436,5 +434,9 @@ public class XMemcachedClientBuilder implements MemcachedClientBuilder {
 		this.name = name;
 
 	}
+
+    public void setSelectorPoolSize(int selectorPoolSize) {
+        getConfiguration().setSelectorPoolSize(selectorPoolSize);
+    }
 
 }
