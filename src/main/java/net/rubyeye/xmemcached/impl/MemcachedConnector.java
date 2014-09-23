@@ -556,6 +556,7 @@ Connector {
 		}
 
 		public void onReady(Controller controller) {
+			MemcachedConnector.this.sessionMonitor.setDaemon(true);
 			MemcachedConnector.this.sessionMonitor.start();
 		}
 
