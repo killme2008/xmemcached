@@ -185,7 +185,7 @@ public class MemcachedHandler extends HandlerAdapter {
 	private void checkHeartBeat(Session session) {
 		if (this.enableHeartBeat) {
 			log.debug(
-					"Check session (%s) is alive,send heartbeat",
+					"Check session ({}) is alive,send heartbeat",
 					session.getRemoteSocketAddress() == null ? "unknown"
 							: SystemUtils.getRawAddress(session
 									.getRemoteSocketAddress())
