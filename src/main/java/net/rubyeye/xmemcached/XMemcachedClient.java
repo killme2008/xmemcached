@@ -108,8 +108,6 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 	private int timeoutExceptionThreshold = DEFAULT_MAX_TIMEOUTEXCEPTION_THRESHOLD;
 
 	private final CopyOnWriteArrayList<MemcachedClientStateListenerAdapter> stateListenerAdapters = new CopyOnWriteArrayList<MemcachedClientStateListenerAdapter>();
-	private Thread shutdownHookThread;
-	private volatile boolean isHutdownHookCalled = false;
 	// key provider for pre-processing keys before sending them to memcached
 	// added by dennis,2012-07-14
 	private KeyProvider keyProvider = DefaultKeyProvider.INSTANCE;
@@ -669,18 +667,6 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 			this.shutdown = false;
 			this.connector.start();
 			this.memcachedHandler.start();
-			this.shutdownHookThread = new Thread() {
-				@Override
-				public void run() {
-					try {
-						XMemcachedClient.this.isHutdownHookCalled = true;
-						XMemcachedClient.this.shutdown();
-					} catch (IOException e) {
-						log.error("Shutdown XMemcachedClient error", e);
-					}
-				}
-			};
-			Runtime.getRuntime().addShutdownHook(this.shutdownHookThread);
 		}
 	}
 
@@ -2395,14 +2381,6 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 		this.connector.stop();
 		this.memcachedHandler.stop();
 		XMemcachedMbeanServer.getInstance().shutdown();
-		if (!this.isHutdownHookCalled) {
-			try {
-				Runtime.getRuntime()
-						.removeShutdownHook(this.shutdownHookThread);
-			} catch (Exception e) {
-				// ignore;
-			}
-		}
 	}
 
 	private long sendIncrOrDecrCommand(final String key, final long delta,
