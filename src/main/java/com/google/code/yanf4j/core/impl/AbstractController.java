@@ -121,8 +121,6 @@ public abstract class AbstractController implements Controller,
 	 * Connected session set
 	 */
 	protected Set<Session> sessionSet = new ConcurrentHashSet<Session>();
-	private Thread shutdownHookThread;
-	private volatile boolean isHutdownHookCalled = false;
 
 	public final int getDispatchMessageThreadCount() {
 		return dispatchMessageThreadCount;
@@ -358,18 +356,6 @@ public abstract class AbstractController implements Controller,
 		startStatistics();
 		start0();
 		notifyStarted();
-		shutdownHookThread = new Thread() {
-			@Override
-			public void run() {
-				try {
-					isHutdownHookCalled = true;
-					AbstractController.this.stop();
-				} catch (IOException e) {
-					log.error("Stop controller fail", e);
-				}
-			}
-		};
-		Runtime.getRuntime().addShutdownHook(shutdownHookThread);
 		log.warn("The Controller started at " + localSocketAddress + " ...");
 	}
 
@@ -475,9 +461,6 @@ public abstract class AbstractController implements Controller,
 		notifyStopped();
 		clearStateListeners();
 		stop0();
-		if (!isHutdownHookCalled) {
-			Runtime.getRuntime().removeShutdownHook(shutdownHookThread);
-		}
 		log.info("Controller has been stopped.");
 	}
 
