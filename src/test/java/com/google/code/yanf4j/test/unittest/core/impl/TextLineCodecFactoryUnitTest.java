@@ -8,6 +8,8 @@ import com.google.code.yanf4j.buffer.IoBuffer;
 import com.google.code.yanf4j.core.CodecFactory.Encoder;
 import com.google.code.yanf4j.core.impl.TextLineCodecFactory;
 
+import static com.google.code.yanf4j.core.impl.TextLineCodecFactory.SPLIT;
+
 
 /**
  * 
@@ -15,7 +17,7 @@ import com.google.code.yanf4j.core.impl.TextLineCodecFactory;
  * 
  * @author boyan
  * 
- * @since 1.0, 2009-12-24 ÉÏÎç10:33:59
+ * @since 1.0, 2009-12-24 ï¿½ï¿½ï¿½ï¿½10:33:59
  */
 
 public class TextLineCodecFactoryUnitTest {
@@ -44,7 +46,7 @@ public class TextLineCodecFactoryUnitTest {
     public void testEncodeEmpty() throws Exception {
         Encoder encoder = this.textLineCodecFactory.getEncoder();
         Assert.assertNull(encoder.encode(null, null));
-        Assert.assertEquals(TextLineCodecFactory.SPLIT, encoder.encode("", null));
+        Assert.assertEquals(SPLIT, encoder.encode("", null));
     }
 
 
@@ -62,7 +64,6 @@ public class TextLineCodecFactoryUnitTest {
     @Test
     public void decodeEmpty() throws Exception {
         Assert.assertNull(this.textLineCodecFactory.getDecoder().decode(null, null));
-        Assert.assertEquals("", this.textLineCodecFactory.getDecoder().decode(TextLineCodecFactory.SPLIT, null));
+        Assert.assertEquals("", this.textLineCodecFactory.getDecoder().decode(SPLIT.slice(), null));
     }
-
 }
