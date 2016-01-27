@@ -67,9 +67,12 @@
 		<log4j.version>1.2.16</log4j.version>
 		<junit.version>4.4</junit.version>
 		<easymock.version>2.4</easymock.version>
+
+		<test.memcached.servers>localhost:12000</test.memcached.servers>
 	</properties>
 
 	<build>
+		<!-- Only filter test properties -->
 		<testResources>
 			<testResource>
 				<directory>src/test/resources</directory>
@@ -78,6 +81,14 @@
 					<include>**/*.properties</include>
 				</includes>
 			</testResource>
+			<testResource>
+				<directory>src/test/resources</directory>
+				<filtering>false</filtering>
+				<excludes>
+					<exclude>**/*.properties</exclude>
+				</excludes>
+			</testResource>
+
 		</testResources>
 
 		<plugins>
