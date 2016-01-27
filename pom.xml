@@ -59,7 +59,7 @@
 		<maven.compiler.source>1.5</maven.compiler.source>
 		<maven.compiler.target>1.5</maven.compiler.target>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		
+
 		<slf4j.version>1.7.5</slf4j.version>
 		<spring.version>2.5</spring.version>
 		<hibernate.memcached.version>1.2</hibernate.memcached.version>
@@ -81,6 +81,9 @@
 						<goals>
 							<goal>jar</goal>
 						</goals>
+						<configuration>
+							<additionalparam>${javadoc.xdoclint}</additionalparam>
+						</configuration>
 					</execution>
 				</executions>
 			</plugin>
@@ -181,12 +184,24 @@
 					<charset>utf-8</charset>
 					<locale>en_US</locale>
 					<excludePackageNames>net.rubyeye.xmemcached.test</excludePackageNames>
+					<additionalparam>${javadoc.xdoclint}</additionalparam>
 				</configuration>
 			</plugin>
 		</plugins>
 	</reporting>
 
 	<profiles>
+		<!-- Go around the issue with javadoc on jdk8 -->
+		<profile>
+			<id>jdk8</id>
+			<activation>
+				<jdk>[1.8,)</jdk>
+			</activation>
+			<properties>
+				<javadoc.xdoclint>-Xdoclint:none</javadoc.xdoclint>
+			</properties>
+		</profile>
+
 		<profile>
 			<id>release</id>
 			<activation>
