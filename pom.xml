@@ -68,7 +68,7 @@
 		<junit.version>4.4</junit.version>
 		<easymock.version>2.4</easymock.version>
 
-		<test.memcached.servers>localhost:12000</test.memcached.servers>
+		<test.memcached.servers>localhost:11211</test.memcached.servers>
 	</properties>
 
 	<build>
