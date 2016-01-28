@@ -15,7 +15,7 @@ import com.google.code.yanf4j.core.impl.TextLineCodecFactory;
  * 
  * @author boyan
  * 
- * @since 1.0, 2009-12-24 ионГ10:33:59
+ * @since 1.0, 2009-12-24 10:33:59
  */
 
 public class TextLineCodecFactoryUnitTest {

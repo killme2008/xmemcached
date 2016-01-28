@@ -11,7 +11,7 @@ import java.nio.channels.Selector;
  * 
  * @author boyan
  * 
- * @since 1.0, 2009-12-24 обнГ02:01:20
+ * @since 1.0, 2009-12-24 02:01:20
  */
 
 public class MockSelectionKey extends SelectionKey {

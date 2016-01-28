@@ -14,7 +14,7 @@ import java.nio.channels.spi.SelectorProvider;
  * 
  * @author boyan
  * 
- * @since 1.0, 2009-12-24 обнГ01:40:15
+ * @since 1.0, 2009-12-24 01:40:15
  */
 
 public class MockSelectableChannel extends SelectableChannel {

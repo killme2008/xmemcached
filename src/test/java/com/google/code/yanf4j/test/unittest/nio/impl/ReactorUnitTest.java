@@ -27,7 +27,7 @@ import com.google.code.yanf4j.nio.impl.SelectorManager;
  * 
  * @author boyan
  * 
- * @since 1.0, 2009-12-24 ÏÂÎç01:18:18
+ * @since 1.0, 2009-12-24 01:18:18
  */
 
 public class ReactorUnitTest {
@@ -144,10 +144,10 @@ public class ReactorUnitTest {
         MockSelectionKey key = new MockSelectionKey();
         NioSession session = mocksControl.createMock(NioSession.class);
         key.attach(session);
-        // ÅÐ¶ÏsessionÊÇ·ñ¹ýÆÚ£¬¼ÙÉèÎª¹ýÆÚ
+        // ï¿½Ð¶ï¿½sessionï¿½Ç·ï¿½ï¿½ï¿½Ú£ï¿½ï¿½ï¿½ï¿½ï¿½Îªï¿½ï¿½ï¿½ï¿½
         EasyMock.expect(session.isExpired()).andReturn(true);
-        // ¹ýÆÚ¾Í»áµ÷ÓÃonSessionExpired£¬×îºó¹Ø±ÕÁ¬½Ó
-        // Í¬Ê±£¬expiredµÄsession²»»áÅÐ¶Ïidle
+        // ï¿½ï¿½ï¿½Ú¾Í»ï¿½ï¿½ï¿½ï¿½onSessionExpiredï¿½ï¿½ï¿½ï¿½ï¿½Ø±ï¿½ï¿½ï¿½ï¿½ï¿½
+        // Í¬Ê±ï¿½ï¿½expiredï¿½ï¿½sessionï¿½ï¿½ï¿½ï¿½ï¿½Ð¶ï¿½idle
         session.onEvent(EventType.EXPIRED, this.reactor.getSelector());
         EasyMock.expectLastCall();
         session.close();
@@ -193,11 +193,11 @@ public class ReactorUnitTest {
         MockSelectionKey key = new MockSelectionKey();
         NioSession session = mocksControl.createMock(NioSession.class);
         key.attach(session);
-        // ÅÐ¶ÏsessionÊÇ·ñ¹ýÆÚ£¬²»¹ýÆÚ
+        // session
         EasyMock.expect(session.isExpired()).andReturn(false);
-        // ²»¹ýÆÚ¾Í»áÅÐ¶ÏsessionÊÇ·ñidle£¬¼ÙÉèidleÎªÕæ
+        // session idle
         EasyMock.expect(session.isIdle()).andReturn(true);
-        // Èç¹ûidleÌõ¼þÎªÕæ£¬ÄÇÃ´»áµ÷ÓÃonSessionIdle
+        // idle onSessionIdle
         session.onEvent(EventType.IDLE, this.reactor.getSelector());
         EasyMock.expectLastCall();
 

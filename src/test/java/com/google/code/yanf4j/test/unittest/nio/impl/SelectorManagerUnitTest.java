@@ -22,7 +22,7 @@ import com.google.code.yanf4j.nio.impl.SelectorManager;
  * 
  * @author boyan
  * 
- * @since 1.0, 2009-12-24 ÏÂÎç03:09:42
+ * @since 1.0, 2009-12-24 03:09:42
  */
 
 public class SelectorManagerUnitTest {
@@ -83,7 +83,7 @@ public class SelectorManagerUnitTest {
         IMocksControl control = EasyMock.createControl();
         NioSession session = control.createMock(NioSession.class);
         EasyMock.makeThreadSafe(session, true);
-        // next reactorµÄindex=2
+        // next reactor index=2
         Reactor nextReactor = this.selectorManager.getReactorByIndex(2);
         session.onEvent(EventType.ENABLE_READ, nextReactor.getSelector());
         EasyMock.expectLastCall();
