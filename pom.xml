@@ -60,6 +60,9 @@
 		<maven.compiler.target>1.5</maven.compiler.target>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
+		<maven.surefire.report.plugin.version>2.19.1</maven.surefire.report.plugin.version>
+		<maven.jxr.plugin.version>2.1</maven.jxr.plugin.version>
+
 		<slf4j.version>1.7.5</slf4j.version>
 		<spring.version>2.5</spring.version>
 		<hibernate.memcached.version>1.2</hibernate.memcached.version>
@@ -209,6 +212,20 @@
 					<excludePackageNames>net.rubyeye.xmemcached.test</excludePackageNames>
 					<additionalparam>${javadoc.xdoclint}</additionalparam>
 				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-report-plugin</artifactId>
+				<version>${maven.surefire.report.plugin.version}</version>
+				<configuration>
+					<showSuccess>false</showSuccess>
+				</configuration>
+			</plugin>
+			<!-- Source code cross reference -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jxr-plugin</artifactId>
+				<version>${maven.jxr.plugin.version}</version>
 			</plugin>
 		</plugins>
 	</reporting>
