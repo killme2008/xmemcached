@@ -6,7 +6,7 @@ jdk:
 services:
   - memcached
 after_script:
-  - mvn -X site -Ppublish-site-github -Dgithub.site.repositoryName=xmemcached -Dgithub.site.repositoryOwner=bmahe -Dgithub.site.userName=bmahe
+  - '[ "${TRAVIS_PULL_REQUEST}" = "false" ] && mvn -X site -Ppublish-site-github -Dgithub.site.repositoryName=xmemcached -Dgithub.site.repositoryOwner=bmahe -Dgithub.site.userName=bmahe || false'
 env:
   global:
     secure: f0+kC0wV6hO09ls2X4seMD6bU/EKMUfz6J/2r6qXvS6jflFz9208O8uNecFjm/eicVmZaDCrZDv7eXyi0LS/wRrjw9z2U4gnIQKXx0NfiUYw2TAsURKKYQJiOVXeC3xw9/75m1/Cdz19fgqgmDS1xIFzxqIe0RcyxJpFHjxn3SFHBZBT2ryShE4QERnsbtonEvKbk8kV4UUpVJMwqnMKGjlCIYkkANxUK8S9/3UEit0Ns4gkkwrvwHY+N805EViIHT6/2EK+c7myydsyy6GzEIEAsg/h8fK1TrGC54y7diU1lAcQHsVf2Te9IBYSjr426wRVzubcvUKStsPHEO7XVla7ecAW76YtuXNK/y6X0z3UVNTuyEadzAiDbned7Vp7IfrWLOKm0l+bNrb3wHsEd+XbZk1YEK9xDnj+nt+psqShstSay+JJmgdm+pg17kqgPUgR5QOIkpcEJerR3cEo3T021fgr4Tzd+eXRzNxGUMvvdmHVHKibPiaTnZ2iVoHWeJJT413PGhOsMT1Fnmqj/ET/2gSLfT909nRBidkg8lfymusJAHRDO99gw3QWY/6iMCWc9M99ZpbYK0EysTQbpCcIvnSriPufN2jSeQ5MdHy7OOkEuVpefOBCPfdePsoQLEZSdMj1frKZkPnmc/icEaCOuyQ4mbqFjxhlU9SZ5Rk=
