@@ -5,3 +5,5 @@ jdk:
   - openjdk6
 services:
   - memcached
+after_script:
+  - mvn site
