@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/bmahe/xmemcached.svg?branch=master)](https://travis-ci.org/bmahe/xmemcached)
+[![Build Status](https://travis-ci.org/bmahe/xmemcached.svg?branch=tango)](https://travis-ci.org/bmahe/xmemcached)
 
 ##Introduction
 
