@@ -7,10 +7,10 @@
 
 	<bean name="server1" class="java.net.InetSocketAddress">
 		<constructor-arg>
-			<value>localhost</value>
+			<value>${test.memcached.host}</value>
 		</constructor-arg>
 		<constructor-arg>
-			<value>11211</value>
+			<value>${test.memcached.port}</value>
 		</constructor-arg>
 	</bean>
 
@@ -20,7 +20,7 @@
 		class="net.rubyeye.xmemcached.utils.XMemcachedClientFactoryBean"
 		destroy-method="shutdown">
 		<property name="servers">
-			<value>localhost:11211</value>
+			<value>${test.memcached.servers}</value>
 		</property>
 		<property name="weights">
 			<list>
