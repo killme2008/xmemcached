@@ -62,6 +62,7 @@
 
 		<maven.surefire.report.plugin.version>2.19.1</maven.surefire.report.plugin.version>
 		<maven.jxr.plugin.version>2.1</maven.jxr.plugin.version>
+		<maven.site.maven.plugin.github.version>0.12</maven.site.maven.plugin.github.version>
 
 		<slf4j.version>1.7.5</slf4j.version>
 		<spring.version>2.5</spring.version>
@@ -259,6 +260,37 @@
 								<goals>
 									<goal>sign</goal>
 								</goals>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+
+		<profile>
+			<id>publish-site-github</id>
+			<activation>
+				<activeByDefault>false</activeByDefault>
+			</activation>
+			<properties>
+				<github.global.server>github</github.global.server>
+				<github.global.oauth2Token>${env.GITHUB_OAUTH_TOKEN}</github.global.oauth2Token>
+			</properties>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>com.github.github</groupId>
+						<artifactId>site-maven-plugin</artifactId>
+						<version>${maven.site.maven.plugin.github.version}</version>
+						<configuration>
+							<message>Creating site for ${project.version}</message>
+						</configuration>
+						<executions>
+							<execution>
+								<goals>
+									<goal>site</goal>
+								</goals>
+								<phase>site</phase>
 							</execution>
 						</executions>
 					</plugin>
