@@ -32,9 +32,9 @@
 	</licenses>
 
 	<scm>
-		<connection>scm:git:git@github.com:killme2008/xmemcached.git</connection>
-		<developerConnection>scm:git:git@github.com:killme2008/xmemcached.git</developerConnection>
-		<url>git@github.com:killme2008/xmemcached.git</url>
+		<connection>scm:git:git://github.com/bmahe/xmemcached.git</connection>
+		<developerConnection>scm:git:git@github.com:bmahe/xmemcached.git</developerConnection>
+		<url>https://github.com/bmahe/xmemcached</url>
 	</scm>
 
 	<repositories>
@@ -284,6 +284,7 @@
 						<version>${maven.site.maven.plugin.github.version}</version>
 						<configuration>
 							<message>Creating site for ${project.version}</message>
+							<noJekyll>true</noJekyll>
 						</configuration>
 						<executions>
 							<execution>
