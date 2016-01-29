@@ -32,9 +32,9 @@
 	</licenses>
 
 	<scm>
-		<connection>scm:git:git://github.com/bmahe/xmemcached.git</connection>
-		<developerConnection>scm:git:git@github.com:bmahe/xmemcached.git</developerConnection>
-		<url>https://github.com/bmahe/xmemcached</url>
+		<connection>scm:git:git://github.com/${github.account}/xmemcached.git</connection>
+		<developerConnection>scm:git:git@github.com:${github.account}/xmemcached.git</developerConnection>
+		<url>https://github.com/${github.account}/xmemcached</url>
 	</scm>
 
 	<repositories>
@@ -56,6 +56,8 @@
 	</repositories>
 
 	<properties>
+		<github.account>bmahe</github.account>
+
 		<maven.compiler.source>1.5</maven.compiler.source>
 		<maven.compiler.target>1.5</maven.compiler.target>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

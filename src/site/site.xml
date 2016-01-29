@@ -12,7 +12,7 @@
 			<sourceLineNumbersEnabled>true</sourceLineNumbersEnabled>
 
 			<gitHub>
-				<projectId>bmahe/xmemcached</projectId>
+				<projectId>${github.account}/xmemcached</projectId>
 				<ribbonOrientation>right</ribbonOrientation>
 				<ribbonColor>green</ribbonColor>
 			</gitHub>
