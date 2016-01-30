@@ -6,7 +6,7 @@ jdk:
 services:
   - memcached
 after_script:
-  - '[ "${TRAVIS_PULL_REQUEST}" = "false" ] && mvn -X site -Ppublish-site-github || false'
+  - '[ "${TRAVIS_PULL_REQUEST}" = "false" ] && travis_wait mvn site -Ppublish-site-github || false'
 env:
   global:
   - secure: by8Y+t+Dt7CShdmPw9vb2ssO2bHl5PKxS6n5VyRI6Jy2cRtCHsVIIMKe/6bJATGSbhzDOCrbQUC9U9WgIkBp8nCbI4UqCF31us+vt+OJXQIX2BT5nyRetsRQ2n2y8ebj7C+LJYfN72W7UaUYLuLXhh3+XfT51NCEppA2Po0LGf3O05yMsMYcuHuXNGitVMx7jZCQS+7FnMNdtsgjDrIzELOZQ65oKjh7uWTBRm6Fw+EZZVmz0wg7O3qrlFpUGQOh9rGUM9/coIMeXqU5ZcnXayXbeaQWO6/UXrTt/xLEupUEWsBm0QJEMGlYvvhpThSSAbkBE0PCWys6Fm7BqCmMOvISCuVlN6h3aUXXkQdpuQEATrLuYx63zJzjIxWlW0wmv4a1iB1+gCBtK67N4lD/sgv+6WPDCz3JAPulLTtCbaqoHJ0+VKkvZtsLBUDapRqe2FcVV+wsKMCdEx/gyhvwHwam0szenRmm3khwP7hoTX3v6VNuBE/C/sM9mysDim9nAovDvcJC1hA8mfQDnCi0WCHVF6FJnaydQxPEb6JxB3QCryxYlB6kT+pjEthXZiCxwLOnylVWANYkDVuhhi62p0x/Dvu50skroXflbd+YlExYZEfnhIo0GQ+ByLSGAbVxiuKqUYEMoJGReKdjc4HE/N6oCwdJ1dICKyU18SssWLk=
