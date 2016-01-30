@@ -70,6 +70,7 @@
 		<maven-pmd-plugin>3.0.1</maven-pmd-plugin>
 		<maven.project.info.plugin.version>2.7</maven.project.info.plugin.version>
 		<maven.site.maven.plugin.github.version>0.12</maven.site.maven.plugin.github.version>
+		<maven.surefire.plugin.version>2.19.1</maven.surefire.plugin.version>
 		<maven.surefire.report.plugin.version>2.19.1</maven.surefire.report.plugin.version>
 		<maven.taglist.report.plugin>2.4</maven.taglist.report.plugin>
 		<maven.versions.plugin>2.1</maven.versions.plugin>
@@ -133,6 +134,15 @@
 					<encoding>${project.build.sourceEncoding}</encoding>
 				</configuration>
 			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>${maven.surefire.plugin.version}</version>
+				<configuration>
+					<redirectTestOutputToFile>true</redirectTestOutputToFile>
+				</configuration>
+			</plugin>
+
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-assembly-plugin</artifactId>
