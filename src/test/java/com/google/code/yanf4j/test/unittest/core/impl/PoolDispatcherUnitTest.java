@@ -11,7 +11,6 @@ import org.junit.Test;
 
 import com.google.code.yanf4j.core.impl.PoolDispatcher;
 
-
 /**
  * 
  * 
@@ -22,94 +21,70 @@ import com.google.code.yanf4j.core.impl.PoolDispatcher;
  */
 
 public class PoolDispatcherUnitTest {
-    PoolDispatcher dispatcher;
+	PoolDispatcher dispatcher;
 
+	@Before
+	public void setUp() {
+		this.dispatcher = new PoolDispatcher(10, 60, TimeUnit.SECONDS, new ThreadPoolExecutor.AbortPolicy(), "test");
+	}
 
-    @Before
-    public void setUp() {
-        this.dispatcher = new PoolDispatcher(10, 60, TimeUnit.SECONDS, new ThreadPoolExecutor.AbortPolicy(),"test");
-    }
+	@After
+	public void tearDown() {
+		this.dispatcher.stop();
+	}
 
-    private static final class TestRunner implements Runnable {
-        boolean ran;
+	private static final class TestRunner implements Runnable {
+		boolean ran;
 
+		public void run() {
+			this.ran = true;
 
-        public void run() {
-            this.ran = true;
+		}
+	}
 
-        }
-    }
+	@Test
+	public void testDispatch() throws Exception {
+		TestRunner runner = new TestRunner();
+		this.dispatcher.dispatch(runner);
+		Thread.sleep(1000);
+		Assert.assertTrue(runner.ran);
 
+	}
 
-    @Test
-    public void testDispatch() throws Exception {
-        TestRunner runner = new TestRunner();
-        this.dispatcher.dispatch(runner);
-        Thread.sleep(1000);
-        Assert.assertTrue(runner.ran);
+	@Test(expected = NullPointerException.class)
+	public void testDispatchNull() throws Exception {
+		this.dispatcher.dispatch(null);
+	}
 
-    }
-
-
-    @Test
-    public void testDispatchNull() throws Exception {
-        try {
-            this.dispatcher.dispatch(null);
-            Assert.fail();
-        }
-        catch (NullPointerException e) {
-
-        }
-    }
-
-
-    @Test
-    public void testDispatcherStop() throws Exception {
+	@Test
+	public void testDispatcherStop() throws Exception {
         this.dispatcher.stop();
-        TestRunner runner = new TestRunner();
-        this.dispatcher.dispatch(runner);
-        Thread.sleep(1000);
-        Assert.assertFalse(runner.ran);
-    }
+		TestRunner runner = new TestRunner();
+		this.dispatcher.dispatch(runner);
+		Thread.sleep(1000);
+		Assert.assertFalse(runner.ran);
+	}
 
+	@Test(expected = RejectedExecutionException.class)
+	public void testDispatchReject() throws Exception {
+		this.dispatcher = new PoolDispatcher(1, 1, 1, 60, TimeUnit.SECONDS, new ThreadPoolExecutor.AbortPolicy(),
+				"test");
+		this.dispatcher.dispatch(new Runnable() {
+			public void run() {
+				while (!Thread.currentThread().isInterrupted()) {
 
-    @Test
-    public void testDispatchReject() throws Exception {
-        this.dispatcher.stop();
-        PoolDispatcher.MAX_POOL_SIZE_FACTOR = 1;
-        PoolDispatcher.POOL_QUEUE_SIZE_FACTOR = 1;
-        this.dispatcher = new PoolDispatcher(1, 60, TimeUnit.SECONDS, new ThreadPoolExecutor.AbortPolicy(),"test");
-        this.dispatcher.dispatch(new Runnable() {
-            public void run() {
-                while (!Thread.currentThread().isInterrupted()) {
+				}
+			}
+		});
+		this.dispatcher.dispatch(new Runnable() {
+			public void run() {
+				while (!Thread.currentThread().isInterrupted()) {
 
-                }
-            }
-        });
-        this.dispatcher.dispatch(new Runnable() {
-            public void run() {
-                while (!Thread.currentThread().isInterrupted()) {
+				}
+			}
+		});
 
-                }
-            }
-        });
-
-        try {
-            this.dispatcher.dispatch(new TestRunner());
-            Assert.fail();
-        }
-        catch (RejectedExecutionException e) {
-
-        }
-        PoolDispatcher.MAX_POOL_SIZE_FACTOR = 1.25f;
-        PoolDispatcher.POOL_QUEUE_SIZE_FACTOR = 1000;
-    }
-
-
-    @After
-    public void tearDown() {
-        this.dispatcher.stop();
-
-    }
-
+		// Should throw a RejectedExecutionException
+		this.dispatcher.dispatch(new TestRunner());
+	}
 }
