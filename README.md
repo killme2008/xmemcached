@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/bmahe/xmemcached.svg?branch=tango)](https://travis-ci.org/bmahe/xmemcached)
+
 ##Introduction
 
   XMemcached is a high performance, easy to use blocking multithreaded memcached client in java.

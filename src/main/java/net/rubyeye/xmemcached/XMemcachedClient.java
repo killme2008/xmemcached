@@ -44,6 +44,7 @@ import net.rubyeye.xmemcached.command.CommandType;
 import net.rubyeye.xmemcached.command.ServerAddressAware;
 import net.rubyeye.xmemcached.command.TextCommandFactory;
 import net.rubyeye.xmemcached.exception.MemcachedException;
+import net.rubyeye.xmemcached.exception.NoValueException;
 import net.rubyeye.xmemcached.impl.ArrayMemcachedSessionLocator;
 import net.rubyeye.xmemcached.impl.ClosedMemcachedTCPSession;
 import net.rubyeye.xmemcached.impl.DefaultKeyProvider;
@@ -1702,7 +1703,7 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 		int tryCount = 0;
 		GetsResponse<T> result = getsResponse;
 		if (result == null) {
-			throw new MemcachedException("Null GetsResponse");
+			throw new NoValueException("Null GetsResponse for key=" + key);
 		}
 		while (tryCount <= operation.getMaxTries()
 				&& result != null
@@ -1716,7 +1717,7 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 			tryCount++;
 			result = this.gets0(key, keyBytes, transcoder);
 			if (result == null) {
-				throw new MemcachedException(
+				throw new NoValueException(
 						"could not gets the value for Key=" + key + " for cas");
 			}
 			if (tryCount > operation.getMaxTries()) {

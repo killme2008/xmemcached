@@ -15,7 +15,7 @@ import com.google.code.yanf4j.core.impl.ByteBufferCodecFactory;
  * 
  * @author boyan
  * 
- * @since 1.0, 2009-12-24 ионГ10:49:54
+ * @since 1.0, 2009-12-24 10:49:54
  */
 
 public class ByteBufferCodecFactoryUnitTest {

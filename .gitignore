@@ -3,3 +3,6 @@ target/
 .classpath
 .project
 .settings
+.idea/
+*.iml
+*.swp
