@@ -58,13 +58,20 @@
 	<properties>
 		<github.account>bmahe</github.account>
 
+		<!-- Default to number of CPUs on the host. See cpu-count goal of the build 
+			helper plugin -->
+		<surefire.thread.count>${cpu.count}</surefire.thread.count>
+		<surefire.perCoreThreadCount>false</surefire.perCoreThreadCount>
+
 		<maven.compiler.source>1.5</maven.compiler.source>
 		<maven.compiler.target>1.5</maven.compiler.target>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
+		<build.helper.maven.plugin.version>1.10</build.helper.maven.plugin.version>
 		<cobertura-maven-plugin>2.6</cobertura-maven-plugin>
 		<maven-checkstyle-plugin>2.10</maven-checkstyle-plugin>
 		<maven.dependency.plugin.version>2.10</maven.dependency.plugin.version>
+		<maven.failsafe.plugin.version>2.19.1</maven.failsafe.plugin.version>
 		<maven.findbugs.report.plugin>3.0.1</maven.findbugs.report.plugin>
 		<maven.jxr.plugin.version>2.1</maven.jxr.plugin.version>
 		<maven-pmd-plugin>3.0.1</maven-pmd-plugin>
@@ -80,7 +87,7 @@
 		<hibernate.memcached.version>1.2</hibernate.memcached.version>
 		<jta.version>1.1</jta.version>
 		<log4j.version>1.2.16</log4j.version>
-		<junit.version>4.4</junit.version>
+		<junit.version>4.12</junit.version>
 		<easymock.version>2.4</easymock.version>
 
 		<test.memcached.host>localhost</test.memcached.host>
@@ -109,6 +116,22 @@
 		</testResources>
 
 		<plugins>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>build-helper-maven-plugin</artifactId>
+				<version>${build.helper.maven.plugin.version}</version>
+				<executions>
+					<execution>
+						<id>get-cpu-count</id>
+						<goals>
+							<goal>cpu-count</goal>
+						</goals>
+						<configuration>
+							<cpuCount>cpu.count</cpuCount>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
@@ -140,9 +163,27 @@
 				<version>${maven.surefire.plugin.version}</version>
 				<configuration>
 					<redirectTestOutputToFile>true</redirectTestOutputToFile>
+					<parallel>classes</parallel>
+					<perCoreThreadCount>${surefire.perCoreThreadCount}</perCoreThreadCount>
+					<threadCount>${surefire.thread.count}</threadCount>
 				</configuration>
 			</plugin>
-
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-failsafe-plugin</artifactId>
+				<version>${maven.failsafe.plugin.version}</version>
+				<executions>
+					<execution>
+						<goals>
+							<goal>integration-test</goal>
+							<goal>verify</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<redirectTestOutputToFile>true</redirectTestOutputToFile>
+				</configuration>
+			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-assembly-plugin</artifactId>
@@ -242,6 +283,14 @@
 				<configuration>
 					<showSuccess>false</showSuccess>
 				</configuration>
+				<reportSets>
+					<reportSet>
+						<reports>
+							<report>failsafe-report-only</report>
+							<report>report-only</report>
+						</reports>
+					</reportSet>
+				</reportSets>
 			</plugin>
 			<!-- Source code cross reference -->
 			<plugin>

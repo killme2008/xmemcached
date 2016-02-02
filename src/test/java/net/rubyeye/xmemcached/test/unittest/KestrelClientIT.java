@@ -19,7 +19,7 @@ import net.rubyeye.xmemcached.utils.AddrUtil;
 
 import com.google.code.yanf4j.util.ResourcesUtils;
 
-public class KestrelClientUnitTest extends TestCase {
+public class KestrelClientIT extends TestCase {
 	static class UserDefinedClass implements Serializable {
 		private String name;
 
@@ -231,11 +231,11 @@ public class KestrelClientUnitTest extends TestCase {
 			try {
 				this.cyclicBarrier.await();
 				for (int i = 0; i < 10000; i++) {
-					KestrelClientUnitTest.this.memcachedClient.set("queue1", 0,
+					KestrelClientIT.this.memcachedClient.set("queue1", 0,
 							"hello");
 				}
 				for (int i = 0; i < 10000; i++) {
-					KestrelClientUnitTest.this.memcachedClient.get("queue1");
+					KestrelClientIT.this.memcachedClient.get("queue1");
 				}
 				this.cyclicBarrier.await();
 			} catch (Exception e) {

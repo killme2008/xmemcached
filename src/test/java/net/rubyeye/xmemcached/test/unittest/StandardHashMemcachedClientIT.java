@@ -13,7 +13,7 @@ import net.rubyeye.xmemcached.impl.KetamaMemcachedSessionLocator;
 import net.rubyeye.xmemcached.transcoders.StringTranscoder;
 import net.rubyeye.xmemcached.utils.AddrUtil;
 
-public class StandardHashMemcachedClientTest extends XMemcachedClientTest {
+public class StandardHashMemcachedClientIT extends XMemcachedClientIT {
 
 	@Override
 	public MemcachedClientBuilder createBuilder() throws Exception {

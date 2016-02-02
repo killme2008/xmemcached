@@ -12,7 +12,7 @@ import net.rubyeye.xmemcached.XMemcachedClientBuilder;
 import net.rubyeye.xmemcached.utils.AddrUtil;
 import junit.framework.TestCase;
 
-public class MemcachedClientStateListenerUnitTest extends TestCase {
+public class MemcachedClientStateListenerIT extends TestCase {
 
 	MemcachedClient memcachedClient;
 	MockMemcachedClientStateListener listener;

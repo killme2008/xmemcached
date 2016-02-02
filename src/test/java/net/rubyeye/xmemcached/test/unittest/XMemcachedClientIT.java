@@ -54,7 +54,7 @@ import net.rubyeye.xmemcached.utils.Protocol;
 import com.google.code.yanf4j.buffer.IoBuffer;
 import com.google.code.yanf4j.util.ResourcesUtils;
 
-public abstract class XMemcachedClientTest extends TestCase {
+public abstract class XMemcachedClientIT extends TestCase {
 	protected MemcachedClient memcachedClient;
 	Properties properties;
 	private MockTranscoder mockTranscoder;

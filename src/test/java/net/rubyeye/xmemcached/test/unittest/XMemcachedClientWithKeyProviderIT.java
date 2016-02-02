@@ -12,7 +12,7 @@ import net.rubyeye.xmemcached.exception.MemcachedException;
 import net.rubyeye.xmemcached.utils.AddrUtil;
 import net.rubyeye.xmemcached.utils.ByteUtils;
 
-public class XMemcachedClientWithKeyProviderTest extends XMemcachedClientTest{
+public class XMemcachedClientWithKeyProviderIT extends XMemcachedClientIT{
 	
 	private KeyProvider keyProvider;
 	
