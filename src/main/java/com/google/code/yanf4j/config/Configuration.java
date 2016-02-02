@@ -70,7 +70,7 @@ public class Configuration {
 	/**
 	 * Max read buffer size for connection
 	 */
-	public static int MAX_READ_BUFFER_SIZE = 128 * 1024;
+	public final static int MAX_READ_BUFFER_SIZE = 128 * 1024;
 
 	/**
 	 * check session idle interval
