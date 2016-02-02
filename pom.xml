@@ -67,7 +67,7 @@
 		<maven.compiler.target>1.5</maven.compiler.target>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-		<build.helper.maven.plugin.version>1.10</build.helper.maven.plugin.version>
+		<build.helper.maven.plugin.version>1.9.1</build.helper.maven.plugin.version>
 		<cobertura-maven-plugin>2.6</cobertura-maven-plugin>
 		<maven-checkstyle-plugin>2.10</maven-checkstyle-plugin>
 		<maven.dependency.plugin.version>2.10</maven.dependency.plugin.version>
