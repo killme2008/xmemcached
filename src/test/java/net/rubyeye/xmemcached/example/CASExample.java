@@ -19,6 +19,8 @@ import net.rubyeye.xmemcached.MemcachedClientBuilder;
 import net.rubyeye.xmemcached.XMemcachedClientBuilder;
 import net.rubyeye.xmemcached.command.BinaryCommandFactory;
 import net.rubyeye.xmemcached.utils.AddrUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * CASOperation example
@@ -26,6 +28,10 @@ import net.rubyeye.xmemcached.utils.AddrUtil;
  * @author dennis
  */
 class CASThread extends Thread {
+
+
+	private static final Logger log = LoggerFactory.getLogger(CASThread.class);
+	
 	/**
 	 * Increase Operation
 	 * 
@@ -61,7 +67,7 @@ class CASThread extends Thread {
 					this.cd.countDown();
 				}
 		} catch (Exception e) {
-			e.printStackTrace();
+			log.error(e.getMessage(), e);
 		}
 	}
 }

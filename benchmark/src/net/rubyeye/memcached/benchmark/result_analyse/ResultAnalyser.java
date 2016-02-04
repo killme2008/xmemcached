@@ -40,6 +40,7 @@ import org.jfree.data.general.DatasetUtilities;
  */
 public class ResultAnalyser {
 
+	private static final Logger log = LoggerFactory.getLogger(ResultAnalyser.class);
 	private static final int HEIGHT = 600;
 	private static final String DEFAULT_RESULT_IMAGES_DIR = "result/images";
 	private static final String DEFAULT_RESULT_DIR = "result";
@@ -251,15 +252,16 @@ public class ResultAnalyser {
 			ChartUtilities.writeChartAsJPEG(out, chart, weight, height);
 			out.flush();
 		} catch (FileNotFoundException e) {
-			e.printStackTrace();
+			log.error(e.getMessage(), e);
 		} catch (IOException e) {
-			e.printStackTrace();
+			log.error(e.getMessage(), e);
 		} finally {
 			if (out != null) {
 				try {
 					out.close();
 				} catch (IOException e) {
 					// do nothing
+					log.error(e.getMessage(), e);
 				}
 			}
 		}
@@ -285,8 +287,8 @@ public class ResultAnalyser {
 		render.setSeriesPaint(2, Color.YELLOW);
 		render.setSeriesPaint(3, Color.BLUE);
 		render.setSeriesPaint(4, Color.CYAN);
-		render.setShapesFilled(Boolean.TRUE);// ÔÚÊý¾ÝµãÏÔÊ¾ÊµÐÄµÄÐ¡Í¼±ê
-		render.setShapesVisible(true);// ÉèÖÃÏÔÊ¾Ð¡Í¼±ê
+		render.setShapesFilled(Boolean.TRUE);// ï¿½ï¿½ï¿½ï¿½ï¿½Ýµï¿½ï¿½ï¿½Ê¾Êµï¿½Äµï¿½Ð¡Í¼ï¿½ï¿½
+		render.setShapesVisible(true);// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê¾Ð¡Í¼ï¿½ï¿½
 
 		CategoryAxis cateaxis = plot.getDomainAxis();
 
@@ -305,7 +307,7 @@ public class ResultAnalyser {
 	}
 
 	/**
-	 * ´´½¨CategoryDataset¶ÔÏó
+	 * ï¿½ï¿½ï¿½ï¿½CategoryDatasetï¿½ï¿½ï¿½ï¿½
 	 * 
 	 */
 	public static CategoryDataset createDataset(String[] rowKeys,

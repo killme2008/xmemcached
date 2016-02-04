@@ -8,6 +8,7 @@ import net.rubyeye.memcached.benchmark.StringGenerator;
 
 public abstract class BaseReadWriteThread extends Thread {
 
+	private static final Logger log = LoggerFactory.getLogger(BaseReadWriteThread.class);
 	protected int repeats;
 	protected CyclicBarrier barrier;
 	protected int offset;
@@ -64,7 +65,7 @@ public abstract class BaseReadWriteThread extends Thread {
 
 			barrier.await();
 		} catch (Exception e) {
-			e.printStackTrace();
+			log.error(e.getMessage(), e);
 
 		}
 	}

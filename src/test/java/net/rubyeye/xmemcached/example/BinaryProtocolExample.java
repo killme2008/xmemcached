@@ -9,6 +9,8 @@ import net.rubyeye.xmemcached.XMemcachedClientBuilder;
 import net.rubyeye.xmemcached.exception.MemcachedException;
 import net.rubyeye.xmemcached.utils.AddrUtil;
 import net.rubyeye.xmemcached.command.BinaryCommandFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Simple example for xmemcached,use binary protocol
@@ -17,6 +19,9 @@ import net.rubyeye.xmemcached.command.BinaryCommandFactory;
  * 
  */
 public class BinaryProtocolExample {
+
+	private static final Logger log = LoggerFactory.getLogger(BinaryProtocolExample.class);
+	
 	public static void main(String[] args) {
 		if (args.length < 1) {
 			System.err.println("Useage:java BinaryProtocolExample [servers]");
@@ -40,19 +45,17 @@ public class BinaryProtocolExample {
 			value = memcachedClient.get("a");
 			System.out.println("after delete,a=" + value);
 		} catch (MemcachedException e) {
-			System.err.println("MemcachedClient operation fail");
-			e.printStackTrace();
+			log.error("MemcachedClient operation fail", e);
 		} catch (TimeoutException e) {
-			System.err.println("MemcachedClient operation timeout");
-			e.printStackTrace();
+			log.error("MemcachedClient operation timeout", e);
 		} catch (InterruptedException e) {
 			// ignore
+			log.info(e.getMessage());
 		}
 		try {
 			memcachedClient.shutdown();
 		} catch (Exception e) {
-			System.err.println("Shutdown MemcachedClient fail");
-			e.printStackTrace();
+			log.error("Shutdown MemcachedClient fail", e);
 		}
 	}
 
