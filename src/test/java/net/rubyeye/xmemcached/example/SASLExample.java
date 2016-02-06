@@ -16,6 +16,8 @@ import net.rubyeye.xmemcached.exception.MemcachedException;
 import net.rubyeye.xmemcached.utils.AddrUtil;
 import net.rubyeye.xmemcached.auth.AuthInfo;
 import net.rubyeye.xmemcached.command.BinaryCommandFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Simple example for xmemcached,use binary protocol
@@ -24,6 +26,9 @@ import net.rubyeye.xmemcached.command.BinaryCommandFactory;
  * 
  */
 public class SASLExample {
+
+	private static final Logger log = LoggerFactory.getLogger(SASLExample.class);
+
 	public static void main(String[] args) {
 		if (args.length < 3) {
 			System.err
@@ -49,19 +54,16 @@ public class SASLExample {
 			value = memcachedClient.get("a");
 			System.out.println("after delete,a=" + value);
 		} catch (MemcachedException e) {
-			System.err.println("MemcachedClient operation fail");
-			e.printStackTrace();
+			log.error("MemcachedClient operation fail", e);
 		} catch (TimeoutException e) {
-			System.err.println("MemcachedClient operation timeout");
-			e.printStackTrace();
+			log.error("MemcachedClient operation timeout", e);
 		} catch (InterruptedException e) {
 			// ignore
 		}
 		try {
 			memcachedClient.shutdown();
 		} catch (Exception e) {
-			System.err.println("Shutdown MemcachedClient fail");
-			e.printStackTrace();
+			log.error("Shutdown MemcachedClient fail", e);
 		}
 	}
 
@@ -76,8 +78,7 @@ public class SASLExample {
 			builder.setCommandFactory(new BinaryCommandFactory());
 			return builder.build();
 		} catch (IOException e) {
-			System.err.println("Create MemcachedClient fail");
-			e.printStackTrace();
+			log.error("Create MemcachedClient fail", e);
 		}
 		return null;
 	}

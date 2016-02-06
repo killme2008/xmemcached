@@ -9,6 +9,8 @@ import net.rubyeye.xmemcached.MemcachedClientBuilder;
 import net.rubyeye.xmemcached.XMemcachedClientBuilder;
 import net.rubyeye.xmemcached.exception.MemcachedException;
 import net.rubyeye.xmemcached.utils.AddrUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Simple example for xmemcached
@@ -17,6 +19,9 @@ import net.rubyeye.xmemcached.utils.AddrUtil;
  * 
  */
 public class SimpleExample {
+
+	private static final Logger log = LoggerFactory.getLogger(SimpleExample.class);
+
 	public static void main(String[] args) {
 		if (args.length < 1) {
 			System.err.println("Useage:java SimpleExample [servers]");
@@ -53,19 +58,17 @@ public class SimpleExample {
 			System.out.println(memcachedClient.touch("b", 1000));
 
 		} catch (MemcachedException e) {
-			System.err.println("MemcachedClient operation fail");
-			e.printStackTrace();
+			log.error("MemcachedClient operation fail", e);
 		} catch (TimeoutException e) {
-			System.err.println("MemcachedClient operation timeout");
-			e.printStackTrace();
+			log.error("MemcachedClient operation timeout", e);
 		} catch (InterruptedException e) {
 			// ignore
+			log.info(e.getMessage());
 		}
 		try {
 			memcachedClient.shutdown();
 		} catch (Exception e) {
-			System.err.println("Shutdown MemcachedClient fail");
-			e.printStackTrace();
+			log.error("Shutdown MemcachedClient fail", e);
 		}
 	}
 
@@ -76,8 +79,7 @@ public class SimpleExample {
 					AddrUtil.getAddresses(servers));
 			return builder.build();
 		} catch (IOException e) {
-			System.err.println("Create MemcachedClient fail");
-			e.printStackTrace();
+			log.error("Create MemcachedClient fail", e);
 		}
 		return null;
 	}

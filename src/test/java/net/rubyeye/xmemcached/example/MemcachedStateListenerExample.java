@@ -8,8 +8,12 @@ import net.rubyeye.xmemcached.MemcachedClientBuilder;
 import net.rubyeye.xmemcached.MemcachedClientStateListener;
 import net.rubyeye.xmemcached.XMemcachedClientBuilder;
 import net.rubyeye.xmemcached.utils.AddrUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 class MyListener implements MemcachedClientStateListener {
+
+	private static final Logger log = LoggerFactory.getLogger(MyListener.class);
 
 	public void onConnected(MemcachedClient memcachedClient,
 			InetSocketAddress inetSocketAddress) {
@@ -23,7 +27,7 @@ class MyListener implements MemcachedClientStateListener {
 	}
 
 	public void onException(MemcachedClient memcachedClient, Throwable throwable) {
-		throwable.printStackTrace();
+		log.error(throwable.getMessage(), throwable);
 
 	}
 
@@ -40,6 +44,9 @@ class MyListener implements MemcachedClientStateListener {
 }
 
 public class MemcachedStateListenerExample {
+
+	private static final Logger log = LoggerFactory.getLogger(MemcachedStateListenerExample.class);
+	
 	public static void main(String[] args) {
 		if (args.length < 1) {
 			System.err
@@ -50,7 +57,7 @@ public class MemcachedStateListenerExample {
 		try {
 			memcachedClient.shutdown();
 		} catch (IOException e) {
-			e.printStackTrace();
+			log.error(e.getMessage(), e);
 		}
 	}
 
@@ -64,7 +71,7 @@ public class MemcachedStateListenerExample {
 			return builder.build();
 		} catch (IOException e) {
 			System.err.println("Create MemcachedClient fail");
-			e.printStackTrace();
+			log.error(e.getMessage(), e);
 		}
 		return null;
 	}
