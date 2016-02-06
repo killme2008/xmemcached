@@ -40,8 +40,8 @@ import com.google.code.yanf4j.util.WorkerThreadFactory;
  * 
  */
 public class PoolDispatcher implements Dispatcher {
-	public static int POOL_QUEUE_SIZE_FACTOR = 1000;
-	public static float MAX_POOL_SIZE_FACTOR = 1.25f;
+	public static final int POOL_QUEUE_SIZE_FACTOR = 1000;
+	public static final float MAX_POOL_SIZE_FACTOR = 1.25f;
 	private ThreadPoolExecutor threadPool;
 
 	public PoolDispatcher(int poolSize) {

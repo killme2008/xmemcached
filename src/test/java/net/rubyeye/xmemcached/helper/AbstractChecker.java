@@ -5,6 +5,7 @@ import junit.framework.ComparisonFailure;
 
 public abstract class AbstractChecker implements ExceptionChecker {
 
+	private static final double EPSILON =  0.00000001;
 	public void call() throws Exception {
 		// TODO Auto-generated method stub
 		
@@ -108,7 +109,7 @@ public abstract class AbstractChecker implements ExceptionChecker {
 		// NaN and the
 		// the following test fails
 		if (Double.isInfinite(expected)) {
-			if (!(expected == actual))
+			if (!(Math.abs(expected - actual) <= EPSILON))
 				failNotEquals(message, new Double(expected), new Double(actual));
 		} else if (!(Math.abs(expected - actual) <= delta)) // Because
 															// comparison with
@@ -136,7 +137,7 @@ public abstract class AbstractChecker implements ExceptionChecker {
 		// NaN and the
 		// the following test fails
 		if (Float.isInfinite(expected)) {
-			if (!(expected == actual))
+			if (!(Math.abs(expected - actual) <= EPSILON))
 				failNotEquals(message, new Float(expected), new Float(actual));
 		} else if (!(Math.abs(expected - actual) <= delta))
 			failNotEquals(message, new Float(expected), new Float(actual));

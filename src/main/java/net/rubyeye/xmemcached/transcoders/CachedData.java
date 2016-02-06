@@ -13,7 +13,7 @@ public final class CachedData {
 	/**
 	 * Maximum data size allowed by memcached.
 	 */
-	public static int MAX_SIZE = 1024 * 1024;
+	public final static int MAX_SIZE = 1024 * 1024;
 
 	protected int flag;
 	protected long cas;
