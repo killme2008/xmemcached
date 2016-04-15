@@ -542,9 +542,9 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 						.getStandbySessionListByMainNodeAddr(address);
 				if (standBySession != null) {
 					for (Session session : standBySession) {
-						this.connector.removeReconnectRequest(session
-								.getRemoteSocketAddress());
 						if (session != null) {
+							this.connector.removeReconnectRequest(session
+									.getRemoteSocketAddress());
 							// Disable auto reconnection
 							((MemcachedSession) session)
 									.setAllowReconnect(false);
