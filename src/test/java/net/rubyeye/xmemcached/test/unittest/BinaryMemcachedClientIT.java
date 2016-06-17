@@ -23,7 +23,7 @@ import org.junit.Test;
  * @author boyan
  * 
  */
-public class BinaryMemcachedClientUnitTest extends XMemcachedClientTest {
+public class BinaryMemcachedClientIT extends XMemcachedClientIT {
 	@Override
 	public MemcachedClientBuilder createBuilder() throws Exception {
 

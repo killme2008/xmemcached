@@ -11,7 +11,7 @@ import com.googlecode.hibernate.memcached.Memcache;
 import com.googlecode.hibernate.memcached.PropertiesHelper;
 import com.googlecode.hibernate.memcached.spymemcached.SpyMemcacheClientFactory;
 
-public class XmemcacheClientFactoryUnitTest extends TestCase {
+public class XmemcacheClientFactoryUnitIT extends TestCase {
 	Properties properties;
 
 	@Override

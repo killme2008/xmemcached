@@ -5,6 +5,8 @@ jdk:
   - openjdk6
 services:
   - memcached
+script:
+  - mvn verify
 after_script:
   - '[ "${TRAVIS_PULL_REQUEST}" = "false" ] && travis_wait 300 mvn site -Ppublish-site-github || false'
 env:

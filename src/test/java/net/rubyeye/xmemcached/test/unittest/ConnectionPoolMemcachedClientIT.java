@@ -16,7 +16,7 @@ import com.google.code.yanf4j.core.Session;
 import com.google.code.yanf4j.core.impl.HandlerAdapter;
 import com.google.code.yanf4j.nio.TCPController;
 
-public class ConnectionPoolMemcachedClientTest extends XMemcachedClientTest {
+public class ConnectionPoolMemcachedClientIT extends XMemcachedClientIT {
 	private static final int CONNECTION_POOL_SIZE = 3;
 
 	@Override

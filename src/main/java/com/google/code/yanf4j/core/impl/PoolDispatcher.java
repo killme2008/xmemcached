@@ -40,22 +40,24 @@ import com.google.code.yanf4j.util.WorkerThreadFactory;
  * 
  */
 public class PoolDispatcher implements Dispatcher {
-	public static final int POOL_QUEUE_SIZE_FACTOR = 1000;
-	public static final float MAX_POOL_SIZE_FACTOR = 1.25f;
+	public static final int DEFAULT_POOL_QUEUE_SIZE_FACTOR = 1000;
+	public static final float DEFAULT_MAX_POOL_SIZE_FACTOR = 1.25f;
 	private ThreadPoolExecutor threadPool;
 
 	public PoolDispatcher(int poolSize) {
-		this(poolSize, 60, TimeUnit.SECONDS,
-				new ThreadPoolExecutor.AbortPolicy(), "pool-dispatcher");
+		this(poolSize, 60, TimeUnit.SECONDS, new ThreadPoolExecutor.AbortPolicy(), "pool-dispatcher");
 	}
 
 	public PoolDispatcher(int poolSize, long keepAliveTime, TimeUnit unit,
 			RejectedExecutionHandler rejectedExecutionHandler, String prefix) {
-		this.threadPool = new ThreadPoolExecutor(poolSize,
-				(int) (MAX_POOL_SIZE_FACTOR * poolSize), keepAliveTime, unit,
-				new ArrayBlockingQueue<Runnable>(poolSize
-						* POOL_QUEUE_SIZE_FACTOR), new WorkerThreadFactory(
-						prefix));
+		this(poolSize, DEFAULT_POOL_QUEUE_SIZE_FACTOR, DEFAULT_MAX_POOL_SIZE_FACTOR, keepAliveTime, unit,
+				rejectedExecutionHandler, prefix);
+	}
+
+	public PoolDispatcher(int poolSize, int poolQueueSizeFactor, float maxPoolSizeFactor, long keepAliveTime,
+			TimeUnit unit, RejectedExecutionHandler rejectedExecutionHandler, String prefix) {
+		this.threadPool = new ThreadPoolExecutor(poolSize, (int) (maxPoolSizeFactor * poolSize), keepAliveTime, unit,
+				new ArrayBlockingQueue<Runnable>(poolSize * poolQueueSizeFactor), new WorkerThreadFactory(prefix));
 		this.threadPool.setRejectedExecutionHandler(rejectedExecutionHandler);
 	}
 

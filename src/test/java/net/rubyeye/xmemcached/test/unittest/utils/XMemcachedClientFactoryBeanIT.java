@@ -10,7 +10,7 @@ import net.rubyeye.xmemcached.exception.MemcachedException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
-public class XMemcachedClientFactoryBeanUnitTest extends TestCase {
+public class XMemcachedClientFactoryBeanIT extends TestCase {
 
 	ApplicationContext ctx;
 
