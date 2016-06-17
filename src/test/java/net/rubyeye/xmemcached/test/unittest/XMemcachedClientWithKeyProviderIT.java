@@ -9,9 +9,7 @@ import net.rubyeye.xmemcached.MemcachedClient;
 import net.rubyeye.xmemcached.MemcachedClientBuilder;
 import net.rubyeye.xmemcached.MemcachedClientCallable;
 import net.rubyeye.xmemcached.XMemcachedClientBuilder;
-import net.rubyeye.xmemcached.command.BinaryCommandFactory;
 import net.rubyeye.xmemcached.exception.MemcachedException;
-import net.rubyeye.xmemcached.impl.KetamaMemcachedSessionLocator;
 import net.rubyeye.xmemcached.utils.AddrUtil;
 import net.rubyeye.xmemcached.utils.ByteUtils;
 
@@ -25,8 +23,7 @@ public class XMemcachedClientWithKeyProviderIT extends XMemcachedClientIT {
 		keyProvider = new KeyProvider() {
 
 			public String process(String key) {
-				// 现实中是基于某种规则进行字符串转换, 为了简单, 我直接用hashCode
-				return String.valueOf(key.hashCode());
+				return "prefix-" + key;
 			}
 		};
 	}
@@ -37,7 +34,6 @@ public class XMemcachedClientWithKeyProviderIT extends XMemcachedClientIT {
 		MemcachedClientBuilder builder = new XMemcachedClientBuilder(
 				AddrUtil.getAddresses(this.properties
 						.getProperty("test.memcached.servers")));
-		builder.setCommandFactory(new BinaryCommandFactory());
 		ByteUtils.testing = true;
 		return builder;
 	}
@@ -54,14 +50,13 @@ public class XMemcachedClientWithKeyProviderIT extends XMemcachedClientIT {
 
 		MemcachedClientBuilder builder = new XMemcachedClientBuilder(
 				addressList, weights);
-		builder.setCommandFactory(new BinaryCommandFactory());
 		ByteUtils.testing = true;
 		return builder;
 	}
 
 	public void testKeyProvider() {
 		String process = keyProvider.process("namespace:a");
-		assertEquals("790852098", process);
+		assertEquals("prefix-namespace:a", process);
 	}
 
 	public void testWithNamespaceAndKeyProvider() throws Exception {
