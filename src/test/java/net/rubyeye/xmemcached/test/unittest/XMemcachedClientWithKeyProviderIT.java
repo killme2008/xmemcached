@@ -54,7 +54,7 @@ public class XMemcachedClientWithKeyProviderIT extends XMemcachedClientIT {
 
 		MemcachedClientBuilder builder = new XMemcachedClientBuilder(
 				addressList, weights);
-		builder.setSessionLocator(new KetamaMemcachedSessionLocator());
+		builder.setCommandFactory(new BinaryCommandFactory());
 		ByteUtils.testing = true;
 		return builder;
 	}
