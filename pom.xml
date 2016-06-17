@@ -48,17 +48,12 @@
 				<enabled>false</enabled>
 			</snapshots>
 		</repository>
-		<repository>
-			<id>hibernate-memcached</id>
-			<name>hibernate-memcached</name>
-			<url>http://raykrueger.googlecode.com/svn/repository</url>
-		</repository>
 	</repositories>
 
 	<properties>
 		<github.account>bmahe</github.account>
 
-		<!-- Default to number of CPUs on the host. See cpu-count goal of the build 
+		<!-- Default to number of CPUs on the host. See cpu-count goal of the build
 			helper plugin -->
 		<surefire.thread.count>${cpu.count}</surefire.thread.count>
 		<surefire.perCoreThreadCount>false</surefire.perCoreThreadCount>
@@ -221,7 +216,7 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
-		<!-- Overriding javax.transaction:jta from hibernate-memcached as the required 
+		<!-- Overriding javax.transaction:jta from hibernate-memcached as the required
 			version is not available anymore -->
 		<dependency>
 			<groupId>javax.transaction</groupId>
