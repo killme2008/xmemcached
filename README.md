@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/killme2008/xmemcached.svg?branch=tango)](https://travis-ci.org/killme2008/xmemcached)
+[![Build Status](https://travis-ci.org/killme2008/xmemcached.svg?branch=master)](https://travis-ci.org/killme2008/xmemcached)
 
 ##Introduction
 
