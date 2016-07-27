@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	       xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<parent>
 		<groupId>org.sonatype.oss</groupId>
 		<artifactId>oss-parent</artifactId>
@@ -54,7 +54,7 @@
 		<github.account>killme2008</github.account>
 
 		<!-- Default to number of CPUs on the host. See cpu-count goal of the build
-			helper plugin -->
+			   helper plugin -->
 		<surefire.thread.count>${cpu.count}</surefire.thread.count>
 		<surefire.perCoreThreadCount>false</surefire.perCoreThreadCount>
 
@@ -130,15 +130,16 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
+				<version>2.9.1</version>
 				<executions>
 					<execution>
-						<id>attach-javadoc</id>
+						<id>attach-javadocs</id>
 						<phase>verify</phase>
 						<goals>
 							<goal>jar</goal>
 						</goals>
 						<configuration>
-							<additionalparam>${javadoc.xdoclint}</additionalparam>
+							<additionalparam>${javadoc.opts}</additionalparam>
 						</configuration>
 					</execution>
 				</executions>
@@ -217,7 +218,7 @@
 			</exclusions>
 		</dependency>
 		<!-- Overriding javax.transaction:jta from hibernate-memcached as the required
-			version is not available anymore -->
+			   version is not available anymore -->
 		<dependency>
 			<groupId>javax.transaction</groupId>
 			<artifactId>jta</artifactId>
