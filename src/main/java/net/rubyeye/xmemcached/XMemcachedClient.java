@@ -118,7 +118,7 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 	 */
 	private boolean isEnableShutDownHook() {
 		return Boolean.valueOf(System.getProperty(
-				"xmemcached.shutdown.hook.enable", "true"));
+				"xmemcached.shutdown.hook.enable", "false"));
 	}
 
 	private volatile boolean isHutdownHookCalled = false;
