@@ -5,6 +5,19 @@ Xmemcached Change log
 
 *******************************************
 
+
+v2.0.1
+
+1. Uses nano timestamp value as namespace.
+2. Adds `setSelectorPoolSize` method to builder/client to set reactor pool size per client.
+3. Set heartbeat thread and session monitor thread to be daemon.
+4. Thanks to @bmahe, so much refactor and clean code.
+5. Disable shutdown hook by default, you can change it by `-Dxmemcached.shutdown.hook.enable=true`.
+6. Make log more friendly.
+7. Fixed auth for binary protocol.
+8. Some bug fix by contributors,thanks all of you.
+
+
 -----Xmemcached 2.0.0 release note ------------------
 
 1.Performance tweaks,10% improved for text protocol in my benchmark.
