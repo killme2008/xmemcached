@@ -119,7 +119,7 @@ Connector {
 								.connect(request.getInetSocketAddressWrapper());
 						request.setTries(request.getTries() + 1);
 						try {
-							log.warn("Trying to connect to "
+							log.info("Trying to connect to "
 									+ address.getAddress().getHostAddress()
 									+ ":" + address.getPort() + " for "
 									+ request.getTries() + " times");
@@ -142,7 +142,7 @@ Connector {
 							}
 						}
 					} else {
-						log.warn("Remove invalid reconnect task for " + address);
+						log.info("Remove invalid reconnect task for " + address);
 						// remove reconnect task
 					}
 				} catch (InterruptedException e) {
@@ -245,7 +245,7 @@ Connector {
 	private void addMainSession(Session session) {
 		InetSocketAddress remoteSocketAddress = session
 				.getRemoteSocketAddress();
-		log.warn("Add a session: "
+		log.info("Add a session: "
 				+ SystemUtils.getRawAddress(remoteSocketAddress) + ":"
 				+ remoteSocketAddress.getPort());
 		Queue<Session> sessions = this.sessionMap.get(remoteSocketAddress);
@@ -282,7 +282,7 @@ Connector {
 			InetSocketAddress mainNodeAddress) {
 		InetSocketAddress remoteSocketAddress = session
 				.getRemoteSocketAddress();
-		log.warn("Add a standby session: "
+		log.info("Add a standby session: "
 				+ SystemUtils.getRawAddress(remoteSocketAddress) + ":"
 				+ remoteSocketAddress.getPort() + " for "
 				+ SystemUtils.getRawAddress(mainNodeAddress) + ":"
@@ -359,7 +359,7 @@ Connector {
 					+ remoteSocketAddress.getPort());
 			return;
 		}
-		log.warn("Remove a session: "
+		log.info("Remove a session: "
 				+ SystemUtils.getRawAddress(remoteSocketAddress) + ":"
 				+ remoteSocketAddress.getPort());
 		Queue<Session> sessionQueue = this.sessionMap.get(session

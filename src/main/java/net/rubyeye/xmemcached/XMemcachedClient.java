@@ -738,7 +738,7 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 		}
 		this.commandFactory = commandFactory;
 		ByteUtils.setProtocol(this.commandFactory.getProtocol());
-		log.warn("XMemcachedClient is using "
+		log.info("XMemcachedClient is using "
 				+ this.commandFactory.getProtocol().name() + " protocol");
 		this.commandFactory.setBufferAllocator(bufferAllocator);
 		this.shutdown = true;
@@ -753,7 +753,7 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 		this.connector.setSessionTimeout(-1);
 		this.connector.setSocketOptions(socketOptions);
 		if (this.isFailureMode()) {
-			log.warn("XMemcachedClient in failure mode.");
+			log.info("XMemcachedClient in failure mode.");
 		}
 		this.connector.setFailureMode(this.failureMode);
 		this.sessionLocator.setFailureMode(this.failureMode);

@@ -370,7 +370,7 @@ public abstract class AbstractController implements Controller,
 			}
 		};
 		Runtime.getRuntime().addShutdownHook(shutdownHookThread);
-		log.warn("The Controller started at " + localSocketAddress + " ...");
+		log.info("The Controller started at " + localSocketAddress + " ...");
 	}
 
 	protected abstract void start0() throws IOException;
