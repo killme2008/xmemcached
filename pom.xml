@@ -13,13 +13,13 @@
 	<version>2.0.1-SNAPSHOT</version>
 	<name>xmemcached</name>
 	<description>Extreme performance modern memcached client for java</description>
-	<url>http://code.google.com/p/xmemcached/</url>
+	<url>https://github.com/killme2008/xmemcached</url>
 	<packaging>jar</packaging>
 
 	<developers>
 		<developer>
 			<name>dennis zhuang</name>
-			<url>http://www.blogjava.net/killme2008/</url>
+			<url>http://fnil.net/</url>
 			<timezone>8</timezone>
 		</developer>
 	</developers>
@@ -51,7 +51,7 @@
 	</repositories>
 
 	<properties>
-		<github.account>bmahe</github.account>
+		<github.account>killme2008</github.account>
 
 		<!-- Default to number of CPUs on the host. See cpu-count goal of the build
 			helper plugin -->
@@ -70,7 +70,7 @@
 		<maven.findbugs.report.plugin>3.0.1</maven.findbugs.report.plugin>
 		<maven.jxr.plugin.version>2.1</maven.jxr.plugin.version>
 		<maven-pmd-plugin>3.0.1</maven-pmd-plugin>
-		<maven.project.info.plugin.version>2.7</maven.project.info.plugin.version>
+		<maven.project.info.plugin.version>2.9</maven.project.info.plugin.version>
 		<maven.site.maven.plugin.github.version>0.12</maven.site.maven.plugin.github.version>
 		<maven.surefire.plugin.version>2.19.1</maven.surefire.plugin.version>
 		<maven.surefire.report.plugin.version>2.19.1</maven.surefire.report.plugin.version>
