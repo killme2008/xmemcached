@@ -32,6 +32,7 @@ public class AuthTask extends Thread {
 	private MemcachedTCPSession memcachedTCPSession;
 	public static final byte[] EMPTY_BYTES = new byte[0];
 	static final Logger log = LoggerFactory.getLogger(AuthTask.class);
+	private SaslClient saslClient;
 
 	public AuthTask(AuthInfo authInfo, CommandFactory commandFactory,
 			MemcachedTCPSession memcachedTCPSession) {
@@ -46,39 +47,17 @@ public class AuthTask extends Thread {
 			doAuth();
 			this.authInfo.increaseAttempts();
 		}
-
 	}
 
 	private void doAuth() {
-		SaslClient saslClient = null;
 		try {
-			saslClient = Sasl.createSaslClient(authInfo.getMechanisms(), null,
-					"memcached", memcachedTCPSession.getRemoteSocketAddress()
-							.toString(), null, this.authInfo
-							.getCallbackHandler());
-
 			final AtomicBoolean done = new AtomicBoolean(false);
-			byte[] response = saslClient.hasInitialResponse() ? saslClient
-					.evaluateChallenge(EMPTY_BYTES) : EMPTY_BYTES;
-			CountDownLatch latch = new CountDownLatch(1);
-			Command command = this.commandFactory.createAuthStartCommand(
-					saslClient.getMechanismName(), latch, response);
-			if (!this.memcachedTCPSession.isClosed())
-				this.memcachedTCPSession.write(command);
-			else {
-				log
-						.error("Authentication fail,because the connection has been closed");
-				throw new RuntimeException(
-						"Authentication fai,connection has been close");
-			}
+			Command command = startAuth();
 
 			while (!done.get()) {
-				try {
-					latch.await();
-				} catch (InterruptedException e) {
-					Thread.currentThread().interrupt();
-					done.set(true);
-				}
+				// wait previous command response
+				waitCommand(command, done);
+				// process response
 				ResponseStatus responseStatus = ((BaseBinaryCommand) command)
 						.getResponseStatus();
 				switch (responseStatus) {
@@ -89,16 +68,14 @@ public class AuthTask extends Thread {
 							+ " successfully");
 					break;
 				case AUTH_REQUIRED:
-					log
-							.error("Authentication failed to "
-									+ this.memcachedTCPSession
-											.getRemoteSocketAddress());
+					log.error("Authentication failed to "
+							+ this.memcachedTCPSession.getRemoteSocketAddress());
 					log.warn("Reopen connection to "
 							+ this.memcachedTCPSession.getRemoteSocketAddress()
 							+ ",beacause auth fail");
 					this.memcachedTCPSession.setAuthFailed(true);
 
-					// It it is not first time,try to sleep 1 second
+					// It it is not first time ,try to sleep 1 second
 					if (!this.authInfo.isFirstTime()) {
 						Thread.sleep(1000);
 					}
@@ -106,28 +83,26 @@ public class AuthTask extends Thread {
 					done.set(true);
 					break;
 				case FUTHER_AUTH_REQUIRED:
-					System.out.println(command.getResult());
 					String result = String.valueOf(command.getResult());
-					response = saslClient.evaluateChallenge(ByteUtils
+					byte[] response = saslClient.evaluateChallenge(ByteUtils
 							.getBytes(result));
-					latch = new CountDownLatch(1);
-					command = commandFactory.createAuthStepCommand(saslClient
-							.getMechanismName(), latch, response);
+					CountDownLatch latch = new CountDownLatch(1);
+					command = commandFactory.createAuthStepCommand(
+							saslClient.getMechanismName(), latch, response);
 					if (!this.memcachedTCPSession.isClosed())
 						this.memcachedTCPSession.write(command);
 					else {
-						log
-								.error("Authentication fail,because the connection has been closed");
+						log.error("Authentication fail,because the connection has been closed");
 						throw new RuntimeException(
 								"Authentication fai,connection has been close");
 					}
 
 					break;
 				default:
-					done.set(true);
 					log.error("Authentication failed to "
 							+ this.memcachedTCPSession.getRemoteSocketAddress()
 							+ ",response status=" + responseStatus);
+					command = startAuth();
 					break;
 
 				}
@@ -136,13 +111,49 @@ public class AuthTask extends Thread {
 		} catch (Exception e) {
 			log.error("Create saslClient error", e);
 		} finally {
-			if (saslClient != null) {
-				try {
-					saslClient.dispose();
-				} catch (SaslException e) {
-					log.error("Dispose saslClient error", e);
-				}
+			destroySaslClient();
+		}
+	}
+
+	private void destroySaslClient() {
+		if (saslClient != null) {
+			try {
+				saslClient.dispose();
+			} catch (SaslException e) {
+				log.error("Dispose saslClient error", e);
 			}
+			this.saslClient = null;
+		}
+	}
+
+	private Command startAuth() throws SaslException {
+		// destroy previous client.
+		destroySaslClient();
+
+		this.saslClient = Sasl.createSaslClient(authInfo.getMechanisms(), null,
+				"memcached", memcachedTCPSession.getRemoteSocketAddress()
+						.toString(), null, this.authInfo.getCallbackHandler());
+		byte[] response = saslClient.hasInitialResponse() ? saslClient
+				.evaluateChallenge(EMPTY_BYTES) : EMPTY_BYTES;
+		CountDownLatch latch = new CountDownLatch(1);
+		Command command = this.commandFactory.createAuthStartCommand(
+				saslClient.getMechanismName(), latch, response);
+		if (!this.memcachedTCPSession.isClosed())
+			this.memcachedTCPSession.write(command);
+		else {
+			log.error("Authentication fail,because the connection has been closed");
+			throw new RuntimeException(
+					"Authentication fai,connection has been close");
+		}
+		return command;
+	}
+
+	private void waitCommand(Command cmd, AtomicBoolean done) {
+		try {
+			cmd.getLatch().await();
+		} catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
+			done.set(true);
 		}
 	}
 
