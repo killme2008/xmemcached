@@ -303,9 +303,7 @@ public class MemcachedHandler extends HandlerAdapter {
                 new ThreadFactory() {
             public Thread newThread(Runnable r) {
                 Thread t = new Thread(r, name + "-" + threadCounter.getAndIncrement());
-                if (t.isDaemon()) {
-                    t.setDaemon(false);
-                }
+                t.setDaemon(true);
                 if (t.getPriority() != Thread.NORM_PRIORITY) {
                     t.setPriority(Thread.NORM_PRIORITY);
                 }
