@@ -104,7 +104,7 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 
 	private String name; // cache name
 
-	private volatile boolean failureMode;
+	private boolean failureMode;
 
 	private int timeoutExceptionThreshold = DEFAULT_MAX_TIMEOUTEXCEPTION_THRESHOLD;
 

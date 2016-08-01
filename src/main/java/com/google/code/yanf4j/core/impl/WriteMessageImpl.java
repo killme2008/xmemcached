@@ -39,7 +39,7 @@ public class WriteMessageImpl implements WriteMessage {
 
 	protected FutureImpl<Boolean> writeFuture;
 
-	protected volatile boolean writing;
+	protected boolean writing;
 
 	public final void writing() {
 		this.writing = true;

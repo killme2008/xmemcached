@@ -64,9 +64,9 @@ public abstract class AbstractSession implements Session {
 
 	protected Queue<WriteMessage> writeQueue;
 
-	protected volatile long sessionIdleTimeout;
+	protected long sessionIdleTimeout;
 
-	protected volatile long sessionTimeout;
+	protected long sessionTimeout;
 
 	public long getSessionIdleTimeout() {
 		return sessionIdleTimeout;
@@ -120,9 +120,9 @@ public abstract class AbstractSession implements Session {
 	protected AtomicLong scheduleWritenBytes = new AtomicLong(0);
 
 	protected final Dispatcher dispatchMessageDispatcher;
-	protected volatile boolean useBlockingWrite = false;
-	protected volatile boolean useBlockingRead = true;
-	protected volatile boolean handleReadWriteConcurrently = true;
+	protected boolean useBlockingWrite = false;
+	protected boolean useBlockingRead = true;
+	protected boolean handleReadWriteConcurrently = true;
 
 	public abstract void decode();
 

@@ -80,7 +80,7 @@ public abstract class AbstractController implements Controller,
 	 * Codec Factory
 	 */
 
-	protected volatile CodecFactory codecFactory;
+	protected CodecFactory codecFactory;
 	/**
 	 * Status
 	 */
@@ -99,7 +99,7 @@ public abstract class AbstractController implements Controller,
 	protected Dispatcher readEventDispatcher, dispatchMessageDispatcher,
 			writeEventDispatcher;
 	protected long sessionTimeout;
-	protected volatile boolean handleReadWriteConcurrently = true;
+	protected boolean handleReadWriteConcurrently = true;
 
 	protected int soTimeout;
 

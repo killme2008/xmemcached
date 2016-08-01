@@ -54,7 +54,7 @@ public class MemcachedTCPSession extends NioTCPSession implements
 	private SocketAddress remoteSocketAddress; // prevent channel is closed
 	private int sendBufferSize;
 	private final MemcachedOptimizer optimiezer;
-	private volatile boolean allowReconnect;
+	private boolean allowReconnect;
 
 	private volatile boolean authFailed;
 

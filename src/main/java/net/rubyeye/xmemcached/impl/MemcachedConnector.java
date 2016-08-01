@@ -72,12 +72,12 @@ Connector {
 	private final Set<InetSocketAddress> removedAddrSet = new ConcurrentHashSet<InetSocketAddress>();
 
 	private final MemcachedOptimizer optimiezer;
-	private volatile long healSessionInterval = MemcachedClient.DEFAULT_HEAL_SESSION_INTERVAL;
+	private long healSessionInterval = MemcachedClient.DEFAULT_HEAL_SESSION_INTERVAL;
 	private int connectionPoolSize; // session pool size
 	protected Protocol protocol;
-	private volatile boolean enableHealSession = true;
+	private boolean enableHealSession = true;
 	private final CommandFactory commandFactory;
-	private volatile boolean failureMode;
+	private boolean failureMode;
 
 	private final ConcurrentHashMap<InetSocketAddress/* Main node address */, List<Session>/*
 	 * standby

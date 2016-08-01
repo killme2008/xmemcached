@@ -52,7 +52,7 @@ AbstractMemcachedSessionLocator {
 	static final int NUM_REPS = 160;
 	private transient volatile TreeMap<Long, List<Session>> ketamaSessions = new TreeMap<Long, List<Session>>();
 	private final HashAlgorithm hashAlg;
-	private volatile int maxTries;
+	private int maxTries;
 	private final Random random = new Random();
 
 	/**

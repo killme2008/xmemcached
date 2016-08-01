@@ -75,7 +75,7 @@ public class Configuration {
 	/**
 	 * check session idle interval
 	 */
-	private volatile long checkSessionTimeoutInterval = 1000L;
+	private long checkSessionTimeoutInterval = 1000L;
 
 	public final int getWriteThreadCount() {
 		return this.writeThreadCount;
@@ -94,7 +94,7 @@ public class Configuration {
 		this.writeThreadCount = writeThreadCount;
 	}
 
-	private volatile long sessionIdleTimeout = 5000L;
+	private long sessionIdleTimeout = 5000L;
 
 	/**
 	 * @see setSessionIdleTimeout

@@ -35,7 +35,7 @@ public class LibmemcachedMemcachedSessionLocator extends
 
 	static final int DEFAULT_NUM_REPS = 100;
 	private transient volatile TreeMap<Long, List<Session>> ketamaSessions = new TreeMap<Long, List<Session>>();
-	private volatile int maxTries;
+	private int maxTries;
 	private int numReps = DEFAULT_NUM_REPS;
 	private final Random random = new Random();
 	private HashAlgorithm hashAlgorithm = HashAlgorithm.ONE_AT_A_TIME;

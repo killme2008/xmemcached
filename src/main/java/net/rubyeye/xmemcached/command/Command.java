@@ -54,13 +54,13 @@ public abstract class Command implements WriteMessage {
 
 	protected String key;
 	protected byte[] keyBytes;
-	protected volatile Object result;
+	protected Object result;
 	protected CountDownLatch latch;
 	protected CommandType commandType;
 	protected Exception exception;
-	protected volatile IoBuffer ioBuffer;
+	protected IoBuffer ioBuffer;
 	protected volatile boolean cancel;
-	protected volatile OperationStatus status;
+	protected OperationStatus status;
 	protected int mergeCount = -1;
 	private int copiedMergeCount = mergeCount;
 	@SuppressWarnings("unchecked")
