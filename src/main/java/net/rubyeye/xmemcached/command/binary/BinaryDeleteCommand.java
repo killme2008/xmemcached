@@ -53,11 +53,11 @@ public class BinaryDeleteCommand extends BaseBinaryCommand {
 	}
 
 	@Override
-	protected void fillCAS() {
+	protected long getCasValue(){
 		if (this.cas > 0) {
-			this.ioBuffer.putLong(this.cas);
+			return this.cas;
 		} else {
-			super.fillCAS();
+			return super.getCasValue();
 		}
 	}
 

@@ -248,18 +248,16 @@ public final class ByteUtils {
 	}
 
 	/**
-	 * �峰�涓��琛�
+	 * Read next line from ByteBuffer
 	 * 
 	 * @param buffer
+	 * @return
 	 */
 	public static final String nextLine(ByteBuffer buffer) {
 		if (buffer == null) {
 			return null;
 		}
-		/**
-		 * 娴��琛ㄦ���� Shift-And绠���归� >BM绠���归���� > �寸��归� > KMP�归�锛�
-		 * 濡��浣���村ソ��缓璁��璇�mail缁��(killme2008@gmail.com)
-		 */
+
 		int index = MemcachedDecoder.SPLIT_MATCHER
 				.matchFirst(com.google.code.yanf4j.buffer.IoBuffer.wrap(buffer));
 		if (index >= 0) {
@@ -446,5 +444,61 @@ public final class ByteUtils {
 			int size = (i < 0) ? stringSize(-i) + 1 : stringSize(i);
 			byte_len_array[i & 0xFF] = size;
 		}
+	}
+
+	public static byte int3(int x) {
+		return (byte) (x >> 24);
+	}
+
+	public static byte int2(int x) {
+		return (byte) (x >> 16);
+	}
+
+	public static byte int1(int x) {
+		return (byte) (x >> 8);
+	}
+
+	public static byte int0(int x) {
+		return (byte) (x);
+	}
+
+	public static byte short1(short x) {
+		return (byte) (x >> 8);
+	}
+
+	public static byte short0(short x) {
+		return (byte) (x);
+	}
+
+	public static byte long7(long x) {
+		return (byte) (x >> 56);
+	}
+
+	public static byte long6(long x) {
+		return (byte) (x >> 48);
+	}
+
+	public static byte long5(long x) {
+		return (byte) (x >> 40);
+	}
+
+	public static byte long4(long x) {
+		return (byte) (x >> 32);
+	}
+
+	public static byte long3(long x) {
+		return (byte) (x >> 24);
+	}
+
+	public static byte long2(long x) {
+		return (byte) (x >> 16);
+	}
+
+	public static byte long1(long x) {
+		return (byte) (x >> 8);
+	}
+
+	public static byte long0(long x) {
+		return (byte) (x);
 	}
 }

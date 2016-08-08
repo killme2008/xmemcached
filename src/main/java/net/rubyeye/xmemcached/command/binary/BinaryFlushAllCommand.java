@@ -60,7 +60,7 @@ public class BinaryFlushAllCommand extends BaseBinaryCommand {
 	}
 
 	@Override
-	protected int getKeyLength() {
+	protected short getKeyLength() {
 		return 0;
 	}
 

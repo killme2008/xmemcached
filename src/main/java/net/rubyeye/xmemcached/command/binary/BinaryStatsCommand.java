@@ -33,8 +33,10 @@ import net.rubyeye.xmemcached.command.ServerAddressAware;
 import net.rubyeye.xmemcached.exception.UnknownCommandException;
 import net.rubyeye.xmemcached.transcoders.CachedData;
 import net.rubyeye.xmemcached.utils.ByteUtils;
+
 /**
  * Stats command for binary protocol
+ * 
  * @author boyan
  *
  */
@@ -66,7 +68,7 @@ public class BinaryStatsCommand extends BaseBinaryCommand implements
 		super(null, null, CommandType.STATS, latch, 0, 0, null, false, null);
 		this.server = server;
 		this.itemName = itemName;
-		this.opCode=OpCode.STAT;
+		this.opCode = OpCode.STAT;
 		this.result = new HashMap<String, String>();
 	}
 
@@ -82,8 +84,6 @@ public class BinaryStatsCommand extends BaseBinaryCommand implements
 		}
 	}
 
-	
-	
 	@Override
 	protected void readStatus(ByteBuffer buffer) {
 		ResponseStatus responseStatus = ResponseStatus.parseShort(buffer
@@ -153,9 +153,9 @@ public class BinaryStatsCommand extends BaseBinaryCommand implements
 	}
 
 	@Override
-	protected int getKeyLength() {
+	protected short getKeyLength() {
 		if (this.itemName != null) {
-			return this.itemName.length();
+			return (short) this.itemName.length();
 		} else {
 			return 0;
 		}

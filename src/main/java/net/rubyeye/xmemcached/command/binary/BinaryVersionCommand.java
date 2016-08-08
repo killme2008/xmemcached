@@ -90,7 +90,7 @@ public class BinaryVersionCommand extends BaseBinaryCommand implements
 	}
 
 	@Override
-	protected int getKeyLength() {
+	protected short getKeyLength() {
 		return 0;
 	}
 

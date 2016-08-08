@@ -54,7 +54,7 @@ public abstract class BaseBinaryCommand extends Command implements StoreCommand 
 	protected OpCode opCode;
 	protected BinaryDecodeStatus decodeStatus = BinaryDecodeStatus.NONE;
 	protected int responseKeyLength, responseExtrasLength,
-	responseTotalBodyLength;
+			responseTotalBodyLength;
 	protected ResponseStatus responseStatus;
 	protected int opaque;
 	protected short vbucketId = DEFAULT_VBUCKET_ID;
@@ -145,7 +145,7 @@ public abstract class BaseBinaryCommand extends Command implements StoreCommand 
 				}
 			case READ_VALUE:
 				if (this.responseStatus == null
-				|| this.responseStatus == ResponseStatus.NO_ERROR) {
+						|| this.responseStatus == ResponseStatus.NO_ERROR) {
 					if (this.readValue(buffer, this.responseTotalBodyLength,
 							this.responseKeyLength, this.responseExtrasLength)) {
 						this.decodeStatus = BinaryDecodeStatus.DONE;
@@ -157,8 +157,8 @@ public abstract class BaseBinaryCommand extends Command implements StoreCommand 
 					// Ignore error message
 					if (ByteUtils.stepBuffer(buffer,
 							this.responseTotalBodyLength
-							- this.responseKeyLength
-							- this.responseExtrasLength)) {
+									- this.responseKeyLength
+									- this.responseExtrasLength)) {
 						this.decodeStatus = BinaryDecodeStatus.DONE;
 						continue;
 					} else {
@@ -271,8 +271,8 @@ public abstract class BaseBinaryCommand extends Command implements StoreCommand 
 		case INTERNAL_ERROR:
 		case BUSY:
 		case TEMP_FAILURE:
-			this.setException(new MemcachedServerException(
-					this.responseStatus.errorMessage()));
+			this.setException(new MemcachedServerException(this.responseStatus
+					.errorMessage()));
 			break;
 		}
 
@@ -368,68 +368,56 @@ public abstract class BaseBinaryCommand extends Command implements StoreCommand 
 		this.ioBuffer.putInt(this.expTime);
 	}
 
-	protected final void fillHeader(final CachedData data) {
-		this.fillMagicNumber();
-		this.fillOpCode();
-		this.fillKeyLength();
-		this.fillExtrasLength();
-		this.fillDataType();
-		this.fillVbucketId();
-		this.fillTotalBodyLength(data);
-		this.fillOpaque();
-		this.fillCAS();
-	}
+	private void fillHeader(final CachedData data) {
+		byte[] bs = new byte[24];
+		bs[0] = REQUEST_MAGIC_NUMBER;
+		bs[1] = this.opCode.fieldValue();
+		short keyLen = getKeyLength();
+		bs[2] = ByteUtils.short1(keyLen);
+		bs[3] = ByteUtils.short0(keyLen);
+		bs[4] = this.getExtrasLength();
+		// dataType,always zero bs[5]=0;
 
-	protected void fillCAS() {
-		// CAS
-		this.ioBuffer.putLong(0L);
-	}
-
-	private void fillOpaque() {
+		bs[6] = ByteUtils.short1(this.vbucketId);
+		bs[7] = ByteUtils.short0(this.vbucketId);
+		// body len
+		int bodyLen = this.getExtrasLength() + this.getKeyLength()
+				+ this.getValueLength(data);
+		bs[8] = ByteUtils.int3(bodyLen);
+		bs[9] = ByteUtils.int2(bodyLen);
+		bs[10] = ByteUtils.int1(bodyLen);
+		bs[11] = ByteUtils.int0(bodyLen);
 		// Opaque
 		if (this.noreply) {
 			this.opaque = OpaqueGenerater.getInstance().getNextValue();
 		}
-		this.ioBuffer.putInt(this.opaque);
+		bs[12] = ByteUtils.int3(this.opaque);
+		bs[13] = ByteUtils.int2(this.opaque);
+		bs[14] = ByteUtils.int1(this.opaque);
+		bs[15] = ByteUtils.int0(this.opaque);
+		// cas
+		long casValue = getCasValue();
+		bs[16] = ByteUtils.long7(casValue);
+		bs[17] = ByteUtils.long6(casValue);
+		bs[18] = ByteUtils.long5(casValue);
+		bs[19] = ByteUtils.long4(casValue);
+		bs[20] = ByteUtils.long3(casValue);
+		bs[21] = ByteUtils.long2(casValue);
+		bs[22] = ByteUtils.long1(casValue);
+		bs[23] = ByteUtils.long0(casValue);
+		this.ioBuffer.put(bs);
 	}
 
-	private void fillTotalBodyLength(final CachedData data) {
-		this.ioBuffer.putInt(this.getExtrasLength() + this.getKeyLength()
-				+ this.getValueLength(data));
-	}
-
-	private void fillVbucketId() {
-		// vbucketId,valid since memcached 1.6
-		this.ioBuffer.putShort(this.vbucketId);
-	}
-
-	private void fillDataType() {
-		// Data type
-		this.ioBuffer.put((byte) 0);
-	}
-
-	private void fillExtrasLength() {
-		this.ioBuffer.put(this.getExtrasLength());
-	}
-
-	private void fillKeyLength() {
-		this.ioBuffer.putShort((short) this.getKeyLength());
-	}
-
-	private void fillOpCode() {
-		this.ioBuffer.put(this.opCode.fieldValue());
-	}
-
-	private void fillMagicNumber() {
-		this.ioBuffer.put(REQUEST_MAGIC_NUMBER);
+	protected long getCasValue() {
+		return 0L;
 	}
 
 	protected int getValueLength(final CachedData data) {
 		return data.getData().length;
 	}
 
-	protected int getKeyLength() {
-		return this.keyBytes.length;
+	protected short getKeyLength() {
+		return (short) this.keyBytes.length;
 	}
 
 	protected byte getExtrasLength() {

@@ -54,7 +54,7 @@ public class BinaryAuthListMechanismsCommand extends BaseBinaryCommand {
 	}
 
 	@Override
-	protected int getKeyLength() {
+	protected short getKeyLength() {
 		return 0;
 	}
 

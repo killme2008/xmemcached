@@ -53,9 +53,8 @@ public class BinaryCASCommand extends BaseBinaryCommand {
 		
 	}
 	@Override
-	protected void fillCAS() {
-		this.ioBuffer.putLong(this.cas);
-	}
-	
+	protected long getCasValue() {
+		return this.cas;
+	}	
 	
 }
