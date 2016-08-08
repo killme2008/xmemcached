@@ -975,7 +975,7 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 		if (conf != null && addressCount > 1) {
 			if (!this.isWindowsPlatform()
 					&& conf.getReadThreadCount() == DEFAULT_READ_THREAD_COUNT) {
-				int threadCount = 2 * SystemUtils.getSystemThreadCount();
+				int threadCount = SystemUtils.getSystemThreadCount();
 				conf.setReadThreadCount(addressCount > threadCount ? threadCount
 						: addressCount);
 			}
