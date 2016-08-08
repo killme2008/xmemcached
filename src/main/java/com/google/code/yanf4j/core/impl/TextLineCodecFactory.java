@@ -42,7 +42,8 @@ import com.google.code.yanf4j.util.ShiftAndByteBufferMatcher;
  */
 public class TextLineCodecFactory implements CodecFactory {
 
-    public static final IoBuffer SPLIT = IoBuffer.wrap("\r\n".getBytes());
+	public static final byte [] SPLIT_BS = "\r\n".getBytes();
+    public static final IoBuffer SPLIT = IoBuffer.wrap(SPLIT_BS);
 
     private static final ByteBufferMatcher SPLIT_PATTERN = new ShiftAndByteBufferMatcher(SPLIT);
 
@@ -85,26 +86,31 @@ public class TextLineCodecFactory implements CodecFactory {
 
     }
 
-    class StringEncoder implements Encoder {
-        public IoBuffer encode(Object msg, Session session) {
-            if (msg == null) {
-                return null;
-            }
-            String message = (String) msg;
-            ByteBuffer buff = TextLineCodecFactory.this.charset.encode(message);
-            IoBuffer resultBuffer = IoBuffer.allocate(buff.remaining() + SPLIT.remaining());
-            resultBuffer.put(buff);
-            resultBuffer.put(SPLIT.slice());
-            resultBuffer.flip();
-            return resultBuffer;
-        }
-    }
+	class StringEncoder implements Encoder {
+		public IoBuffer encode(Object msg, Session session) {
+			if (msg == null) {
+				return null;
+			}
+			String message = (String) msg;
+			ByteBuffer buff = TextLineCodecFactory.this.charset.encode(message);
+			byte[] bs = new byte[buff.remaining() + SPLIT.remaining()];
+			int len = buff.remaining();
+			System.arraycopy(buff.array(), buff.position(), bs, 0, len);
+			System.arraycopy(SPLIT_BS, 0, bs, len, 2);
+			IoBuffer resultBuffer = IoBuffer.wrap(bs);
+			return resultBuffer;
+		}
+	}
 
     private Encoder encoder = new StringEncoder();
 
 
     public Encoder getEncoder() {
         return this.encoder;
+    }
+    
+    public static void main(String args[] ){
+    	
     }
 
 }
