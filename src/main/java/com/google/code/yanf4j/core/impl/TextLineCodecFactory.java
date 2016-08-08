@@ -32,59 +32,55 @@ import com.google.code.yanf4j.core.Session;
 import com.google.code.yanf4j.util.ByteBufferMatcher;
 import com.google.code.yanf4j.util.ShiftAndByteBufferMatcher;
 
-
-
-
 /**
  * Text line codec factory
+ * 
  * @author dennis
  *
  */
 public class TextLineCodecFactory implements CodecFactory {
 
-	public static final byte [] SPLIT_BS = "\r\n".getBytes();
-    public static final IoBuffer SPLIT = IoBuffer.wrap(SPLIT_BS);
+	public static final IoBuffer SPLIT = IoBuffer.wrap("\r\n".getBytes());
 
-    private static final ByteBufferMatcher SPLIT_PATTERN = new ShiftAndByteBufferMatcher(SPLIT);
+	private static final ByteBufferMatcher SPLIT_PATTERN = new ShiftAndByteBufferMatcher(
+			SPLIT);
 
-    public static final String DEFAULT_CHARSET_NAME = "utf-8";
+	public static final String DEFAULT_CHARSET_NAME = "utf-8";
 
-    private Charset charset;
+	private Charset charset;
 
+	public TextLineCodecFactory() {
+		this.charset = Charset.forName(DEFAULT_CHARSET_NAME);
+	}
 
-    public TextLineCodecFactory() {
-        this.charset = Charset.forName(DEFAULT_CHARSET_NAME);
-    }
+	public TextLineCodecFactory(String charsetName) {
+		this.charset = Charset.forName(charsetName);
+	}
 
+	class StringDecoder implements Decoder {
+		public Object decode(IoBuffer buffer, Session session) {
+			String result = null;
+			int index = SPLIT_PATTERN.matchFirst(buffer);
+			if (index >= 0) {
+				int limit = buffer.limit();
+				buffer.limit(index);
+				CharBuffer charBuffer = TextLineCodecFactory.this.charset
+						.decode(buffer.buf());
+				result = charBuffer.toString();
+				buffer.limit(limit);
+				buffer.position(index + SPLIT.remaining());
 
-    public TextLineCodecFactory(String charsetName) {
-        this.charset = Charset.forName(charsetName);
-    }
+			}
+			return result;
+		}
+	}
 
-    class StringDecoder implements Decoder {
-        public Object decode(IoBuffer buffer, Session session) {
-            String result = null;
-            int index = SPLIT_PATTERN.matchFirst(buffer);
-            if (index >= 0) {
-                int limit = buffer.limit();
-                buffer.limit(index);
-                CharBuffer charBuffer = TextLineCodecFactory.this.charset.decode(buffer.buf());
-                result = charBuffer.toString();
-                buffer.limit(limit);
-                buffer.position(index + SPLIT.remaining());
+	private Decoder decoder = new StringDecoder();
 
-            }
-            return result;
-        }
-    }
+	public Decoder getDecoder() {
+		return this.decoder;
 
-    private Decoder decoder = new StringDecoder();
-
-
-    public Decoder getDecoder() {
-        return this.decoder;
-
-    }
+	}
 
 	class StringEncoder implements Encoder {
 		public IoBuffer encode(Object msg, Session session) {
@@ -96,21 +92,35 @@ public class TextLineCodecFactory implements CodecFactory {
 			byte[] bs = new byte[buff.remaining() + SPLIT.remaining()];
 			int len = buff.remaining();
 			System.arraycopy(buff.array(), buff.position(), bs, 0, len);
-			System.arraycopy(SPLIT_BS, 0, bs, len, 2);
+			bs[len] = 13; // \r
+			bs[len + 1] = 10; // \n
 			IoBuffer resultBuffer = IoBuffer.wrap(bs);
+
 			return resultBuffer;
 		}
 	}
 
-    private Encoder encoder = new StringEncoder();
+	private Encoder encoder = new StringEncoder();
 
+	public Encoder getEncoder() {
+		return this.encoder;
+	}
 
-    public Encoder getEncoder() {
-        return this.encoder;
-    }
-    
-    public static void main(String args[] ){
-    	
-    }
+//	public static void main(String args[]) {
+//		TextLineCodecFactory codecFactory = new TextLineCodecFactory();
+//		Encoder encoder = codecFactory.getEncoder();
+//		long sum = 0;
+//		for (int i = 0; i < 100000; i++) {
+//			sum += encoder.encode("hello", null).remaining();
+//		}
+//
+//		long start = System.currentTimeMillis();
+//
+//		for (int i = 0; i < 10000000; i++) {
+//			sum += encoder.encode("hello", null).remaining();
+//		}
+//		long cost = System.currentTimeMillis() - start;
+//		System.out.println("sum=" + sum + ",cost = " + cost + " ms.");
+//	}
 
 }
