@@ -57,7 +57,9 @@ import java.util.concurrent.ThreadPoolExecutor;
  */
 public class MemcachedHandler extends HandlerAdapter {
 
-	private static final int MAX_HEARTBEAT_THREADS = Integer.parseInt(System.getProperty("xmemcached.heartbeat.max_threads", String.valueOf(Runtime.getRuntime().availableProcessors())));
+	private static final int MAX_HEARTBEAT_THREADS = Integer.parseInt(System
+			.getProperty("xmemcached.heartbeat.max_threads",
+					String.valueOf(SystemUtils.getSystemThreadCount())));
 
 	private final StatisticsHandler statisticsHandler;
 
@@ -291,26 +293,27 @@ public class MemcachedHandler extends HandlerAdapter {
 	final long HEARTBEAT_PERIOD = Long.parseLong(System.getProperty(
 			"xmemcached.heartbeat.period", "5000"));
 
-	 public void start() {
-        final String name = "XMemcached-HeartBeatPool[" + client.getName() + "]";
-        final AtomicInteger threadCounter = new AtomicInteger();
-        
-        long keepAliveTime = client.getConnector().getSessionIdleTimeout() * 3 / 2;
-        
-        this.heartBeatThreadPool = new ThreadPoolExecutor(1, MAX_HEARTBEAT_THREADS,
-                keepAliveTime, TimeUnit.MILLISECONDS,
-                new SynchronousQueue<Runnable>(),
-                new ThreadFactory() {
-            public Thread newThread(Runnable r) {
-                Thread t = new Thread(r, name + "-" + threadCounter.getAndIncrement());
-                t.setDaemon(true);
-                if (t.getPriority() != Thread.NORM_PRIORITY) {
-                    t.setPriority(Thread.NORM_PRIORITY);
-                }
-                return t;
-            }
-        }, new ThreadPoolExecutor.DiscardPolicy());
-    }
+	public void start() {
+		final String name = "XMemcached-HeartBeatPool[" + client.getName()
+				+ "]";
+		final AtomicInteger threadCounter = new AtomicInteger();
+
+		long keepAliveTime = client.getConnector().getSessionIdleTimeout() * 3 / 2;
+
+		this.heartBeatThreadPool = new ThreadPoolExecutor(1,
+				MAX_HEARTBEAT_THREADS, keepAliveTime, TimeUnit.MILLISECONDS,
+				new SynchronousQueue<Runnable>(), new ThreadFactory() {
+					public Thread newThread(Runnable r) {
+						Thread t = new Thread(r, name + "-"
+								+ threadCounter.getAndIncrement());
+						t.setDaemon(true);
+						if (t.getPriority() != Thread.NORM_PRIORITY) {
+							t.setPriority(Thread.NORM_PRIORITY);
+						}
+						return t;
+					}
+				}, new ThreadPoolExecutor.DiscardPolicy());
+	}
 
 	public MemcachedHandler(MemcachedClient client) {
 		super();

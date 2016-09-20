@@ -95,7 +95,12 @@ public final class SystemUtils {
 	}
 
 	public static final int getSystemThreadCount() {
-		return getCpuProcessorCount();
+		int cpus = getCpuProcessorCount();
+		if (cpus <= 8) {
+			return cpus;
+		} else {
+			return 8 + (cpus - 8) * 5 / 8;
+		}
 	}
 
 	public static final int getCpuProcessorCount() {

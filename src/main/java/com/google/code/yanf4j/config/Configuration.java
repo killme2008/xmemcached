@@ -15,6 +15,8 @@ import net.rubyeye.xmemcached.impl.ReconnectRequest;
 
 import java.util.concurrent.DelayQueue;
 
+import com.google.code.yanf4j.util.SystemUtils;
+
 /**
  * Networking configuration
  * 
@@ -23,7 +25,7 @@ import java.util.concurrent.DelayQueue;
  */
 public class Configuration {
 
-    public static final String XMEMCACHED_SELECTOR_POOL_SIZE = "xmemcached.selector.pool.size";
+	public static final String XMEMCACHED_SELECTOR_POOL_SIZE = "xmemcached.selector.pool.size";
 
 	/**
 	 * Read buffer size per connection
@@ -60,7 +62,10 @@ public class Configuration {
 	 */
 	private int readThreadCount = 1;
 
-    private int selectorPoolSize = System.getProperty(XMEMCACHED_SELECTOR_POOL_SIZE) == null ? 2 * Runtime.getRuntime().availableProcessors() : Integer.parseInt(System.getProperty(XMEMCACHED_SELECTOR_POOL_SIZE));
+	private int selectorPoolSize = System
+			.getProperty(XMEMCACHED_SELECTOR_POOL_SIZE) == null ? SystemUtils
+			.getSystemThreadCount() : Integer.parseInt(System
+			.getProperty(XMEMCACHED_SELECTOR_POOL_SIZE));
 
 	/**
 	 * Increasing buffer size per time
@@ -184,11 +189,11 @@ public class Configuration {
 		return this.checkSessionTimeoutInterval;
 	}
 
-    public void setSelectorPoolSize(int selectorPoolSize) {
-        this.selectorPoolSize = selectorPoolSize;
-    }
+	public void setSelectorPoolSize(int selectorPoolSize) {
+		this.selectorPoolSize = selectorPoolSize;
+	}
 
-    public int getSelectorPoolSize() {
-        return selectorPoolSize;
-    }
+	public int getSelectorPoolSize() {
+		return selectorPoolSize;
+	}
 }
