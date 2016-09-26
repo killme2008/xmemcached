@@ -148,7 +148,7 @@ public class Optimizer implements OptimizerMBean, MemcachedOptimizer {
 			log.debug("Optimieze merge buffer:" + optimiezeCommand.toString());
 		}
 		if (this.optimiezeMergeBuffer
-				&& optimiezeCommand.getIoBuffer().remaining() < sendBufferSize) {
+				&& optimiezeCommand.getIoBuffer().remaining() < sendBufferSize - 24) {
 			optimiezeCommand = this.mergeBuffer(optimiezeCommand, writeQueue,
 					executingCmds, sendBufferSize);
 		}

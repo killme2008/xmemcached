@@ -24,7 +24,7 @@ import com.google.code.yanf4j.util.LinkedTransferQueue;
 import com.google.code.yanf4j.util.SimpleQueue;
 
 @SuppressWarnings("unchecked")
-public class OptimezerTest extends TestCase {
+public class OptimizerTest extends TestCase {
 	Optimizer optimiezer;
 
 	Queue writeQueue;
@@ -254,7 +254,7 @@ public class OptimezerTest extends TestCase {
 		// set send buffer size to 30,merge four commands at most
 		this.optimiezer.setOptimizeMergeBuffer(true);
 		Command optimiezeCommand = this.optimiezer.optimiezeMergeBuffer(
-				this.currentCmd, this.writeQueue, this.executingCmds, 30);
+				this.currentCmd, this.writeQueue, this.executingCmds, 54);
 		assertNotSame(this.currentCmd, optimiezeCommand);
 		ByteBuffer mergeBuffer = optimiezeCommand.getIoBuffer().buf();
 		assertEquals(0, this.writeQueue.size());

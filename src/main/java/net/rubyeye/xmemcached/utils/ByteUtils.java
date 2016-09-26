@@ -35,6 +35,10 @@ public final class ByteUtils {
 	public static final Charset DEFAULT_CHARSET = Charset
 			.forName(DEFAULT_CHARSET_NAME);
 	public static final ByteBuffer SPLIT = ByteBuffer.wrap(Constants.CRLF);
+
+	public static final boolean ENABLE_CACHED_STRING_BYTES = Boolean
+			.valueOf(System.getProperty(
+					"xmemcached.string.bytes.cached.enable", "false"));
 	/**
 	 * if it is testing,check key argument even if use binary protocol. The user
 	 * must never change this value at all.
@@ -67,6 +71,9 @@ public final class ByteUtils {
 	public static final byte[] getBytes(String k) {
 		if (k == null || k.length() == 0) {
 			throw new IllegalArgumentException("Key must not be blank");
+		}
+		if (ENABLE_CACHED_STRING_BYTES) {
+			return CachedString.getBytes(k);
 		}
 		try {
 			return k.getBytes(DEFAULT_CHARSET_NAME);

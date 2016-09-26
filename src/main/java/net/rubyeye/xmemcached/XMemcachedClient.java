@@ -1315,13 +1315,12 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 
 		for (String key : keyCollections) {
 			Session index = this.sessionLocator.getSessionByKey(key);
-			if (!catalogMap.containsKey(index)) {
-				List<String> tmpKeys = new ArrayList<String>(100);
-				tmpKeys.add(key);
+			List<String> tmpKeys = catalogMap.get(index);
+			if (tmpKeys == null) {
+				tmpKeys = new ArrayList<String>(10);
 				catalogMap.put(index, tmpKeys);
-			} else {
-				catalogMap.get(index).add(key);
 			}
+			tmpKeys.add(key);
 		}
 
 		Collection<List<String>> catalogKeys = catalogMap.values();
