@@ -39,6 +39,16 @@ public abstract class Command implements WriteMessage {
 	public static final byte REQUEST_MAGIC_NUMBER = (byte) (0x80 & 0xFF);
 
 	public static final byte RESPONSE_MAGIC_NUMBER = (byte) (0x81 & 0xFF);
+	
+	private boolean added;
+	
+	public boolean isAdded() {
+		return added;
+	}
+
+	public void setAdded(boolean added) {
+		this.added = added;
+	}
 
 	public final Object getMessage() {
 		return this;

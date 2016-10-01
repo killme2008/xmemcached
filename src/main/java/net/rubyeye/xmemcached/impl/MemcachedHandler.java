@@ -118,18 +118,18 @@ public class MemcachedHandler extends HandlerAdapter {
 	public final void onMessageSent(Session session, Object msg) {
 		Command command = (Command) msg;
 		command.setStatus(OperationStatus.SENT);
-		if (!command.isNoreply()
-				|| this.client.getProtocol() == Protocol.Binary) {
-			((MemcachedTCPSession) session).addCommand(command);
-		}
 		// After message sent,we can set the buffer to be null for gc friendly.
 		command.setIoBuffer(EMPTY_BUF);
 		switch (command.getCommandType()) {
+		case ADD:
+		case APPEND:
 		case SET:
 		case SET_MANY:
 			// After message sent,we can set the value to be null for gc
 			// friendly.
-			((StoreCommand) command).setValue(null);
+			if (command instanceof StoreCommand) {
+				((StoreCommand) command).setValue(null);
+			}
 			break;
 		}
 	}

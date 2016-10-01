@@ -28,6 +28,7 @@ import net.rubyeye.xmemcached.command.OperationStatus;
 import net.rubyeye.xmemcached.exception.MemcachedException;
 import net.rubyeye.xmemcached.networking.MemcachedSession;
 import net.rubyeye.xmemcached.utils.InetSocketAddressWrapper;
+import net.rubyeye.xmemcached.utils.Protocol;
 
 import com.google.code.yanf4j.core.WriteMessage;
 import com.google.code.yanf4j.core.impl.FutureImpl;
@@ -144,13 +145,20 @@ public class MemcachedTCPSession extends NioTCPSession implements
 		}
 		if (currentCommand.getStatus() == OperationStatus.SENDING) {
 			/**
-			 * optimieze commands
+			 * optimize commands
 			 */
 			currentCommand = this.optimiezer.optimize(currentCommand,
 					this.writeQueue, this.commandAlreadySent,
 					this.sendBufferSize);
 		}
+		
 		currentCommand.setStatus(OperationStatus.WRITING);
+		if ((!currentCommand.isNoreply() || this.commandFactory.getProtocol() == Protocol.Binary)
+				&& !currentCommand.isAdded()) {
+			currentCommand.setAdded(true);
+			this.addCommand(currentCommand);
+		}
+
 		return currentCommand;
 	}
 
