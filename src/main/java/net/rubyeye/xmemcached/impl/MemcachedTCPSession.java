@@ -153,8 +153,9 @@ public class MemcachedTCPSession extends NioTCPSession implements
 		}
 		
 		currentCommand.setStatus(OperationStatus.WRITING);
-		if ((!currentCommand.isNoreply() || this.commandFactory.getProtocol() == Protocol.Binary)
-				&& !currentCommand.isAdded()) {
+		if (!currentCommand.isAdded()
+				&& (!currentCommand.isNoreply() || this.commandFactory
+						.getProtocol() == Protocol.Binary)) {
 			currentCommand.setAdded(true);
 			this.addCommand(currentCommand);
 		}

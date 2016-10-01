@@ -2,14 +2,20 @@ package net.rubyeye.xmemcached.test.unittest;
 
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+
+import org.junit.Assert;
+import org.junit.Test;
 
 import net.rubyeye.xmemcached.CASOperation;
 import net.rubyeye.xmemcached.GetsResponse;
 import net.rubyeye.xmemcached.MemcachedClientBuilder;
 import net.rubyeye.xmemcached.XMemcachedClientBuilder;
+import net.rubyeye.xmemcached.exception.MemcachedServerException;
 import net.rubyeye.xmemcached.impl.KetamaMemcachedSessionLocator;
+import net.rubyeye.xmemcached.transcoders.SerializingTranscoder;
 import net.rubyeye.xmemcached.transcoders.StringTranscoder;
 import net.rubyeye.xmemcached.utils.AddrUtil;
 
@@ -17,13 +23,56 @@ public class StandardHashMemcachedClientIT extends XMemcachedClientIT {
 
 	@Override
 	public MemcachedClientBuilder createBuilder() throws Exception {
-		MemcachedClientBuilder builder = new XMemcachedClientBuilder(AddrUtil
-				.getAddresses(this.properties
+		MemcachedClientBuilder builder = new XMemcachedClientBuilder(
+				AddrUtil.getAddresses(this.properties
 						.getProperty("test.memcached.servers")));
-		//builder.setConnectionPoolSize(Runtime.getRuntime().availableProcessors());
+		// builder.setConnectionPoolSize(Runtime.getRuntime().availableProcessors());
 		return builder;
 	}
-	
+
+	private static final String KEY_LARGE_OBJECT = "largeObject";
+
+	@Test
+	public void testLargeObject() throws Exception {
+		int megabyte_plus1 = 1048577; // 1024 * 1024 + 1
+		SerializingTranscoder transcoder = new SerializingTranscoder(
+				megabyte_plus1 * 2); // something bigger than memcached daemon
+										// max value size.
+		transcoder.setCompressionThreshold(transcoder.getMaxSize()); // bumping
+																		// up
+																		// compression
+																		// threshold
+																		// so
+																		// that
+																		// xmemcached
+																		// client
+																		// does
+																		// not
+																		// compress.
+
+		for (int i = 0; i < 5; i++) {
+			try {
+				String largeObject = createString(megabyte_plus1);
+
+				this.memcachedClient.set(KEY_LARGE_OBJECT, 60, largeObject,
+						transcoder);
+				fail();
+
+			} catch (MemcachedServerException exception) {
+				Assert.assertTrue(exception.getMessage().contains(
+						"object too large for cache"));
+			}
+		}
+		String readLargeObject = memcachedClient.get(KEY_LARGE_OBJECT);
+		assertNull(readLargeObject);
+	}
+
+	private static String createString(int size) {
+		char[] chars = new char[size];
+		Arrays.fill(chars, 'f');
+		return new String(chars);
+	}
+
 	public void testStoreNoReply() throws Exception {
 		memcachedClient.replaceWithNoReply("name", 0, 1);
 		assertNull(memcachedClient.get("name"));
@@ -93,7 +142,6 @@ public class StandardHashMemcachedClientIT extends XMemcachedClientIT {
 		assertEquals(3, memcachedClient.get("a"));
 	}
 
-
 	public void testDeleteWithNoReply() throws Exception {
 		assertTrue(memcachedClient.set("name", 0, "dennis"));
 		assertEquals("dennis", memcachedClient.get("name"));
@@ -109,7 +157,7 @@ public class StandardHashMemcachedClientIT extends XMemcachedClientIT {
 		assertTrue(memcachedClient.add("name", 0, "zhuang"));
 		assertTrue(memcachedClient.replace("name", 0, "zhuang"));
 	}
-	
+
 	public void testFlushAllWithNoReply() throws Exception {
 		for (int i = 0; i < 10; i++) {
 			assertTrue(memcachedClient.add(String.valueOf(i), 0, i));
@@ -147,7 +195,6 @@ public class StandardHashMemcachedClientIT extends XMemcachedClientIT {
 		assertEquals("46", memcachedClient.get("a"));
 	}
 
-	
 	@Override
 	public MemcachedClientBuilder createWeightedBuilder() throws Exception {
 		List<InetSocketAddress> addressList = AddrUtil

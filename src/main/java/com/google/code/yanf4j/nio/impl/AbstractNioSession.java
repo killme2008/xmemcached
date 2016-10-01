@@ -95,7 +95,7 @@ public abstract class AbstractNioSession extends AbstractSession implements
 
 		isLockedByMe = true;
 		WriteMessage currentMessage = null;
-		// make read/write fail, write/read=2/1
+
 		final long maxWritten = readBuffer.capacity() + readBuffer.capacity() >>> 1;
 		try {
 			long written = 0;
