@@ -237,12 +237,13 @@ public class MemcachedHandler extends HandlerAdapter {
 					if (!this.versionCommand.getLatch().await(2000,
 							TimeUnit.MILLISECONDS)) {
 						heartBeatFailCount.incrementAndGet();
-					}
-					if (this.versionCommand.getResult() == null) {
-						heartBeatFailCount.incrementAndGet();
 					} else {
-						// reset
-						heartBeatFailCount.set(0);
+						if (this.versionCommand.getResult() == null) {
+							heartBeatFailCount.incrementAndGet();
+						} else {
+							// reset the failure counter
+							heartBeatFailCount.set(0);
+						}
 					}
 					if (heartBeatFailCount.get() > MAX_HEART_BEAT_FAIL_COUNT) {
 						log.warn("Session("
