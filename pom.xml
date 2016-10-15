@@ -78,7 +78,6 @@
 
 		<slf4j.version>1.7.5</slf4j.version>
 		<spring.version>2.5</spring.version>
-		<hibernate.memcached.version>1.2</hibernate.memcached.version>
 		<jta.version>1.1</jta.version>
 		<log4j.version>1.2.16</log4j.version>
 		<junit.version>4.12</junit.version>
@@ -204,20 +203,6 @@
 			<version>${spring.version}</version>
 			<scope>provided</scope>
 		</dependency>
-		<dependency>
-			<groupId>com.googlecode</groupId>
-			<artifactId>hibernate-memcached</artifactId>
-			<version>${hibernate.memcached.version}</version>
-			<scope>provided</scope>
-			<exclusions>
-				<exclusion>
-					<groupId>javax.transaction</groupId>
-					<artifactId>jta</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-		<!-- Overriding javax.transaction:jta from hibernate-memcached as the required
-			   version is not available anymore -->
 		<dependency>
 			<groupId>javax.transaction</groupId>
 			<artifactId>jta</artifactId>
