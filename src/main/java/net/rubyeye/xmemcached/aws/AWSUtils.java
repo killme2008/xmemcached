@@ -21,7 +21,7 @@ public class AWSUtils {
 	 * @param line
 	 * @return
 	 */
-	public ClusterConfigration parseConfiguration(String line) {
+	public static ClusterConfigration parseConfiguration(String line) {
 		String[] lines = line.trim().split("(?:\\r?\\n)");
 		if (lines.length < 2) {
 			throw new IllegalArgumentException("Incorrect config response:"

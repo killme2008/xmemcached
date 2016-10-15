@@ -1,12 +1,12 @@
 package net.rubyeye.xmemcached.aws;
 
-import java.util.Collections;
-import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 
-import net.rubyeye.xmemcached.MemcachedClient;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * AWS ElastiCache configuration poller
@@ -17,35 +17,80 @@ import net.rubyeye.xmemcached.MemcachedClient;
 public class ConfigurationPoller implements Runnable {
 
 	/**
-	 * Return current ElasticCache node list.
+	 * Return current ClusterConfigration.
 	 * 
 	 * @return
 	 */
-	public List<CacheNode> getCurrentNodeList() {
-		return currentNodeList;
+	public ClusterConfigration getClusterConfiguration() {
+		return clusterConfigration;
 	}
 
-	private MemcachedClient client;
+	private static final Logger log = LoggerFactory
+			.getLogger(ConfigurationPoller.class);
 
-	private int pollIntervalMills;
+	private final AWSElasticCacheClient client;
+
+	private final long pollIntervalMills;
 
 	private ScheduledExecutorService scheduledExecutorService;
 
-	private volatile List<CacheNode> currentNodeList = Collections.emptyList();
+	private volatile ClusterConfigration clusterConfigration = null;
 
-	public ConfigurationPoller(MemcachedClient client, int pollIntervalMills) {
+	public ConfigurationPoller(AWSElasticCacheClient client,
+			long pollIntervalMills) {
 		super();
 		this.client = client;
 		this.pollIntervalMills = pollIntervalMills;
 		this.scheduledExecutorService = Executors
-				.newSingleThreadScheduledExecutor();
+				.newSingleThreadScheduledExecutor(new ThreadFactory() {
+
+					public Thread newThread(Runnable r) {
+						Thread t = new Thread(r, "AWSElasticCacheConfigPoller");
+						t.setDaemon(true);
+						if (t.getPriority() != Thread.NORM_PRIORITY) {
+							t.setPriority(Thread.NORM_PRIORITY);
+						}
+						return t;
+					}
+				});
+	}
+
+	public void start() {
 		this.scheduledExecutorService.scheduleWithFixedDelay(this,
 				this.pollIntervalMills, this.pollIntervalMills,
 				TimeUnit.MILLISECONDS);
 	}
 
-	public void run() {
-		
+	public void stop() {
+		this.scheduledExecutorService.shutdown();
 	}
 
+	public void run() {
+		try {
+			ClusterConfigration newConfig = this.client.getConfig();
+			if (newConfig != null) {
+				ClusterConfigration currentConfig = this.clusterConfigration;
+				if (currentConfig == null) {
+					this.clusterConfigration = newConfig;
+				} else {
+					if (newConfig.getVersion() < currentConfig.getVersion()) {
+						log.warn("Ignored new config from ElasticCache node, it's too old, current version is: "
+								+ currentConfig.getVersion()
+								+ ", but the new version is: "
+								+ newConfig.getVersion());
+						return;
+					} else {
+						this.clusterConfigration = newConfig;
+					}
+				}
+				log.info("Retrieved new  config from ElasticCache node: "
+						+ this.clusterConfigration);
+				this.client.onUpdate(newConfig);
+			}
+		} catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
+		} catch (Exception e) {
+			log.error("Poll config from ElasticCache node failed", e);
+		}
+	}
 }
