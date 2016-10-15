@@ -10,6 +10,7 @@ import java.util.concurrent.CountDownLatch;
 import net.rubyeye.xmemcached.CommandFactory;
 import net.rubyeye.xmemcached.buffer.BufferAllocator;
 import net.rubyeye.xmemcached.buffer.SimpleBufferAllocator;
+import net.rubyeye.xmemcached.command.binary.BinaryAWSElasticCacheConfigCommand;
 import net.rubyeye.xmemcached.command.binary.BinaryAppendPrependCommand;
 import net.rubyeye.xmemcached.command.binary.BinaryAuthListMechanismsCommand;
 import net.rubyeye.xmemcached.command.binary.BinaryAuthStartCommand;
@@ -43,6 +44,12 @@ import com.google.code.yanf4j.buffer.IoBuffer;
 @SuppressWarnings("unchecked")
 public class BinaryCommandFactory implements CommandFactory {
 
+	public Command createAWSElasticCacheConfigCommand(String subCommand,
+			String key) {
+		return new BinaryAWSElasticCacheConfigCommand(new CountDownLatch(1),
+				subCommand, key);
+	}
+
 	private BufferAllocator bufferAllocator = new SimpleBufferAllocator();
 
 	public void setBufferAllocator(BufferAllocator bufferAllocator) {
@@ -51,8 +58,8 @@ public class BinaryCommandFactory implements CommandFactory {
 
 	public Command createAddCommand(String key, byte[] keyBytes, int exp,
 			Object value, boolean noreply, Transcoder transcoder) {
-		return this.createStoreCommand(key, keyBytes, exp, value, CommandType.ADD,
-				noreply, transcoder);
+		return this.createStoreCommand(key, keyBytes, exp, value,
+				CommandType.ADD, noreply, transcoder);
 	}
 
 	public Command createAppendCommand(String key, byte[] keyBytes,
@@ -69,8 +76,7 @@ public class BinaryCommandFactory implements CommandFactory {
 	}
 
 	public Command createDeleteCommand(String key, byte[] keyBytes, int time,
-			long cas,
-			boolean noreply) {
+			long cas, boolean noreply) {
 		return new BinaryDeleteCommand(key, keyBytes, cas, CommandType.DELETE,
 				new CountDownLatch(1), noreply);
 	}
@@ -96,9 +102,9 @@ public class BinaryCommandFactory implements CommandFactory {
 			key = it.next();
 			if (it.hasNext()) {
 				// first n-1 send getq command
-				Command command = new BinaryGetCommand(key, ByteUtils
-						.getBytes(key), cmdType, null, OpCode.GET_KEY_QUIETLY,
-						true);
+				Command command = new BinaryGetCommand(key,
+						ByteUtils.getBytes(key), cmdType, null,
+						OpCode.GET_KEY_QUIETLY, true);
 				command.encode();
 				totalLength += command.getIoBuffer().remaining();
 				bufferList.add(command.getIoBuffer());
@@ -151,8 +157,8 @@ public class BinaryCommandFactory implements CommandFactory {
 
 	public Command createSetCommand(String key, byte[] keyBytes, int exp,
 			Object value, boolean noreply, Transcoder transcoder) {
-		return this.createStoreCommand(key, keyBytes, exp, value, CommandType.SET,
-				noreply, transcoder);
+		return this.createStoreCommand(key, keyBytes, exp, value,
+				CommandType.SET, noreply, transcoder);
 	}
 
 	public Command createStatsCommand(InetSocketAddress server,
@@ -176,21 +182,21 @@ public class BinaryCommandFactory implements CommandFactory {
 
 	public Command createAuthStartCommand(String mechanism,
 			CountDownLatch latch, byte[] authData) {
-		return new BinaryAuthStartCommand(mechanism, ByteUtils
-				.getBytes(mechanism), latch, authData);
+		return new BinaryAuthStartCommand(mechanism,
+				ByteUtils.getBytes(mechanism), latch, authData);
 	}
 
 	public Command createAuthStepCommand(String mechanism,
 			CountDownLatch latch, byte[] authData) {
-		return new BinaryAuthStepCommand(mechanism, ByteUtils
-				.getBytes(mechanism), latch, authData);
+		return new BinaryAuthStepCommand(mechanism,
+				ByteUtils.getBytes(mechanism), latch, authData);
 	}
 
 	public Command createGetAndTouchCommand(String key, byte[] keyBytes,
 			CountDownLatch latch, int exp, boolean noreply) {
 		return new BinaryGetAndTouchCommand(key, keyBytes,
 				noreply ? CommandType.GATQ : CommandType.GAT, latch, exp,
-						noreply);
+				noreply);
 	}
 
 	public Command createTouchCommand(String key, byte[] keyBytes,

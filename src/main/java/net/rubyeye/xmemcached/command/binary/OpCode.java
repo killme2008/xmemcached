@@ -261,6 +261,29 @@ public enum OpCode {
 			return 0x1e;
 
 		}
+	},
+	// AWS ElasticCache config commands
+	// https://github.com/awslabs/aws-elasticache-cluster-client-memcached-for-java/commit/70bf7643963500db20749d97c071b64b954eabb3
+	CONFIG_GET {
+		@Override
+		public byte fieldValue() {
+			return 0x60;
+
+		}
+	},
+	CONFIG_SET {
+		@Override
+		public byte fieldValue() {
+			return 0x64;
+
+		}
+	},
+	CONFIG_DEL {
+		@Override
+		public byte fieldValue() {
+			return 0x66;
+
+		}
 	};
 
 	public abstract byte fieldValue();

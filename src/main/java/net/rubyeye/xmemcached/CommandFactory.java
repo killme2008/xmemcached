@@ -267,7 +267,8 @@ public interface CommandFactory {
 	 * @since 1.3.3
 	 * @param key
 	 * @param keyBytes
-	 * @param latch TODO
+	 * @param latch
+	 *            TODO
 	 * @param exp
 	 * @param noreply
 	 * @return
@@ -281,13 +282,29 @@ public interface CommandFactory {
 	 * @since 1.3.3
 	 * @param key
 	 * @param keyBytes
-	 * @param latch TODO
+	 * @param latch
+	 *            TODO
 	 * @param exp
 	 * @param noreply
 	 * @return
 	 */
 	public Command createGetAndTouchCommand(final String key,
-			final byte[] keyBytes, CountDownLatch latch, int exp, boolean noreply);
+			final byte[] keyBytes, CountDownLatch latch, int exp,
+			boolean noreply);
+
+	/**
+	 * Create a AWS ElasticCache config command, only supports Cache Engine
+	 * Version 1.4.14 or Higher.
+	 * 
+	 * @see <a
+	 *      href="http://docs.aws.amazon.com/AmazonElastiCache/latest/UserGuide/AutoDiscovery.AddingToYourClientLibrary.html">Adding
+	 *      Auto Discovery To Your Client Library</a>
+	 * @param subCommand
+	 * @param key
+	 * @return
+	 */
+	public Command createAWSElasticCacheConfigCommand(String subCommand,
+			String key);
 
 	/**
 	 * Get this client's protocol version
