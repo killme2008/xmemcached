@@ -534,53 +534,52 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 		List<InetSocketAddress> addresses = AddrUtil.getAddresses(hostList);
 		if (addresses != null && addresses.size() > 0) {
 			for (InetSocketAddress address : addresses) {
-				// Close main sessions
-				Queue<Session> sessionQueue = this.connector
-						.getSessionByAddress(address);
-				if (sessionQueue != null) {
-					for (Session session : sessionQueue) {
-						if (session != null) {
-							// Disable auto reconnection
-							((MemcachedSession) session)
-									.setAllowReconnect(false);
-							// Close connection
-							((MemcachedSession) session).quit();
-						}
-					}
-				}
-				// Close standby sessions
-				List<Session> standBySession = this.connector
-						.getStandbySessionListByMainNodeAddr(address);
-				if (standBySession != null) {
-					for (Session session : standBySession) {
-						if (session != null) {
-							this.connector.removeReconnectRequest(session
-									.getRemoteSocketAddress());
-							// Disable auto reconnection
-							((MemcachedSession) session)
-									.setAllowReconnect(false);
-							// Close connection
-							((MemcachedSession) session).quit();
-						}
-					}
-				}
-				this.connector.removeReconnectRequest(address);
+				removeAddr(address);
 			}
 
 		}
 
 	}
 
-	protected void checkSocketAddress(InetSocketAddress address) {
-
+	protected void removeAddr(InetSocketAddress address) {
+		// Close main sessions
+		Queue<Session> sessionQueue = this.connector
+				.getSessionByAddress(address);
+		if (sessionQueue != null) {
+			for (Session session : sessionQueue) {
+				if (session != null) {
+					// Disable auto reconnection
+					((MemcachedSession) session)
+							.setAllowReconnect(false);
+					// Close connection
+					((MemcachedSession) session).quit();
+				}
+			}
+		}
+		// Close standby sessions
+		List<Session> standBySession = this.connector
+				.getStandbySessionListByMainNodeAddr(address);
+		if (standBySession != null) {
+			for (Session session : standBySession) {
+				if (session != null) {
+					this.connector.removeReconnectRequest(session
+							.getRemoteSocketAddress());
+					// Disable auto reconnection
+					((MemcachedSession) session)
+							.setAllowReconnect(false);
+					// Close connection
+					((MemcachedSession) session).quit();
+				}
+			}
+		}
+		this.connector.removeReconnectRequest(address);
 	}
 
-	private void connect(final InetSocketAddressWrapper inetSocketAddressWrapper)
+	protected void connect(final InetSocketAddressWrapper inetSocketAddressWrapper)
 			throws IOException {
 		// creat connection pool
 		InetSocketAddress inetSocketAddress = inetSocketAddressWrapper
 				.getInetSocketAddress();
-		this.checkSocketAddress(inetSocketAddress);
 		if (this.connectionPoolSize > 1) {
 			log.warn("You are using connection pool for xmemcached client,it's not recommended unless you have test it that it can boost performance in your app.");
 		}

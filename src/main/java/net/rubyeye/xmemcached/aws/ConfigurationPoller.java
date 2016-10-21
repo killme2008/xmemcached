@@ -1,9 +1,12 @@
 package net.rubyeye.xmemcached.aws;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,6 +26,24 @@ public class ConfigurationPoller implements Runnable {
 	 */
 	public ClusterConfigration getClusterConfiguration() {
 		return clusterConfigration;
+	}
+
+	private final AtomicInteger serverOrderCounter = new AtomicInteger(0);
+
+	private Map<String, Integer> ordersMap = new HashMap<String, Integer>();
+
+	public synchronized int getCacheNodeOrder(CacheNode node) {
+		Integer order = this.ordersMap.get(node.getCacheKey());
+		if (order != null) {
+			return order;
+		}
+		order = this.serverOrderCounter.incrementAndGet();
+		this.ordersMap.put(node.getCacheKey(), order);
+		return order;
+	}
+
+	public synchronized void removeCacheNodeOrder(CacheNode node) {
+		this.ordersMap.remove(node.getCacheKey());
 	}
 
 	private static final Logger log = LoggerFactory

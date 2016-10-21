@@ -48,6 +48,10 @@ public final class ByteUtils {
 	private ByteUtils() {
 	}
 
+	public static boolean isValidString(String s) {
+		return s != null && s.trim().length() > 0;
+	}
+
 	public static boolean isNumber(String string) {
 		if (string == null || string.isEmpty()) {
 			return false;
