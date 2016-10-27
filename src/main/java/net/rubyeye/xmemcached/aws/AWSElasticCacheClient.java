@@ -7,13 +7,25 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeoutException;
 
+import javax.xml.soap.SOAPElement;
+import javax.xml.soap.SOAPException;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.w3c.dom.DOMException;
+import org.w3c.dom.Document;
+import org.w3c.dom.NamedNodeMap;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.w3c.dom.Text;
+import org.w3c.dom.UserDataHandler;
 
 import com.google.code.yanf4j.core.Session;
 
+import net.rubyeye.xmemcached.CommandFactory;
 import net.rubyeye.xmemcached.XMemcachedClient;
 import net.rubyeye.xmemcached.command.Command;
+import net.rubyeye.xmemcached.command.TextCommandFactory;
 import net.rubyeye.xmemcached.exception.MemcachedException;
 import net.rubyeye.xmemcached.utils.InetSocketAddressWrapper;
 
@@ -91,10 +103,23 @@ public class AWSElasticCacheClient extends XMemcachedClient implements
 
 	private final ConfigurationPoller configPoller;
 
+	public static final long DEFAULT_POLL_CONFIG_INTERVAL_MS = 60000;
+
+	public AWSElasticCacheClient(InetSocketAddress addr) throws IOException {
+		this(addr, DEFAULT_POLL_CONFIG_INTERVAL_MS);
+	}
+
 	public AWSElasticCacheClient(InetSocketAddress addr,
 			long pollConfigIntervalMills) throws IOException {
-		super(addr);
+		this(addr, pollConfigIntervalMills, new TextCommandFactory());
+	}
+
+	public AWSElasticCacheClient(InetSocketAddress addr,
+			long pollConfigIntervalMills, CommandFactory commandFactory)
+			throws IOException {
+		super(addr, 1, commandFactory);
 		// Use failure mode by default.
+		this.commandFactory = commandFactory;
 		this.setFailureMode(true);
 		this.configAddr = addr;
 		this.configPoller = new ConfigurationPoller(this,

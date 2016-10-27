@@ -41,14 +41,12 @@ public class ClusterConfigration implements Serializable {
 	public ClusterConfigration() {
 		super();
 	}
-	
 
 	public String toString() {
-		StringBuilder nodeList = new StringBuilder("Version:" + version
-				+ "  CacheNode List:");
-		for (CacheNode node : this.nodeList) {
-			nodeList.append(" " + node.getHostName() + ":" + node.getPort());
-		}
+		StringBuilder nodeList = new StringBuilder("{ Version: " + version
+				+ ", CacheNode List: ");
+		nodeList.append(this.nodeList);
+		nodeList.append("}");
 
 		return nodeList.toString();
 	}
