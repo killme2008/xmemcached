@@ -808,6 +808,9 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 			throw new IllegalArgumentException("Null InetSocketAddress");
 
 		}
+		if (cmdFactory == null) {
+			throw new IllegalArgumentException("Null command factory.");
+		}
 		if (weight <= 0) {
 			throw new IllegalArgumentException("weight<=0");
 		}
@@ -1002,7 +1005,24 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 	 */
 	public XMemcachedClient(List<InetSocketAddress> addressList)
 			throws IOException {
+		this(addressList, new TextCommandFactory());
+	}
+
+	/**
+	 * XMemcached Constructor.Every server's weight is one by default.
+	 * 
+	 * @param cmdFactory
+	 *            command factory
+	 * @param addressList
+	 *            memcached server socket address list.
+	 * @throws IOException
+	 */
+	public XMemcachedClient(List<InetSocketAddress> addressList,
+			CommandFactory cmdFactory) throws IOException {
 		super();
+		if (cmdFactory == null) {
+			throw new IllegalArgumentException("Null command factory.");
+		}
 		if (addressList == null || addressList.isEmpty()) {
 			throw new IllegalArgumentException("Empty address list");
 		}
@@ -1010,8 +1030,8 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 		this.buildConnector(new ArrayMemcachedSessionLocator(),
 				simpleBufferAllocator,
 				XMemcachedClientBuilder.getDefaultConfiguration(),
-				XMemcachedClientBuilder.getDefaultSocketOptions(),
-				new TextCommandFactory(), new SerializingTranscoder());
+				XMemcachedClientBuilder.getDefaultSocketOptions(), cmdFactory,
+				new SerializingTranscoder());
 		this.start0();
 		for (InetSocketAddress inetSocketAddress : addressList) {
 			this.connect(new InetSocketAddressWrapper(inetSocketAddress,

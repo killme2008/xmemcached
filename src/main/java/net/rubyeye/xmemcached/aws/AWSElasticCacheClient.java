@@ -33,13 +33,13 @@ public class AWSElasticCacheClient extends XMemcachedClient implements
 
 	private boolean firstTimeUpdate = true;
 
-	private InetSocketAddress configAddr;
+	private List<InetSocketAddress> configAddrs = new ArrayList<InetSocketAddress>();
 
 	public synchronized void onUpdate(ClusterConfigration config) {
 
 		if (firstTimeUpdate) {
 			firstTimeUpdate = false;
-			removeConfigAddr();
+			removeConfigAddrs();
 		}
 
 		List<CacheNode> oldList = this.currentClusterConfiguration != null ? this.currentClusterConfiguration
@@ -79,14 +79,17 @@ public class AWSElasticCacheClient extends XMemcachedClient implements
 		this.currentClusterConfiguration = config;
 	}
 
-	private void removeConfigAddr() {
-		this.removeAddr(configAddr);
-		while (this.getConnector().getSessionByAddress(configAddr) != null
-				&& this.getConnector().getSessionByAddress(configAddr).size() > 0) {
-			try {
-				Thread.sleep(50);
-			} catch (InterruptedException e) {
-				Thread.currentThread().interrupt();
+	private void removeConfigAddrs() {
+		for (InetSocketAddress configAddr : this.configAddrs) {
+			this.removeAddr(configAddr);
+			while (this.getConnector().getSessionByAddress(configAddr) != null
+					&& this.getConnector().getSessionByAddress(configAddr)
+							.size() > 0) {
+				try {
+					Thread.sleep(50);
+				} catch (InterruptedException e) {
+					Thread.currentThread().interrupt();
+				}
 			}
 		}
 	}
@@ -105,13 +108,39 @@ public class AWSElasticCacheClient extends XMemcachedClient implements
 	}
 
 	public AWSElasticCacheClient(InetSocketAddress addr,
+			long pollConfigIntervalMills, CommandFactory cmdFactory)
+			throws IOException {
+		this(asList(addr), pollConfigIntervalMills, cmdFactory);
+	}
+
+	private static List<InetSocketAddress> asList(InetSocketAddress addr) {
+		List<InetSocketAddress> addrs = new ArrayList<InetSocketAddress>();
+		addrs.add(addr);
+		return addrs;
+	}
+
+	public AWSElasticCacheClient(List<InetSocketAddress> addrs)
+			throws IOException {
+		this(addrs, DEFAULT_POLL_CONFIG_INTERVAL_MS);
+	}
+
+	public AWSElasticCacheClient(List<InetSocketAddress> addrs,
+			long pollConfigIntervalMills) throws IOException {
+		this(addrs, pollConfigIntervalMills, new TextCommandFactory());
+	}
+
+	public AWSElasticCacheClient(List<InetSocketAddress> addrs,
 			long pollConfigIntervalMills, CommandFactory commandFactory)
 			throws IOException {
-		super(addr, 1, commandFactory);
+		super(addrs, commandFactory);
+		if (pollConfigIntervalMills <= 0) {
+			throw new IllegalArgumentException(
+					"Invalid pollConfigIntervalMills value.");
+		}
 		// Use failure mode by default.
 		this.commandFactory = commandFactory;
 		this.setFailureMode(true);
-		this.configAddr = addr;
+		this.configAddrs = addrs;
 		this.configPoller = new ConfigurationPoller(this,
 				pollConfigIntervalMills);
 		// Run at once to get config at startup.
@@ -119,7 +148,7 @@ public class AWSElasticCacheClient extends XMemcachedClient implements
 		this.configPoller.run();
 		if (this.currentClusterConfiguration == null) {
 			throw new IllegalStateException(
-					"Retrieve ElasticCache config from `" + addr.toString()
+					"Retrieve ElasticCache config from `" + addrs.toString()
 							+ "` failed.");
 		}
 		this.configPoller.start();
