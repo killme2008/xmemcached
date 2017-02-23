@@ -163,8 +163,7 @@ Connector {
 			// update timestamp for next reconnecting
 			request.updateNextReconnectTimeStamp(MemcachedConnector.this.healSessionInterval
 					* request.getTries());
-			log.error("Reconnect to " + address.getAddress().getHostAddress()
-					+ ":" + address.getPort() + " fail");
+			log.error("Reconnected to " + address + " fail");
 			// add to tail
 			MemcachedConnector.this.waitingQueue.offer(request);
 		}
