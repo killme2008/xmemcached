@@ -61,7 +61,7 @@ public class TextAWSElasticCacheConfigCommand extends Command {
 		final byte[] subCmdBytes = ByteUtils.getBytes(this.subCommand);
 		final byte[] keyBytes = ByteUtils.getBytes(this.key);
 		this.ioBuffer = IoBuffer.allocate(6 + 1 + subCmdBytes.length + 1
-				+ +keyBytes.length + 2);
+				+ keyBytes.length + 2);
 		ByteUtils.setArguments(this.ioBuffer, "config", subCmdBytes, keyBytes);
 		this.ioBuffer.flip();
 	}

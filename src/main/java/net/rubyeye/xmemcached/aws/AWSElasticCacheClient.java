@@ -22,6 +22,7 @@ import net.rubyeye.xmemcached.utils.InetSocketAddressWrapper;
 /**
  * AWS ElasticCache Client.
  * 
+ * @since 2.3.0
  * @author dennis
  *
  */
@@ -73,7 +74,11 @@ public class AWSElasticCacheClient extends XMemcachedClient implements
 		}
 
 		for (CacheNode node : removeNodes) {
-			this.removeAddr(node.getInetSocketAddress());
+			try {
+				this.removeAddr(node.getInetSocketAddress());
+			} catch (Exception e) {
+				log.error("Remove " + node + " failed.");
+			}
 		}
 
 		this.currentClusterConfiguration = config;
@@ -86,7 +91,7 @@ public class AWSElasticCacheClient extends XMemcachedClient implements
 					&& this.getConnector().getSessionByAddress(configAddr)
 							.size() > 0) {
 				try {
-					Thread.sleep(50);
+					Thread.sleep(10);
 				} catch (InterruptedException e) {
 					Thread.currentThread().interrupt();
 				}
@@ -96,12 +101,35 @@ public class AWSElasticCacheClient extends XMemcachedClient implements
 
 	private final ConfigurationPoller configPoller;
 
+	/**
+	 * Default elasticcache configuration poll interval, it's one minute.
+	 */
 	public static final long DEFAULT_POLL_CONFIG_INTERVAL_MS = 60000;
 
+	/**
+	 * Construct an AWSElasticCacheClient instance with one config address and
+	 * default poll interval.
+	 * 
+	 * @since 2.3.0
+	 * @param addr
+	 *            config server address.
+	 * @throws IOException
+	 */
 	public AWSElasticCacheClient(InetSocketAddress addr) throws IOException {
 		this(addr, DEFAULT_POLL_CONFIG_INTERVAL_MS);
 	}
 
+	/**
+	 * Construct an AWSElasticCacheClient instance with one config address and
+	 * poll interval.
+	 * 
+	 * @since 2.3.0
+	 * @param addr
+	 *            config server address.
+	 * @param pollConfigIntervalMills
+	 *            config poll interval in milliseconds.
+	 * @throws IOException
+	 */
 	public AWSElasticCacheClient(InetSocketAddress addr,
 			long pollConfigIntervalMills) throws IOException {
 		this(addr, pollConfigIntervalMills, new TextCommandFactory());
@@ -119,16 +147,45 @@ public class AWSElasticCacheClient extends XMemcachedClient implements
 		return addrs;
 	}
 
+	/**
+	 * Construct an AWSElasticCacheClient instance with config server addresses
+	 * and default config poll interval.
+	 * 
+	 * @since 2.3.0
+	 * @param addrs
+	 *            config server list.
+	 * @throws IOException
+	 */
 	public AWSElasticCacheClient(List<InetSocketAddress> addrs)
 			throws IOException {
 		this(addrs, DEFAULT_POLL_CONFIG_INTERVAL_MS);
 	}
 
+	/**
+	 * Construct an AWSElasticCacheClient instance with config server addresses.
+	 * 
+	 * @since 2.3.0
+	 * @param addrs
+	 * @param pollConfigIntervalMills
+	 * @throws IOException
+	 */
 	public AWSElasticCacheClient(List<InetSocketAddress> addrs,
 			long pollConfigIntervalMills) throws IOException {
 		this(addrs, pollConfigIntervalMills, new TextCommandFactory());
 	}
 
+	/**
+	 * Construct an AWSElasticCacheClient instance with config server addresses.
+	 * 
+	 * @since 2.3.0
+	 * @param addrs
+	 *            config server list.
+	 * @param pollConfigIntervalMills
+	 *            config poll interval in milliseconds.
+	 * @param commandFactory
+	 *            protocol command factory.
+	 * @throws IOException
+	 */
 	public AWSElasticCacheClient(List<InetSocketAddress> addrs,
 			long pollConfigIntervalMills, CommandFactory commandFactory)
 			throws IOException {
@@ -169,7 +226,8 @@ public class AWSElasticCacheClient extends XMemcachedClient implements
 	/**
 	 * Get config by key from cache node by network command.
 	 * 
-	 * @return
+	 * @since 2.3.0
+	 * @return clusetr config.
 	 */
 	public ClusterConfigration getConfig(String key) throws MemcachedException,
 			InterruptedException, TimeoutException {
@@ -190,7 +248,8 @@ public class AWSElasticCacheClient extends XMemcachedClient implements
 	/**
 	 * Get the current using configuration in memory.
 	 * 
-	 * @return
+	 * @since 2.3.0
+	 * @return current cluster config.
 	 */
 	public ClusterConfigration getCurrentConfig() {
 		return this.currentClusterConfiguration;
