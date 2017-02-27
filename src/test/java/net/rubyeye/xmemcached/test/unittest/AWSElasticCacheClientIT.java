@@ -67,7 +67,7 @@ public class AWSElasticCacheClientIT extends TestCase {
 			} else {
 				sb.append(" ");
 			}
-			sb.append(addr.getHostString() + "|" + addr.getHostString() + "|"
+			sb.append(addr.getHostName() + "|" + addr.getHostName() + "|"
 					+ addr.getPort());
 
 		}
