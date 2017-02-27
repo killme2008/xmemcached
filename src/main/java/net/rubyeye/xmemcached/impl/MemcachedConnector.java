@@ -65,7 +65,7 @@ import com.google.code.yanf4j.util.SystemUtils;
  * @author dennis
  */
 public class MemcachedConnector extends SocketChannelController implements
-Connector {
+		Connector {
 	private final DelayQueue<ReconnectRequest> waitingQueue = new DelayQueue<ReconnectRequest>();
 	private BufferAllocator bufferAllocator;
 
@@ -80,11 +80,17 @@ Connector {
 	private boolean failureMode;
 
 	private final ConcurrentHashMap<InetSocketAddress/* Main node address */, List<Session>/*
-	 * standby
-	 * sessions
-	 */> standbySessionMap = new ConcurrentHashMap<InetSocketAddress, List<Session>>();
+																						 * standby
+																						 * sessions
+																						 */> standbySessionMap = new ConcurrentHashMap<InetSocketAddress, List<Session>>();
 
 	private final FlowControl flowControl;
+
+	private volatile boolean shuttingDown = false;
+
+	public void shuttingDown() {
+		this.shuttingDown = true;
+	}
 
 	public void setSessionLocator(MemcachedSessionLocator sessionLocator) {
 		this.sessionLocator = sessionLocator;
@@ -103,7 +109,8 @@ Connector {
 
 		@Override
 		public void run() {
-			while (MemcachedConnector.this.isStarted() && MemcachedConnector.this.enableHealSession) {
+			while (MemcachedConnector.this.isStarted()
+					&& MemcachedConnector.this.enableHealSession) {
 				ReconnectRequest request = null;
 				try {
 					request = MemcachedConnector.this.waitingQueue.take();
@@ -171,7 +178,7 @@ Connector {
 
 	public void setEnableHealSession(boolean enableHealSession) {
 		this.enableHealSession = enableHealSession;
-		//wake up session monitor thread.
+		// wake up session monitor thread.
 		if (this.sessionMonitor != null && this.sessionMonitor.isAlive()) {
 			this.sessionMonitor.interrupt();
 		}
@@ -205,7 +212,7 @@ Connector {
 
 	public void setOptimizeMergeBuffer(boolean optimizeMergeBuffer) {
 		((OptimizerMBean) this.optimiezer)
-		.setOptimizeMergeBuffer(optimizeMergeBuffer);
+				.setOptimizeMergeBuffer(optimizeMergeBuffer);
 	}
 
 	public Protocol getProtocol() {
@@ -213,7 +220,6 @@ Connector {
 	}
 
 	protected MemcachedSessionLocator sessionLocator;
-
 
 	protected final ConcurrentHashMap<InetSocketAddress, Queue<Session>> sessionMap = new ConcurrentHashMap<InetSocketAddress, Queue<Session>>();
 
@@ -318,7 +324,7 @@ Connector {
 				it.remove();
 				log.warn("Remove invalid reconnect task for "
 						+ request.getInetSocketAddressWrapper()
-						.getInetSocketAddress());
+								.getInetSocketAddress());
 			}
 		}
 	}
@@ -352,7 +358,8 @@ Connector {
 		InetSocketAddress remoteSocketAddress = session
 				.getRemoteSocketAddress();
 		// If it was in failure mode,we don't remove closed session from list.
-		if (this.failureMode) {
+		if (this.failureMode && ((MemcachedSession) session).isAllowReconnect()
+				&& !this.shuttingDown && this.isStarted()) {
 			log.warn("Client in failure mode,we don't remove session "
 					+ SystemUtils.getRawAddress(remoteSocketAddress) + ":"
 					+ remoteSocketAddress.getPort());
@@ -403,8 +410,8 @@ Connector {
 						+ SystemUtils.getRawAddress(future
 								.getInetSocketAddressWrapper()
 								.getInetSocketAddress())
-								+ ":"
-								+ future.getInetSocketAddressWrapper()
+						+ ":"
+						+ future.getInetSocketAddressWrapper()
 								.getInetSocketAddress().getPort() + " fail"));
 			} else {
 				key.attach(null);
@@ -420,10 +427,10 @@ Connector {
 					+ SystemUtils.getRawAddress(future
 							.getInetSocketAddressWrapper()
 							.getInetSocketAddress())
-							+ ":"
-							+ future.getInetSocketAddressWrapper()
+					+ ":"
+					+ future.getInetSocketAddressWrapper()
 							.getInetSocketAddress().getPort() + " fail,"
-							+ e.getMessage());
+					+ e.getMessage());
 		}
 	}
 
@@ -502,8 +509,8 @@ Connector {
 			throw new MemcachedException("Session("
 					+ SystemUtils.getRawAddress(session
 							.getRemoteSocketAddress()) + ":"
-							+ session.getRemoteSocketAddress().getPort()
-							+ ") has been closed");
+					+ session.getRemoteSocketAddress().getPort()
+					+ ") has been closed");
 		}
 		if (session.isAuthFailed()) {
 			throw new MemcachedException("Auth failed to connection "
@@ -538,6 +545,7 @@ Connector {
 	}
 
 	private final SessionMonitor sessionMonitor = new SessionMonitor();
+
 	/**
 	 * Inner state listenner,manage session monitor.
 	 * 

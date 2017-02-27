@@ -39,17 +39,13 @@ public class InetSocketAddressWrapper {
 	}
 
 	public final InetSocketAddress getInetSocketAddress() {
-		if (isValidHostName(this.hostName)) {
+		if (ByteUtils.isValidString(this.hostName)) {
 			// If it has a hostName, we try to resolve it again.
 			return new InetSocketAddress(this.hostName,
 					this.inetSocketAddress.getPort());
 		} else {
 			return this.inetSocketAddress;
 		}
-	}
-
-	private boolean isValidHostName(String h) {
-		return h != null && h.trim().length() > 0;
 	}
 
 	public final void setInetSocketAddress(InetSocketAddress inetSocketAddress) {
@@ -72,7 +68,7 @@ public class InetSocketAddressWrapper {
 	}
 
 	public InetSocketAddress getMainNodeAddress() {
-		if (this.isValidHostName(this.mainNodeHostName)) {
+		if (ByteUtils.isValidString(this.mainNodeHostName)) {
 			return new InetSocketAddress(this.mainNodeHostName,
 					this.mainNodeAddress.getPort());
 		} else {

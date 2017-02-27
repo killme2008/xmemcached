@@ -6,6 +6,7 @@ import java.util.concurrent.CountDownLatch;
 
 import net.rubyeye.xmemcached.CommandFactory;
 import net.rubyeye.xmemcached.buffer.BufferAllocator;
+import net.rubyeye.xmemcached.command.text.TextAWSElasticCacheConfigCommand;
 import net.rubyeye.xmemcached.command.text.TextCASCommand;
 import net.rubyeye.xmemcached.command.text.TextDeleteCommand;
 import net.rubyeye.xmemcached.command.text.TextFlushAllCommand;
@@ -29,6 +30,12 @@ import net.rubyeye.xmemcached.utils.Protocol;
  * 
  */
 public class TextCommandFactory implements CommandFactory {
+
+	public Command createAWSElasticCacheConfigCommand(String subCommand,
+			String key) {
+		return new TextAWSElasticCacheConfigCommand(new CountDownLatch(1),
+				subCommand, key);
+	}
 
 	public void setBufferAllocator(BufferAllocator bufferAllocator) {
 
@@ -114,16 +121,16 @@ public class TextCommandFactory implements CommandFactory {
 	public final Command createSetCommand(final String key,
 			final byte[] keyBytes, final int exp, final Object value,
 			boolean noreply, Transcoder transcoder) {
-		return this.createStoreCommand(key, keyBytes, exp, value, CommandType.SET,
-				noreply, transcoder);
+		return this.createStoreCommand(key, keyBytes, exp, value,
+				CommandType.SET, noreply, transcoder);
 	}
 
 	@SuppressWarnings("unchecked")
 	public final Command createAddCommand(final String key,
 			final byte[] keyBytes, final int exp, final Object value,
 			boolean noreply, Transcoder transcoder) {
-		return this.createStoreCommand(key, keyBytes, exp, value, CommandType.ADD,
-				noreply, transcoder);
+		return this.createStoreCommand(key, keyBytes, exp, value,
+				CommandType.ADD, noreply, transcoder);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -138,16 +145,16 @@ public class TextCommandFactory implements CommandFactory {
 	public final Command createAppendCommand(final String key,
 			final byte[] keyBytes, final Object value, boolean noreply,
 			Transcoder transcoder) {
-		return this.createStoreCommand(key, keyBytes, 0, value, CommandType.APPEND,
-				noreply, transcoder);
+		return this.createStoreCommand(key, keyBytes, 0, value,
+				CommandType.APPEND, noreply, transcoder);
 	}
 
 	@SuppressWarnings("unchecked")
 	public final Command createPrependCommand(final String key,
 			final byte[] keyBytes, final Object value, boolean noreply,
 			Transcoder transcoder) {
-		return this.createStoreCommand(key, keyBytes, 0, value, CommandType.PREPEND,
-				noreply, transcoder);
+		return this.createStoreCommand(key, keyBytes, 0, value,
+				CommandType.PREPEND, noreply, transcoder);
 	}
 
 	@SuppressWarnings("unchecked")

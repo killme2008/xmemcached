@@ -28,6 +28,12 @@ import net.rubyeye.xmemcached.utils.Protocol;
 @SuppressWarnings("unchecked")
 public class KestrelCommandFactory implements CommandFactory {
 
+	public Command createAWSElasticCacheConfigCommand(String subCommand,
+			String key) {
+		throw new UnsupportedOperationException(
+				"Kestrel doesn't support this operation");
+	}
+
 	public Command createAddCommand(String key, byte[] keyBytes, int exp,
 			Object value, boolean noreply, Transcoder transcoder) {
 		throw new UnsupportedOperationException(
@@ -47,8 +53,7 @@ public class KestrelCommandFactory implements CommandFactory {
 	}
 
 	public Command createDeleteCommand(String key, byte[] keyBytes, int time,
-			long cas,
-			boolean noreply) {
+			long cas, boolean noreply) {
 		return new KestrelDeleteCommand(key, keyBytes, -1,
 				new CountDownLatch(1), noreply);
 	}
@@ -144,8 +149,8 @@ public class KestrelCommandFactory implements CommandFactory {
 				"GAT is only supported by binary protocol");
 	}
 
-	public Command createTouchCommand(String key, byte[] keyBytes, CountDownLatch latch,
-			int exp, boolean noreply) {
+	public Command createTouchCommand(String key, byte[] keyBytes,
+			CountDownLatch latch, int exp, boolean noreply) {
 		throw new UnsupportedOperationException(
 				"Touch is only supported by binary protocol");
 	}

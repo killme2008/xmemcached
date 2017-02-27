@@ -93,7 +93,7 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 	private boolean sanitizeKeys;
 	private MemcachedHandler memcachedHandler;
 	protected CommandFactory commandFactory;
-	private long opTimeout = DEFAULT_OP_TIMEOUT;
+	protected long opTimeout = DEFAULT_OP_TIMEOUT;
 	private long connectTimeout = DEFAULT_CONNECT_TIMEOUT;
 	protected int connectionPoolSize = DEFAULT_CONNECTION_POOL_SIZE;
 	protected int maxQueuedNoReplyOperations = DEFAULT_MAX_QUEUED_NOPS;
@@ -319,7 +319,7 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 		return result;
 	}
 
-	private final Session sendCommand(final Command cmd)
+	protected final Session sendCommand(final Command cmd)
 			throws MemcachedException {
 		if (this.shutdown) {
 			throw new MemcachedException("Xmemcached is stopped");
@@ -534,53 +534,51 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 		List<InetSocketAddress> addresses = AddrUtil.getAddresses(hostList);
 		if (addresses != null && addresses.size() > 0) {
 			for (InetSocketAddress address : addresses) {
-				// Close main sessions
-				Queue<Session> sessionQueue = this.connector
-						.getSessionByAddress(address);
-				if (sessionQueue != null) {
-					for (Session session : sessionQueue) {
-						if (session != null) {
-							// Disable auto reconnection
-							((MemcachedSession) session)
-									.setAllowReconnect(false);
-							// Close connection
-							((MemcachedSession) session).quit();
-						}
-					}
-				}
-				// Close standby sessions
-				List<Session> standBySession = this.connector
-						.getStandbySessionListByMainNodeAddr(address);
-				if (standBySession != null) {
-					for (Session session : standBySession) {
-						if (session != null) {
-							this.connector.removeReconnectRequest(session
-									.getRemoteSocketAddress());
-							// Disable auto reconnection
-							((MemcachedSession) session)
-									.setAllowReconnect(false);
-							// Close connection
-							((MemcachedSession) session).quit();
-						}
-					}
-				}
-				this.connector.removeReconnectRequest(address);
+				removeAddr(address);
 			}
 
 		}
 
 	}
 
-	protected void checkSocketAddress(InetSocketAddress address) {
-
+	protected void removeAddr(InetSocketAddress address) {
+		// Close main sessions
+		Queue<Session> sessionQueue = this.connector
+				.getSessionByAddress(address);
+		if (sessionQueue != null) {
+			for (Session session : sessionQueue) {
+				if (session != null) {
+					// Disable auto reconnection
+					((MemcachedSession) session).setAllowReconnect(false);
+					// Close connection
+					((MemcachedSession) session).quit();
+				}
+			}
+		}
+		// Close standby sessions
+		List<Session> standBySession = this.connector
+				.getStandbySessionListByMainNodeAddr(address);
+		if (standBySession != null) {
+			for (Session session : standBySession) {
+				if (session != null) {
+					this.connector.removeReconnectRequest(session
+							.getRemoteSocketAddress());
+					// Disable auto reconnection
+					((MemcachedSession) session).setAllowReconnect(false);
+					// Close connection
+					((MemcachedSession) session).quit();
+				}
+			}
+		}
+		this.connector.removeReconnectRequest(address);
 	}
 
-	private void connect(final InetSocketAddressWrapper inetSocketAddressWrapper)
+	protected void connect(
+			final InetSocketAddressWrapper inetSocketAddressWrapper)
 			throws IOException {
 		// creat connection pool
 		InetSocketAddress inetSocketAddress = inetSocketAddressWrapper
 				.getInetSocketAddress();
-		this.checkSocketAddress(inetSocketAddress);
 		if (this.connectionPoolSize > 1) {
 			log.warn("You are using connection pool for xmemcached client,it's not recommended unless you have test it that it can boost performance in your app.");
 		}
@@ -804,11 +802,14 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 	 * @throws IOException
 	 */
 	public XMemcachedClient(final InetSocketAddress inetSocketAddress,
-			int weight) throws IOException {
+			int weight, CommandFactory cmdFactory) throws IOException {
 		super();
 		if (inetSocketAddress == null) {
 			throw new IllegalArgumentException("Null InetSocketAddress");
 
+		}
+		if (cmdFactory == null) {
+			throw new IllegalArgumentException("Null command factory.");
 		}
 		if (weight <= 0) {
 			throw new IllegalArgumentException("weight<=0");
@@ -816,11 +817,16 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 		this.buildConnector(new ArrayMemcachedSessionLocator(),
 				new SimpleBufferAllocator(),
 				XMemcachedClientBuilder.getDefaultConfiguration(),
-				XMemcachedClientBuilder.getDefaultSocketOptions(),
-				new TextCommandFactory(), new SerializingTranscoder());
+				XMemcachedClientBuilder.getDefaultSocketOptions(), cmdFactory,
+				new SerializingTranscoder());
 		this.start0();
 		this.connect(new InetSocketAddressWrapper(inetSocketAddress,
 				this.serverOrderCount.incrementAndGet(), weight, null));
+	}
+
+	public XMemcachedClient(final InetSocketAddress inetSocketAddress,
+			int weight) throws IOException {
+		this(inetSocketAddress, weight, new TextCommandFactory());
 	}
 
 	public XMemcachedClient(final InetSocketAddress inetSocketAddress)
@@ -999,7 +1005,24 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 	 */
 	public XMemcachedClient(List<InetSocketAddress> addressList)
 			throws IOException {
+		this(addressList, new TextCommandFactory());
+	}
+
+	/**
+	 * XMemcached Constructor.Every server's weight is one by default.
+	 * 
+	 * @param cmdFactory
+	 *            command factory
+	 * @param addressList
+	 *            memcached server socket address list.
+	 * @throws IOException
+	 */
+	public XMemcachedClient(List<InetSocketAddress> addressList,
+			CommandFactory cmdFactory) throws IOException {
 		super();
+		if (cmdFactory == null) {
+			throw new IllegalArgumentException("Null command factory.");
+		}
 		if (addressList == null || addressList.isEmpty()) {
 			throw new IllegalArgumentException("Empty address list");
 		}
@@ -1007,8 +1030,8 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 		this.buildConnector(new ArrayMemcachedSessionLocator(),
 				simpleBufferAllocator,
 				XMemcachedClientBuilder.getDefaultConfiguration(),
-				XMemcachedClientBuilder.getDefaultSocketOptions(),
-				new TextCommandFactory(), new SerializingTranscoder());
+				XMemcachedClientBuilder.getDefaultSocketOptions(), cmdFactory,
+				new SerializingTranscoder());
 		this.start0();
 		for (InetSocketAddress inetSocketAddress : addressList) {
 			this.connect(new InetSocketAddressWrapper(inetSocketAddress,
@@ -1926,7 +1949,8 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 		return (Boolean) command.getResult();
 	}
 
-	void checkException(final Command command) throws MemcachedException {
+	protected void checkException(final Command command)
+			throws MemcachedException {
 		if (command.getException() != null) {
 			if (command.getException() instanceof MemcachedException) {
 				throw (MemcachedException) command.getException();
@@ -2404,6 +2428,7 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 			return;
 		}
 		this.shutdown = true;
+		this.connector.shuttingDown();
 		this.connector.quitAllSessions();
 		this.connector.stop();
 		this.memcachedHandler.stop();
@@ -2523,7 +2548,7 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 
 	private static final String CONTINUOUS_TIMEOUT_COUNTER = "ContinuousTimeouts";
 
-	private void latchWait(final Command cmd, final long timeout,
+	protected void latchWait(final Command cmd, final long timeout,
 			final Session session) throws InterruptedException,
 			TimeoutException {
 		if (cmd.getLatch().await(timeout, TimeUnit.MILLISECONDS)) {
