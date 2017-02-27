@@ -89,7 +89,7 @@ public class AWSElasticCacheClientIT extends TestCase {
 					new InetSocketAddress(2271));
 			fail();
 		} catch (IllegalStateException e) {
-			assert (e.getMessage().contains("Invalid server"));
+			assertTrue(e.getMessage().contains("failed"));
 		} finally {
 			configServer.stop();
 		}
