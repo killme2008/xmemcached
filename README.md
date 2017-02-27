@@ -17,6 +17,11 @@ Quick start:
 * [Getting started](https://github.com/killme2008/xmemcached/wiki/Getting%20started)
 * [快速入门](https://github.com/killme2008/xmemcached/wiki/%E5%BF%AB%E9%80%9F%E5%85%A5%E9%97%A8)
 
+#News
+
+* [2.2.0](https://github.com/killme2008/xmemcached/releases/tag/xmemcached-2.2.0) released, highly recommended upgrading.
+
+
 ## Contributors
 
 * [cnscud](https://code.google.com/u/cnscud/)
