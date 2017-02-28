@@ -1,5 +1,10 @@
 [![Build Status](https://travis-ci.org/killme2008/xmemcached.svg?branch=master)](https://travis-ci.org/killme2008/xmemcached)
 
+#News
+
+* [2.3.0](https://github.com/killme2008/xmemcached/releases/tag/xmemcached-2.3.0) released, suppports [AWS ElasticCache Auto Discovery](http://docs.aws.amazon.com/AmazonElastiCache/latest/UserGuide/AutoDiscovery.html).
+* [2.2.0](https://github.com/killme2008/xmemcached/releases/tag/xmemcached-2.2.0) released, highly recommended upgrading.
+
 ##Introduction
 
   XMemcached is a high performance, easy to use blocking multithreaded memcached client in java.
@@ -16,11 +21,6 @@ Quick start:
 
 * [Getting started](https://github.com/killme2008/xmemcached/wiki/Getting%20started)
 * [快速入门](https://github.com/killme2008/xmemcached/wiki/%E5%BF%AB%E9%80%9F%E5%85%A5%E9%97%A8)
-
-#News
-
-* [2.2.0](https://github.com/killme2008/xmemcached/releases/tag/xmemcached-2.2.0) released, highly recommended upgrading.
-
 
 ## Contributors
 
