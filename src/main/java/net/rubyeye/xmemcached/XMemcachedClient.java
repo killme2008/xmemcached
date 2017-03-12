@@ -846,7 +846,7 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 
 	/**
 	 * XMemcachedClient constructor.Every server's weight is one by default.
-	 * 
+	 * You should not new client instance by this method, use MemcachedClientBuilder instead.
 	 * @param locator
 	 * @param allocator
 	 * @param conf
@@ -857,7 +857,7 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 	 * @throws IOException
 	 */
 	@SuppressWarnings("unchecked")
-	XMemcachedClient(MemcachedSessionLocator locator,
+	public XMemcachedClient(MemcachedSessionLocator locator,
 			BufferAllocator allocator, Configuration conf,
 			Map<SocketOption, Object> socketOptions,
 			CommandFactory commandFactory, Transcoder transcoder,

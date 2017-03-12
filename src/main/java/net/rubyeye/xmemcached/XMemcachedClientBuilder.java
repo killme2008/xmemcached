@@ -35,54 +35,55 @@ import com.google.code.yanf4j.core.impl.StandardSocketOption;
  */
 public class XMemcachedClientBuilder implements MemcachedClientBuilder {
 
-    private static final Logger log = LoggerFactory
-            .getLogger(XMemcachedClientBuilder.class);
+	private static final Logger log = LoggerFactory
+			.getLogger(XMemcachedClientBuilder.class);
 
-	private MemcachedSessionLocator sessionLocator = new ArrayMemcachedSessionLocator();
-	private BufferAllocator bufferAllocator = new SimpleBufferAllocator();
-	private Configuration configuration = getDefaultConfiguration();
-	private Map<InetSocketAddress, InetSocketAddress> addressMap = new LinkedHashMap<InetSocketAddress, InetSocketAddress>();
+	protected MemcachedSessionLocator sessionLocator = new ArrayMemcachedSessionLocator();
+	protected BufferAllocator bufferAllocator = new SimpleBufferAllocator();
+	protected Configuration configuration = getDefaultConfiguration();
+	protected Map<InetSocketAddress, InetSocketAddress> addressMap = new LinkedHashMap<InetSocketAddress, InetSocketAddress>();
 
-	private int[] weights;
+	protected int[] weights;
 
-	private long connectTimeout = MemcachedClient.DEFAULT_CONNECT_TIMEOUT;
+	protected long connectTimeout = MemcachedClient.DEFAULT_CONNECT_TIMEOUT;
 
-	private int connectionPoolSize = MemcachedClient.DEFAULT_CONNECTION_POOL_SIZE;
+	protected int connectionPoolSize = MemcachedClient.DEFAULT_CONNECTION_POOL_SIZE;
 
 	@SuppressWarnings("unchecked")
-	final Map<SocketOption, Object> socketOptions = getDefaultSocketOptions();
+	protected final Map<SocketOption, Object> socketOptions = getDefaultSocketOptions();
 
-	private List<MemcachedClientStateListener> stateListeners = new ArrayList<MemcachedClientStateListener>();
+	protected List<MemcachedClientStateListener> stateListeners = new ArrayList<MemcachedClientStateListener>();
 
-	private Map<InetSocketAddress, AuthInfo> authInfoMap = new HashMap<InetSocketAddress, AuthInfo>();
+	protected Map<InetSocketAddress, AuthInfo> authInfoMap = new HashMap<InetSocketAddress, AuthInfo>();
 
-	private String name;
+	protected String name;
 
-	private boolean failureMode;
+	protected boolean failureMode;
 
-	private boolean sanitizeKeys;
+	protected boolean sanitizeKeys;
 
-	private KeyProvider keyProvider = DefaultKeyProvider.INSTANCE;
+	protected KeyProvider keyProvider = DefaultKeyProvider.INSTANCE;
 
-	private int maxQueuedNoReplyOperations = MemcachedClient.DEFAULT_MAX_QUEUED_NOPS;
+	protected int maxQueuedNoReplyOperations = MemcachedClient.DEFAULT_MAX_QUEUED_NOPS;
 
-	private long healSessionInterval = MemcachedClient.DEFAULT_HEAL_SESSION_INTERVAL;
+	protected long healSessionInterval = MemcachedClient.DEFAULT_HEAL_SESSION_INTERVAL;
 
-	private boolean enableHealSession = true;
+	protected boolean enableHealSession = true;
 
-    private long opTimeout = MemcachedClient.DEFAULT_OP_TIMEOUT;
+	protected long opTimeout = MemcachedClient.DEFAULT_OP_TIMEOUT;
 
 	public long getOpTimeout() {
-        return opTimeout;
-    }
+		return opTimeout;
+	}
 
 	public void setOpTimeout(long opTimeout) {
-        if (opTimeout <= 0)
-            throw new IllegalArgumentException("Invalid opTimeout value:"+opTimeout);
-        this.opTimeout = opTimeout;
-    }
+		if (opTimeout <= 0)
+			throw new IllegalArgumentException("Invalid opTimeout value:"
+					+ opTimeout);
+		this.opTimeout = opTimeout;
+	}
 
-    public int getMaxQueuedNoReplyOperations() {
+	public int getMaxQueuedNoReplyOperations() {
 		return maxQueuedNoReplyOperations;
 	}
 
@@ -169,7 +170,7 @@ public class XMemcachedClientBuilder implements MemcachedClientBuilder {
 		this.stateListeners = stateListeners;
 	}
 
-	private CommandFactory commandFactory = new TextCommandFactory();
+	protected CommandFactory commandFactory = new TextCommandFactory();
 
 	@SuppressWarnings("unchecked")
 	public static final Map<SocketOption, Object> getDefaultSocketOptions() {
@@ -196,7 +197,7 @@ public class XMemcachedClientBuilder implements MemcachedClientBuilder {
 		configuration
 				.setSessionIdleTimeout(MemcachedClient.DEFAULT_SESSION_IDLE_TIMEOUT);
 		configuration.setWriteThreadCount(0);
-        return configuration;
+		return configuration;
 	}
 
 	public boolean isFailureMode() {
@@ -215,8 +216,8 @@ public class XMemcachedClientBuilder implements MemcachedClientBuilder {
 		this.commandFactory = commandFactory;
 	}
 
-	private @SuppressWarnings("unchecked")
-	Transcoder transcoder = new SerializingTranscoder();
+	@SuppressWarnings({ "rawtypes" })
+	protected Transcoder transcoder = new SerializingTranscoder();
 
 	public XMemcachedClientBuilder(String addressList) {
 		this(AddrUtil.getAddresses(addressList));
@@ -357,6 +358,11 @@ public class XMemcachedClientBuilder implements MemcachedClientBuilder {
 					this.authInfoMap, this.connectionPoolSize,
 					this.connectTimeout, this.name, this.failureMode);
 		}
+		this.configureClient(memcachedClient);
+		return memcachedClient;
+	}
+
+	protected void configureClient(XMemcachedClient memcachedClient) {
 		if (this.commandFactory.getProtocol() == Protocol.Kestrel) {
 			memcachedClient.setOptimizeGet(false);
 		}
@@ -368,10 +374,9 @@ public class XMemcachedClientBuilder implements MemcachedClientBuilder {
 		memcachedClient.setEnableHealSession(this.enableHealSession);
 		memcachedClient
 				.setMaxQueuedNoReplyOperations(this.maxQueuedNoReplyOperations);
-		return memcachedClient;
 	}
 
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings("rawtypes")
 	public Transcoder getTranscoder() {
 		return this.transcoder;
 	}
@@ -435,8 +440,8 @@ public class XMemcachedClientBuilder implements MemcachedClientBuilder {
 
 	}
 
-    public void setSelectorPoolSize(int selectorPoolSize) {
-        getConfiguration().setSelectorPoolSize(selectorPoolSize);
-    }
+	public void setSelectorPoolSize(int selectorPoolSize) {
+		getConfiguration().setSelectorPoolSize(selectorPoolSize);
+	}
 
 }

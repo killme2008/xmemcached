@@ -4,19 +4,32 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeoutException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.code.yanf4j.config.Configuration;
 import com.google.code.yanf4j.core.Session;
+import com.google.code.yanf4j.core.SocketOption;
 
 import net.rubyeye.xmemcached.CommandFactory;
+import net.rubyeye.xmemcached.MemcachedClientStateListener;
+import net.rubyeye.xmemcached.MemcachedSessionLocator;
 import net.rubyeye.xmemcached.XMemcachedClient;
+import net.rubyeye.xmemcached.XMemcachedClientBuilder;
+import net.rubyeye.xmemcached.auth.AuthInfo;
+import net.rubyeye.xmemcached.buffer.BufferAllocator;
+import net.rubyeye.xmemcached.buffer.SimpleBufferAllocator;
 import net.rubyeye.xmemcached.command.Command;
 import net.rubyeye.xmemcached.command.TextCommandFactory;
 import net.rubyeye.xmemcached.exception.MemcachedException;
+import net.rubyeye.xmemcached.impl.ArrayMemcachedSessionLocator;
+import net.rubyeye.xmemcached.transcoders.SerializingTranscoder;
+import net.rubyeye.xmemcached.transcoders.Transcoder;
 import net.rubyeye.xmemcached.utils.InetSocketAddressWrapper;
 
 /**
@@ -186,10 +199,43 @@ public class AWSElasticCacheClient extends XMemcachedClient implements
 	 *            protocol command factory.
 	 * @throws IOException
 	 */
+	@SuppressWarnings("unchecked")
 	public AWSElasticCacheClient(List<InetSocketAddress> addrs,
 			long pollConfigIntervalMills, CommandFactory commandFactory)
 			throws IOException {
-		super(addrs, commandFactory);
+		this(new ArrayMemcachedSessionLocator(), new SimpleBufferAllocator(),
+				XMemcachedClientBuilder.getDefaultConfiguration(),
+				XMemcachedClientBuilder.getDefaultSocketOptions(),
+				new TextCommandFactory(), new SerializingTranscoder(),
+				(List<MemcachedClientStateListener>) Collections.EMPTY_LIST,
+				(Map<InetSocketAddress, AuthInfo>) Collections.EMPTY_MAP, 1,
+				XMemcachedClient.DEFAULT_CONNECT_TIMEOUT, null, true, addrs,
+				pollConfigIntervalMills);
+
+	}
+
+	private static Map<InetSocketAddress, InetSocketAddress> getAddressMapFromConfigAddrs(
+			List<InetSocketAddress> configAddrs) {
+		Map<InetSocketAddress, InetSocketAddress> m = new HashMap<InetSocketAddress, InetSocketAddress>();
+		for (InetSocketAddress addr : configAddrs) {
+			m.put(addr, null);
+		}
+		return m;
+	}
+
+	AWSElasticCacheClient(MemcachedSessionLocator locator,
+			BufferAllocator allocator, Configuration conf,
+			Map<SocketOption, Object> socketOptions,
+			CommandFactory commandFactory, Transcoder transcoder,
+			List<MemcachedClientStateListener> stateListeners,
+			Map<InetSocketAddress, AuthInfo> map, int poolSize,
+			long connectTimeout, String name, boolean failureMode,
+			List<InetSocketAddress> configAddrs, long pollConfigIntervalMills)
+			throws IOException {
+		super(locator, allocator, conf, socketOptions, commandFactory,
+				transcoder, getAddressMapFromConfigAddrs(configAddrs),
+				stateListeners, map, poolSize, connectTimeout, name,
+				failureMode);
 		if (pollConfigIntervalMills <= 0) {
 			throw new IllegalArgumentException(
 					"Invalid pollConfigIntervalMills value.");
@@ -197,7 +243,7 @@ public class AWSElasticCacheClient extends XMemcachedClient implements
 		// Use failure mode by default.
 		this.commandFactory = commandFactory;
 		this.setFailureMode(true);
-		this.configAddrs = addrs;
+		this.configAddrs = configAddrs;
 		this.configPoller = new ConfigurationPoller(this,
 				pollConfigIntervalMills);
 		// Run at once to get config at startup.
@@ -205,8 +251,8 @@ public class AWSElasticCacheClient extends XMemcachedClient implements
 		this.configPoller.run();
 		if (this.currentClusterConfiguration == null) {
 			throw new IllegalStateException(
-					"Retrieve ElasticCache config from `" + addrs.toString()
-							+ "` failed.");
+					"Retrieve ElasticCache config from `"
+							+ configAddrs.toString() + "` failed.");
 		}
 		this.configPoller.start();
 	}

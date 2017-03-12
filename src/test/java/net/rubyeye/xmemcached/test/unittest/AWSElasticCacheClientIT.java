@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Properties;
 
 import net.rubyeye.xmemcached.aws.AWSElasticCacheClient;
+import net.rubyeye.xmemcached.aws.AWSElasticCacheClientBuilder;
 import net.rubyeye.xmemcached.aws.ClusterConfigration;
 import net.rubyeye.xmemcached.utils.AddrUtil;
 
@@ -106,6 +107,31 @@ public class AWSElasticCacheClientIT extends TestCase {
 		try {
 			AWSElasticCacheClient client = new AWSElasticCacheClient(
 					new InetSocketAddress(2271));
+			ClusterConfigration config = client.getCurrentConfig();
+			assertEquals(config.getVersion(), version);
+			assertEquals(addresses.size(), config.getNodeList().size());
+
+			client.set("aws-cache", 0, "foobar");
+			assertEquals("foobar", client.get("aws-cache"));
+		} finally {
+			configServer.stop();
+		}
+	}
+
+	@Test
+	public void testPollConfigAndUsageWithBuilder() throws Exception {
+		TCPController configServer = new TCPController();
+		int version = 10;
+		configServer.setHandler(new MockHandler(version, serverList));
+		configServer.setCodecFactory(new TextLineCodecFactory());
+		configServer.bind(new InetSocketAddress(2279));
+
+		try {
+			AWSElasticCacheClientBuilder builder = new AWSElasticCacheClientBuilder(
+					new InetSocketAddress(2279));
+			builder.setConnectionPoolSize(2);
+			builder.setEnableHealSession(false);
+			AWSElasticCacheClient client = builder.build();
 			ClusterConfigration config = client.getCurrentConfig();
 			assertEquals(config.getVersion(), version);
 			assertEquals(addresses.size(), config.getNodeList().size());
