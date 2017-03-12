@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import net.rubyeye.xmemcached.XMemcachedClientBuilder;
+import net.rubyeye.xmemcached.utils.AddrUtil;
 
 /**
  * AWSElasticCacheClient builder.
@@ -56,10 +57,20 @@ public class AWSElasticCacheClientBuilder extends XMemcachedClientBuilder {
 	private long pollConfigIntervalMs = AWSElasticCacheClient.DEFAULT_POLL_CONFIG_INTERVAL_MS;
 
 	/**
+	 * Create a builder with an initial ElasticCache server list string in the
+	 * form of "host:port host2:port".
+	 * 
+	 * @param serverList
+	 *            server list string in the form of "host:port host2:port"
+	 */
+	public AWSElasticCacheClientBuilder(String serverList) {
+		this(AddrUtil.getAddresses(serverList));
+	}
+
+	/**
 	 * Create a builder with an initial ElasticCache server.
 	 * 
-	 * @param addressList
-	 * @param configAddrs
+	 * @param addr
 	 */
 	public AWSElasticCacheClientBuilder(InetSocketAddress addr) {
 		this(asList(addr));
@@ -74,7 +85,6 @@ public class AWSElasticCacheClientBuilder extends XMemcachedClientBuilder {
 	/**
 	 * Create a builder with initial ElasticCache server addresses.
 	 * 
-	 * @param addressList
 	 * @param configAddrs
 	 */
 	public AWSElasticCacheClientBuilder(List<InetSocketAddress> configAddrs) {
