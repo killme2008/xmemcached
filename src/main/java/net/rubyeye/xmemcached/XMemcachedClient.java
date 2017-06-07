@@ -2735,7 +2735,7 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 		Object item = this.fetch0(key, keyBytes, CommandType.GET_ONE,
 				this.opTimeout, this.transcoder);
 		while (item == null) {
-			item = String.valueOf(System.nanoTime());
+			item = getNSValue(ns);
 			boolean added = this.add0(key, 0, item, this.transcoder,
 					this.opTimeout);
 			if (!added) {
@@ -2744,12 +2744,21 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 			}
 		}
 		String namespace = item.toString();
-		if (!ByteUtils.isNumber(namespace)) {
+		int lastIdx = namespace.lastIndexOf(':');
+		String namespaceTimeStamp = null;
+		if (lastIdx > 0) {
+			namespaceTimeStamp = namespace.substring(lastIdx + 1);
+		}
+		if (lastIdx == -1 || !ByteUtils.isNumber(namespaceTimeStamp)) {
 			throw new IllegalStateException(
 					"Namespace key already has value.The key is:" + key
 							+ ",and the value is:" + namespace);
 		}
 		return namespace;
+	}
+
+	private String getNSValue(String ns) {
+		return ns + ":" + System.currentTimeMillis();
 	}
 
 	private String getNSKey(String ns) {
