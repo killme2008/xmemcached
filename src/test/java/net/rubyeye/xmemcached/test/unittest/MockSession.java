@@ -13,7 +13,7 @@ import com.google.code.yanf4j.core.impl.FutureImpl;
 
 public class MockSession implements Session {
 	private boolean closed = false;
-	private final int port;
+	protected final int port;
 
 	public MockSession(int port) {
 		this.port = port;
