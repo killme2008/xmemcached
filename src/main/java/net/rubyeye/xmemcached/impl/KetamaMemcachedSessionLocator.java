@@ -60,32 +60,46 @@ AbstractMemcachedSessionLocator {
 	 */
 	static final int DEFAULT_PORT = 11211;
 	private final boolean cwNginxUpstreamConsistent;
+	private final boolean gwhalinMemcachedJavaClientCompatibiltyConsistent;
 
 	public KetamaMemcachedSessionLocator() {
 		this.hashAlg = HashAlgorithm.KETAMA_HASH;
 		this.cwNginxUpstreamConsistent = false;
+		this.gwhalinMemcachedJavaClientCompatibiltyConsistent = false;
 	}
 
 	public KetamaMemcachedSessionLocator(boolean cwNginxUpstreamConsistent) {
 		this.hashAlg = HashAlgorithm.KETAMA_HASH;
 		this.cwNginxUpstreamConsistent = cwNginxUpstreamConsistent;
+		this.gwhalinMemcachedJavaClientCompatibiltyConsistent = false;
 	}
 
 	public KetamaMemcachedSessionLocator(HashAlgorithm alg) {
 		this.hashAlg = alg;
 		this.cwNginxUpstreamConsistent = false;
+		this.gwhalinMemcachedJavaClientCompatibiltyConsistent = false;
 	}
 
 	public KetamaMemcachedSessionLocator(HashAlgorithm alg,
 			boolean cwNginxUpstreamConsistent) {
 		this.hashAlg = alg;
 		this.cwNginxUpstreamConsistent = cwNginxUpstreamConsistent;
+		this.gwhalinMemcachedJavaClientCompatibiltyConsistent = false;
 	}
 
+	public KetamaMemcachedSessionLocator(HashAlgorithm alg,
+			boolean cwNginxUpstreamConsistent,
+			boolean gwhalinMemcachedJavaClientCompatibiltyConsistent) {
+		this.hashAlg = HashAlgorithm.KETAMA_HASH;
+		this.cwNginxUpstreamConsistent = cwNginxUpstreamConsistent;
+		this.gwhalinMemcachedJavaClientCompatibiltyConsistent = gwhalinMemcachedJavaClientCompatibiltyConsistent;
+	}
+	
 	public KetamaMemcachedSessionLocator(List<Session> list, HashAlgorithm alg) {
 		super();
 		this.hashAlg = alg;
 		this.cwNginxUpstreamConsistent = false;
+		this.gwhalinMemcachedJavaClientCompatibiltyConsistent = false;
 		this.buildMap(list, alg);
 	}
 
@@ -102,11 +116,20 @@ AbstractMemcachedSessionLocator {
 					sockStr = sockStr + ":" + serverAddress.getPort();
 				}
 			} else {
-				if (session instanceof MemcachedTCPSession) {
-					// Always use the first time resolved address.
-					sockStr = ((MemcachedTCPSession) session)
-							.getInetSocketAddressWrapper()
-							.getRemoteAddressStr();
+				if (session instanceof MemcachedSession) {
+					if (!gwhalinMemcachedJavaClientCompatibiltyConsistent) {
+						// Always use the first time resolved address.
+						sockStr = ((MemcachedSession) session)
+								.getInetSocketAddressWrapper()
+								.getRemoteAddressStr();
+					} else {
+						sockStr = ((MemcachedSession) session)
+								.getInetSocketAddressWrapper()
+								.getInetSocketAddress().getHostName() + ":" +
+								((MemcachedSession) session)
+								.getInetSocketAddressWrapper()
+								.getInetSocketAddress().getPort();
+					}
 				}
 				if (sockStr == null) {
 					sockStr = String.valueOf(session.getRemoteSocketAddress());
@@ -116,7 +139,7 @@ AbstractMemcachedSessionLocator {
 			 * Duplicate 160 X weight references
 			 */
 			int numReps = NUM_REPS;
-			if (session instanceof MemcachedTCPSession) {
+			if (session instanceof MemcachedSession) {
 				numReps *= ((MemcachedSession) session).getWeight();
 			}
 			if (alg == HashAlgorithm.KETAMA_HASH) {

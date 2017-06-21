@@ -4,8 +4,7 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.nio.ByteOrder;
 
-import net.rubyeye.xmemcached.buffer.BufferAllocator;
-import net.rubyeye.xmemcached.networking.MemcachedSession;
+import net.rubyeye.xmemcached.networking.ClosedMemcachedSession;
 import net.rubyeye.xmemcached.utils.InetSocketAddressWrapper;
 
 import com.google.code.yanf4j.core.Handler;
@@ -18,7 +17,7 @@ import com.google.code.yanf4j.core.CodecFactory.Encoder;
  * @author dennis
  * 
  */
-public class ClosedMemcachedTCPSession implements MemcachedSession {
+public class ClosedMemcachedTCPSession implements ClosedMemcachedSession {
 	private InetSocketAddressWrapper inetSocketAddressWrapper;
 	private volatile boolean allowReconnect = true;
 
@@ -26,10 +25,6 @@ public class ClosedMemcachedTCPSession implements MemcachedSession {
 			InetSocketAddressWrapper inetSocketAddressWrapper) {
 		super();
 		this.inetSocketAddressWrapper = inetSocketAddressWrapper;
-	}
-
-	public void destroy() {
-
 	}
 
 	public InetSocketAddressWrapper getInetSocketAddressWrapper() {
@@ -48,17 +43,10 @@ public class ClosedMemcachedTCPSession implements MemcachedSession {
 		return this.allowReconnect;
 	}
 
-	public void quit() {
-
-	}
-
 	public void setAllowReconnect(boolean allow) {
 		this.allowReconnect = allow;
 	}
 
-	public void setBufferAllocator(BufferAllocator allocator) {
-
-	}
 
 	public void clearAttributes() {
 
@@ -198,14 +186,6 @@ public class ClosedMemcachedTCPSession implements MemcachedSession {
 	}
 
 	public void setUseBlockingRead(boolean useBlockingRead) {
-
-	}
-
-	public boolean isAuthFailed() {
-		return false;
-	}
-
-	public void setAuthFailed(boolean authFailed) {
 
 	}
 

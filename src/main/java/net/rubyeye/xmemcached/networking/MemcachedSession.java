@@ -23,9 +23,6 @@
 package net.rubyeye.xmemcached.networking;
 
 import net.rubyeye.xmemcached.buffer.BufferAllocator;
-import net.rubyeye.xmemcached.utils.InetSocketAddressWrapper;
-
-import com.google.code.yanf4j.core.Session;
 
 /**
  * Abstract interface for memcached connection.
@@ -33,23 +30,11 @@ import com.google.code.yanf4j.core.Session;
  * @author dennis
  * 
  */
-public interface MemcachedSession extends Session {
-
-	public void setAllowReconnect(boolean allow);
-
-	public boolean isAllowReconnect();
+public interface MemcachedSession extends ClosedMemcachedSession {
 
 	public void setBufferAllocator(BufferAllocator allocator);
 
-	public InetSocketAddressWrapper getInetSocketAddressWrapper();
-
 	public void destroy();
-
-	@Deprecated
-	public int getWeight();
-
-	@Deprecated
-	public int getOrder();
 
 	public void quit();
 
