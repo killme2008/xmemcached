@@ -291,6 +291,18 @@ public class AWSElasticCacheClient extends XMemcachedClient implements
 		return AWSUtils.parseConfiguration(result);
 	}
 
+	@Override
+	protected void shutdown0() {
+		super.shutdown0();
+		if (this.configPoller != null) {
+			try {
+				this.configPoller.stop();
+			} catch (Exception e) {
+				// ignore
+			}
+		}
+	}
+
 	/**
 	 * Get the current using configuration in memory.
 	 * 

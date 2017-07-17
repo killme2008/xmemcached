@@ -2417,6 +2417,13 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 			throws MemcachedException, InterruptedException, TimeoutException {
 		return this.getStatsByItem(null, timeout);
 	}
+	
+	/**
+	 * For subclass override.
+	 */
+	protected void shutdown0(){
+		
+	}
 
 	/*
 	 * (non-Javadoc)
@@ -2427,6 +2434,7 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 		if (this.shutdown) {
 			return;
 		}
+		this.shutdown0();
 		this.shutdown = true;
 		this.connector.shuttingDown();
 		this.connector.quitAllSessions();
