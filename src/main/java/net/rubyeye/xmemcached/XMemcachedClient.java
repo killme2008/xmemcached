@@ -111,16 +111,6 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 	private final CopyOnWriteArrayList<MemcachedClientStateListenerAdapter> stateListenerAdapters = new CopyOnWriteArrayList<MemcachedClientStateListenerAdapter>();
 	private Thread shutdownHookThread;
 
-	/**
-	 * System property to control shutdown hook, issue #44
-	 * 
-	 * @since 2.0.1
-	 */
-	private boolean isEnableShutDownHook() {
-		return Boolean.valueOf(System.getProperty(
-				"xmemcached.shutdown.hook.enable", "false"));
-	}
-
 	private volatile boolean isHutdownHookCalled = false;
 	// key provider for pre-processing keys before sending them to memcached
 	// added by dennis,2012-07-14
@@ -679,7 +669,7 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 			this.shutdown = false;
 			this.connector.start();
 			this.memcachedHandler.start();
-			if (isEnableShutDownHook()) {
+			if (AddrUtil.isEnableShutDownHook()) {
 				this.shutdownHookThread = new Thread() {
 					@Override
 					public void run() {
@@ -2441,7 +2431,7 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 		this.connector.stop();
 		this.memcachedHandler.stop();
 		XMemcachedMbeanServer.getInstance().shutdown();
-		if (isEnableShutDownHook() && !this.isHutdownHookCalled) {
+		if (AddrUtil.isEnableShutDownHook() && !this.isHutdownHookCalled) {
 			try {
 				Runtime.getRuntime()
 						.removeShutdownHook(this.shutdownHookThread);

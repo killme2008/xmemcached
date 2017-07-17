@@ -148,4 +148,14 @@ public class AddrUtil {
 		String portNum = server.substring(finalColon + 1).trim();
 		return new InetSocketAddress(hostPart, Integer.parseInt(portNum));
 	}
+
+	/**
+	 * System property to control shutdown hook, issue #44
+	 * 
+	 * @since 2.0.1
+	 */
+	public static boolean isEnableShutDownHook() {
+		return Boolean.valueOf(System.getProperty(
+				"xmemcached.shutdown.hook.enable", "false"));
+	}
 }

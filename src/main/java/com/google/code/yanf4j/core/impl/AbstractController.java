@@ -34,6 +34,8 @@ import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ThreadPoolExecutor;
 
+import net.rubyeye.xmemcached.utils.AddrUtil;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -358,18 +360,20 @@ public abstract class AbstractController implements Controller,
 		startStatistics();
 		start0();
 		notifyStarted();
-		shutdownHookThread = new Thread() {
-			@Override
-			public void run() {
-				try {
-					isHutdownHookCalled = true;
-					AbstractController.this.stop();
-				} catch (IOException e) {
-					log.error("Stop controller fail", e);
+		if (AddrUtil.isEnableShutDownHook()) {
+			shutdownHookThread = new Thread() {
+				@Override
+				public void run() {
+					try {
+						isHutdownHookCalled = true;
+						AbstractController.this.stop();
+					} catch (IOException e) {
+						log.error("Stop controller fail", e);
+					}
 				}
-			}
-		};
-		Runtime.getRuntime().addShutdownHook(shutdownHookThread);
+			};
+			Runtime.getRuntime().addShutdownHook(shutdownHookThread);
+		}
 		log.info("The Controller started at " + localSocketAddress + " ...");
 	}
 
@@ -475,7 +479,8 @@ public abstract class AbstractController implements Controller,
 		notifyStopped();
 		clearStateListeners();
 		stop0();
-		if (!isHutdownHookCalled) {
+		if (AddrUtil.isEnableShutDownHook() && shutdownHookThread != null
+				&& !isHutdownHookCalled) {
 			Runtime.getRuntime().removeShutdownHook(shutdownHookThread);
 		}
 		log.info("Controller has been stopped.");
