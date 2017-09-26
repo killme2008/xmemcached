@@ -37,6 +37,7 @@ Quick start:
 * [spudone](https://github.com/spudone)
 * [MikeBily](https://github.com/MikeBily)
 * [Lucas Pouzac](https://github.com/lucaspouzac)
+* [IluckySi](https://github.com/IluckySi)
 
 ## License
 
