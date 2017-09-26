@@ -638,7 +638,7 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 	private final <T> Object fetch0(final String key, final byte[] keyBytes,
 			final CommandType cmdType, final long timeout,
 			Transcoder<T> transcoder) throws InterruptedException,
-			TimeoutException, MemcachedException, MemcachedException {
+			TimeoutException, MemcachedException {
 		final Command command = this.commandFactory.createGetCommand(key,
 				keyBytes, cmdType, this.transcoder);
 		this.latchWait(command, timeout, this.sendCommand(command));
