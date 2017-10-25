@@ -1,0 +1,8 @@
+version: '3'
+services:
+  kestrel:
+    build: .
+    ports:
+      - "22133:22133"
+  memcached:
+    image: "memcached"

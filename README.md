@@ -23,6 +23,31 @@ Quick start:
 * [Getting started](https://github.com/killme2008/xmemcached/wiki/Getting%20started)
 * [快速入门](https://github.com/killme2008/xmemcached/wiki/%E5%BF%AB%E9%80%9F%E5%85%A5%E9%97%A8)
 
+## Contribute
+
+[Fork](https://github.com/killme2008/xmemcached#fork-destination-box) the source code and checkout it to your local machine.Make changes and create a pull request.
+
+Use [docker](https://docs.docker.com/engine/installation/) and [docker-compose](https://docs.docker.com/compose/gettingstarted/) to setup test environment:
+
+```sh
+$ cd xmemcached
+$ docker-compose up
+```
+
+Run unit tests:
+
+```sh
+$ mvn test
+```
+
+Run intergration test:
+
+```sh
+$ mvn integration-test
+```
+
+Thanks to all contributors, you make xmemcached better.
+
 ## Contributors
 
 * [cnscud](https://code.google.com/u/cnscud/)
