@@ -159,7 +159,7 @@ public final class Reactor extends Thread {
 						lookJVMBug(before, selected, wait);
 					}
 					selectTries++;
-					// check tmeout and idle
+					// check timeout and idle
 					nextTimeout = checkSessionTimeout();
 					continue;
 				} else {
@@ -463,12 +463,15 @@ public final class Reactor extends Thread {
 		if (session.isClosed() && event != EventType.UNREGISTER) {
 			return;
 		}
-		if (EventType.REGISTER.equals(event)) {
-			controller.registerSession(session);
-		} else if (EventType.UNREGISTER.equals(event)) {
-			controller.unregisterSession(session);
-		} else {
-			((NioSession) session).onEvent(event, selector);
+		switch (event) {
+			case REGISTER :
+				controller.registerSession(session);
+				break;
+			case UNREGISTER :
+				controller.unregisterSession(session);
+				break;
+			default :
+				((NioSession) session).onEvent(event, selector);
 		}
 	}
 

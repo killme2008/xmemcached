@@ -25,8 +25,9 @@ import com.google.code.yanf4j.util.SelectorFactory;
  * @author dennis
  * 
  */
-public abstract class AbstractNioSession extends AbstractSession implements
-		NioSession {
+public abstract class AbstractNioSession extends AbstractSession
+		implements
+			NioSession {
 
 	public SelectableChannel channel() {
 		return selectableChannel;
@@ -47,8 +48,8 @@ public abstract class AbstractNioSession extends AbstractSession implements
 			interestRead(key);
 		} else {
 			try {
-				selectableChannel
-						.register(selector, SelectionKey.OP_READ, this);
+				selectableChannel.register(selector, SelectionKey.OP_READ,
+						this);
 			} catch (ClosedChannelException e) {
 				// ignore
 			} catch (CancelledKeyException e) {
@@ -96,7 +97,8 @@ public abstract class AbstractNioSession extends AbstractSession implements
 		isLockedByMe = true;
 		WriteMessage currentMessage = null;
 
-		final long maxWritten = readBuffer.capacity() + readBuffer.capacity() >>> 1;
+		final long maxWritten = readBuffer.capacity()
+				+ readBuffer.capacity() >>> 1;
 		try {
 			long written = 0;
 			while (this.currentMessage.get() != null) {
@@ -110,8 +112,7 @@ public abstract class AbstractNioSession extends AbstractSession implements
 				if (written < maxWritten) {
 					writeResult = writeToChannel(currentMessage);
 					written += this.currentMessage.get().getWriteBuffer()
-							.remaining()
-							- before;
+							.remaining() - before;
 				} else {
 					// wait for next time to write
 				}
@@ -129,9 +130,8 @@ public abstract class AbstractNioSession extends AbstractSession implements
 						WriteMessage nextMessage = writeQueue.peek();
 						if (nextMessage != null && writeLock.tryLock()) {
 							isLockedByMe = true;
-							if (!writeQueue.isEmpty()
-									&& this.currentMessage.compareAndSet(null,
-											nextMessage)) {
+							if (!writeQueue.isEmpty() && this.currentMessage
+									.compareAndSet(null, nextMessage)) {
 								writeQueue.remove();
 							}
 							continue;
@@ -175,8 +175,8 @@ public abstract class AbstractNioSession extends AbstractSession implements
 			interestWrite(key);
 		} else {
 			try {
-				selectableChannel.register(selector,
-						SelectionKey.OP_WRITE, this);
+				selectableChannel.register(selector, SelectionKey.OP_WRITE,
+						this);
 			} catch (ClosedChannelException e) {
 				// ignore
 			} catch (CancelledKeyException e) {
@@ -233,9 +233,7 @@ public abstract class AbstractNioSession extends AbstractSession implements
 		if (schduleWriteMessage(message)) {
 			return;
 		}
-		// 到这里，当前线程一定是IO线程
 		onWrite(null);
-
 	}
 
 	protected boolean schduleWriteMessage(WriteMessage writeMessage) {
@@ -311,8 +309,8 @@ public abstract class AbstractNioSession extends AbstractSession implements
 		if (log.isDebugEnabled()) {
 			StringBuffer bufMsg = new StringBuffer("send buffers:\n[\n");
 			final ByteBuffer buff = buffer.buf();
-			bufMsg.append(" buffer:position=").append(buff.position()).append(
-					",limit=").append(buff.limit()).append(",capacity=")
+			bufMsg.append(" buffer:position=").append(buff.position())
+					.append(",limit=").append(buff.limit()).append(",capacity=")
 					.append(buff.capacity()).append("\n");
 
 			bufMsg.append("]");
@@ -331,30 +329,30 @@ public abstract class AbstractNioSession extends AbstractSession implements
 		SelectionKey key = selectableChannel.keyFor(selector);
 
 		switch (event) {
-		case EXPIRED:
-			onExpired();
-			break;
-		case WRITEABLE:
-			onWrite(key);
-			break;
-		case READABLE:
-			onRead(key);
-			break;
-		case ENABLE_WRITE:
-			enableWrite(selector);
-			break;
-		case ENABLE_READ:
-			enableRead(selector);
-			break;
-		case IDLE:
-			onIdle();
-			break;
-		case CONNECTED:
-			onConnected();
-			break;
-		default:
-			log.error("Unknown event:" + event.name());
-			break;
+			case EXPIRED :
+				onExpired();
+				break;
+			case WRITEABLE :
+				onWrite(key);
+				break;
+			case READABLE :
+				onRead(key);
+				break;
+			case ENABLE_WRITE :
+				enableWrite(selector);
+				break;
+			case ENABLE_READ :
+				enableRead(selector);
+				break;
+			case IDLE :
+				onIdle();
+				break;
+			case CONNECTED :
+				onConnected();
+				break;
+			default :
+				log.error("Unknown event:" + event.name());
+				break;
 		}
 	}
 }
