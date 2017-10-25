@@ -472,6 +472,7 @@ public final class Reactor extends Thread {
 				break;
 			default :
 				((NioSession) session).onEvent(event, selector);
+				break;
 		}
 	}
 
