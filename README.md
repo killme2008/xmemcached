@@ -2,6 +2,8 @@
 
 ## News
 
+
+* [2.4.0](https://github.com/killme2008/xmemcached/releases/tag/xmemcached-2.4.0) released, reduce CPU consumption when connecting to a lot of memcached servers.
 * [2.3.2](https://github.com/killme2008/xmemcached/releases/tag/xmemcached-2.3.2) released, some fixes and add compatibility for `KetamaMemcachedSessionLocator` with Gwhalin Memcached Java Client. 
 * [2.3.1](https://github.com/killme2008/xmemcached/releases/tag/xmemcached-2.3.1) released, Adds `AWSElasticCacheClientBuilder` to build `AWSElasticCacheClient`.
 * [2.3.0](https://github.com/killme2008/xmemcached/releases/tag/xmemcached-2.3.0) released, suppports [AWS ElasticCache Auto Discovery](http://docs.aws.amazon.com/AmazonElastiCache/latest/UserGuide/AutoDiscovery.html).
