@@ -40,10 +40,11 @@ public final class Reactor extends Thread {
 	/**
 	 * JVM bug threshold
 	 */
-	public static final int JVMBUG_THRESHHOLD = Integer.getInteger(
-			"com.googlecode.yanf4j.nio.JVMBUG_THRESHHOLD", 128);
+	public static final int JVMBUG_THRESHHOLD = Integer
+			.getInteger("com.googlecode.yanf4j.nio.JVMBUG_THRESHHOLD", 128);
 	public static final int JVMBUG_THRESHHOLD2 = JVMBUG_THRESHHOLD * 2;
-	public static final int JVMBUG_THRESHHOLD1 = (JVMBUG_THRESHHOLD2 + JVMBUG_THRESHHOLD) / 2;
+	public static final int JVMBUG_THRESHHOLD1 = (JVMBUG_THRESHHOLD2
+			+ JVMBUG_THRESHHOLD) / 2;
 	public static final int DEFAULT_WAIT = 1000;
 
 	private static final Logger log = LoggerFactory.getLogger("remoting");
@@ -110,6 +111,8 @@ public final class Reactor extends Thread {
 	private int selectTries = 0;
 
 	private long nextTimeout = 0;
+
+	private long lastCheckTimestamp = 0L;
 
 	Reactor(SelectorManager selectorManager, Configuration configuration,
 			int index) throws IOException {
@@ -218,17 +221,18 @@ public final class Reactor extends Thread {
 				gate.lock();
 				try {
 					lastJVMBug = now;
-					log.warn("JVM bug occured at "
-							+ new Date(lastJVMBug)
+					log.warn("JVM bug occured at " + new Date(lastJVMBug)
 							+ ",http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6403933,reactIndex="
 							+ reactorIndex);
 					if (jvmBug1) {
-						log.debug("seeing JVM BUG(s) - recreating selector,reactIndex="
-								+ reactorIndex);
+						log.debug(
+								"seeing JVM BUG(s) - recreating selector,reactIndex="
+										+ reactorIndex);
 					} else {
 						jvmBug1 = true;
-						log.info("seeing JVM BUG(s) - recreating selector,reactIndex="
-								+ reactorIndex);
+						log.info(
+								"seeing JVM BUG(s) - recreating selector,reactIndex="
+										+ reactorIndex);
 					}
 					seeing = true;
 					final Selector new_selector = SystemUtils.openSelector();
@@ -256,12 +260,14 @@ public final class Reactor extends Thread {
 			} else if (jvmBug.get() == JVMBUG_THRESHHOLD
 					|| jvmBug.get() == JVMBUG_THRESHHOLD1) {
 				if (jvmBug0) {
-					log.debug("seeing JVM BUG(s) - cancelling interestOps==0,reactIndex="
-							+ reactorIndex);
+					log.debug(
+							"seeing JVM BUG(s) - cancelling interestOps==0,reactIndex="
+									+ reactorIndex);
 				} else {
 					jvmBug0 = true;
-					log.info("seeing JVM BUG(s) - cancelling interestOps==0,reactIndex="
-							+ reactorIndex);
+					log.info(
+							"seeing JVM BUG(s) - cancelling interestOps==0,reactIndex="
+									+ reactorIndex);
 				}
 				gate.lock();
 				seeing = true;
@@ -305,8 +311,8 @@ public final class Reactor extends Thread {
 					controller.onAccept(key);
 					continue;
 				}
-				if (key.isValid()
-						&& (key.readyOps() & SelectionKey.OP_WRITE) == SelectionKey.OP_WRITE) {
+				if (key.isValid() && (key.readyOps()
+						& SelectionKey.OP_WRITE) == SelectionKey.OP_WRITE) {
 					// Remove write interest
 					key.interestOps(key.interestOps() & ~SelectionKey.OP_WRITE);
 					controller.onWrite(key);
@@ -314,20 +320,20 @@ public final class Reactor extends Thread {
 						skipOpRead = true;
 					}
 				}
-				if (!skipOpRead
-						&& key.isValid()
-						&& (key.readyOps() & SelectionKey.OP_READ) == SelectionKey.OP_READ) {
+				if (!skipOpRead && key.isValid() && (key.readyOps()
+						& SelectionKey.OP_READ) == SelectionKey.OP_READ) {
 					key.interestOps(key.interestOps() & ~SelectionKey.OP_READ);
 					if (!controller.getStatistics().isReceiveOverFlow()) {
 						// Remove read interest
 						controller.onRead(key);
 					} else {
-						key.interestOps(key.interestOps()
-								| SelectionKey.OP_READ);
+						key.interestOps(
+								key.interestOps() | SelectionKey.OP_READ);
 					}
 
 				}
-				if ((key.readyOps() & SelectionKey.OP_CONNECT) == SelectionKey.OP_CONNECT) {
+				if ((key.readyOps()
+						& SelectionKey.OP_CONNECT) == SelectionKey.OP_CONNECT) {
 					controller.onConnect(key);
 				}
 
@@ -383,8 +389,7 @@ public final class Reactor extends Thread {
 		if (configuration.getCheckSessionTimeoutInterval() > 0) {
 			gate.lock();
 			try {
-				if (selectTries * 1000 >= configuration
-						.getCheckSessionTimeoutInterval()) {
+				if (isNeedCheckSessionIdleTimeout()) {
 					nextTimeout = configuration
 							.getCheckSessionTimeoutInterval();
 					for (SelectionKey key : selector.keys()) {
@@ -396,12 +401,21 @@ public final class Reactor extends Thread {
 						}
 					}
 					selectTries = 0;
+					lastCheckTimestamp = System.currentTimeMillis();
 				}
 			} finally {
 				gate.unlock();
 			}
 		}
 		return nextTimeout;
+	}
+
+	private boolean isNeedCheckSessionIdleTimeout() {
+		return selectTries * 1000 >= configuration
+				.getCheckSessionTimeoutInterval()
+				|| System.currentTimeMillis()
+						- this.lastCheckTimestamp >= configuration
+								.getCheckSessionTimeoutInterval();
 	}
 
 	private final Session getSessionFromAttchment(SelectionKey key) {
@@ -462,13 +476,15 @@ public final class Reactor extends Thread {
 			Set<SelectionKey> allKeys) {
 		if (controller.getSessionTimeout() > 0
 				|| controller.getSessionIdleTimeout() > 0) {
-			for (SelectionKey key : allKeys) {
-
-				if (!selectedKeys.contains(key)) {
-					if (key.attachment() != null) {
-						checkExpiredIdle(key, getSessionFromAttchment(key));
+			if (isNeedCheckSessionIdleTimeout()) {
+				for (SelectionKey key : allKeys) {
+					if (!selectedKeys.contains(key)) {
+						if (key.attachment() != null) {
+							checkExpiredIdle(key, getSessionFromAttchment(key));
+						}
 					}
 				}
+				lastCheckTimestamp = System.currentTimeMillis();
 			}
 		}
 	}
