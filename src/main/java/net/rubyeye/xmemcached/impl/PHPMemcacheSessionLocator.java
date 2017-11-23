@@ -21,15 +21,13 @@ import net.rubyeye.xmemcached.networking.MemcachedSession;
 import com.google.code.yanf4j.core.Session;
 
 /**
- * Session locator base on hash(key) mod sessions.size(). Uses the PHP
- * memcached hash strategy so it's easier to share data with PHP based
- * clients.
+ * Session locator base on hash(key) mod sessions.size(). Uses the PHP memcached
+ * hash strategy so it's easier to share data with PHP based clients.
  *
  * @author aravind
  *
  */
-public class PHPMemcacheSessionLocator extends
-		AbstractMemcachedSessionLocator {
+public class PHPMemcacheSessionLocator extends AbstractMemcachedSessionLocator {
 
 	private HashAlgorithm hashAlgorithm;
 	private transient volatile List<Session> sessions;
@@ -48,7 +46,7 @@ public class PHPMemcacheSessionLocator extends
 
 	public final long getHash(int size, String key) {
 		long hash = this.hashAlgorithm.hash(key);
-    hash = (hash >> 16) & 0x7fff;
+		hash = (hash >> 16) & 0x7fff;
 		return hash % size;
 	}
 

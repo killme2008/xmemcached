@@ -32,17 +32,16 @@ public class XMemcachedClientWithKeyProviderIT extends XMemcachedClientIT {
 	public MemcachedClientBuilder createBuilder() throws Exception {
 
 		MemcachedClientBuilder builder = new XMemcachedClientBuilder(
-				AddrUtil.getAddresses(this.properties
-						.getProperty("test.memcached.servers")));
+				AddrUtil.getAddresses(
+						this.properties.getProperty("test.memcached.servers")));
 		ByteUtils.testing = true;
 		return builder;
 	}
 
 	@Override
 	public MemcachedClientBuilder createWeightedBuilder() throws Exception {
-		List<InetSocketAddress> addressList = AddrUtil
-				.getAddresses(this.properties
-						.getProperty("test.memcached.servers"));
+		List<InetSocketAddress> addressList = AddrUtil.getAddresses(
+				this.properties.getProperty("test.memcached.servers"));
 		int[] weights = new int[addressList.size()];
 		for (int i = 0; i < weights.length; i++) {
 			weights[i] = i + 1;

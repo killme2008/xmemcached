@@ -45,5 +45,4 @@ public class ConnectFuture extends FutureImpl<Boolean> {
 		return this.inetSocketAddressWrapper;
 	}
 
-
 }

@@ -45,7 +45,9 @@ import com.google.code.yanf4j.buffer.IoBuffer;
  * @author dennis
  * 
  */
-public abstract class BaseBinaryCommand extends Command implements StoreCommand {
+public abstract class BaseBinaryCommand extends Command
+		implements
+			StoreCommand {
 	static final short DEFAULT_VBUCKET_ID = 0;
 	protected int expTime;
 	protected long cas;
@@ -118,64 +120,65 @@ public abstract class BaseBinaryCommand extends Command implements StoreCommand 
 	@Override
 	public boolean decode(MemcachedTCPSession session, ByteBuffer buffer) {
 		while (true) {
-			LABEL: switch (this.decodeStatus) {
-			case NONE:
-				if (buffer.remaining() < 24) {
-					return false;
-				} else {
-					this.decodeStatus = BinaryDecodeStatus.READ_HEADER;
-				}
-				continue;
-			case READ_HEADER:
-				this.readHeader(buffer);
-				continue;
-			case READ_EXTRAS:
-				if (this.readExtras(buffer, this.responseExtrasLength)) {
-					this.decodeStatus = BinaryDecodeStatus.READ_KEY;
+			LABEL : switch (this.decodeStatus) {
+				case NONE :
+					if (buffer.remaining() < 24) {
+						return false;
+					} else {
+						this.decodeStatus = BinaryDecodeStatus.READ_HEADER;
+					}
 					continue;
-				} else {
-					return false;
-				}
-			case READ_KEY:
-				if (this.readKey(buffer, this.responseKeyLength)) {
-					this.decodeStatus = BinaryDecodeStatus.READ_VALUE;
+				case READ_HEADER :
+					this.readHeader(buffer);
 					continue;
-				} else {
-					return false;
-				}
-			case READ_VALUE:
-				if (this.responseStatus == null
-						|| this.responseStatus == ResponseStatus.NO_ERROR) {
-					if (this.readValue(buffer, this.responseTotalBodyLength,
-							this.responseKeyLength, this.responseExtrasLength)) {
-						this.decodeStatus = BinaryDecodeStatus.DONE;
+				case READ_EXTRAS :
+					if (this.readExtras(buffer, this.responseExtrasLength)) {
+						this.decodeStatus = BinaryDecodeStatus.READ_KEY;
 						continue;
 					} else {
 						return false;
 					}
-				} else {
-					// Ignore error message
-					if (ByteUtils.stepBuffer(buffer,
-							this.responseTotalBodyLength
-									- this.responseKeyLength
-									- this.responseExtrasLength)) {
-						this.decodeStatus = BinaryDecodeStatus.DONE;
+				case READ_KEY :
+					if (this.readKey(buffer, this.responseKeyLength)) {
+						this.decodeStatus = BinaryDecodeStatus.READ_VALUE;
 						continue;
 					} else {
 						return false;
 					}
-				}
-			case DONE:
-				if (this.finish()) {
+				case READ_VALUE :
+					if (this.responseStatus == null
+							|| this.responseStatus == ResponseStatus.NO_ERROR) {
+						if (this.readValue(buffer, this.responseTotalBodyLength,
+								this.responseKeyLength,
+								this.responseExtrasLength)) {
+							this.decodeStatus = BinaryDecodeStatus.DONE;
+							continue;
+						} else {
+							return false;
+						}
+					} else {
+						// Ignore error message
+						if (ByteUtils.stepBuffer(buffer,
+								this.responseTotalBodyLength
+										- this.responseKeyLength
+										- this.responseExtrasLength)) {
+							this.decodeStatus = BinaryDecodeStatus.DONE;
+							continue;
+						} else {
+							return false;
+						}
+					}
+				case DONE :
+					if (this.finish()) {
+						return true;
+					} else {
+						// Do not finish,continue to decode
+						this.decodeStatus = BinaryDecodeStatus.NONE;
+						break LABEL;
+					}
+				case IGNORE :
+					buffer.reset();
 					return true;
-				} else {
-					// Do not finish,continue to decode
-					this.decodeStatus = BinaryDecodeStatus.NONE;
-					break LABEL;
-				}
-			case IGNORE:
-				buffer.reset();
-				return true;
 			}
 		}
 	}
@@ -240,8 +243,8 @@ public abstract class BaseBinaryCommand extends Command implements StoreCommand 
 
 	protected boolean readValue(ByteBuffer buffer, int bodyLength,
 			int keyLength, int extrasLength) {
-		return ByteUtils.stepBuffer(buffer, bodyLength - keyLength
-				- extrasLength);
+		return ByteUtils.stepBuffer(buffer,
+				bodyLength - keyLength - extrasLength);
 	}
 
 	protected boolean readExtras(ByteBuffer buffer, int extrasLength) {
@@ -256,24 +259,24 @@ public abstract class BaseBinaryCommand extends Command implements StoreCommand 
 	protected void readStatus(ByteBuffer buffer) {
 		this.responseStatus = ResponseStatus.parseShort(buffer.getShort());
 		switch (this.responseStatus) {
-		case NOT_SUPPORTED:
-		case UNKNOWN_COMMAND:
-			this.setException(new UnknownCommandException());
-			break;
-		case AUTH_REQUIRED:
-		case FUTHER_AUTH_REQUIRED:
-		case VALUE_TOO_BIG:
-		case INVALID_ARGUMENTS:
-		case INC_DEC_NON_NUM:
-		case BELONGS_TO_ANOTHER_SRV:
-		case AUTH_ERROR:
-		case OUT_OF_MEMORY:
-		case INTERNAL_ERROR:
-		case BUSY:
-		case TEMP_FAILURE:
-			this.setException(new MemcachedServerException(this.responseStatus
-					.errorMessage()));
-			break;
+			case NOT_SUPPORTED :
+			case UNKNOWN_COMMAND :
+				this.setException(new UnknownCommandException());
+				break;
+			case AUTH_REQUIRED :
+			case FUTHER_AUTH_REQUIRED :
+			case VALUE_TOO_BIG :
+			case INVALID_ARGUMENTS :
+			case INC_DEC_NON_NUM :
+			case BELONGS_TO_ANOTHER_SRV :
+			case AUTH_ERROR :
+			case OUT_OF_MEMORY :
+			case INTERNAL_ERROR :
+			case BUSY :
+			case TEMP_FAILURE :
+				this.setException(new MemcachedServerException(
+						this.responseStatus.errorMessage()));
+				break;
 		}
 
 	}
@@ -314,8 +317,8 @@ public abstract class BaseBinaryCommand extends Command implements StoreCommand 
 			if (this.noreply) {
 				return false;
 			} else {
-				throw new MemcachedDecodeException("Not a proper "
-						+ this.opCode.name() + " response");
+				throw new MemcachedDecodeException(
+						"Not a proper " + this.opCode.name() + " response");
 			}
 		}
 		return true;

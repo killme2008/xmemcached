@@ -34,8 +34,7 @@ public class BinaryDeleteCommandUnitTest extends BaseBinaryCommandUnitTest {
 		buffer = this.constructResponse(OpCode.DELETE.fieldValue(), (short) 0,
 				(byte) 0, (byte) 0, (short) 0x0005, 0, 0, 1L, null, null, null);
 		command = this.commandFactory.createDeleteCommand(this.key,
-				this.keyBytes, 0, 999L,
-				this.noreply);
+				this.keyBytes, 0, 999L, this.noreply);
 		assertTrue(command.decode(null, buffer));
 		assertFalse((Boolean) command.getResult());
 		assertEquals(0, buffer.remaining());

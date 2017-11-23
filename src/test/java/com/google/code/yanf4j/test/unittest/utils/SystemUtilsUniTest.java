@@ -18,8 +18,7 @@ public class SystemUtilsUniTest extends TestCase {
 			assertTrue(pollClassName.equals("sun.nio.ch.EPollSelectorProvider")
 					|| pollClassName.equals("sun.nio.ch.PollSelectorProvider"));
 		}
-		Selector selector2 = SystemUtils.openSelector();
-		;
+		Selector selector2 = SystemUtils.openSelector();;
 		assertNotSame(selector, selector2);
 		selector.close();
 		selector2.close();

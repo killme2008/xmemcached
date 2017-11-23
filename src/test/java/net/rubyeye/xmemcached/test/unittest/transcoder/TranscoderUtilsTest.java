@@ -11,46 +11,46 @@ import junit.framework.TestCase;
 public class TranscoderUtilsTest extends TestCase {
 
 	private TranscoderUtils tu;
-	byte[] oversizeBytes=new byte[16];
+	byte[] oversizeBytes = new byte[16];
 
 	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
-		tu=new TranscoderUtils(true);
+		tu = new TranscoderUtils(true);
 	}
 
 	public void testBooleanOverflow() {
 		try {
-			boolean b=tu.decodeBoolean(oversizeBytes);
+			boolean b = tu.decodeBoolean(oversizeBytes);
 			fail("Got " + b + " expected assertion.");
-		} catch(AssertionError e) {
+		} catch (AssertionError e) {
 			// pass
 		}
 	}
 
 	public void testByteOverflow() {
 		try {
-			byte b=tu.decodeByte(oversizeBytes);
+			byte b = tu.decodeByte(oversizeBytes);
 			fail("Got " + b + " expected assertion.");
-		} catch(AssertionError e) {
+		} catch (AssertionError e) {
 			// pass
 		}
 	}
 
 	public void testIntOverflow() {
 		try {
-			int b=tu.decodeInt(oversizeBytes);
+			int b = tu.decodeInt(oversizeBytes);
 			fail("Got " + b + " expected assertion.");
-		} catch(AssertionError e) {
+		} catch (AssertionError e) {
 			// pass
 		}
 	}
 
 	public void testLongOverflow() {
 		try {
-			long b=tu.decodeLong(oversizeBytes);
+			long b = tu.decodeLong(oversizeBytes);
 			fail("Got " + b + " expected assertion.");
-		} catch(AssertionError e) {
+		} catch (AssertionError e) {
 			// pass
 		}
 	}
@@ -61,6 +61,6 @@ public class TranscoderUtilsTest extends TestCase {
 
 	public void testUnpackedLong() {
 		assertEquals("[0, 0, 0, 0, 0, 0, 0, 1]",
-			Arrays.toString(new TranscoderUtils(false).encodeLong(1)));
+				Arrays.toString(new TranscoderUtils(false).encodeLong(1)));
 	}
 }

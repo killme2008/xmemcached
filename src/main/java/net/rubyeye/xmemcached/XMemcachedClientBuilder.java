@@ -78,8 +78,8 @@ public class XMemcachedClientBuilder implements MemcachedClientBuilder {
 
 	public void setOpTimeout(long opTimeout) {
 		if (opTimeout <= 0)
-			throw new IllegalArgumentException("Invalid opTimeout value:"
-					+ opTimeout);
+			throw new IllegalArgumentException(
+					"Invalid opTimeout value:" + opTimeout);
 		this.opTimeout = opTimeout;
 	}
 
@@ -132,8 +132,8 @@ public class XMemcachedClientBuilder implements MemcachedClientBuilder {
 		}
 		if (!socketOption.type().equals(value.getClass())) {
 			throw new IllegalArgumentException("Expected "
-					+ socketOption.type().getSimpleName()
-					+ " value,but givend " + value.getClass().getSimpleName());
+					+ socketOption.type().getSimpleName() + " value,but givend "
+					+ value.getClass().getSimpleName());
 		}
 		this.socketOptions.put(socketOption, value);
 	}
@@ -150,7 +150,8 @@ public class XMemcachedClientBuilder implements MemcachedClientBuilder {
 		this.connectionPoolSize = poolSize;
 	}
 
-	public void removeStateListener(MemcachedClientStateListener stateListener) {
+	public void removeStateListener(
+			MemcachedClientStateListener stateListener) {
 		this.stateListeners.remove(stateListener);
 	}
 
@@ -190,12 +191,12 @@ public class XMemcachedClientBuilder implements MemcachedClientBuilder {
 
 	public static final Configuration getDefaultConfiguration() {
 		final Configuration configuration = new Configuration();
-		configuration
-				.setSessionReadBufferSize(MemcachedClient.DEFAULT_SESSION_READ_BUFF_SIZE);
+		configuration.setSessionReadBufferSize(
+				MemcachedClient.DEFAULT_SESSION_READ_BUFF_SIZE);
 		configuration
 				.setReadThreadCount(MemcachedClient.DEFAULT_READ_THREAD_COUNT);
-		configuration
-				.setSessionIdleTimeout(MemcachedClient.DEFAULT_SESSION_IDLE_TIMEOUT);
+		configuration.setSessionIdleTimeout(
+				MemcachedClient.DEFAULT_SESSION_IDLE_TIMEOUT);
 		configuration.setWriteThreadCount(0);
 		return configuration;
 	}
@@ -216,7 +217,7 @@ public class XMemcachedClientBuilder implements MemcachedClientBuilder {
 		this.commandFactory = commandFactory;
 	}
 
-	@SuppressWarnings({ "rawtypes" })
+	@SuppressWarnings({"rawtypes"})
 	protected Transcoder transcoder = new SerializingTranscoder();
 
 	public XMemcachedClientBuilder(String addressList) {
@@ -247,7 +248,8 @@ public class XMemcachedClientBuilder implements MemcachedClientBuilder {
 	}
 
 	public XMemcachedClientBuilder(
-			Map<InetSocketAddress, InetSocketAddress> addressMap, int[] weights) {
+			Map<InetSocketAddress, InetSocketAddress> addressMap,
+			int[] weights) {
 		this.addressMap = addressMap;
 		this.weights = weights;
 	}
@@ -268,9 +270,8 @@ public class XMemcachedClientBuilder implements MemcachedClientBuilder {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see
-	 * net.rubyeye.xmemcached.MemcachedClientBuilder#setSessionLocator(net.rubyeye
-	 * .xmemcached.MemcachedSessionLocator)
+	 * @see net.rubyeye.xmemcached.MemcachedClientBuilder#setSessionLocator(net.
+	 * rubyeye .xmemcached.MemcachedSessionLocator)
 	 */
 	public void setSessionLocator(MemcachedSessionLocator sessionLocator) {
 		if (sessionLocator == null) {
@@ -332,7 +333,8 @@ public class XMemcachedClientBuilder implements MemcachedClientBuilder {
 		// kestrel protocol use random session locator.
 		if (this.commandFactory.getProtocol() == Protocol.Kestrel) {
 			if (!(this.sessionLocator instanceof RandomMemcachedSessionLocaltor)) {
-				log.warn("Recommend to use `net.rubyeye.xmemcached.impl.RandomMemcachedSessionLocaltor` as session locator for kestrel protocol.");
+				log.warn(
+						"Recommend to use `net.rubyeye.xmemcached.impl.RandomMemcachedSessionLocaltor` as session locator for kestrel protocol.");
 			}
 		}
 		if (this.weights == null) {

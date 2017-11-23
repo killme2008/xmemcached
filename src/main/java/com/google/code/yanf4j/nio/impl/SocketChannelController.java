@@ -44,8 +44,8 @@ public abstract class SocketChannelController extends NioController {
 		super(configuration, null, codecFactory);
 	}
 
-	public SocketChannelController(Configuration configuration,
-			Handler handler, CodecFactory codecFactory) {
+	public SocketChannelController(Configuration configuration, Handler handler,
+			CodecFactory codecFactory) {
 		super(configuration, handler, codecFactory);
 	}
 
@@ -55,8 +55,8 @@ public abstract class SocketChannelController extends NioController {
 		if (session != null) {
 			((NioSession) session).onEvent(EventType.READABLE, key.selector());
 		} else {
-			log
-					.warn("Could not find session for readable event,maybe it is closed");
+			log.warn(
+					"Could not find session for readable event,maybe it is closed");
 		}
 	}
 
@@ -66,8 +66,8 @@ public abstract class SocketChannelController extends NioController {
 		if (session != null) {
 			((NioSession) session).onEvent(EventType.WRITEABLE, key.selector());
 		} else {
-			log
-					.warn("Could not find session for writable event,maybe it is closed");
+			log.warn(
+					"Could not find session for writable event,maybe it is closed");
 		}
 
 	}
@@ -91,41 +91,40 @@ public abstract class SocketChannelController extends NioController {
 		sc.socket().setSoTimeout(this.soTimeout);
 		sc.configureBlocking(false);
 		if (this.socketOptions.get(StandardSocketOption.SO_REUSEADDR) != null) {
-			sc.socket().setReuseAddress(
-					StandardSocketOption.SO_REUSEADDR.type().cast(
-							this.socketOptions
+			sc.socket()
+					.setReuseAddress(StandardSocketOption.SO_REUSEADDR.type()
+							.cast(this.socketOptions
 									.get(StandardSocketOption.SO_REUSEADDR)));
 		}
 		if (this.socketOptions.get(StandardSocketOption.SO_SNDBUF) != null) {
-			sc.socket().setSendBufferSize(
-					StandardSocketOption.SO_SNDBUF.type().cast(
-							this.socketOptions
+			sc.socket()
+					.setSendBufferSize(StandardSocketOption.SO_SNDBUF.type()
+							.cast(this.socketOptions
 									.get(StandardSocketOption.SO_SNDBUF)));
 		}
 		if (this.socketOptions.get(StandardSocketOption.SO_KEEPALIVE) != null) {
-			sc.socket().setKeepAlive(
-					StandardSocketOption.SO_KEEPALIVE.type().cast(
-							this.socketOptions
+			sc.socket()
+					.setKeepAlive(StandardSocketOption.SO_KEEPALIVE.type()
+							.cast(this.socketOptions
 									.get(StandardSocketOption.SO_KEEPALIVE)));
 		}
 		if (this.socketOptions.get(StandardSocketOption.SO_LINGER) != null) {
-			sc.socket().setSoLinger(
-					this.soLingerOn,
-					StandardSocketOption.SO_LINGER.type().cast(
-							this.socketOptions
+			sc.socket().setSoLinger(this.soLingerOn,
+					StandardSocketOption.SO_LINGER.type()
+							.cast(this.socketOptions
 									.get(StandardSocketOption.SO_LINGER)));
 		}
 		if (this.socketOptions.get(StandardSocketOption.SO_RCVBUF) != null) {
-			sc.socket().setReceiveBufferSize(
-					StandardSocketOption.SO_RCVBUF.type().cast(
-							this.socketOptions
+			sc.socket()
+					.setReceiveBufferSize(StandardSocketOption.SO_RCVBUF.type()
+							.cast(this.socketOptions
 									.get(StandardSocketOption.SO_RCVBUF)));
 
 		}
 		if (this.socketOptions.get(StandardSocketOption.TCP_NODELAY) != null) {
-			sc.socket().setTcpNoDelay(
-					StandardSocketOption.TCP_NODELAY.type().cast(
-							this.socketOptions
+			sc.socket()
+					.setTcpNoDelay(StandardSocketOption.TCP_NODELAY.type()
+							.cast(this.socketOptions
 									.get(StandardSocketOption.TCP_NODELAY)));
 		}
 	}

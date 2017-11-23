@@ -64,8 +64,8 @@ public class SelectorManager {
 
 		if (reactor == null) {
 			reactor = nextReactor();
-			final Reactor oldReactor = (Reactor) session.setAttributeIfAbsent(
-					REACTOR_ATTRIBUTE, reactor);
+			final Reactor oldReactor = (Reactor) session
+					.setAttributeIfAbsent(REACTOR_ATTRIBUTE, reactor);
 			if (oldReactor != null) {
 				reactor = oldReactor;
 			}
@@ -162,8 +162,8 @@ public class SelectorManager {
 
 		if (reactor == null) {
 			reactor = nextReactor();
-			final Reactor oldReactor = (Reactor) session.setAttributeIfAbsent(
-					REACTOR_ATTRIBUTE, reactor);
+			final Reactor oldReactor = (Reactor) session
+					.setAttributeIfAbsent(REACTOR_ATTRIBUTE, reactor);
 			if (oldReactor != null) {
 				reactor = oldReactor;
 			}

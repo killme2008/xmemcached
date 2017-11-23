@@ -38,8 +38,8 @@ public class SessionLocatorTest extends TestCase {
 		oldSession.close();
 		assertNotSame(oldSession, sessionLocator.getSessionByKey(key));
 		// use next
-		assertSame(sessions.get(oldIndex + 1), sessionLocator
-				.getSessionByKey(key));
+		assertSame(sessions.get(oldIndex + 1),
+				sessionLocator.getSessionByKey(key));
 		sessions = new ArrayList<Session>();
 		sessionLocator.updateSessions(sessions);
 		assertNull(sessionLocator.getSessionByKey(key));

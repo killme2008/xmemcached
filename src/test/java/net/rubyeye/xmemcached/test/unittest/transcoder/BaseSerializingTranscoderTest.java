@@ -71,14 +71,14 @@ public class BaseSerializingTranscoderTest extends TestCase {
 	}
 
 	public void testUndeserializable() throws Exception {
-		byte[] data = { -84, -19, 0, 5, 115, 114, 0, 4, 84, 101, 115, 116, 2,
-				61, 102, -87, -28, 17, 52, 30, 2, 0, 1, 73, 0, 9, 115, 111,
-				109, 101, 116, 104, 105, 110, 103, 120, 112, 0, 0, 0, 5 };
+		byte[] data = {-84, -19, 0, 5, 115, 114, 0, 4, 84, 101, 115, 116, 2, 61,
+				102, -87, -28, 17, 52, 30, 2, 0, 1, 73, 0, 9, 115, 111, 109,
+				101, 116, 104, 105, 110, 103, 120, 112, 0, 0, 0, 5};
 		assertNull(ex.deserialize(data));
 	}
 
 	public void testDeserializable() throws Exception {
-		byte[] data = { -84, -19, 0, 5, 116, 0, 5, 104, 101, 108, 108, 111 };
+		byte[] data = {-84, -19, 0, 5, 116, 0, 5, 104, 101, 108, 108, 111};
 		assertEquals("hello", ex.deserialize(data));
 	}
 
@@ -88,8 +88,8 @@ public class BaseSerializingTranscoderTest extends TestCase {
 			ex.encodeString("Woo!");
 			fail("Expected runtime exception");
 		} catch (RuntimeException e) {
-			assertSame(UnsupportedEncodingException.class, e.getCause()
-					.getClass());
+			assertSame(UnsupportedEncodingException.class,
+					e.getCause().getClass());
 		}
 	}
 
@@ -99,8 +99,8 @@ public class BaseSerializingTranscoderTest extends TestCase {
 			ex.decodeString("Woo!".getBytes());
 			fail("Expected runtime exception");
 		} catch (RuntimeException e) {
-			assertSame(UnsupportedEncodingException.class, e.getCause()
-					.getClass());
+			assertSame(UnsupportedEncodingException.class,
+					e.getCause().getClass());
 		}
 	}
 

@@ -16,8 +16,8 @@ public class BinaryAuthStepCommand extends BaseBinaryCommand {
 
 	public BinaryAuthStepCommand(String mechanism, byte[] keyBytes,
 			CountDownLatch latch, byte[] authData) {
-		super(mechanism, keyBytes, CommandType.AUTH_STEP, latch, 0, 0,
-				authData, false, null);
+		super(mechanism, keyBytes, CommandType.AUTH_STEP, latch, 0, 0, authData,
+				false, null);
 		this.opCode = OpCode.AUTH_STEP;
 	}
 

@@ -13,8 +13,8 @@ public class ByteBufferUtilsTest extends TestCase {
 		ByteBuffer buffer = ByteBuffer.allocate(1024);
 		buffer = ByteBufferUtils.increaseBufferCapatity(buffer);
 
-		assertEquals(1024 + Configuration.DEFAULT_INCREASE_BUFF_SIZE, buffer
-				.capacity());
+		assertEquals(1024 + Configuration.DEFAULT_INCREASE_BUFF_SIZE,
+				buffer.capacity());
 		buffer = ByteBufferUtils.increaseBufferCapatity(buffer);
 		assertEquals(1024 + 2 * Configuration.DEFAULT_INCREASE_BUFF_SIZE,
 				buffer.capacity());
@@ -25,8 +25,8 @@ public class ByteBufferUtilsTest extends TestCase {
 		ByteBuffer buffer = ByteBuffer.allocate(1024);
 		buffer.putInt(100);
 		buffer = ByteBufferUtils.increaseBufferCapatity(buffer);
-		assertEquals(1024 + Configuration.DEFAULT_INCREASE_BUFF_SIZE, buffer
-				.capacity());
+		assertEquals(1024 + Configuration.DEFAULT_INCREASE_BUFF_SIZE,
+				buffer.capacity());
 		assertEquals(4, buffer.position());
 		assertEquals(1024 + Configuration.DEFAULT_INCREASE_BUFF_SIZE - 4,
 				buffer.remaining());
@@ -34,8 +34,9 @@ public class ByteBufferUtilsTest extends TestCase {
 		assertEquals(12, buffer.position());
 		buffer = ByteBufferUtils.increaseBufferCapatity(buffer);
 		assertEquals(12, buffer.position());
-		assertEquals(1024 + 2 * Configuration.DEFAULT_INCREASE_BUFF_SIZE - 4
-				- 8, buffer.remaining());
+		assertEquals(
+				1024 + 2 * Configuration.DEFAULT_INCREASE_BUFF_SIZE - 4 - 8,
+				buffer.remaining());
 
 	}
 
@@ -118,18 +119,18 @@ public class ByteBufferUtilsTest extends TestCase {
 		ByteBuffer buffer = ByteBuffer.wrap(words.getBytes());
 
 		String world = "world";
-		assertEquals(6, ByteBufferUtils.indexOf(buffer, ByteBuffer.wrap(world
-				.getBytes())));
-		assertEquals(0, ByteBufferUtils.indexOf(buffer, ByteBuffer.wrap("hello"
-				.getBytes())));
+		assertEquals(6, ByteBufferUtils.indexOf(buffer,
+				ByteBuffer.wrap(world.getBytes())));
+		assertEquals(0, ByteBufferUtils.indexOf(buffer,
+				ByteBuffer.wrap("hello".getBytes())));
 		long start = System.currentTimeMillis();
 		for (int i = 0; i < 10000; i++) {
-			assertEquals(17, ByteBufferUtils.indexOf(buffer, ByteBuffer
-					.wrap("hello".getBytes()), 6));
+			assertEquals(17, ByteBufferUtils.indexOf(buffer,
+					ByteBuffer.wrap("hello".getBytes()), 6));
 		}
 		System.out.println(System.currentTimeMillis() - start);
-		assertEquals(-1, ByteBufferUtils.indexOf(buffer, ByteBuffer.wrap("test"
-				.getBytes())));
+		assertEquals(-1, ByteBufferUtils.indexOf(buffer,
+				ByteBuffer.wrap("test".getBytes())));
 		assertEquals(-1, ByteBufferUtils.indexOf(buffer, (ByteBuffer) null));
 		assertEquals(-1, ByteBufferUtils.indexOf(null, buffer));
 	}
@@ -138,10 +139,11 @@ public class ByteBufferUtilsTest extends TestCase {
 		ByteBuffer buffer1 = ByteBuffer.wrap("hello".getBytes());
 		ByteBuffer buffer2 = ByteBuffer.wrap(" dennis".getBytes());
 
-		ByteBuffer gather=ByteBufferUtils.gather(new ByteBuffer[] { buffer1, buffer2 });
-		
-		assertEquals("hello dennis",new String(gather.array()));
-		
+		ByteBuffer gather = ByteBufferUtils
+				.gather(new ByteBuffer[]{buffer1, buffer2});
+
+		assertEquals("hello dennis", new String(gather.array()));
+
 		assertNull(ByteBufferUtils.gather(null));
 		assertNull(ByteBufferUtils.gather(new ByteBuffer[]{}));
 	}

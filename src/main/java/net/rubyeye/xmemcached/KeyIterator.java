@@ -32,8 +32,8 @@ public interface KeyIterator {
 	 *             ,MemcachedException,TimeoutException,InterruptedException
 	 * 
 	 */
-	public String next() throws MemcachedException, TimeoutException,
-			InterruptedException;
+	public String next()
+			throws MemcachedException, TimeoutException, InterruptedException;
 
 	/**
 	 * Check if the iterator has more keys.

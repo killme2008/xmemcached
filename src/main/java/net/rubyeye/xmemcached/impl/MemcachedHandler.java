@@ -57,8 +57,8 @@ import java.util.concurrent.ThreadPoolExecutor;
  */
 public class MemcachedHandler extends HandlerAdapter {
 
-	private static final int MAX_HEARTBEAT_THREADS = Integer.parseInt(System
-			.getProperty("xmemcached.heartbeat.max_threads",
+	private static final int MAX_HEARTBEAT_THREADS = Integer
+			.parseInt(System.getProperty("xmemcached.heartbeat.max_threads",
 					String.valueOf(SystemUtils.getSystemThreadCount())));
 
 	private final StatisticsHandler statisticsHandler;
@@ -75,7 +75,8 @@ public class MemcachedHandler extends HandlerAdapter {
 	 * On receive message from memcached server
 	 */
 	@Override
-	public final void onMessageReceived(final Session session, final Object msg) {
+	public final void onMessageReceived(final Session session,
+			final Object msg) {
 		Command command = (Command) msg;
 		if (this.statisticsHandler.isStatistics()) {
 			if (command.getCopiedMergeCount() > 0
@@ -121,16 +122,16 @@ public class MemcachedHandler extends HandlerAdapter {
 		// After message sent,we can set the buffer to be null for gc friendly.
 		command.setIoBuffer(EMPTY_BUF);
 		switch (command.getCommandType()) {
-		case ADD:
-		case APPEND:
-		case SET:
-		case SET_MANY:
-			// After message sent,we can set the value to be null for gc
-			// friendly.
-			if (command instanceof StoreCommand) {
-				((StoreCommand) command).setValue(null);
-			}
-			break;
+			case ADD :
+			case APPEND :
+			case SET :
+			case SET_MANY :
+				// After message sent,we can set the value to be null for gc
+				// friendly.
+				if (command instanceof StoreCommand) {
+					((StoreCommand) command).setValue(null);
+				}
+				break;
 		}
 	}
 
@@ -186,12 +187,11 @@ public class MemcachedHandler extends HandlerAdapter {
 
 	private void checkHeartBeat(Session session) {
 		if (this.enableHeartBeat) {
-			log.debug(
-					"Check session ({}) is alive,send heartbeat",
-					session.getRemoteSocketAddress() == null ? "unknown"
-							: SystemUtils.getRawAddress(session
-									.getRemoteSocketAddress())
-									+ ":"
+			log.debug("Check session ({}) is alive,send heartbeat",
+					session.getRemoteSocketAddress() == null
+							? "unknown"
+							: SystemUtils.getRawAddress(
+									session.getRemoteSocketAddress()) + ":"
 									+ session.getRemoteSocketAddress()
 											.getPort());
 			Command versionCommand = null;
@@ -207,16 +207,15 @@ public class MemcachedHandler extends HandlerAdapter {
 			session.write(versionCommand);
 			// Start a check thread,avoid blocking reactor thread
 			if (this.heartBeatThreadPool != null) {
-				this.heartBeatThreadPool.execute(new CheckHeartResultThread(
-						versionCommand, session));
+				this.heartBeatThreadPool.execute(
+						new CheckHeartResultThread(versionCommand, session));
 			}
 		}
 	}
 
 	private static final String HEART_BEAT_FAIL_COUNT_ATTR = "heartBeatFailCount";
-	private static final int MAX_HEART_BEAT_FAIL_COUNT = Integer
-			.parseInt(System.getProperty("xmemcached.heartbeat.max.fail.times",
-					"3"));
+	private static final int MAX_HEART_BEAT_FAIL_COUNT = Integer.parseInt(
+			System.getProperty("xmemcached.heartbeat.max.fail.times", "3"));
 
 	final static class CheckHeartResultThread implements Runnable {
 
@@ -247,12 +246,12 @@ public class MemcachedHandler extends HandlerAdapter {
 					}
 					if (heartBeatFailCount.get() > MAX_HEART_BEAT_FAIL_COUNT) {
 						log.warn("Session("
-								+ SystemUtils.getRawAddress(this.session
-										.getRemoteSocketAddress())
+								+ SystemUtils.getRawAddress(
+										this.session.getRemoteSocketAddress())
 								+ ":"
 								+ this.session.getRemoteSocketAddress()
-										.getPort() + ") heartbeat fail "
-								+ heartBeatFailCount.get()
+										.getPort()
+								+ ") heartbeat fail " + heartBeatFailCount.get()
 								+ " times,close session and try to heal it");
 						this.session.close();// close session
 						heartBeatFailCount.set(0);
@@ -291,22 +290,23 @@ public class MemcachedHandler extends HandlerAdapter {
 		this.heartBeatThreadPool.shutdown();
 	}
 
-	final long HEARTBEAT_PERIOD = Long.parseLong(System.getProperty(
-			"xmemcached.heartbeat.period", "5000"));
+	final long HEARTBEAT_PERIOD = Long.parseLong(
+			System.getProperty("xmemcached.heartbeat.period", "5000"));
 
 	public void start() {
 		final String name = "XMemcached-HeartBeatPool[" + client.getName()
 				+ "]";
 		final AtomicInteger threadCounter = new AtomicInteger();
 
-		long keepAliveTime = client.getConnector().getSessionIdleTimeout() * 3 / 2;
+		long keepAliveTime = client.getConnector().getSessionIdleTimeout() * 3
+				/ 2;
 
 		this.heartBeatThreadPool = new ThreadPoolExecutor(1,
 				MAX_HEARTBEAT_THREADS, keepAliveTime, TimeUnit.MILLISECONDS,
 				new SynchronousQueue<Runnable>(), new ThreadFactory() {
 					public Thread newThread(Runnable r) {
-						Thread t = new Thread(r, name + "-"
-								+ threadCounter.getAndIncrement());
+						Thread t = new Thread(r,
+								name + "-" + threadCounter.getAndIncrement());
 						t.setDaemon(true);
 						if (t.getPriority() != Thread.NORM_PRIORITY) {
 							t.setPriority(Thread.NORM_PRIORITY);

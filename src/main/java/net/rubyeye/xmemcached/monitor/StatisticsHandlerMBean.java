@@ -58,9 +58,10 @@ public interface StatisticsHandlerMBean {
 	public boolean isStatistics();
 
 	public void setStatistics(boolean statistics);
-	
+
 	/**
 	 * Reset the statistics
+	 * 
 	 * @since 1.3.9
 	 */
 	public void resetStats();

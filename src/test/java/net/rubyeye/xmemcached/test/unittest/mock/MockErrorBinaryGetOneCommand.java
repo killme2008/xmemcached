@@ -6,8 +6,9 @@ import net.rubyeye.xmemcached.command.CommandType;
 import net.rubyeye.xmemcached.command.binary.BinaryGetCommand;
 import net.rubyeye.xmemcached.command.binary.OpCode;
 
-public class MockErrorBinaryGetOneCommand extends BinaryGetCommand implements
-		MockErrorCommand {
+public class MockErrorBinaryGetOneCommand extends BinaryGetCommand
+		implements
+			MockErrorCommand {
 
 	private boolean decode;
 
@@ -18,18 +19,14 @@ public class MockErrorBinaryGetOneCommand extends BinaryGetCommand implements
 		// TODO Auto-generated constructor stub
 	}
 
-	
-	
 	@Override
 	protected boolean finish() {
-		this.decode=true;
+		this.decode = true;
 		super.finish();
 		decodeError();
 		return true;
 	}
 
-
-	
 	public boolean isDecoded() {
 		return this.decode;
 	}

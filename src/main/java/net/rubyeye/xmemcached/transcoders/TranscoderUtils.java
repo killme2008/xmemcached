@@ -73,7 +73,7 @@ public final class TranscoderUtils {
 	}
 
 	public final byte[] encodeByte(byte in) {
-		return new byte[] { in };
+		return new byte[]{in};
 	}
 
 	public final byte decodeByte(byte[] in) {

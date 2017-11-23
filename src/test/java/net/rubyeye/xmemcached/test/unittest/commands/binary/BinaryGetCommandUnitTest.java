@@ -15,8 +15,8 @@ public class BinaryGetCommandUnitTest extends BaseBinaryCommandUnitTest {
 
 	public void testGetEncodeAndDecode() {
 
-		Command command = this.commandFactory.createGetCommand(this.key, this.keyBytes,
-				CommandType.GET_ONE, this.transcoder);
+		Command command = this.commandFactory.createGetCommand(this.key,
+				this.keyBytes, CommandType.GET_ONE, this.transcoder);
 		command.encode();
 		ByteBuffer encodeBuffer = command.getIoBuffer().buf();
 		assertNotNull(encodeBuffer);
@@ -31,8 +31,8 @@ public class BinaryGetCommandUnitTest extends BaseBinaryCommandUnitTest {
 
 		assertEquals(33, buffer.capacity());
 		assertTrue(command.decode(null, buffer));
-		assertEquals("world", this.transcoder.decode((CachedData) command
-				.getResult()));
+		assertEquals("world",
+				this.transcoder.decode((CachedData) command.getResult()));
 		assertEquals(0, buffer.remaining());
 
 		buffer = constructResponse(OpCode.GET.fieldValue(), (short) 0,

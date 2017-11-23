@@ -76,13 +76,13 @@ public class XMemcachedClientFactoryBean implements FactoryBean {
 	private boolean failureMode;
 
 	private long opTimeout = MemcachedClient.DEFAULT_OP_TIMEOUT;
-	
+
 	private long connectTimeout = MemcachedClient.DEFAULT_CONNECT_TIMEOUT;
 
 	private KeyProvider keyProvider = DefaultKeyProvider.INSTANCE;
 
 	private int maxQueuedNoReplyOperations = MemcachedClient.DEFAULT_MAX_QUEUED_NOPS;
-	
+
 	private long healSessionInterval = MemcachedClient.DEFAULT_HEAL_SESSION_INTERVAL;
 
 	private boolean enableHealSession = true;

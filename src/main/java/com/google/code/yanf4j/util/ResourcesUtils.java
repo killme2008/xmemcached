@@ -203,8 +203,8 @@ public class ResourcesUtils extends Object {
 	 *             If the resource cannot be found or read
 	 * @return The resource
 	 */
-	public static Reader getResourceAsReader(ClassLoader loader, String resource)
-			throws IOException {
+	public static Reader getResourceAsReader(ClassLoader loader,
+			String resource) throws IOException {
 		return new InputStreamReader(getResourceAsStream(loader, resource));
 	}
 

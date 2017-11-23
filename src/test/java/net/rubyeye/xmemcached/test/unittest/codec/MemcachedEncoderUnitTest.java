@@ -16,8 +16,8 @@ public class MemcachedEncoderUnitTest extends TestCase {
 
 	public void testEncode() {
 		this.encoder = new MemcachedCodecFactory().getEncoder();
-		Command command = new TextCommandFactory().createVersionCommand(
-				new CountDownLatch(1), null);
+		Command command = new TextCommandFactory()
+				.createVersionCommand(new CountDownLatch(1), null);
 		command.encode();
 		IoBuffer buffer = this.encoder.encode(command, null);
 		assertEquals(buffer.buf(), ServerAddressAware.VERSION);

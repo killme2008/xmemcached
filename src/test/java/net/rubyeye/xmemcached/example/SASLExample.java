@@ -27,12 +27,13 @@ import org.slf4j.LoggerFactory;
  */
 public class SASLExample {
 
-	private static final Logger log = LoggerFactory.getLogger(SASLExample.class);
+	private static final Logger log = LoggerFactory
+			.getLogger(SASLExample.class);
 
 	public static void main(String[] args) {
 		if (args.length < 3) {
-			System.err
-					.println("Useage:java SASLExample servers username password");
+			System.err.println(
+					"Useage:java SASLExample servers username password");
 			System.exit(1);
 		}
 		MemcachedClient memcachedClient = getMemcachedClient(args[0], args[1],
@@ -72,8 +73,8 @@ public class SASLExample {
 		try {
 			MemcachedClientBuilder builder = new XMemcachedClientBuilder(
 					AddrUtil.getAddresses(servers));
-			builder.addAuthInfo(AddrUtil.getOneAddress(servers), AuthInfo
-					.typical(username, password));
+			builder.addAuthInfo(AddrUtil.getOneAddress(servers),
+					AuthInfo.typical(username, password));
 			// Must use binary protocol
 			builder.setCommandFactory(new BinaryCommandFactory());
 			return builder.build();

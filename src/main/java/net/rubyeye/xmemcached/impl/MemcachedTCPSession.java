@@ -42,15 +42,17 @@ import com.google.code.yanf4j.util.SystemUtils;
  * 
  * @author dennis
  */
-public class MemcachedTCPSession extends NioTCPSession implements
-		MemcachedSession {
+public class MemcachedTCPSession extends NioTCPSession
+		implements
+			MemcachedSession {
 
 	/**
 	 * Command which are already sent
 	 */
 	protected BlockingQueue<Command> commandAlreadySent;
 
-	private final AtomicReference<Command> currentCommand = new LinkedTransferQueue.PaddedAtomicReference<Command>(null);
+	private final AtomicReference<Command> currentCommand = new LinkedTransferQueue.PaddedAtomicReference<Command>(
+			null);
 
 	private SocketAddress remoteSocketAddress; // prevent channel is closed
 	private int sendBufferSize;
@@ -79,7 +81,8 @@ public class MemcachedTCPSession extends NioTCPSession implements
 				this.sendBufferSize = 8 * 1024;
 			}
 		}
-		this.commandAlreadySent = (BlockingQueue<Command>)SystemUtils.createTransferQueue();
+		this.commandAlreadySent = (BlockingQueue<Command>) SystemUtils
+				.createTransferQueue();
 		this.commandFactory = commandFactory;
 	}
 
@@ -107,18 +110,18 @@ public class MemcachedTCPSession extends NioTCPSession implements
 	}
 
 	public void destroy() {
-		Command command = this.currentCommand.get();	
+		Command command = this.currentCommand.get();
 		if (command != null) {
-			command.setException(new MemcachedException(
-					"Session has been closed"));
+			command.setException(
+					new MemcachedException("Session has been closed"));
 			CountDownLatch latch = command.getLatch();
 			if (latch != null) {
 				latch.countDown();
 			}
 		}
 		while ((command = this.commandAlreadySent.poll()) != null) {
-			command.setException(new MemcachedException(
-					"Session has been closed"));
+			command.setException(
+					new MemcachedException("Session has been closed"));
 			CountDownLatch latch = command.getLatch();
 			if (latch != null) {
 				latch.countDown();
@@ -151,11 +154,10 @@ public class MemcachedTCPSession extends NioTCPSession implements
 					this.writeQueue, this.commandAlreadySent,
 					this.sendBufferSize);
 		}
-		
+
 		currentCommand.setStatus(OperationStatus.WRITING);
-		if (!currentCommand.isAdded()
-				&& (!currentCommand.isNoreply() || this.commandFactory
-						.getProtocol() == Protocol.Binary)) {
+		if (!currentCommand.isAdded() && (!currentCommand.isNoreply()
+				|| this.commandFactory.getProtocol() == Protocol.Binary)) {
 			currentCommand.setAdded(true);
 			this.addCommand(currentCommand);
 		}

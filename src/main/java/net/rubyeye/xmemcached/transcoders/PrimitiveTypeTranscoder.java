@@ -1,7 +1,10 @@
 package net.rubyeye.xmemcached.transcoders;
 
-public abstract class PrimitiveTypeTranscoder<T> extends
-		BaseSerializingTranscoder implements Transcoder<T> {
+public abstract class PrimitiveTypeTranscoder<T>
+		extends
+			BaseSerializingTranscoder
+		implements
+			Transcoder<T> {
 	protected final TranscoderUtils tu = new TranscoderUtils(true);
 
 	protected boolean primitiveAsString;

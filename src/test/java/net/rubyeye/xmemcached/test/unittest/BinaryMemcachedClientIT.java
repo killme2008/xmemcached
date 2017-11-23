@@ -27,9 +27,9 @@ public class BinaryMemcachedClientIT extends XMemcachedClientIT {
 	@Override
 	public MemcachedClientBuilder createBuilder() throws Exception {
 
-		MemcachedClientBuilder builder = new XMemcachedClientBuilder(AddrUtil
-				.getAddresses(this.properties
-						.getProperty("test.memcached.servers")));
+		MemcachedClientBuilder builder = new XMemcachedClientBuilder(
+				AddrUtil.getAddresses(
+						this.properties.getProperty("test.memcached.servers")));
 		builder.setCommandFactory(new BinaryCommandFactory());
 		ByteUtils.testing = true;
 		return builder;
@@ -37,9 +37,8 @@ public class BinaryMemcachedClientIT extends XMemcachedClientIT {
 
 	@Override
 	public MemcachedClientBuilder createWeightedBuilder() throws Exception {
-		List<InetSocketAddress> addressList = AddrUtil
-				.getAddresses(this.properties
-						.getProperty("test.memcached.servers"));
+		List<InetSocketAddress> addressList = AddrUtil.getAddresses(
+				this.properties.getProperty("test.memcached.servers"));
 		int[] weights = new int[addressList.size()];
 		for (int i = 0; i < weights.length; i++) {
 			weights[i] = i + 1;
@@ -58,16 +57,16 @@ public class BinaryMemcachedClientIT extends XMemcachedClientIT {
 	public void testTouch() throws Exception {
 		if (this.isMemcached1_6()) {
 			assertNull(this.memcachedClient.get("name"));
-			this.memcachedClient.set("name", 1, "dennis", new StringTranscoder(),
-					1000);
-			assertEquals("dennis", this.memcachedClient.get("name",
-					new StringTranscoder()));
+			this.memcachedClient.set("name", 1, "dennis",
+					new StringTranscoder(), 1000);
+			assertEquals("dennis",
+					this.memcachedClient.get("name", new StringTranscoder()));
 
 			// touch expiration to three seconds
 			System.out.println(this.memcachedClient.touch("name", 3));
 			Thread.sleep(2000);
-			assertEquals("dennis", this.memcachedClient.get("name",
-					new StringTranscoder()));
+			assertEquals("dennis",
+					this.memcachedClient.get("name", new StringTranscoder()));
 			Thread.sleep(1500);
 			assertNull(this.memcachedClient.get("name"));
 		}
@@ -85,13 +84,13 @@ public class BinaryMemcachedClientIT extends XMemcachedClientIT {
 	public void testGetAndTouch_OneKey() throws Exception {
 		if (this.isMemcached1_6()) {
 			assertNull(this.memcachedClient.get("name"));
-			this.memcachedClient.set("name", 1, "dennis", new StringTranscoder(),
-					1000);
+			this.memcachedClient.set("name", 1, "dennis",
+					new StringTranscoder(), 1000);
 			assertEquals("dennis", this.memcachedClient.getAndTouch("name", 3));
 
 			Thread.sleep(2000);
-			assertEquals("dennis", this.memcachedClient.get("name",
-					new StringTranscoder()));
+			assertEquals("dennis",
+					this.memcachedClient.get("name", new StringTranscoder()));
 			Thread.sleep(1500);
 			assertNull(this.memcachedClient.get("name"));
 		}
@@ -119,7 +118,7 @@ public class BinaryMemcachedClientIT extends XMemcachedClientIT {
 	}
 
 	@Test
-	public void testDeleteWithCAS()throws Exception{
+	public void testDeleteWithCAS() throws Exception {
 		this.memcachedClient.set("a", 0, 1);
 		GetsResponse<Integer> gets = this.memcachedClient.gets("a");
 		this.memcachedClient.set("a", 0, 2);

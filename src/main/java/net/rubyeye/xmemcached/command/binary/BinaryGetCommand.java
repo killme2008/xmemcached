@@ -38,8 +38,9 @@ import net.rubyeye.xmemcached.utils.ByteUtils;
  * @author dennis
  * 
  */
-public class BinaryGetCommand extends BaseBinaryCommand implements
-		AssocCommandAware {
+public class BinaryGetCommand extends BaseBinaryCommand
+		implements
+			AssocCommandAware {
 	private String responseKey;
 	private CachedData responseValue;
 	private List<Command> assocCommands;
@@ -112,7 +113,8 @@ public class BinaryGetCommand extends BaseBinaryCommand implements
 			int remainingCapacity = this.responseValue.remainingCapacity();
 			int remaining = buffer.remaining();
 			if (remaining < remainingCapacity) {
-				int length = remaining > remainingCapacity ? remainingCapacity
+				int length = remaining > remainingCapacity
+						? remainingCapacity
 						: remaining;
 				this.responseValue.fillData(buffer, length);
 				return false;
@@ -122,8 +124,8 @@ public class BinaryGetCommand extends BaseBinaryCommand implements
 			setResult(this.responseValue);
 			return true;
 		} else {
-			return ByteUtils.stepBuffer(buffer, bodyLength - keyLength
-					- extrasLength);
+			return ByteUtils.stepBuffer(buffer,
+					bodyLength - keyLength - extrasLength);
 		}
 	}
 

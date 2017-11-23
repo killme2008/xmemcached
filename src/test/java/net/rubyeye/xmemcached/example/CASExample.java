@@ -29,9 +29,8 @@ import org.slf4j.LoggerFactory;
  */
 class CASThread extends Thread {
 
-
 	private static final Logger log = LoggerFactory.getLogger(CASThread.class);
-	
+
 	/**
 	 * Increase Operation
 	 * 
@@ -75,14 +74,14 @@ class CASThread extends Thread {
 public class CASExample {
 
 	public static void main(String[] args) throws Exception {
-		//125489
+		// 125489
 		if (args.length < 2) {
 			System.err.println("Usage:java CASTest [threadNum] [server]");
 			System.exit(1);
 		}
 		int NUM = Integer.parseInt(args[0]);
-		MemcachedClientBuilder builder = new XMemcachedClientBuilder(AddrUtil
-				.getAddresses(args[1]));
+		MemcachedClientBuilder builder = new XMemcachedClientBuilder(
+				AddrUtil.getAddresses(args[1]));
 		// use binary protocol
 		builder.setCommandFactory(new BinaryCommandFactory());
 		MemcachedClient mc = builder.build();
@@ -96,8 +95,8 @@ public class CASExample {
 		}
 
 		cdl.await();
-		System.out.println("test cas,timed:"
-				+ (System.currentTimeMillis() - start));
+		System.out.println(
+				"test cas,timed:" + (System.currentTimeMillis() - start));
 		// print result,must equals to NUM
 		System.out.println("result=" + mc.get("a"));
 		mc.shutdown();

@@ -44,15 +44,15 @@ public class BinaryAppendPrependCommand extends BaseBinaryCommand {
 		super(key, keyBytes, cmdType, latch, exp, cas, value, noreply,
 				transcoder);
 		switch (cmdType) {
-		case APPEND:
-			this.opCode = noreply ? OpCode.APPEND_QUIETLY : OpCode.APPEND;
-			break;
-		case PREPEND:
-			this.opCode = noreply ? OpCode.PREPEND_QUIETLY : OpCode.PREPEND;
-			break;
-		default:
-			throw new UnknownCommandException(
-					"Not a append or prepend command:" + cmdType.name());
+			case APPEND :
+				this.opCode = noreply ? OpCode.APPEND_QUIETLY : OpCode.APPEND;
+				break;
+			case PREPEND :
+				this.opCode = noreply ? OpCode.PREPEND_QUIETLY : OpCode.PREPEND;
+				break;
+			default :
+				throw new UnknownCommandException(
+						"Not a append or prepend command:" + cmdType.name());
 		}
 	}
 

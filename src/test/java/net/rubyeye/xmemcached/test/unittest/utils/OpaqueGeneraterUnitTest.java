@@ -7,7 +7,7 @@ import junit.framework.TestCase;
 import static junit.framework.Assert.*;
 import net.rubyeye.xmemcached.utils.OpaqueGenerater;
 
-public class OpaqueGeneraterUnitTest extends TestCase{
+public class OpaqueGeneraterUnitTest extends TestCase {
 
 	public void testGetNextValue() throws Exception {
 		OpaqueGenerater.getInstance().setValue(Integer.MAX_VALUE - 10000);
@@ -19,7 +19,8 @@ public class OpaqueGeneraterUnitTest extends TestCase{
 					try {
 						barrier.await();
 						for (int i = 0; i < 10000; i++) {
-							if (OpaqueGenerater.getInstance().getNextValue() < 0)
+							if (OpaqueGenerater.getInstance()
+									.getNextValue() < 0)
 								throw new RuntimeException("Test failed.");
 						}
 						barrier.await();

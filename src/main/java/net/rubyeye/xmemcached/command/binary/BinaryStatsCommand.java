@@ -40,8 +40,9 @@ import net.rubyeye.xmemcached.utils.ByteUtils;
  * @author boyan
  *
  */
-public class BinaryStatsCommand extends BaseBinaryCommand implements
-		ServerAddressAware {
+public class BinaryStatsCommand extends BaseBinaryCommand
+		implements
+			ServerAddressAware {
 
 	private InetSocketAddress server;
 	private String itemName;
@@ -86,8 +87,8 @@ public class BinaryStatsCommand extends BaseBinaryCommand implements
 
 	@Override
 	protected void readStatus(ByteBuffer buffer) {
-		ResponseStatus responseStatus = ResponseStatus.parseShort(buffer
-				.getShort());
+		ResponseStatus responseStatus = ResponseStatus
+				.parseShort(buffer.getShort());
 		if (responseStatus == ResponseStatus.UNKNOWN_COMMAND) {
 			setException(new UnknownCommandException());
 		}

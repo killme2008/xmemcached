@@ -106,21 +106,21 @@ public class TextLineCodecFactory implements CodecFactory {
 		return this.encoder;
 	}
 
-//	public static void main(String args[]) {
-//		TextLineCodecFactory codecFactory = new TextLineCodecFactory();
-//		Encoder encoder = codecFactory.getEncoder();
-//		long sum = 0;
-//		for (int i = 0; i < 100000; i++) {
-//			sum += encoder.encode("hello", null).remaining();
-//		}
-//
-//		long start = System.currentTimeMillis();
-//
-//		for (int i = 0; i < 10000000; i++) {
-//			sum += encoder.encode("hello", null).remaining();
-//		}
-//		long cost = System.currentTimeMillis() - start;
-//		System.out.println("sum=" + sum + ",cost = " + cost + " ms.");
-//	}
+	// public static void main(String args[]) {
+	// TextLineCodecFactory codecFactory = new TextLineCodecFactory();
+	// Encoder encoder = codecFactory.getEncoder();
+	// long sum = 0;
+	// for (int i = 0; i < 100000; i++) {
+	// sum += encoder.encode("hello", null).remaining();
+	// }
+	//
+	// long start = System.currentTimeMillis();
+	//
+	// for (int i = 0; i < 10000000; i++) {
+	// sum += encoder.encode("hello", null).remaining();
+	// }
+	// long cost = System.currentTimeMillis() - start;
+	// System.out.println("sum=" + sum + ",cost = " + cost + " ms.");
+	// }
 
 }

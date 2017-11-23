@@ -39,8 +39,9 @@ import net.rubyeye.xmemcached.utils.InetSocketAddressWrapper;
  * @author dennis
  *
  */
-public class AWSElasticCacheClient extends XMemcachedClient implements
-		ConfigUpdateListener {
+public class AWSElasticCacheClient extends XMemcachedClient
+		implements
+			ConfigUpdateListener {
 
 	private static final Logger log = LoggerFactory
 			.getLogger(AWSElasticCacheClient.class);
@@ -56,8 +57,9 @@ public class AWSElasticCacheClient extends XMemcachedClient implements
 			removeConfigAddrs();
 		}
 
-		List<CacheNode> oldList = this.currentClusterConfiguration != null ? this.currentClusterConfiguration
-				.getNodeList() : Collections.EMPTY_LIST;
+		List<CacheNode> oldList = this.currentClusterConfiguration != null
+				? this.currentClusterConfiguration.getNodeList()
+				: Collections.EMPTY_LIST;
 		List<CacheNode> newList = config.getNodeList();
 
 		List<CacheNode> addNodes = new ArrayList<CacheNode>();
@@ -78,9 +80,9 @@ public class AWSElasticCacheClient extends XMemcachedClient implements
 		// Begin to update server list
 		for (CacheNode node : addNodes) {
 			try {
-				this.connect(new InetSocketAddressWrapper(node
-						.getInetSocketAddress(), this.configPoller
-						.getCacheNodeOrder(node), 1, null));
+				this.connect(new InetSocketAddressWrapper(
+						node.getInetSocketAddress(),
+						this.configPoller.getCacheNodeOrder(node), 1, null));
 			} catch (IOException e) {
 				log.error("Connect to " + node + "failed.", e);
 			}
@@ -264,8 +266,8 @@ public class AWSElasticCacheClient extends XMemcachedClient implements
 	 * 
 	 * @return
 	 */
-	public ClusterConfigration getConfig() throws MemcachedException,
-			InterruptedException, TimeoutException {
+	public ClusterConfigration getConfig()
+			throws MemcachedException, InterruptedException, TimeoutException {
 		return this.getConfig("cluster");
 	}
 
@@ -275,10 +277,10 @@ public class AWSElasticCacheClient extends XMemcachedClient implements
 	 * @since 2.3.0
 	 * @return clusetr config.
 	 */
-	public ClusterConfigration getConfig(String key) throws MemcachedException,
-			InterruptedException, TimeoutException {
-		Command cmd = this.commandFactory.createAWSElasticCacheConfigCommand(
-				"get", key);
+	public ClusterConfigration getConfig(String key)
+			throws MemcachedException, InterruptedException, TimeoutException {
+		Command cmd = this.commandFactory
+				.createAWSElasticCacheConfigCommand("get", key);
 		final Session session = this.sendCommand(cmd);
 		this.latchWait(cmd, opTimeout, session);
 		cmd.getIoBuffer().free();

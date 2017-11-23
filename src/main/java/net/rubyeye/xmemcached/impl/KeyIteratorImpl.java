@@ -55,13 +55,13 @@ public final class KeyIteratorImpl implements KeyIterator {
 
 	public boolean hasNext() {
 		return (this.itemNumbersList != null && !this.itemNumbersList.isEmpty())
-				|| (this.currentKeyList != null && !this.currentKeyList
-						.isEmpty());
+				|| (this.currentKeyList != null
+						&& !this.currentKeyList.isEmpty());
 	}
 
 	@SuppressWarnings("unchecked")
-	public String next() throws MemcachedException, TimeoutException,
-			InterruptedException {
+	public String next()
+			throws MemcachedException, TimeoutException, InterruptedException {
 		if (!hasNext()) {
 			throw new NoSuchElementException();
 		}
@@ -88,20 +88,21 @@ public final class KeyIteratorImpl implements KeyIterator {
 				throw new TimeoutException("stats cachedump timeout");
 			}
 			if (textCacheDumpCommand.getException() != null) {
-				if (textCacheDumpCommand.getException() instanceof MemcachedException) {
+				if (textCacheDumpCommand
+						.getException() instanceof MemcachedException) {
 					throw (MemcachedException) textCacheDumpCommand
 							.getException();
 				} else {
-					throw new MemcachedServerException(textCacheDumpCommand
-							.getException());
+					throw new MemcachedServerException(
+							textCacheDumpCommand.getException());
 				}
 			}
 			this.currentKeyList = (LinkedList<String>) textCacheDumpCommand
 					.getResult();
 		} else {
-			throw new MemcachedException(
-					this.memcachedClient.getProtocol().name()
-							+ " protocol doesn't support iterating all keys in memcached");
+			throw new MemcachedException(this.memcachedClient.getProtocol()
+					.name()
+					+ " protocol doesn't support iterating all keys in memcached");
 		}
 		return next();
 	}

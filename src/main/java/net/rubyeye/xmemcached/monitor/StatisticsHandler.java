@@ -39,15 +39,14 @@ public class StatisticsHandler implements StatisticsHandlerMBean {
 
 	public StatisticsHandler() {
 		buildCounterMap();
-		XMemcachedMbeanServer.getInstance().registMBean(
-				this,
+		XMemcachedMbeanServer.getInstance().registMBean(this,
 				this.getClass().getPackage().getName() + ":type="
 						+ this.getClass().getSimpleName() + "-"
 						+ MemcachedClientNameHolder.getName());
 	}
 
-	private boolean statistics = Boolean.valueOf(System.getProperty(
-			Constants.XMEMCACHED_STATISTICS_ENABLE, "false"));
+	private boolean statistics = Boolean.valueOf(System
+			.getProperty(Constants.XMEMCACHED_STATISTICS_ENABLE, "false"));
 
 	private void buildCounterMap() {
 		if (this.statistics) {

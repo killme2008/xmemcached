@@ -5,10 +5,10 @@ import junit.framework.ComparisonFailure;
 
 public abstract class AbstractChecker implements ExceptionChecker {
 
-	private static final double EPSILON =  0.00000001;
+	private static final double EPSILON = 0.00000001;
 	public void call() throws Exception {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	/**
@@ -110,7 +110,8 @@ public abstract class AbstractChecker implements ExceptionChecker {
 		// the following test fails
 		if (Double.isInfinite(expected)) {
 			if (!(Math.abs(expected - actual) <= EPSILON))
-				failNotEquals(message, new Double(expected), new Double(actual));
+				failNotEquals(message, new Double(expected),
+						new Double(actual));
 		} else if (!(Math.abs(expected - actual) <= delta)) // Because
 															// comparison with
 															// NaN always
@@ -122,7 +123,8 @@ public abstract class AbstractChecker implements ExceptionChecker {
 	 * Asserts that two doubles are equal concerning a delta. If the expected
 	 * value is infinity then the delta value is ignored.
 	 */
-	static public void assertEquals(double expected, double actual, double delta) {
+	static public void assertEquals(double expected, double actual,
+			double delta) {
 		assertEquals(null, expected, actual, delta);
 	}
 
@@ -155,7 +157,8 @@ public abstract class AbstractChecker implements ExceptionChecker {
 	 * Asserts that two longs are equal. If they are not an AssertionFailedError
 	 * is thrown with the given message.
 	 */
-	static public void assertEquals(String message, long expected, long actual) {
+	static public void assertEquals(String message, long expected,
+			long actual) {
 		assertEquals(message, new Long(expected), new Long(actual));
 	}
 
@@ -186,7 +189,8 @@ public abstract class AbstractChecker implements ExceptionChecker {
 	 * Asserts that two bytes are equal. If they are not an AssertionFailedError
 	 * is thrown with the given message.
 	 */
-	static public void assertEquals(String message, byte expected, byte actual) {
+	static public void assertEquals(String message, byte expected,
+			byte actual) {
 		assertEquals(message, new Byte(expected), new Byte(actual));
 	}
 
@@ -201,7 +205,8 @@ public abstract class AbstractChecker implements ExceptionChecker {
 	 * Asserts that two chars are equal. If they are not an AssertionFailedError
 	 * is thrown with the given message.
 	 */
-	static public void assertEquals(String message, char expected, char actual) {
+	static public void assertEquals(String message, char expected,
+			char actual) {
 		assertEquals(message, new Character(expected), new Character(actual));
 	}
 
@@ -216,7 +221,8 @@ public abstract class AbstractChecker implements ExceptionChecker {
 	 * Asserts that two shorts are equal. If they are not an
 	 * AssertionFailedError is thrown with the given message.
 	 */
-	static public void assertEquals(String message, short expected, short actual) {
+	static public void assertEquals(String message, short expected,
+			short actual) {
 		assertEquals(message, new Short(expected), new Short(actual));
 	}
 
@@ -276,7 +282,8 @@ public abstract class AbstractChecker implements ExceptionChecker {
 	 * Asserts that two objects refer to the same object. If they are not an
 	 * AssertionFailedError is thrown with the given message.
 	 */
-	static public void assertSame(String message, Object expected, Object actual) {
+	static public void assertSame(String message, Object expected,
+			Object actual) {
 		if (expected == actual)
 			return;
 		failNotSame(message, expected, actual);

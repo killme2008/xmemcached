@@ -16,7 +16,7 @@ public class XMemcachedMBeanServerUnitTest extends TestCase {
 
 	public void testMBeanServer() throws Exception {
 		Method method = XMemcachedMbeanServer.getInstance().getClass()
-				.getDeclaredMethod("initialize", new Class[] {});
+				.getDeclaredMethod("initialize", new Class[]{});
 		method.setAccessible(true);
 		method.invoke(XMemcachedMbeanServer.getInstance());
 
@@ -25,8 +25,8 @@ public class XMemcachedMBeanServerUnitTest extends TestCase {
 		String name = mock.getClass().getPackage().getName() + ":type="
 				+ mock.getClass().getSimpleName();
 		XMemcachedMbeanServer.getInstance().registMBean(mock, name);
-		assertEquals(oldCount + 1, XMemcachedMbeanServer.getInstance()
-				.getMBeanCount());
+		assertEquals(oldCount + 1,
+				XMemcachedMbeanServer.getInstance().getMBeanCount());
 		assertTrue(XMemcachedMbeanServer.getInstance().isRegistered(name));
 		XMemcachedMbeanServer.getInstance().shutdown();
 		assertFalse(XMemcachedMbeanServer.getInstance().isActive());

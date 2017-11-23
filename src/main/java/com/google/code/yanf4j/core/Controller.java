@@ -93,7 +93,8 @@ public interface Controller {
 
 	public int getDispatchMessageThreadCount();
 
-	public void setDispatchMessageThreadCount(int dispatchMessageThreadPoolSize);
+	public void setDispatchMessageThreadCount(
+			int dispatchMessageThreadPoolSize);
 
 	public int getWriteThreadCount();
 

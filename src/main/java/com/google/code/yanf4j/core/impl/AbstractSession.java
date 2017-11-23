@@ -250,8 +250,8 @@ public abstract class AbstractSession implements Session {
 					}
 					onMessage(message, AbstractSession.this);
 					if (start != -1) {
-						statistics.statisticsProcess(System.currentTimeMillis()
-								- start);
+						statistics.statisticsProcess(
+								System.currentTimeMillis() - start);
 					}
 				}
 
@@ -347,7 +347,8 @@ public abstract class AbstractSession implements Session {
 
 	protected ReentrantLock writeLock = new ReentrantLock();
 
-	protected AtomicReference<WriteMessage> currentMessage = new LinkedTransferQueue.PaddedAtomicReference<WriteMessage>(null);
+	protected AtomicReference<WriteMessage> currentMessage = new LinkedTransferQueue.PaddedAtomicReference<WriteMessage>(
+			null);
 
 	static final class FailFuture implements Future<Boolean> {
 
@@ -386,7 +387,6 @@ public abstract class AbstractSession implements Session {
 
 	public abstract void writeFromUserCode(WriteMessage message);
 
-
 	public final boolean isLoopbackConnection() {
 		return loopback;
 	}
@@ -417,8 +417,8 @@ public abstract class AbstractSession implements Session {
 
 	public boolean isIdle() {
 		long lastOpTimestamp = getLastOperationTimeStamp();
-		return lastOpTimestamp > 0
-				&& System.currentTimeMillis() - lastOpTimestamp > sessionIdleTimeout;
+		return lastOpTimestamp > 0 && System.currentTimeMillis()
+				- lastOpTimestamp > sessionIdleTimeout;
 	}
 
 	public AbstractSession(SessionConfig sessionConfig) {

@@ -14,19 +14,20 @@ import net.rubyeye.xmemcached.transcoders.CachedData;
 public class BinaryGetAndTouchCommand extends BinaryGetCommand {
 
 	public BinaryGetAndTouchCommand(String key, byte[] keyBytes,
-			CommandType cmdType, CountDownLatch latch, int exp, boolean noreply) {
+			CommandType cmdType, CountDownLatch latch, int exp,
+			boolean noreply) {
 		super(key, keyBytes, cmdType, latch, null, noreply);
 		this.expTime = exp;
 		switch (cmdType) {
-		case GAT:
-			this.opCode = OpCode.GAT;
-			break;
-		case GATQ:
-			this.opCode = OpCode.GATQ;
-			break;
-		default:
-			throw new IllegalArgumentException("Invalid GAT command type:"
-					+ cmdType);
+			case GAT :
+				this.opCode = OpCode.GAT;
+				break;
+			case GATQ :
+				this.opCode = OpCode.GATQ;
+				break;
+			default :
+				throw new IllegalArgumentException(
+						"Invalid GAT command type:" + cmdType);
 		}
 	}
 

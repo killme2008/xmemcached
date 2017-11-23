@@ -39,8 +39,8 @@ public class BinaryAWSElasticCacheConfigCommand extends BaseBinaryCommand {
 
 	public BinaryAWSElasticCacheConfigCommand(final CountDownLatch latch,
 			String subCommand, String key) {
-		super(key, ByteUtils.getBytes(key), CommandType.AWS_CONFIG, latch, 0,
-				0, latch, false, null);
+		super(key, ByteUtils.getBytes(key), CommandType.AWS_CONFIG, latch, 0, 0,
+				latch, false, null);
 		this.commandType = CommandType.AWS_CONFIG;
 		if (subCommand.equals("get")) {
 			this.opCode = OpCode.CONFIG_GET;

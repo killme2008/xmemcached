@@ -20,8 +20,9 @@ import org.slf4j.LoggerFactory;
  */
 public class BinaryProtocolExample {
 
-	private static final Logger log = LoggerFactory.getLogger(BinaryProtocolExample.class);
-	
+	private static final Logger log = LoggerFactory
+			.getLogger(BinaryProtocolExample.class);
+
 	public static void main(String[] args) {
 		if (args.length < 1) {
 			System.err.println("Useage:java BinaryProtocolExample [servers]");

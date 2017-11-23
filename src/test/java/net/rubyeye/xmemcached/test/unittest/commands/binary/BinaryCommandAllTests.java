@@ -8,7 +8,7 @@ public class BinaryCommandAllTests {
 	public static Test suite() {
 		TestSuite suite = new TestSuite(
 				"Test for net.rubyeye.xmemcached.test.unittest.commands.binary");
-		//$JUnit-BEGIN$
+		// $JUnit-BEGIN$
 		suite.addTestSuite(BinaryGetCommandUnitTest.class);
 		suite.addTestSuite(BinaryDeleteCommandUnitTest.class);
 		suite.addTestSuite(BinaryStoreCommandUnitTest.class);
@@ -17,7 +17,7 @@ public class BinaryCommandAllTests {
 		suite.addTestSuite(BinaryStatsCommandUnitTest.class);
 		suite.addTestSuite(BinaryGetMultiCommandUnitTest.class);
 		suite.addTestSuite(BinaryCASCommandUnitTest.class);
-		//$JUnit-END$
+		// $JUnit-END$
 		return suite;
 	}
 

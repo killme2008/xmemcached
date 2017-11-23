@@ -59,7 +59,8 @@ public class TextVersionCommand extends Command implements ServerAddressAware {
 	}
 
 	@Override
-	public final boolean decode(MemcachedTCPSession session, ByteBuffer buffer) {
+	public final boolean decode(MemcachedTCPSession session,
+			ByteBuffer buffer) {
 		String line = ByteUtils.nextLine(buffer);
 		if (line != null) {
 			if (line.startsWith("VERSION")) {

@@ -42,19 +42,18 @@ public class BinaryCASCommand extends BaseBinaryCommand {
 		super(key, keyBytes, cmdType, latch, exp, cas, value, noreply,
 				transcoder);
 		switch (cmdType) {
-		case CAS:
-			this.opCode = noreply ? OpCode.SET_QUIETLY : OpCode.SET;
-			break;
-		default:
-			throw new IllegalArgumentException("Unknow cas command type:"
-					+ cmdType);
+			case CAS :
+				this.opCode = noreply ? OpCode.SET_QUIETLY : OpCode.SET;
+				break;
+			default :
+				throw new IllegalArgumentException(
+						"Unknow cas command type:" + cmdType);
 		}
-		
-		
+
 	}
 	@Override
 	protected long getCasValue() {
 		return this.cas;
-	}	
-	
+	}
+
 }

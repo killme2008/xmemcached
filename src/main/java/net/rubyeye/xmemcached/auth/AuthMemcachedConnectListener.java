@@ -15,19 +15,20 @@ import net.rubyeye.xmemcached.networking.MemcachedSessionConnectListener;
  * @author dennis
  * 
  */
-public class AuthMemcachedConnectListener implements
-		MemcachedSessionConnectListener {
+public class AuthMemcachedConnectListener
+		implements
+			MemcachedSessionConnectListener {
 
 	public void onConnect(MemcachedSession session, MemcachedClient client) {
 		MemcachedTCPSession tcpSession = (MemcachedTCPSession) session;
 		Map<InetSocketAddress, AuthInfo> authInfoMap = client.getAuthInfoMap();
 		if (authInfoMap != null) {
-			AuthInfo authInfo = authInfoMap.get(tcpSession
-					.getRemoteSocketAddress());
+			AuthInfo authInfo = authInfoMap
+					.get(tcpSession.getRemoteSocketAddress());
 			if (authInfo != null) {
 				XMemcachedClient xMemcachedClient = (XMemcachedClient) client;
-				AuthTask task = new AuthTask(authInfo, xMemcachedClient
-						.getCommandFactory(), tcpSession);
+				AuthTask task = new AuthTask(authInfo,
+						xMemcachedClient.getCommandFactory(), tcpSession);
 				task.start();
 				// First time,try to wait
 				if (authInfo.isFirstTime()) {

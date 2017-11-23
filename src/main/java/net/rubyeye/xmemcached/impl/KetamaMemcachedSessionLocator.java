@@ -46,8 +46,9 @@ import com.google.code.yanf4j.core.Session;
  * @author dennis
  * 
  */
-public class KetamaMemcachedSessionLocator extends
-AbstractMemcachedSessionLocator {
+public class KetamaMemcachedSessionLocator
+		extends
+			AbstractMemcachedSessionLocator {
 
 	static final int NUM_REPS = 160;
 	private transient volatile TreeMap<Long, List<Session>> ketamaSessions = new TreeMap<Long, List<Session>>();
@@ -94,8 +95,9 @@ AbstractMemcachedSessionLocator {
 		this.cwNginxUpstreamConsistent = cwNginxUpstreamConsistent;
 		this.gwhalinMemcachedJavaClientCompatibiltyConsistent = gwhalinMemcachedJavaClientCompatibiltyConsistent;
 	}
-	
-	public KetamaMemcachedSessionLocator(List<Session> list, HashAlgorithm alg) {
+
+	public KetamaMemcachedSessionLocator(List<Session> list,
+			HashAlgorithm alg) {
 		super();
 		this.hashAlg = alg;
 		this.cwNginxUpstreamConsistent = false;
@@ -125,10 +127,11 @@ AbstractMemcachedSessionLocator {
 					} else {
 						sockStr = ((MemcachedSession) session)
 								.getInetSocketAddressWrapper()
-								.getInetSocketAddress().getHostName() + ":" +
-								((MemcachedSession) session)
-								.getInetSocketAddressWrapper()
-								.getInetSocketAddress().getPort();
+								.getInetSocketAddress().getHostName()
+								+ ":"
+								+ ((MemcachedSession) session)
+										.getInetSocketAddressWrapper()
+										.getInetSocketAddress().getPort();
 					}
 				}
 				if (sockStr == null) {

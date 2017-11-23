@@ -15,7 +15,8 @@ import net.rubyeye.xmemcached.transcoders.CachedData;
 public class BinaryAuthListMechanismsCommand extends BaseBinaryCommand {
 
 	public BinaryAuthListMechanismsCommand(CountDownLatch latch) {
-		super(null, null, CommandType.AUTH_LIST, latch, 0, 0, null, false, null);
+		super(null, null, CommandType.AUTH_LIST, latch, 0, 0, null, false,
+				null);
 		this.opCode = OpCode.AUTH_LIST_MECHANISMS;
 	}
 

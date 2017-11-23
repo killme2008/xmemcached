@@ -9,11 +9,9 @@ public class MockTranscoder<T> implements Transcoder<T> {
 	private volatile int count;
 	private SerializingTranscoder serializingTranscoder = new SerializingTranscoder();
 
-
-
 	public void setCompressionMode(CompressionMode compressMode) {
 		this.serializingTranscoder.setCompressionMode(compressMode);
-		
+
 	}
 
 	public int getCount() {

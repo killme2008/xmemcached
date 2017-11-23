@@ -13,8 +13,10 @@ import com.google.code.yanf4j.core.Session;
  * @author dennis
  * 
  */
-public class MemcachedSessionComparator implements Comparator<Session>,
-		Serializable {
+public class MemcachedSessionComparator
+		implements
+			Comparator<Session>,
+			Serializable {
 	static final long serialVersionUID = -1L;
 
 	public int compare(Session o1, Session o2) {

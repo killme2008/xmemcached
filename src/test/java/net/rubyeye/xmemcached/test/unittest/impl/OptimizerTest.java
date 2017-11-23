@@ -74,7 +74,8 @@ public class OptimizerTest extends TestCase {
 
 		int limit = 100;
 		BinarySetMultiCommand optimiezedCommand = (BinarySetMultiCommand) this.optimiezer
-				.optimiezeSet(this.writeQueue, this.executingCmds, this.currentCmd, limit);
+				.optimiezeSet(this.writeQueue, this.executingCmds,
+						this.currentCmd, limit);
 		assertEquals(optimiezedCommand.getMergeCount(),
 				Math.round((double) limit / oneBufferSize));
 	}
@@ -97,8 +98,8 @@ public class OptimizerTest extends TestCase {
 		this.currentCmd.encode();
 
 		BinarySetMultiCommand optimiezedCommand = (BinarySetMultiCommand) this.optimiezer
-				.optimiezeSet(this.writeQueue, this.executingCmds, this.currentCmd,
-						Integer.MAX_VALUE);
+				.optimiezeSet(this.writeQueue, this.executingCmds,
+						this.currentCmd, Integer.MAX_VALUE);
 		assertEquals(optimiezedCommand.getMergeCount(), 10);
 	}
 
@@ -114,8 +115,8 @@ public class OptimizerTest extends TestCase {
 		assertNull(this.writeQueue.peek());
 		assertSame(CommandType.GET_ONE, optimiezeCommand.getCommandType());
 		assertEquals(10, optimiezeCommand.getMergeCount());
-		assertEquals("get 0 1 2 3 4 5 6 7 8 9\r\n", new String(optimiezeCommand
-				.getIoBuffer().buf().array()));
+		assertEquals("get 0 1 2 3 4 5 6 7 8 9\r\n",
+				new String(optimiezeCommand.getIoBuffer().buf().array()));
 	}
 
 	public void testOptimiezeGetWithSameKey() {
@@ -140,8 +141,8 @@ public class OptimizerTest extends TestCase {
 		assertNull(this.writeQueue.peek());
 		assertSame(CommandType.GET_ONE, optimiezeCommand.getCommandType());
 		assertEquals(11, optimiezeCommand.getMergeCount());
-		assertEquals("get 0\r\n", new String(optimiezeCommand.getIoBuffer()
-				.buf().array()));
+		assertEquals("get 0\r\n",
+				new String(optimiezeCommand.getIoBuffer().buf().array()));
 		optimiezeCommand.decode(null,
 				ByteBuffer.wrap("VALUE 0 0 2\r\n10\r\n".getBytes()));
 
@@ -151,8 +152,8 @@ public class OptimizerTest extends TestCase {
 				transcoder.decode((CachedData) this.currentCmd.getResult()));
 		for (Command cmd : localQueue) {
 			assertEquals(0, cmd.getLatch().getCount());
-			assertEquals("10",
-					transcoder.decode((CachedData) this.currentCmd.getResult()));
+			assertEquals("10", transcoder
+					.decode((CachedData) this.currentCmd.getResult()));
 		}
 		assertEquals(0, optimiezeCommand.getMergeCount());
 	}
@@ -166,8 +167,8 @@ public class OptimizerTest extends TestCase {
 		assertEquals(5, optimiezeCommand.getMergeCommands().size());
 		assertSame(CommandType.GET_ONE, optimiezeCommand.getCommandType());
 		assertEquals(5, optimiezeCommand.getMergeCount());
-		assertEquals("get 0 1 2 3 4\r\n", new String(optimiezeCommand
-				.getIoBuffer().buf().array()));
+		assertEquals("get 0 1 2 3 4\r\n",
+				new String(optimiezeCommand.getIoBuffer().buf().array()));
 		assertEquals(5, this.writeQueue.size()); // remain five commands
 	}
 
@@ -182,8 +183,8 @@ public class OptimizerTest extends TestCase {
 		assertSame(CommandType.GET_ONE, optimiezeCommand.getCommandType());
 		assertNull(optimiezeCommand.getMergeCommands());
 		assertEquals(-1, optimiezeCommand.getMergeCount());
-		assertEquals("get 0\r\n", new String(optimiezeCommand.getIoBuffer()
-				.buf().array()));
+		assertEquals("get 0\r\n",
+				new String(optimiezeCommand.getIoBuffer().buf().array()));
 		assertEquals(9, this.writeQueue.size());
 		assertSame(this.currentCmd, optimiezeCommand);
 	}
@@ -198,8 +199,8 @@ public class OptimizerTest extends TestCase {
 		assertSame(CommandType.GET_ONE, optimiezeCommand.getCommandType());
 		assertNull(optimiezeCommand.getMergeCommands());
 		assertEquals(-1, optimiezeCommand.getMergeCount());
-		assertEquals("get 0\r\n", new String(optimiezeCommand.getIoBuffer()
-				.buf().array()));
+		assertEquals("get 0\r\n",
+				new String(optimiezeCommand.getIoBuffer().buf().array()));
 		assertEquals(9, this.writeQueue.size());
 		assertSame(this.currentCmd, optimiezeCommand);
 	}
@@ -230,16 +231,16 @@ public class OptimizerTest extends TestCase {
 		assertEquals(5, optimiezeCommand.getMergeCommands().size());
 		assertSame(CommandType.GET_ONE, optimiezeCommand.getCommandType());
 		assertEquals(6, optimiezeCommand.getMergeCount());
-		assertEquals("get 0 1 2 3 4\r\n", new String(optimiezeCommand
-				.getIoBuffer().buf().array()));
+		assertEquals("get 0 1 2 3 4\r\n",
+				new String(optimiezeCommand.getIoBuffer().buf().array()));
 		assertEquals(5, this.writeQueue.size()); // remain five commands
 
 	}
 
 	public void testMergeGetCommandsWithEmptyWriteQueue() {
 		this.writeQueue.clear();
-		Command optimiezeCommand = this.optimiezer.optimiezeGet(
-				this.writeQueue, this.executingCmds, this.currentCmd);
+		Command optimiezeCommand = this.optimiezer.optimiezeGet(this.writeQueue,
+				this.executingCmds, this.currentCmd);
 		optimiezeCommand.encode();
 		ByteBuffer mergeBuffer = optimiezeCommand.getIoBuffer().buf();
 		assertSame(this.currentCmd, optimiezeCommand);
@@ -259,8 +260,8 @@ public class OptimizerTest extends TestCase {
 		ByteBuffer mergeBuffer = optimiezeCommand.getIoBuffer().buf();
 		assertEquals(0, this.writeQueue.size());
 		assertSame(CommandType.GET_ONE, optimiezeCommand.getCommandType());
-		assertEquals("get 0\r\nget 1 2 3 4 5 6 7 8 9\r\n", new String(
-				mergeBuffer.array())); // current command at last
+		assertEquals("get 0\r\nget 1 2 3 4 5 6 7 8 9\r\n",
+				new String(mergeBuffer.array())); // current command at last
 	}
 
 	public void testMergeAllBuffer() {
@@ -272,8 +273,8 @@ public class OptimizerTest extends TestCase {
 		assertNotSame(this.currentCmd, optimiezeCommand);
 		assertTrue(mergeBuffer.remaining() < 100);
 		assertEquals(0, this.writeQueue.size());
-		assertEquals("get 0\r\nget 1 2 3 4 5 6 7 8 9\r\n", new String(
-				mergeBuffer.array())); // current command at last
+		assertEquals("get 0\r\nget 1 2 3 4 5 6 7 8 9\r\n",
+				new String(mergeBuffer.array())); // current command at last
 	}
 
 	public void testMergeBufferWithEmptyWriteQueue() {

@@ -12,7 +12,7 @@ public class TokyoTyrantTranscoderUnitTest extends TestCase {
 	TokyoTyrantTranscoder tokyoTyrantTranscoder;
 
 	public void setUp() {
-		tokyoTyrantTranscoder = new TokyoTyrantTranscoder(5*1024*1024);
+		tokyoTyrantTranscoder = new TokyoTyrantTranscoder(5 * 1024 * 1024);
 
 	}
 
@@ -49,18 +49,20 @@ public class TokyoTyrantTranscoderUnitTest extends TestCase {
 		}
 
 	}
-	
-	public void testEncodeDecodeLargeValue(){
-		List<Long> list=new ArrayList<Long>(1000000);
-		for(long i=0;i<1000000;i++){
+
+	public void testEncodeDecodeLargeValue() {
+		List<Long> list = new ArrayList<Long>(1000000);
+		for (long i = 0; i < 1000000; i++) {
 			list.add(i);
 		}
 		CachedData cachedData = tokyoTyrantTranscoder.encode(list);
-		List<Long> decodeList = (List<Long>) tokyoTyrantTranscoder.decode(cachedData);
+		List<Long> decodeList = (List<Long>) tokyoTyrantTranscoder
+				.decode(cachedData);
 		assertNotSame(list, decodeList);
 		assertEquals(list, decodeList);
-		
-		List<Long> decodeList2 = (List<Long>) tokyoTyrantTranscoder.decode(cachedData);
+
+		List<Long> decodeList2 = (List<Long>) tokyoTyrantTranscoder
+				.decode(cachedData);
 		assertNotSame(list, decodeList2);
 		assertNotSame(decodeList2, decodeList);
 		assertEquals(list, decodeList2);
@@ -74,8 +76,9 @@ public class TokyoTyrantTranscoderUnitTest extends TestCase {
 		Person decodePerson = (Person) tokyoTyrantTranscoder.decode(cachedData);
 		assertNotSame(p, decodePerson);
 		assertEquals(p, decodePerson);
-		
-		Person decodePerson2 = (Person) tokyoTyrantTranscoder.decode(cachedData);
+
+		Person decodePerson2 = (Person) tokyoTyrantTranscoder
+				.decode(cachedData);
 		assertNotSame(p, decodePerson2);
 		assertNotSame(decodePerson, decodePerson2);
 		assertEquals(p, decodePerson2);
@@ -91,8 +94,8 @@ public class TokyoTyrantTranscoderUnitTest extends TestCase {
 		long currentTimeMillis = System.currentTimeMillis();
 		cachedData = tokyoTyrantTranscoder.encode(currentTimeMillis);
 		assertEquals(12, cachedData.getData().length);
-		assertEquals(currentTimeMillis, tokyoTyrantTranscoder
-				.decode(cachedData));
+		assertEquals(currentTimeMillis,
+				tokyoTyrantTranscoder.decode(cachedData));
 
 		cachedData = tokyoTyrantTranscoder.encode("hello");
 		assertEquals(9, cachedData.getData().length);

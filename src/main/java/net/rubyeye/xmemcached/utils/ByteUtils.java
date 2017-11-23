@@ -37,8 +37,8 @@ public final class ByteUtils {
 	public static final ByteBuffer SPLIT = ByteBuffer.wrap(Constants.CRLF);
 
 	public static final boolean ENABLE_CACHED_STRING_BYTES = Boolean
-			.valueOf(System.getProperty(
-					"xmemcached.string.bytes.cached.enable", "false"));
+			.valueOf(System.getProperty("xmemcached.string.bytes.cached.enable",
+					"false"));
 	/**
 	 * if it is testing,check key argument even if use binary protocol. The user
 	 * must never change this value at all.
@@ -204,39 +204,39 @@ public final class ByteUtils {
 
 	public static final int normalizeCapacity(int requestedCapacity) {
 		switch (requestedCapacity) {
-		case 0:
-		case 1 << 0:
-		case 1 << 1:
-		case 1 << 2:
-		case 1 << 3:
-		case 1 << 4:
-		case 1 << 5:
-		case 1 << 6:
-		case 1 << 7:
-		case 1 << 8:
-		case 1 << 9:
-		case 1 << 10:
-		case 1 << 11:
-		case 1 << 12:
-		case 1 << 13:
-		case 1 << 14:
-		case 1 << 15:
-		case 1 << 16:
-		case 1 << 17:
-		case 1 << 18:
-		case 1 << 19:
-		case 1 << 21:
-		case 1 << 22:
-		case 1 << 23:
-		case 1 << 24:
-		case 1 << 25:
-		case 1 << 26:
-		case 1 << 27:
-		case 1 << 28:
-		case 1 << 29:
-		case 1 << 30:
-		case Integer.MAX_VALUE:
-			return requestedCapacity;
+			case 0 :
+			case 1 << 0 :
+			case 1 << 1 :
+			case 1 << 2 :
+			case 1 << 3 :
+			case 1 << 4 :
+			case 1 << 5 :
+			case 1 << 6 :
+			case 1 << 7 :
+			case 1 << 8 :
+			case 1 << 9 :
+			case 1 << 10 :
+			case 1 << 11 :
+			case 1 << 12 :
+			case 1 << 13 :
+			case 1 << 14 :
+			case 1 << 15 :
+			case 1 << 16 :
+			case 1 << 17 :
+			case 1 << 18 :
+			case 1 << 19 :
+			case 1 << 21 :
+			case 1 << 22 :
+			case 1 << 23 :
+			case 1 << 24 :
+			case 1 << 25 :
+			case 1 << 26 :
+			case 1 << 27 :
+			case 1 << 28 :
+			case 1 << 29 :
+			case 1 << 30 :
+			case Integer.MAX_VALUE :
+				return requestedCapacity;
 		}
 
 		int newCapacity = 1;
@@ -269,8 +269,8 @@ public final class ByteUtils {
 			return null;
 		}
 
-		int index = MemcachedDecoder.SPLIT_MATCHER
-				.matchFirst(com.google.code.yanf4j.buffer.IoBuffer.wrap(buffer));
+		int index = MemcachedDecoder.SPLIT_MATCHER.matchFirst(
+				com.google.code.yanf4j.buffer.IoBuffer.wrap(buffer));
 		if (index >= 0) {
 			int limit = buffer.limit();
 			buffer.limit(index);
@@ -293,8 +293,8 @@ public final class ByteUtils {
 	}
 
 	public static void byte2hex(byte b, StringBuffer buf) {
-		char[] hexChars = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
-				'A', 'B', 'C', 'D', 'E', 'F' };
+		char[] hexChars = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
+				'A', 'B', 'C', 'D', 'E', 'F'};
 		int high = ((b & 0xf0) >> 4);
 		int low = (b & 0x0f);
 		buf.append(hexChars[high]);
@@ -403,12 +403,12 @@ public final class ByteUtils {
 	/**
 	 * All possible chars for representing a number as a String
 	 */
-	final static byte[] digits = { '0', '1', '2', '3', '4', '5', '6', '7', '8',
+	final static byte[] digits = {'0', '1', '2', '3', '4', '5', '6', '7', '8',
 			'9', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l',
 			'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y',
-			'z' };
+			'z'};
 
-	final static byte[] DigitTens = { '0', '0', '0', '0', '0', '0', '0', '0',
+	final static byte[] DigitTens = {'0', '0', '0', '0', '0', '0', '0', '0',
 			'0', '0', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '2',
 			'2', '2', '2', '2', '2', '2', '2', '2', '2', '3', '3', '3', '3',
 			'3', '3', '3', '3', '3', '3', '4', '4', '4', '4', '4', '4', '4',
@@ -416,9 +416,9 @@ public final class ByteUtils {
 			'6', '6', '6', '6', '6', '6', '6', '6', '6', '6', '7', '7', '7',
 			'7', '7', '7', '7', '7', '7', '7', '8', '8', '8', '8', '8', '8',
 			'8', '8', '8', '8', '9', '9', '9', '9', '9', '9', '9', '9', '9',
-			'9', };
+			'9',};
 
-	final static byte[] DigitOnes = { '0', '1', '2', '3', '4', '5', '6', '7',
+	final static byte[] DigitOnes = {'0', '1', '2', '3', '4', '5', '6', '7',
 			'8', '9', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0',
 			'1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '1', '2', '3',
 			'4', '5', '6', '7', '8', '9', '0', '1', '2', '3', '4', '5', '6',
@@ -426,10 +426,10 @@ public final class ByteUtils {
 			'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '1', '2',
 			'3', '4', '5', '6', '7', '8', '9', '0', '1', '2', '3', '4', '5',
 			'6', '7', '8', '9', '0', '1', '2', '3', '4', '5', '6', '7', '8',
-			'9', };
+			'9',};
 
-	final static int[] sizeTable = { 9, 99, 999, 9999, 99999, 999999, 9999999,
-			99999999, 999999999, Integer.MAX_VALUE };
+	final static int[] sizeTable = {9, 99, 999, 9999, 99999, 999999, 9999999,
+			99999999, 999999999, Integer.MAX_VALUE};
 
 	// Requires positive x
 	public static final int stringSize(int x) {

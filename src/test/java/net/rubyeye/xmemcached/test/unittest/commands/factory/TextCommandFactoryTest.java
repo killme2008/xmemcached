@@ -22,8 +22,7 @@ public class TextCommandFactoryTest extends TestCase {
 
 	@Override
 	protected void setUp() throws Exception {
-		this.commandFactory = new TextCommandFactory(
-				);
+		this.commandFactory = new TextCommandFactory();
 	}
 
 	public void testCreateDeleteCommand() {
@@ -34,8 +33,7 @@ public class TextCommandFactoryTest extends TestCase {
 				keyBytes, time, 0, false);
 		deleteCmd.encode();
 		assertEquals(CommandType.DELETE, deleteCmd.getCommandType());
-		String commandStr = new String(deleteCmd.getIoBuffer().buf()
-				.array());
+		String commandStr = new String(deleteCmd.getIoBuffer().buf().array());
 
 		String expectedStr = "delete test\r\n";
 
@@ -43,10 +41,10 @@ public class TextCommandFactoryTest extends TestCase {
 	}
 
 	public void testCreateVersionCommand() {
-		Command versionCmd = this.commandFactory.createVersionCommand(new CountDownLatch(1),null);
+		Command versionCmd = this.commandFactory
+				.createVersionCommand(new CountDownLatch(1), null);
 		versionCmd.encode();
-		String commandStr = new String(versionCmd.getIoBuffer().buf()
-				.array());
+		String commandStr = new String(versionCmd.getIoBuffer().buf().array());
 		assertEquals("version\r\n", commandStr);
 		assertEquals(CommandType.VERSION, versionCmd.getCommandType());
 	}
@@ -57,12 +55,12 @@ public class TextCommandFactoryTest extends TestCase {
 		byte[] keyBytes = ByteUtils.getBytes(key);
 		int exp = 0;
 		Transcoder transcoder = new StringTranscoder();
-		Command storeCmd = this.commandFactory.createSetCommand(key, keyBytes, exp, value,false, transcoder);
+		Command storeCmd = this.commandFactory.createSetCommand(key, keyBytes,
+				exp, value, false, transcoder);
 		storeCmd.encode();
 		assertFalse(storeCmd.isNoreply());
 		assertEquals(CommandType.SET, storeCmd.getCommandType());
-		String commandStr = new String(storeCmd.getIoBuffer().buf()
-				.array());
+		String commandStr = new String(storeCmd.getIoBuffer().buf().array());
 
 		String expectedStr = "set test " + StringTranscoder.STRING_FLAG
 				+ " 0 4\r\ntest\r\n";
@@ -76,8 +74,7 @@ public class TextCommandFactoryTest extends TestCase {
 				CommandType.GET_ONE, null);
 		getCmd.encode();
 		assertEquals(CommandType.GET_ONE, getCmd.getCommandType());
-		String commandStr = new String(getCmd.getIoBuffer().buf()
-				.array());
+		String commandStr = new String(getCmd.getIoBuffer().buf().array());
 
 		String expectedStr = "get test\r\n";
 		assertEquals(expectedStr, commandStr);
@@ -88,11 +85,10 @@ public class TextCommandFactoryTest extends TestCase {
 		byte[] keyBytes = ByteUtils.getBytes(key);
 		int num = 10;
 		Command inCr = this.commandFactory.createIncrDecrCommand(key, keyBytes,
-				num, 0,0, CommandType.INCR, false);
+				num, 0, 0, CommandType.INCR, false);
 		inCr.encode();
 		assertEquals(CommandType.INCR, inCr.getCommandType());
-		String commandStr = new String(inCr.getIoBuffer().buf()
-				.array());
+		String commandStr = new String(inCr.getIoBuffer().buf().array());
 
 		String expectedStr = "incr test 10\r\n";
 		assertEquals(expectedStr, commandStr);
@@ -110,8 +106,7 @@ public class TextCommandFactoryTest extends TestCase {
 				CommandType.GET_MANY, null);
 		cmd.encode();
 		assertEquals(CommandType.GET_MANY, cmd.getCommandType());
-		String commandStr = new String(cmd.getIoBuffer().buf()
-				.array());
+		String commandStr = new String(cmd.getIoBuffer().buf().array());
 
 		String expectedStr = "get a b c a\r\n";
 		assertEquals(expectedStr, commandStr);

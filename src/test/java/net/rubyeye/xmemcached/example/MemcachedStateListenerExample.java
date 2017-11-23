@@ -26,7 +26,8 @@ class MyListener implements MemcachedClientStateListener {
 
 	}
 
-	public void onException(MemcachedClient memcachedClient, Throwable throwable) {
+	public void onException(MemcachedClient memcachedClient,
+			Throwable throwable) {
 		log.error(throwable.getMessage(), throwable);
 
 	}
@@ -45,12 +46,13 @@ class MyListener implements MemcachedClientStateListener {
 
 public class MemcachedStateListenerExample {
 
-	private static final Logger log = LoggerFactory.getLogger(MemcachedStateListenerExample.class);
-	
+	private static final Logger log = LoggerFactory
+			.getLogger(MemcachedStateListenerExample.class);
+
 	public static void main(String[] args) {
 		if (args.length < 1) {
-			System.err
-					.println("Useage:java MemcachedStateListenerExample [servers]");
+			System.err.println(
+					"Useage:java MemcachedStateListenerExample [servers]");
 			System.exit(1);
 		}
 		MemcachedClient memcachedClient = getMemcachedClient(args[0]);

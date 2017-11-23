@@ -63,9 +63,10 @@ public class Configuration {
 	private int readThreadCount = 1;
 
 	private int selectorPoolSize = System
-			.getProperty(XMEMCACHED_SELECTOR_POOL_SIZE) == null ? SystemUtils
-			.getSystemThreadCount() : Integer.parseInt(System
-			.getProperty(XMEMCACHED_SELECTOR_POOL_SIZE));
+			.getProperty(XMEMCACHED_SELECTOR_POOL_SIZE) == null
+					? SystemUtils.getSystemThreadCount()
+					: Integer.parseInt(
+							System.getProperty(XMEMCACHED_SELECTOR_POOL_SIZE));
 
 	/**
 	 * Increasing buffer size per time
@@ -181,7 +182,8 @@ public class Configuration {
 		this.readThreadCount = readThreadCount;
 	}
 
-	public void setCheckSessionTimeoutInterval(long checkSessionTimeoutInterval) {
+	public void setCheckSessionTimeoutInterval(
+			long checkSessionTimeoutInterval) {
 		this.checkSessionTimeoutInterval = checkSessionTimeoutInterval;
 	}
 

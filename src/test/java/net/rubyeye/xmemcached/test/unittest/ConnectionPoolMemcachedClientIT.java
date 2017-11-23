@@ -21,9 +21,9 @@ public class ConnectionPoolMemcachedClientIT extends XMemcachedClientIT {
 
 	@Override
 	public MemcachedClientBuilder createBuilder() throws Exception {
-		MemcachedClientBuilder builder = new XMemcachedClientBuilder(AddrUtil
-				.getAddresses(properties
-						.getProperty("test.memcached.servers")));
+		MemcachedClientBuilder builder = new XMemcachedClientBuilder(
+				AddrUtil.getAddresses(
+						properties.getProperty("test.memcached.servers")));
 		builder.setConnectionPoolSize(CONNECTION_POOL_SIZE);
 		return builder;
 	}
@@ -110,7 +110,7 @@ public class ConnectionPoolMemcachedClientIT extends XMemcachedClientIT {
 		client.shutdown();
 
 	}
-	
+
 	public void testDisableHealSession() throws Exception {
 		MockServer server = new MockServer();
 		server.start();
@@ -118,7 +118,7 @@ public class ConnectionPoolMemcachedClientIT extends XMemcachedClientIT {
 		XMemcachedClient client = new XMemcachedClient();
 		client.setConnectionPoolSize(5);
 		client.setEnableHeartBeat(false);
-		//disable heal session.
+		// disable heal session.
 		client.setEnableHealSession(false);
 		client.addServer(serverAddress);
 		synchronized (this) {
@@ -140,7 +140,7 @@ public class ConnectionPoolMemcachedClientIT extends XMemcachedClientIT {
 		server = new MockServer();
 		server.start();
 		Thread.sleep(30000);
-		//Still empty.
+		// Still empty.
 		assertEquals(0, client.getAvaliableServers().size());
 		assertEquals(0, client.getConnectionSizeBySocketAddress(serverAddress));
 
@@ -152,8 +152,7 @@ public class ConnectionPoolMemcachedClientIT extends XMemcachedClientIT {
 	@Override
 	public MemcachedClientBuilder createWeightedBuilder() throws Exception {
 		List<InetSocketAddress> addressList = AddrUtil
-				.getAddresses(properties
-						.getProperty("test.memcached.servers"));
+				.getAddresses(properties.getProperty("test.memcached.servers"));
 		int[] weights = new int[addressList.size()];
 		for (int i = 0; i < weights.length; i++) {
 			weights[i] = i + 1;

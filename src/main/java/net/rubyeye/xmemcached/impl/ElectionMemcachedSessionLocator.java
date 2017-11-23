@@ -37,8 +37,9 @@ import com.google.code.yanf4j.core.Session;
  * @author dennis
  * 
  */
-public class ElectionMemcachedSessionLocator extends
-		AbstractMemcachedSessionLocator {
+public class ElectionMemcachedSessionLocator
+		extends
+			AbstractMemcachedSessionLocator {
 
 	private transient volatile List<Session> sessions;
 
@@ -74,18 +75,17 @@ public class ElectionMemcachedSessionLocator extends
 			if (session instanceof MemcachedTCPSession) {
 				MemcachedSession tcpSession = (MemcachedSession) session;
 				for (int i = 0; i < tcpSession.getWeight(); i++) {
-					hash = this.hashAlgorithm.hash(session
-							.getRemoteSocketAddress().toString()
-							+ "-" + i + key);
+					hash = this.hashAlgorithm
+							.hash(session.getRemoteSocketAddress().toString()
+									+ "-" + i + key);
 					if (hash > highScore) {
 						highScore = hash;
 						result = session;
 					}
 				}
 			} else {
-				hash = this.hashAlgorithm.hash(session.getRemoteSocketAddress()
-						.toString()
-						+ key);
+				hash = this.hashAlgorithm.hash(
+						session.getRemoteSocketAddress().toString() + key);
 
 			}
 			if (hash > highScore) {

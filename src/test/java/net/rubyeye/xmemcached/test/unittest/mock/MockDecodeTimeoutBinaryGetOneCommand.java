@@ -15,12 +15,12 @@ public class MockDecodeTimeoutBinaryGetOneCommand extends BinaryGetCommand {
 			CommandType cmdType, CountDownLatch latch, OpCode opCode,
 			boolean noreply, long sleepTime) {
 		super(key, keyBytes, cmdType, latch, opCode, noreply);
-		this.sleepTime=sleepTime;
+		this.sleepTime = sleepTime;
 		// TODO Auto-generated constructor stub
 	}
 
 	@Override
-	public boolean decode(MemcachedTCPSession session, ByteBuffer buffer){
+	public boolean decode(MemcachedTCPSession session, ByteBuffer buffer) {
 		// TODO Auto-generated method stub
 		try {
 			Thread.sleep(this.sleepTime);

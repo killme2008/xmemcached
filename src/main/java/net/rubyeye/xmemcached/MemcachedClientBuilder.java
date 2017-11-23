@@ -254,7 +254,7 @@ public interface MemcachedClientBuilder {
 	 * @since 1.3.8
 	 */
 	public void setMaxQueuedNoReplyOperations(int maxQueuedNoReplyOperations);
-	
+
 	/**
 	 * If the memcached dump or network error cause connection closed,xmemcached
 	 * would try to heal the connection.The interval between reconnections is 2
@@ -280,13 +280,16 @@ public interface MemcachedClientBuilder {
 
 	/**
 	 * Set default operation timeout.
-	 * @param opTimeout  Operation timeout value in milliseconds.
+	 * 
+	 * @param opTimeout
+	 *            Operation timeout value in milliseconds.
 	 * @since 1.4.1
 	 */
 	public void setOpTimeout(long opTimeout);
 
 	/**
 	 * Returns the default operation timeout in milliseconds.
+	 * 
 	 * @since 1.4.1
 	 * @return
 	 */

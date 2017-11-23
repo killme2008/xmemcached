@@ -21,7 +21,7 @@ public final class GetsResponse<T> {
 	private final long cas;
 	private final T value;
 
-	public GetsResponse(final long cas,final T value) {
+	public GetsResponse(final long cas, final T value) {
 		super();
 		this.cas = cas;
 		this.value = value;
@@ -34,7 +34,6 @@ public final class GetsResponse<T> {
 	public T getValue() {
 		return this.value;
 	}
-
 
 	@Override
 	public int hashCode() {
@@ -74,8 +73,7 @@ public final class GetsResponse<T> {
 
 	@Override
 	public String toString() {
-		return "GetsResponse[cas=" + this.cas + ",value="
-				+ this.value + "]";
+		return "GetsResponse[cas=" + this.cas + ",value=" + this.value + "]";
 	}
 
 }

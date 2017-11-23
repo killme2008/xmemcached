@@ -25,7 +25,8 @@ public class PoolDispatcherUnitTest {
 
 	@Before
 	public void setUp() {
-		this.dispatcher = new PoolDispatcher(10, 60, TimeUnit.SECONDS, new ThreadPoolExecutor.AbortPolicy(), "test");
+		this.dispatcher = new PoolDispatcher(10, 60, TimeUnit.SECONDS,
+				new ThreadPoolExecutor.AbortPolicy(), "test");
 	}
 
 	@After
@@ -58,7 +59,7 @@ public class PoolDispatcherUnitTest {
 
 	@Test
 	public void testDispatcherStop() throws Exception {
-        this.dispatcher.stop();
+		this.dispatcher.stop();
 		TestRunner runner = new TestRunner();
 		this.dispatcher.dispatch(runner);
 		Thread.sleep(1000);
@@ -67,8 +68,8 @@ public class PoolDispatcherUnitTest {
 
 	@Test(expected = RejectedExecutionException.class)
 	public void testDispatchReject() throws Exception {
-		this.dispatcher = new PoolDispatcher(1, 1, 1, 60, TimeUnit.SECONDS, new ThreadPoolExecutor.AbortPolicy(),
-				"test");
+		this.dispatcher = new PoolDispatcher(1, 1, 1, 60, TimeUnit.SECONDS,
+				new ThreadPoolExecutor.AbortPolicy(), "test");
 		this.dispatcher.dispatch(new Runnable() {
 			public void run() {
 				while (!Thread.currentThread().isInterrupted()) {

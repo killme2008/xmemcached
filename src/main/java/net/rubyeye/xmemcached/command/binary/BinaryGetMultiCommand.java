@@ -42,8 +42,10 @@ import net.rubyeye.xmemcached.utils.ByteUtils;
  * 
  */
 @SuppressWarnings("unchecked")
-public class BinaryGetMultiCommand extends BaseBinaryCommand implements
-		MergeCommandsAware, MapReturnValueAware {
+public class BinaryGetMultiCommand extends BaseBinaryCommand
+		implements
+			MergeCommandsAware,
+			MapReturnValueAware {
 	private boolean finished;
 	private String responseKey;
 	private long responseCAS;
@@ -118,7 +120,8 @@ public class BinaryGetMultiCommand extends BaseBinaryCommand implements
 					BinaryGetCommand command = (BinaryGetCommand) nextCommand;
 					command.countDownLatch();
 					if (command.getAssocCommands() != null) {
-						for (Command assocCommand : command.getAssocCommands()) {
+						for (Command assocCommand : command
+								.getAssocCommands()) {
 							assocCommand.countDownLatch();
 						}
 					}
@@ -144,8 +147,8 @@ public class BinaryGetMultiCommand extends BaseBinaryCommand implements
 			CachedData value = new CachedData();
 			value.setCas(this.responseCAS);
 			value.setFlag(this.responseFlag);
-			((Map<String, CachedData>) this.result)
-					.put(this.responseKey, value);
+			((Map<String, CachedData>) this.result).put(this.responseKey,
+					value);
 		}
 		return true;
 	}
@@ -164,7 +167,8 @@ public class BinaryGetMultiCommand extends BaseBinaryCommand implements
 			int remainingCapacity = responseValue.remainingCapacity();
 			int remaining = buffer.remaining();
 			if (remaining < remainingCapacity) {
-				int length = remaining > remainingCapacity ? remainingCapacity
+				int length = remaining > remainingCapacity
+						? remainingCapacity
 						: remaining;
 				responseValue.fillData(buffer, length);
 				return false;

@@ -24,8 +24,8 @@ public class AWSUtils {
 	public static ClusterConfigration parseConfiguration(String line) {
 		String[] lines = line.trim().split("(?:\\r?\\n)");
 		if (lines.length < 2) {
-			throw new IllegalArgumentException("Incorrect config response:"
-					+ line);
+			throw new IllegalArgumentException(
+					"Incorrect config response:" + line);
 		}
 		String configversion = lines[0];
 		String nodeListStr = lines[1];
@@ -44,12 +44,12 @@ public class AWSUtils {
 			int firstDelimiter = nodeStr.indexOf(DELIMITER);
 			int secondDelimiter = nodeStr.lastIndexOf(DELIMITER);
 			if (firstDelimiter < 1 || firstDelimiter == secondDelimiter) {
-				throw new IllegalArgumentException("Invalid server ''"
-						+ nodeStr + "'' in response:  " + line);
+				throw new IllegalArgumentException("Invalid server ''" + nodeStr
+						+ "'' in response:  " + line);
 			}
 			String hostName = nodeStr.substring(0, firstDelimiter).trim();
-			String ipAddress = nodeStr.substring(firstDelimiter + 1,
-					secondDelimiter).trim();
+			String ipAddress = nodeStr
+					.substring(firstDelimiter + 1, secondDelimiter).trim();
 			String portNum = nodeStr.substring(secondDelimiter + 1).trim();
 			int port = Integer.parseInt(portNum);
 			nodeList.add(new CacheNode(hostName, ipAddress, port));

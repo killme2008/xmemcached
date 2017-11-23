@@ -63,8 +63,8 @@ public class MemcachedClientStateListenerIT extends TestCase {
 			while (memcachedClient.getAvaliableServers().size() < list.size())
 				wait(1000);
 		}
-		assertEquals(1 + memcachedClient.getAvaliableServers().size(), listener
-				.getNum());
+		assertEquals(1 + memcachedClient.getAvaliableServers().size(),
+				listener.getNum());
 	}
 
 	public void testDisconnected() throws Exception {
@@ -81,9 +81,9 @@ public class MemcachedClientStateListenerIT extends TestCase {
 		Thread.sleep(2000);
 		memcachedClient.shutdown();
 		synchronized (this) {
-			
-			while (memcachedClient.getAvaliableServers().size() > 0){
-				//System.out.println(memcachedClient.getAvaliableServers().size());
+
+			while (memcachedClient.getAvaliableServers().size() > 0) {
+				// System.out.println(memcachedClient.getAvaliableServers().size());
 				wait(1000);
 			}
 		}

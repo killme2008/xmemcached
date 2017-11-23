@@ -21,7 +21,6 @@ package com.google.code.yanf4j.test.unittest.buffer;
 
 import java.io.Serializable;
 
-
 /**
  * The parent class of {@link Bar}. It is used to test the serialization of
  * inherited object in {@link IoBufferTest}.
@@ -32,17 +31,15 @@ import java.io.Serializable;
  */
 public class Foo implements Serializable {
 
-    private static final long serialVersionUID = 6467037996528575216L;
+	private static final long serialVersionUID = 6467037996528575216L;
 
-    private int fooValue;
+	private int fooValue;
 
+	public int getFooValue() {
+		return fooValue;
+	}
 
-    public int getFooValue() {
-        return fooValue;
-    }
-
-
-    public void setFooValue(int fooValue) {
-        this.fooValue = fooValue;
-    }
+	public void setFooValue(int fooValue) {
+		this.fooValue = fooValue;
+	}
 }

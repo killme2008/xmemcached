@@ -7,8 +7,9 @@ import java.util.Date;
 /**
  * Transcoder that serializes and compresses objects.
  */
-public class SerializingTranscoder extends BaseSerializingTranscoder implements
-		Transcoder<Object> {
+public class SerializingTranscoder extends BaseSerializingTranscoder
+		implements
+			Transcoder<Object> {
 
 	public void setPackZeros(boolean packZeros) {
 		this.transcoderUtils.setPackZeros(packZeros);
@@ -92,7 +93,8 @@ public class SerializingTranscoder extends BaseSerializingTranscoder implements
 		return obj;
 	}
 
-	protected final Object decode0(CachedData cachedData,byte[] data, int flags) {
+	protected final Object decode0(CachedData cachedData, byte[] data,
+			int flags) {
 		Object rv = null;
 		if ((cachedData.flag & SERIALIZED) != 0 && data != null) {
 			rv = deserialize(data);
@@ -104,38 +106,39 @@ public class SerializingTranscoder extends BaseSerializingTranscoder implements
 			}
 			if (flags != 0 && data != null) {
 				switch (flags) {
-				case SPECIAL_BOOLEAN:
-					rv = Boolean.valueOf(this.transcoderUtils
-							.decodeBoolean(data));
-					break;
-				case SPECIAL_INT:
-					rv = Integer.valueOf(this.transcoderUtils.decodeInt(data));
-					break;
-				case SPECIAL_LONG:
-					rv = Long.valueOf(this.transcoderUtils.decodeLong(data));
-					break;
-				case SPECIAL_BYTE:
-					rv = Byte.valueOf(this.transcoderUtils.decodeByte(data));
-					break;
-				case SPECIAL_FLOAT:
-					rv = new Float(Float.intBitsToFloat(this.transcoderUtils
-							.decodeInt(data)));
-					break;
-				case SPECIAL_DOUBLE:
-					rv = new Double(Double
-							.longBitsToDouble(this.transcoderUtils
-									.decodeLong(data)));
-					break;
-				case SPECIAL_DATE:
-					rv = new Date(this.transcoderUtils.decodeLong(data));
-					break;
-				case SPECIAL_BYTEARRAY:
-					rv = data;
-					break;
-				default:
-					log
-							.warn(String.format("Undecodeable with flags %x",
-									flags));
+					case SPECIAL_BOOLEAN :
+						rv = Boolean.valueOf(
+								this.transcoderUtils.decodeBoolean(data));
+						break;
+					case SPECIAL_INT :
+						rv = Integer
+								.valueOf(this.transcoderUtils.decodeInt(data));
+						break;
+					case SPECIAL_LONG :
+						rv = Long
+								.valueOf(this.transcoderUtils.decodeLong(data));
+						break;
+					case SPECIAL_BYTE :
+						rv = Byte
+								.valueOf(this.transcoderUtils.decodeByte(data));
+						break;
+					case SPECIAL_FLOAT :
+						rv = new Float(Float.intBitsToFloat(
+								this.transcoderUtils.decodeInt(data)));
+						break;
+					case SPECIAL_DOUBLE :
+						rv = new Double(Double.longBitsToDouble(
+								this.transcoderUtils.decodeLong(data)));
+						break;
+					case SPECIAL_DATE :
+						rv = new Date(this.transcoderUtils.decodeLong(data));
+						break;
+					case SPECIAL_BYTEARRAY :
+						rv = data;
+						break;
+					default :
+						log.warn(String.format("Undecodeable with flags %x",
+								flags));
 				}
 			} else {
 				rv = decodeString(data);
@@ -189,16 +192,16 @@ public class SerializingTranscoder extends BaseSerializingTranscoder implements
 			if (this.primitiveAsString) {
 				b = encodeString(o.toString());
 			} else {
-				b = this.transcoderUtils.encodeInt(Float
-						.floatToRawIntBits((Float) o));
+				b = this.transcoderUtils
+						.encodeInt(Float.floatToRawIntBits((Float) o));
 			}
 			flags |= SPECIAL_FLOAT;
 		} else if (o instanceof Double) {
 			if (this.primitiveAsString) {
 				b = encodeString(o.toString());
 			} else {
-				b = this.transcoderUtils.encodeLong(Double
-						.doubleToRawLongBits((Double) o));
+				b = this.transcoderUtils
+						.encodeLong(Double.doubleToRawLongBits((Double) o));
 			}
 			flags |= SPECIAL_DOUBLE;
 		} else if (o instanceof byte[]) {

@@ -13,7 +13,7 @@ public class MockEncodeTimeoutBinaryGetCommand extends BinaryGetCommand {
 			CommandType cmdType, CountDownLatch latch, OpCode opCode,
 			boolean noreply, long sleepTime) {
 		super(key, keyBytes, cmdType, latch, opCode, noreply);
-		this.sleepTime=sleepTime;
+		this.sleepTime = sleepTime;
 	}
 
 	@Override

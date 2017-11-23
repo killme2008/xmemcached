@@ -139,16 +139,19 @@ public final class SystemUtils {
 
 	}
 
-	public static final String getRawAddress(InetSocketAddress inetSocketAddress) {
+	public static final String getRawAddress(
+			InetSocketAddress inetSocketAddress) {
 		InetAddress address = inetSocketAddress.getAddress();
-		return address != null ? address.getHostAddress() : inetSocketAddress
-				.getHostName();
+		return address != null
+				? address.getHostAddress()
+				: inetSocketAddress.getHostName();
 	}
 
 	public static final Queue<?> createTransferQueue() {
 		try {
-			return (Queue<?>) Class.forName(
-					"java.util.concurrent.LinkedTransferQueue").newInstance();
+			return (Queue<?>) Class
+					.forName("java.util.concurrent.LinkedTransferQueue")
+					.newInstance();
 		} catch (Exception e) {
 			return new LinkedTransferQueue<Object>();
 		}

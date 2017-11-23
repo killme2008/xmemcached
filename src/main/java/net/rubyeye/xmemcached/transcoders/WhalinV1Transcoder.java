@@ -10,8 +10,9 @@ import java.util.Date;
  * @author bpartensky
  * @since Oct 16, 2008
  */
-public class WhalinV1Transcoder extends BaseSerializingTranscoder implements
-		Transcoder<Object> {
+public class WhalinV1Transcoder extends BaseSerializingTranscoder
+		implements
+			Transcoder<Object> {
 
 	public static final int SPECIAL_BYTE = 1;
 	public static final int SPECIAL_BOOLEAN = 2;
@@ -28,7 +29,6 @@ public class WhalinV1Transcoder extends BaseSerializingTranscoder implements
 	public static final int COMPRESSED = 2;
 	public static final int SERIALIZED = 8;
 
-
 	public void setPackZeros(boolean packZeros) {
 		throw new UnsupportedOperationException();
 
@@ -44,7 +44,6 @@ public class WhalinV1Transcoder extends BaseSerializingTranscoder implements
 	public boolean isPrimitiveAsString() {
 		return false;
 	}
-
 
 	public CachedData encode(Object o) {
 		byte[] b = null;
@@ -83,15 +82,14 @@ public class WhalinV1Transcoder extends BaseSerializingTranscoder implements
 		if (b.length > this.compressionThreshold) {
 			byte[] compressed = compress(b);
 			if (compressed.length < b.length) {
-				log.debug(String.format("Compressed %s from %d to %d", o
-						.getClass().getName(), b.length, compressed.length));
+				log.debug(String.format("Compressed %s from %d to %d",
+						o.getClass().getName(), b.length, compressed.length));
 				b = compressed;
 				flags |= COMPRESSED;
 			} else {
 				log.debug(String.format(
-						"Compression increased the size of %s from %d to %d", o
-								.getClass().getName(), b.length,
-						compressed.length));
+						"Compression increased the size of %s from %d to %d",
+						o.getClass().getName(), b.length, compressed.length));
 			}
 		}
 		return new CachedData(flags, b);
@@ -108,44 +106,45 @@ public class WhalinV1Transcoder extends BaseSerializingTranscoder implements
 		} else {
 			int f = data[0];
 			switch (f) {
-			case SPECIAL_BOOLEAN:
-				rv = decodeBoolean(data);
-				break;
-			case SPECIAL_INTEGER:
-				rv = decodeInteger(data);
-				break;
-			case SPECIAL_SHORT:
-				rv = decodeShort(data);
-				break;
-			case SPECIAL_LONG:
-				rv = decodeLong(data);
-				break;
-			case SPECIAL_DATE:
-				rv = new Date(decodeLong(data));
-				break;
-			case SPECIAL_BYTE:
-				rv = decodeByte(data);
-				break;
-			case SPECIAL_FLOAT:
-				rv = decodeFloat(data);
-				break;
-			case SPECIAL_DOUBLE:
-				rv = decodeDouble(data);
-				break;
-			case SPECIAL_STRING:
-				rv = decodeW1String(data);
-				break;
-			case SPECIAL_STRINGBUFFER:
-				rv = new StringBuffer(decodeW1String(data));
-				break;
-			case SPECIAL_STRINGBUILDER:
-				rv = new StringBuilder(decodeW1String(data));
-				break;
-			case SPECIAL_CHARACTER:
-				rv = decodeCharacter(data);
-				break;
-			default:
-				log.warn(String.format("Cannot handle data with flags %x", f));
+				case SPECIAL_BOOLEAN :
+					rv = decodeBoolean(data);
+					break;
+				case SPECIAL_INTEGER :
+					rv = decodeInteger(data);
+					break;
+				case SPECIAL_SHORT :
+					rv = decodeShort(data);
+					break;
+				case SPECIAL_LONG :
+					rv = decodeLong(data);
+					break;
+				case SPECIAL_DATE :
+					rv = new Date(decodeLong(data));
+					break;
+				case SPECIAL_BYTE :
+					rv = decodeByte(data);
+					break;
+				case SPECIAL_FLOAT :
+					rv = decodeFloat(data);
+					break;
+				case SPECIAL_DOUBLE :
+					rv = decodeDouble(data);
+					break;
+				case SPECIAL_STRING :
+					rv = decodeW1String(data);
+					break;
+				case SPECIAL_STRINGBUFFER :
+					rv = new StringBuffer(decodeW1String(data));
+					break;
+				case SPECIAL_STRINGBUILDER :
+					rv = new StringBuilder(decodeW1String(data));
+					break;
+				case SPECIAL_CHARACTER :
+					rv = decodeCharacter(data);
+					break;
+				default :
+					log.warn(String.format("Cannot handle data with flags %x",
+							f));
 			}
 		}
 		return rv;

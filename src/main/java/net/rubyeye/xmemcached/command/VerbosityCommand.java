@@ -23,7 +23,7 @@ public abstract class VerbosityCommand extends Command {
 	public VerbosityCommand(CountDownLatch latch, int level, boolean noreply) {
 		super(CommandType.VERBOSITY, latch);
 		this.level = level;
-		this.key="[verbosity]";
+		this.key = "[verbosity]";
 		this.noreply = noreply;
 	}
 

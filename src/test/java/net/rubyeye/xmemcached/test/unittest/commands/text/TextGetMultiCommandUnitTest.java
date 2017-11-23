@@ -48,28 +48,27 @@ public class TextGetMultiCommandUnitTest extends BaseTextCommandUnitTest {
 				.createGetMultiCommand(keys, new CountDownLatch(1),
 						CommandType.GET_MANY, transcoder);
 		checkDecodeNullAndNotLineByteBuffer(command);
-		checkDecodeInvalidLine(command,"test1", "STORED\r\n");
-		checkDecodeInvalidLine(command,"test1", "NOT_FOUND\r\n");
-		checkDecodeInvalidLine(command,"test1", "NOT_STORED\r\n");
-		checkDecodeInvalidLine(command, "test1","DELETED\r\n");
+		checkDecodeInvalidLine(command, "test1", "STORED\r\n");
+		checkDecodeInvalidLine(command, "test1", "NOT_FOUND\r\n");
+		checkDecodeInvalidLine(command, "test1", "NOT_STORED\r\n");
+		checkDecodeInvalidLine(command, "test1", "DELETED\r\n");
 
 		checkDecodeValidLine(command, "END\r\n");
 		assertEquals(0, ((Map) command.getResult()).size());
 		// data not complelte
-		command.setParseStatus(net.rubyeye.xmemcached.command.text.TextGetCommand.ParseStatus.NULL);
-		assertFalse(command.decode(null, ByteBuffer
-				.wrap("VALUE test1 0 2\r\n10\r\nVALUE test2 0 4\r\n10"
-						.getBytes())));
+		command.setParseStatus(
+				net.rubyeye.xmemcached.command.text.TextGetCommand.ParseStatus.NULL);
+		assertFalse(command.decode(null, ByteBuffer.wrap(
+				"VALUE test1 0 2\r\n10\r\nVALUE test2 0 4\r\n10".getBytes())));
 		// data coming,but not with END
 		assertFalse(command.decode(null, ByteBuffer.wrap("00\r\n".getBytes())));
 		checkDecodeValidLine(command, "END\r\n");
 
 		assertEquals(2, ((Map) command.getResult()).size());
-		assertEquals("10", transcoder.decode(((Map<String, CachedData>) command
-				.getResult()).get("test1")));
-		assertEquals("1000", transcoder
-				.decode(((Map<String, CachedData>) command.getResult())
-						.get("test2")));
+		assertEquals("10", transcoder.decode(
+				((Map<String, CachedData>) command.getResult()).get("test1")));
+		assertEquals("1000", transcoder.decode(
+				((Map<String, CachedData>) command.getResult()).get("test2")));
 	}
 
 	public void testGetsManyDecode() {
@@ -77,14 +76,15 @@ public class TextGetMultiCommandUnitTest extends BaseTextCommandUnitTest {
 				.createGetMultiCommand(keys, new CountDownLatch(1),
 						CommandType.GETS_MANY, transcoder);
 		checkDecodeNullAndNotLineByteBuffer(command);
-		checkDecodeInvalidLine(command,"test1", "STORED\r\n");
-		checkDecodeInvalidLine(command,"test1", "NOT_FOUND\r\n");
-		checkDecodeInvalidLine(command,"test1", "NOT_STORED\r\n");
-		checkDecodeInvalidLine(command, "test1","DELETED\r\n");
+		checkDecodeInvalidLine(command, "test1", "STORED\r\n");
+		checkDecodeInvalidLine(command, "test1", "NOT_FOUND\r\n");
+		checkDecodeInvalidLine(command, "test1", "NOT_STORED\r\n");
+		checkDecodeInvalidLine(command, "test1", "DELETED\r\n");
 
 		checkDecodeValidLine(command, "END\r\n");
 		assertEquals(0, ((Map) command.getResult()).size());
-		command.setParseStatus(net.rubyeye.xmemcached.command.text.TextGetCommand.ParseStatus.NULL);
+		command.setParseStatus(
+				net.rubyeye.xmemcached.command.text.TextGetCommand.ParseStatus.NULL);
 		// data not complelte
 		assertFalse(command.decode(null, ByteBuffer
 				.wrap("VALUE test1 0 2 999\r\n10\r\nVALUE test2 0 4 1000\r\n10"
@@ -94,14 +94,13 @@ public class TextGetMultiCommandUnitTest extends BaseTextCommandUnitTest {
 		checkDecodeValidLine(command, "END\r\n");
 
 		assertEquals(2, ((Map) command.getResult()).size());
-		assertEquals(999, ((Map<String, CachedData>) command.getResult()).get(
-				"test1").getCas());
-		assertEquals(1000, ((Map<String, CachedData>) command.getResult()).get(
-				"test2").getCas());
-		assertEquals("10", transcoder.decode(((Map<String, CachedData>) command
-				.getResult()).get("test1")));
-		assertEquals("1000", transcoder
-				.decode(((Map<String, CachedData>) command.getResult())
-						.get("test2")));
+		assertEquals(999, ((Map<String, CachedData>) command.getResult())
+				.get("test1").getCas());
+		assertEquals(1000, ((Map<String, CachedData>) command.getResult())
+				.get("test2").getCas());
+		assertEquals("10", transcoder.decode(
+				((Map<String, CachedData>) command.getResult()).get("test1")));
+		assertEquals("1000", transcoder.decode(
+				((Map<String, CachedData>) command.getResult()).get("test2")));
 	}
 }

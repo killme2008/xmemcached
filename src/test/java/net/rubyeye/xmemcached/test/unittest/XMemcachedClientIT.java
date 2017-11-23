@@ -147,7 +147,8 @@ public abstract class XMemcachedClientIT extends TestCase {
 		new TooLongKeyChecker(memcachedClient) {
 			@Override
 			public void call() throws Exception {
-				int keyLength = memcachedClient.getProtocol() == Protocol.Text ? 256
+				int keyLength = memcachedClient.getProtocol() == Protocol.Text
+						? 256
 						: 65536;
 				StringBuilder sb = new StringBuilder();
 				for (int i = 0; i < keyLength; i++) {
@@ -212,7 +213,8 @@ public abstract class XMemcachedClientIT extends TestCase {
 		new TooLongKeyChecker(memcachedClient) {
 			@Override
 			public void call() throws Exception {
-				int keyLength = memcachedClient.getProtocol() == Protocol.Text ? 256
+				int keyLength = memcachedClient.getProtocol() == Protocol.Text
+						? 256
 						: 65536;
 				StringBuilder sb = new StringBuilder();
 				for (int i = 0; i < keyLength; i++) {
@@ -256,7 +258,8 @@ public abstract class XMemcachedClientIT extends TestCase {
 		new TooLongKeyChecker(memcachedClient) {
 			@Override
 			public void call() throws Exception {
-				int keyLength = memcachedClient.getProtocol() == Protocol.Text ? 256
+				int keyLength = memcachedClient.getProtocol() == Protocol.Text
+						? 256
 						: 65536;
 				StringBuilder sb = new StringBuilder();
 				for (int i = 0; i < keyLength; i++) {
@@ -268,8 +271,8 @@ public abstract class XMemcachedClientIT extends TestCase {
 
 	}
 
-	public void testStoreCollection() throws TimeoutException,
-			InterruptedException, MemcachedException {
+	public void testStoreCollection()
+			throws TimeoutException, InterruptedException, MemcachedException {
 		// store list
 		List<String> list = new ArrayList<String>();
 		for (int i = 0; i < 100; i++) {
@@ -342,7 +345,8 @@ public abstract class XMemcachedClientIT extends TestCase {
 		new TooLongKeyChecker(memcachedClient) {
 			@Override
 			public void call() throws Exception {
-				int keyLength = memcachedClient.getProtocol() == Protocol.Text ? 256
+				int keyLength = memcachedClient.getProtocol() == Protocol.Text
+						? 256
 						: 65536;
 				StringBuilder sb = new StringBuilder();
 				for (int i = 0; i < keyLength; i++) {
@@ -406,7 +410,8 @@ public abstract class XMemcachedClientIT extends TestCase {
 		new TooLongKeyChecker(memcachedClient) {
 			@Override
 			public void call() throws Exception {
-				int keyLength = memcachedClient.getProtocol() == Protocol.Text ? 256
+				int keyLength = memcachedClient.getProtocol() == Protocol.Text
+						? 256
 						: 65536;
 				StringBuilder sb = new StringBuilder();
 				for (int i = 0; i < keyLength; i++) {
@@ -429,8 +434,8 @@ public abstract class XMemcachedClientIT extends TestCase {
 			@Override
 			public void call() throws Exception {
 				memcachedClient.set("name", 0, 1);
-				memcachedClient
-						.replace("name", 0, "xmemcached", mockTranscoder);
+				memcachedClient.replace("name", 0, "xmemcached",
+						mockTranscoder);
 				assertEquals("xmemcached",
 						memcachedClient.get("name", mockTranscoder));
 
@@ -476,7 +481,8 @@ public abstract class XMemcachedClientIT extends TestCase {
 		new TooLongKeyChecker(memcachedClient) {
 			@Override
 			public void call() throws Exception {
-				int keyLength = memcachedClient.getProtocol() == Protocol.Text ? 256
+				int keyLength = memcachedClient.getProtocol() == Protocol.Text
+						? 256
 						: 65536;
 				StringBuilder sb = new StringBuilder();
 				for (int i = 0; i < keyLength; i++) {
@@ -593,7 +599,8 @@ public abstract class XMemcachedClientIT extends TestCase {
 		new TooLongKeyChecker(memcachedClient) {
 			@Override
 			public void call() throws Exception {
-				int keyLength = memcachedClient.getProtocol() == Protocol.Text ? 256
+				int keyLength = memcachedClient.getProtocol() == Protocol.Text
+						? 256
 						: 65536;
 				StringBuilder sb = new StringBuilder();
 				for (int i = 0; i < keyLength; i++) {
@@ -654,18 +661,18 @@ public abstract class XMemcachedClientIT extends TestCase {
 	public void testSetLoggingLevelVerbosity() throws Exception {
 		if (memcachedClient.getProtocol() == Protocol.Text
 				|| memcachedClient.getProtocol() == Protocol.Binary) {
-			memcachedClient.setLoggingLevelVerbosity(
-					AddrUtil.getAddresses(
+			memcachedClient.setLoggingLevelVerbosity(AddrUtil
+					.getAddresses(
 							properties.getProperty("test.memcached.servers"))
-							.get(0), 2);
-			memcachedClient.setLoggingLevelVerbosityWithNoReply(
-					AddrUtil.getAddresses(
+					.get(0), 2);
+			memcachedClient.setLoggingLevelVerbosityWithNoReply(AddrUtil
+					.getAddresses(
 							properties.getProperty("test.memcached.servers"))
-							.get(0), 3);
-			memcachedClient.setLoggingLevelVerbosityWithNoReply(
-					AddrUtil.getAddresses(
+					.get(0), 3);
+			memcachedClient.setLoggingLevelVerbosityWithNoReply(AddrUtil
+					.getAddresses(
 							properties.getProperty("test.memcached.servers"))
-							.get(0), 0);
+					.get(0), 0);
 		} else {
 			// do nothing,binary protocol doesn't have verbosity protocol.
 		}
@@ -677,7 +684,8 @@ public abstract class XMemcachedClientIT extends TestCase {
 			memcachedClient.incr("a", 1);
 			fail();
 		} catch (MemcachedException e) {
-			// assertEquals("cannot increment or decrement non-numeric value",e.getMessage());
+			// assertEquals("cannot increment or decrement non-numeric
+			// value",e.getMessage());
 		}
 		memcachedClient.set("a", 0, "1");
 		assertEquals(3, memcachedClient.incr("a", 2));
@@ -739,7 +747,8 @@ public abstract class XMemcachedClientIT extends TestCase {
 		new TooLongKeyChecker(memcachedClient) {
 			@Override
 			public void call() throws Exception {
-				int keyLength = memcachedClient.getProtocol() == Protocol.Text ? 256
+				int keyLength = memcachedClient.getProtocol() == Protocol.Text
+						? 256
 						: 65536;
 				StringBuilder sb = new StringBuilder();
 				for (int i = 0; i < keyLength; i++) {
@@ -803,7 +812,8 @@ public abstract class XMemcachedClientIT extends TestCase {
 		new TooLongKeyChecker(memcachedClient) {
 			@Override
 			public void call() throws Exception {
-				int keyLength = memcachedClient.getProtocol() == Protocol.Text ? 256
+				int keyLength = memcachedClient.getProtocol() == Protocol.Text
+						? 256
 						: 65536;
 				StringBuilder sb = new StringBuilder();
 				for (int i = 0; i < keyLength; i++) {
@@ -872,7 +882,8 @@ public abstract class XMemcachedClientIT extends TestCase {
 		new TooLongKeyChecker(memcachedClient) {
 			@Override
 			public void call() throws Exception {
-				int keyLength = memcachedClient.getProtocol() == Protocol.Text ? 256
+				int keyLength = memcachedClient.getProtocol() == Protocol.Text
+						? 256
 						: 65536;
 				StringBuilder sb = new StringBuilder();
 				for (int i = 0; i < keyLength; i++) {
@@ -895,17 +906,16 @@ public abstract class XMemcachedClientIT extends TestCase {
 			errorCommand = new MockErrorTextGetOneCommand(key, key.getBytes(),
 					CommandType.GET_ONE, latch);
 		} else {
-			errorCommand = new MockErrorBinaryGetOneCommand(key,
-					key.getBytes(), CommandType.GET_ONE, latch, OpCode.GET,
-					false);
+			errorCommand = new MockErrorBinaryGetOneCommand(key, key.getBytes(),
+					CommandType.GET_ONE, latch, OpCode.GET, false);
 		}
 		memcachedClient.getConnector().send((Command) errorCommand);
 		latch.await(MemcachedClient.DEFAULT_OP_TIMEOUT, TimeUnit.MILLISECONDS);
 		assertTrue(errorCommand.isDecoded());
 		// wait for reconnecting
 		Thread.sleep(2000 * 3);
-		assertEquals(currentServerCount, memcachedClient.getAvaliableServers()
-				.size());
+		assertEquals(currentServerCount,
+				memcachedClient.getAvaliableServers().size());
 		// It works
 		assertEquals("dennis", memcachedClient.get(key));
 	}
@@ -984,8 +994,8 @@ public abstract class XMemcachedClientIT extends TestCase {
 					e.getMessage());
 		}
 
-		memcachedClient.addServer(properties
-				.getProperty("test.memcached.servers"));
+		memcachedClient
+				.addServer(properties.getProperty("test.memcached.servers"));
 		synchronized (this) {
 			while (memcachedClient.getAvaliableServers().size() < AddrUtil
 					.getAddresses(servers).size()) {
@@ -1015,8 +1025,8 @@ public abstract class XMemcachedClientIT extends TestCase {
 			assertEquals(i, memcachedClient.get(String.valueOf(i)));
 		}
 
-		List<InetSocketAddress> addressList = AddrUtil.getAddresses(properties
-				.getProperty("test.memcached.servers"));
+		List<InetSocketAddress> addressList = AddrUtil
+				.getAddresses(properties.getProperty("test.memcached.servers"));
 		Map<InetSocketAddress, Map<String, String>> newStats = memcachedClient
 				.getStats();
 		for (InetSocketAddress address : addressList) {
@@ -1037,7 +1047,8 @@ public abstract class XMemcachedClientIT extends TestCase {
 		Command nonexisCmd = new Command() {
 
 			@Override
-			public boolean decode(MemcachedTCPSession session, ByteBuffer buffer) {
+			public boolean decode(MemcachedTCPSession session,
+					ByteBuffer buffer) {
 				return decodeError(ByteUtils.nextLine(buffer));
 			}
 
@@ -1057,7 +1068,8 @@ public abstract class XMemcachedClientIT extends TestCase {
 		assertNotNull(nonexisCmd.getException());
 		assertEquals("Nonexist command,check your memcached version please.",
 				nonexisCmd.getException().getMessage());
-		assertTrue(nonexisCmd.getException() instanceof UnknownCommandException);
+		assertTrue(
+				nonexisCmd.getException() instanceof UnknownCommandException);
 
 		memcachedClient.set("name", 0, "dennis");
 		assertEquals("dennis", memcachedClient.get("name"));
@@ -1067,8 +1079,8 @@ public abstract class XMemcachedClientIT extends TestCase {
 		Collection<InetSocketAddress> servers = memcachedClient
 				.getAvaliableServers();
 
-		List<InetSocketAddress> serverList = AddrUtil.getAddresses(properties
-				.getProperty("test.memcached.servers"));
+		List<InetSocketAddress> serverList = AddrUtil
+				.getAddresses(properties.getProperty("test.memcached.servers"));
 		assertEquals(servers.size(), serverList.size());
 		for (InetSocketAddress address : servers) {
 			assertTrue(serverList.contains(address));
@@ -1184,40 +1196,40 @@ public abstract class XMemcachedClientIT extends TestCase {
 		assertTrue(this.memcachedClient.delete("counter"));
 	}
 
-//	public void testKeyIterator() throws Exception {
-//		if (memcachedClient.getProtocol() == Protocol.Text) {
-//			Collection<InetSocketAddress> avaliableServers = memcachedClient
-//					.getAvaliableServers();
-//			InetSocketAddress address = avaliableServers.iterator().next();
-//			KeyIterator it = memcachedClient.getKeyIterator(address);
-//			while (it.hasNext()) {
-//				memcachedClient.delete(it.next());
-//			}
-//			it = memcachedClient.getKeyIterator(address);
-//			Assert.assertFalse(it.hasNext());
-//			try {
-//				it.next();
-//				Assert.fail();
-//			} catch (NoSuchElementException e) {
-//				Assert.assertTrue(true);
-//			}
-//			for (int i = 0; i < 10; i++) {
-//				memcachedClient.set(String.valueOf(i), 0, i);
-//			}
-//			it = memcachedClient.getKeyIterator(address);
-//			Assert.assertTrue(it.hasNext());
-//			Assert.assertEquals(address, it.getServerAddress());
-//			while (it.hasNext()) {
-//				String key = it.next();
-//				Assert.assertEquals(Integer.parseInt(key),
-//						memcachedClient.get(key));
-//			}
-//			Assert.assertFalse(it.hasNext());
-//		} else {
-//			// ignore
-//		}
-//
-//	}
+	// public void testKeyIterator() throws Exception {
+	// if (memcachedClient.getProtocol() == Protocol.Text) {
+	// Collection<InetSocketAddress> avaliableServers = memcachedClient
+	// .getAvaliableServers();
+	// InetSocketAddress address = avaliableServers.iterator().next();
+	// KeyIterator it = memcachedClient.getKeyIterator(address);
+	// while (it.hasNext()) {
+	// memcachedClient.delete(it.next());
+	// }
+	// it = memcachedClient.getKeyIterator(address);
+	// Assert.assertFalse(it.hasNext());
+	// try {
+	// it.next();
+	// Assert.fail();
+	// } catch (NoSuchElementException e) {
+	// Assert.assertTrue(true);
+	// }
+	// for (int i = 0; i < 10; i++) {
+	// memcachedClient.set(String.valueOf(i), 0, i);
+	// }
+	// it = memcachedClient.getKeyIterator(address);
+	// Assert.assertTrue(it.hasNext());
+	// Assert.assertEquals(address, it.getServerAddress());
+	// while (it.hasNext()) {
+	// String key = it.next();
+	// Assert.assertEquals(Integer.parseInt(key),
+	// memcachedClient.get(key));
+	// }
+	// Assert.assertFalse(it.hasNext());
+	// } else {
+	// // ignore
+	// }
+	//
+	// }
 
 	public void testNamespace() throws Exception {
 		String ns = "user-id";
@@ -1275,9 +1287,9 @@ public abstract class XMemcachedClientIT extends TestCase {
 				});
 
 	}
-	
-	public void testNamespaceWithGetMulti()throws Exception{
-		String ns="user";
+
+	public void testNamespaceWithGetMulti() throws Exception {
+		String ns = "user";
 		this.memcachedClient.withNamespace(ns,
 				new MemcachedClientCallable<Void>() {
 
@@ -1287,11 +1299,12 @@ public abstract class XMemcachedClientIT extends TestCase {
 						client.set("a", 0, 1);
 						client.set("b", 0, 2);
 						client.set("c", 0, 3);
-						Map<String, Object> values = client.get(Arrays.asList("a","b","c"));
-						assertEquals(3,values.size());
-						assertEquals(1,values.get("a"));
-						assertEquals(2,values.get("b"));
-						assertEquals(3,values.get("c"));
+						Map<String, Object> values = client
+								.get(Arrays.asList("a", "b", "c"));
+						assertEquals(3, values.size());
+						assertEquals(1, values.get("a"));
+						assertEquals(2, values.get("b"));
+						assertEquals(3, values.get("c"));
 						return null;
 					}
 				});

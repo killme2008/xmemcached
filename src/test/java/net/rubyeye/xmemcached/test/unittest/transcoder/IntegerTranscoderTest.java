@@ -9,12 +9,12 @@ import junit.framework.TestCase;
  */
 public class IntegerTranscoderTest extends TestCase {
 
-	private IntegerTranscoder tc=null;
+	private IntegerTranscoder tc = null;
 
 	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
-		tc=new IntegerTranscoder();
+		tc = new IntegerTranscoder();
 	}
 
 	public void testInt() throws Exception {
@@ -22,8 +22,8 @@ public class IntegerTranscoderTest extends TestCase {
 	}
 
 	public void testBadFlags() throws Exception {
-		CachedData cd=tc.encode(9284);
-		assertNull(tc.decode(new CachedData(cd.getFlag()+1, cd.getData(),
-				CachedData.MAX_SIZE,-1)));
+		CachedData cd = tc.encode(9284);
+		assertNull(tc.decode(new CachedData(cd.getFlag() + 1, cd.getData(),
+				CachedData.MAX_SIZE, -1)));
 	}
 }

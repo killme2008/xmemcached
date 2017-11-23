@@ -44,8 +44,8 @@ import com.google.code.yanf4j.buffer.IoBuffer;
  * 
  */
 public class TextStatsCommand extends Command implements ServerAddressAware {
-	public static final ByteBuffer STATS = ByteBuffer.wrap("stats\r\n"
-			.getBytes());
+	public static final ByteBuffer STATS = ByteBuffer
+			.wrap("stats\r\n".getBytes());
 	private InetSocketAddress server;
 	private String itemName;
 
@@ -77,12 +77,14 @@ public class TextStatsCommand extends Command implements ServerAddressAware {
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public final boolean decode(MemcachedTCPSession session, ByteBuffer buffer) {
+	public final boolean decode(MemcachedTCPSession session,
+			ByteBuffer buffer) {
 		String line = null;
 		while ((line = ByteUtils.nextLine(buffer)) != null) {
 			if (line.equals("END")) { // at the end
 				return done(session);
-			} else if (line.startsWith("STAT") || line.startsWith("PREFIX") || line.startsWith("ITEM") ) {
+			} else if (line.startsWith("STAT") || line.startsWith("PREFIX")
+					|| line.startsWith("ITEM")) {
 				// Fixed issue 126
 				String[] items = line.split(" ");
 				((Map<String, String>) getResult()).put(items[1], items[2]);

@@ -58,8 +58,8 @@ public class AWSElasticCacheClientIT extends TestCase {
 	public void setUp() throws Exception {
 		Properties properties = ResourcesUtils
 				.getResourceAsProperties("test.properties");
-		List<InetSocketAddress> addresses = AddrUtil.getAddresses(properties
-				.getProperty("test.memcached.servers"));
+		List<InetSocketAddress> addresses = AddrUtil
+				.getAddresses(properties.getProperty("test.memcached.servers"));
 		StringBuffer sb = new StringBuffer();
 		boolean wasFirst = true;
 		for (InetSocketAddress addr : addresses) {

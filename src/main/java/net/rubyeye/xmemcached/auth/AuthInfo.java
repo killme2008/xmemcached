@@ -11,8 +11,8 @@ import javax.security.auth.callback.CallbackHandler;
 public class AuthInfo {
 	private final CallbackHandler callbackHandler;
 	private final String[] mechanisms;
-	private final int maxAttempts = Integer.parseInt(System.getProperty(
-			"net.rubyeye.xmemcached.auth_max_attempts", "-1"));
+	private final int maxAttempts = Integer.parseInt(System
+			.getProperty("net.rubyeye.xmemcached.auth_max_attempts", "-1"));
 	private int attempts;
 
 	public synchronized boolean isValid() {
@@ -50,7 +50,7 @@ public class AuthInfo {
 	 */
 	public static AuthInfo plain(String username, String password) {
 		return new AuthInfo(new PlainCallbackHandler(username, password),
-				new String[] { "PLAIN" });
+				new String[]{"PLAIN"});
 	}
 
 	/**
@@ -66,7 +66,7 @@ public class AuthInfo {
 	 */
 	public static AuthInfo cramMD5(String username, String password) {
 		return new AuthInfo(new PlainCallbackHandler(username, password),
-				new String[] { "CRAM-MD5" });
+				new String[]{"CRAM-MD5"});
 	}
 
 	/**
@@ -82,7 +82,7 @@ public class AuthInfo {
 	 */
 	public static AuthInfo typical(String username, String password) {
 		return new AuthInfo(new PlainCallbackHandler(username, password),
-				new String[] { "CRAM-MD5", "PLAIN" });
+				new String[]{"CRAM-MD5", "PLAIN"});
 	}
 
 	public CallbackHandler getCallbackHandler() {

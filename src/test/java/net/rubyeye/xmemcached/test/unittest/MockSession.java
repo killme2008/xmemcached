@@ -175,7 +175,6 @@ public class MockSession implements Session {
 	public void setSessionTimeout(long sessionTimeout) {
 	}
 
-
 	public Object setAttributeIfAbsent(String key, Object value) {
 		return null;
 	}

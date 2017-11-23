@@ -29,17 +29,15 @@ package com.google.code.yanf4j.test.unittest.buffer;
  */
 public class Bar extends Foo {
 
-    private static final long serialVersionUID = -7360624845308368521L;
+	private static final long serialVersionUID = -7360624845308368521L;
 
-    private int barValue;
+	private int barValue;
 
+	public int getBarValue() {
+		return barValue;
+	}
 
-    public int getBarValue() {
-        return barValue;
-    }
-
-
-    public void setBarValue(int barValue) {
-        this.barValue = barValue;
-    }
+	public void setBarValue(int barValue) {
+		this.barValue = barValue;
+	}
 }

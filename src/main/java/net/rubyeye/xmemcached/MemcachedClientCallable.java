@@ -26,6 +26,6 @@ import net.rubyeye.xmemcached.exception.MemcachedException;
  * @param <T>
  */
 public interface MemcachedClientCallable<T> {
-	public T call(MemcachedClient client) throws MemcachedException,
-			InterruptedException, TimeoutException;
+	public T call(MemcachedClient client)
+			throws MemcachedException, InterruptedException, TimeoutException;
 }

@@ -90,12 +90,12 @@ public final class XMemcachedMbeanServer {
 		}
 		String host = System.getProperty("hostName", hostName);
 		try {
-			boolean enableJMX = Boolean.parseBoolean(System.getProperty(
-					Constants.XMEMCACHED_JMX_ENABLE, "false"));
+			boolean enableJMX = Boolean.parseBoolean(System
+					.getProperty(Constants.XMEMCACHED_JMX_ENABLE, "false"));
 			if (enableJMX) {
 				mbserver = ManagementFactory.getPlatformMBeanServer();
-				int port = Integer.parseInt(System.getProperty(
-						Constants.XMEMCACHED_RMI_PORT, "7077"));
+				int port = Integer.parseInt(System
+						.getProperty(Constants.XMEMCACHED_RMI_PORT, "7077"));
 				String rmiName = System.getProperty(
 						Constants.XMEMCACHED_RMI_NAME, "xmemcachedServer");
 				Registry registry = null;
@@ -109,8 +109,8 @@ public final class XMemcachedMbeanServer {
 					registry = LocateRegistry.createRegistry(port);
 				}
 				registry.list();
-				String serverURL = "service:jmx:rmi:///jndi/rmi://" + host
-						+ ":" + port + "/" + rmiName;
+				String serverURL = "service:jmx:rmi:///jndi/rmi://" + host + ":"
+						+ port + "/" + rmiName;
 				JMXServiceURL url = new JMXServiceURL(serverURL);
 				connectorServer = JMXConnectorServerFactory
 						.newJMXConnectorServer(url, null, mbserver);
@@ -120,10 +120,8 @@ public final class XMemcachedMbeanServer {
 					public void run() {
 						try {
 							isHutdownHookCalled = true;
-							if (connectorServer
-									.isActive()) {
-								connectorServer
-										.stop();
+							if (connectorServer.isActive()) {
+								connectorServer.stop();
 								log.warn("JMXConnector stop");
 							}
 						} catch (IOException e) {
@@ -132,7 +130,7 @@ public final class XMemcachedMbeanServer {
 						}
 					}
 				};
-				
+
 				Runtime.getRuntime().addShutdownHook(shutdownHookThread);
 				log.warn("jmx url: " + serverURL);
 			}

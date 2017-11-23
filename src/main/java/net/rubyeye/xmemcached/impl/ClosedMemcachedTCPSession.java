@@ -47,7 +47,6 @@ public class ClosedMemcachedTCPSession implements ClosedMemcachedSession {
 		this.allowReconnect = allow;
 	}
 
-
 	public void clearAttributes() {
 
 	}

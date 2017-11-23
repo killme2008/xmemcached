@@ -65,8 +65,8 @@ public class FailureModeUnitTest {
 		memServer2.setCodecFactory(new TextLineCodecFactory());
 		memServer2.bind(new InetSocketAddress(4798));
 
-		MemcachedClientBuilder builder = new XMemcachedClientBuilder(AddrUtil
-				.getAddressMap("localhost:4799,localhost:4798"));
+		MemcachedClientBuilder builder = new XMemcachedClientBuilder(
+				AddrUtil.getAddressMap("localhost:4799,localhost:4798"));
 		// It must be in failure mode
 		builder.setFailureMode(true);
 		MemcachedClient client = builder.build();
@@ -103,8 +103,8 @@ public class FailureModeUnitTest {
 		memServer2.setCodecFactory(new TextLineCodecFactory());
 		memServer2.bind(new InetSocketAddress(4798));
 
-		MemcachedClientBuilder builder = new XMemcachedClientBuilder(AddrUtil
-				.getAddressMap("localhost:4799 localhost:4798"));
+		MemcachedClientBuilder builder = new XMemcachedClientBuilder(
+				AddrUtil.getAddressMap("localhost:4799 localhost:4798"));
 		// It must be in failure mode
 		builder.setFailureMode(true);
 		MemcachedClient client = builder.build();
@@ -118,18 +118,24 @@ public class FailureModeUnitTest {
 				assertEquals("response from server1", client.get("b"));
 				fail();
 			} catch (MemcachedException e) {
-				assertEquals("Session(127.0.0.1:4799) has been closed", e
-						.getMessage());
+				assertEquals("Session(127.0.0.1:4799) has been closed",
+						e.getMessage());
 			}
-			assertEquals(1, client.getConnector().getSessionByAddress(
-					AddrUtil.getOneAddress("localhost:4799")).size());
+			assertEquals(1,
+					client.getConnector()
+							.getSessionByAddress(
+									AddrUtil.getOneAddress("localhost:4799"))
+							.size());
 			memServer1 = new TCPController();
 			memServer1.setHandler(new MockHandler("response from server1"));
 			memServer1.setCodecFactory(new TextLineCodecFactory());
 			memServer1.bind(new InetSocketAddress(4799));
 			Thread.sleep(5000);
-			assertEquals(1, client.getConnector().getSessionByAddress(
-					AddrUtil.getOneAddress("localhost:4799")).size());
+			assertEquals(1,
+					client.getConnector()
+							.getSessionByAddress(
+									AddrUtil.getOneAddress("localhost:4799"))
+							.size());
 			assertEquals("response from server2", client.get("a"));
 			assertEquals("response from server1", client.get("b"));
 		} finally {
@@ -153,8 +159,8 @@ public class FailureModeUnitTest {
 		memServer2.setCodecFactory(new TextLineCodecFactory());
 		memServer2.bind(new InetSocketAddress(4798));
 
-		MemcachedClientBuilder builder = new XMemcachedClientBuilder(AddrUtil
-				.getAddressMap("localhost:4799,localhost:4798"));
+		MemcachedClientBuilder builder = new XMemcachedClientBuilder(
+				AddrUtil.getAddressMap("localhost:4799,localhost:4798"));
 		// It must be in failure mode
 		builder.setFailureMode(true);
 		MemcachedClient client = builder.build();
@@ -173,8 +179,8 @@ public class FailureModeUnitTest {
 				client.get("a");
 				fail();
 			} catch (MemcachedException e) {
-				assertEquals("Session(127.0.0.1:4799) has been closed", e
-						.getMessage());
+				assertEquals("Session(127.0.0.1:4799) has been closed",
+						e.getMessage());
 				// e.printStackTrace();
 			}
 			// restart server2
@@ -208,8 +214,8 @@ public class FailureModeUnitTest {
 		memServer1.setCodecFactory(new TextLineCodecFactory());
 		memServer1.bind(new InetSocketAddress(4799));
 
-		MemcachedClientBuilder builder = new XMemcachedClientBuilder(AddrUtil
-				.getAddressMap("localhost:4799"));
+		MemcachedClientBuilder builder = new XMemcachedClientBuilder(
+				AddrUtil.getAddressMap("localhost:4799"));
 		builder.setFailureMode(true);
 		MemcachedClient client = builder.build();
 
@@ -225,8 +231,8 @@ public class FailureModeUnitTest {
 				client.get("a");
 				fail();
 			} catch (MemcachedException e) {
-				assertEquals("Session(127.0.0.1:4799) has been closed", e
-						.getMessage());
+				assertEquals("Session(127.0.0.1:4799) has been closed",
+						e.getMessage());
 				assertTrue(true);
 			}
 		} finally {
@@ -248,8 +254,8 @@ public class FailureModeUnitTest {
 		memServer2.setCodecFactory(new TextLineCodecFactory());
 		memServer2.bind(new InetSocketAddress(4798));
 
-		MemcachedClientBuilder builder = new XMemcachedClientBuilder(AddrUtil
-				.getAddressMap("localhost:4799,localhost:4798"));
+		MemcachedClientBuilder builder = new XMemcachedClientBuilder(
+				AddrUtil.getAddressMap("localhost:4799,localhost:4798"));
 		MemcachedClient client = builder.build();
 
 		client.setEnableHeartBeat(false);
@@ -282,8 +288,8 @@ public class FailureModeUnitTest {
 		memServer1.setCodecFactory(new TextLineCodecFactory());
 		memServer1.bind(new InetSocketAddress(4799));
 
-		MemcachedClientBuilder builder = new XMemcachedClientBuilder(AddrUtil
-				.getAddressMap("localhost:4799"));
+		MemcachedClientBuilder builder = new XMemcachedClientBuilder(
+				AddrUtil.getAddressMap("localhost:4799"));
 		MemcachedClient client = builder.build();
 
 		client.setEnableHeartBeat(false);
@@ -320,8 +326,8 @@ public class FailureModeUnitTest {
 		memServer2.setCodecFactory(new TextLineCodecFactory());
 		memServer2.bind(new InetSocketAddress(4798));
 
-		MemcachedClientBuilder builder = new XMemcachedClientBuilder(AddrUtil
-				.getAddressMap("localhost:4799 localhost:4798"));
+		MemcachedClientBuilder builder = new XMemcachedClientBuilder(
+				AddrUtil.getAddressMap("localhost:4799 localhost:4798"));
 		MemcachedClient client = builder.build();
 
 		client.setEnableHeartBeat(false);

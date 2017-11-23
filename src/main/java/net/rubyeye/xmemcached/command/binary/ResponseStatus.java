@@ -240,45 +240,45 @@ public enum ResponseStatus {
 	 */
 	public static ResponseStatus parseShort(short value) {
 		switch (value) {
-		case 0x0000:
-			return NO_ERROR;
-		case 0x0001:
-			return KEY_NOT_FOUND;
-		case 0x0002:
-			return KEY_EXISTS;
-		case 0x0003:
-			return VALUE_TOO_BIG;
-		case 0x0004:
-			return INVALID_ARGUMENTS;
-		case 0x0005:
-			return ITEM_NOT_STORED;
-		case 0x0006:
-			return INC_DEC_NON_NUM;
-		case 0x0007:
-			return BELONGS_TO_ANOTHER_SRV;
-		case 0x0008:
-			return AUTH_ERROR;
-		case 0x0009:
-			return AUTH_CONTINUE;
-		case 0x0081:
-			return UNKNOWN_COMMAND;
-		case 0x0082:
-			return OUT_OF_MEMORY;
-		case 0x0083:
-			return NOT_SUPPORTED;
-		case 0x0084:
-			return INTERNAL_ERROR;
-		case 0x0085:
-			return BUSY;
-		case 0x0086:
-			return TEMP_FAILURE;
-		case 0x20:
-			return AUTH_REQUIRED;
-		case 0x21:
-			return FUTHER_AUTH_REQUIRED;
-		default:
-			throw new IllegalArgumentException("Unknow Response status:"
-					+ value);
+			case 0x0000 :
+				return NO_ERROR;
+			case 0x0001 :
+				return KEY_NOT_FOUND;
+			case 0x0002 :
+				return KEY_EXISTS;
+			case 0x0003 :
+				return VALUE_TOO_BIG;
+			case 0x0004 :
+				return INVALID_ARGUMENTS;
+			case 0x0005 :
+				return ITEM_NOT_STORED;
+			case 0x0006 :
+				return INC_DEC_NON_NUM;
+			case 0x0007 :
+				return BELONGS_TO_ANOTHER_SRV;
+			case 0x0008 :
+				return AUTH_ERROR;
+			case 0x0009 :
+				return AUTH_CONTINUE;
+			case 0x0081 :
+				return UNKNOWN_COMMAND;
+			case 0x0082 :
+				return OUT_OF_MEMORY;
+			case 0x0083 :
+				return NOT_SUPPORTED;
+			case 0x0084 :
+				return INTERNAL_ERROR;
+			case 0x0085 :
+				return BUSY;
+			case 0x0086 :
+				return TEMP_FAILURE;
+			case 0x20 :
+				return AUTH_REQUIRED;
+			case 0x21 :
+				return FUTHER_AUTH_REQUIRED;
+			default :
+				throw new IllegalArgumentException(
+						"Unknow Response status:" + value);
 		}
 	}
 

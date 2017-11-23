@@ -62,8 +62,10 @@ import com.google.code.yanf4j.util.LinkedTransferQueue;
  * @author dennis
  * 
  */
-public abstract class AbstractController implements Controller,
-		ControllerLifeCycle {
+public abstract class AbstractController
+		implements
+			Controller,
+			ControllerLifeCycle {
 
 	protected Statistics statistics = new DefaultStatistics();
 	protected long statisticsInterval;
@@ -212,17 +214,17 @@ public abstract class AbstractController implements Controller,
 		init(configuration, handler, codecFactory);
 	}
 
-	private synchronized void init(Configuration configuration,
-			Handler handler, CodecFactory codecFactory) {
+	private synchronized void init(Configuration configuration, Handler handler,
+			CodecFactory codecFactory) {
 		setHandler(handler);
 		setCodecFactory(codecFactory);
 		setConfiguration(configuration);
 		setReadThreadCount(configuration.getReadThreadCount());
 		setWriteThreadCount(configuration.getWriteThreadCount());
-		setDispatchMessageThreadCount(configuration
-				.getDispatchMessageThreadCount());
-		setHandleReadWriteConcurrently(configuration
-				.isHandleReadWriteConcurrently());
+		setDispatchMessageThreadCount(
+				configuration.getDispatchMessageThreadCount());
+		setHandleReadWriteConcurrently(
+				configuration.isHandleReadWriteConcurrently());
 		setSoTimeout(configuration.getSoTimeout());
 		setStatisticsConfig(configuration);
 		setReceiveThroughputLimit(-0.1d);
@@ -346,17 +348,16 @@ public abstract class AbstractController implements Controller,
 		}
 		setStarted(true);
 		setReadEventDispatcher(DispatcherFactory.newDispatcher(
-				getReadThreadCount(),
-				new ThreadPoolExecutor.CallerRunsPolicy(),
+				getReadThreadCount(), new ThreadPoolExecutor.CallerRunsPolicy(),
 				"xmemcached-read-thread"));
-		setWriteEventDispatcher(DispatcherFactory.newDispatcher(
-				getWriteThreadCount(),
-				new ThreadPoolExecutor.CallerRunsPolicy(),
-				"xmemcached-write-thread"));
-		setDispatchMessageDispatcher(DispatcherFactory.newDispatcher(
-				getDispatchMessageThreadCount(),
-				new ThreadPoolExecutor.CallerRunsPolicy(),
-				"xmemcached-dispatch-thread"));
+		setWriteEventDispatcher(
+				DispatcherFactory.newDispatcher(getWriteThreadCount(),
+						new ThreadPoolExecutor.CallerRunsPolicy(),
+						"xmemcached-write-thread"));
+		setDispatchMessageDispatcher(
+				DispatcherFactory.newDispatcher(getDispatchMessageThreadCount(),
+						new ThreadPoolExecutor.CallerRunsPolicy(),
+						"xmemcached-dispatch-thread"));
 		startStatistics();
 		start0();
 		notifyStarted();
@@ -448,8 +449,8 @@ public abstract class AbstractController implements Controller,
 	}
 
 	public void checkStatisticsForRestart() {
-		if (statisticsInterval > 0
-				&& System.currentTimeMillis() - statistics.getStartedTime() > statisticsInterval * 1000) {
+		if (statisticsInterval > 0 && System.currentTimeMillis()
+				- statistics.getStartedTime() > statisticsInterval * 1000) {
 			statistics.restart();
 		}
 	}
@@ -485,8 +486,6 @@ public abstract class AbstractController implements Controller,
 		}
 		log.info("Controller has been stopped.");
 	}
-
-
 
 	protected abstract void stop0() throws IOException;
 
@@ -541,8 +540,8 @@ public abstract class AbstractController implements Controller,
 		}
 		if (!socketOption.type().equals(value.getClass())) {
 			throw new IllegalArgumentException("Expected "
-					+ socketOption.type().getSimpleName()
-					+ " value,but givend " + value.getClass().getSimpleName());
+					+ socketOption.type().getSimpleName() + " value,but givend "
+					+ value.getClass().getSimpleName());
 		}
 		socketOptions.put(socketOption, value);
 	}

@@ -27,20 +27,22 @@ public class BaseTextCommandUnitTest extends TestCase {
 		assertFalse(command.decode(null, ByteBuffer.wrap("test".getBytes())));
 	}
 
-	protected void checkDecodeInvalidLine(Command command,String key,String invalidLine) {
+	protected void checkDecodeInvalidLine(Command command, String key,
+			String invalidLine) {
 		try {
 
 			command.decode(null, ByteBuffer.wrap(invalidLine.getBytes()));
 			fail();
 		} catch (MemcachedDecodeException e) {
 			assertTrue(true);
-			 assertEquals(DECODE_ERROR_SESSION_WILL_BE_CLOSED + ",key="+key+",server returns="
-					+ invalidLine.replace("\r\n", ""), e.getMessage());
+			assertEquals(DECODE_ERROR_SESSION_WILL_BE_CLOSED + ",key=" + key
+					+ ",server returns=" + invalidLine.replace("\r\n", ""),
+					e.getMessage());
 		}
 	}
-	
-	public void testDecodeError(){
-		
+
+	public void testDecodeError() {
+
 	}
 
 	protected void checkDecodeValidLine(Command command, String validLine) {
@@ -48,7 +50,7 @@ public class BaseTextCommandUnitTest extends TestCase {
 	}
 
 	protected void checkByteBufferEquals(Command command, String line) {
-		assertEquals(ByteBuffer.wrap(line.getBytes()), command.getIoBuffer()
-				.buf());
+		assertEquals(ByteBuffer.wrap(line.getBytes()),
+				command.getIoBuffer().buf());
 	}
 }

@@ -33,8 +33,9 @@ import com.google.code.yanf4j.util.SystemUtils;
  * @author dennis
  * 
  */
-public abstract class NioController extends AbstractController implements
-		SelectionKeyHandler {
+public abstract class NioController extends AbstractController
+		implements
+			SelectionKeyHandler {
 
 	protected SelectorManager selectorManager;
 
@@ -62,7 +63,8 @@ public abstract class NioController extends AbstractController implements
 		super();
 	}
 
-	public NioController(Configuration configuration, CodecFactory codecFactory) {
+	public NioController(Configuration configuration,
+			CodecFactory codecFactory) {
 		super(configuration, codecFactory);
 	}
 
@@ -136,8 +138,8 @@ public abstract class NioController extends AbstractController implements
 	 */
 	protected void initialSelectorManager() throws IOException {
 		if (this.selectorManager == null) {
-			this.selectorManager = new SelectorManager(this.selectorPoolSize, this,
-					this.configuration);
+			this.selectorManager = new SelectorManager(this.selectorPoolSize,
+					this, this.configuration);
 			this.selectorManager.start();
 		}
 	}
@@ -209,8 +211,8 @@ public abstract class NioController extends AbstractController implements
 
 	public synchronized void bind(int port) throws IOException {
 		if (isStarted()) {
-			throw new IllegalStateException("Server has been bind to "
-					+ getLocalSocketAddress());
+			throw new IllegalStateException(
+					"Server has been bind to " + getLocalSocketAddress());
 		}
 		bind(new InetSocketAddress(port));
 	}
@@ -227,8 +229,8 @@ public abstract class NioController extends AbstractController implements
 		final NioSessionConfig sessionConfig = new NioSessionConfig(sc,
 				getHandler(), this.selectorManager, getCodecFactory(),
 				getStatistics(), queue, this.dispatchMessageDispatcher,
-				isHandleReadWriteConcurrently(), this.sessionTimeout, this.configuration
-						.getSessionIdleTimeout());
+				isHandleReadWriteConcurrently(), this.sessionTimeout,
+				this.configuration.getSessionIdleTimeout());
 		return sessionConfig;
 	}
 

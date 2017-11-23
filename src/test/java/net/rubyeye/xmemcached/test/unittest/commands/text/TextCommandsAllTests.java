@@ -8,7 +8,7 @@ public class TextCommandsAllTests {
 	public static Test suite() {
 		TestSuite suite = new TestSuite(
 				"Test for net.rubyeye.xmemcached.test.unittest.commands.text");
-		//$JUnit-BEGIN$
+		// $JUnit-BEGIN$
 		suite.addTestSuite(TextStatsCommandUnitTest.class);
 		suite.addTestSuite(TextIncrDecrCommandUnitTest.class);
 		suite.addTestSuite(TextVersionCommandUnitTest.class);
@@ -17,7 +17,7 @@ public class TextCommandsAllTests {
 		suite.addTestSuite(TextDeleteCommandUnitTest.class);
 		suite.addTestSuite(TextGetOneCommandUnitTest.class);
 		suite.addTestSuite(TextGetMultiCommandUnitTest.class);
-		//$JUnit-END$
+		// $JUnit-END$
 		return suite;
 	}
 

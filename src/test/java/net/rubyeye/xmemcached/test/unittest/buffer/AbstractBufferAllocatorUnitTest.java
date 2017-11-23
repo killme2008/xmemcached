@@ -71,7 +71,7 @@ public abstract class AbstractBufferAllocatorUnitTest extends TestCase {
 		assertEquals(0, buffer.position());
 		assertEquals(4, buffer.limit());
 		assertEquals(4, buffer.remaining());
-		
+
 		buffer.clear();
 		assertEquals(64, buffer.capacity());
 		assertEquals(0, buffer.position());

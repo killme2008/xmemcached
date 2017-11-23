@@ -39,15 +39,15 @@ public class KestrelClientIT extends TestCase {
 				.getResourceAsProperties("test.properties");
 		MemcachedClientBuilder builder = newBuilder();
 		builder.setConnectionPoolSize(5);
-		//builder.getConfiguration().setSessionIdleTimeout(5);
+		// builder.getConfiguration().setSessionIdleTimeout(5);
 		this.memcachedClient = builder.build();
 		this.memcachedClient.flushAll();
 	}
 
 	private MemcachedClientBuilder newBuilder() {
-		MemcachedClientBuilder builder = new XMemcachedClientBuilder(AddrUtil
-				.getAddresses(this.properties
-						.getProperty("test.kestrel.servers")));
+		MemcachedClientBuilder builder = new XMemcachedClientBuilder(
+				AddrUtil.getAddresses(
+						this.properties.getProperty("test.kestrel.servers")));
 		// Use kestrel command factory
 		builder.setCommandFactory(new KestrelCommandFactory());
 		return builder;
@@ -61,8 +61,8 @@ public class KestrelClientIT extends TestCase {
 		}
 		// but get string
 		for (int i = 0; i < 1000; i++) {
-			Assert.assertEquals(String.valueOf(i), this.memcachedClient
-					.get("queue1"));
+			Assert.assertEquals(String.valueOf(i),
+					this.memcachedClient.get("queue1"));
 		}
 
 		this.memcachedClient.setPrimitiveAsString(false);
@@ -122,8 +122,8 @@ public class KestrelClientIT extends TestCase {
 		userDefinedClassList.add(new UserDefinedClass("b"));
 		userDefinedClassList.add(new UserDefinedClass("c"));
 
-		Assert.assertTrue(this.memcachedClient.set("queue1", 0,
-				userDefinedClassList));
+		Assert.assertTrue(
+				this.memcachedClient.set("queue1", 0, userDefinedClassList));
 		List<UserDefinedClass> userDefinedClassListFromMQ = (List<UserDefinedClass>) this.memcachedClient
 				.get("queue1");
 
@@ -139,25 +139,25 @@ public class KestrelClientIT extends TestCase {
 		Assert.assertEquals(1000, System.currentTimeMillis() - start, 100);
 
 		Assert.assertTrue(this.memcachedClient.set("queue1", 0, "hello world"));
-		Assert.assertEquals("hello world", this.memcachedClient
-				.get("queue1/t=1000"));
+		Assert.assertEquals("hello world",
+				this.memcachedClient.get("queue1/t=1000"));
 
 	}
-	
-	public void testPeek()throws Exception{
+
+	public void testPeek() throws Exception {
 		Assert.assertNull(this.memcachedClient.get("queue1/peek"));
 		this.memcachedClient.set("queue1", 0, 1);
-		Assert.assertEquals(1,this.memcachedClient.get("queue1/peek"));
+		Assert.assertEquals(1, this.memcachedClient.get("queue1/peek"));
 		this.memcachedClient.set("queue1", 0, 10);
-		Assert.assertEquals(1,this.memcachedClient.get("queue1/peek"));
+		Assert.assertEquals(1, this.memcachedClient.get("queue1/peek"));
 		this.memcachedClient.set("queue1", 0, 11);
-		Assert.assertEquals(1,this.memcachedClient.get("queue1/peek"));
-		
-		Assert.assertEquals(1,this.memcachedClient.get("queue1"));
-		Assert.assertEquals(10,this.memcachedClient.get("queue1/peek"));
-		Assert.assertEquals(10,this.memcachedClient.get("queue1"));
-		Assert.assertEquals(11,this.memcachedClient.get("queue1/peek"));
-		Assert.assertEquals(11,this.memcachedClient.get("queue1"));
+		Assert.assertEquals(1, this.memcachedClient.get("queue1/peek"));
+
+		Assert.assertEquals(1, this.memcachedClient.get("queue1"));
+		Assert.assertEquals(10, this.memcachedClient.get("queue1/peek"));
+		Assert.assertEquals(10, this.memcachedClient.get("queue1"));
+		Assert.assertEquals(11, this.memcachedClient.get("queue1/peek"));
+		Assert.assertEquals(11, this.memcachedClient.get("queue1"));
 		Assert.assertNull(this.memcachedClient.get("queue1/peek"));
 	}
 
@@ -174,8 +174,8 @@ public class KestrelClientIT extends TestCase {
 
 	public void testReliableFetch() throws Exception {
 		Assert.assertTrue(this.memcachedClient.set("queue1", 0, "hello world"));
-		Assert.assertEquals("hello world", this.memcachedClient
-				.get("queue1/open"));
+		Assert.assertEquals("hello world",
+				this.memcachedClient.get("queue1/open"));
 		// close connection
 		this.memcachedClient.shutdown();
 		// still can fetch it
@@ -244,7 +244,6 @@ public class KestrelClientIT extends TestCase {
 		}
 	}
 
-	
 	public void ignoreTestConcurrentAccess() throws Exception {
 		int threadCount = 100;
 		CyclicBarrier cyclicBarrier = new CyclicBarrier(threadCount + 1);
@@ -255,11 +254,11 @@ public class KestrelClientIT extends TestCase {
 		cyclicBarrier.await();
 
 	}
-	
-	public void testHearBeat()throws Exception{
-		Thread.sleep(30*1000);
+
+	public void testHearBeat() throws Exception {
+		Thread.sleep(30 * 1000);
 		this.memcachedClient.set("queue1", 0, "hello");
-		assertEquals("hello",this.memcachedClient.get("queue1"));
+		assertEquals("hello", this.memcachedClient.get("queue1"));
 	}
 
 }

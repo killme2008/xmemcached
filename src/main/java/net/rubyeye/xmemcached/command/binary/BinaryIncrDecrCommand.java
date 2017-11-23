@@ -29,6 +29,7 @@ import net.rubyeye.xmemcached.command.CommandType;
 import net.rubyeye.xmemcached.transcoders.CachedData;
 /**
  * Binary incr/decr command
+ * 
  * @author dennis
  *
  */
@@ -60,15 +61,19 @@ public class BinaryIncrDecrCommand extends BaseBinaryCommand {
 		this.initial = initial;
 		this.expTime = expTime;
 		switch (cmdType) {
-		case INCR:
-			this.opCode = noreply ? OpCode.INCREMENT_QUIETLY : OpCode.INCREMENT;
-			break;
-		case DECR:
-			this.opCode = noreply ? OpCode.DECREMENT_QUIETLY : OpCode.DECREMENT;
-			break;
-		default:
-			throw new IllegalArgumentException("Unknow cmd type for incr/decr:"
-					+ cmdType);
+			case INCR :
+				this.opCode = noreply
+						? OpCode.INCREMENT_QUIETLY
+						: OpCode.INCREMENT;
+				break;
+			case DECR :
+				this.opCode = noreply
+						? OpCode.DECREMENT_QUIETLY
+						: OpCode.DECREMENT;
+				break;
+			default :
+				throw new IllegalArgumentException(
+						"Unknow cmd type for incr/decr:" + cmdType);
 		}
 
 	}

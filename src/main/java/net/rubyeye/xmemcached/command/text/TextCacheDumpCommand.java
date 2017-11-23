@@ -34,7 +34,8 @@ public class TextCacheDumpCommand extends Command {
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public final boolean decode(MemcachedTCPSession session, ByteBuffer buffer) {
+	public final boolean decode(MemcachedTCPSession session,
+			ByteBuffer buffer) {
 		String line = null;
 		while ((line = ByteUtils.nextLine(buffer)) != null) {
 			if (line.equals("END")) { // at the end
@@ -57,7 +58,6 @@ public class TextCacheDumpCommand extends Command {
 	@Override
 	public final void encode() {
 		String result = String.format(CACHE_DUMP_COMMAND, this.itemNumber);
-		this.ioBuffer = IoBuffer
-				.wrap(ByteBuffer.wrap(result.getBytes()));
+		this.ioBuffer = IoBuffer.wrap(ByteBuffer.wrap(result.getBytes()));
 	}
 }

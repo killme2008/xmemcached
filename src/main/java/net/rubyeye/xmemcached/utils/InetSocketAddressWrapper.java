@@ -48,7 +48,8 @@ public class InetSocketAddressWrapper {
 		}
 	}
 
-	public final void setInetSocketAddress(InetSocketAddress inetSocketAddress) {
+	public final void setInetSocketAddress(
+			InetSocketAddress inetSocketAddress) {
 		this.inetSocketAddress = inetSocketAddress;
 		if (inetSocketAddress != null) {
 			this.hostName = inetSocketAddress.getHostName();

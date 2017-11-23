@@ -81,7 +81,10 @@ import com.google.code.yanf4j.util.SystemUtils;
  * @author dennis(killme2008@gmail.com)
  * 
  */
-public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient {
+public class XMemcachedClient
+		implements
+			XMemcachedClientMBean,
+			MemcachedClient {
 
 	private static final Logger log = LoggerFactory
 			.getLogger(XMemcachedClient.class);
@@ -143,7 +146,8 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 							+ timeoutExceptionThreshold);
 		}
 		if (timeoutExceptionThreshold < 100) {
-			log.warn("Too small timeoutExceptionThreshold value may cause connections disconnect/reconnect frequently.");
+			log.warn(
+					"Too small timeoutExceptionThreshold value may cause connections disconnect/reconnect frequently.");
 		}
 		this.timeoutExceptionThreshold = timeoutExceptionThreshold;
 	}
@@ -247,8 +251,8 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 
 	public void setHealSessionInterval(long healConnectionInterval) {
 		if (healConnectionInterval <= 0) {
-			throw new IllegalArgumentException("Invalid heal session interval:"
-					+ healConnectionInterval);
+			throw new IllegalArgumentException(
+					"Invalid heal session interval:" + healConnectionInterval);
 		}
 		if (null != this.connector) {
 			this.connector.setHealSessionInterval(healConnectionInterval);
@@ -287,7 +291,8 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 	 * @see
 	 * net.rubyeye.xmemcached.MemcachedClient#setOptimizeMergeBuffer(boolean)
 	 */
-	public final void setOptimizeMergeBuffer(final boolean optimizeMergeBuffer) {
+	public final void setOptimizeMergeBuffer(
+			final boolean optimizeMergeBuffer) {
 		this.connector.setOptimizeMergeBuffer(optimizeMergeBuffer);
 	}
 
@@ -355,8 +360,9 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 				XMemcachedClientBuilder.getDefaultSocketOptions(),
 				new TextCommandFactory(), new SerializingTranscoder());
 		this.start0();
-		this.connect(new InetSocketAddressWrapper(this.newSocketAddress(host,
-				port), this.serverOrderCount.incrementAndGet(), weight, null));
+		this.connect(
+				new InetSocketAddressWrapper(this.newSocketAddress(host, port),
+						this.serverOrderCount.incrementAndGet(), weight, null));
 	}
 
 	protected InetSocketAddress newSocketAddress(final String server,
@@ -398,16 +404,16 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 			throw new IllegalArgumentException("weight<=0");
 		}
 		this.checkServerPort(server, port);
-		this.connect(new InetSocketAddressWrapper(this.newSocketAddress(server,
-				port), this.serverOrderCount.incrementAndGet(), weight, null));
+		this.connect(new InetSocketAddressWrapper(
+				this.newSocketAddress(server, port),
+				this.serverOrderCount.incrementAndGet(), weight, null));
 	}
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see
-	 * net.rubyeye.xmemcached.MemcachedClient#addServer(java.net.InetSocketAddress
-	 * )
+	 * @see net.rubyeye.xmemcached.MemcachedClient#addServer(java.net.
+	 * InetSocketAddress )
 	 */
 	public final void addServer(final InetSocketAddress inetSocketAddress)
 			throws IOException {
@@ -551,8 +557,8 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 		if (standBySession != null) {
 			for (Session session : standBySession) {
 				if (session != null) {
-					this.connector.removeReconnectRequest(session
-							.getRemoteSocketAddress());
+					this.connector.removeReconnectRequest(
+							session.getRemoteSocketAddress());
 					// Disable auto reconnection
 					((MemcachedSession) session).setAllowReconnect(false);
 					// Close connection
@@ -570,7 +576,8 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 		InetSocketAddress inetSocketAddress = inetSocketAddressWrapper
 				.getInetSocketAddress();
 		if (this.connectionPoolSize > 1) {
-			log.warn("You are using connection pool for xmemcached client,it's not recommended unless you have test it that it can boost performance in your app.");
+			log.warn(
+					"You are using connection pool for xmemcached client,it's not recommended unless you have test it that it can boost performance in your app.");
 		}
 		for (int i = 0; i < this.connectionPoolSize; i++) {
 			Future<Boolean> future = null;
@@ -581,8 +588,8 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 
 				if (!future.get(this.connectTimeout, TimeUnit.MILLISECONDS)) {
 					log.error("connect to "
-							+ SystemUtils.getRawAddress(inetSocketAddress)
-							+ ":" + inetSocketAddress.getPort() + " fail");
+							+ SystemUtils.getRawAddress(inetSocketAddress) + ":"
+							+ inetSocketAddress.getPort() + " fail");
 				} else {
 					connected = true;
 				}
@@ -597,11 +604,9 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 						e);
 			} catch (TimeoutException e) {
 				throwable = e;
-				log.error(
-						"connect to "
-								+ SystemUtils.getRawAddress(inetSocketAddress)
-								+ ":" + inetSocketAddress.getPort()
-								+ " timeout", e);
+				log.error("connect to "
+						+ SystemUtils.getRawAddress(inetSocketAddress) + ":"
+						+ inetSocketAddress.getPort() + " timeout", e);
 			} catch (Exception e) {
 				throwable = e;
 				log.error(
@@ -621,9 +626,9 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 					this.connector.addSession(new ClosedMemcachedTCPSession(
 							inetSocketAddressWrapper));
 				}
-				this.connector.addToWatingQueue(new ReconnectRequest(
-						inetSocketAddressWrapper, 0, this
-								.getHealSessionInterval()));
+				this.connector.addToWatingQueue(
+						new ReconnectRequest(inetSocketAddressWrapper, 0,
+								this.getHealSessionInterval()));
 				log.error(
 						"Connect to "
 								+ SystemUtils.getRawAddress(inetSocketAddress)
@@ -637,8 +642,8 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 	@SuppressWarnings("unchecked")
 	private final <T> Object fetch0(final String key, final byte[] keyBytes,
 			final CommandType cmdType, final long timeout,
-			Transcoder<T> transcoder) throws InterruptedException,
-			TimeoutException, MemcachedException {
+			Transcoder<T> transcoder)
+			throws InterruptedException, TimeoutException, MemcachedException {
 		final Command command = this.commandFactory.createGetCommand(key,
 				keyBytes, cmdType, this.transcoder);
 		this.latchWait(command, timeout, this.sendCommand(command));
@@ -761,8 +766,7 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 
 	private final void registerMBean() {
 		if (this.shutdown) {
-			XMemcachedMbeanServer.getInstance().registMBean(
-					this,
+			XMemcachedMbeanServer.getInstance().registMBean(this,
 					this.getClass().getPackage().getName() + ":type="
 							+ this.getClass().getSimpleName() + "-"
 							+ MemcachedClientNameHolder.getName());
@@ -780,7 +784,8 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 	 * net.rubyeye.xmemcached.MemcachedClient#setBufferAllocator(net.rubyeye
 	 * .xmemcached.buffer.BufferAllocator)
 	 */
-	public final void setBufferAllocator(final BufferAllocator bufferAllocator) {
+	public final void setBufferAllocator(
+			final BufferAllocator bufferAllocator) {
 		this.connector.setBufferAllocator(bufferAllocator);
 	}
 
@@ -835,8 +840,10 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 	}
 
 	/**
-	 * XMemcachedClient constructor.Every server's weight is one by default.
-	 * You should not new client instance by this method, use MemcachedClientBuilder instead.
+	 * XMemcachedClient constructor.Every server's weight is one by default. You
+	 * should not new client instance by this method, use MemcachedClientBuilder
+	 * instead.
+	 * 
 	 * @param locator
 	 * @param allocator
 	 * @param conf
@@ -860,8 +867,8 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 		this.setConnectTimeout(connectTimeout);
 		this.setFailureMode(failureMode);
 		this.setName(name);
-		this.optimiezeSetReadThreadCount(conf, addressMap == null ? 0
-				: addressMap.size());
+		this.optimiezeSetReadThreadCount(conf,
+				addressMap == null ? 0 : addressMap.size());
 		this.buildConnector(locator, allocator, conf, socketOptions,
 				commandFactory, transcoder);
 		if (stateListeners != null) {
@@ -903,12 +910,11 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 	 * @throws IOException
 	 */
 	@SuppressWarnings("unchecked")
-	XMemcachedClient(MemcachedSessionLocator locator,
-			BufferAllocator allocator, Configuration conf,
-			Map<SocketOption, Object> socketOptions,
+	XMemcachedClient(MemcachedSessionLocator locator, BufferAllocator allocator,
+			Configuration conf, Map<SocketOption, Object> socketOptions,
 			CommandFactory commandFactory, Transcoder transcoder,
-			Map<InetSocketAddress, InetSocketAddress> addressMap,
-			int[] weights, List<MemcachedClientStateListener> stateListeners,
+			Map<InetSocketAddress, InetSocketAddress> addressMap, int[] weights,
+			List<MemcachedClientStateListener> stateListeners,
 			Map<InetSocketAddress, AuthInfo> infoMap, int poolSize,
 			long connectTimeout, final String name, boolean failureMode)
 			throws IOException {
@@ -935,8 +941,8 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 			throw new IllegalArgumentException(
 					"weights.length is less than addressList.size()");
 		}
-		this.optimiezeSetReadThreadCount(conf, addressMap == null ? 0
-				: addressMap.size());
+		this.optimiezeSetReadThreadCount(conf,
+				addressMap == null ? 0 : addressMap.size());
 		this.buildConnector(locator, allocator, conf, socketOptions,
 				commandFactory, transcoder);
 		if (stateListeners != null) {
@@ -958,8 +964,8 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 						null));
 				if (standbyNodeAddr != null) {
 					this.connect(new InetSocketAddressWrapper(standbyNodeAddr,
-							this.serverOrderCount.incrementAndGet(),
-							weights[i], mainNodeAddr));
+							this.serverOrderCount.incrementAndGet(), weights[i],
+							mainNodeAddr));
 				}
 				i++;
 			}
@@ -972,7 +978,8 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 			if (!this.isWindowsPlatform()
 					&& conf.getReadThreadCount() == DEFAULT_READ_THREAD_COUNT) {
 				int threadCount = SystemUtils.getSystemThreadCount();
-				conf.setReadThreadCount(addressCount > threadCount ? threadCount
+				conf.setReadThreadCount(addressCount > threadCount
+						? threadCount
 						: addressCount);
 			}
 		}
@@ -1038,8 +1045,8 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 	 */
 	@SuppressWarnings("unchecked")
 	public final <T> T get(final String key, final long timeout,
-			final Transcoder<T> transcoder) throws TimeoutException,
-			InterruptedException, MemcachedException {
+			final Transcoder<T> transcoder)
+			throws TimeoutException, InterruptedException, MemcachedException {
 		return (T) this.get0(key, timeout, CommandType.GET_ONE, transcoder);
 	}
 
@@ -1071,8 +1078,8 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 	 * @see net.rubyeye.xmemcached.MemcachedClient#get(java.lang.String)
 	 */
 	@SuppressWarnings("unchecked")
-	public final <T> T get(final String key) throws TimeoutException,
-			InterruptedException, MemcachedException {
+	public final <T> T get(final String key)
+			throws TimeoutException, InterruptedException, MemcachedException {
 		return (T) this.get(key, this.opTimeout);
 	}
 
@@ -1093,8 +1100,8 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 	 */
 	@SuppressWarnings("unchecked")
 	public final <T> GetsResponse<T> gets(final String key, final long timeout,
-			final Transcoder<T> transcoder) throws TimeoutException,
-			InterruptedException, MemcachedException {
+			final Transcoder<T> transcoder)
+			throws TimeoutException, InterruptedException, MemcachedException {
 		return (GetsResponse<T>) this.get0(key, timeout, CommandType.GETS_ONE,
 				transcoder);
 	}
@@ -1128,8 +1135,8 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 	 */
 	@SuppressWarnings("unchecked")
 	public final <T> GetsResponse<T> gets(final String key,
-			final Transcoder transcoder) throws TimeoutException,
-			InterruptedException, MemcachedException {
+			final Transcoder transcoder)
+			throws TimeoutException, InterruptedException, MemcachedException {
 		return this.gets(key, this.opTimeout, transcoder);
 	}
 
@@ -1139,10 +1146,9 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 	 * @see net.rubyeye.xmemcached.MemcachedClient#get(java.util.Collection,
 	 * long, net.rubyeye.xmemcached.transcoders.Transcoder)
 	 */
-	public final <T> Map<String, T> get(
-			final Collection<String> keyCollections, final long timeout,
-			final Transcoder<T> transcoder) throws TimeoutException,
-			InterruptedException, MemcachedException {
+	public final <T> Map<String, T> get(final Collection<String> keyCollections,
+			final long timeout, final Transcoder<T> transcoder)
+			throws TimeoutException, InterruptedException, MemcachedException {
 		return this.getMulti0(keyCollections, timeout, CommandType.GET_MANY,
 				transcoder);
 	}
@@ -1153,10 +1159,9 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 	 * @see net.rubyeye.xmemcached.MemcachedClient#get(java.util.Collection,
 	 * net.rubyeye.xmemcached.transcoders.Transcoder)
 	 */
-	public final <T> Map<String, T> get(
-			final Collection<String> keyCollections,
-			final Transcoder<T> transcoder) throws TimeoutException,
-			InterruptedException, MemcachedException {
+	public final <T> Map<String, T> get(final Collection<String> keyCollections,
+			final Transcoder<T> transcoder)
+			throws TimeoutException, InterruptedException, MemcachedException {
 		return this.getMulti0(keyCollections, this.opTimeout,
 				CommandType.GET_MANY, transcoder);
 	}
@@ -1178,8 +1183,8 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 	 * long)
 	 */
 	@SuppressWarnings("unchecked")
-	public final <T> Map<String, T> get(
-			final Collection<String> keyCollections, final long timeout)
+	public final <T> Map<String, T> get(final Collection<String> keyCollections,
+			final long timeout)
 			throws TimeoutException, InterruptedException, MemcachedException {
 		return this.get(keyCollections, timeout, this.transcoder);
 	}
@@ -1193,8 +1198,8 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 	@SuppressWarnings("unchecked")
 	public final <T> Map<String, GetsResponse<T>> gets(
 			final Collection<String> keyCollections, final long timeout,
-			final Transcoder<T> transcoder) throws TimeoutException,
-			InterruptedException, MemcachedException {
+			final Transcoder<T> transcoder)
+			throws TimeoutException, InterruptedException, MemcachedException {
 		return (Map<String, GetsResponse<T>>) this.getMulti0(keyCollections,
 				timeout, CommandType.GETS_MANY, transcoder);
 	}
@@ -1205,8 +1210,8 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 	 * @see net.rubyeye.xmemcached.MemcachedClient#gets(java.util.Collection)
 	 */
 	public final <T> Map<String, GetsResponse<T>> gets(
-			final Collection<String> keyCollections) throws TimeoutException,
-			InterruptedException, MemcachedException {
+			final Collection<String> keyCollections)
+			throws TimeoutException, InterruptedException, MemcachedException {
 		return this.gets(keyCollections, this.opTimeout);
 	}
 
@@ -1231,15 +1236,15 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 	 */
 	public final <T> Map<String, GetsResponse<T>> gets(
 			final Collection<String> keyCollections,
-			final Transcoder<T> transcoder) throws TimeoutException,
-			InterruptedException, MemcachedException {
+			final Transcoder<T> transcoder)
+			throws TimeoutException, InterruptedException, MemcachedException {
 		return this.gets(keyCollections, this.opTimeout, transcoder);
 	}
 
 	private final <T> Map<String, T> getMulti0(final Collection<String> keys,
 			final long timeout, final CommandType cmdType,
-			final Transcoder<T> transcoder) throws TimeoutException,
-			InterruptedException, MemcachedException {
+			final Transcoder<T> transcoder)
+			throws TimeoutException, InterruptedException, MemcachedException {
 		if (keys == null || keys.size() == 0) {
 			return null;
 		}
@@ -1301,9 +1306,9 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 						.iterator();
 				while (it.hasNext()) {
 					Map.Entry<String, CachedData> entry = it.next();
-					GetsResponse getsResponse = new GetsResponse(entry
-							.getValue().getCas(), transcoder.decode(entry
-							.getValue()));
+					GetsResponse getsResponse = new GetsResponse(
+							entry.getValue().getCas(),
+							transcoder.decode(entry.getValue()));
 					String decodeKey = this.decodeKey(entry.getKey());
 					if (decodeKey != null) {
 						result.put(decodeKey, (T) getsResponse);
@@ -1340,9 +1345,9 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 		return catalogKeys;
 	}
 
-	private final <T> Command sendGetMultiCommand(
-			final Collection<String> keys, final CountDownLatch latch,
-			final CommandType cmdType, final Transcoder<T> transcoder)
+	private final <T> Command sendGetMultiCommand(final Collection<String> keys,
+			final CountDownLatch latch, final CommandType cmdType,
+			final Transcoder<T> transcoder)
 			throws InterruptedException, TimeoutException, MemcachedException {
 		final Command command = this.commandFactory.createGetMultiCommand(keys,
 				latch, cmdType, transcoder);
@@ -1372,8 +1377,8 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 	}
 
 	public <T> void setWithNoReply(String key, int exp, T value,
-			Transcoder<T> transcoder) throws InterruptedException,
-			MemcachedException {
+			Transcoder<T> transcoder)
+			throws InterruptedException, MemcachedException {
 		key = this.preProcessKey(key);
 		byte[] keyBytes = this.checkStoreArguments(key, exp, value);
 		try {
@@ -1404,7 +1409,8 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 	 * @see net.rubyeye.xmemcached.MemcachedClient#set(java.lang.String, int,
 	 * java.lang.Object)
 	 */
-	public final boolean set(final String key, final int exp, final Object value)
+	public final boolean set(final String key, final int exp,
+			final Object value)
 			throws TimeoutException, InterruptedException, MemcachedException {
 		return this.set(key, exp, value, this.opTimeout);
 	}
@@ -1417,8 +1423,8 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 	 */
 	@SuppressWarnings("unchecked")
 	public final boolean set(final String key, final int exp,
-			final Object value, final long timeout) throws TimeoutException,
-			InterruptedException, MemcachedException {
+			final Object value, final long timeout)
+			throws TimeoutException, InterruptedException, MemcachedException {
 		return this.set(key, exp, value, this.transcoder, timeout);
 	}
 
@@ -1428,8 +1434,8 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 	 * @see net.rubyeye.xmemcached.MemcachedClient#set(java.lang.String, int, T,
 	 * net.rubyeye.xmemcached.transcoders.Transcoder)
 	 */
-	public final <T> boolean set(final String key, final int exp,
-			final T value, final Transcoder<T> transcoder)
+	public final <T> boolean set(final String key, final int exp, final T value,
+			final Transcoder<T> transcoder)
 			throws TimeoutException, InterruptedException, MemcachedException {
 		return this.set(key, exp, value, transcoder, this.opTimeout);
 	}
@@ -1461,7 +1467,8 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 	 * @see net.rubyeye.xmemcached.MemcachedClient#add(java.lang.String, int,
 	 * java.lang.Object)
 	 */
-	public final boolean add(final String key, final int exp, final Object value)
+	public final boolean add(final String key, final int exp,
+			final Object value)
 			throws TimeoutException, InterruptedException, MemcachedException {
 		return this.add(key, exp, value, this.opTimeout);
 	}
@@ -1474,8 +1481,8 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 	 */
 	@SuppressWarnings("unchecked")
 	public final boolean add(final String key, final int exp,
-			final Object value, final long timeout) throws TimeoutException,
-			InterruptedException, MemcachedException {
+			final Object value, final long timeout)
+			throws TimeoutException, InterruptedException, MemcachedException {
 		return this.add(key, exp, value, this.transcoder, timeout);
 	}
 
@@ -1485,8 +1492,8 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 	 * @see net.rubyeye.xmemcached.MemcachedClient#add(java.lang.String, int, T,
 	 * net.rubyeye.xmemcached.transcoders.Transcoder)
 	 */
-	public final <T> boolean add(final String key, final int exp,
-			final T value, final Transcoder<T> transcoder)
+	public final <T> boolean add(final String key, final int exp, final T value,
+			final Transcoder<T> transcoder)
 			throws TimeoutException, InterruptedException, MemcachedException {
 		return this.add(key, exp, value, transcoder, this.opTimeout);
 	}
@@ -1499,8 +1506,8 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 	}
 
 	public <T> void addWithNoReply(String key, int exp, T value,
-			Transcoder<T> transcoder) throws InterruptedException,
-			MemcachedException {
+			Transcoder<T> transcoder)
+			throws InterruptedException, MemcachedException {
 		key = this.preProcessKey(key);
 		byte[] keyBytes = this.checkStoreArguments(key, exp, value);
 		try {
@@ -1520,8 +1527,8 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 	}
 
 	public <T> void replaceWithNoReply(String key, int exp, T value,
-			Transcoder<T> transcoder) throws InterruptedException,
-			MemcachedException {
+			Transcoder<T> transcoder)
+			throws InterruptedException, MemcachedException {
 		key = this.preProcessKey(key);
 		byte[] keyBytes = this.checkStoreArguments(key, exp, value);
 		try {
@@ -1555,8 +1562,8 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 	 * int, java.lang.Object)
 	 */
 	public final boolean replace(final String key, final int exp,
-			final Object value) throws TimeoutException, InterruptedException,
-			MemcachedException {
+			final Object value)
+			throws TimeoutException, InterruptedException, MemcachedException {
 		return this.replace(key, exp, value, this.opTimeout);
 	}
 
@@ -1568,8 +1575,8 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 	 */
 	@SuppressWarnings("unchecked")
 	public final boolean replace(final String key, final int exp,
-			final Object value, final long timeout) throws TimeoutException,
-			InterruptedException, MemcachedException {
+			final Object value, final long timeout)
+			throws TimeoutException, InterruptedException, MemcachedException {
 		return this.replace(key, exp, value, this.transcoder, timeout);
 	}
 
@@ -1603,8 +1610,8 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 	 * java.lang.Object, long)
 	 */
 	public final boolean append(String key, final Object value,
-			final long timeout) throws TimeoutException, InterruptedException,
-			MemcachedException {
+			final long timeout)
+			throws TimeoutException, InterruptedException, MemcachedException {
 		key = this.preProcessKey(key);
 		byte[] keyBytes = this.checkStoreArguments(key, 0, value);
 		return this.sendStoreCommand(this.commandFactory.createAppendCommand(
@@ -1642,8 +1649,8 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 	 * java.lang.Object, long)
 	 */
 	public final boolean prepend(String key, final Object value,
-			final long timeout) throws TimeoutException, InterruptedException,
-			MemcachedException {
+			final long timeout)
+			throws TimeoutException, InterruptedException, MemcachedException {
 		key = this.preProcessKey(key);
 		byte[] keyBytes = this.checkStoreArguments(key, 0, value);
 		return this.sendStoreCommand(this.commandFactory.createPrependCommand(
@@ -1669,8 +1676,8 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 	 * java.lang.Object, long)
 	 */
 	public final boolean cas(final String key, final int exp,
-			final Object value, final long cas) throws TimeoutException,
-			InterruptedException, MemcachedException {
+			final Object value, final long cas)
+			throws TimeoutException, InterruptedException, MemcachedException {
 		return this.cas(key, exp, value, this.opTimeout, cas);
 	}
 
@@ -1708,8 +1715,8 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 	 * @see net.rubyeye.xmemcached.MemcachedClient#cas(java.lang.String, int, T,
 	 * net.rubyeye.xmemcached.transcoders.Transcoder, long)
 	 */
-	public final <T> boolean cas(final String key, final int exp,
-			final T value, final Transcoder<T> transcoder, final long cas)
+	public final <T> boolean cas(final String key, final int exp, final T value,
+			final Transcoder<T> transcoder, final long cas)
 			throws TimeoutException, InterruptedException, MemcachedException {
 		return this.cas(key, exp, value, transcoder, this.opTimeout, cas);
 	}
@@ -1719,7 +1726,8 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 			final Transcoder<T> transcoder, byte[] keyBytes, boolean noreply)
 			throws TimeoutException, InterruptedException, MemcachedException {
 		if (operation == null) {
-			throw new IllegalArgumentException("CASOperation could not be null");
+			throw new IllegalArgumentException(
+					"CASOperation could not be null");
 		}
 		if (operation.getMaxTries() < 0) {
 			throw new IllegalArgumentException(
@@ -1731,19 +1739,20 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 			throw new NoValueException("Null GetsResponse for key=" + key);
 		}
 		while (tryCount <= operation.getMaxTries()
-				&& result != null
-				&& !this.sendStoreCommand(this.commandFactory.createCASCommand(
-						key,
-						keyBytes,
-						exp,
-						operation.getNewValue(result.getCas(),
-								result.getValue()), result.getCas(), noreply,
-						transcoder), this.opTimeout) && !noreply) {
+				&& result != null && !this
+						.sendStoreCommand(
+								this.commandFactory.createCASCommand(key,
+										keyBytes, exp,
+										operation.getNewValue(result.getCas(),
+												result.getValue()),
+										result.getCas(), noreply, transcoder),
+								this.opTimeout)
+				&& !noreply) {
 			tryCount++;
 			result = this.gets0(key, keyBytes, transcoder);
 			if (result == null) {
-				throw new NoValueException("could not gets the value for Key="
-						+ key + " for cas");
+				throw new NoValueException(
+						"could not gets the value for Key=" + key + " for cas");
 			}
 			if (tryCount > operation.getMaxTries()) {
 				throw new TimeoutException("CAS try times is greater than max");
@@ -1779,13 +1788,13 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 	 */
 	public final <T> boolean cas(String key, final int exp,
 			GetsResponse<T> getsReponse, final CASOperation<T> operation,
-			final Transcoder<T> transcoder) throws TimeoutException,
-			InterruptedException, MemcachedException {
+			final Transcoder<T> transcoder)
+			throws TimeoutException, InterruptedException, MemcachedException {
 		key = this.preProcessKey(key);
 		byte[] keyBytes = ByteUtils.getBytes(key);
 		ByteUtils.checkKey(keyBytes);
-		return this.cas0(key, exp, getsReponse, operation, transcoder,
-				keyBytes, false);
+		return this.cas0(key, exp, getsReponse, operation, transcoder, keyBytes,
+				false);
 	}
 
 	/*
@@ -1808,16 +1817,16 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 	}
 
 	public <T> void casWithNoReply(String key, GetsResponse<T> getsResponse,
-			CASOperation<T> operation) throws TimeoutException,
-			InterruptedException, MemcachedException {
+			CASOperation<T> operation)
+			throws TimeoutException, InterruptedException, MemcachedException {
 		this.casWithNoReply(key, 0, getsResponse, operation);
 
 	}
 
 	@SuppressWarnings("unchecked")
 	public <T> void casWithNoReply(String key, int exp,
-			CASOperation<T> operation) throws TimeoutException,
-			InterruptedException, MemcachedException {
+			CASOperation<T> operation)
+			throws TimeoutException, InterruptedException, MemcachedException {
 		key = this.preProcessKey(key);
 		byte[] keyBytes = ByteUtils.getBytes(key);
 		GetsResponse<T> result = this.gets0(key, keyBytes, this.transcoder);
@@ -1844,8 +1853,8 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 	 * net.rubyeye.xmemcached.GetsResponse, net.rubyeye.xmemcached.CASOperation)
 	 */
 	public final <T> boolean cas(final String key, GetsResponse<T> getsReponse,
-			final CASOperation<T> operation) throws TimeoutException,
-			InterruptedException, MemcachedException {
+			final CASOperation<T> operation)
+			throws TimeoutException, InterruptedException, MemcachedException {
 		return this.cas(key, 0, getsReponse, operation);
 	}
 
@@ -1857,8 +1866,8 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 	 */
 	@SuppressWarnings("unchecked")
 	public final <T> boolean cas(final String key, final int exp,
-			final CASOperation<T> operation) throws TimeoutException,
-			InterruptedException, MemcachedException {
+			final CASOperation<T> operation)
+			throws TimeoutException, InterruptedException, MemcachedException {
 		return this.cas(key, exp, operation, this.transcoder);
 	}
 
@@ -1869,8 +1878,8 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 	 * net.rubyeye.xmemcached.CASOperation)
 	 */
 	public final <T> boolean cas(final String key,
-			final CASOperation<T> operation) throws TimeoutException,
-			InterruptedException, MemcachedException {
+			final CASOperation<T> operation)
+			throws TimeoutException, InterruptedException, MemcachedException {
 		return this.cas(key, 0, operation);
 	}
 
@@ -1884,8 +1893,8 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 		return this.delete0(key, time, 0, false, this.opTimeout);
 	}
 
-	public boolean delete(String key, long opTimeout) throws TimeoutException,
-			InterruptedException, MemcachedException {
+	public boolean delete(String key, long opTimeout)
+			throws TimeoutException, InterruptedException, MemcachedException {
 		return this.delete0(key, 0, 0, false, opTimeout);
 	}
 
@@ -1917,8 +1926,8 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 	}
 
 	private boolean delete0(String key, final int time, long cas,
-			boolean noreply, long opTimeout) throws MemcachedException,
-			InterruptedException, TimeoutException {
+			boolean noreply, long opTimeout)
+			throws MemcachedException, InterruptedException, TimeoutException {
 		key = this.preProcessKey(key);
 		final byte[] keyBytes = ByteUtils.getBytes(key);
 		ByteUtils.checkKey(keyBytes);
@@ -1968,8 +1977,8 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 		return (Boolean) command.getResult();
 	}
 
-	public boolean touch(String key, int exp) throws TimeoutException,
-			InterruptedException, MemcachedException {
+	public boolean touch(String key, int exp)
+			throws TimeoutException, InterruptedException, MemcachedException {
 		return this.touch(key, exp, this.opTimeout);
 	}
 
@@ -1980,8 +1989,8 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 		final byte[] keyBytes = ByteUtils.getBytes(key);
 		ByteUtils.checkKey(keyBytes);
 		CountDownLatch latch = new CountDownLatch(1);
-		final Command command = this.commandFactory.createGetAndTouchCommand(
-				key, keyBytes, latch, newExp, false);
+		final Command command = this.commandFactory
+				.createGetAndTouchCommand(key, keyBytes, latch, newExp, false);
 		this.latchWait(command, opTimeout, this.sendCommand(command));
 		command.getIoBuffer().free();
 		this.checkException(command);
@@ -1993,8 +2002,8 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 	}
 
 	@SuppressWarnings("unchecked")
-	public <T> T getAndTouch(String key, int newExp) throws TimeoutException,
-			InterruptedException, MemcachedException {
+	public <T> T getAndTouch(String key, int newExp)
+			throws TimeoutException, InterruptedException, MemcachedException {
 		return (T) this.getAndTouch(key, newExp, this.opTimeout);
 	}
 
@@ -2025,8 +2034,8 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 	}
 
 	public long incr(String key, long delta, long initValue, long timeout,
-			int exp) throws TimeoutException, InterruptedException,
-			MemcachedException {
+			int exp)
+			throws TimeoutException, InterruptedException, MemcachedException {
 		key = this.preProcessKey(key);
 		return this.sendIncrOrDecrCommand(key, delta, initValue,
 				CommandType.INCR, false, timeout, exp);
@@ -2081,8 +2090,8 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 	}
 
 	public long decr(String key, long delta, long initValue, long timeout,
-			int exp) throws TimeoutException, InterruptedException,
-			MemcachedException {
+			int exp)
+			throws TimeoutException, InterruptedException, MemcachedException {
 		key = this.preProcessKey(key);
 		return this.sendIncrOrDecrCommand(key, delta, initValue,
 				CommandType.DECR, false, timeout, exp);
@@ -2093,13 +2102,13 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 	 * 
 	 * @see net.rubyeye.xmemcached.MemcachedClient#flushAll()
 	 */
-	public final void flushAll() throws TimeoutException, InterruptedException,
-			MemcachedException {
+	public final void flushAll()
+			throws TimeoutException, InterruptedException, MemcachedException {
 		this.flushAll(this.opTimeout);
 	}
 
-	public void flushAllWithNoReply() throws InterruptedException,
-			MemcachedException {
+	public void flushAllWithNoReply()
+			throws InterruptedException, MemcachedException {
 		try {
 			this.flushAllMemcachedServers(this.opTimeout, true, 0);
 		} catch (TimeoutException e) {
@@ -2107,8 +2116,8 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 		}
 	}
 
-	public void flushAllWithNoReply(int exptime) throws InterruptedException,
-			MemcachedException {
+	public void flushAllWithNoReply(int exptime)
+			throws InterruptedException, MemcachedException {
 		try {
 			this.flushAllMemcachedServers(this.opTimeout, true, exptime);
 		} catch (TimeoutException e) {
@@ -2145,21 +2154,21 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 	 * 
 	 * @see net.rubyeye.xmemcached.MemcachedClient#flushAll(long)
 	 */
-	public final void flushAll(long timeout) throws TimeoutException,
-			InterruptedException, MemcachedException {
+	public final void flushAll(long timeout)
+			throws TimeoutException, InterruptedException, MemcachedException {
 		this.flushAllMemcachedServers(timeout, false, 0);
 	}
 
 	private void flushAllMemcachedServers(long timeout, boolean noreply,
-			int exptime) throws MemcachedException, InterruptedException,
-			TimeoutException {
+			int exptime)
+			throws MemcachedException, InterruptedException, TimeoutException {
 		final Collection<Session> sessions = this.connector.getSessionSet();
 		CountDownLatch latch = new CountDownLatch(sessions.size());
 		List<Command> commands = new ArrayList<Command>(sessions.size());
 		for (Session session : sessions) {
 			if (session != null && !session.isClosed()) {
-				Command command = this.commandFactory.createFlushAllCommand(
-						latch, exptime, noreply);
+				Command command = this.commandFactory
+						.createFlushAllCommand(latch, exptime, noreply);
 
 				session.write(command);
 			} else {
@@ -2183,8 +2192,8 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 	}
 
 	private void setMemcachedLoggingLevel(InetSocketAddress address, int level,
-			boolean noreply) throws MemcachedException, InterruptedException,
-			TimeoutException {
+			boolean noreply)
+			throws MemcachedException, InterruptedException, TimeoutException {
 		if (address == null) {
 			throw new IllegalArgumentException("Null adderss");
 		}
@@ -2220,9 +2229,8 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see
-	 * net.rubyeye.xmemcached.MemcachedClient#flushAll(java.net.InetSocketAddress
-	 * )
+	 * @see net.rubyeye.xmemcached.MemcachedClient#flushAll(java.net.
+	 * InetSocketAddress )
 	 */
 	public final void flushAll(InetSocketAddress address)
 			throws MemcachedException, InterruptedException, TimeoutException {
@@ -2232,9 +2240,8 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see
-	 * net.rubyeye.xmemcached.MemcachedClient#flushAll(java.net.InetSocketAddress
-	 * , long)
+	 * @see net.rubyeye.xmemcached.MemcachedClient#flushAll(java.net.
+	 * InetSocketAddress , long)
 	 */
 	public final void flushAll(InetSocketAddress address, long timeout)
 			throws MemcachedException, InterruptedException, TimeoutException {
@@ -2242,8 +2249,8 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 	}
 
 	public final void flushAll(InetSocketAddress address, long timeout,
-			int exptime) throws MemcachedException, InterruptedException,
-			TimeoutException {
+			int exptime)
+			throws MemcachedException, InterruptedException, TimeoutException {
 		this.flushSpecialMemcachedServer(address, timeout, false, exptime);
 	}
 
@@ -2276,8 +2283,8 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 	 * 
 	 * @see net.rubyeye.xmemcached.MemcachedClient#flushAll(java.lang.String)
 	 */
-	public final void flushAll(String host) throws TimeoutException,
-			InterruptedException, MemcachedException {
+	public final void flushAll(String host)
+			throws TimeoutException, InterruptedException, MemcachedException {
 		this.flushAll(AddrUtil.getOneAddress(host), this.opTimeout);
 	}
 
@@ -2301,8 +2308,8 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 	 */
 	@SuppressWarnings("unchecked")
 	public final Map<String, String> stats(InetSocketAddress address,
-			long timeout) throws MemcachedException, InterruptedException,
-			TimeoutException {
+			long timeout)
+			throws MemcachedException, InterruptedException, TimeoutException {
 		if (address == null) {
 			throw new IllegalArgumentException("Null inetSocketAddress");
 		}
@@ -2315,8 +2322,8 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 					+ SystemUtils.getRawAddress(address) + ":"
 					+ address.getPort() + ",maybe it have not been connected");
 		}
-		Command command = this.commandFactory.createStatsCommand(address,
-				latch, null);
+		Command command = this.commandFactory.createStatsCommand(address, latch,
+				null);
 		final Session session = sessionQueue.peek();
 		session.write(command);
 		this.latchWait(command, timeout, session);
@@ -2329,15 +2336,15 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 	}
 
 	public final Map<InetSocketAddress, Map<String, String>> getStatsByItem(
-			String itemName) throws MemcachedException, InterruptedException,
-			TimeoutException {
+			String itemName)
+			throws MemcachedException, InterruptedException, TimeoutException {
 		return this.getStatsByItem(itemName, this.opTimeout);
 	}
 
 	@SuppressWarnings("unchecked")
 	public final Map<InetSocketAddress, Map<String, String>> getStatsByItem(
-			String itemName, long timeout) throws MemcachedException,
-			InterruptedException, TimeoutException {
+			String itemName, long timeout)
+			throws MemcachedException, InterruptedException, TimeoutException {
 		final Set<Session> sessionSet = this.connector.getSessionSet();
 		final Map<InetSocketAddress, Map<String, String>> collectResult = new HashMap<InetSocketAddress, Map<String, String>>();
 		if (sessionSet.size() == 0) {
@@ -2407,12 +2414,12 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 			throws MemcachedException, InterruptedException, TimeoutException {
 		return this.getStatsByItem(null, timeout);
 	}
-	
+
 	/**
 	 * For subclass override.
 	 */
-	protected void shutdown0(){
-		
+	protected void shutdown0() {
+
 	}
 
 	/*
@@ -2443,8 +2450,8 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 
 	private long sendIncrOrDecrCommand(final String key, final long delta,
 			long initValue, final CommandType cmdType, boolean noreply,
-			long operationTimeout, int exp) throws InterruptedException,
-			TimeoutException, MemcachedException {
+			long operationTimeout, int exp)
+			throws InterruptedException, TimeoutException, MemcachedException {
 		final byte[] keyBytes = ByteUtils.getBytes(key);
 		ByteUtils.checkKey(keyBytes);
 		final Command command = this.commandFactory.createIncrDecrCommand(key,
@@ -2465,9 +2472,8 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 							this.transcoder, this.opTimeout)) {
 						return initValue;
 					} else {
-						return this.sendIncrOrDecrCommand(key, delta,
-								initValue, cmdType, noreply, operationTimeout,
-								exp);
+						return this.sendIncrOrDecrCommand(key, delta, initValue,
+								cmdType, noreply, operationTimeout, exp);
 					}
 				} else {
 					throw new MemcachedException(
@@ -2499,8 +2505,8 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 	 * 
 	 * @see net.rubyeye.xmemcached.MemcachedClient#delete(java.lang.String)
 	 */
-	public final boolean delete(final String key) throws TimeoutException,
-			InterruptedException, MemcachedException {
+	public final boolean delete(final String key)
+			throws TimeoutException, InterruptedException, MemcachedException {
 		return this.delete(key, 0);
 	}
 
@@ -2517,9 +2523,8 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see
-	 * net.rubyeye.xmemcached.MemcachedClient#setTranscoder(net.rubyeye.xmemcached
-	 * .transcoders.Transcoder)
+	 * @see net.rubyeye.xmemcached.MemcachedClient#setTranscoder(net.rubyeye.
+	 * xmemcached .transcoders.Transcoder)
 	 */
 	@SuppressWarnings("unchecked")
 	public final void setTranscoder(final Transcoder transcoder) {
@@ -2547,8 +2552,8 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 	private static final String CONTINUOUS_TIMEOUT_COUNTER = "ContinuousTimeouts";
 
 	protected void latchWait(final Command cmd, final long timeout,
-			final Session session) throws InterruptedException,
-			TimeoutException {
+			final Session session)
+			throws InterruptedException, TimeoutException {
 		if (cmd.getLatch().await(timeout, TimeUnit.MILLISECONDS)) {
 			AtomicInteger counter = this.getContinuousTimeoutCounter(session);
 			// reset counter.
@@ -2569,11 +2574,9 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 					// ignore it.
 				}
 			}
-			throw new TimeoutException(
-					"Timed out("
-							+ timeout
-							+ " milliseconds) waiting for operation while connected to "
-							+ session);
+			throw new TimeoutException("Timed out(" + timeout
+					+ " milliseconds) waiting for operation while connected to "
+					+ session);
 		}
 	}
 
@@ -2611,7 +2614,8 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 		return Collections.unmodifiableSet(result);
 	}
 
-	public final int getConnectionSizeBySocketAddress(InetSocketAddress address) {
+	public final int getConnectionSizeBySocketAddress(
+			InetSocketAddress address) {
 		Queue<Session> sessionList = this.connector
 				.getSessionByAddress(address);
 		return sessionList == null ? 0 : sessionList.size();
@@ -2658,8 +2662,8 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 		this.sanitizeKeys = sanitizeKeys;
 	}
 
-	private String decodeKey(String key) throws MemcachedException,
-			InterruptedException, TimeoutException {
+	private String decodeKey(String key)
+			throws MemcachedException, InterruptedException, TimeoutException {
 		try {
 			key = this.sanitizeKeys ? URLDecoder.decode(key, "UTF-8") : key;
 		} catch (UnsupportedEncodingException e) {
@@ -2684,8 +2688,8 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 		return key;
 	}
 
-	private String preProcessKey(String key) throws MemcachedException,
-			InterruptedException {
+	private String preProcessKey(String key)
+			throws MemcachedException, InterruptedException {
 		key = this.keyProvider.process(key);
 		try {
 			key = this.sanitizeKeys ? URLEncoder.encode(key, "UTF-8") : key;
@@ -2711,8 +2715,8 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 		this.incr(key, 1, System.currentTimeMillis(), opTimeout);
 	}
 
-	public void invalidateNamespace(String ns) throws MemcachedException,
-			InterruptedException, TimeoutException {
+	public void invalidateNamespace(String ns)
+			throws MemcachedException, InterruptedException, TimeoutException {
 		this.invalidateNamespace(ns, this.opTimeout);
 	}
 
@@ -2725,8 +2729,8 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 	 * @throws InterruptedException
 	 * @throws MemcachedException
 	 */
-	public String getNamespace(String ns) throws TimeoutException,
-			InterruptedException, MemcachedException {
+	public String getNamespace(String ns)
+			throws TimeoutException, InterruptedException, MemcachedException {
 		String key = this.keyProvider.process(this.getNSKey(ns));
 		byte[] keyBytes = ByteUtils.getBytes(key);
 		ByteUtils.checkKey(keyBytes);
@@ -2835,8 +2839,9 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 	}
 
 	public Queue<ReconnectRequest> getReconnectRequestQueue() {
-		return this.connector != null ? this.connector
-				.getReconnectRequestQueue() : null;
+		return this.connector != null
+				? this.connector.getReconnectRequestQueue()
+				: null;
 	}
 
 }

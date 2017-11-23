@@ -48,11 +48,14 @@ public class NioTCPSession extends AbstractNioSession {
 					+ ",this.timestamp=" + this.lastOperationTimeStamp.get()
 					+ ",current=" + System.currentTimeMillis());
 		}
-		return this.sessionTimeout <= 0 ? false : System.currentTimeMillis()
-				- this.lastOperationTimeStamp.get() >= this.sessionTimeout;
+		return this.sessionTimeout <= 0
+				? false
+				: System.currentTimeMillis() - this.lastOperationTimeStamp
+						.get() >= this.sessionTimeout;
 	}
 
-	public NioTCPSession(NioSessionConfig sessionConfig, int readRecvBufferSize) {
+	public NioTCPSession(NioSessionConfig sessionConfig,
+			int readRecvBufferSize) {
 		super(sessionConfig);
 		if (this.selectableChannel != null
 				&& this.getRemoteSocketAddress() != null) {
@@ -122,8 +125,8 @@ public class NioTCPSession extends AbstractNioSession {
 	 * @throws ClosedChannelException
 	 */
 	protected final Object blockingWrite(SelectableChannel channel,
-			WriteMessage message, IoBuffer writeBuffer) throws IOException,
-			ClosedChannelException {
+			WriteMessage message, IoBuffer writeBuffer)
+			throws IOException, ClosedChannelException {
 		SelectionKey tmpKey = null;
 		Selector writeSelector = null;
 		int attempts = 0;
@@ -153,7 +156,8 @@ public class NioTCPSession extends AbstractNioSession {
 					}
 				}
 			}
-			if (!writeBuffer.hasRemaining() && message.getWriteFuture() != null) {
+			if (!writeBuffer.hasRemaining()
+					&& message.getWriteFuture() != null) {
 				message.getWriteFuture().setResult(Boolean.TRUE);
 			}
 		} finally {
@@ -172,12 +176,13 @@ public class NioTCPSession extends AbstractNioSession {
 	}
 
 	@Override
-	protected WriteMessage wrapMessage(Object msg, Future<Boolean> writeFuture) {
+	protected WriteMessage wrapMessage(Object msg,
+			Future<Boolean> writeFuture) {
 		WriteMessage message = new WriteMessageImpl(msg,
 				(FutureImpl<Boolean>) writeFuture);
 		if (message.getWriteBuffer() == null) {
-			message.setWriteBuffer(this.encoder.encode(message.getMessage(),
-					this));
+			message.setWriteBuffer(
+					this.encoder.encode(message.getMessage(), this));
 		}
 		return message;
 	}
@@ -185,7 +190,8 @@ public class NioTCPSession extends AbstractNioSession {
 	@Override
 	protected void readFromBuffer() {
 		if (!this.readBuffer.hasRemaining()) {
-			if (this.readBuffer.capacity() < Configuration.MAX_READ_BUFFER_SIZE) {
+			if (this.readBuffer
+					.capacity() < Configuration.MAX_READ_BUFFER_SIZE) {
 				this.readBuffer = IoBuffer.wrap(ByteBufferUtils
 						.increaseBufferCapatity(this.readBuffer.buf()));
 			} else {
@@ -207,7 +213,8 @@ public class NioTCPSession extends AbstractNioSession {
 				decodeAndDispatch();
 			} else if (readCount == 0
 					&& !((SocketChannel) this.selectableChannel).socket()
-							.isInputShutdown() && this.useBlockingRead) {
+							.isInputShutdown()
+					&& this.useBlockingRead) {
 				n = this.blockingRead();
 				if (n > 0) {
 					readCount += n;
@@ -245,8 +252,8 @@ public class NioTCPSession extends AbstractNioSession {
 	 * @throws ClosedChannelException
 	 * @throws IOException
 	 */
-	protected final int blockingRead() throws ClosedChannelException,
-			IOException {
+	protected final int blockingRead()
+			throws ClosedChannelException, IOException {
 		int n = 0;
 		int readCount = 0;
 		Selector readSelector = SelectorFactory.getSelector();
@@ -256,7 +263,8 @@ public class NioTCPSession extends AbstractNioSession {
 				tmpKey = this.selectableChannel.register(readSelector, 0);
 				tmpKey.interestOps(tmpKey.interestOps() | SelectionKey.OP_READ);
 				int code = readSelector.select(500);
-				tmpKey.interestOps(tmpKey.interestOps() & ~SelectionKey.OP_READ);
+				tmpKey.interestOps(
+						tmpKey.interestOps() & ~SelectionKey.OP_READ);
 				if (code > 0) {
 					do {
 						n = ((ReadableByteChannel) this.selectableChannel)
@@ -299,8 +307,8 @@ public class NioTCPSession extends AbstractNioSession {
 					break;
 				} else {
 					if (this.statistics.isStatistics()) {
-						this.statistics.statisticsRead(size
-								- this.readBuffer.remaining());
+						this.statistics.statisticsRead(
+								size - this.readBuffer.remaining());
 						size = this.readBuffer.remaining();
 					}
 				}

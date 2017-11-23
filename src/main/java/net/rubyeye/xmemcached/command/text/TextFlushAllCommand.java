@@ -41,8 +41,8 @@ import com.google.code.yanf4j.buffer.IoBuffer;
  */
 public class TextFlushAllCommand extends Command {
 
-	public static final ByteBuffer FLUSH_ALL = ByteBuffer.wrap("flush_all\r\n"
-			.getBytes());
+	public static final ByteBuffer FLUSH_ALL = ByteBuffer
+			.wrap("flush_all\r\n".getBytes());
 
 	protected int exptime;
 
@@ -87,8 +87,8 @@ public class TextFlushAllCommand extends Command {
 				ByteUtils.setArguments(this.ioBuffer, "flush_all",
 						Constants.NO_REPLY);
 			} else {
-				byte[] delayBytes = ByteUtils.getBytes(String
-						.valueOf(this.exptime));
+				byte[] delayBytes = ByteUtils
+						.getBytes(String.valueOf(this.exptime));
 				this.ioBuffer = IoBuffer.allocate("flush_all".length() + 2
 						+ delayBytes.length + Constants.NO_REPLY.length + 2);
 				ByteUtils.setArguments(this.ioBuffer, "flush_all", delayBytes,
@@ -100,10 +100,10 @@ public class TextFlushAllCommand extends Command {
 				this.ioBuffer = IoBuffer.wrap(FLUSH_ALL.slice());
 			} else {
 
-				byte[] delayBytes = ByteUtils.getBytes(String
-						.valueOf(this.exptime));
-				this.ioBuffer = IoBuffer.allocate("flush_all".length() + 1
-						+ delayBytes.length + 2);
+				byte[] delayBytes = ByteUtils
+						.getBytes(String.valueOf(this.exptime));
+				this.ioBuffer = IoBuffer.allocate(
+						"flush_all".length() + 1 + delayBytes.length + 2);
 				ByteUtils.setArguments(this.ioBuffer, "flush_all", delayBytes);
 			}
 		}

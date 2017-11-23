@@ -44,9 +44,8 @@ public class TextIncrDecrCommand extends Command {
 	private long delta;
 	private final long initial;
 
-	public TextIncrDecrCommand(String key, byte[] keyBytes,
-			CommandType cmdType, CountDownLatch latch, long delta,
-			long initial, boolean noreply) {
+	public TextIncrDecrCommand(String key, byte[] keyBytes, CommandType cmdType,
+			CountDownLatch latch, long delta, long initial, boolean noreply) {
 		super(key, keyBytes, cmdType, latch);
 		this.delta = delta;
 		this.noreply = noreply;
@@ -62,7 +61,8 @@ public class TextIncrDecrCommand extends Command {
 	}
 
 	@Override
-	public final boolean decode(MemcachedTCPSession session, ByteBuffer buffer) {
+	public final boolean decode(MemcachedTCPSession session,
+			ByteBuffer buffer) {
 		String line = ByteUtils.nextLine(buffer);
 		if (line != null) {
 			if (line.equals("NOT_FOUND")) {
@@ -87,7 +87,8 @@ public class TextIncrDecrCommand extends Command {
 
 	@Override
 	public final void encode() {
-		byte[] cmdBytes = this.commandType == CommandType.INCR ? Constants.INCR
+		byte[] cmdBytes = this.commandType == CommandType.INCR
+				? Constants.INCR
 				: Constants.DECR;
 		int size = 6 + this.keyBytes.length
 				+ ByteUtils.stringSize(this.getDelta()) + Constants.CRLF.length;

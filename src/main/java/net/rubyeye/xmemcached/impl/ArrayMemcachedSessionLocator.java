@@ -28,8 +28,9 @@ import com.google.code.yanf4j.core.Session;
  * @author dennis
  * 
  */
-public class ArrayMemcachedSessionLocator extends
-		AbstractMemcachedSessionLocator {
+public class ArrayMemcachedSessionLocator
+		extends
+			AbstractMemcachedSessionLocator {
 
 	private HashAlgorithm hashAlgorighm;
 	private transient volatile List<List<Session>> sessions;
@@ -108,10 +109,10 @@ public class ArrayMemcachedSessionLocator extends
 				subList = new ArrayList<Session>();
 				subList.add(target);
 			} else {
-				if (session.getRemoteSocketAddress().equals(
-						target.getRemoteSocketAddress())) {
+				if (session.getRemoteSocketAddress()
+						.equals(target.getRemoteSocketAddress())) {
 					subList.add(session);
-				} else {					
+				} else {
 					tmpList.add(subList);
 					target = session;
 					subList = new ArrayList<Session>();

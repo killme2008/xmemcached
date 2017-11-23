@@ -4,7 +4,6 @@ import java.nio.channels.SelectableChannel;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 
-
 /**
  * 
  * 
@@ -15,53 +14,46 @@ import java.nio.channels.Selector;
  */
 
 public class MockSelectionKey extends SelectionKey {
-    MockSelectableChannel channel;
-    int interestOps;
-    boolean valid = true;
-    Selector selector;
+	MockSelectableChannel channel;
+	int interestOps;
+	boolean valid = true;
+	Selector selector;
 
+	@Override
+	public void cancel() {
+		this.valid = false;
 
-    @Override
-    public void cancel() {
-        this.valid = false;
+	}
 
-    }
+	@Override
+	public SelectableChannel channel() {
+		return this.channel;
+	}
 
+	@Override
+	public int interestOps() {
+		return this.interestOps;
+	}
 
-    @Override
-    public SelectableChannel channel() {
-        return this.channel;
-    }
+	@Override
+	public SelectionKey interestOps(int ops) {
+		this.interestOps = ops;
+		return this;
+	}
 
+	@Override
+	public boolean isValid() {
+		return this.valid;
+	}
 
-    @Override
-    public int interestOps() {
-        return this.interestOps;
-    }
+	@Override
+	public int readyOps() {
+		return this.interestOps;
+	}
 
-
-    @Override
-    public SelectionKey interestOps(int ops) {
-        this.interestOps = ops;
-        return this;
-    }
-
-
-    @Override
-    public boolean isValid() {
-        return this.valid;
-    }
-
-
-    @Override
-    public int readyOps() {
-        return this.interestOps;
-    }
-
-
-    @Override
-    public Selector selector() {
-        return this.selector;
-    }
+	@Override
+	public Selector selector() {
+		return this.selector;
+	}
 
 }

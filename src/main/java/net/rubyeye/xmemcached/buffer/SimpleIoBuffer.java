@@ -24,118 +24,95 @@ public class SimpleIoBuffer implements IoBuffer {
 		this.origBuffer = origBuffer;
 	}
 
-	
 	public final void free() {
 		this.origBuffer = null;
 	}
 
-	
 	public final ByteBuffer[] getByteBuffers() {
-		return new ByteBuffer[] { this.origBuffer };
+		return new ByteBuffer[]{this.origBuffer};
 	}
 
-	
 	public final void put(byte[] bytes) {
 		this.origBuffer.put(bytes);
 	}
 
-	
 	public final int capacity() {
 		return this.origBuffer.capacity();
 	}
 
-	
 	public void putInt(int i) {
 		this.origBuffer.putInt(i);
 
 	}
 
-	
 	public void putShort(short s) {
 		this.origBuffer.putShort(s);
 	}
 
-	
 	public final void clear() {
 		this.origBuffer.clear();
 	}
 
-	
 	public final void reset() {
 		this.origBuffer.reset();
 	}
 
-	
 	public final int remaining() {
 		return this.origBuffer.remaining();
 	}
 
-	
 	public final int position() {
 		return this.origBuffer.position();
 	}
 
-	
 	public final void mark() {
 		this.origBuffer.mark();
 	}
 
-	
 	public final int limit() {
 		return this.origBuffer.limit();
 	}
 
-	
 	public final boolean hasRemaining() {
 		return this.origBuffer.hasRemaining();
 	}
 
-	
 	public final void flip() {
 		this.origBuffer.flip();
 	}
 
-	
 	public final void put(byte b) {
 		this.origBuffer.put(b);
 	}
 
-	
 	public final void put(ByteBuffer buff) {
 		this.origBuffer.put(buff);
 	}
 
-	
 	public final ByteBuffer getByteBuffer() {
 		return this.origBuffer;
 	}
 
-	
 	public final void limit(int limit) {
 		this.origBuffer.limit(limit);
 	}
 
-	
 	public final void position(int pos) {
 		this.origBuffer.position(pos);
 	}
 
-	
 	public void order(ByteOrder byteOrder) {
 		this.origBuffer.order(byteOrder);
 	}
 
-	
 	public boolean isDirect() {
 		return this.origBuffer.isDirect();
 	}
 
-	
 	public ByteOrder order() {
 		return this.origBuffer.order();
 	}
 
-	
 	public void putLong(long l) {
 		this.origBuffer.putLong(l);
 

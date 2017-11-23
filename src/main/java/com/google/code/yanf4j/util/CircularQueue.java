@@ -34,8 +34,11 @@ import java.util.Queue;
  * 
  * @param <E>
  */
-public class CircularQueue<E> extends AbstractList<E> implements List<E>,
-		Queue<E>, Serializable {
+public class CircularQueue<E> extends AbstractList<E>
+		implements
+			List<E>,
+			Queue<E>,
+			Serializable {
 
 	private static final long serialVersionUID = 3993421269224511264L;
 
@@ -195,11 +198,11 @@ public class CircularQueue<E> extends AbstractList<E> implements List<E>,
 			Object[] tmp = new Object[newLen];
 
 			if (this.first < this.last) {
-				System.arraycopy(this.items, this.first, tmp, 0, this.last
-						- this.first);
+				System.arraycopy(this.items, this.first, tmp, 0,
+						this.last - this.first);
 			} else {
-				System.arraycopy(this.items, this.first, tmp, 0, oldLen
-						- this.first);
+				System.arraycopy(this.items, this.first, tmp, 0,
+						oldLen - this.first);
 				System.arraycopy(this.items, 0, tmp, oldLen - this.first,
 						this.last);
 			}
@@ -241,11 +244,11 @@ public class CircularQueue<E> extends AbstractList<E> implements List<E>,
 			// Copy only when there's something to copy.
 			if (size > 0) {
 				if (this.first < this.last) {
-					System.arraycopy(this.items, this.first, tmp, 0, this.last
-							- this.first);
+					System.arraycopy(this.items, this.first, tmp, 0,
+							this.last - this.first);
 				} else {
-					System.arraycopy(this.items, this.first, tmp, 0, oldLen
-							- this.first);
+					System.arraycopy(this.items, this.first, tmp, 0,
+							oldLen - this.first);
 					System.arraycopy(this.items, 0, tmp, oldLen - this.first,
 							this.last);
 				}
@@ -321,8 +324,8 @@ public class CircularQueue<E> extends AbstractList<E> implements List<E>,
 
 		// Remove a room for the removed element.
 		if (this.first < this.last) {
-			System.arraycopy(this.items, this.first, this.items,
-					this.first + 1, realIdx - this.first);
+			System.arraycopy(this.items, this.first, this.items, this.first + 1,
+					realIdx - this.first);
 		} else {
 			if (realIdx >= this.first) {
 				System.arraycopy(this.items, this.first, this.items,

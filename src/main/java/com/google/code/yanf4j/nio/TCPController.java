@@ -33,8 +33,7 @@ import com.google.code.yanf4j.nio.impl.SocketChannelController;
  * 
  * @author dennis
  */
-public class TCPController extends SocketChannelController 
-		 {
+public class TCPController extends SocketChannelController {
 
 	private ServerSocketChannel serverSocketChannel;
 
@@ -66,7 +65,8 @@ public class TCPController extends SocketChannelController
 
 	}
 
-	public TCPController(Configuration configuration, CodecFactory codecFactory) {
+	public TCPController(Configuration configuration,
+			CodecFactory codecFactory) {
 		super(configuration, null, codecFactory);
 	}
 
@@ -96,15 +96,15 @@ public class TCPController extends SocketChannelController
 		this.serverSocketChannel.configureBlocking(false);
 
 		if (this.socketOptions.get(StandardSocketOption.SO_REUSEADDR) != null) {
-			this.serverSocketChannel.socket().setReuseAddress(
-					StandardSocketOption.SO_REUSEADDR.type().cast(
-							this.socketOptions
+			this.serverSocketChannel.socket()
+					.setReuseAddress(StandardSocketOption.SO_REUSEADDR.type()
+							.cast(this.socketOptions
 									.get(StandardSocketOption.SO_REUSEADDR)));
 		}
 		if (this.socketOptions.get(StandardSocketOption.SO_RCVBUF) != null) {
-			this.serverSocketChannel.socket().setReceiveBufferSize(
-					StandardSocketOption.SO_RCVBUF.type().cast(
-							this.socketOptions
+			this.serverSocketChannel.socket()
+					.setReceiveBufferSize(StandardSocketOption.SO_RCVBUF.type()
+							.cast(this.socketOptions
 									.get(StandardSocketOption.SO_RCVBUF)));
 
 		}
@@ -112,8 +112,8 @@ public class TCPController extends SocketChannelController
 			this.serverSocketChannel.socket().bind(this.localSocketAddress,
 					this.backlog);
 		} else {
-			this.serverSocketChannel.socket().bind(
-					new InetSocketAddress("localhost", 0), this.backlog);
+			this.serverSocketChannel.socket()
+					.bind(new InetSocketAddress("localhost", 0), this.backlog);
 		}
 		setLocalSocketAddress((InetSocketAddress) this.serverSocketChannel
 				.socket().getLocalSocketAddress());

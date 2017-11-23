@@ -10,8 +10,9 @@ import net.rubyeye.xmemcached.command.Command;
 import com.google.code.yanf4j.core.WriteMessage;
 import com.google.code.yanf4j.util.LinkedTransferQueue;
 
-public class FlowControlLinkedTransferQueue extends
-		LinkedTransferQueue<WriteMessage> {
+public class FlowControlLinkedTransferQueue
+		extends
+			LinkedTransferQueue<WriteMessage> {
 	private FlowControl flowControl;
 
 	public FlowControlLinkedTransferQueue(FlowControl flowControl) {

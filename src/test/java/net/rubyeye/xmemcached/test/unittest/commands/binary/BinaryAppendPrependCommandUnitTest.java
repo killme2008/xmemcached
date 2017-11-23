@@ -6,8 +6,9 @@ import net.rubyeye.xmemcached.command.Command;
 import net.rubyeye.xmemcached.command.binary.OpCode;
 import net.rubyeye.xmemcached.utils.ByteUtils;
 
-public class BinaryAppendPrependCommandUnitTest extends
-		BaseBinaryCommandUnitTest {
+public class BinaryAppendPrependCommandUnitTest
+		extends
+			BaseBinaryCommandUnitTest {
 	String key = "hello";
 	byte[] keyBytes = ByteUtils.getBytes(this.key);
 	String value = "!";
@@ -35,8 +36,8 @@ public class BinaryAppendPrependCommandUnitTest extends
 
 		buffer = constructResponse(OpCode.APPEND.fieldValue(), (short) 0,
 				(byte) 0, (byte) 0, (short) 0x0005, 0, 0, 1L, null, null, null);
-		command = this.commandFactory.createAppendCommand(this.key, this.keyBytes, this.value,
-				this.noreply, this.transcoder);
+		command = this.commandFactory.createAppendCommand(this.key,
+				this.keyBytes, this.value, this.noreply, this.transcoder);
 		assertTrue(command.decode(null, buffer));
 		assertFalse((Boolean) command.getResult());
 		assertEquals(0, buffer.remaining());
@@ -64,8 +65,8 @@ public class BinaryAppendPrependCommandUnitTest extends
 
 		buffer = constructResponse(OpCode.PREPEND.fieldValue(), (short) 0,
 				(byte) 0, (byte) 0, (short) 0x0005, 0, 0, 1L, null, null, null);
-		command = this.commandFactory.createPrependCommand(this.key, this.keyBytes,
-				this.value, this.noreply, this.transcoder);
+		command = this.commandFactory.createPrependCommand(this.key,
+				this.keyBytes, this.value, this.noreply, this.transcoder);
 		assertTrue(command.decode(null, buffer));
 		assertFalse((Boolean) command.getResult());
 		assertEquals(0, buffer.remaining());

@@ -53,7 +53,8 @@ public class TextCASCommand extends TextStoreCommand {
 	}
 
 	@Override
-	public final boolean decode(MemcachedTCPSession session, ByteBuffer buffer) {
+	public final boolean decode(MemcachedTCPSession session,
+			ByteBuffer buffer) {
 
 		if (buffer == null || !buffer.hasRemaining())
 			return false;
@@ -87,12 +88,12 @@ public class TextCASCommand extends TextStoreCommand {
 				return ByteUtils.stepBuffer(buffer, 8);
 			} else {
 				switch (this.failStatus) {
-				case NOT_FOUND:
-					return ByteUtils.stepBuffer(buffer, 11);
-				case EXISTS:
-					return ByteUtils.stepBuffer(buffer, 8);
-				default:
-					return decodeError(session, buffer);
+					case NOT_FOUND :
+						return ByteUtils.stepBuffer(buffer, 11);
+					case EXISTS :
+						return ByteUtils.stepBuffer(buffer, 8);
+					default :
+						return decodeError(session, buffer);
 				}
 			}
 		}

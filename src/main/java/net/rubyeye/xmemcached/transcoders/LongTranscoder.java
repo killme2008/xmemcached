@@ -39,7 +39,8 @@ public final class LongTranscoder extends PrimitiveTypeTranscoder<Long> {
 			}
 			return new CachedData(flags, b, b.length, -1);
 		}
-		return new CachedData(SerializingTranscoder.SPECIAL_LONG, this.tu.encodeLong(l));
+		return new CachedData(SerializingTranscoder.SPECIAL_LONG,
+				this.tu.encodeLong(l));
 	}
 
 	public Long decode(CachedData d) {

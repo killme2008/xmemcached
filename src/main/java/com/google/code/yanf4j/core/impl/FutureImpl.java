@@ -132,8 +132,8 @@ public class FutureImpl<R> implements Future<R> {
 	/**
 	 * {@inheritDoc}
 	 */
-	public R get(long timeout, TimeUnit unit) throws InterruptedException,
-			ExecutionException, TimeoutException {
+	public R get(long timeout, TimeUnit unit)
+			throws InterruptedException, ExecutionException, TimeoutException {
 		long startTime = System.currentTimeMillis();
 		long timeoutMillis = TimeUnit.MILLISECONDS.convert(timeout, unit);
 		synchronized (this.sync) {
@@ -146,7 +146,8 @@ public class FutureImpl<R> implements Future<R> {
 					} else if (this.result != null) {
 						return this.result;
 					}
-				} else if (System.currentTimeMillis() - startTime > timeoutMillis) {
+				} else if (System.currentTimeMillis()
+						- startTime > timeoutMillis) {
 					throw new TimeoutException();
 				}
 

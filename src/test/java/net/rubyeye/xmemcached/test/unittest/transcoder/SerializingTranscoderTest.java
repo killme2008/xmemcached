@@ -94,8 +94,8 @@ public class SerializingTranscoderTest extends BaseTranscoderCase {
 
 	public void testUndecodeable() throws Exception {
 		CachedData cd = new CachedData(
-				Integer.MAX_VALUE
-						& ~(SerializingTranscoder.COMPRESSED | SerializingTranscoder.SERIALIZED),
+				Integer.MAX_VALUE & ~(SerializingTranscoder.COMPRESSED
+						| SerializingTranscoder.SERIALIZED),
 				tu.encodeInt(Integer.MAX_VALUE), tc.getMaxSize(), -1);
 		assertNull(tc.decode(cd));
 	}

@@ -45,7 +45,8 @@ public class TextQuitCommand extends Command {
 	static final IoBuffer QUIT = IoBuffer.wrap("quit\r\n".getBytes());
 
 	@Override
-	public final boolean decode(MemcachedTCPSession session, ByteBuffer buffer) {
+	public final boolean decode(MemcachedTCPSession session,
+			ByteBuffer buffer) {
 		// do nothing
 		return true;
 	}

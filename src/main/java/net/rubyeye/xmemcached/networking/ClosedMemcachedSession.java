@@ -5,7 +5,7 @@ import com.google.code.yanf4j.core.Session;
 import net.rubyeye.xmemcached.utils.InetSocketAddressWrapper;
 
 public interface ClosedMemcachedSession extends Session {
-	
+
 	public void setAllowReconnect(boolean allow);
 
 	public boolean isAllowReconnect();

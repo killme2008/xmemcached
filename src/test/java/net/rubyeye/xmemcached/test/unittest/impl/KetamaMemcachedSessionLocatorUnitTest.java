@@ -13,8 +13,9 @@ import org.junit.Test;
 
 import com.google.code.yanf4j.core.Session;
 
-public class KetamaMemcachedSessionLocatorUnitTest extends
-		AbstractMemcachedSessionLocatorUnitTest {
+public class KetamaMemcachedSessionLocatorUnitTest
+		extends
+			AbstractMemcachedSessionLocatorUnitTest {
 
 	@Before
 	public void setUp() {

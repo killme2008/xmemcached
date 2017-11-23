@@ -45,19 +45,25 @@ public class PoolDispatcher implements Dispatcher {
 	private ThreadPoolExecutor threadPool;
 
 	public PoolDispatcher(int poolSize) {
-		this(poolSize, 60, TimeUnit.SECONDS, new ThreadPoolExecutor.AbortPolicy(), "pool-dispatcher");
+		this(poolSize, 60, TimeUnit.SECONDS,
+				new ThreadPoolExecutor.AbortPolicy(), "pool-dispatcher");
 	}
 
 	public PoolDispatcher(int poolSize, long keepAliveTime, TimeUnit unit,
 			RejectedExecutionHandler rejectedExecutionHandler, String prefix) {
-		this(poolSize, DEFAULT_POOL_QUEUE_SIZE_FACTOR, DEFAULT_MAX_POOL_SIZE_FACTOR, keepAliveTime, unit,
+		this(poolSize, DEFAULT_POOL_QUEUE_SIZE_FACTOR,
+				DEFAULT_MAX_POOL_SIZE_FACTOR, keepAliveTime, unit,
 				rejectedExecutionHandler, prefix);
 	}
 
-	public PoolDispatcher(int poolSize, int poolQueueSizeFactor, float maxPoolSizeFactor, long keepAliveTime,
-			TimeUnit unit, RejectedExecutionHandler rejectedExecutionHandler, String prefix) {
-		this.threadPool = new ThreadPoolExecutor(poolSize, (int) (maxPoolSizeFactor * poolSize), keepAliveTime, unit,
-				new ArrayBlockingQueue<Runnable>(poolSize * poolQueueSizeFactor), new WorkerThreadFactory(prefix));
+	public PoolDispatcher(int poolSize, int poolQueueSizeFactor,
+			float maxPoolSizeFactor, long keepAliveTime, TimeUnit unit,
+			RejectedExecutionHandler rejectedExecutionHandler, String prefix) {
+		this.threadPool = new ThreadPoolExecutor(poolSize,
+				(int) (maxPoolSizeFactor * poolSize), keepAliveTime, unit,
+				new ArrayBlockingQueue<Runnable>(
+						poolSize * poolQueueSizeFactor),
+				new WorkerThreadFactory(prefix));
 		this.threadPool.setRejectedExecutionHandler(rejectedExecutionHandler);
 	}
 

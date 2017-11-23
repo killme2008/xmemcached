@@ -12,8 +12,8 @@ public class MemcachedClientNameHolder {
 	public static void setName(String name) {
 		cacheName.set(name);
 	}
-	
-	public static String getName(){
+
+	public static String getName() {
 		return cacheName.get();
 	}
 

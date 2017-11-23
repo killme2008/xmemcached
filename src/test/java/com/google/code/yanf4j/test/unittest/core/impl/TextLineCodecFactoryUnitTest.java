@@ -41,7 +41,8 @@ public class TextLineCodecFactoryUnitTest {
 	public void testEncodeEmpty() throws Exception {
 		Encoder encoder = this.textLineCodecFactory.getEncoder();
 		Assert.assertNull(encoder.encode(null, null));
-		Assert.assertEquals(TextLineCodecFactory.SPLIT, encoder.encode("", null));
+		Assert.assertEquals(TextLineCodecFactory.SPLIT,
+				encoder.encode("", null));
 	}
 
 	@Test
@@ -50,14 +51,17 @@ public class TextLineCodecFactoryUnitTest {
 		Assert.assertNotNull(encoder);
 		IoBuffer buffer = encoder.encode("hello", null);
 
-		String str = (String) this.textLineCodecFactory.getDecoder().decode(buffer, null);
+		String str = (String) this.textLineCodecFactory.getDecoder()
+				.decode(buffer, null);
 		Assert.assertEquals("hello", str);
 	}
 
 	@Test
 	public void decodeEmpty() throws Exception {
-		Assert.assertNull(this.textLineCodecFactory.getDecoder().decode(null, null));
-		Assert.assertEquals("", this.textLineCodecFactory.getDecoder().decode(TextLineCodecFactory.SPLIT, null));
+		Assert.assertNull(
+				this.textLineCodecFactory.getDecoder().decode(null, null));
+		Assert.assertEquals("", this.textLineCodecFactory.getDecoder()
+				.decode(TextLineCodecFactory.SPLIT, null));
 	}
 
 }

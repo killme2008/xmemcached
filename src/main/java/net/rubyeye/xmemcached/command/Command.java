@@ -39,9 +39,9 @@ public abstract class Command implements WriteMessage {
 	public static final byte REQUEST_MAGIC_NUMBER = (byte) (0x80 & 0xFF);
 
 	public static final byte RESPONSE_MAGIC_NUMBER = (byte) (0x81 & 0xFF);
-	
+
 	private boolean added;
-	
+
 	public boolean isAdded() {
 		return added;
 	}
@@ -243,9 +243,9 @@ public abstract class Command implements WriteMessage {
 			ByteBuffer buffer);
 
 	protected final void decodeError(String msg, Throwable e) {
-		throw new MemcachedDecodeException(
-				msg == null ? "decode error,session will be closed,key="
-						+ this.key : msg, e);
+		throw new MemcachedDecodeException(msg == null
+				? "decode error,session will be closed,key=" + this.key
+				: msg, e);
 	}
 
 	protected final void decodeError() {
@@ -256,21 +256,22 @@ public abstract class Command implements WriteMessage {
 	protected final boolean decodeError(String line) {
 		if (line.startsWith("ERROR")) {
 			String[] splits = line.split("ERROR");
-			String errorMsg = splits.length >= 2 ? splits[1]
+			String errorMsg = splits.length >= 2
+					? splits[1]
 					: "Unknow command " + getCommandType();
-			setException(new UnknownCommandException(
-					"Response error,error message:" + errorMsg + ",key="
-							+ this.key));
+			setException(
+					new UnknownCommandException("Response error,error message:"
+							+ errorMsg + ",key=" + this.key));
 			countDownLatch();
 			return true;
 		} else if (line.startsWith("CLIENT_ERROR")) {
-			setException(new MemcachedClientException(getErrorMsg(line,
-					"Unknown Client Error")));
+			setException(new MemcachedClientException(
+					getErrorMsg(line, "Unknown Client Error")));
 			this.countDownLatch();
 			return true;
 		} else if (line.startsWith("SERVER_ERROR")) {
-			setException(new MemcachedServerException(getErrorMsg(line,
-					"Unknown Server Error")));
+			setException(new MemcachedServerException(
+					getErrorMsg(line, "Unknown Server Error")));
 			this.countDownLatch();
 			return true;
 		} else {

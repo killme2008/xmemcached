@@ -34,8 +34,9 @@ import com.google.code.yanf4j.core.ControllerStateListener;
  * @author dennis
  * 
  */
-public class MemcachedClientStateListenerAdapter implements
-		ControllerStateListener {
+public class MemcachedClientStateListenerAdapter
+		implements
+			ControllerStateListener {
 	private final MemcachedClientStateListener memcachedClientStateListener;
 	private final MemcachedClient memcachedClient;
 
@@ -55,29 +56,24 @@ public class MemcachedClientStateListenerAdapter implements
 		return this.memcachedClient;
 	}
 
-	
 	public final void onAllSessionClosed(Controller acceptor) {
 
 	}
 
-	
 	public final void onException(Controller acceptor, Throwable t) {
 		this.memcachedClientStateListener.onException(this.memcachedClient, t);
 
 	}
 
-	
 	public final void onReady(Controller acceptor) {
 
 	}
 
-	
 	public final void onStarted(Controller acceptor) {
 		this.memcachedClientStateListener.onStarted(this.memcachedClient);
 
 	}
 
-	
 	public final void onStopped(Controller acceptor) {
 		this.memcachedClientStateListener.onShutDown(this.memcachedClient);
 

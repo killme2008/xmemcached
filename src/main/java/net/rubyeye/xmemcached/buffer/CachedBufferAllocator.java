@@ -73,8 +73,8 @@ public class CachedBufferAllocator implements BufferAllocator {
 			throw new IllegalArgumentException("maxPoolSize: " + maxPoolSize);
 		}
 		if (maxCachedBufferSize < 0) {
-			throw new IllegalArgumentException("maxCachedBufferSize: "
-					+ maxCachedBufferSize);
+			throw new IllegalArgumentException(
+					"maxCachedBufferSize: " + maxCachedBufferSize);
 		}
 
 		this.maxPoolSize = maxPoolSize;
@@ -82,7 +82,6 @@ public class CachedBufferAllocator implements BufferAllocator {
 
 		this.heapBuffers = new ThreadLocal<Map<Integer, Queue<CachedIoBuffer>>>() {
 
-			
 			@Override
 			protected Map<Integer, Queue<CachedIoBuffer>> initialValue() {
 				return newPoolMap();
@@ -105,14 +104,15 @@ public class CachedBufferAllocator implements BufferAllocator {
 	 */
 	private Map<Integer, Queue<CachedIoBuffer>> newPoolMap() {
 		Map<Integer, Queue<CachedIoBuffer>> poolMap = new HashMap<Integer, Queue<CachedIoBuffer>>();
-		int poolSize = this.maxPoolSize == 0 ? DEFAULT_MAX_POOL_SIZE
+		int poolSize = this.maxPoolSize == 0
+				? DEFAULT_MAX_POOL_SIZE
 				: this.maxPoolSize;
 		for (int i = 0; i < 31; i++) {
 			poolMap.put(1 << i, new CircularQueue<CachedIoBuffer>(poolSize));
 		}
 		poolMap.put(0, new CircularQueue<CachedIoBuffer>(poolSize));
-		poolMap.put(Integer.MAX_VALUE, new CircularQueue<CachedIoBuffer>(
-				poolSize));
+		poolMap.put(Integer.MAX_VALUE,
+				new CircularQueue<CachedIoBuffer>(poolSize));
 		return poolMap;
 	}
 
@@ -169,48 +169,43 @@ public class CachedBufferAllocator implements BufferAllocator {
 			this.origBuffer = origBuffer;
 		}
 
-		
 		public void putInt(int i) {
 			this.origBuffer.putInt(i);
 
 		}
 
-		
 		public void putShort(short s) {
 			this.origBuffer.putShort(s);
 		}
 
-		
 		public ByteOrder order() {
 			return this.origBuffer.order();
 		}
 
-		
 		public boolean isDirect() {
 			return this.origBuffer.isDirect();
 		}
 
-		
 		public void order(ByteOrder byteOrder) {
 			this.origBuffer.order(byteOrder);
 		}
-		
+
 		public void putLong(long l) {
 			this.origBuffer.putLong(l);
 
 		}
-		
+
 		public final void free() {
-			if (this.origBuffer == null
-					|| this.origBuffer.capacity() > CachedBufferAllocator.this.maxCachedBufferSize
+			if (this.origBuffer == null || this.origBuffer
+					.capacity() > CachedBufferAllocator.this.maxCachedBufferSize
 					|| Thread.currentThread() != this.ownerThread) {
 				return;
 			}
 
 			// Add to the cache.
 			Queue<CachedIoBuffer> pool;
-			pool = CachedBufferAllocator.this.heapBuffers.get().get(
-					this.origBuffer.capacity());
+			pool = CachedBufferAllocator.this.heapBuffers.get()
+					.get(this.origBuffer.capacity());
 			if (pool == null) {
 				return;
 			}
@@ -223,82 +218,66 @@ public class CachedBufferAllocator implements BufferAllocator {
 
 		}
 
-		
 		public final ByteBuffer[] getByteBuffers() {
-			return new ByteBuffer[] { this.origBuffer };
+			return new ByteBuffer[]{this.origBuffer};
 		}
 
-		
 		public final void put(byte[] bytes) {
 			this.origBuffer.put(bytes);
 		}
 
-		
 		public final int capacity() {
 			return this.origBuffer.capacity();
 		}
 
-		
 		public final void clear() {
 			this.origBuffer.clear();
 		}
 
-		
 		public final void reset() {
 			this.origBuffer.reset();
 		}
 
-		
 		public final int remaining() {
 			return this.origBuffer.remaining();
 		}
 
-		
 		public final int position() {
 			return this.origBuffer.position();
 		}
 
-		
 		public final void mark() {
 			this.origBuffer.mark();
 		}
 
-		
 		public final int limit() {
 			return this.origBuffer.limit();
 		}
 
-		
 		public final boolean hasRemaining() {
 			return this.origBuffer.hasRemaining();
 		}
 
-		
 		public final void flip() {
 			this.origBuffer.flip();
 		}
 
-		
 		public final void put(byte b) {
 			this.origBuffer.put(b);
 		}
 
-		
 		public final void put(ByteBuffer buff) {
 			this.origBuffer.put(buff);
 		}
 
-		
 		public final ByteBuffer getByteBuffer() {
 			return this.origBuffer;
 		}
 
-		
 		public final void limit(int limit) {
 			this.origBuffer.limit(limit);
 		}
 
-		
 		public final void position(int pos) {
 			this.origBuffer.position(pos);
 		}

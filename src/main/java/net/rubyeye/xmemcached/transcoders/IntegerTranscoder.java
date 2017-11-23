@@ -34,8 +34,8 @@ public final class IntegerTranscoder extends PrimitiveTypeTranscoder<Integer> {
 			}
 			return new CachedData(flags, b, b.length, -1);
 		}
-		return new CachedData(SerializingTranscoder.SPECIAL_INT, this.tu
-				.encodeInt(l));
+		return new CachedData(SerializingTranscoder.SPECIAL_INT,
+				this.tu.encodeInt(l));
 	}
 
 	public Integer decode(CachedData d) {

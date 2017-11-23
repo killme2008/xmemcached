@@ -5,7 +5,9 @@ import java.util.concurrent.CountDownLatch;
 import net.rubyeye.xmemcached.command.CommandType;
 import net.rubyeye.xmemcached.command.text.TextGetOneCommand;
 
-public class MockErrorTextGetOneCommand extends TextGetOneCommand implements MockErrorCommand{
+public class MockErrorTextGetOneCommand extends TextGetOneCommand
+		implements
+			MockErrorCommand {
 
 	private volatile boolean decoded;
 

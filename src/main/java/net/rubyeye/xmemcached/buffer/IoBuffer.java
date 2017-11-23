@@ -50,11 +50,11 @@ public interface IoBuffer {
 	void put(ByteBuffer buff);
 
 	void put(byte b);
-	
+
 	void putShort(short s);
-	
+
 	void putInt(int i);
-	
+
 	void putLong(long l);
 
 	void put(byte[] bytes);

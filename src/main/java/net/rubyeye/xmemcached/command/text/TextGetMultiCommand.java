@@ -28,6 +28,7 @@ import net.rubyeye.xmemcached.command.CommandType;
 import net.rubyeye.xmemcached.transcoders.Transcoder;
 /**
  * Bulk-get command for text protocol
+ * 
  * @author dennis
  *
  */
@@ -35,7 +36,7 @@ public class TextGetMultiCommand extends TextGetCommand {
 
 	@SuppressWarnings("unchecked")
 	public TextGetMultiCommand(String key, byte[] keyBytes, CommandType cmdType,
-			CountDownLatch latch,Transcoder transcoder) {
+			CountDownLatch latch, Transcoder transcoder) {
 		super(key, keyBytes, cmdType, latch);
 		this.transcoder = transcoder;
 	}

@@ -12,6 +12,7 @@
 package net.rubyeye.xmemcached.exception;
 /**
  * Memcached Client Exception
+ * 
  * @author dennis
  *
  */

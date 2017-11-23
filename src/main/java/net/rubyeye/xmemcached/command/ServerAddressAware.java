@@ -11,8 +11,8 @@ import java.nio.ByteBuffer;
  * 
  */
 public interface ServerAddressAware {
-	public static final ByteBuffer VERSION = ByteBuffer.wrap("version\r\n"
-			.getBytes());
+	public static final ByteBuffer VERSION = ByteBuffer
+			.wrap("version\r\n".getBytes());
 
 	public InetSocketAddress getServer();
 

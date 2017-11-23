@@ -13,14 +13,15 @@ import org.junit.Test;
 
 import com.google.code.yanf4j.core.Session;
 
-public class ArrayMemcachedSessionLocatorUnitTest extends
-		AbstractMemcachedSessionLocatorUnitTest {
+public class ArrayMemcachedSessionLocatorUnitTest
+		extends
+			AbstractMemcachedSessionLocatorUnitTest {
 
 	@Before
 	public void setUp() {
 		this.locator = new ArrayMemcachedSessionLocator();
 	}
-	
+
 	@Test
 	public void testGetSessionByKey_SessionPool() {
 		MockSession session1 = new MockSession(8080);
@@ -33,7 +34,7 @@ public class ArrayMemcachedSessionLocatorUnitTest extends
 		list.add(session2);
 		list.add(session2);
 		list.add(session3);
-	
+
 		this.locator.updateSessions(list);
 
 		assertSame(session2, this.locator.getSessionByKey("a"));

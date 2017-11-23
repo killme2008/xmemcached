@@ -31,11 +31,13 @@ import net.rubyeye.xmemcached.command.ServerAddressAware;
 import net.rubyeye.xmemcached.transcoders.CachedData;
 /**
  * Version command for binary protocol
+ * 
  * @author boyan
  *
  */
-public class BinaryVersionCommand extends BaseBinaryCommand implements
-		ServerAddressAware {
+public class BinaryVersionCommand extends BaseBinaryCommand
+		implements
+			ServerAddressAware {
 	public InetSocketAddress server;
 
 	public final InetSocketAddress getServer() {

@@ -42,8 +42,9 @@ import net.rubyeye.xmemcached.utils.ByteUtils;
  * 
  */
 @SuppressWarnings("unchecked")
-public class BinarySetMultiCommand extends BaseBinaryCommand implements
-		MergeCommandsAware {
+public class BinarySetMultiCommand extends BaseBinaryCommand
+		implements
+			MergeCommandsAware {
 	private boolean finished;
 	private Integer responseOpaque;
 	private Map<Object, Command> mergeCommands;

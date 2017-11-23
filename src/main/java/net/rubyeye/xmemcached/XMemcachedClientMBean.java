@@ -12,11 +12,11 @@ import java.util.List;
 public interface XMemcachedClientMBean {
 
 	/**
-	 *Add memcached servers
+	 * Add memcached servers
 	 * 
 	 * @param host
-	 *            a String in the form of
-	 *            "[host1]:[port1],[host2]:[port2] [host3]:[port3],[host4]:[port4]"
+	 *            a String in the form of "[host1]:[port1],[host2]:[port2]
+	 *            [host3]:[port3],[host4]:[port4]"
 	 */
 	public void addServer(String hostList) throws IOException;
 
@@ -35,7 +35,8 @@ public interface XMemcachedClientMBean {
 	 * Remove memcached servers
 	 * 
 	 * @param host
-	 *            a string in the form of "[host1]:[port1],[host2]:[port2] [host3]:[port3],[host4]:[port4]"
+	 *            a string in the form of "[host1]:[port1],[host2]:[port2]
+	 *            [host3]:[port3],[host4]:[port4]"
 	 */
 	public void removeServer(String hostList);
 

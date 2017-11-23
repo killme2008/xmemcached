@@ -107,7 +107,8 @@ public interface CommandFactory {
 	 * @return
 	 */
 	public <T> Command createGetMultiCommand(Collection<String> keys,
-			CountDownLatch latch, CommandType cmdType, Transcoder<T> transcoder);
+			CountDownLatch latch, CommandType cmdType,
+			Transcoder<T> transcoder);
 
 	/**
 	 * create a incr/decr command
@@ -182,9 +183,9 @@ public interface CommandFactory {
 	 * @param transcoder
 	 * @return
 	 */
-	public Command createReplaceCommand(final String key,
-			final byte[] keyBytes, final int exp, final Object value,
-			boolean noreply, Transcoder transcoder);
+	public Command createReplaceCommand(final String key, final byte[] keyBytes,
+			final int exp, final Object value, boolean noreply,
+			Transcoder transcoder);
 
 	/**
 	 * create a append command
@@ -209,9 +210,8 @@ public interface CommandFactory {
 	 * @param transcoder
 	 * @return
 	 */
-	public Command createPrependCommand(final String key,
-			final byte[] keyBytes, final Object value, boolean noreply,
-			Transcoder transcoder);
+	public Command createPrependCommand(final String key, final byte[] keyBytes,
+			final Object value, boolean noreply, Transcoder transcoder);
 
 	/**
 	 * Create a verbosity command
@@ -251,8 +251,8 @@ public interface CommandFactory {
 	 * @param authData
 	 * @return
 	 */
-	public Command createAuthStepCommand(String mechanism,
-			CountDownLatch latch, byte[] authData);
+	public Command createAuthStepCommand(String mechanism, CountDownLatch latch,
+			byte[] authData);
 
 	/**
 	 * create a quit command
@@ -296,8 +296,8 @@ public interface CommandFactory {
 	 * Create a AWS ElasticCache config command, only supports Cache Engine
 	 * Version 1.4.14 or Higher.
 	 * 
-	 * @see <a
-	 *      href="http://docs.aws.amazon.com/AmazonElastiCache/latest/UserGuide/AutoDiscovery.AddingToYourClientLibrary.html">Adding
+	 * @see <a href=
+	 *      "http://docs.aws.amazon.com/AmazonElastiCache/latest/UserGuide/AutoDiscovery.AddingToYourClientLibrary.html">Adding
 	 *      Auto Discovery To Your Client Library</a>
 	 * @param subCommand
 	 * @param key

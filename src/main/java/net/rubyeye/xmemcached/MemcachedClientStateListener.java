@@ -63,5 +63,6 @@ public interface MemcachedClientStateListener {
 	 * @param memcachedClient
 	 * @param throwable
 	 */
-	public void onException(MemcachedClient memcachedClient, Throwable throwable);
+	public void onException(MemcachedClient memcachedClient,
+			Throwable throwable);
 }

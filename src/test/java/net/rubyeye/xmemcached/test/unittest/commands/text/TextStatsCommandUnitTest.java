@@ -26,15 +26,15 @@ public class TextStatsCommandUnitTest extends BaseTextCommandUnitTest {
 				new CountDownLatch(1), "items");
 		assertNull(command.getIoBuffer());
 		command.encode();
-		assertEquals(ByteBuffer.wrap("stats items\r\n".getBytes()), command
-				.getIoBuffer().buf());
+		assertEquals(ByteBuffer.wrap("stats items\r\n".getBytes()),
+				command.getIoBuffer().buf());
 	}
 
 	public void testDecode() {
 		Command command = this.commandFactory.createStatsCommand(null,
 				new CountDownLatch(1), null);
 		checkDecodeNullAndNotLineByteBuffer(command);
-		checkDecodeInvalidLine(command,"stats", "OK\r\n");
+		checkDecodeInvalidLine(command, "stats", "OK\r\n");
 		checkDecodeValidLine(command, "END\r\n");
 		assertFalse(command.decode(null, ByteBuffer
 				.wrap("STAT bytes 100\r\nSTAT threads 1\r\n".getBytes())));

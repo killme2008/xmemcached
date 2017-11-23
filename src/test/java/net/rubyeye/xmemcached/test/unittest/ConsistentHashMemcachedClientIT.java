@@ -8,11 +8,14 @@ import net.rubyeye.xmemcached.XMemcachedClientBuilder;
 import net.rubyeye.xmemcached.impl.KetamaMemcachedSessionLocator;
 import net.rubyeye.xmemcached.utils.AddrUtil;
 
-public class ConsistentHashMemcachedClientIT extends StandardHashMemcachedClientIT {
+public class ConsistentHashMemcachedClientIT
+		extends
+			StandardHashMemcachedClientIT {
 	@Override
 	public MemcachedClientBuilder createBuilder() throws Exception {
-		MemcachedClientBuilder builder = new XMemcachedClientBuilder(AddrUtil
-				.getAddresses(properties.getProperty("test.memcached.servers")));
+		MemcachedClientBuilder builder = new XMemcachedClientBuilder(
+				AddrUtil.getAddresses(
+						properties.getProperty("test.memcached.servers")));
 		builder.setSessionLocator(new KetamaMemcachedSessionLocator());
 
 		return builder;
@@ -20,8 +23,8 @@ public class ConsistentHashMemcachedClientIT extends StandardHashMemcachedClient
 
 	@Override
 	public MemcachedClientBuilder createWeightedBuilder() throws Exception {
-		List<InetSocketAddress> addressList = AddrUtil.getAddresses(properties
-				.getProperty("test.memcached.servers"));
+		List<InetSocketAddress> addressList = AddrUtil
+				.getAddresses(properties.getProperty("test.memcached.servers"));
 		int[] weights = new int[addressList.size()];
 		for (int i = 0; i < weights.length; i++) {
 			weights[i] = i + 1;

@@ -14,8 +14,9 @@ import org.junit.Test;
 
 import com.google.code.yanf4j.core.Session;
 
-public class RoundRobinMemcachedSessionLocatorUnitTest extends
-		AbstractMemcachedSessionLocatorUnitTest {
+public class RoundRobinMemcachedSessionLocatorUnitTest
+		extends
+			AbstractMemcachedSessionLocatorUnitTest {
 	@Before
 	public void setUp() {
 		this.locator = new RoundRobinMemcachedSessionLocator();

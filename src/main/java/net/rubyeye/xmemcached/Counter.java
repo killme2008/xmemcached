@@ -22,10 +22,9 @@ public final class Counter {
 		int result = 1;
 		result = prime * result
 				+ ((this.key == null) ? 0 : this.key.hashCode());
-		result = prime
-				* result
-				+ ((this.memcachedClient == null) ? 0 : this.memcachedClient
-						.hashCode());
+		result = prime * result + ((this.memcachedClient == null)
+				? 0
+				: this.memcachedClient.hashCode());
 		return result;
 	}
 
@@ -70,8 +69,8 @@ public final class Counter {
 	 * @throws InterruptedException
 	 * @throws TimeoutException
 	 */
-	public long get() throws MemcachedException, InterruptedException,
-			TimeoutException {
+	public long get()
+			throws MemcachedException, InterruptedException, TimeoutException {
 		Object result = this.memcachedClient.get(this.key);
 		if (result == null) {
 			throw new MemcachedClientException("key is not existed.");
@@ -91,8 +90,8 @@ public final class Counter {
 	 * @throws InterruptedException
 	 * @throws TimeoutException
 	 */
-	public void set(long value) throws MemcachedException,
-			InterruptedException, TimeoutException {
+	public void set(long value)
+			throws MemcachedException, InterruptedException, TimeoutException {
 		this.memcachedClient.set(this.key, 0, String.valueOf(value));
 	}
 
@@ -119,8 +118,8 @@ public final class Counter {
 	 * @throws InterruptedException
 	 * @throws TimeoutException
 	 */
-	public long incrementAndGet() throws MemcachedException,
-			InterruptedException, TimeoutException {
+	public long incrementAndGet()
+			throws MemcachedException, InterruptedException, TimeoutException {
 		return this.memcachedClient.incr(this.key, 1, this.initialValue);
 	}
 
@@ -132,8 +131,8 @@ public final class Counter {
 	 * @throws InterruptedException
 	 * @throws TimeoutException
 	 */
-	public long decrementAndGet() throws MemcachedException,
-			InterruptedException, TimeoutException {
+	public long decrementAndGet()
+			throws MemcachedException, InterruptedException, TimeoutException {
 		return this.memcachedClient.decr(this.key, 1, this.initialValue);
 	}
 
@@ -146,11 +145,11 @@ public final class Counter {
 	 * @throws InterruptedException
 	 * @throws TimeoutException
 	 */
-	public long addAndGet(long delta) throws MemcachedException,
-			InterruptedException, TimeoutException {
+	public long addAndGet(long delta)
+			throws MemcachedException, InterruptedException, TimeoutException {
 		if (delta >= 0) {
-			return this.memcachedClient
-					.incr(this.key, delta, this.initialValue);
+			return this.memcachedClient.incr(this.key, delta,
+					this.initialValue);
 		} else {
 			return this.memcachedClient.decr(this.key, -delta,
 					this.initialValue);

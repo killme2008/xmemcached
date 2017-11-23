@@ -22,8 +22,8 @@ import java.nio.ByteBuffer;
 @Deprecated
 public class SimpleBufferAllocator implements BufferAllocator {
 
-	public static final IoBuffer EMPTY_IOBUFFER = new SimpleIoBuffer(ByteBuffer
-			.allocate(0));
+	public static final IoBuffer EMPTY_IOBUFFER = new SimpleIoBuffer(
+			ByteBuffer.allocate(0));
 
 	public final IoBuffer allocate(int capacity) {
 		if (capacity == 0) {
@@ -40,7 +40,6 @@ public class SimpleBufferAllocator implements BufferAllocator {
 		return new SimpleBufferAllocator();
 	}
 
-	
 	public final IoBuffer wrap(ByteBuffer byteBuffer) {
 		return new SimpleIoBuffer(byteBuffer);
 	}

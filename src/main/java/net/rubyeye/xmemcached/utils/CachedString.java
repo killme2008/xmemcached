@@ -40,8 +40,7 @@ public class CachedString {
 			ConcurrentHashMap<K, Reference<V>> cache) {
 		// cleanup any dead entries
 		if (rq.poll() != null) {
-			while (rq.poll() != null)
-				;
+			while (rq.poll() != null);
 			for (Map.Entry<K, Reference<V>> e : cache.entrySet()) {
 				Reference<V> val = e.getValue();
 				if (val != null && val.get() == null) {
@@ -69,7 +68,7 @@ public class CachedString {
 
 	private static String getKey(int len) {
 		StringBuilder sb = new StringBuilder();
-		String[] chars = { "a", "b", "c", "d", "e", "f", "g", "h" };
+		String[] chars = {"a", "b", "c", "d", "e", "f", "g", "h"};
 		int index = (int) Math.floor(Math.random() * 8);
 		for (int i = 0; i < len; i++) {
 			sb.append(chars[index]);
@@ -82,7 +81,7 @@ public class CachedString {
 		for (int i = 0; i < 10000; i++) {
 			sum += testString(8);
 		}
-		int[] keys = { 8, 64, 128 };
+		int[] keys = {8, 64, 128};
 
 		for (int k : keys) {
 			long start = System.currentTimeMillis();

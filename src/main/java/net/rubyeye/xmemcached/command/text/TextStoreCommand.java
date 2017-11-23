@@ -42,7 +42,7 @@ import com.google.code.yanf4j.buffer.IoBuffer;
  * @author dennis
  * 
  */
-public class TextStoreCommand extends Command implements StoreCommand{
+public class TextStoreCommand extends Command implements StoreCommand {
 	protected int expTime;
 	protected long cas;
 	protected Object value;
@@ -131,21 +131,21 @@ public class TextStoreCommand extends Command implements StoreCommand{
 
 	private String getCommandName() {
 		switch (this.commandType) {
-		case ADD:
-			return "add";
-		case SET:
-			return "set";
-		case REPLACE:
-			return "replace";
-		case APPEND:
-			return "append";
-		case PREPEND:
-			return "prepend";
-		case CAS:
-			return "cas";
-		default:
-			throw new IllegalArgumentException(this.commandType.name()
-					+ " is not a store command");
+			case ADD :
+				return "add";
+			case SET :
+				return "set";
+			case REPLACE :
+				return "replace";
+			case APPEND :
+				return "append";
+			case PREPEND :
+				return "prepend";
+			case CAS :
+				return "cas";
+			default :
+				throw new IllegalArgumentException(
+						this.commandType.name() + " is not a store command");
 
 		}
 	}

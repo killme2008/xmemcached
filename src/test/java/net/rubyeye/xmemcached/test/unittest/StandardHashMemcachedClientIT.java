@@ -24,8 +24,8 @@ public class StandardHashMemcachedClientIT extends XMemcachedClientIT {
 	@Override
 	public MemcachedClientBuilder createBuilder() throws Exception {
 		MemcachedClientBuilder builder = new XMemcachedClientBuilder(
-				AddrUtil.getAddresses(this.properties
-						.getProperty("test.memcached.servers")));
+				AddrUtil.getAddresses(
+						this.properties.getProperty("test.memcached.servers")));
 		// builder.setConnectionPoolSize(Runtime.getRuntime().availableProcessors());
 		return builder;
 	}
@@ -59,8 +59,8 @@ public class StandardHashMemcachedClientIT extends XMemcachedClientIT {
 				fail();
 
 			} catch (MemcachedServerException exception) {
-				Assert.assertTrue(exception.getMessage().contains(
-						"object too large for cache"));
+				Assert.assertTrue(exception.getMessage()
+						.contains("object too large for cache"));
 			}
 		}
 		String readLargeObject = memcachedClient.get(KEY_LARGE_OBJECT);
@@ -197,9 +197,8 @@ public class StandardHashMemcachedClientIT extends XMemcachedClientIT {
 
 	@Override
 	public MemcachedClientBuilder createWeightedBuilder() throws Exception {
-		List<InetSocketAddress> addressList = AddrUtil
-				.getAddresses(this.properties
-						.getProperty("test.memcached.servers"));
+		List<InetSocketAddress> addressList = AddrUtil.getAddresses(
+				this.properties.getProperty("test.memcached.servers"));
 		int[] weights = new int[addressList.size()];
 		for (int i = 0; i < weights.length; i++) {
 			weights[i] = i + 1;

@@ -20,14 +20,14 @@ public final class CachedData {
 	private int capacity = -1;
 
 	protected int size = 0;
-	
-	//cache decoded object.
+
+	// cache decoded object.
 	public volatile Object decodedObject;
-	
-	//padding fields
-	public long p1,p2,p3,p4;
+
+	// padding fields
+	public long p1, p2, p3, p4;
 	public int p5;
-	
+
 	protected byte[] data;
 
 	public final int getSize() {

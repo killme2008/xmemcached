@@ -7,15 +7,17 @@ import net.rubyeye.xmemcached.command.binary.OpCode;
 import net.rubyeye.xmemcached.transcoders.CachedData;
 import net.rubyeye.xmemcached.utils.ByteUtils;
 
-public class BinaryGetAndTouchCommandUnitTest extends BaseBinaryCommandUnitTest {
+public class BinaryGetAndTouchCommandUnitTest
+		extends
+			BaseBinaryCommandUnitTest {
 	String key = "hello";
 	byte[] keyBytes = ByteUtils.getBytes(this.key);
 	boolean noreply = false;
 
 	public void testGetEncodeAndDecode() {
 
-		Command command = this.commandFactory.createGetAndTouchCommand(
-				this.key, this.keyBytes, null, 10, false);
+		Command command = this.commandFactory.createGetAndTouchCommand(this.key,
+				this.keyBytes, null, 10, false);
 
 		command.encode();
 		ByteBuffer encodeBuffer = command.getIoBuffer().buf();
@@ -31,8 +33,8 @@ public class BinaryGetAndTouchCommandUnitTest extends BaseBinaryCommandUnitTest 
 
 		assertEquals(33, buffer.capacity());
 		assertTrue(command.decode(null, buffer));
-		assertEquals("world", this.transcoder.decode((CachedData) command
-				.getResult()));
+		assertEquals("world",
+				this.transcoder.decode((CachedData) command.getResult()));
 		assertEquals(0, buffer.remaining());
 
 		buffer = constructResponse(OpCode.GAT.fieldValue(), (short) 0,

@@ -42,7 +42,8 @@ public class TextVerbosityCommand extends VerbosityCommand {
 
 	public static final String VERBOSITY = "verbosity";
 
-	public TextVerbosityCommand(CountDownLatch latch, int level, boolean noreply) {
+	public TextVerbosityCommand(CountDownLatch latch, int level,
+			boolean noreply) {
 		super(latch, level, noreply);
 
 	}
@@ -77,8 +78,8 @@ public class TextVerbosityCommand extends VerbosityCommand {
 			ByteUtils.setArguments(this.ioBuffer, VERBOSITY, levelBytes,
 					Constants.NO_REPLY);
 		} else {
-			this.ioBuffer = IoBuffer.allocate(2 + 1 + VERBOSITY.length()
-					+ levelBytes.length);
+			this.ioBuffer = IoBuffer
+					.allocate(2 + 1 + VERBOSITY.length() + levelBytes.length);
 			ByteUtils.setArguments(this.ioBuffer, VERBOSITY, levelBytes);
 
 		}

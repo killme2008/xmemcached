@@ -45,21 +45,21 @@ public class BinaryStoreCommand extends BaseBinaryCommand {
 		super(key, keyBytes, cmdType, latch, exp, cas, value, noreply,
 				transcoder);
 		switch (cmdType) {
-		case SET:
-			this.opCode = noreply ? OpCode.SET_QUIETLY : OpCode.SET;
-			break;
-		case REPLACE:
-			this.opCode = noreply ? OpCode.REPLACE_QUIETLY : OpCode.REPLACE;
-			break;
-		case ADD:
-			this.opCode = noreply ? OpCode.ADD_QUIETLY : OpCode.ADD;
-			break;
-		case SET_MANY:
-			//ignore
-			break;
-		default:
-			throw new IllegalArgumentException(
-					"Unknow cmd type for storage commands:" + cmdType);
+			case SET :
+				this.opCode = noreply ? OpCode.SET_QUIETLY : OpCode.SET;
+				break;
+			case REPLACE :
+				this.opCode = noreply ? OpCode.REPLACE_QUIETLY : OpCode.REPLACE;
+				break;
+			case ADD :
+				this.opCode = noreply ? OpCode.ADD_QUIETLY : OpCode.ADD;
+				break;
+			case SET_MANY :
+				// ignore
+				break;
+			default :
+				throw new IllegalArgumentException(
+						"Unknow cmd type for storage commands:" + cmdType);
 
 		}
 	}

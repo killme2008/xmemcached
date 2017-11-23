@@ -14,12 +14,14 @@ import org.junit.Test;
 
 import com.google.code.yanf4j.core.Session;
 
-public class KetamaMemcachedSessionLocatorGwhalinMemcachedJavaClientUnitTest extends
-		AbstractMemcachedSessionLocatorUnitTest {
+public class KetamaMemcachedSessionLocatorGwhalinMemcachedJavaClientUnitTest
+		extends
+			AbstractMemcachedSessionLocatorUnitTest {
 
 	@Before
 	public void setUp() {
-		this.locator = new KetamaMemcachedSessionLocator(HashAlgorithm.KETAMA_HASH, false, true);
+		this.locator = new KetamaMemcachedSessionLocator(
+				HashAlgorithm.KETAMA_HASH, false, true);
 	}
 
 	@Test
@@ -27,8 +29,9 @@ public class KetamaMemcachedSessionLocatorGwhalinMemcachedJavaClientUnitTest ext
 		MockMemcachedSession session1 = new MockMemcachedSession(8080);
 		MockMemcachedSession session2 = new MockMemcachedSession(8081);
 		MockMemcachedSession session3 = new MockMemcachedSession(8082);
-		System.err.print(session1.getInetSocketAddressWrapper().getRemoteAddressStr());
-		
+		System.err.print(
+				session1.getInetSocketAddressWrapper().getRemoteAddressStr());
+
 		List<Session> list = new ArrayList<Session>();
 		list.add(session1);
 		list.add(session2);

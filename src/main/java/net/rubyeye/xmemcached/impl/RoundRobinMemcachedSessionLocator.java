@@ -18,8 +18,9 @@ import net.rubyeye.xmemcached.networking.MemcachedSession;
  * @author apple
  * 
  */
-public class RoundRobinMemcachedSessionLocator implements
-		MemcachedSessionLocator {
+public class RoundRobinMemcachedSessionLocator
+		implements
+			MemcachedSessionLocator {
 	private transient volatile List<Session> sessions;
 	private AtomicInteger sets = new AtomicInteger(0);
 

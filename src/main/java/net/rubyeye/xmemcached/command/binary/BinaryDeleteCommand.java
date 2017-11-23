@@ -29,6 +29,7 @@ import net.rubyeye.xmemcached.command.CommandType;
 import net.rubyeye.xmemcached.transcoders.CachedData;
 /**
  * Binary delete command
+ * 
  * @author boyan
  *
  */
@@ -37,7 +38,7 @@ public class BinaryDeleteCommand extends BaseBinaryCommand {
 	public BinaryDeleteCommand(String key, byte[] keyBytes, long cas,
 			CommandType cmdType, CountDownLatch latch, boolean noreply) {
 		super(key, keyBytes, cmdType, latch, 0, cas, null, noreply, null);
-		this.opCode = noreply?OpCode.DELETE_QUIETLY:OpCode.DELETE;
+		this.opCode = noreply ? OpCode.DELETE_QUIETLY : OpCode.DELETE;
 	}
 
 	/**
@@ -53,7 +54,7 @@ public class BinaryDeleteCommand extends BaseBinaryCommand {
 	}
 
 	@Override
-	protected long getCasValue(){
+	protected long getCasValue() {
 		if (this.cas > 0) {
 			return this.cas;
 		} else {

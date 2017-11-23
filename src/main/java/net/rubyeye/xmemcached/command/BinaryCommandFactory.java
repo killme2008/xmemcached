@@ -64,9 +64,8 @@ public class BinaryCommandFactory implements CommandFactory {
 
 	public Command createAppendCommand(String key, byte[] keyBytes,
 			Object value, boolean noreply, Transcoder transcoder) {
-		return new BinaryAppendPrependCommand(key, keyBytes,
-				CommandType.APPEND, new CountDownLatch(1), 0, 0, value,
-				noreply, transcoder);
+		return new BinaryAppendPrependCommand(key, keyBytes, CommandType.APPEND,
+				new CountDownLatch(1), 0, 0, value, noreply, transcoder);
 	}
 
 	public Command createCASCommand(String key, byte[] keyBytes, int exp,
@@ -88,12 +87,13 @@ public class BinaryCommandFactory implements CommandFactory {
 
 	public Command createGetCommand(String key, byte[] keyBytes,
 			CommandType cmdType, Transcoder transcoder) {
-		return new BinaryGetCommand(key, keyBytes, cmdType, new CountDownLatch(
-				1), OpCode.GET, false);
+		return new BinaryGetCommand(key, keyBytes, cmdType,
+				new CountDownLatch(1), OpCode.GET, false);
 	}
 
 	public <T> Command createGetMultiCommand(Collection<String> keys,
-			CountDownLatch latch, CommandType cmdType, Transcoder<T> transcoder) {
+			CountDownLatch latch, CommandType cmdType,
+			Transcoder<T> transcoder) {
 		Iterator<String> it = keys.iterator();
 		String key = null;
 		List<com.google.code.yanf4j.buffer.IoBuffer> bufferList = new ArrayList<com.google.code.yanf4j.buffer.IoBuffer>();
@@ -111,9 +111,8 @@ public class BinaryCommandFactory implements CommandFactory {
 			}
 		}
 		// last key,create a get command
-		Command lastCommand = new BinaryGetCommand(key,
-				ByteUtils.getBytes(key), cmdType, new CountDownLatch(1),
-				OpCode.GET_KEY, false);
+		Command lastCommand = new BinaryGetCommand(key, ByteUtils.getBytes(key),
+				cmdType, new CountDownLatch(1), OpCode.GET_KEY, false);
 		lastCommand.encode();
 		bufferList.add(lastCommand.getIoBuffer());
 		totalLength += lastCommand.getIoBuffer().remaining();
@@ -186,8 +185,8 @@ public class BinaryCommandFactory implements CommandFactory {
 				ByteUtils.getBytes(mechanism), latch, authData);
 	}
 
-	public Command createAuthStepCommand(String mechanism,
-			CountDownLatch latch, byte[] authData) {
+	public Command createAuthStepCommand(String mechanism, CountDownLatch latch,
+			byte[] authData) {
 		return new BinaryAuthStepCommand(mechanism,
 				ByteUtils.getBytes(mechanism), latch, authData);
 	}

@@ -14,8 +14,9 @@ public class BinaryCASCommandUnitTest extends BaseBinaryCommandUnitTest {
 
 	public void testAddEncodeAndDecode() {
 
-		Command command = this.commandFactory.createCASCommand(this.key, this.keyBytes,
-				0, this.value, 9L, this.noreply, this.transcoder);
+		Command command = this.commandFactory.createCASCommand(this.key,
+				this.keyBytes, 0, this.value, 9L, this.noreply,
+				this.transcoder);
 
 		command.encode();
 		ByteBuffer encodeBuffer = command.getIoBuffer().buf();
@@ -27,17 +28,17 @@ public class BinaryCASCommandUnitTest extends BaseBinaryCommandUnitTest {
 		assertEquals(OpCode.SET.fieldValue(), opCode);
 
 		ByteBuffer buffer = constructResponse(OpCode.SET.fieldValue(),
-				(short) 0, (byte) 0, (byte) 0, (short) 0, 0, 0, 10L, null,
-				null, null);
+				(short) 0, (byte) 0, (byte) 0, (short) 0, 0, 0, 10L, null, null,
+				null);
 
 		assertTrue(command.decode(null, buffer));
 		assertTrue((Boolean) command.getResult());
 		assertEquals(0, buffer.remaining());
 
-		buffer = constructResponse(OpCode.SET.fieldValue(), (short) 0,
-				(byte) 0, (byte) 0, (short) 0x0005, 0, 0, 0L, null, null, null);
-		command = this.commandFactory.createCASCommand(this.key, this.keyBytes, 0, this.value,
-				9L, this.noreply, this.transcoder);
+		buffer = constructResponse(OpCode.SET.fieldValue(), (short) 0, (byte) 0,
+				(byte) 0, (short) 0x0005, 0, 0, 0L, null, null, null);
+		command = this.commandFactory.createCASCommand(this.key, this.keyBytes,
+				0, this.value, 9L, this.noreply, this.transcoder);
 		assertTrue(command.decode(null, buffer));
 		assertFalse((Boolean) command.getResult());
 		assertEquals(0, buffer.remaining());

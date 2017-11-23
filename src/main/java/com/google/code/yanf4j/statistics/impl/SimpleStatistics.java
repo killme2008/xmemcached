@@ -123,7 +123,8 @@ public class SimpleStatistics implements Statistics {
 	}
 
 	public double getProcessedMessageAverageTime() {
-		return this.processMessageCount.get() == 0 ? 0
+		return this.processMessageCount.get() == 0
+				? 0
 				: (double) this.processMessageTotalTime.get()
 						/ this.processMessageCount.get();
 	}
@@ -196,50 +197,61 @@ public class SimpleStatistics implements Statistics {
 	}
 
 	public long getRecvMessageAverageSize() {
-		return this.recvMessageCount.get() == 0 ? 0 : this.recvMessageTotalSize
-				.get()
-				/ this.recvMessageCount.get();
+		return this.recvMessageCount.get() == 0
+				? 0
+				: this.recvMessageTotalSize.get() / this.recvMessageCount.get();
 	}
 
 	public double getRecvMessageCountPerSecond() {
-		long duration = (this.stopTime == -1) ? (System.currentTimeMillis() - this.startTime)
+		long duration = (this.stopTime == -1)
+				? (System.currentTimeMillis() - this.startTime)
 				: (this.stopTime - this.startTime);
-		return duration == 0 ? 0 : (double) this.recvMessageCount.get() * 1000
-				/ duration;
+		return duration == 0
+				? 0
+				: (double) this.recvMessageCount.get() * 1000 / duration;
 	}
 
 	public double getWriteMessageCountPerSecond() {
-		long duration = (this.stopTime == -1) ? (System.currentTimeMillis() - this.startTime)
+		long duration = (this.stopTime == -1)
+				? (System.currentTimeMillis() - this.startTime)
 				: (this.stopTime - this.startTime);
-		return duration == 0 ? 0 : (double) this.writeMessageCount.get() * 1000
-				/ duration;
+		return duration == 0
+				? 0
+				: (double) this.writeMessageCount.get() * 1000 / duration;
 	}
 
 	public long getWriteMessageAverageSize() {
-		return this.writeMessageCount.get() == 0 ? 0
+		return this.writeMessageCount.get() == 0
+				? 0
 				: this.writeMessageTotalSize.get()
 						/ this.writeMessageCount.get();
 	}
 
 	public double getAcceptCountPerSecond() {
-		long duration = (this.stopTime == -1) ? (System.currentTimeMillis() - this.startTime)
+		long duration = (this.stopTime == -1)
+				? (System.currentTimeMillis() - this.startTime)
 				: (this.stopTime - this.startTime);
-		return duration == 0 ? 0 : (double) this.acceptCount.get() * 1000
-				/ duration;
+		return duration == 0
+				? 0
+				: (double) this.acceptCount.get() * 1000 / duration;
 	}
 
 	public double getReceiveBytesPerSecond() {
-		long duration = (this.stopTime == -1) ? (System.currentTimeMillis() - this.startTime)
+		long duration = (this.stopTime == -1)
+				? (System.currentTimeMillis() - this.startTime)
 				: (this.stopTime - this.startTime);
-		return duration == 0 ? 0 : (double) this.recvMessageTotalSize.get()
-				* 1000 / duration;
+		return duration == 0
+				? 0
+				: (double) this.recvMessageTotalSize.get() * 1000 / duration;
 	}
 
 	public double getSendBytesPerSecond() {
-		long duration = (this.stopTime == -1) ? (System.currentTimeMillis() - this.startTime)
+		long duration = (this.stopTime == -1)
+				? (System.currentTimeMillis() - this.startTime)
 				: (this.stopTime - this.startTime);
-		return duration == 0 ? 0 : (double) this.writeMessageTotalSize.get()
-				* 1000 / duration;
+		return duration == 0
+				? 0
+				: (double) this.writeMessageTotalSize.get() * 1000 / duration;
 	}
 
 	public void statisticsAccept() {

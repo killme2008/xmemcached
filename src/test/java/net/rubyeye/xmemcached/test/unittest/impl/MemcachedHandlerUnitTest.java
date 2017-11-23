@@ -51,8 +51,8 @@ public class MemcachedHandlerUnitTest {
 
 	@Test
 	public void testOnMessageSent_TextCommand_NoReply() {
-		TextStoreCommand cmd = new TextStoreCommand(null, null,
-				CommandType.SET, null, 1, 1, "hello", true, null);
+		TextStoreCommand cmd = new TextStoreCommand(null, null, CommandType.SET,
+				null, 1, 1, "hello", true, null);
 		Assert.assertEquals("hello", cmd.getValue());
 		this.mocksControl.replay();
 		this.handler.onMessageSent(this.session, cmd);

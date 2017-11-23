@@ -21,13 +21,16 @@ public abstract class BaseSerializingTranscoder {
 		}
 
 		@Override
-		protected Class<?> resolveClass(ObjectStreamClass desc) throws IOException, ClassNotFoundException {
-		    try {
-		        //When class is not found,try to load it from context class loader.
-		        return super.resolveClass(desc);
-		    } catch (ClassNotFoundException e) {
-		        return Thread.currentThread().getContextClassLoader().loadClass(desc.getName());
-		    }
+		protected Class<?> resolveClass(ObjectStreamClass desc)
+				throws IOException, ClassNotFoundException {
+			try {
+				// When class is not found,try to load it from context class
+				// loader.
+				return super.resolveClass(desc);
+			} catch (ClassNotFoundException e) {
+				return Thread.currentThread().getContextClassLoader()
+						.loadClass(desc.getName());
+			}
 		}
 	}
 
@@ -108,15 +111,16 @@ public abstract class BaseSerializingTranscoder {
 		try {
 			if (in != null) {
 				bis = new ByteArrayInputStream(in);
-                is = new XmcObjectInputStream(bis);
-                rv = is.readObject();
+				is = new XmcObjectInputStream(bis);
+				rv = is.readObject();
 
 			}
 		} catch (IOException e) {
 			log.error("Caught IOException decoding " + in.length
 					+ " bytes of data", e);
 		} catch (ClassNotFoundException e) {
-			log.error("Caught CNFE decoding " + in.length + " bytes of data", e);
+			log.error("Caught CNFE decoding " + in.length + " bytes of data",
+					e);
 		} finally {
 			if (is != null) {
 				try {
@@ -141,12 +145,12 @@ public abstract class BaseSerializingTranscoder {
 	 */
 	public final byte[] compress(byte[] in) {
 		switch (this.compressMode) {
-		case GZIP:
-			return gzipCompress(in);
-		case ZIP:
-			return zipCompress(in);
-		default:
-			return gzipCompress(in);
+			case GZIP :
+				return gzipCompress(in);
+			case ZIP :
+				return zipCompress(in);
+			default :
+				return gzipCompress(in);
 		}
 
 	}
@@ -215,12 +219,12 @@ public abstract class BaseSerializingTranscoder {
 	 */
 	protected byte[] decompress(byte[] in) {
 		switch (this.compressMode) {
-		case GZIP:
-			return gzipDecompress(in);
-		case ZIP:
-			return zipDecompress(in);
-		default:
-			return gzipDecompress(in);
+			case GZIP :
+				return gzipDecompress(in);
+			case ZIP :
+				return zipDecompress(in);
+			default :
+				return gzipDecompress(in);
 		}
 	}
 
@@ -243,7 +247,7 @@ public abstract class BaseSerializingTranscoder {
 
 		} catch (IOException e) {
 			log.error("Failed to decompress data", e);
-			//baos = null;
+			// baos = null;
 		} finally {
 			try {
 				is.close();

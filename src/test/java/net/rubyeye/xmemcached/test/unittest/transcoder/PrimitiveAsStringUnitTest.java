@@ -30,79 +30,73 @@ public class PrimitiveAsStringUnitTest extends TestCase {
 
 	public void testXmemcachedTranscoderEncode() {
 
-		Assert.assertEquals(this.str, encodeAndGet(this.str,
-				this.serializingTranscoder));
-		Assert.assertEquals("1", encodeAndGet(this.i,
-				this.serializingTranscoder));
-		Assert.assertEquals("2", encodeAndGet(this.b,
-				this.serializingTranscoder));
-		Assert.assertEquals("34930403040", encodeAndGet(this.l,
-				this.serializingTranscoder));
-		Assert.assertEquals("1.02", encodeAndGet(this.f,
-				this.serializingTranscoder));
-		Assert.assertEquals("3.14", encodeAndGet(this.d,
-				this.serializingTranscoder));
-//		Assert.assertEquals("1024", encodeAndGet(this.s,
-//				this.serializingTranscoder));
+		Assert.assertEquals(this.str,
+				encodeAndGet(this.str, this.serializingTranscoder));
+		Assert.assertEquals("1",
+				encodeAndGet(this.i, this.serializingTranscoder));
+		Assert.assertEquals("2",
+				encodeAndGet(this.b, this.serializingTranscoder));
+		Assert.assertEquals("34930403040",
+				encodeAndGet(this.l, this.serializingTranscoder));
+		Assert.assertEquals("1.02",
+				encodeAndGet(this.f, this.serializingTranscoder));
+		Assert.assertEquals("3.14",
+				encodeAndGet(this.d, this.serializingTranscoder));
+		// Assert.assertEquals("1024", encodeAndGet(this.s,
+		// this.serializingTranscoder));
 
 	}
 
 	public void testXmemcachedDecode() {
-		Assert.assertEquals(this.str, decodeAndGet(this.str,
-				this.serializingTranscoder));
-		Assert.assertEquals("1", decodeAndGet(this.i,
-				this.serializingTranscoder));
-		Assert.assertEquals("2", decodeAndGet(this.b,
-				this.serializingTranscoder));
-		Assert.assertEquals("34930403040", decodeAndGet(this.l,
-				this.serializingTranscoder));
-		Assert.assertEquals("1.02", decodeAndGet(this.f,
-				this.serializingTranscoder));
-		Assert.assertEquals("3.14", decodeAndGet(this.d,
-				this.serializingTranscoder));
-		Assert.assertEquals(this.s, decodeAndGet(this.s,
-				this.serializingTranscoder));
-		Assert.assertEquals(this.map, decodeAndGet(this.map,
-				this.serializingTranscoder));
+		Assert.assertEquals(this.str,
+				decodeAndGet(this.str, this.serializingTranscoder));
+		Assert.assertEquals("1",
+				decodeAndGet(this.i, this.serializingTranscoder));
+		Assert.assertEquals("2",
+				decodeAndGet(this.b, this.serializingTranscoder));
+		Assert.assertEquals("34930403040",
+				decodeAndGet(this.l, this.serializingTranscoder));
+		Assert.assertEquals("1.02",
+				decodeAndGet(this.f, this.serializingTranscoder));
+		Assert.assertEquals("3.14",
+				decodeAndGet(this.d, this.serializingTranscoder));
+		Assert.assertEquals(this.s,
+				decodeAndGet(this.s, this.serializingTranscoder));
+		Assert.assertEquals(this.map,
+				decodeAndGet(this.map, this.serializingTranscoder));
 	}
 
 	public void testWhalinTranscoderTranscoderEncode() {
 
-		Assert.assertEquals(this.str, encodeAndGet(this.str,
-				this.whalinTranscoder));
+		Assert.assertEquals(this.str,
+				encodeAndGet(this.str, this.whalinTranscoder));
 		Assert.assertEquals("1", encodeAndGet(this.i, this.whalinTranscoder));
 		Assert.assertEquals("2", encodeAndGet(this.b, this.whalinTranscoder));
-		Assert.assertEquals("34930403040", encodeAndGet(this.l,
-				this.whalinTranscoder));
-		Assert
-				.assertEquals("1.02", encodeAndGet(this.f,
-						this.whalinTranscoder));
-		Assert
-				.assertEquals("3.14", encodeAndGet(this.d,
-						this.whalinTranscoder));
-		Assert
-				.assertEquals("1024", encodeAndGet(this.s,
-						this.whalinTranscoder));
+		Assert.assertEquals("34930403040",
+				encodeAndGet(this.l, this.whalinTranscoder));
+		Assert.assertEquals("1.02",
+				encodeAndGet(this.f, this.whalinTranscoder));
+		Assert.assertEquals("3.14",
+				encodeAndGet(this.d, this.whalinTranscoder));
+		Assert.assertEquals("1024",
+				encodeAndGet(this.s, this.whalinTranscoder));
 	}
 
 	public void testWhalinTranscoderDecode() {
-		Assert.assertEquals(this.str, decodeAndGet(this.str,
-				this.whalinTranscoder));
+		Assert.assertEquals(this.str,
+				decodeAndGet(this.str, this.whalinTranscoder));
 		Assert.assertEquals("1", decodeAndGet(this.i, this.whalinTranscoder));
 		Assert.assertEquals("2", decodeAndGet(this.b, this.whalinTranscoder));
-		Assert.assertEquals("34930403040", decodeAndGet(this.l,
-				this.whalinTranscoder));
-		Assert
-				.assertEquals("1.02", decodeAndGet(this.f,
-						this.whalinTranscoder));
-		Assert
-				.assertEquals("3.14", decodeAndGet(this.d,
-						this.whalinTranscoder));
-		Assert
-				.assertEquals("1024", decodeAndGet(this.s,
-						this.whalinTranscoder));
-		Assert.assertEquals(this.map, decodeAndGet(this.map,
-				this.whalinTranscoder));
+		Assert.assertEquals("34930403040",
+				decodeAndGet(this.l, this.whalinTranscoder));
+		Assert.assertEquals("1.02",
+				decodeAndGet(this.f, this.whalinTranscoder));
+		Assert.assertEquals("3.14",
+				decodeAndGet(this.d, this.whalinTranscoder));
+		Assert.assertEquals("1024",
+				decodeAndGet(this.s, this.whalinTranscoder));
+		Assert.assertEquals(this.map,
+				decodeAndGet(this.map, this.whalinTranscoder));
 	}
 
 	private Object decodeAndGet(Object obj, Transcoder transcoder) {

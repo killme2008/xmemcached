@@ -22,7 +22,6 @@
  */
 package net.rubyeye.xmemcached.impl;
 
-
 /**
  * OptimizerMBean,used for changing the optimizer's factor
  *
@@ -41,6 +40,5 @@ public interface OptimizerMBean {
 	public void setOptimizeGet(boolean optimiezeGet);
 
 	public void setOptimizeMergeBuffer(boolean optimiezeMergeBuffer);
-
 
 }

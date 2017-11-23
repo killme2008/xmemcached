@@ -16,7 +16,8 @@ import java.util.List;
 import static org.junit.Assert.assertEquals;
 
 public class KetamaMemcachedSessionLocatorNginxUpstreamConsistentUnitTest
-		extends AbstractMemcachedSessionLocatorUnitTest {
+		extends
+			AbstractMemcachedSessionLocatorUnitTest {
 
 	static private class MockSession implements Session {
 
@@ -183,15 +184,17 @@ public class KetamaMemcachedSessionLocatorNginxUpstreamConsistentUnitTest
 				.getSessionByKey("127.0.0.1:11212-0").getRemoteSocketAddress());
 		assertEquals(session2.getRemoteSocketAddress(), this.locator
 				.getSessionByKey("127.0.0.1:11212-1").getRemoteSocketAddress());
-		assertEquals(session2.getRemoteSocketAddress(), this.locator
-				.getSessionByKey("127.0.0.1:11212-39").getRemoteSocketAddress());
+		assertEquals(session2.getRemoteSocketAddress(),
+				this.locator.getSessionByKey("127.0.0.1:11212-39")
+						.getRemoteSocketAddress());
 
 		assertEquals(session3.getRemoteSocketAddress(), this.locator
 				.getSessionByKey("127.0.0.1:11213-0").getRemoteSocketAddress());
 		assertEquals(session3.getRemoteSocketAddress(), this.locator
 				.getSessionByKey("127.0.0.1:11213-1").getRemoteSocketAddress());
-		assertEquals(session3.getRemoteSocketAddress(), this.locator
-				.getSessionByKey("127.0.0.1:11213-39").getRemoteSocketAddress());
+		assertEquals(session3.getRemoteSocketAddress(),
+				this.locator.getSessionByKey("127.0.0.1:11213-39")
+						.getRemoteSocketAddress());
 
 	}
 

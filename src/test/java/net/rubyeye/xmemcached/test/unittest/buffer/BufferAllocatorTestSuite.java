@@ -8,10 +8,10 @@ public class BufferAllocatorTestSuite {
 	public static Test suite() {
 		TestSuite suite = new TestSuite(
 				"Test for net.rubyeye.xmemcached.test.unittest.buffer");
-		//$JUnit-BEGIN$
+		// $JUnit-BEGIN$
 		suite.addTestSuite(SimpleBufferAllocatorUnitTest.class);
 		suite.addTestSuite(CachedBufferAllocatorUnitTest.class);
-		//$JUnit-END$
+		// $JUnit-END$
 		return suite;
 	}
 

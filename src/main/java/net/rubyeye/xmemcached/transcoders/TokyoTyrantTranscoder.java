@@ -53,8 +53,8 @@ public class TokyoTyrantTranscoder implements Transcoder<Object> {
 		System.arraycopy(compositeData, 0, flagBytes, 0, 4);
 		System.arraycopy(compositeData, 4, realData, 0,
 				compositeData.length - 4);
-		int flag = serializingTranscoder.getTranscoderUtils().decodeInt(
-				flagBytes);
+		int flag = serializingTranscoder.getTranscoderUtils()
+				.decodeInt(flagBytes);
 		d.setFlag(flag);
 		if ((flag & SerializingTranscoder.COMPRESSED) != 0) {
 			realData = serializingTranscoder.decompress(realData);
@@ -62,11 +62,9 @@ public class TokyoTyrantTranscoder implements Transcoder<Object> {
 		flag = flag & SerializingTranscoder.SPECIAL_MASK;
 		return serializingTranscoder.decode0(d, realData, flag);
 	}
-	
-	
 
 	public void setCompressionMode(CompressionMode compressMode) {
-		this.serializingTranscoder.setCompressionMode(compressMode);		
+		this.serializingTranscoder.setCompressionMode(compressMode);
 	}
 
 	public final CachedData encode(Object o) {

@@ -40,8 +40,9 @@ public class WorkerThreadFactory implements ThreadFactory {
 	public WorkerThreadFactory(ThreadGroup group, String prefix) {
 		if (group == null) {
 			SecurityManager s = System.getSecurityManager();
-			this.group = (s != null) ? s.getThreadGroup() : Thread
-					.currentThread().getThreadGroup();
+			this.group = (s != null)
+					? s.getThreadGroup()
+					: Thread.currentThread().getThreadGroup();
 		} else {
 			this.group = group;
 		}
@@ -53,9 +54,9 @@ public class WorkerThreadFactory implements ThreadFactory {
 					+ "-thread-";
 		}
 	}
-	
-	public WorkerThreadFactory(String prefix){
-		this(null,prefix);
+
+	public WorkerThreadFactory(String prefix) {
+		this(null, prefix);
 	}
 
 	public WorkerThreadFactory() {
@@ -63,8 +64,8 @@ public class WorkerThreadFactory implements ThreadFactory {
 	}
 
 	public Thread newThread(Runnable r) {
-		Thread t = new Thread(this.group, r, this.namePrefix
-				+ this.threadNumber.getAndIncrement(), 0);
+		Thread t = new Thread(this.group, r,
+				this.namePrefix + this.threadNumber.getAndIncrement(), 0);
 		t.setDaemon(true);
 		if (t.getPriority() != Thread.NORM_PRIORITY) {
 			t.setPriority(Thread.NORM_PRIORITY);

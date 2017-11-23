@@ -70,7 +70,8 @@ public class KestrelCommandFactory implements CommandFactory {
 	}
 
 	public <T> Command createGetMultiCommand(Collection<String> keys,
-			CountDownLatch latch, CommandType cmdType, Transcoder<T> transcoder) {
+			CountDownLatch latch, CommandType cmdType,
+			Transcoder<T> transcoder) {
 		throw new UnsupportedOperationException(
 				"Kestrel doesn't support this operation");
 	}
@@ -138,8 +139,8 @@ public class KestrelCommandFactory implements CommandFactory {
 		throw new UnsupportedOperationException("Kestrel doesn't support SASL");
 	}
 
-	public Command createAuthStepCommand(String mechanism,
-			CountDownLatch latch, byte[] authData) {
+	public Command createAuthStepCommand(String mechanism, CountDownLatch latch,
+			byte[] authData) {
 		throw new UnsupportedOperationException("Kestrel doesn't support SASL");
 	}
 

@@ -20,7 +20,8 @@ import org.slf4j.LoggerFactory;
  */
 public class SimpleExample {
 
-	private static final Logger log = LoggerFactory.getLogger(SimpleExample.class);
+	private static final Logger log = LoggerFactory
+			.getLogger(SimpleExample.class);
 
 	public static void main(String[] args) {
 		if (args.length < 1) {
@@ -50,8 +51,8 @@ public class SimpleExample {
 
 			System.out.println("Iterate all keys...");
 			// iterate all keys
-			KeyIterator it = memcachedClient.getKeyIterator(AddrUtil
-					.getOneAddress(args[0]));
+			KeyIterator it = memcachedClient
+					.getKeyIterator(AddrUtil.getOneAddress(args[0]));
 			while (it.hasNext()) {
 				System.out.println(it.next());
 			}

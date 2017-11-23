@@ -44,14 +44,14 @@ import java.nio.ByteBuffer;
 
 import com.google.code.yanf4j.config.Configuration;
 
-
 public class ByteBufferUtils {
 	/**
 	 * 
 	 * @param byteBuffer
 	 * @return *
 	 */
-	public static final ByteBuffer increaseBufferCapatity(ByteBuffer byteBuffer) {
+	public static final ByteBuffer increaseBufferCapatity(
+			ByteBuffer byteBuffer) {
 
 		if (byteBuffer == null) {
 			throw new IllegalArgumentException("buffer is null");
@@ -65,8 +65,9 @@ public class ByteBufferUtils {
 		if (capacity < 0) {
 			throw new IllegalArgumentException("capacity can't be negative");
 		}
-		ByteBuffer result = (byteBuffer.isDirect() ? ByteBuffer
-				.allocateDirect(capacity) : ByteBuffer.allocate(capacity));
+		ByteBuffer result = (byteBuffer.isDirect()
+				? ByteBuffer.allocateDirect(capacity)
+				: ByteBuffer.allocate(capacity));
 		result.order(byteBuffer.order());
 		byteBuffer.flip();
 		result.put(byteBuffer);
@@ -124,8 +125,8 @@ public class ByteBufferUtils {
 	}
 
 	public static final String toHex(byte b) {
-		return ("" + "0123456789ABCDEF".charAt(0xf & b >> 4) + "0123456789ABCDEF"
-				.charAt(b & 0xf));
+		return ("" + "0123456789ABCDEF".charAt(0xf & b >> 4)
+				+ "0123456789ABCDEF".charAt(b & 0xf));
 	}
 
 	public static final int indexOf(ByteBuffer buffer, ByteBuffer pattern) {

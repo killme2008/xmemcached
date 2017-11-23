@@ -5,14 +5,14 @@ import net.rubyeye.xmemcached.*;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 public class SpringExample {
-	public static void main(String[] args) throws Exception{
+	public static void main(String[] args) throws Exception {
 		ApplicationContext ctx = new ClassPathXmlApplicationContext(
 				"sampleApplicationContext.xml");
 
 		MemcachedClient client1 = (MemcachedClient) ctx
 				.getBean("memcachedClient1");
 		MemcachedClient client2 = (MemcachedClient) ctx
-		.getBean("memcachedClient2");
+				.getBean("memcachedClient2");
 		test(client1);
 		test(client2);
 		client1.shutdown();

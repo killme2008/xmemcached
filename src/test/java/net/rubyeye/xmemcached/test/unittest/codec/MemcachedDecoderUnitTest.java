@@ -21,11 +21,12 @@ public class MemcachedDecoderUnitTest extends TestCase {
 	public void testDecode() {
 		decoder = new MemcachedCodecFactory().getDecoder();
 		MemcachedTCPSession session = buildSession();
-		Command versionCommand = new TextCommandFactory().createVersionCommand(
-				new CountDownLatch(1), null);
+		Command versionCommand = new TextCommandFactory()
+				.createVersionCommand(new CountDownLatch(1), null);
 		session.addCommand(versionCommand);
-		Command decodedCommand = (Command) decoder.decode(IoBuffer
-				.wrap(ByteBuffer.wrap("VERSION 1.28\r\n".getBytes())), session);
+		Command decodedCommand = (Command) decoder.decode(
+				IoBuffer.wrap(ByteBuffer.wrap("VERSION 1.28\r\n".getBytes())),
+				session);
 		assertSame(decodedCommand, versionCommand);
 		assertEquals("1.28", decodedCommand.getResult());
 	}

@@ -95,10 +95,11 @@ public class ConfigurationPoller implements Runnable {
 					this.clusterConfigration = newConfig;
 				} else {
 					if (newConfig.getVersion() < currentConfig.getVersion()) {
-						log.warn("Ignored new config from ElasticCache node, it's too old, current version is: "
-								+ currentConfig.getVersion()
-								+ ", but the new version is: "
-								+ newConfig.getVersion());
+						log.warn(
+								"Ignored new config from ElasticCache node, it's too old, current version is: "
+										+ currentConfig.getVersion()
+										+ ", but the new version is: "
+										+ newConfig.getVersion());
 						return;
 					} else {
 						this.clusterConfigration = newConfig;

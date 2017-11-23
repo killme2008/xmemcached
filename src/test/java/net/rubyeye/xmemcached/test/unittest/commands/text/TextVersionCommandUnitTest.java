@@ -7,17 +7,19 @@ import net.rubyeye.xmemcached.command.ServerAddressAware;
 
 public class TextVersionCommandUnitTest extends BaseTextCommandUnitTest {
 	public void testEncode() {
-		Command versionCommand = this.commandFactory.createVersionCommand(new CountDownLatch(1),null);
+		Command versionCommand = this.commandFactory
+				.createVersionCommand(new CountDownLatch(1), null);
 		assertNull(versionCommand.getIoBuffer());
 		versionCommand.encode();
-		assertEquals(ServerAddressAware.VERSION, versionCommand.getIoBuffer()
-				.buf());
+		assertEquals(ServerAddressAware.VERSION,
+				versionCommand.getIoBuffer().buf());
 	}
 
 	public void testDecode() {
-		Command versionCommand = this.commandFactory.createVersionCommand(new CountDownLatch(1),null);
+		Command versionCommand = this.commandFactory
+				.createVersionCommand(new CountDownLatch(1), null);
 		checkDecodeNullAndNotLineByteBuffer(versionCommand);
-		checkDecodeInvalidLine(versionCommand, "[version]","test\r\n");
+		checkDecodeInvalidLine(versionCommand, "[version]", "test\r\n");
 
 		checkDecodeValidLine(versionCommand, "VERSION\r\n");
 		assertEquals("unknown version", versionCommand.getResult());

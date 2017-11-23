@@ -7,8 +7,8 @@ public class InValidKeyChecker extends AbstractChecker {
 			call();
 			fail();
 		} catch (IllegalArgumentException e) {
-			assertTrue(e.getMessage().startsWith(
-					"Key contains invalid characters"));
+			assertTrue(e.getMessage()
+					.startsWith("Key contains invalid characters"));
 		}
 
 	}

@@ -35,12 +35,11 @@ import java.util.Map;
 public class AddrUtil {
 
 	/**
-	 * Split a string in the form of
-	 * "host1:port1,host2:port2 host3:port3,host4:port4" into a Map of
-	 * InetSocketAddress instances suitable for instantiating a
-	 * MemcachedClient,map's key is the main memcached node,and value is the
-	 * standby node for main node. Note that colon-delimited IPv6 is also supported. For
-	 * example: ::1:11211
+	 * Split a string in the form of "host1:port1,host2:port2
+	 * host3:port3,host4:port4" into a Map of InetSocketAddress instances
+	 * suitable for instantiating a MemcachedClient,map's key is the main
+	 * memcached node,and value is the standby node for main node. Note that
+	 * colon-delimited IPv6 is also supported. For example: ::1:11211
 	 * 
 	 * @param s
 	 * @return
@@ -51,17 +50,17 @@ public class AddrUtil {
 			throw new NullPointerException("Null host list");
 		}
 		if (s.trim().equals("")) {
-			throw new IllegalArgumentException("No hosts in list:  ``" + s
-					+ "''");
+			throw new IllegalArgumentException(
+					"No hosts in list:  ``" + s + "''");
 		}
-		s=s.trim();
+		s = s.trim();
 		Map<InetSocketAddress, InetSocketAddress> result = new LinkedHashMap<InetSocketAddress, InetSocketAddress>();
 		for (String hosts : s.split(" ")) {
 			String[] nodes = hosts.split(",");
 
 			if (nodes.length < 1) {
-				throw new IllegalArgumentException("Invalid server ``" + hosts
-						+ "'' in list:  " + s);
+				throw new IllegalArgumentException(
+						"Invalid server ``" + hosts + "'' in list:  " + s);
 			}
 			String mainHost = nodes[0].trim();
 			InetSocketAddress mainAddress = getInetSocketAddress(s, mainHost);
@@ -82,15 +81,15 @@ public class AddrUtil {
 			String mainHost) {
 		int finalColon = mainHost.lastIndexOf(':');
 		if (finalColon < 1) {
-			throw new IllegalArgumentException("Invalid server ``" + mainHost
-					+ "'' in list:  " + s);
+			throw new IllegalArgumentException(
+					"Invalid server ``" + mainHost + "'' in list:  " + s);
 
 		}
 		String hostPart = mainHost.substring(0, finalColon).trim();
 		String portNum = mainHost.substring(finalColon + 1).trim();
 
-		InetSocketAddress mainAddress = new InetSocketAddress(hostPart, Integer
-				.parseInt(portNum));
+		InetSocketAddress mainAddress = new InetSocketAddress(hostPart,
+				Integer.parseInt(portNum));
 		return mainAddress;
 	}
 
@@ -105,8 +104,8 @@ public class AddrUtil {
 			throw new NullPointerException("Null host list");
 		}
 		if (s.trim().equals("")) {
-			throw new IllegalArgumentException("No hosts in list:  ``" + s
-					+ "''");
+			throw new IllegalArgumentException(
+					"No hosts in list:  ``" + s + "''");
 		}
 		s = s.trim();
 		ArrayList<InetSocketAddress> addrs = new ArrayList<InetSocketAddress>();
@@ -114,16 +113,15 @@ public class AddrUtil {
 		for (String hoststuff : s.split(" ")) {
 			int finalColon = hoststuff.lastIndexOf(':');
 			if (finalColon < 1) {
-				throw new IllegalArgumentException("Invalid server ``"
-						+ hoststuff + "'' in list:  " + s);
+				throw new IllegalArgumentException(
+						"Invalid server ``" + hoststuff + "'' in list:  " + s);
 
 			}
 			String hostPart = hoststuff.substring(0, finalColon).trim();
 			String portNum = hoststuff.substring(finalColon + 1).trim();
 
-			addrs
-					.add(new InetSocketAddress(hostPart, Integer
-							.parseInt(portNum)));
+			addrs.add(
+					new InetSocketAddress(hostPart, Integer.parseInt(portNum)));
 		}
 		assert !addrs.isEmpty() : "No addrs found";
 		return addrs;
@@ -134,14 +132,14 @@ public class AddrUtil {
 			throw new NullPointerException("Null host");
 		}
 		if (server.trim().equals("")) {
-			throw new IllegalArgumentException("No hosts in:  ``" + server
-					+ "''");
+			throw new IllegalArgumentException(
+					"No hosts in:  ``" + server + "''");
 		}
 		server = server.trim();
 		int finalColon = server.lastIndexOf(':');
 		if (finalColon < 1) {
-			throw new IllegalArgumentException("Invalid server ``" + server
-					+ "''");
+			throw new IllegalArgumentException(
+					"Invalid server ``" + server + "''");
 
 		}
 		String hostPart = server.substring(0, finalColon).trim();
@@ -155,7 +153,7 @@ public class AddrUtil {
 	 * @since 2.0.1
 	 */
 	public static boolean isEnableShutDownHook() {
-		return Boolean.valueOf(System.getProperty(
-				"xmemcached.shutdown.hook.enable", "false"));
+		return Boolean.valueOf(
+				System.getProperty("xmemcached.shutdown.hook.enable", "false"));
 	}
 }

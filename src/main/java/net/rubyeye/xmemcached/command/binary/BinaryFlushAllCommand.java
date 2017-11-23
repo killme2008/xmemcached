@@ -28,6 +28,7 @@ import net.rubyeye.xmemcached.command.CommandType;
 import net.rubyeye.xmemcached.transcoders.CachedData;
 /**
  * Flush command for binary protocol
+ * 
  * @author dennis
  *
  */
@@ -39,7 +40,7 @@ public class BinaryFlushAllCommand extends BaseBinaryCommand {
 			boolean noreply) {
 		super("[flush_all]", null, CommandType.FLUSH_ALL, latch, 0, 0, null,
 				noreply, null);
-		this.opCode=noreply?OpCode.FLUSH_QUIETLY:OpCode.FLUSH;
+		this.opCode = noreply ? OpCode.FLUSH_QUIETLY : OpCode.FLUSH;
 		this.expTime = exptime;
 	}
 

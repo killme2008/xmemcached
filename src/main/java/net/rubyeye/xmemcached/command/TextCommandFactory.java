@@ -44,14 +44,13 @@ public class TextCommandFactory implements CommandFactory {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see
-	 * net.rubyeye.xmemcached.CommandFactory#createDeleteCommand(java.lang.String
-	 * , byte[], int)
+	 * @see net.rubyeye.xmemcached.CommandFactory#createDeleteCommand(java.lang.
+	 * String , byte[], int)
 	 */
 	public final Command createDeleteCommand(final String key,
 			final byte[] keyBytes, final int time, long cas, boolean noreply) {
-		return new TextDeleteCommand(key, keyBytes, time,
-				new CountDownLatch(1), noreply);
+		return new TextDeleteCommand(key, keyBytes, time, new CountDownLatch(1),
+				noreply);
 	}
 
 	/*
@@ -84,8 +83,8 @@ public class TextCommandFactory implements CommandFactory {
 	 * @param noreply
 	 * @return
 	 */
-	public final Command createVerbosityCommand(CountDownLatch latch,
-			int level, boolean noreply) {
+	public final Command createVerbosityCommand(CountDownLatch latch, int level,
+			boolean noreply) {
 		return new TextVerbosityCommand(latch, level, noreply);
 	}
 
@@ -161,8 +160,8 @@ public class TextCommandFactory implements CommandFactory {
 	final Command createStoreCommand(String key, byte[] keyBytes, int exp,
 			Object value, CommandType cmdType, boolean noreply,
 			Transcoder transcoder) {
-		return new TextStoreCommand(key, keyBytes, cmdType, new CountDownLatch(
-				1), exp, -1, value, noreply, transcoder);
+		return new TextStoreCommand(key, keyBytes, cmdType,
+				new CountDownLatch(1), exp, -1, value, noreply, transcoder);
 	}
 
 	/*
@@ -190,15 +189,16 @@ public class TextCommandFactory implements CommandFactory {
 	 * net.rubyeye.xmemcached.transcoders.Transcoder)
 	 */
 	public final <T> Command createGetMultiCommand(Collection<String> keys,
-			CountDownLatch latch, CommandType cmdType, Transcoder<T> transcoder) {
+			CountDownLatch latch, CommandType cmdType,
+			Transcoder<T> transcoder) {
 		StringBuilder sb = new StringBuilder(keys.size() * 5);
 		for (String tmpKey : keys) {
 			ByteUtils.checkKey(tmpKey);
 			sb.append(tmpKey).append(" ");
 		}
 		String gatherKey = sb.toString();
-		byte[] keyBytes = ByteUtils.getBytes(gatherKey.substring(0,
-				gatherKey.length() - 1));
+		byte[] keyBytes = ByteUtils
+				.getBytes(gatherKey.substring(0, gatherKey.length() - 1));
 		return new TextGetMultiCommand(keys.iterator().next(), keyBytes,
 				cmdType, latch, transcoder);
 	}
@@ -211,8 +211,8 @@ public class TextCommandFactory implements CommandFactory {
 	 * .String, byte[], int, net.rubyeye.xmemcached.command.CommandType)
 	 */
 	public final Command createIncrDecrCommand(final String key,
-			final byte[] keyBytes, final long amount, long initial,
-			int exptime, CommandType cmdType, boolean noreply) {
+			final byte[] keyBytes, final long amount, long initial, int exptime,
+			CommandType cmdType, boolean noreply) {
 		return new TextIncrDecrCommand(key, keyBytes, cmdType,
 				new CountDownLatch(1), amount, initial, noreply);
 	}
@@ -228,8 +228,8 @@ public class TextCommandFactory implements CommandFactory {
 				"SASL is only supported by binary protocol");
 	}
 
-	public Command createAuthStepCommand(String mechanism,
-			CountDownLatch latch, byte[] authData) {
+	public Command createAuthStepCommand(String mechanism, CountDownLatch latch,
+			byte[] authData) {
 		throw new UnsupportedOperationException(
 				"SASL is only supported by binary protocol");
 	}

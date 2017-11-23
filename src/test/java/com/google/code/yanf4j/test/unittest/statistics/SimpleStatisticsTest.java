@@ -56,7 +56,7 @@ public class SimpleStatisticsTest extends TestCase {
 		assertEquals(5632, statistics.getRecvMessageTotalSize());
 		assertEquals(1877, statistics.getRecvMessageAverageSize());
 		assertEquals(3.0, statistics.getRecvMessageCountPerSecond(), 0.5);
-		
+
 		statistics.restart();
 		assertEquals(0, statistics.getRecvMessageCount());
 		assertEquals(0.0, statistics.getRecvMessageCountPerSecond());

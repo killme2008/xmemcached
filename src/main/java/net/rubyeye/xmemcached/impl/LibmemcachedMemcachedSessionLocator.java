@@ -30,8 +30,9 @@ import com.google.code.yanf4j.core.Session;
  * @author dennis
  * 
  */
-public class LibmemcachedMemcachedSessionLocator extends
-		AbstractMemcachedSessionLocator {
+public class LibmemcachedMemcachedSessionLocator
+		extends
+			AbstractMemcachedSessionLocator {
 
 	static final int DEFAULT_NUM_REPS = 100;
 	private transient volatile TreeMap<Long, List<Session>> ketamaSessions = new TreeMap<Long, List<Session>>();
@@ -111,7 +112,7 @@ public class LibmemcachedMemcachedSessionLocator extends
 				resultHash = tailMap.firstKey();
 			}
 		}
-		//		
+		//
 		// if (!sessionMap.containsKey(resultHash)) {
 		// resultHash = sessionMap.ceilingKey(resultHash);
 		// if (resultHash == null && sessionMap.size() > 0) {

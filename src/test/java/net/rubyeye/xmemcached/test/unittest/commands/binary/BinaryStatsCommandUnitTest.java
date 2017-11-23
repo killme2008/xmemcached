@@ -25,8 +25,8 @@ public class BinaryStatsCommandUnitTest extends BaseBinaryCommandUnitTest {
 			String key = String.valueOf(i);
 			buffers[i] = constructResponse(OpCode.STAT.fieldValue(),
 					(short) key.length(), (byte) 0, (byte) 0, (short) 0,
-					2 * key.length(), 0, 0L, null, key.getBytes(), key
-							.getBytes());
+					2 * key.length(), 0, 0L, null, key.getBytes(),
+					key.getBytes());
 			capacity += buffers[i].capacity();
 
 		}
@@ -39,17 +39,15 @@ public class BinaryStatsCommandUnitTest extends BaseBinaryCommandUnitTest {
 		totalBuffer.flip();
 
 		assertTrue(command.decode(null, totalBuffer));
-		Map<String, String> result = (Map<String, String>) command
-				.getResult();
+		Map<String, String> result = (Map<String, String>) command.getResult();
 
 		assertNotNull(result);
 		assertTrue(result.size() > 0);
 		assertEquals(5, result.size());
-		
-		for(Map.Entry<String, String> entry:result.entrySet()){
-			assertEquals(entry.getKey(),entry.getValue());
+
+		for (Map.Entry<String, String> entry : result.entrySet()) {
+			assertEquals(entry.getKey(), entry.getValue());
 		}
-		
-		
+
 	}
 }

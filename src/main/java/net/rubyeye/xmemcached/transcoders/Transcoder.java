@@ -41,24 +41,28 @@ public interface Transcoder<T> {
 	public void setPackZeros(boolean packZeros);
 	/**
 	 * Set compression threshold in bytes
+	 * 
 	 * @param to
 	 */
 	public void setCompressionThreshold(int to);
 
 	/**
 	 * Returns if client stores primitive type as string.
+	 * 
 	 * @return
 	 */
 	public boolean isPrimitiveAsString();
 
 	/**
 	 * Returns if transcoder packs zero.
+	 * 
 	 * @return
 	 */
 	public boolean isPackZeros();
-	
+
 	/**
 	 * Set compress mode,default is ZIP
+	 * 
 	 * @see CompressionMode
 	 * @param compressMode
 	 */

@@ -5,8 +5,9 @@ import java.util.Date;
 /**
  * Transcoder that provides compatibility with Greg Whalin's memcached client.
  */
-public class WhalinTranscoder extends BaseSerializingTranscoder implements
-		Transcoder<Object> {
+public class WhalinTranscoder extends BaseSerializingTranscoder
+		implements
+			Transcoder<Object> {
 
 	public static final int SPECIAL_BYTE = 1;
 	public static final int SPECIAL_BOOLEAN = 8192;
@@ -83,48 +84,50 @@ public class WhalinTranscoder extends BaseSerializingTranscoder implements
 				}
 			}
 			switch (f) {
-			case SPECIAL_BOOLEAN:
-				rv = Boolean.valueOf(this.decodeBoolean(data));
-				break;
-			case SPECIAL_INT:
-				rv = Integer.valueOf(this.tu.decodeInt(data));
-				break;
-			case SPECIAL_SHORT:
-				rv = Short.valueOf((short) this.tu.decodeInt(data));
-				break;
-			case SPECIAL_LONG:
-				rv = Long.valueOf(this.tu.decodeLong(data));
-				break;
-			case SPECIAL_DATE:
-				rv = new Date(this.tu.decodeLong(data));
-				break;
-			case SPECIAL_BYTE:
-				rv = Byte.valueOf(this.tu.decodeByte(data));
-				break;
-			case SPECIAL_FLOAT:
-				rv = new Float(Float.intBitsToFloat(this.tu.decodeInt(data)));
-				break;
-			case SPECIAL_DOUBLE:
-				rv = new Double(Double.longBitsToDouble(this.tu
-						.decodeLong(data)));
-				break;
-			case SPECIAL_BYTEARRAY:
-				rv = data;
-				break;
-			case SPECIAL_STRING:
-				rv = decodeString(data);
-				break;
-			case SPECIAL_STRINGBUFFER:
-				rv = new StringBuffer(decodeString(data));
-				break;
-			case SPECIAL_STRINGBUILDER:
-				rv = new StringBuilder(decodeString(data));
-				break;
-			case SPECIAL_CHARACTER:
-				rv = decodeCharacter(data);
-				break;
-			default:
-				log.warn(String.format("Cannot handle data with flags %x", f));
+				case SPECIAL_BOOLEAN :
+					rv = Boolean.valueOf(this.decodeBoolean(data));
+					break;
+				case SPECIAL_INT :
+					rv = Integer.valueOf(this.tu.decodeInt(data));
+					break;
+				case SPECIAL_SHORT :
+					rv = Short.valueOf((short) this.tu.decodeInt(data));
+					break;
+				case SPECIAL_LONG :
+					rv = Long.valueOf(this.tu.decodeLong(data));
+					break;
+				case SPECIAL_DATE :
+					rv = new Date(this.tu.decodeLong(data));
+					break;
+				case SPECIAL_BYTE :
+					rv = Byte.valueOf(this.tu.decodeByte(data));
+					break;
+				case SPECIAL_FLOAT :
+					rv = new Float(
+							Float.intBitsToFloat(this.tu.decodeInt(data)));
+					break;
+				case SPECIAL_DOUBLE :
+					rv = new Double(
+							Double.longBitsToDouble(this.tu.decodeLong(data)));
+					break;
+				case SPECIAL_BYTEARRAY :
+					rv = data;
+					break;
+				case SPECIAL_STRING :
+					rv = decodeString(data);
+					break;
+				case SPECIAL_STRINGBUFFER :
+					rv = new StringBuffer(decodeString(data));
+					break;
+				case SPECIAL_STRINGBUILDER :
+					rv = new StringBuilder(decodeString(data));
+					break;
+				case SPECIAL_CHARACTER :
+					rv = decodeCharacter(data);
+					break;
+				default :
+					log.warn(String.format("Cannot handle data with flags %x",
+							f));
 			}
 		}
 		return rv;
@@ -215,21 +218,18 @@ public class WhalinTranscoder extends BaseSerializingTranscoder implements
 			byte[] compressed = compress(b);
 			if (compressed.length < b.length) {
 				if (log.isDebugEnabled()) {
-					log
-							.debug(String.format("Compressed %s from %d to %d",
-									o.getClass().getName(), b.length,
-									compressed.length));
+					log.debug(String.format("Compressed %s from %d to %d",
+							o.getClass().getName(), b.length,
+							compressed.length));
 				}
 				b = compressed;
 				flags |= COMPRESSED;
 			} else {
 				if (log.isDebugEnabled()) {
-					log
-							.debug(String
-									.format(
-											"Compression increased the size of %s from %d to %d",
-											o.getClass().getName(), b.length,
-											compressed.length));
+					log.debug(String.format(
+							"Compression increased the size of %s from %d to %d",
+							o.getClass().getName(), b.length,
+							compressed.length));
 				}
 			}
 		}

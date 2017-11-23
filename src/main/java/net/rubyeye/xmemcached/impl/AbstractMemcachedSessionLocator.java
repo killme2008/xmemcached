@@ -8,8 +8,9 @@ import net.rubyeye.xmemcached.MemcachedSessionLocator;
  * @author dennis
  * @date 2010-12-25
  */
-public abstract class AbstractMemcachedSessionLocator implements
-		MemcachedSessionLocator {
+public abstract class AbstractMemcachedSessionLocator
+		implements
+			MemcachedSessionLocator {
 
 	protected boolean failureMode;
 

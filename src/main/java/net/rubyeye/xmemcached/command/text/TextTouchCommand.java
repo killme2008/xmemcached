@@ -62,7 +62,8 @@ public class TextTouchCommand extends Command {
 	}
 
 	@Override
-	public final boolean decode(MemcachedTCPSession session, ByteBuffer buffer) {
+	public final boolean decode(MemcachedTCPSession session,
+			ByteBuffer buffer) {
 		if (buffer == null || !buffer.hasRemaining()) {
 			return false;
 		}
@@ -96,8 +97,8 @@ public class TextTouchCommand extends Command {
 	@Override
 	public final void encode() {
 		byte[] cmdBytes = Constants.TOUCH;
-		int size = 7 + this.keyBytes.length
-				+ ByteUtils.stringSize(this.expTime) + Constants.CRLF.length;
+		int size = 7 + this.keyBytes.length + ByteUtils.stringSize(this.expTime)
+				+ Constants.CRLF.length;
 		if (isNoreply()) {
 			size += 8;
 		}

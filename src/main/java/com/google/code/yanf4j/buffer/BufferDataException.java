@@ -29,26 +29,22 @@ package com.google.code.yanf4j.buffer;
  * 
  */
 public class BufferDataException extends RuntimeException {
-    private static final long serialVersionUID = -4138189188602563502L;
+	private static final long serialVersionUID = -4138189188602563502L;
 
+	public BufferDataException() {
+		super();
+	}
 
-    public BufferDataException() {
-        super();
-    }
+	public BufferDataException(String message) {
+		super(message);
+	}
 
+	public BufferDataException(String message, Throwable cause) {
+		super(message, cause);
+	}
 
-    public BufferDataException(String message) {
-        super(message);
-    }
-
-
-    public BufferDataException(String message, Throwable cause) {
-        super(message, cause);
-    }
-
-
-    public BufferDataException(Throwable cause) {
-        super(cause);
-    }
+	public BufferDataException(Throwable cause) {
+		super(cause);
+	}
 
 }

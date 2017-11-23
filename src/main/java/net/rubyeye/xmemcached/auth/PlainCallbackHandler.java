@@ -17,8 +17,6 @@ import javax.security.auth.callback.UnsupportedCallbackException;
 public class PlainCallbackHandler implements CallbackHandler {
 	private String username;
 	private String password;
-	
-	
 
 	public PlainCallbackHandler(String username, String password) {
 		super();
@@ -26,16 +24,14 @@ public class PlainCallbackHandler implements CallbackHandler {
 		this.password = password;
 	}
 
-
-
-	public void handle(Callback[] callbacks) throws IOException,
-			UnsupportedCallbackException {
+	public void handle(Callback[] callbacks)
+			throws IOException, UnsupportedCallbackException {
 		for (Callback callback : callbacks) {
 			if (callback instanceof NameCallback) {
 				((NameCallback) callback).setName(this.username);
 			} else if (callback instanceof PasswordCallback) {
-				((PasswordCallback) callback).setPassword(password
-						.toCharArray());
+				((PasswordCallback) callback)
+						.setPassword(password.toCharArray());
 			} else
 				throw new UnsupportedCallbackException(callback);
 		}
