@@ -61,7 +61,7 @@ public class CachedString {
 		for (int i = 0; i < 1000; i++) {
 			// byte[] bs = k.getBytes(ByteUtils.DEFAULT_CHARSET);
 			// String nk = new String(bs, ByteUtils.DEFAULT_CHARSET);
-			byte[] bs = getBytes(k);
+			byte[] bs = FastStringEncoder.encodeUTF8(k);
 			String nk = ByteUtils.getString(bs);
 			if (!k.equals(nk)) {
 				throw new RuntimeException();
