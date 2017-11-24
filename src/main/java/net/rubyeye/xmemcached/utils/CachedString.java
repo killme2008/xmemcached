@@ -3,19 +3,20 @@ package net.rubyeye.xmemcached.utils;
 import java.lang.ref.Reference;
 import java.lang.ref.ReferenceQueue;
 import java.lang.ref.WeakReference;
-import java.util.Arrays;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-
-import javax.management.RuntimeErrorException;
 
 public class CachedString {
 	private static ConcurrentHashMap<String, Reference<byte[]>> table = new ConcurrentHashMap();
 	static final ReferenceQueue rq = new ReferenceQueue();
+	public static final int CLEAR_THRESHOLD = Integer.parseInt(
+			System.getProperty("xmemcached.string.bytes.cached.clear_threshold",
+					"1000"));
 
 	public static byte[] getBytes(String s) {
-		if (s == null || s.length() == 0)
+		if (s == null || s.length() == 0) {
 			return null;
+		}
 		byte[] bs = null;
 		Reference<byte[]> existingRef = table.get(s);
 		if (existingRef == null) {
@@ -38,13 +39,17 @@ public class CachedString {
 
 	static public <K, V> void clearCache(ReferenceQueue rq,
 			ConcurrentHashMap<K, Reference<V>> cache) {
-		// cleanup any dead entries
-		if (rq.poll() != null) {
-			while (rq.poll() != null);
-			for (Map.Entry<K, Reference<V>> e : cache.entrySet()) {
-				Reference<V> val = e.getValue();
-				if (val != null && val.get() == null) {
-					cache.remove(e.getKey(), val);
+		if (cache.size() > CLEAR_THRESHOLD) {
+			// cleanup any dead entries
+			if (rq.poll() != null) {
+				while (rq.poll() != null) {
+					;
+				}
+				for (Map.Entry<K, Reference<V>> e : cache.entrySet()) {
+					Reference<V> val = e.getValue();
+					if (val != null && val.get() == null) {
+						cache.remove(e.getKey(), val);
+					}
 				}
 			}
 		}
