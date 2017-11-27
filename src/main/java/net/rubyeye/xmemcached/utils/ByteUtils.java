@@ -15,19 +15,19 @@ import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 
-import net.rubyeye.xmemcached.codec.MemcachedDecoder;
-import net.rubyeye.xmemcached.monitor.Constants;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.code.yanf4j.buffer.IoBuffer;
 
+import net.rubyeye.xmemcached.codec.MemcachedDecoder;
+import net.rubyeye.xmemcached.monitor.Constants;
+
 /**
  * Utilities for byte process
- * 
+ *
  * @author dennis
- * 
+ *
  */
 public final class ByteUtils {
 	public static final Logger log = LoggerFactory.getLogger(ByteUtils.class);
@@ -76,14 +76,7 @@ public final class ByteUtils {
 		if (k == null || k.length() == 0) {
 			throw new IllegalArgumentException("Key must not be blank");
 		}
-		if (ENABLE_CACHED_STRING_BYTES) {
-			return CachedString.getBytes(k);
-		}
-		try {
-			return k.getBytes(DEFAULT_CHARSET_NAME);
-		} catch (UnsupportedEncodingException e) {
-			throw new RuntimeException(e);
-		}
+		return FastStringEncoder.encodeUTF8(k);
 	}
 
 	public static final void setArguments(IoBuffer bb, Object... args) {
@@ -260,7 +253,7 @@ public final class ByteUtils {
 
 	/**
 	 * Read next line from ByteBuffer
-	 * 
+	 *
 	 * @param buffer
 	 * @return
 	 */
@@ -295,8 +288,8 @@ public final class ByteUtils {
 	public static void byte2hex(byte b, StringBuffer buf) {
 		char[] hexChars = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
 				'A', 'B', 'C', 'D', 'E', 'F'};
-		int high = ((b & 0xf0) >> 4);
-		int low = (b & 0x0f);
+		int high = (b & 0xf0) >> 4;
+		int low = b & 0x0f;
 		buf.append(hexChars[high]);
 		buf.append(hexChars[low]);
 	}
@@ -345,12 +338,13 @@ public final class ByteUtils {
 		// Fall thru to fast mode for smaller numbers
 		// assert(i2 <= 65536, i2);
 		for (;;) {
-			q2 = (i2 * 52429) >>> (16 + 3);
+			q2 = i2 * 52429 >>> 16 + 3;
 			r = i2 - ((q2 << 3) + (q2 << 1)); // r = i2-(q2*10) ...
 			buf[--pos] = digits[r];
 			i2 = q2;
-			if (i2 == 0)
+			if (i2 == 0) {
 				break;
+			}
 		}
 		if (sign != 0) {
 			buf[--pos] = sign;
@@ -362,7 +356,7 @@ public final class ByteUtils {
 	 * buf. The characters are placed into the buffer backwards starting with
 	 * the least significant digit at the specified index (exclusive), and
 	 * working backwards from there.
-	 * 
+	 *
 	 * Will fail if i == Integer.MIN_VALUE
 	 */
 	static void getBytes(int i, int index, byte[] buf) {
@@ -388,12 +382,13 @@ public final class ByteUtils {
 		// Fall thru to fast mode for smaller numbers
 		// assert(i <= 65536, i);
 		for (;;) {
-			q = (i * 52429) >>> (16 + 3);
+			q = i * 52429 >>> 16 + 3;
 			r = i - ((q << 3) + (q << 1)); // r = i-(q*10) ...
 			buf[--pos] = digits[r];
 			i = q;
-			if (i == 0)
+			if (i == 0) {
 				break;
+			}
 		}
 		if (sign != 0) {
 			buf[--pos] = sign;
@@ -433,17 +428,20 @@ public final class ByteUtils {
 
 	// Requires positive x
 	public static final int stringSize(int x) {
-		for (int i = 0;; i++)
-			if (x <= sizeTable[i])
+		for (int i = 0;; i++) {
+			if (x <= sizeTable[i]) {
 				return i + 1;
+			}
+		}
 	}
 
 	// Requires positive x
 	public static final int stringSize(long x) {
 		long p = 10;
 		for (int i = 1; i < 19; i++) {
-			if (x < p)
+			if (x < p) {
 				return i;
+			}
 			p = 10 * p;
 		}
 		return 19;
@@ -452,7 +450,7 @@ public final class ByteUtils {
 	final static int[] byte_len_array = new int[256];
 	static {
 		for (int i = Byte.MIN_VALUE; i <= Byte.MAX_VALUE; ++i) {
-			int size = (i < 0) ? stringSize(-i) + 1 : stringSize(i);
+			int size = i < 0 ? stringSize(-i) + 1 : stringSize(i);
 			byte_len_array[i & 0xFF] = size;
 		}
 	}
@@ -470,7 +468,7 @@ public final class ByteUtils {
 	}
 
 	public static byte int0(int x) {
-		return (byte) (x);
+		return (byte) x;
 	}
 
 	public static byte short1(short x) {
@@ -478,7 +476,7 @@ public final class ByteUtils {
 	}
 
 	public static byte short0(short x) {
-		return (byte) (x);
+		return (byte) x;
 	}
 
 	public static byte long7(long x) {
@@ -510,6 +508,6 @@ public final class ByteUtils {
 	}
 
 	public static byte long0(long x) {
-		return (byte) (x);
+		return (byte) x;
 	}
 }

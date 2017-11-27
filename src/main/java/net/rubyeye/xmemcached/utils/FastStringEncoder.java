@@ -10,13 +10,7 @@ import java.util.Arrays;
  */
 public class FastStringEncoder {
 
-	public static void main(String[] args) throws Exception {
-		System.out.println(encodeUTF8("test").length);
-		System.out.println(new String(encodeUTF8("test"), "utf-8"));
-		System.out.println(encodeUTF8("测试下中文").length);
-		System.out.println(new String(encodeUTF8("测试下中文"), "utf-8"));
-	}
-
+	private static final int STEP = 128;
 	private static ThreadLocal<byte[]> bufLocal = new ThreadLocal<byte[]>();
 
 	private static byte[] getBuf(int length) {
@@ -24,7 +18,7 @@ public class FastStringEncoder {
 		if (buf != null) {
 			bufLocal.set(null);
 		} else {
-			buf = new byte[length < 128 ? 128 : length];
+			buf = new byte[length < STEP ? STEP : length];
 		}
 		return buf;
 	}
@@ -58,8 +52,8 @@ public class FastStringEncoder {
 		}
 
 		while (offset < sl) {
-			if (dp >= bytes.length - 1) {
-				bytes = expandCapacity(bytes, len);
+			if (dp >= bytes.length - 4) {
+				bytes = expandCapacity(bytes, bytes.length + STEP * 2);
 			}
 			char c = s.charAt(offset++);
 			if (c < 0x80) {
