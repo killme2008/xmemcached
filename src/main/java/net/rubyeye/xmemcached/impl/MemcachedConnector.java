@@ -241,21 +241,41 @@ public class MemcachedConnector extends SocketChannelController
 		InetSocketAddress mainNodeAddress = addrWrapper.getMainNodeAddress();
 		if (mainNodeAddress != null) {
 			// It is a standby session
-			this.addStandbySession(session, mainNodeAddress);
+			this.addStandbySession(session, mainNodeAddress,
+					addrWrapper.getResolvedMainNodeSocketAddress(),
+					addrWrapper);
 		} else {
 			// It is a main session
-			this.addMainSession(session);
+			this.addMainSession(session, addrWrapper.getResolvedSocketAddress(),
+					addrWrapper);
 			// Update main sessions
 			this.updateSessions();
 		}
 	}
 
-	private void addMainSession(Session session) {
+	private void addMainSession(Session session,
+			InetSocketAddress lastReolvedAddr,
+			InetSocketAddressWrapper addrWrapper) {
 		InetSocketAddress remoteSocketAddress = session
 				.getRemoteSocketAddress();
 		log.info("Add a session: "
 				+ SystemUtils.getRawAddress(remoteSocketAddress) + ":"
 				+ remoteSocketAddress.getPort());
+		if (lastReolvedAddr != null
+				&& !lastReolvedAddr.equals(remoteSocketAddress)) {
+			log.warn("Memcached node {} is resolved into {}.", lastReolvedAddr,
+					remoteSocketAddress);
+			// Remove and closed old resolved address.
+			Queue<Session> sessions = sessionMap.remove(lastReolvedAddr);
+			if (sessions != null) {
+				for (Session s : sessions) {
+					((MemcachedSession) s).setAllowReconnect(false);
+					s.close();
+				}
+			}
+			// updated resolve addr
+			addrWrapper.setResolvedSocketAddress(remoteSocketAddress);
+		}
 		Queue<Session> sessions = this.sessionMap.get(remoteSocketAddress);
 		if (sessions == null) {
 			sessions = new ConcurrentLinkedQueue<Session>();
@@ -287,7 +307,9 @@ public class MemcachedConnector extends SocketChannelController
 	}
 
 	private void addStandbySession(Session session,
-			InetSocketAddress mainNodeAddress) {
+			InetSocketAddress mainNodeAddress,
+			InetSocketAddress lastResolvedMainAddr,
+			InetSocketAddressWrapper addrWrapper) {
 		InetSocketAddress remoteSocketAddress = session
 				.getRemoteSocketAddress();
 		log.info("Add a standby session: "
@@ -295,6 +317,21 @@ public class MemcachedConnector extends SocketChannelController
 				+ remoteSocketAddress.getPort() + " for "
 				+ SystemUtils.getRawAddress(mainNodeAddress) + ":"
 				+ mainNodeAddress.getPort());
+		if (lastResolvedMainAddr != null
+				&& !lastResolvedMainAddr.equals(remoteSocketAddress)) {
+			log.warn("Memcached node {} is resolved into {}.",
+					lastResolvedMainAddr, remoteSocketAddress);
+			// Remove and closed old resolved address.
+			List<Session> sessions = standbySessionMap
+					.remove(lastResolvedMainAddr);
+			if (sessions != null) {
+				for (Session s : sessions) {
+					((MemcachedSession) s).setAllowReconnect(false);
+					s.close();
+				}
+			}
+			addrWrapper.setResolvedMainNodeSocketAddress(remoteSocketAddress);
+		}
 		List<Session> sessions = this.standbySessionMap.get(mainNodeAddress);
 		if (sessions == null) {
 			sessions = new CopyOnWriteArrayList<Session>();
