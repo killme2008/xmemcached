@@ -4,14 +4,14 @@
 
 
 * [2.4.0](https://github.com/killme2008/xmemcached/releases/tag/xmemcached-2.4.0) released, reduce CPU consumption when connecting to a lot of memcached servers.
-* [2.3.2](https://github.com/killme2008/xmemcached/releases/tag/xmemcached-2.3.2) released, some fixes and add compatibility for `KetamaMemcachedSessionLocator` with Gwhalin Memcached Java Client. 
+* [2.3.2](https://github.com/killme2008/xmemcached/releases/tag/xmemcached-2.3.2) released, some fixes and add compatibility for `KetamaMemcachedSessionLocator` with Gwhalin Memcached Java Client.
 * [2.3.1](https://github.com/killme2008/xmemcached/releases/tag/xmemcached-2.3.1) released, Adds `AWSElasticCacheClientBuilder` to build `AWSElasticCacheClient`.
 * [2.3.0](https://github.com/killme2008/xmemcached/releases/tag/xmemcached-2.3.0) released, suppports [AWS ElasticCache Auto Discovery](http://docs.aws.amazon.com/AmazonElastiCache/latest/UserGuide/AutoDiscovery.html).
 
 ## Introduction
 
   XMemcached is a high performance, easy to use blocking multithreaded memcached client in java.
-  
+
   It's nio based and was carefully turned to get top performance.
 
 * [Homepage](http://fnil.net/xmemcached/)
@@ -33,7 +33,7 @@ Use [docker](https://docs.docker.com/engine/installation/) and [docker-compose](
 
 ```sh
 $ cd xmemcached
-$ docker-compose up
+$ docker-compose up -d
 ```
 
 Run unit tests:
