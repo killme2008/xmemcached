@@ -9,7 +9,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.googlecode.xmemcached</groupId>
 	<artifactId>xmemcached</artifactId>
-	<version>2.4.2</version>
+	<version>2.4.3-SNAPSHOT</version>
 	<name>xmemcached</name>
 	<description>Extreme performance modern memcached client for java</description>
 	<url>https://github.com/killme2008/xmemcached</url>
