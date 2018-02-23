@@ -36,9 +36,8 @@ public final class ByteUtils {
 			.forName(DEFAULT_CHARSET_NAME);
 	public static final ByteBuffer SPLIT = ByteBuffer.wrap(Constants.CRLF);
 
-	public static final boolean ENABLE_CACHED_STRING_BYTES = Boolean
-			.valueOf(System.getProperty("xmemcached.string.bytes.cached.enable",
-					"false"));
+	public static final boolean ENABLE_FAST_STRING_ENCODER = Boolean.valueOf(
+			System.getProperty("xmemcached.string.fast.encoder", "false"));
 	/**
 	 * if it is testing,check key argument even if use binary protocol. The user
 	 * must never change this value at all.
@@ -76,7 +75,15 @@ public final class ByteUtils {
 		if (k == null || k.length() == 0) {
 			throw new IllegalArgumentException("Key must not be blank");
 		}
-		return FastStringEncoder.encodeUTF8(k);
+		if (!ENABLE_FAST_STRING_ENCODER) {
+			try {
+				return k.getBytes(DEFAULT_CHARSET_NAME);
+			} catch (UnsupportedEncodingException e) {
+				throw new IllegalStateException(e);
+			}
+		} else {
+			return FastStringEncoder.encodeUTF8(k);
+		}
 	}
 
 	public static final void setArguments(IoBuffer bb, Object... args) {
