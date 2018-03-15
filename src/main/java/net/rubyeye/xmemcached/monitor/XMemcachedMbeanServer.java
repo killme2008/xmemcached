@@ -79,16 +79,16 @@ public final class XMemcachedMbeanServer {
 			return;
 		}
 		// 鍒涘缓MBServer
-		String hostName = null;
-		try {
-			InetAddress addr = InetAddress.getLocalHost();
-
-			hostName = addr.getHostName();
-		} catch (IOException e) {
-			log.error("Get HostName Error", e);
-			hostName = "localhost";
-		}
-		String host = System.getProperty("hostName", hostName);
+        String host = System.getProperty("hostName");
+        if (host == null){
+            try {
+                InetAddress addr = InetAddress.getLocalHost();
+                host = addr.getHostName();
+            } catch (IOException e) {
+                log.error("Get HostName Error", e);
+                host = "localhost";
+            }
+        }
 		try {
 			boolean enableJMX = Boolean.parseBoolean(System
 					.getProperty(Constants.XMEMCACHED_JMX_ENABLE, "false"));
