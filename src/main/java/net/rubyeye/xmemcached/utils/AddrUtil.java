@@ -1,12 +1,12 @@
 /**
  *Copyright [2009-2010] [dennis zhuang(killme2008@gmail.com)]
  *Licensed under the Apache License, Version 2.0 (the "License");
- *you may not use this file except in compliance with the License. 
- *You may obtain a copy of the License at 
- *             http://www.apache.org/licenses/LICENSE-2.0 
- *Unless required by applicable law or agreed to in writing, 
- *software distributed under the License is distributed on an "AS IS" BASIS, 
- *WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, 
+ *you may not use this file except in compliance with the License.
+ *You may obtain a copy of the License at
+ *             http://www.apache.org/licenses/LICENSE-2.0
+ *Unless required by applicable law or agreed to in writing,
+ *software distributed under the License is distributed on an "AS IS" BASIS,
+ *WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
  *either express or implied. See the License for the specific language governing permissions and limitations under the License
  */
 /**
@@ -40,7 +40,7 @@ public class AddrUtil {
 	 * suitable for instantiating a MemcachedClient,map's key is the main
 	 * memcached node,and value is the standby node for main node. Note that
 	 * colon-delimited IPv6 is also supported. For example: ::1:11211
-	 * 
+	 *
 	 * @param s
 	 * @return
 	 */
@@ -96,7 +96,7 @@ public class AddrUtil {
 	/**
 	 * Split a string in the form of "host:port host2:port" into a List of
 	 * InetSocketAddress instances suitable for instantiating a MemcachedClient.
-	 * 
+	 *
 	 * Note that colon-delimited IPv6 is also supported. For example: ::1:11211
 	 */
 	public static List<InetSocketAddress> getAddresses(String s) {
@@ -149,7 +149,7 @@ public class AddrUtil {
 
 	/**
 	 * System property to control shutdown hook, issue #44
-	 * 
+	 *
 	 * @since 2.0.1
 	 */
 	public static boolean isEnableShutDownHook() {

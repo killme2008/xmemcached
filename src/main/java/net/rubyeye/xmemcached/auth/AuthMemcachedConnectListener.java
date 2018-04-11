@@ -11,9 +11,9 @@ import net.rubyeye.xmemcached.networking.MemcachedSessionConnectListener;
 
 /**
  * Client state listener for auth
- * 
+ *
  * @author dennis
- * 
+ *
  */
 public class AuthMemcachedConnectListener
 		implements
