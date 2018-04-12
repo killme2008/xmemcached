@@ -156,4 +156,12 @@ public class AddrUtil {
 		return Boolean.valueOf(
 				System.getProperty("xmemcached.shutdown.hook.enable", "false"));
 	}
+
+	/**
+	 * Create an unresolved server string (hostname:port) from an InetSocketAddress.
+	 */
+	public static final String getServerString(InetSocketAddress addr) {
+		return addr.getHostString() + ":" + Integer.toString(addr.getPort());
+	}
+
 }

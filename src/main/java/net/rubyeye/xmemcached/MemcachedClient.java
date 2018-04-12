@@ -1698,6 +1698,13 @@ public interface MemcachedClient {
 	public Map<InetSocketAddress, AuthInfo> getAuthInfoMap();
 
 	/**
+	 * Retruns the AuthInfo for all server strings (hostname:port)
+	 *
+	 * @return A map of AuthInfos for server strings (hostname:port)
+	 */
+	public Map<String, AuthInfo> getAuthInfoStringMap();
+
+	/**
 	 * "incr" are used to change data for some item in-place, incrementing it.
 	 * The data for the item is treated as decimal representation of a 64-bit
 	 * unsigned integer. If the current data value does not conform to such a

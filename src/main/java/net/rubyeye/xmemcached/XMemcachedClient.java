@@ -104,6 +104,7 @@ public class XMemcachedClient
 	protected final AtomicInteger serverOrderCount = new AtomicInteger();
 
 	private Map<InetSocketAddress, AuthInfo> authInfoMap = new HashMap<InetSocketAddress, AuthInfo>();
+	private Map<String, AuthInfo> authInfoStringMap = new HashMap<String, AuthInfo>();
 
 	private String name; // cache name
 
@@ -274,6 +275,15 @@ public class XMemcachedClient
 
 	public void setAuthInfoMap(Map<InetSocketAddress, AuthInfo> map) {
 		this.authInfoMap = map;
+		this.authInfoStringMap = new HashMap<String, AuthInfo>();
+		for (Map.Entry<InetSocketAddress,AuthInfo> entry : map.entrySet()) {
+			String server = AddrUtil.getServerString(entry.getKey());
+			this.authInfoStringMap.put(server, entry.getValue());
+		}
+	}
+
+	public Map<String, AuthInfo> getAuthInfoStringMap() {
+		return this.authInfoStringMap;
 	}
 
 	/*
