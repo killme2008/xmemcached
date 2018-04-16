@@ -33,7 +33,7 @@ public class AddrUtil {
    * InetSocketAddress instances suitable for instantiating a MemcachedClient,map's key is the main
    * memcached node,and value is the standby node for main node. Note that colon-delimited IPv6 is
    * also supported. For example: ::1:11211
-   * 
+   *
    * @param s
    * @return
    */
@@ -83,7 +83,7 @@ public class AddrUtil {
   /**
    * Split a string in the form of "host:port host2:port" into a List of InetSocketAddress instances
    * suitable for instantiating a MemcachedClient.
-   * 
+   *
    * Note that colon-delimited IPv6 is also supported. For example: ::1:11211
    */
   public static List<InetSocketAddress> getAddresses(String s) {
@@ -131,7 +131,7 @@ public class AddrUtil {
 
   /**
    * System property to control shutdown hook, issue #44
-   * 
+   *
    * @since 2.0.1
    */
   public static boolean isEnableShutDownHook() {

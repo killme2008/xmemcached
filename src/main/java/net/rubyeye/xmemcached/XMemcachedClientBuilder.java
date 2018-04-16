@@ -26,9 +26,9 @@ import com.google.code.yanf4j.core.impl.StandardSocketOption;
 
 /**
  * Builder pattern.Configure XmemcachedClient's options,then build it
- * 
+ *
  * @author dennis
- * 
+ *
  */
 public class XMemcachedClientBuilder implements MemcachedClientBuilder {
 
@@ -103,7 +103,7 @@ public class XMemcachedClientBuilder implements MemcachedClientBuilder {
 
   /**
    * Set max queued noreply operations number
-   * 
+   *
    * @see MemcachedClient#DEFAULT_MAX_QUEUED_NOPS
    * @param maxQueuedNoReplyOperations
    * @since 1.3.8
@@ -245,7 +245,7 @@ public class XMemcachedClientBuilder implements MemcachedClientBuilder {
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see net.rubyeye.xmemcached.MemcachedClientBuilder#getSessionLocator()
    */
   public MemcachedSessionLocator getSessionLocator() {
@@ -254,7 +254,7 @@ public class XMemcachedClientBuilder implements MemcachedClientBuilder {
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see net.rubyeye.xmemcached.MemcachedClientBuilder#setSessionLocator(net. rubyeye
    * .xmemcached.MemcachedSessionLocator)
    */
@@ -267,7 +267,7 @@ public class XMemcachedClientBuilder implements MemcachedClientBuilder {
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see net.rubyeye.xmemcached.MemcachedClientBuilder#getBufferAllocator()
    */
   public BufferAllocator getBufferAllocator() {
@@ -276,7 +276,7 @@ public class XMemcachedClientBuilder implements MemcachedClientBuilder {
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see net.rubyeye.xmemcached.MemcachedClientBuilder#setBufferAllocator(net.
    * rubyeye.xmemcached.buffer.BufferAllocator)
    */
@@ -289,7 +289,7 @@ public class XMemcachedClientBuilder implements MemcachedClientBuilder {
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see net.rubyeye.xmemcached.MemcachedClientBuilder#getConfiguration()
    */
   public Configuration getConfiguration() {
@@ -298,7 +298,7 @@ public class XMemcachedClientBuilder implements MemcachedClientBuilder {
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see net.rubyeye.xmemcached.MemcachedClientBuilder#setConfiguration(com.google
    * .code.yanf4j.config.Configuration)
    */
@@ -308,7 +308,7 @@ public class XMemcachedClientBuilder implements MemcachedClientBuilder {
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see net.rubyeye.xmemcached.MemcachedClientBuilder#build()
    */
   public MemcachedClient build() throws IOException {
@@ -362,7 +362,7 @@ public class XMemcachedClientBuilder implements MemcachedClientBuilder {
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see net.rubyeye.xmemcached.MemcachedClientBuilder#setTranscoder(transcoder)
    */
   public void setTranscoder(Transcoder transcoder) {
@@ -378,7 +378,7 @@ public class XMemcachedClientBuilder implements MemcachedClientBuilder {
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see net.rubyeye.xmemcached.MemcachedClientBuilder#setKeyProvider()
    */
   public void setKeyProvider(KeyProvider keyProvider) {
@@ -389,7 +389,7 @@ public class XMemcachedClientBuilder implements MemcachedClientBuilder {
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see net.rubyeye.xmemcached.MemcachedClientBuilder#addAuthInfo()
    */
   public void addAuthInfo(InetSocketAddress address, AuthInfo authInfo) {
@@ -410,7 +410,7 @@ public class XMemcachedClientBuilder implements MemcachedClientBuilder {
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see net.rubyeye.xmemcached.MemcachedClientBuilder#setName()
    */
   public void setName(String name) {
