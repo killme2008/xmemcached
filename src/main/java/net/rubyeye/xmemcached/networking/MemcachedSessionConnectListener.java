@@ -1,6 +1,7 @@
 package net.rubyeye.xmemcached.networking;
 
 import net.rubyeye.xmemcached.MemcachedClient;
+
 /**
  * 
  * @author dennis
@@ -8,6 +9,6 @@ import net.rubyeye.xmemcached.MemcachedClient;
  */
 public interface MemcachedSessionConnectListener {
 
-	public void onConnect(MemcachedSession session, MemcachedClient client);
+  public void onConnect(MemcachedSession session, MemcachedClient client);
 
 }

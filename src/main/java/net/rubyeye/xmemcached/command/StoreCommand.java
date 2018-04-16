@@ -8,7 +8,7 @@ package net.rubyeye.xmemcached.command;
  */
 public interface StoreCommand {
 
-	public void setValue(Object value);
+  public void setValue(Object value);
 
-	public Object getValue();
+  public Object getValue();
 }

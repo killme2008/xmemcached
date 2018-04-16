@@ -7,11 +7,11 @@ package net.rubyeye.xmemcached;
  * @since 1.3.8
  */
 public interface KeyProvider {
-	/**
-	 * Processes key and returns a new key.
-	 * 
-	 * @param key
-	 * @return
-	 */
-	public String process(String key);
+  /**
+   * Processes key and returns a new key.
+   * 
+   * @param key
+   * @return
+   */
+  public String process(String key);
 }

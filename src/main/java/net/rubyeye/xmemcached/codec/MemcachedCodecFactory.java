@@ -1,13 +1,10 @@
 /**
- *Copyright [2009-2010] [dennis zhuang(killme2008@gmail.com)]
- *Licensed under the Apache License, Version 2.0 (the "License");
- *you may not use this file except in compliance with the License.
- *You may obtain a copy of the License at
- *             http://www.apache.org/licenses/LICENSE-2.0
- *Unless required by applicable law or agreed to in writing,
- *software distributed under the License is distributed on an "AS IS" BASIS,
- *WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
- *either express or implied. See the License for the specific language governing permissions and limitations under the License
+ * Copyright [2009-2010] [dennis zhuang(killme2008@gmail.com)] Licensed under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except in compliance with the License. You
+ * may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0 Unless required by
+ * applicable law or agreed to in writing, software distributed under the License is distributed on
+ * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See
+ * the License for the specific language governing permissions and limitations under the License
  */
 package net.rubyeye.xmemcached.codec;
 
@@ -22,30 +19,30 @@ import com.google.code.yanf4j.core.CodecFactory;
  */
 public class MemcachedCodecFactory implements CodecFactory {
 
-	private final MemcachedEncoder encoder;
+  private final MemcachedEncoder encoder;
 
-	private final MemcachedDecoder decoder;
+  private final MemcachedDecoder decoder;
 
-	public MemcachedCodecFactory() {
-		super();
-		this.encoder = new MemcachedEncoder();
-		this.decoder = new MemcachedDecoder();
-	}
+  public MemcachedCodecFactory() {
+    super();
+    this.encoder = new MemcachedEncoder();
+    this.decoder = new MemcachedDecoder();
+  }
 
-	/**
-	 * return the memcached protocol decoder
-	 */
+  /**
+   * return the memcached protocol decoder
+   */
 
-	public final CodecFactory.Decoder getDecoder() {
-		return this.decoder;
+  public final CodecFactory.Decoder getDecoder() {
+    return this.decoder;
 
-	}
+  }
 
-	/**
-	 * return the memcached protocol encoder
-	 */
+  /**
+   * return the memcached protocol encoder
+   */
 
-	public final CodecFactory.Encoder getEncoder() {
-		return this.encoder;
-	}
+  public final CodecFactory.Encoder getEncoder() {
+    return this.encoder;
+  }
 }

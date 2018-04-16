@@ -3,12 +3,10 @@ package net.rubyeye.xmemcached.impl;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.nio.ByteOrder;
-
 import net.rubyeye.xmemcached.buffer.BufferAllocator;
 import net.rubyeye.xmemcached.networking.ClosedMemcachedSession;
 import net.rubyeye.xmemcached.networking.MemcachedSession;
 import net.rubyeye.xmemcached.utils.InetSocketAddressWrapper;
-
 import com.google.code.yanf4j.core.Handler;
 import com.google.code.yanf4j.core.CodecFactory.Decoder;
 import com.google.code.yanf4j.core.CodecFactory.Encoder;
@@ -19,212 +17,207 @@ import com.google.code.yanf4j.core.CodecFactory.Encoder;
  * @author dennis
  * 
  */
-public class ClosedMemcachedTCPSession
-		implements
-			ClosedMemcachedSession,
-			MemcachedSession {
-	private InetSocketAddressWrapper inetSocketAddressWrapper;
-	private volatile boolean allowReconnect = true;
-	private volatile boolean authFailed = false;
+public class ClosedMemcachedTCPSession implements ClosedMemcachedSession, MemcachedSession {
+  private InetSocketAddressWrapper inetSocketAddressWrapper;
+  private volatile boolean allowReconnect = true;
+  private volatile boolean authFailed = false;
 
-	public ClosedMemcachedTCPSession(
-			InetSocketAddressWrapper inetSocketAddressWrapper) {
-		super();
-		this.inetSocketAddressWrapper = inetSocketAddressWrapper;
-	}
+  public ClosedMemcachedTCPSession(InetSocketAddressWrapper inetSocketAddressWrapper) {
+    super();
+    this.inetSocketAddressWrapper = inetSocketAddressWrapper;
+  }
 
-	public void setBufferAllocator(BufferAllocator allocator) {
+  public void setBufferAllocator(BufferAllocator allocator) {
 
-	}
+  }
 
-	public void destroy() {
+  public void destroy() {
 
-	}
+  }
 
-	public void quit() {
+  public void quit() {
 
-	}
+  }
 
-	public boolean isAuthFailed() {
-		return authFailed;
-	}
+  public boolean isAuthFailed() {
+    return authFailed;
+  }
 
-	public void setAuthFailed(boolean authFailed) {
-		this.authFailed = authFailed;
+  public void setAuthFailed(boolean authFailed) {
+    this.authFailed = authFailed;
 
-	}
+  }
 
-	public InetSocketAddressWrapper getInetSocketAddressWrapper() {
-		return this.inetSocketAddressWrapper;
-	}
+  public InetSocketAddressWrapper getInetSocketAddressWrapper() {
+    return this.inetSocketAddressWrapper;
+  }
 
-	public int getOrder() {
-		return this.inetSocketAddressWrapper.getOrder();
-	}
+  public int getOrder() {
+    return this.inetSocketAddressWrapper.getOrder();
+  }
 
-	public int getWeight() {
-		return this.inetSocketAddressWrapper.getWeight();
-	}
+  public int getWeight() {
+    return this.inetSocketAddressWrapper.getWeight();
+  }
 
-	public boolean isAllowReconnect() {
-		return this.allowReconnect;
-	}
+  public boolean isAllowReconnect() {
+    return this.allowReconnect;
+  }
 
-	public void setAllowReconnect(boolean allow) {
-		this.allowReconnect = allow;
-	}
+  public void setAllowReconnect(boolean allow) {
+    this.allowReconnect = allow;
+  }
 
-	public void clearAttributes() {
+  public void clearAttributes() {
 
-	}
+  }
 
-	public void close() {
+  public void close() {
 
-	}
+  }
 
-	public void flush() {
+  public void flush() {
 
-	}
+  }
 
-	public Object getAttribute(String key) {
+  public Object getAttribute(String key) {
 
-		return null;
-	}
+    return null;
+  }
 
-	public Decoder getDecoder() {
+  public Decoder getDecoder() {
 
-		return null;
-	}
+    return null;
+  }
 
-	public Encoder getEncoder() {
+  public Encoder getEncoder() {
 
-		return null;
-	}
+    return null;
+  }
 
-	public Handler getHandler() {
+  public Handler getHandler() {
 
-		return null;
-	}
+    return null;
+  }
 
-	public long getLastOperationTimeStamp() {
+  public long getLastOperationTimeStamp() {
 
-		return 0;
-	}
+    return 0;
+  }
 
-	public InetAddress getLocalAddress() {
+  public InetAddress getLocalAddress() {
 
-		return null;
-	}
+    return null;
+  }
 
-	public ByteOrder getReadBufferByteOrder() {
+  public ByteOrder getReadBufferByteOrder() {
 
-		return null;
-	}
+    return null;
+  }
 
-	public InetSocketAddress getRemoteSocketAddress() {
-		return this.inetSocketAddressWrapper.getInetSocketAddress();
-	}
+  public InetSocketAddress getRemoteSocketAddress() {
+    return this.inetSocketAddressWrapper.getInetSocketAddress();
+  }
 
-	public long getScheduleWritenBytes() {
+  public long getScheduleWritenBytes() {
 
-		return 0;
-	}
+    return 0;
+  }
 
-	public long getSessionIdleTimeout() {
+  public long getSessionIdleTimeout() {
 
-		return 0;
-	}
+    return 0;
+  }
 
-	public long getSessionTimeout() {
+  public long getSessionTimeout() {
 
-		return 0;
-	}
+    return 0;
+  }
 
-	public boolean isClosed() {
-		return true;
-	}
+  public boolean isClosed() {
+    return true;
+  }
 
-	public boolean isExpired() {
+  public boolean isExpired() {
 
-		return false;
-	}
+    return false;
+  }
 
-	public boolean isHandleReadWriteConcurrently() {
-		return true;
-	}
+  public boolean isHandleReadWriteConcurrently() {
+    return true;
+  }
 
-	public boolean isIdle() {
+  public boolean isIdle() {
 
-		return false;
-	}
+    return false;
+  }
 
-	public boolean isLoopbackConnection() {
+  public boolean isLoopbackConnection() {
 
-		return false;
-	}
+    return false;
+  }
 
-	public boolean isUseBlockingRead() {
+  public boolean isUseBlockingRead() {
 
-		return false;
-	}
+    return false;
+  }
 
-	public boolean isUseBlockingWrite() {
+  public boolean isUseBlockingWrite() {
 
-		return false;
-	}
+    return false;
+  }
 
-	public void removeAttribute(String key) {
+  public void removeAttribute(String key) {
 
-	}
+  }
 
-	public void setAttribute(String key, Object value) {
+  public void setAttribute(String key, Object value) {
 
-	}
+  }
 
-	public Object setAttributeIfAbsent(String key, Object value) {
+  public Object setAttributeIfAbsent(String key, Object value) {
 
-		return null;
-	}
+    return null;
+  }
 
-	public void setDecoder(Decoder decoder) {
+  public void setDecoder(Decoder decoder) {
 
-	}
+  }
 
-	public void setEncoder(Encoder encoder) {
+  public void setEncoder(Encoder encoder) {
 
-	}
+  }
 
-	public void setHandleReadWriteConcurrently(
-			boolean handleReadWriteConcurrently) {
+  public void setHandleReadWriteConcurrently(boolean handleReadWriteConcurrently) {
 
-	}
+  }
 
-	public void setReadBufferByteOrder(ByteOrder readBufferByteOrder) {
+  public void setReadBufferByteOrder(ByteOrder readBufferByteOrder) {
 
-	}
+  }
 
-	public void setSessionIdleTimeout(long sessionIdleTimeout) {
+  public void setSessionIdleTimeout(long sessionIdleTimeout) {
 
-	}
+  }
 
-	public void setSessionTimeout(long sessionTimeout) {
+  public void setSessionTimeout(long sessionTimeout) {
 
-	}
+  }
 
-	public void setUseBlockingRead(boolean useBlockingRead) {
+  public void setUseBlockingRead(boolean useBlockingRead) {
 
-	}
+  }
 
-	public void setUseBlockingWrite(boolean useBlockingWrite) {
+  public void setUseBlockingWrite(boolean useBlockingWrite) {
 
-	}
+  }
 
-	public void start() {
+  public void start() {
 
-	}
+  }
 
-	public void write(Object packet) {
+  public void write(Object packet) {
 
-	}
+  }
 
 }

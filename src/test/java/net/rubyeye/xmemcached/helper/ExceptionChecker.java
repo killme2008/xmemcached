@@ -7,6 +7,7 @@ package net.rubyeye.xmemcached.helper;
  * 
  */
 public interface ExceptionChecker {
-	public void call() throws Exception;
-	public void check() throws Exception;
+  public void call() throws Exception;
+
+  public void check() throws Exception;
 }

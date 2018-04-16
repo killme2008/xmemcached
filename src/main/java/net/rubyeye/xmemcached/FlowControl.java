@@ -10,28 +10,28 @@ import java.util.concurrent.Semaphore;
  * 
  */
 public class FlowControl {
-	private Semaphore permits;
-	private int max;
+  private Semaphore permits;
+  private int max;
 
-	public FlowControl(int permits) {
-		super();
-		this.max = permits;
-		this.permits = new Semaphore(permits);
-	}
+  public FlowControl(int permits) {
+    super();
+    this.max = permits;
+    this.permits = new Semaphore(permits);
+  }
 
-	public int max() {
-		return this.max;
-	}
+  public int max() {
+    return this.max;
+  }
 
-	public int permits() {
-		return this.permits.availablePermits();
-	}
+  public int permits() {
+    return this.permits.availablePermits();
+  }
 
-	public boolean aquire() {
-		return this.permits.tryAcquire();
-	}
+  public boolean aquire() {
+    return this.permits.tryAcquire();
+  }
 
-	public void release() {
-		this.permits.release();
-	}
+  public void release() {
+    this.permits.release();
+  }
 }

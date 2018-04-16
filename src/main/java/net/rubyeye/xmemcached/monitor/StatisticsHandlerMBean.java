@@ -1,24 +1,18 @@
 /**
- *Copyright [2009-2010] [dennis zhuang(killme2008@gmail.com)]
- *Licensed under the Apache License, Version 2.0 (the "License");
- *you may not use this file except in compliance with the License. 
- *You may obtain a copy of the License at 
- *             http://www.apache.org/licenses/LICENSE-2.0 
- *Unless required by applicable law or agreed to in writing, 
- *software distributed under the License is distributed on an "AS IS" BASIS, 
- *WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, 
- *either express or implied. See the License for the specific language governing permissions and limitations under the License
+ * Copyright [2009-2010] [dennis zhuang(killme2008@gmail.com)] Licensed under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except in compliance with the License. You
+ * may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0 Unless required by
+ * applicable law or agreed to in writing, software distributed under the License is distributed on
+ * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See
+ * the License for the specific language governing permissions and limitations under the License
  */
 /**
- *Copyright [2009-2010] [dennis zhuang(killme2008@gmail.com)]
- *Licensed under the Apache License, Version 2.0 (the "License");
- *you may not use this file except in compliance with the License.
- *You may obtain a copy of the License at
- *             http://www.apache.org/licenses/LICENSE-2.0
- *Unless required by applicable law or agreed to in writing,
- *software distributed under the License is distributed on an "AS IS" BASIS,
- *WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
- *either express or implied. See the License for the specific language governing permissions and limitations under the License
+ * Copyright [2009-2010] [dennis zhuang(killme2008@gmail.com)] Licensed under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except in compliance with the License. You
+ * may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0 Unless required by
+ * applicable law or agreed to in writing, software distributed under the License is distributed on
+ * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See
+ * the License for the specific language governing permissions and limitations under the License
  */
 package net.rubyeye.xmemcached.monitor;
 
@@ -29,41 +23,41 @@ package net.rubyeye.xmemcached.monitor;
  * 
  */
 public interface StatisticsHandlerMBean {
-	public long getGetHitCount();
+  public long getGetHitCount();
 
-	public long getGetMissCount();
+  public long getGetMissCount();
 
-	public long getSetCount();
+  public long getSetCount();
 
-	public long getAppendCount();
+  public long getAppendCount();
 
-	public long getPrependCount();
+  public long getPrependCount();
 
-	public long getCASCount();
+  public long getCASCount();
 
-	public long getDeleteCount();
+  public long getDeleteCount();
 
-	public long getIncrCount();
+  public long getIncrCount();
 
-	public long getDecrCount();
+  public long getDecrCount();
 
-	public long getMultiGetCount();
+  public long getMultiGetCount();
 
-	public long getMultiGetsCount();
+  public long getMultiGetsCount();
 
-	public long getAddCount();
+  public long getAddCount();
 
-	public long getReplaceCount();
+  public long getReplaceCount();
 
-	public boolean isStatistics();
+  public boolean isStatistics();
 
-	public void setStatistics(boolean statistics);
+  public void setStatistics(boolean statistics);
 
-	/**
-	 * Reset the statistics
-	 * 
-	 * @since 1.3.9
-	 */
-	public void resetStats();
+  /**
+   * Reset the statistics
+   * 
+   * @since 1.3.9
+   */
+  public void resetStats();
 
 }

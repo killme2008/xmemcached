@@ -10,10 +10,10 @@ import net.rubyeye.xmemcached.KeyProvider;
  */
 public final class DefaultKeyProvider implements KeyProvider {
 
-	public static final KeyProvider INSTANCE = new DefaultKeyProvider();
+  public static final KeyProvider INSTANCE = new DefaultKeyProvider();
 
-	public final String process(String key) {
-		return key;
-	}
+  public final String process(String key) {
+    return key;
+  }
 
 }

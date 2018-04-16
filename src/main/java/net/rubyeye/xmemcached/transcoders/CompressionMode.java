@@ -7,12 +7,12 @@ package net.rubyeye.xmemcached.transcoders;
  * 
  */
 public enum CompressionMode {
-	/**
-	 * Gzip mode
-	 */
-	GZIP,
-	/**
-	 * Zip mode
-	 */
-	ZIP
+  /**
+   * Gzip mode
+   */
+  GZIP,
+  /**
+   * Zip mode
+   */
+  ZIP
 }

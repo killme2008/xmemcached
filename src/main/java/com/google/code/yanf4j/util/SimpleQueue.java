@@ -10,36 +10,36 @@ import java.util.LinkedList;
  */
 public class SimpleQueue<T> extends java.util.AbstractQueue<T> {
 
-	protected final LinkedList<T> list;
+  protected final LinkedList<T> list;
 
-	public SimpleQueue(int initializeCapacity) {
-		this.list = new LinkedList<T>();
-	}
+  public SimpleQueue(int initializeCapacity) {
+    this.list = new LinkedList<T>();
+  }
 
-	public SimpleQueue() {
-		this(100);
-	}
+  public SimpleQueue() {
+    this(100);
+  }
 
-	public synchronized boolean offer(T e) {
-		return this.list.add(e);
-	}
+  public synchronized boolean offer(T e) {
+    return this.list.add(e);
+  }
 
-	public synchronized T peek() {
-		return this.list.peek();
-	}
+  public synchronized T peek() {
+    return this.list.peek();
+  }
 
-	public synchronized T poll() {
-		return this.list.poll();
-	}
+  public synchronized T poll() {
+    return this.list.poll();
+  }
 
-	@Override
-	public Iterator<T> iterator() {
-		return this.list.iterator();
-	}
+  @Override
+  public Iterator<T> iterator() {
+    return this.list.iterator();
+  }
 
-	@Override
-	public int size() {
-		return this.list.size();
-	}
+  @Override
+  public int size() {
+    return this.list.size();
+  }
 
 }
