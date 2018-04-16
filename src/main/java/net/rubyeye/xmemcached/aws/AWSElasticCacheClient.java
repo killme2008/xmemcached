@@ -51,9 +51,8 @@ public class AWSElasticCacheClient extends XMemcachedClient implements ConfigUpd
       removeConfigAddrs();
     }
 
-    List<CacheNode> oldList =
-        this.currentClusterConfiguration != null ? this.currentClusterConfiguration.getNodeList()
-            : Collections.EMPTY_LIST;
+    List<CacheNode> oldList = this.currentClusterConfiguration != null
+        ? this.currentClusterConfiguration.getNodeList() : Collections.EMPTY_LIST;
     List<CacheNode> newList = config.getNodeList();
 
     List<CacheNode> addNodes = new ArrayList<CacheNode>();

@@ -36,7 +36,7 @@ public class StandardHashMemcachedClientIT extends XMemcachedClientIT {
                                                                                       // bigger than
                                                                                       // memcached
                                                                                       // daemon
-    // max value size.
+                                                                                      // max value size.
     transcoder.setCompressionThreshold(transcoder.getMaxSize()); // bumping
     // up
     // compression

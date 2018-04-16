@@ -296,8 +296,7 @@ public abstract class TextGetCommand extends Command
   public void encode() {
     byte[] cmdBytes =
         this.commandType == CommandType.GET_ONE || this.commandType == CommandType.GET_MANY
-            ? Constants.GET
-            : Constants.GETS;
+            ? Constants.GET : Constants.GETS;
     this.ioBuffer =
         IoBuffer.allocate(cmdBytes.length + Constants.CRLF.length + 1 + this.keyBytes.length);
     ByteUtils.setArguments(this.ioBuffer, cmdBytes, this.keyBytes);
