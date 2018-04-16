@@ -116,7 +116,8 @@
 	      <version>2.7.2</version>
 	      <configuration>
 		      <configFile>${project.basedir}/eclipse-java-google-style.xml</configFile>
-		      <lineEnding>CRLF</lineEnding>
+		      <lineEnding>LF</lineEnding>
+          <encoding>utf-8</encoding>
 	      </configuration>
 	      <executions>
 		      <execution>
