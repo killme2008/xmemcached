@@ -7,6 +7,7 @@ import net.rubyeye.xmemcached.XMemcachedClient;
 import net.rubyeye.xmemcached.impl.MemcachedTCPSession;
 import net.rubyeye.xmemcached.networking.MemcachedSession;
 import net.rubyeye.xmemcached.networking.MemcachedSessionConnectListener;
+import net.rubyeye.xmemcached.utils.AddrUtil;
 
 /**
  * Client state listener for auth
@@ -18,9 +19,10 @@ public class AuthMemcachedConnectListener implements MemcachedSessionConnectList
 
   public void onConnect(MemcachedSession session, MemcachedClient client) {
     MemcachedTCPSession tcpSession = (MemcachedTCPSession) session;
-    Map<InetSocketAddress, AuthInfo> authInfoMap = client.getAuthInfoMap();
+    Map<String, AuthInfo> authInfoMap = client.getAuthInfoStringMap();
     if (authInfoMap != null) {
-      AuthInfo authInfo = authInfoMap.get(tcpSession.getRemoteSocketAddress());
+      AuthInfo authInfo =
+          authInfoMap.get(AddrUtil.getServerString(tcpSession.getRemoteSocketAddress()));
       if (authInfo != null) {
         XMemcachedClient xMemcachedClient = (XMemcachedClient) client;
         AuthTask task = new AuthTask(authInfo, xMemcachedClient.getCommandFactory(), tcpSession);
