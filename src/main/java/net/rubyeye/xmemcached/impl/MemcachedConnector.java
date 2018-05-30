@@ -448,30 +448,34 @@ public class MemcachedConnector extends SocketChannelController implements Conne
     this.waitingQueue.add(request);
   }
 
-  public Future<Boolean> connect(InetSocketAddressWrapper addressWrapper) throws IOException {
+  public Future<Boolean> connect(InetSocketAddressWrapper addressWrapper) {
     if (addressWrapper == null) {
       throw new NullPointerException("Null Address");
     }
     // Remove addr from removed set
     this.removedAddrSet.remove(addressWrapper.getInetSocketAddress());
     SocketChannel socketChannel = null;
+    ConnectFuture future = new ConnectFuture(addressWrapper);
     try {
       socketChannel = SocketChannel.open();
       this.configureSocketChannel(socketChannel);
-      ConnectFuture future = new ConnectFuture(addressWrapper);
       if (!socketChannel.connect(addressWrapper.getInetSocketAddress())) {
         this.selectorManager.registerChannel(socketChannel, SelectionKey.OP_CONNECT, future);
       } else {
         this.addSession(this.createSession(socketChannel, addressWrapper));
         future.setResult(true);
       }
-      return future;
-    } catch (IOException e) {
+    } catch (Exception e) {
       if (socketChannel != null) {
-        socketChannel.close();
+        try {
+          socketChannel.close();
+        } catch (IOException e1) {
+          //propagate original exception
+        }
       }
-      throw e;
+      future.failure(e);
     }
+    return future;
   }
 
   public void closeChannel(Selector selector) throws IOException {
