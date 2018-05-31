@@ -2,10 +2,8 @@
 
 ## News
 
-* [2.4.2](https://github.com/killme2008/xmemcached/releases/tag/xmemcached-2.4.2) released, some bug fixes.
-* [2.4.0](https://github.com/killme2008/xmemcached/releases/tag/xmemcached-2.4.0) released, reduce CPU consumption when connecting to a lot of memcached servers.
-* [2.3.2](https://github.com/killme2008/xmemcached/releases/tag/xmemcached-2.3.2) released, some fixes and add compatibility for `KetamaMemcachedSessionLocator` with Gwhalin Memcached Java Client.
-* [2.3.1](https://github.com/killme2008/xmemcached/releases/tag/xmemcached-2.3.1) released, Adds `AWSElasticCacheClientBuilder` to build `AWSElasticCacheClient`.
+* [2.4.4](https://github.com/killme2008/xmemcached/releases/tag/xmemcached-2.4.4) released, bug fixes.
+* [2.4.3](https://github.com/killme2008/xmemcached/releases/tag/xmemcached-2.4.3) released, bug fixes.
 
 ## Introduction
 
@@ -64,6 +62,8 @@ Thanks to all contributors, you make xmemcached better.
 * [MikeBily](https://github.com/MikeBily)
 * [Lucas Pouzac](https://github.com/lucaspouzac)
 * [IluckySi](https://github.com/IluckySi)
+* [saschat](https://github.com/saschat)
+* [matejuh](https://github.com/matejuh)
 
 ## License
 
