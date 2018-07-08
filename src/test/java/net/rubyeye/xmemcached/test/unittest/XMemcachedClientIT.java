@@ -10,17 +10,17 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.NoSuchElementException;
 import java.util.Properties;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import com.google.code.yanf4j.buffer.IoBuffer;
+import com.google.code.yanf4j.util.ResourcesUtils;
 import junit.framework.Assert;
 import junit.framework.TestCase;
 import net.rubyeye.xmemcached.CASOperation;
 import net.rubyeye.xmemcached.Counter;
 import net.rubyeye.xmemcached.GetsResponse;
-import net.rubyeye.xmemcached.KeyIterator;
 import net.rubyeye.xmemcached.MemcachedClient;
 import net.rubyeye.xmemcached.MemcachedClientBuilder;
 import net.rubyeye.xmemcached.MemcachedClientCallable;
@@ -49,8 +49,6 @@ import net.rubyeye.xmemcached.transcoders.StringTranscoder;
 import net.rubyeye.xmemcached.utils.AddrUtil;
 import net.rubyeye.xmemcached.utils.ByteUtils;
 import net.rubyeye.xmemcached.utils.Protocol;
-import com.google.code.yanf4j.buffer.IoBuffer;
-import com.google.code.yanf4j.util.ResourcesUtils;
 
 public abstract class XMemcachedClientIT extends TestCase {
   protected MemcachedClient memcachedClient;
@@ -1221,6 +1219,26 @@ public abstract class XMemcachedClientIT extends TestCase {
       }
     });
 
+  }
+
+  public void testNameSpaceWithSantiKeys() throws Exception {
+    this.memcachedClient.setSanitizeKeys(true);
+    this.memcachedClient.withNamespace("hello", new MemcachedClientCallable<Void>() {
+      public Void call(MemcachedClient client)
+          throws MemcachedException, InterruptedException, TimeoutException {
+        client.set("a", 0, 1);
+        assertEquals(1, client.get("a"));
+        return null;
+      }
+    });
+    this.memcachedClient.invalidateNamespace("hello");
+    this.memcachedClient.withNamespace("hello", new MemcachedClientCallable<Void>() {
+      public Void call(MemcachedClient client)
+          throws MemcachedException, InterruptedException, TimeoutException {
+        assertNull(client.get("a"));
+        return null;
+      }
+    });
   }
 
   public void testNamespaceWithGetMulti() throws Exception {

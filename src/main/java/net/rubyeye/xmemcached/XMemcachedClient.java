@@ -31,6 +31,12 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import com.google.code.yanf4j.config.Configuration;
+import com.google.code.yanf4j.core.Session;
+import com.google.code.yanf4j.core.SocketOption;
+import com.google.code.yanf4j.util.SystemUtils;
 import net.rubyeye.xmemcached.auth.AuthInfo;
 import net.rubyeye.xmemcached.buffer.BufferAllocator;
 import net.rubyeye.xmemcached.buffer.SimpleBufferAllocator;
@@ -62,12 +68,6 @@ import net.rubyeye.xmemcached.utils.AddrUtil;
 import net.rubyeye.xmemcached.utils.ByteUtils;
 import net.rubyeye.xmemcached.utils.InetSocketAddressWrapper;
 import net.rubyeye.xmemcached.utils.Protocol;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import com.google.code.yanf4j.config.Configuration;
-import com.google.code.yanf4j.core.Session;
-import com.google.code.yanf4j.core.SocketOption;
-import com.google.code.yanf4j.util.SystemUtils;
 
 /**
  * Memcached Client for connecting to memcached server and do operations.
@@ -2505,8 +2505,8 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 
   public void invalidateNamespace(String ns, long opTimeout)
       throws MemcachedException, InterruptedException, TimeoutException {
-    String key = this.getNSKey(ns);
-    this.incr(key, 1, System.currentTimeMillis(), opTimeout);
+    String key = this.keyProvider.process(this.getNSKey(ns));
+    this.sendIncrOrDecrCommand(key, 1, System.nanoTime(), CommandType.INCR, false, opTimeout, 0);
   }
 
   public void invalidateNamespace(String ns)
