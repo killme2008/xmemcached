@@ -2,8 +2,7 @@
 
 ## News
 
-* [2.4.4](https://github.com/killme2008/xmemcached/releases/tag/xmemcached-2.4.4) released, bug fixes.
-* [2.4.3](https://github.com/killme2008/xmemcached/releases/tag/xmemcached-2.4.3) released, bug fixes.
+* [2.4.5](https://github.com/killme2008/xmemcached/releases/tag/xmemcached-2.4.5) released, bug fixes.
 
 ## Introduction
 
