@@ -13,6 +13,7 @@ import net.rubyeye.xmemcached.command.text.TextGetMultiCommand;
 import net.rubyeye.xmemcached.command.text.TextGetOneCommand;
 import net.rubyeye.xmemcached.command.text.TextIncrDecrCommand;
 import net.rubyeye.xmemcached.command.text.TextQuitCommand;
+import net.rubyeye.xmemcached.command.text.TextStatsCachedumpCommand;
 import net.rubyeye.xmemcached.command.text.TextStatsCommand;
 import net.rubyeye.xmemcached.command.text.TextStoreCommand;
 import net.rubyeye.xmemcached.command.text.TextTouchCommand;
@@ -24,9 +25,9 @@ import net.rubyeye.xmemcached.utils.Protocol;
 
 /**
  * Command Factory for creating text protocol commands.
- * 
+ *
  * @author dennis
- * 
+ *
  */
 public class TextCommandFactory implements CommandFactory {
 
@@ -69,7 +70,7 @@ public class TextCommandFactory implements CommandFactory {
 
   /**
    * Create verbosity command
-   * 
+   *
    * @param latch
    * @param level
    * @param noreply
@@ -82,12 +83,23 @@ public class TextCommandFactory implements CommandFactory {
   /*
    * (non-Javadoc)
    * 
-   * @seenet.rubyeye.xmemcached.CommandFactory#createStatsCommand(java.net. InetSocketAddress,
+   * @seenet.rubyeye.xmemcached.CommandFactory#createStatsCommand(java.net.InetSocketAddress,
    * java.util.concurrent.CountDownLatch)
    */
   public final Command createStatsCommand(InetSocketAddress server, CountDownLatch latch,
       String itemName) {
     return new TextStatsCommand(server, latch, itemName);
+  }
+
+  /*
+  * (non-Javadoc)
+  *
+  * @seenet.rubyeye.xmemcached.CommandFactory#createStatsCachedumpCommand(java.net.InetSocketAddress,
+  * java.util.concurrent.CountDownLatch, int, int)
+  */
+  public final Command createStatsCachedumpCommand(InetSocketAddress server, CountDownLatch latch,
+      int slabId, int limit) {
+    return new TextStatsCachedumpCommand(server, latch, slabId, limit);
   }
 
   /*

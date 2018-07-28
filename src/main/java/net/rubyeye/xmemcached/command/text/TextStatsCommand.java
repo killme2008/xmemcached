@@ -67,7 +67,7 @@ public class TextStatsCommand extends Command implements ServerAddressAware {
 
   @Override
   @SuppressWarnings("unchecked")
-  public final boolean decode(MemcachedTCPSession session, ByteBuffer buffer) {
+  public boolean decode(MemcachedTCPSession session, ByteBuffer buffer) {
     String line = null;
     while ((line = ByteUtils.nextLine(buffer)) != null) {
       if (line.equals("END")) { // at the end
@@ -83,7 +83,7 @@ public class TextStatsCommand extends Command implements ServerAddressAware {
     return false;
   }
 
-  private final boolean done(MemcachedSession session) {
+  protected final boolean done(MemcachedSession session) {
     countDownLatch();
     return true;
   }

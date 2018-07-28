@@ -4,14 +4,14 @@ import java.nio.ByteBuffer;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import net.rubyeye.xmemcached.command.Command;
+import net.rubyeye.xmemcached.command.TextCommandFactory;
 import net.rubyeye.xmemcached.command.text.TextStatsCommand;
 
 /**
- * 
  * @author dennis
- * 
  */
 public class TextStatsCommandUnitTest extends BaseTextCommandUnitTest {
+
   public void testEncode() {
     Command command = this.commandFactory.createStatsCommand(null, new CountDownLatch(1), null);
     assertNull(command.getIoBuffer());
@@ -39,6 +39,20 @@ public class TextStatsCommandUnitTest extends BaseTextCommandUnitTest {
     checkDecodeValidLine(command, "STAT connections 5\r\nEND\r\n");
     assertEquals(3, result.size());
     assertEquals("5", result.get("connections"));
+
+  }
+
+  public void testCachedumpDecode() {
+    Command command = ((TextCommandFactory) this.commandFactory).createStatsCachedumpCommand(null,
+        new CountDownLatch(1), 1, 10);
+    checkDecodeNullAndNotLineByteBuffer(command);
+    checkDecodeInvalidLine(command, "stats", "OK\r\n");
+    assertFalse(command.decode(null, ByteBuffer.wrap("ITEM some-key [6 b; 0 s]\r\n".getBytes())));
+    checkDecodeValidLine(command, "END\r\n");
+    Map<String, Integer[]> result = (Map<String, Integer[]>) command.getResult();
+    Integer[] item = result.get("some-key");
+    assertEquals(Integer.valueOf(6), item[0]);
+    assertEquals(Integer.valueOf(0), item[1]);
 
   }
 }
