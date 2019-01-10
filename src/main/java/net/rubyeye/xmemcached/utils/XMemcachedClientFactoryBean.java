@@ -77,6 +77,16 @@ public class XMemcachedClientFactoryBean implements FactoryBean {
 
   private boolean enableHealSession = true;
 
+  private int timeoutExceptionThreshold = MemcachedClient.DEFAULT_MAX_TIMEOUTEXCEPTION_THRESHOLD;
+
+  public int getTimeoutExceptionThreshold() {
+    return timeoutExceptionThreshold;
+  }
+
+  public void setTimeoutExceptionThreshold(int timeoutExceptionThreshold) {
+    this.timeoutExceptionThreshold = timeoutExceptionThreshold;
+  }
+
   public long getHealSessionInterval() {
     return healSessionInterval;
   }
@@ -224,6 +234,7 @@ public class XMemcachedClientFactoryBean implements FactoryBean {
     this.configBuilder(builder);
     this.memcachedClient = builder.build();
     this.memcachedClient.setOpTimeout(opTimeout);
+    this.memcachedClient.setTimeoutExceptionThreshold(timeoutExceptionThreshold);
     return this.memcachedClient;
   }
 
