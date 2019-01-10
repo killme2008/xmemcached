@@ -26,6 +26,7 @@ public class XMemcachedClientFactoryBeanIT extends TestCase {
   public void testAllConfig() throws Exception {
     MemcachedClient memcachedClient = (MemcachedClient) this.ctx.getBean("memcachedClient2");
     validateClient(memcachedClient);
+    assertEquals(memcachedClient.getTimeoutExceptionThreshold(), 999);
   }
 
   public void testComposite() throws Exception {

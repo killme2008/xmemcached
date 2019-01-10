@@ -45,5 +45,6 @@
 		<property name="bufferAllocator">
 			<bean class="net.rubyeye.xmemcached.buffer.SimpleBufferAllocator"></bean>
 		</property>
+		<property name="timeoutExceptionThreshold" value="999" />
 	</bean>
 </beans>
