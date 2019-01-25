@@ -30,9 +30,8 @@ public class TextStatsCachedumpCommand extends TextStatsCommand {
       } else if (line.startsWith("ITEM")) {
         Matcher m = itemPattern.matcher(line);
         if (m.find()) {
-          ((Map<String, Integer[]>) getResult())
-              .put(m.group("key"), new Integer[]{Integer.parseInt(m.group("size")),
-                  Integer.parseInt(m.group("expire"))});
+          ((Map<String, Integer[]>) getResult()).put(m.group("key"), new Integer[] {
+              Integer.parseInt(m.group("size")), Integer.parseInt(m.group("expire"))});
         }
       } else {
         return decodeError(line);
