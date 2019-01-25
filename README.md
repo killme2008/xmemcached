@@ -38,7 +38,7 @@ Run unit tests:
 $ mvn test
 ```
 
-Run intergration test:
+Run integration test:
 
 ```sh
 $ mvn integration-test
