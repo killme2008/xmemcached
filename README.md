@@ -2,6 +2,7 @@
 
 ## News
 
+* [2.4.6](https://github.com/killme2008/xmemcached/releases/tag/xmemcached-2.4.6) released, set timeoutExceptionThreshold though XMemcachedClientFactoryBean.
 * [2.4.5](https://github.com/killme2008/xmemcached/releases/tag/xmemcached-2.4.5) released, bug fixes.
 
 ## Introduction
