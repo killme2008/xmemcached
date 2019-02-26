@@ -16,6 +16,7 @@ import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -24,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
@@ -457,6 +459,53 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
       }
     }
 
+  }
+
+  /*
+   * (non-Javadoc)
+   *
+   * @see net.rubyeye.xmemcached.MemcachedClient#updateServersWith(java.lang.String)
+   */
+  public void updateServersWith(String hostList) throws IOException {
+    Comparator<InetSocketAddress> addressComparator = new Comparator<InetSocketAddress>() {
+
+      public int compare(InetSocketAddress addr1, InetSocketAddress addr2) {
+        return AddrUtil.getServerString(addr1).compareTo(AddrUtil.getServerString(addr2));
+      }
+
+    };
+    Set<InetSocketAddress> originalServers = new TreeSet<InetSocketAddress>(addressComparator);
+    for (Session session : this.connector.getSessionSet()) {
+      InetSocketAddress socketAddress = session.getRemoteSocketAddress();
+      originalServers.add(socketAddress);
+    }
+    Set<InetSocketAddress> newServers = new TreeSet<InetSocketAddress>(addressComparator);
+    newServers.addAll(AddrUtil.getAddresses(hostList));
+
+    Set<InetSocketAddress> toAddServers = new TreeSet<InetSocketAddress>(addressComparator);
+    Set<InetSocketAddress> toRemoveServers = new TreeSet<InetSocketAddress>(addressComparator);
+    /**
+     * if originalServers = 1 2 3, newServers = 2 3 4
+     * then toAddServers = 4, toRemoveServers = 1
+     */
+
+    for (InetSocketAddress addr : newServers) {
+      if (!originalServers.contains(addr)) {
+        toAddServers.add(addr);
+      }
+    }
+    for (InetSocketAddress addr : originalServers) {
+      if (!newServers.contains(addr)) {
+        toRemoveServers.add(addr);
+      }
+    }
+
+    for (InetSocketAddress addr : toAddServers) {
+      this.addServer(addr);
+    }
+    for (InetSocketAddress addr : toRemoveServers) {
+      this.removeAddr(addr);
+    }
   }
 
   /*
