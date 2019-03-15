@@ -2,6 +2,7 @@ package net.rubyeye.xmemcached.test.unittest.impl;
 
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.net.UnknownHostException;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -9,7 +10,7 @@ import java.util.List;
 import java.util.concurrent.Future;
 import junit.framework.TestCase;
 import net.rubyeye.xmemcached.buffer.BufferAllocator;
-import net.rubyeye.xmemcached.impl.MemcachedSessionComparator;
+import net.rubyeye.xmemcached.impl.AddressMemcachedSessionComparator;
 import net.rubyeye.xmemcached.networking.MemcachedSession;
 import net.rubyeye.xmemcached.utils.InetSocketAddressWrapper;
 import com.google.code.yanf4j.core.Handler;
@@ -17,17 +18,17 @@ import com.google.code.yanf4j.core.Session;
 import com.google.code.yanf4j.core.CodecFactory.Decoder;
 import com.google.code.yanf4j.core.CodecFactory.Encoder;
 
-public class MemcachedSessionComparatorUnitTest extends TestCase {
+public class AddressMemcachedSessionComparatorUnitTest extends TestCase {
   static private class MockSession implements MemcachedSession, Session {
-    private final int order;
+    private final InetSocketAddress address;
 
     public InetSocketAddressWrapper getInetSocketAddressWrapper() {
-      return new InetSocketAddressWrapper(null, this.order, 0, null);
+      return new InetSocketAddressWrapper(this.address, 0, 0, null);
     }
 
-    public MockSession(int order) {
+    public MockSession(InetSocketAddress address) {
       super();
-      this.order = order;
+      this.address = address;
     }
 
     public void quit() {
@@ -226,7 +227,8 @@ public class MemcachedSessionComparatorUnitTest extends TestCase {
     }
 
     public int getOrder() {
-      return this.order;
+      // TODO Auto-generated method stub
+      return 0;
     }
 
     public int getWeight() {
@@ -251,20 +253,26 @@ public class MemcachedSessionComparatorUnitTest extends TestCase {
 
   }
 
-  public void testCompare() {
+  public void testCompare() throws UnknownHostException {
 
     List<Session> sessionList = new ArrayList<Session>();
     for (int i = 0; i < 100; i++) {
-      sessionList.add(new MockSession(i));
+      sessionList.add(new MockSession(new InetSocketAddress("hostA", i)));
+      sessionList.add(new MockSession(new InetSocketAddress("hostB", i)));
+
+      byte[] ipAddr = new byte[] {127, 0, 0, 1};
+      sessionList.add(new MockSession(new InetSocketAddress(InetAddress.getByAddress(ipAddr), i)));
     }
-    Collections.sort(sessionList, new MemcachedSessionComparator());
+    Collections.sort(sessionList, new AddressMemcachedSessionComparator());
 
     for (int i = 0; i < sessionList.size(); i++) {
       if (i < sessionList.size() - 1) {
         int next = i + 1;
         MockSession nextSession = (MockSession) sessionList.get(next);
         MockSession currentSession = (MockSession) sessionList.get(i);
-        assertTrue(currentSession.getOrder() < nextSession.getOrder());
+        assertTrue(currentSession.getInetSocketAddressWrapper().getInetSocketAddress().toString()
+            .compareTo(
+                nextSession.getInetSocketAddressWrapper().getInetSocketAddress().toString()) < 0);
       }
     }
 

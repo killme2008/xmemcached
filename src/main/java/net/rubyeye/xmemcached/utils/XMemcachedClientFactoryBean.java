@@ -25,6 +25,7 @@ import net.rubyeye.xmemcached.CommandFactory;
 import net.rubyeye.xmemcached.KeyProvider;
 import net.rubyeye.xmemcached.MemcachedClient;
 import net.rubyeye.xmemcached.MemcachedClientBuilder;
+import net.rubyeye.xmemcached.MemcachedSessionComparator;
 import net.rubyeye.xmemcached.MemcachedSessionLocator;
 import net.rubyeye.xmemcached.XMemcachedClientBuilder;
 import net.rubyeye.xmemcached.auth.AuthInfo;
@@ -33,6 +34,7 @@ import net.rubyeye.xmemcached.buffer.SimpleBufferAllocator;
 import net.rubyeye.xmemcached.command.TextCommandFactory;
 import net.rubyeye.xmemcached.impl.ArrayMemcachedSessionLocator;
 import net.rubyeye.xmemcached.impl.DefaultKeyProvider;
+import net.rubyeye.xmemcached.impl.IndexMemcachedSessionComparator;
 import net.rubyeye.xmemcached.transcoders.SerializingTranscoder;
 import net.rubyeye.xmemcached.transcoders.Transcoder;
 import org.springframework.beans.factory.FactoryBean;
@@ -47,6 +49,7 @@ import com.google.code.yanf4j.config.Configuration;
 public class XMemcachedClientFactoryBean implements FactoryBean {
 
   private MemcachedSessionLocator sessionLocator = new ArrayMemcachedSessionLocator();
+  private MemcachedSessionComparator sessionComparator = new IndexMemcachedSessionComparator();
   private BufferAllocator bufferAllocator = new SimpleBufferAllocator();
   private String servers;
   private List<Integer> weights;
@@ -167,6 +170,10 @@ public class XMemcachedClientFactoryBean implements FactoryBean {
     this.sessionLocator = sessionLocator;
   }
 
+  public void setSessionComparator(MemcachedSessionComparator sessionComparator) {
+    this.sessionComparator = sessionComparator;
+  }
+
   public void setBufferAllocator(BufferAllocator bufferAllocator) {
     this.bufferAllocator = bufferAllocator;
   }
@@ -190,6 +197,10 @@ public class XMemcachedClientFactoryBean implements FactoryBean {
 
   public MemcachedSessionLocator getSessionLocator() {
     return this.sessionLocator;
+  }
+
+  public MemcachedSessionComparator getSessionComparator() {
+    return this.sessionComparator;
   }
 
   public BufferAllocator getBufferAllocator() {
@@ -253,6 +264,7 @@ public class XMemcachedClientFactoryBean implements FactoryBean {
     builder.setConfiguration(this.configuration);
     builder.setBufferAllocator(this.bufferAllocator);
     builder.setSessionLocator(this.sessionLocator);
+    builder.setSessionComparator(this.sessionComparator);
     builder.setTranscoder(this.transcoder);
     builder.setCommandFactory(this.commandFactory);
     builder.setConnectionPoolSize(this.connectionPoolSize);
@@ -297,6 +309,9 @@ public class XMemcachedClientFactoryBean implements FactoryBean {
     }
     if (this.sessionLocator == null) {
       throw new NullPointerException("Null MemcachedSessionLocator");
+    }
+    if (this.sessionComparator == null) {
+      throw new NullPointerException("Null MemcachedSessionComparator");
     }
     if (this.configuration == null) {
       throw new NullPointerException("Null networking configuration");

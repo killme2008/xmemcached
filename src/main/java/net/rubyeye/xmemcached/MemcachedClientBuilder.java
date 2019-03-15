@@ -32,6 +32,19 @@ public interface MemcachedClientBuilder {
    */
   public void setSessionLocator(MemcachedSessionLocator sessionLocator);
 
+  /**
+   * 
+   * @return net.rubyeye.xmemcached.MemcachedSessionComparator
+   */
+  public MemcachedSessionComparator getSessionComparator();
+
+  /**
+  * Set the XmemcachedClient's session comparator.Use IndexMemcachedSessionComparator by default.
+  * 
+  * @param sessionComparator
+  */
+  public void setSessionComparator(MemcachedSessionComparator sessionComparator);
+
   public BufferAllocator getBufferAllocator();
 
   /**

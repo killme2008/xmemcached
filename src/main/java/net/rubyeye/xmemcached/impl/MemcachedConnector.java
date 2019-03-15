@@ -34,6 +34,7 @@ import net.rubyeye.xmemcached.CommandFactory;
 import net.rubyeye.xmemcached.FlowControl;
 import net.rubyeye.xmemcached.MemcachedClient;
 import net.rubyeye.xmemcached.MemcachedOptimizer;
+import net.rubyeye.xmemcached.MemcachedSessionComparator;
 import net.rubyeye.xmemcached.MemcachedSessionLocator;
 import net.rubyeye.xmemcached.buffer.BufferAllocator;
 import net.rubyeye.xmemcached.command.Command;
@@ -89,6 +90,10 @@ public class MemcachedConnector extends SocketChannelController implements Conne
 
   public void setSessionLocator(MemcachedSessionLocator sessionLocator) {
     this.sessionLocator = sessionLocator;
+  }
+
+  public void setSessionComparator(MemcachedSessionComparator sessionComparator) {
+    this.sessionComparator = sessionComparator;
   }
 
   /**
@@ -205,6 +210,7 @@ public class MemcachedConnector extends SocketChannelController implements Conne
   }
 
   protected MemcachedSessionLocator sessionLocator;
+  protected MemcachedSessionComparator sessionComparator;
 
   protected final ConcurrentHashMap<InetSocketAddress, Queue<Session>> sessionMap =
       new ConcurrentHashMap<InetSocketAddress, Queue<Session>>();
@@ -329,9 +335,6 @@ public class MemcachedConnector extends SocketChannelController implements Conne
       }
     }
   }
-
-  private static final MemcachedSessionComparator sessionComparator =
-      new MemcachedSessionComparator();
 
   public final void updateSessions() {
     Collection<Queue<Session>> sessionCollection = this.sessionMap.values();
@@ -576,10 +579,11 @@ public class MemcachedConnector extends SocketChannelController implements Conne
   }
 
   public MemcachedConnector(Configuration configuration, MemcachedSessionLocator locator,
-      BufferAllocator allocator, CommandFactory commandFactory, int poolSize,
-      int maxQueuedNoReplyOperations) {
+      MemcachedSessionComparator comparator, BufferAllocator allocator,
+      CommandFactory commandFactory, int poolSize, int maxQueuedNoReplyOperations) {
     super(configuration, null);
     this.sessionLocator = locator;
+    this.sessionComparator = comparator;
     this.protocol = commandFactory.getProtocol();
     this.addStateListener(new InnerControllerStateListener());
     this.updateSessions();

@@ -13,6 +13,7 @@ import net.rubyeye.xmemcached.buffer.SimpleBufferAllocator;
 import net.rubyeye.xmemcached.command.TextCommandFactory;
 import net.rubyeye.xmemcached.impl.ArrayMemcachedSessionLocator;
 import net.rubyeye.xmemcached.impl.DefaultKeyProvider;
+import net.rubyeye.xmemcached.impl.IndexMemcachedSessionComparator;
 import net.rubyeye.xmemcached.impl.RandomMemcachedSessionLocaltor;
 import net.rubyeye.xmemcached.transcoders.SerializingTranscoder;
 import net.rubyeye.xmemcached.transcoders.Transcoder;
@@ -35,6 +36,7 @@ public class XMemcachedClientBuilder implements MemcachedClientBuilder {
   private static final Logger log = LoggerFactory.getLogger(XMemcachedClientBuilder.class);
 
   protected MemcachedSessionLocator sessionLocator = new ArrayMemcachedSessionLocator();
+  protected MemcachedSessionComparator sessionComparator = new IndexMemcachedSessionComparator();
   protected BufferAllocator bufferAllocator = new SimpleBufferAllocator();
   protected Configuration configuration = getDefaultConfiguration();
   protected Map<InetSocketAddress, InetSocketAddress> addressMap =
@@ -268,6 +270,28 @@ public class XMemcachedClientBuilder implements MemcachedClientBuilder {
   /*
    * (non-Javadoc)
    *
+   * @see net.rubyeye.xmemcached.MemcachedClientBuilder#getSessionComparator()
+   */
+  public MemcachedSessionComparator getSessionComparator() {
+    return this.sessionComparator;
+  }
+
+  /*
+   * (non-Javadoc)
+   *
+   * @see net.rubyeye.xmemcached.MemcachedClientBuilder#setSessionComparator(net. rubyeye
+   * .xmemcached.MemcachedSessionComparator)
+   */
+  public void setSessionComparator(MemcachedSessionComparator sessionComparator) {
+    if (sessionComparator == null) {
+      throw new IllegalArgumentException("Null SessionComparator");
+    }
+    this.sessionComparator = sessionComparator;
+  }
+
+  /*
+   * (non-Javadoc)
+   *
    * @see net.rubyeye.xmemcached.MemcachedClientBuilder#getBufferAllocator()
    */
   public BufferAllocator getBufferAllocator() {
@@ -321,10 +345,10 @@ public class XMemcachedClientBuilder implements MemcachedClientBuilder {
       }
     }
     if (this.weights == null) {
-      memcachedClient = new XMemcachedClient(this.sessionLocator, this.bufferAllocator,
-          this.configuration, this.socketOptions, this.commandFactory, this.transcoder,
-          this.addressMap, this.stateListeners, this.authInfoMap, this.connectionPoolSize,
-          this.connectTimeout, this.name, this.failureMode);
+      memcachedClient = new XMemcachedClient(this.sessionLocator, this.sessionComparator,
+          this.bufferAllocator, this.configuration, this.socketOptions, this.commandFactory,
+          this.transcoder, this.addressMap, this.stateListeners, this.authInfoMap,
+          this.connectionPoolSize, this.connectTimeout, this.name, this.failureMode);
 
     } else {
       if (this.addressMap == null) {
@@ -333,9 +357,9 @@ public class XMemcachedClientBuilder implements MemcachedClientBuilder {
       if (this.addressMap.size() > this.weights.length) {
         throw new IllegalArgumentException("Weights Array's length is less than server's number");
       }
-      memcachedClient = new XMemcachedClient(this.sessionLocator, this.bufferAllocator,
-          this.configuration, this.socketOptions, this.commandFactory, this.transcoder,
-          this.addressMap, this.weights, this.stateListeners, this.authInfoMap,
+      memcachedClient = new XMemcachedClient(this.sessionLocator, this.sessionComparator,
+          this.bufferAllocator, this.configuration, this.socketOptions, this.commandFactory,
+          this.transcoder, this.addressMap, this.weights, this.stateListeners, this.authInfoMap,
           this.connectionPoolSize, this.connectTimeout, this.name, this.failureMode);
     }
     this.configureClient(memcachedClient);

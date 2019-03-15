@@ -15,6 +15,7 @@ import com.google.code.yanf4j.core.Session;
 import com.google.code.yanf4j.core.SocketOption;
 import net.rubyeye.xmemcached.CommandFactory;
 import net.rubyeye.xmemcached.MemcachedClientStateListener;
+import net.rubyeye.xmemcached.MemcachedSessionComparator;
 import net.rubyeye.xmemcached.MemcachedSessionLocator;
 import net.rubyeye.xmemcached.XMemcachedClient;
 import net.rubyeye.xmemcached.XMemcachedClientBuilder;
@@ -25,6 +26,7 @@ import net.rubyeye.xmemcached.command.Command;
 import net.rubyeye.xmemcached.command.TextCommandFactory;
 import net.rubyeye.xmemcached.exception.MemcachedException;
 import net.rubyeye.xmemcached.impl.ArrayMemcachedSessionLocator;
+import net.rubyeye.xmemcached.impl.IndexMemcachedSessionComparator;
 import net.rubyeye.xmemcached.transcoders.SerializingTranscoder;
 import net.rubyeye.xmemcached.transcoders.Transcoder;
 import net.rubyeye.xmemcached.utils.InetSocketAddressWrapper;
@@ -184,8 +186,8 @@ public class AWSElasticCacheClient extends XMemcachedClient implements ConfigUpd
   @SuppressWarnings("unchecked")
   public AWSElasticCacheClient(List<InetSocketAddress> addrs, long pollConfigIntervalMills,
       CommandFactory commandFactory) throws IOException {
-    this(new ArrayMemcachedSessionLocator(), new SimpleBufferAllocator(),
-        XMemcachedClientBuilder.getDefaultConfiguration(),
+    this(new ArrayMemcachedSessionLocator(), new IndexMemcachedSessionComparator(),
+        new SimpleBufferAllocator(), XMemcachedClientBuilder.getDefaultConfiguration(),
         XMemcachedClientBuilder.getDefaultSocketOptions(), new TextCommandFactory(),
         new SerializingTranscoder(), (List<MemcachedClientStateListener>) Collections.EMPTY_LIST,
         (Map<InetSocketAddress, AuthInfo>) Collections.EMPTY_MAP, 1,
@@ -203,13 +205,13 @@ public class AWSElasticCacheClient extends XMemcachedClient implements ConfigUpd
     return m;
   }
 
-  AWSElasticCacheClient(MemcachedSessionLocator locator, BufferAllocator allocator,
-      Configuration conf, Map<SocketOption, Object> socketOptions, CommandFactory commandFactory,
-      Transcoder transcoder, List<MemcachedClientStateListener> stateListeners,
-      Map<InetSocketAddress, AuthInfo> map, int poolSize, long connectTimeout, String name,
-      boolean failureMode, List<InetSocketAddress> configAddrs, long pollConfigIntervalMills)
-      throws IOException {
-    super(locator, allocator, conf, socketOptions, commandFactory, transcoder,
+  AWSElasticCacheClient(MemcachedSessionLocator locator, MemcachedSessionComparator comparator,
+      BufferAllocator allocator, Configuration conf, Map<SocketOption, Object> socketOptions,
+      CommandFactory commandFactory, Transcoder transcoder,
+      List<MemcachedClientStateListener> stateListeners, Map<InetSocketAddress, AuthInfo> map,
+      int poolSize, long connectTimeout, String name, boolean failureMode,
+      List<InetSocketAddress> configAddrs, long pollConfigIntervalMills) throws IOException {
+    super(locator, comparator, allocator, conf, socketOptions, commandFactory, transcoder,
         getAddressMapFromConfigAddrs(configAddrs), stateListeners, map, poolSize, connectTimeout,
         name, failureMode);
     if (pollConfigIntervalMills <= 0) {
