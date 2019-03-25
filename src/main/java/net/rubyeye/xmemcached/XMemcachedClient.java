@@ -55,6 +55,7 @@ import net.rubyeye.xmemcached.impl.MemcachedClientStateListenerAdapter;
 import net.rubyeye.xmemcached.impl.MemcachedConnector;
 import net.rubyeye.xmemcached.impl.MemcachedHandler;
 import net.rubyeye.xmemcached.impl.MemcachedTCPSession;
+import net.rubyeye.xmemcached.impl.IndexMemcachedSessionComparator;
 import net.rubyeye.xmemcached.impl.ReconnectRequest;
 import net.rubyeye.xmemcached.monitor.Constants;
 import net.rubyeye.xmemcached.monitor.MemcachedClientNameHolder;
@@ -79,6 +80,7 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 
   private static final Logger log = LoggerFactory.getLogger(XMemcachedClient.class);
   protected MemcachedSessionLocator sessionLocator;
+  protected MemcachedSessionComparator sessionComparator;
   private volatile boolean shutdown;
   protected MemcachedConnector connector;
   @SuppressWarnings("unchecked")
@@ -180,6 +182,10 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 
   public final MemcachedSessionLocator getSessionLocator() {
     return this.sessionLocator;
+  }
+
+  public final MemcachedSessionComparator getSessionComparator() {
+    return this.sessionComparator;
   }
 
   public final CommandFactory getCommandFactory() {
@@ -343,8 +349,8 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
       throw new IllegalArgumentException("weight<=0");
     }
     this.checkServerPort(host, port);
-    this.buildConnector(new ArrayMemcachedSessionLocator(), new SimpleBufferAllocator(),
-        XMemcachedClientBuilder.getDefaultConfiguration(),
+    this.buildConnector(new ArrayMemcachedSessionLocator(), new IndexMemcachedSessionComparator(),
+        new SimpleBufferAllocator(), XMemcachedClientBuilder.getDefaultConfiguration(),
         XMemcachedClientBuilder.getDefaultSocketOptions(), new TextCommandFactory(),
         new SerializingTranscoder());
     this.start0();
@@ -653,12 +659,15 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
   }
 
   @SuppressWarnings("unchecked")
-  private void buildConnector(MemcachedSessionLocator locator, BufferAllocator bufferAllocator,
+  private void buildConnector(MemcachedSessionLocator locator,
+      MemcachedSessionComparator comparator, BufferAllocator bufferAllocator,
       Configuration configuration, Map<SocketOption, Object> socketOptions,
       CommandFactory commandFactory, Transcoder transcoder) {
     if (locator == null) {
       locator = new ArrayMemcachedSessionLocator();
-
+    }
+    if (comparator == null) {
+      comparator = new IndexMemcachedSessionComparator();
     }
     if (bufferAllocator == null) {
       bufferAllocator = new SimpleBufferAllocator();
@@ -683,8 +692,10 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
     this.shutdown = true;
     this.transcoder = transcoder;
     this.sessionLocator = locator;
+    this.sessionComparator = comparator;
     this.connector = this.newConnector(bufferAllocator, configuration, this.sessionLocator,
-        this.commandFactory, this.connectionPoolSize, this.maxQueuedNoReplyOperations);
+        this.sessionComparator, this.commandFactory, this.connectionPoolSize,
+        this.maxQueuedNoReplyOperations);
     this.memcachedHandler = new MemcachedHandler(this);
     this.connector.setHandler(this.memcachedHandler);
     this.connector.setCodecFactory(new MemcachedCodecFactory());
@@ -699,11 +710,13 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 
   protected MemcachedConnector newConnector(BufferAllocator bufferAllocator,
       Configuration configuration, MemcachedSessionLocator memcachedSessionLocator,
-      CommandFactory commandFactory, int poolSize, int maxQueuedNoReplyOperations) {
+      MemcachedSessionComparator memcachedSessionComparator, CommandFactory commandFactory,
+      int poolSize, int maxQueuedNoReplyOperations) {
     // make sure dispatch message thread count is zero
     configuration.setDispatchMessageThreadCount(0);
-    return new MemcachedConnector(configuration, memcachedSessionLocator, bufferAllocator,
-        commandFactory, poolSize, maxQueuedNoReplyOperations);
+    return new MemcachedConnector(configuration, memcachedSessionLocator,
+        memcachedSessionComparator, bufferAllocator, commandFactory, poolSize,
+        maxQueuedNoReplyOperations);
   }
 
   private final void registerMBean() {
@@ -747,8 +760,8 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
     if (weight <= 0) {
       throw new IllegalArgumentException("weight<=0");
     }
-    this.buildConnector(new ArrayMemcachedSessionLocator(), new SimpleBufferAllocator(),
-        XMemcachedClientBuilder.getDefaultConfiguration(),
+    this.buildConnector(new ArrayMemcachedSessionLocator(), new IndexMemcachedSessionComparator(),
+        new SimpleBufferAllocator(), XMemcachedClientBuilder.getDefaultConfiguration(),
         XMemcachedClientBuilder.getDefaultSocketOptions(), cmdFactory, new SerializingTranscoder());
     this.start0();
     this.connect(new InetSocketAddressWrapper(inetSocketAddress,
@@ -766,8 +779,8 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 
   public XMemcachedClient() throws IOException {
     super();
-    this.buildConnector(new ArrayMemcachedSessionLocator(), new SimpleBufferAllocator(),
-        XMemcachedClientBuilder.getDefaultConfiguration(),
+    this.buildConnector(new ArrayMemcachedSessionLocator(), new IndexMemcachedSessionComparator(),
+        new SimpleBufferAllocator(), XMemcachedClientBuilder.getDefaultConfiguration(),
         XMemcachedClientBuilder.getDefaultSocketOptions(), new TextCommandFactory(),
         new SerializingTranscoder());
     this.start0();
@@ -778,6 +791,7 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
    * instance by this method, use MemcachedClientBuilder instead.
    *
    * @param locator
+   * @param comparator
    * @param allocator
    * @param conf
    * @param commandFactory
@@ -787,9 +801,10 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
    * @throws IOException
    */
   @SuppressWarnings("unchecked")
-  public XMemcachedClient(MemcachedSessionLocator locator, BufferAllocator allocator,
-      Configuration conf, Map<SocketOption, Object> socketOptions, CommandFactory commandFactory,
-      Transcoder transcoder, Map<InetSocketAddress, InetSocketAddress> addressMap,
+  public XMemcachedClient(MemcachedSessionLocator locator, MemcachedSessionComparator comparator,
+      BufferAllocator allocator, Configuration conf, Map<SocketOption, Object> socketOptions,
+      CommandFactory commandFactory, Transcoder transcoder,
+      Map<InetSocketAddress, InetSocketAddress> addressMap,
       List<MemcachedClientStateListener> stateListeners, Map<InetSocketAddress, AuthInfo> map,
       int poolSize, long connectTimeout, String name, boolean failureMode) throws IOException {
     super();
@@ -797,7 +812,8 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
     this.setFailureMode(failureMode);
     this.setName(name);
     this.optimiezeSetReadThreadCount(conf, addressMap == null ? 0 : addressMap.size());
-    this.buildConnector(locator, allocator, conf, socketOptions, commandFactory, transcoder);
+    this.buildConnector(locator, comparator, allocator, conf, socketOptions, commandFactory,
+        transcoder);
     if (stateListeners != null) {
       for (MemcachedClientStateListener stateListener : stateListeners) {
         this.addStateListener(stateListener);
@@ -824,6 +840,7 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
    * XMemcachedClient constructor.
    *
    * @param locator
+   * @param comparator
    * @param allocator
    * @param conf
    * @param commandFactory
@@ -834,8 +851,9 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
    * @throws IOException
    */
   @SuppressWarnings("unchecked")
-  XMemcachedClient(MemcachedSessionLocator locator, BufferAllocator allocator, Configuration conf,
-      Map<SocketOption, Object> socketOptions, CommandFactory commandFactory, Transcoder transcoder,
+  XMemcachedClient(MemcachedSessionLocator locator, MemcachedSessionComparator comparator,
+      BufferAllocator allocator, Configuration conf, Map<SocketOption, Object> socketOptions,
+      CommandFactory commandFactory, Transcoder transcoder,
       Map<InetSocketAddress, InetSocketAddress> addressMap, int[] weights,
       List<MemcachedClientStateListener> stateListeners, Map<InetSocketAddress, AuthInfo> infoMap,
       int poolSize, long connectTimeout, final String name, boolean failureMode)
@@ -862,7 +880,8 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
       throw new IllegalArgumentException("weights.length is less than addressList.size()");
     }
     this.optimiezeSetReadThreadCount(conf, addressMap == null ? 0 : addressMap.size());
-    this.buildConnector(locator, allocator, conf, socketOptions, commandFactory, transcoder);
+    this.buildConnector(locator, comparator, allocator, conf, socketOptions, commandFactory,
+        transcoder);
     if (stateListeners != null) {
       for (MemcachedClientStateListener stateListener : stateListeners) {
         this.addStateListener(stateListener);
@@ -932,8 +951,8 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
       throw new IllegalArgumentException("Empty address list");
     }
     BufferAllocator simpleBufferAllocator = new SimpleBufferAllocator();
-    this.buildConnector(new ArrayMemcachedSessionLocator(), simpleBufferAllocator,
-        XMemcachedClientBuilder.getDefaultConfiguration(),
+    this.buildConnector(new ArrayMemcachedSessionLocator(), new IndexMemcachedSessionComparator(),
+        simpleBufferAllocator, XMemcachedClientBuilder.getDefaultConfiguration(),
         XMemcachedClientBuilder.getDefaultSocketOptions(), cmdFactory, new SerializingTranscoder());
     this.start0();
     for (InetSocketAddress inetSocketAddress : addressList) {

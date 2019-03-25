@@ -24,6 +24,7 @@ import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.Future;
 import net.rubyeye.xmemcached.FlowControl;
+import net.rubyeye.xmemcached.MemcachedSessionComparator;
 import net.rubyeye.xmemcached.MemcachedSessionLocator;
 import net.rubyeye.xmemcached.buffer.BufferAllocator;
 import net.rubyeye.xmemcached.command.Command;
@@ -79,6 +80,8 @@ public interface Connector extends Controller {
   public void updateSessions();
 
   public void setSessionLocator(MemcachedSessionLocator sessionLocator);
+
+  public void setSessionComparator(MemcachedSessionComparator sessionComparator);
 
   /**
    * Make all connection sending a quit command to memcached
