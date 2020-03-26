@@ -1,0 +1,65 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.googlecode.xmemcached</groupId>
+    <artifactId>xmemcached-benchmarks</artifactId>
+    <version>2.4.7-SNAPSHOT</version>
+
+    <url>https://github.com/killme2008/xmemcached</url>
+
+
+    <dependencies>
+        <dependency>
+            <groupId>org.jfree</groupId>
+            <artifactId>jfreechart</artifactId>
+            <version>1.0.17</version>
+        </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>3.7</version>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-log4j12</artifactId>
+            <version>1.7.30</version>
+        </dependency>
+
+        <dependency>
+            <groupId>custom</groupId>
+            <artifactId>xmemcached</artifactId>
+            <version>1.2.6.1</version>
+            <scope>system</scope>
+            <systemPath>${basedir}/lib/xmemcached-1.2.6.1.jar</systemPath>
+        </dependency>
+        <dependency>
+            <groupId>custom</groupId>
+            <artifactId>spymemcached</artifactId>
+            <version>2.5</version>
+            <scope>system</scope>
+            <systemPath>${basedir}/lib/memcached-2.5.jar</systemPath>
+        </dependency>
+        <dependency>
+            <groupId>custom</groupId>
+            <artifactId>java-memcached</artifactId>
+            <version>2.5.1</version>
+            <scope>system</scope>
+            <systemPath>${basedir}/lib/java_memcached-release_2.5.1.jar</systemPath>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.8.1</version>
+                <configuration>
+                    <source>1.8</source>
+                    <target>1.8</target>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>
