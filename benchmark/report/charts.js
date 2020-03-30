@@ -1,11 +1,13 @@
 var filesToParse = [
     { file: './logs/memcachedjava251.log', label: 'Memcached JC 2.5.1' },
     { file: './logs/spymemcached25.log', label: 'SpyMemcached 2.5' },
-    { file: './logs/xmemcached1261.log', label: 'XMemcached 1.2.6.1' }
+    { file: './logs/xmemcached1261.log', label: 'XMemcached 1.2.6.1' },
+    { file: './logs/xmemcached200.log', label: 'XMemcached 2.0.0' },
+    { file: './logs/xmemcached246.log', label: 'XMemcached 2.4.6' }
 ];
 
 // expand if needed
-var colorArray = ['#3e95cd', '#8e5ea2', '#3cba9f', '#e8c3b9', '#e8c3b9'];
+var colorArray = ['#3e95cd', '#8e5ea2', '#3cba9f', '#e8c3b9', '#ffa600'];
 
 function makeChart(ctx, ds) {
     var chart = new Chart(ctx, {

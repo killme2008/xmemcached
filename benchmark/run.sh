@@ -20,5 +20,13 @@ java -server -Xms1G -Xmx1G -XX:NewSize=256m -XX:MaxNewSize=256m \
   -cp "./xmemcached1261/target/xmemcached1261.jar:./xmemcached1261/lib/*" \
   net.rubyeye.memcached.benchmark.xmemcached.Xmemcached
 
+java -server -Xms1G -Xmx1G -XX:NewSize=256m -XX:MaxNewSize=256m \
+  -cp "./xmemcached200/target/xmemcached200.jar" \
+  net.rubyeye.memcached.benchmark.xmemcached.Xmemcached
+
+java -server -Xms1G -Xmx1G -XX:NewSize=256m -XX:MaxNewSize=256m \
+  -cp "./xmemcached246/target/xmemcached246.jar" \
+  net.rubyeye.memcached.benchmark.xmemcached.Xmemcached
+
 cd ".."
 docker-compose kill

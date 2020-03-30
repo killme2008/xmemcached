@@ -19,6 +19,8 @@
         <module>memcachedjava251</module>
         <module>spymemcached25</module>
         <module>xmemcached1261</module>
+        <module>xmemcached200</module>
+        <module>xmemcached246</module>
     </modules>
 
     <build>
