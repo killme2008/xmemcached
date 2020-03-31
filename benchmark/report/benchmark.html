@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Performance Comparison between Java Memcached Client</title>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/5.15.0/d3.min.js"></script>
+    <link type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.min.css">
+</head>
+<body>
+<h1>Performance Comparison between Java Memcached Client</h1>
+
+<p style="text-align: justify;">There are several memcached client
+    for java,include <a href="http://code.google.com/p/spymemcached">spymemcached</a>,
+    &nbsp<a href="http://github.com/gwhalin/Memcached-Java-Client">Memcached-Java-Client</a> and <a
+            href="http://code.google.com/p/xmemcached/">Xmemcached</a> etc. The performance of the three open
+    source memcached client are presented here to help you make choice.</p>
+
+<h2>Test Environment</h2>
+
+<ul>
+    <li>Software
+        <ul>
+            <li>Dockerized Memcached Server 1.5.5</li>
+            <li>Java Client
+                <ul>
+                    <li>openjdk version 1.8.0_232</li>
+                    <li>All clients use memcached text protocol.
+                    <li>xmemcached 1.2.6.1,default configuration</li>
+                    <li>Spymemcached 2.5,default configuration</li>
+                    <li>Memcached-Java-Client 2.5.1,SockIOPool set minConn to 10 and maxConn to 500,Max idle time set to
+                        one hour,also set compress threshold to 16K.
+                    </li>
+                    <li>Xmemcached and Spymemcached is nio based.So they have to set operation timeout,both are set to
+                        five seconds.
+                    </li>
+                </ul>
+            </li>
+        </ul>
+    </li>
+    <li>Hardware
+        <ul>
+            <li>CPU: Intel(R) Core(TM) i7-9700K CPU @ 3.60GHz (8 core, 8 thread)</li>
+            <li>O/S: Mac OS X 10.15.2</li>
+            <li>RAM: 32 GB</li>
+        </ul>
+    </li>
+</ul>
+
+<h1>Test Result</h1>
+
+<h2>Part1 Compared by threads number</h2>
+
+<div class="chart-container" style="width:100%; max-width: 1000px;">
+    <canvas x="threads" y="tps" groupByField="valueLength" groupByValue="64"></canvas>
+    <br>
+    <canvas x="threads" y="tps" groupByField="valueLength" groupByValue="512"></canvas>
+    <br>
+    <canvas x="threads" y="tps" groupByField="valueLength" groupByValue="1024"></canvas>
+    <br>
+    <canvas x="threads" y="tps" groupByField="valueLength" groupByValue="4096"></canvas>
+    <br>
+    <canvas x="threads" y="tps" groupByField="valueLength" groupByValue="16384"></canvas>
+</div>
+
+<h2>Part2 Compared by value size</h2>
+
+<div class="chart-container" style="width:100%; max-width: 1000px;">
+    <canvas x="valueLength" y="tps" groupByField="threads" groupByValue="1"></canvas>
+    <br>
+    <canvas x="valueLength" y="tps" groupByField="threads" groupByValue="10"></canvas>
+    <br>
+    <canvas x="valueLength" y="tps" groupByField="threads" groupByValue="50"></canvas>
+    <br>
+    <canvas x="valueLength" y="tps" groupByField="threads" groupByValue="100"></canvas>
+    <br>
+    <canvas x="valueLength" y="tps" groupByField="threads" groupByValue="300"></canvas>
+</div>
+
+<h1>Running the Tests by Yourself</h1>
+
+<p>The test result should be always reproduceable. Please give me (<a
+        href='mailto:killme2008@gmail.com'>killme2008@gmail.com</a>) your feedback
+    to improve the accuracy of the test result. The full source code is
+    available at the GitHub repository:
+
+    <a href="https://github.com/killme2008/xmemcached">https://github.com/killme2008/xmemcached</a>
+</p>
+
+<script src="./charts.js"></script>
+</body>
+</html>
