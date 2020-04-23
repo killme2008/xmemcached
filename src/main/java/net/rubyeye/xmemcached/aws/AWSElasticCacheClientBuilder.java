@@ -96,11 +96,11 @@ public class AWSElasticCacheClientBuilder extends XMemcachedClientBuilder {
   @Override
   public AWSElasticCacheClient build() throws IOException {
 
-    AWSElasticCacheClient memcachedClient =
-        new AWSElasticCacheClient(this.sessionLocator, this.sessionComparator, this.bufferAllocator,
-            this.configuration, this.socketOptions, this.commandFactory, this.transcoder,
-            this.stateListeners, this.authInfoMap, this.connectionPoolSize, this.connectTimeout,
-            this.name, this.failureMode, configAddrs, this.pollConfigIntervalMs);
+    AWSElasticCacheClient memcachedClient = new AWSElasticCacheClient(this.sessionLocator,
+        this.sessionComparator, this.bufferAllocator, this.configuration, this.socketOptions,
+        this.commandFactory, this.transcoder, this.stateListeners, this.authInfoMap,
+        this.connectionPoolSize, this.connectTimeout, this.name, this.failureMode,
+        this.resolveInetAddresses, configAddrs, this.pollConfigIntervalMs);
     this.configureClient(memcachedClient);
 
     return memcachedClient;

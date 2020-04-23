@@ -15,6 +15,7 @@ public class InetSocketAddressWrapper {
   private volatile String remoteAddressStr;
   private volatile String hostName;
   private volatile String mainNodeHostName;
+  private boolean resolve;
   /**
    * Main memcached node address,if this is a main node,then this value is null.
    */
@@ -22,11 +23,17 @@ public class InetSocketAddressWrapper {
 
   public InetSocketAddressWrapper(InetSocketAddress inetSocketAddress, int order, int weight,
       InetSocketAddress mainNodeAddress) {
+    this(inetSocketAddress, order, weight, mainNodeAddress, true);
+  }
+
+  public InetSocketAddressWrapper(InetSocketAddress inetSocketAddress, int order, int weight,
+      InetSocketAddress mainNodeAddress, boolean resolve) {
     super();
     setInetSocketAddress(inetSocketAddress);
     setMainNodeAddress(mainNodeAddress);
     this.order = order;
     this.weight = weight;
+    this.resolve = resolve;
   }
 
   public String getRemoteAddressStr() {
@@ -38,7 +45,7 @@ public class InetSocketAddressWrapper {
   }
 
   public final InetSocketAddress getInetSocketAddress() {
-    if (ByteUtils.isValidString(this.hostName)) {
+    if (resolve && ByteUtils.isValidString(this.hostName)) {
       // If it has a hostName, we try to resolve it again.
       return new InetSocketAddress(this.hostName, this.inetSocketAddress.getPort());
     } else {
@@ -64,7 +71,7 @@ public class InetSocketAddressWrapper {
 
   private final void setInetSocketAddress(InetSocketAddress inetSocketAddress) {
     this.inetSocketAddress = inetSocketAddress;
-    if (inetSocketAddress != null) {
+    if (resolve && inetSocketAddress != null) {
       this.hostName = inetSocketAddress.getHostName();
     }
   }
@@ -82,7 +89,7 @@ public class InetSocketAddressWrapper {
   }
 
   public InetSocketAddress getMainNodeAddress() {
-    if (ByteUtils.isValidString(this.mainNodeHostName)) {
+    if (resolve && ByteUtils.isValidString(this.mainNodeHostName)) {
       return new InetSocketAddress(this.mainNodeHostName, this.mainNodeAddress.getPort());
     } else {
       return this.mainNodeAddress;
@@ -91,7 +98,7 @@ public class InetSocketAddressWrapper {
 
   private void setMainNodeAddress(InetSocketAddress mainNodeAddress) {
     this.mainNodeAddress = mainNodeAddress;
-    if (mainNodeAddress != null) {
+    if (resolve && mainNodeAddress != null) {
       this.mainNodeHostName = mainNodeAddress.getHostName();
     }
   }
