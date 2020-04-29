@@ -186,6 +186,13 @@ public interface MemcachedClient {
   public void removeServer(String hostList);
 
   /**
+   * Remove memcached server with the exact given address.
+   *
+   * @param address Resolved server address
+   */
+  public void removeServer(InetSocketAddress address);
+
+  /**
    * Set the nio's ByteBuffer Allocator,use SimpleBufferAllocator by default.
    *
    *

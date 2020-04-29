@@ -73,6 +73,20 @@ public class XMemcachedClientBuilder implements MemcachedClientBuilder {
 
   protected long opTimeout = MemcachedClient.DEFAULT_OP_TIMEOUT;
 
+  protected boolean resolveInetAddresses = true;
+
+  public boolean isResolveInetAddresses() {
+    return resolveInetAddresses;
+  }
+
+  public void setResolveInetAddresses(boolean resolveInetAddresses) {
+    this.resolveInetAddresses = resolveInetAddresses;
+  }
+
+  public void doNotResolveInetAddresses() {
+    this.resolveInetAddresses = false;
+  }
+
   public long getOpTimeout() {
     return opTimeout;
   }
@@ -345,10 +359,11 @@ public class XMemcachedClientBuilder implements MemcachedClientBuilder {
       }
     }
     if (this.weights == null) {
-      memcachedClient = new XMemcachedClient(this.sessionLocator, this.sessionComparator,
-          this.bufferAllocator, this.configuration, this.socketOptions, this.commandFactory,
-          this.transcoder, this.addressMap, this.stateListeners, this.authInfoMap,
-          this.connectionPoolSize, this.connectTimeout, this.name, this.failureMode);
+      memcachedClient =
+          new XMemcachedClient(this.sessionLocator, this.sessionComparator, this.bufferAllocator,
+              this.configuration, this.socketOptions, this.commandFactory, this.transcoder,
+              this.addressMap, this.stateListeners, this.authInfoMap, this.connectionPoolSize,
+              this.connectTimeout, this.name, this.failureMode, this.resolveInetAddresses);
 
     } else {
       if (this.addressMap == null) {
@@ -360,7 +375,8 @@ public class XMemcachedClientBuilder implements MemcachedClientBuilder {
       memcachedClient = new XMemcachedClient(this.sessionLocator, this.sessionComparator,
           this.bufferAllocator, this.configuration, this.socketOptions, this.commandFactory,
           this.transcoder, this.addressMap, this.weights, this.stateListeners, this.authInfoMap,
-          this.connectionPoolSize, this.connectTimeout, this.name, this.failureMode);
+          this.connectionPoolSize, this.connectTimeout, this.name, this.failureMode,
+          this.resolveInetAddresses);
     }
     this.configureClient(memcachedClient);
     return memcachedClient;

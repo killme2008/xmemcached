@@ -92,6 +92,7 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
   private long connectTimeout = DEFAULT_CONNECT_TIMEOUT;
   protected int connectionPoolSize = DEFAULT_CONNECTION_POOL_SIZE;
   protected int maxQueuedNoReplyOperations = DEFAULT_MAX_QUEUED_NOPS;
+  protected boolean resolveInetAddresses = true;
 
   protected final AtomicInteger serverOrderCount = new AtomicInteger();
 
@@ -355,7 +356,7 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
         new SerializingTranscoder());
     this.start0();
     this.connect(new InetSocketAddressWrapper(this.newSocketAddress(host, port),
-        this.serverOrderCount.incrementAndGet(), weight, null));
+        this.serverOrderCount.incrementAndGet(), weight, null, this.resolveInetAddresses));
   }
 
   protected InetSocketAddress newSocketAddress(final String server, final int port) {
@@ -394,7 +395,7 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
     }
     this.checkServerPort(server, port);
     this.connect(new InetSocketAddressWrapper(this.newSocketAddress(server, port),
-        this.serverOrderCount.incrementAndGet(), weight, null));
+        this.serverOrderCount.incrementAndGet(), weight, null, this.resolveInetAddresses));
   }
 
   /*
@@ -415,7 +416,7 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
       throw new IllegalArgumentException("weight<=0");
     }
     this.connect(new InetSocketAddressWrapper(inetSocketAddress,
-        this.serverOrderCount.incrementAndGet(), weight, null));
+        this.serverOrderCount.incrementAndGet(), weight, null, this.resolveInetAddresses));
   }
 
   /*
@@ -430,10 +431,10 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
         final InetSocketAddress mainNodeAddr = entry.getKey();
         final InetSocketAddress standbyNodeAddr = entry.getValue();
         this.connect(new InetSocketAddressWrapper(mainNodeAddr,
-            this.serverOrderCount.incrementAndGet(), 1, null));
+            this.serverOrderCount.incrementAndGet(), 1, null, this.resolveInetAddresses));
         if (standbyNodeAddr != null) {
           this.connect(new InetSocketAddressWrapper(standbyNodeAddr,
-              this.serverOrderCount.incrementAndGet(), 1, mainNodeAddr));
+              this.serverOrderCount.incrementAndGet(), 1, mainNodeAddr, this.resolveInetAddresses));
         }
       }
     }
@@ -455,10 +456,10 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
         final InetSocketAddress mainNodeAddr = entry.getKey();
         final InetSocketAddress standbyNodeAddr = entry.getValue();
         this.connect(new InetSocketAddressWrapper(mainNodeAddr,
-            this.serverOrderCount.incrementAndGet(), 1, null));
+            this.serverOrderCount.incrementAndGet(), 1, null, this.resolveInetAddresses));
         if (standbyNodeAddr != null) {
           this.connect(new InetSocketAddressWrapper(standbyNodeAddr,
-              this.serverOrderCount.incrementAndGet(), 1, mainNodeAddr));
+              this.serverOrderCount.incrementAndGet(), 1, mainNodeAddr, this.resolveInetAddresses));
         }
       }
     }
@@ -511,7 +512,12 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
 
   }
 
-  protected void removeAddr(InetSocketAddress address) {
+  /*
+   * (non-Javadoc)
+   *
+   * @see net.rubyeye.xmemcached.MemcachedClient#removeServer(java.net.InetSocketAddress)
+   */
+  public void removeServer(InetSocketAddress address) {
     // Close main sessions
     Queue<Session> sessionQueue = this.connector.getSessionByAddress(address);
     if (sessionQueue != null) {
@@ -765,7 +771,7 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
         XMemcachedClientBuilder.getDefaultSocketOptions(), cmdFactory, new SerializingTranscoder());
     this.start0();
     this.connect(new InetSocketAddressWrapper(inetSocketAddress,
-        this.serverOrderCount.incrementAndGet(), weight, null));
+        this.serverOrderCount.incrementAndGet(), weight, null, this.resolveInetAddresses));
   }
 
   public XMemcachedClient(final InetSocketAddress inetSocketAddress, int weight)
@@ -806,7 +812,8 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
       CommandFactory commandFactory, Transcoder transcoder,
       Map<InetSocketAddress, InetSocketAddress> addressMap,
       List<MemcachedClientStateListener> stateListeners, Map<InetSocketAddress, AuthInfo> map,
-      int poolSize, long connectTimeout, String name, boolean failureMode) throws IOException {
+      int poolSize, long connectTimeout, String name, boolean failureMode,
+      boolean resolveInetAddresses) throws IOException {
     super();
     this.setConnectTimeout(connectTimeout);
     this.setFailureMode(failureMode);
@@ -821,16 +828,17 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
     }
     this.setAuthInfoMap(map);
     this.setConnectionPoolSize(poolSize);
+    this.resolveInetAddresses = resolveInetAddresses;
     this.start0();
     if (addressMap != null) {
       for (Map.Entry<InetSocketAddress, InetSocketAddress> entry : addressMap.entrySet()) {
         final InetSocketAddress mainNodeAddr = entry.getKey();
         final InetSocketAddress standbyNodeAddr = entry.getValue();
         this.connect(new InetSocketAddressWrapper(mainNodeAddr,
-            this.serverOrderCount.incrementAndGet(), 1, null));
+            this.serverOrderCount.incrementAndGet(), 1, null, this.resolveInetAddresses));
         if (standbyNodeAddr != null) {
           this.connect(new InetSocketAddressWrapper(standbyNodeAddr,
-              this.serverOrderCount.incrementAndGet(), 1, mainNodeAddr));
+              this.serverOrderCount.incrementAndGet(), 1, mainNodeAddr, this.resolveInetAddresses));
         }
       }
     }
@@ -856,8 +864,8 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
       CommandFactory commandFactory, Transcoder transcoder,
       Map<InetSocketAddress, InetSocketAddress> addressMap, int[] weights,
       List<MemcachedClientStateListener> stateListeners, Map<InetSocketAddress, AuthInfo> infoMap,
-      int poolSize, long connectTimeout, final String name, boolean failureMode)
-      throws IOException {
+      int poolSize, long connectTimeout, final String name, boolean failureMode,
+      boolean resolveInetAddresses) throws IOException {
     super();
     this.setConnectTimeout(connectTimeout);
     this.setFailureMode(failureMode);
@@ -889,6 +897,7 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
     }
     this.setAuthInfoMap(infoMap);
     this.setConnectionPoolSize(poolSize);
+    this.resolveInetAddresses = resolveInetAddresses;
     this.start0();
     if (addressMap != null && weights != null) {
       int i = 0;
@@ -896,10 +905,11 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
         final InetSocketAddress mainNodeAddr = entry.getKey();
         final InetSocketAddress standbyNodeAddr = entry.getValue();
         this.connect(new InetSocketAddressWrapper(mainNodeAddr,
-            this.serverOrderCount.incrementAndGet(), weights[i], null));
+            this.serverOrderCount.incrementAndGet(), weights[i], null, this.resolveInetAddresses));
         if (standbyNodeAddr != null) {
-          this.connect(new InetSocketAddressWrapper(standbyNodeAddr,
-              this.serverOrderCount.incrementAndGet(), weights[i], mainNodeAddr));
+          this.connect(
+              new InetSocketAddressWrapper(standbyNodeAddr, this.serverOrderCount.incrementAndGet(),
+                  weights[i], mainNodeAddr, this.resolveInetAddresses));
         }
         i++;
       }
@@ -957,7 +967,7 @@ public class XMemcachedClient implements XMemcachedClientMBean, MemcachedClient 
     this.start0();
     for (InetSocketAddress inetSocketAddress : addressList) {
       this.connect(new InetSocketAddressWrapper(inetSocketAddress,
-          this.serverOrderCount.incrementAndGet(), 1, null));
+          this.serverOrderCount.incrementAndGet(), 1, null, this.resolveInetAddresses));
 
     }
   }

@@ -76,7 +76,7 @@ public class AWSElasticCacheClient extends XMemcachedClient implements ConfigUpd
     for (CacheNode node : addNodes) {
       try {
         this.connect(new InetSocketAddressWrapper(node.getInetSocketAddress(),
-            this.configPoller.getCacheNodeOrder(node), 1, null));
+            this.configPoller.getCacheNodeOrder(node), 1, null, this.resolveInetAddresses));
       } catch (IOException e) {
         log.error("Connect to " + node + "failed.", e);
       }
@@ -191,7 +191,7 @@ public class AWSElasticCacheClient extends XMemcachedClient implements ConfigUpd
         XMemcachedClientBuilder.getDefaultSocketOptions(), new TextCommandFactory(),
         new SerializingTranscoder(), (List<MemcachedClientStateListener>) Collections.EMPTY_LIST,
         (Map<InetSocketAddress, AuthInfo>) Collections.EMPTY_MAP, 1,
-        XMemcachedClient.DEFAULT_CONNECT_TIMEOUT, null, true, addrs, pollConfigIntervalMills);
+        XMemcachedClient.DEFAULT_CONNECT_TIMEOUT, null, true, true, addrs, pollConfigIntervalMills);
 
   }
 
@@ -210,10 +210,11 @@ public class AWSElasticCacheClient extends XMemcachedClient implements ConfigUpd
       CommandFactory commandFactory, Transcoder transcoder,
       List<MemcachedClientStateListener> stateListeners, Map<InetSocketAddress, AuthInfo> map,
       int poolSize, long connectTimeout, String name, boolean failureMode,
-      List<InetSocketAddress> configAddrs, long pollConfigIntervalMills) throws IOException {
+      boolean resolveInetAddresses, List<InetSocketAddress> configAddrs,
+      long pollConfigIntervalMills) throws IOException {
     super(locator, comparator, allocator, conf, socketOptions, commandFactory, transcoder,
         getAddressMapFromConfigAddrs(configAddrs), stateListeners, map, poolSize, connectTimeout,
-        name, failureMode);
+        name, failureMode, resolveInetAddresses);
     if (pollConfigIntervalMills <= 0) {
       throw new IllegalArgumentException("Invalid pollConfigIntervalMills value.");
     }
