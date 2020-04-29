@@ -75,6 +75,14 @@ public class XMemcachedClientBuilder implements MemcachedClientBuilder {
 
   protected boolean resolveInetAddresses = true;
 
+  public boolean isResolveInetAddresses() {
+    return resolveInetAddresses;
+  }
+
+  public void setResolveInetAddresses(boolean resolveInetAddresses) {
+    this.resolveInetAddresses = resolveInetAddresses;
+  }
+
   public void doNotResolveInetAddresses() {
     this.resolveInetAddresses = false;
   }
