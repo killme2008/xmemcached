@@ -33,10 +33,10 @@ import net.rubyeye.xmemcached.utils.InetSocketAddressWrapper;
 
 /**
  * AWS ElasticCache Client.
- * 
+ *
  * @since 2.3.0
  * @author dennis
- * 
+ *
  */
 public class AWSElasticCacheClient extends XMemcachedClient implements ConfigUpdateListener {
 
@@ -46,10 +46,10 @@ public class AWSElasticCacheClient extends XMemcachedClient implements ConfigUpd
 
   private List<InetSocketAddress> configAddrs = new ArrayList<InetSocketAddress>();
 
-  public synchronized void onUpdate(ClusterConfigration config) {
+  public synchronized void onUpdate(final ClusterConfigration config) {
 
-    if (firstTimeUpdate) {
-      firstTimeUpdate = false;
+    if (this.firstTimeUpdate) {
+      this.firstTimeUpdate = false;
       removeConfigAddrs();
     }
 
@@ -75,7 +75,7 @@ public class AWSElasticCacheClient extends XMemcachedClient implements ConfigUpd
     // Begin to update server list
     for (CacheNode node : addNodes) {
       try {
-        this.connect(new InetSocketAddressWrapper(node.getInetSocketAddress(),
+        connect(new InetSocketAddressWrapper(node.getInetSocketAddress(),
             this.configPoller.getCacheNodeOrder(node), 1, null, this.resolveInetAddresses));
       } catch (IOException e) {
         log.error("Connect to " + node + "failed.", e);
@@ -84,7 +84,7 @@ public class AWSElasticCacheClient extends XMemcachedClient implements ConfigUpd
 
     for (CacheNode node : removeNodes) {
       try {
-        this.removeAddr(node.getInetSocketAddress());
+        this.removeServer(node.getInetSocketAddress());
       } catch (Exception e) {
         log.error("Remove " + node + " failed.");
       }
@@ -95,9 +95,9 @@ public class AWSElasticCacheClient extends XMemcachedClient implements ConfigUpd
 
   private void removeConfigAddrs() {
     for (InetSocketAddress configAddr : this.configAddrs) {
-      this.removeAddr(configAddr);
-      while (this.getConnector().getSessionByAddress(configAddr) != null
-          && this.getConnector().getSessionByAddress(configAddr).size() > 0) {
+      this.removeServer(configAddr);
+      while (getConnector().getSessionByAddress(configAddr) != null
+          && getConnector().getSessionByAddress(configAddr).size() > 0) {
         try {
           Thread.sleep(10);
         } catch (InterruptedException e) {
@@ -116,34 +116,34 @@ public class AWSElasticCacheClient extends XMemcachedClient implements ConfigUpd
 
   /**
    * Construct an AWSElasticCacheClient instance with one config address and default poll interval.
-   * 
+   *
    * @since 2.3.0
    * @param addr config server address.
    * @throws IOException
    */
-  public AWSElasticCacheClient(InetSocketAddress addr) throws IOException {
+  public AWSElasticCacheClient(final InetSocketAddress addr) throws IOException {
     this(addr, DEFAULT_POLL_CONFIG_INTERVAL_MS);
   }
 
   /**
    * Construct an AWSElasticCacheClient instance with one config address and poll interval.
-   * 
+   *
    * @since 2.3.0
    * @param addr config server address.
    * @param pollConfigIntervalMills config poll interval in milliseconds.
    * @throws IOException
    */
-  public AWSElasticCacheClient(InetSocketAddress addr, long pollConfigIntervalMills)
+  public AWSElasticCacheClient(final InetSocketAddress addr, final long pollConfigIntervalMills)
       throws IOException {
     this(addr, pollConfigIntervalMills, new TextCommandFactory());
   }
 
-  public AWSElasticCacheClient(InetSocketAddress addr, long pollConfigIntervalMills,
-      CommandFactory cmdFactory) throws IOException {
+  public AWSElasticCacheClient(final InetSocketAddress addr, final long pollConfigIntervalMills,
+      final CommandFactory cmdFactory) throws IOException {
     this(asList(addr), pollConfigIntervalMills, cmdFactory);
   }
 
-  private static List<InetSocketAddress> asList(InetSocketAddress addr) {
+  private static List<InetSocketAddress> asList(final InetSocketAddress addr) {
     List<InetSocketAddress> addrs = new ArrayList<InetSocketAddress>();
     addrs.add(addr);
     return addrs;
@@ -152,31 +152,31 @@ public class AWSElasticCacheClient extends XMemcachedClient implements ConfigUpd
   /**
    * Construct an AWSElasticCacheClient instance with config server addresses and default config
    * poll interval.
-   * 
+   *
    * @since 2.3.0
    * @param addrs config server list.
    * @throws IOException
    */
-  public AWSElasticCacheClient(List<InetSocketAddress> addrs) throws IOException {
+  public AWSElasticCacheClient(final List<InetSocketAddress> addrs) throws IOException {
     this(addrs, DEFAULT_POLL_CONFIG_INTERVAL_MS);
   }
 
   /**
    * Construct an AWSElasticCacheClient instance with config server addresses.
-   * 
+   *
    * @since 2.3.0
    * @param addrs
    * @param pollConfigIntervalMills
    * @throws IOException
    */
-  public AWSElasticCacheClient(List<InetSocketAddress> addrs, long pollConfigIntervalMills)
-      throws IOException {
+  public AWSElasticCacheClient(final List<InetSocketAddress> addrs,
+      final long pollConfigIntervalMills) throws IOException {
     this(addrs, pollConfigIntervalMills, new TextCommandFactory());
   }
 
   /**
    * Construct an AWSElasticCacheClient instance with config server addresses.
-   * 
+   *
    * @since 2.3.0
    * @param addrs config server list.
    * @param pollConfigIntervalMills config poll interval in milliseconds.
@@ -184,19 +184,18 @@ public class AWSElasticCacheClient extends XMemcachedClient implements ConfigUpd
    * @throws IOException
    */
   @SuppressWarnings("unchecked")
-  public AWSElasticCacheClient(List<InetSocketAddress> addrs, long pollConfigIntervalMills,
-      CommandFactory commandFactory) throws IOException {
+  public AWSElasticCacheClient(final List<InetSocketAddress> addrs,
+      final long pollConfigIntervalMills, final CommandFactory commandFactory) throws IOException {
     this(new ArrayMemcachedSessionLocator(), new IndexMemcachedSessionComparator(),
         new SimpleBufferAllocator(), XMemcachedClientBuilder.getDefaultConfiguration(),
         XMemcachedClientBuilder.getDefaultSocketOptions(), new TextCommandFactory(),
-        new SerializingTranscoder(), (List<MemcachedClientStateListener>) Collections.EMPTY_LIST,
-        (Map<InetSocketAddress, AuthInfo>) Collections.EMPTY_MAP, 1,
+        new SerializingTranscoder(), Collections.EMPTY_LIST, Collections.EMPTY_MAP, 1,
         XMemcachedClient.DEFAULT_CONNECT_TIMEOUT, null, true, true, addrs, pollConfigIntervalMills);
 
   }
 
   private static Map<InetSocketAddress, InetSocketAddress> getAddressMapFromConfigAddrs(
-      List<InetSocketAddress> configAddrs) {
+      final List<InetSocketAddress> configAddrs) {
     Map<InetSocketAddress, InetSocketAddress> m =
         new HashMap<InetSocketAddress, InetSocketAddress>();
     for (InetSocketAddress addr : configAddrs) {
@@ -205,13 +204,15 @@ public class AWSElasticCacheClient extends XMemcachedClient implements ConfigUpd
     return m;
   }
 
-  AWSElasticCacheClient(MemcachedSessionLocator locator, MemcachedSessionComparator comparator,
-      BufferAllocator allocator, Configuration conf, Map<SocketOption, Object> socketOptions,
-      CommandFactory commandFactory, Transcoder transcoder,
-      List<MemcachedClientStateListener> stateListeners, Map<InetSocketAddress, AuthInfo> map,
-      int poolSize, long connectTimeout, String name, boolean failureMode,
-      boolean resolveInetAddresses, List<InetSocketAddress> configAddrs,
-      long pollConfigIntervalMills) throws IOException {
+  AWSElasticCacheClient(final MemcachedSessionLocator locator,
+      final MemcachedSessionComparator comparator, final BufferAllocator allocator,
+      final Configuration conf, final Map<SocketOption, Object> socketOptions,
+      final CommandFactory commandFactory, final Transcoder transcoder,
+      final List<MemcachedClientStateListener> stateListeners,
+      final Map<InetSocketAddress, AuthInfo> map, final int poolSize, final long connectTimeout,
+      final String name, final boolean failureMode, final boolean resolveInetAddresses,
+      final List<InetSocketAddress> configAddrs, final long pollConfigIntervalMills)
+      throws IOException {
     super(locator, comparator, allocator, conf, socketOptions, commandFactory, transcoder,
         getAddressMapFromConfigAddrs(configAddrs), stateListeners, map, poolSize, connectTimeout,
         name, failureMode, resolveInetAddresses);
@@ -220,7 +221,7 @@ public class AWSElasticCacheClient extends XMemcachedClient implements ConfigUpd
     }
     // Use failure mode by default.
     this.commandFactory = commandFactory;
-    this.setFailureMode(true);
+    setFailureMode(true);
     this.configAddrs = configAddrs;
     this.configPoller = new ConfigurationPoller(this, pollConfigIntervalMills);
     // Run at once to get config at startup.
@@ -237,7 +238,7 @@ public class AWSElasticCacheClient extends XMemcachedClient implements ConfigUpd
 
   /**
    * Get cluster config from cache node by network command.
-   * 
+   *
    * @return
    */
   public ClusterConfigration getConfig()
@@ -247,17 +248,17 @@ public class AWSElasticCacheClient extends XMemcachedClient implements ConfigUpd
 
   /**
    * Get config by key from cache node by network command.
-   * 
+   *
    * @since 2.3.0
    * @return clusetr config.
    */
-  public ClusterConfigration getConfig(String key)
+  public ClusterConfigration getConfig(final String key)
       throws MemcachedException, InterruptedException, TimeoutException {
     Command cmd = this.commandFactory.createAWSElasticCacheConfigCommand("get", key);
-    final Session session = this.sendCommand(cmd);
-    this.latchWait(cmd, opTimeout, session);
+    final Session session = sendCommand(cmd);
+    latchWait(cmd, this.opTimeout, session);
     cmd.getIoBuffer().free();
-    this.checkException(cmd);
+    checkException(cmd);
     String result = (String) cmd.getResult();
     if (result == null) {
       throw new MemcachedException("Operation fail,may be caused by networking or timeout");
@@ -279,7 +280,7 @@ public class AWSElasticCacheClient extends XMemcachedClient implements ConfigUpd
 
   /**
    * Get the current using configuration in memory.
-   * 
+   *
    * @since 2.3.0
    * @return current cluster config.
    */
