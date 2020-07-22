@@ -2,7 +2,6 @@ package net.rubyeye.xmemcached.test.unittest.impl;
 
 import static org.junit.Assert.*;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import net.rubyeye.xmemcached.HashAlgorithm;
 import net.rubyeye.xmemcached.impl.KetamaMemcachedSessionLocator;
