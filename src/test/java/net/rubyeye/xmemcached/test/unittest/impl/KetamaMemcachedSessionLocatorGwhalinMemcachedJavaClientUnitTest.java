@@ -2,6 +2,7 @@ package net.rubyeye.xmemcached.test.unittest.impl;
 
 import static org.junit.Assert.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import net.rubyeye.xmemcached.HashAlgorithm;
 import net.rubyeye.xmemcached.impl.KetamaMemcachedSessionLocator;
@@ -94,6 +95,33 @@ public class KetamaMemcachedSessionLocatorGwhalinMemcachedJavaClientUnitTest
     assertSame(session2, this.locator.getSessionByKey("a1"));
     assertSame(session3, this.locator.getSessionByKey("a2"));
     assertSame(session1, this.locator.getSessionByKey("a3"));
+  }
+
+  @Test
+  public void testGetSessionByKey_UseRemoteIPConsistent() {
+
+    ((KetamaMemcachedSessionLocator)locator).setUseRemoteIPConsistent(true);
+    MockMemcachedSession session1 = new MockMemcachedSession(8080);
+    MockMemcachedSession session2 = new MockMemcachedSession(8081);
+    MockMemcachedSession session3 = new MockMemcachedSession(8082);
+    List<Session> list = new ArrayList<Session>();
+    list.add(session1);
+    list.add(session2);
+    list.add(session3);
+    this.locator.updateSessions(list);
+
+    assertSame(session1, this.locator.getSessionByKey("a1"));
+    assertSame(session3, this.locator.getSessionByKey("a2"));
+    assertSame(session2, this.locator.getSessionByKey("a3"));
+
+    assertSame(session1, this.locator.getSessionByKey("a1"));
+    assertSame(session3, this.locator.getSessionByKey("a2"));
+    assertSame(session2, this.locator.getSessionByKey("a3"));
+
+    assertSame(session1, this.locator.getSessionByKey("a1"));
+    assertSame(session3, this.locator.getSessionByKey("a2"));
+    assertSame(session2, this.locator.getSessionByKey("a3"));
+
   }
 
 }

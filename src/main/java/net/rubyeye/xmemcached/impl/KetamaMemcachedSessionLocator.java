@@ -8,6 +8,9 @@
  */
 package net.rubyeye.xmemcached.impl;
 
+import java.net.Inet4Address;
+import java.net.Inet6Address;
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -54,6 +57,7 @@ public class KetamaMemcachedSessionLocator extends AbstractMemcachedSessionLocat
   static final int DEFAULT_PORT = 11211;
   private final boolean cwNginxUpstreamConsistent;
   private final boolean gwhalinMemcachedJavaClientCompatibiltyConsistent;
+  private boolean useRemoteIPConsistent = false;
 
   /**
    * Create a KetamaMemcachedSessionLocator with default config.
@@ -169,9 +173,17 @@ public class KetamaMemcachedSessionLocator extends AbstractMemcachedSessionLocat
         InetSocketAddressWrapper inetSocketAddressWrapper =
             memcachedSession.getInetSocketAddressWrapper();
         if (this.gwhalinMemcachedJavaClientCompatibiltyConsistent) {
-          sockStr = inetSocketAddressWrapper.getInetSocketAddress().getHostName() + ":"
+          String host = inetSocketAddressWrapper.getInetSocketAddress().getHostName();
+          if (this.useRemoteIPConsistent){
+            InetAddress inetAddress = inetSocketAddressWrapper.getInetSocketAddress().getAddress();
+            if (inetAddress instanceof Inet4Address) {
+              host = ((Inet4Address) inetAddress).getHostAddress();
+            } else {
+              host = ((Inet6Address) inetAddress).getHostAddress();
+            }
+          }
+          sockStr = host + ":"
               + inetSocketAddressWrapper.getInetSocketAddress().getPort();
-
         } else {
           // Always use the first time resolved address.
           sockStr = inetSocketAddressWrapper.getRemoteAddressStr();
@@ -247,5 +259,10 @@ public class KetamaMemcachedSessionLocator extends AbstractMemcachedSessionLocat
 
   public final void updateSessions(final Collection<Session> list) {
     this.buildMap(list, this.hashAlg);
+  }
+
+  public void setUseRemoteIPConsistent(boolean useRemoteIPConsistent) {
+
+    this.useRemoteIPConsistent = useRemoteIPConsistent;
   }
 }
