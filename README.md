@@ -24,7 +24,7 @@ Quick start:
 
 ## Contribute
 
-[Fork](https://github.com/killme2008/xmemcached#fork-destination-box) the source code and checkout it to your local machine.Make changes and create a pull request.
+[Fork](https://github.com/killme2008/xmemcached#fork-destination-box) the source code and checkout it to your local machine. Make changes and create a pull request.
 
 Use [docker](https://docs.docker.com/engine/installation/) and [docker-compose](https://docs.docker.com/compose/gettingstarted/) to setup test environment:
 
