@@ -55,6 +55,7 @@ import net.rubyeye.xmemcached.utils.Protocol;
  */
 public class Optimizer implements OptimizerMBean, MemcachedOptimizer {
 
+  private static final int MARGIN = 24;
   public static final int DEFAULT_MERGE_FACTOR = 32;
   private int mergeFactor = DEFAULT_MERGE_FACTOR; // default merge factor;
   private boolean optimiezeGet = true;
@@ -520,7 +521,7 @@ public class Optimizer implements OptimizerMBean, MemcachedOptimizer {
     currentCmd.setStatus(OperationStatus.WRITING);
     int totalBytes = currentCmd.getIoBuffer().remaining();
     commandCollector.visit(currentCmd);
-    while (mergeCount < this.mergeFactor && totalBytes <= sendBufferSize) {
+    while (mergeCount < this.mergeFactor && totalBytes + MARGIN < sendBufferSize) {
       Command nextCmd = (Command) writeQueue.peek();
       if (nextCmd == null) {
         break;
