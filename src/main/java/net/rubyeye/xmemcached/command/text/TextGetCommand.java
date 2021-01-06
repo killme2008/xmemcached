@@ -22,6 +22,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
+import com.google.code.yanf4j.buffer.IoBuffer;
 import net.rubyeye.xmemcached.command.AssocCommandAware;
 import net.rubyeye.xmemcached.command.Command;
 import net.rubyeye.xmemcached.command.CommandType;
@@ -31,16 +32,17 @@ import net.rubyeye.xmemcached.impl.MemcachedTCPSession;
 import net.rubyeye.xmemcached.monitor.Constants;
 import net.rubyeye.xmemcached.transcoders.CachedData;
 import net.rubyeye.xmemcached.utils.ByteUtils;
-import com.google.code.yanf4j.buffer.IoBuffer;
 
 /**
  * Abstract get command for text protocol
- * 
+ *
  * @author dennis
- * 
+ *
  */
 public abstract class TextGetCommand extends Command
     implements MergeCommandsAware, AssocCommandAware, MapReturnValueAware {
+  private static final char[] A_SPACE = new char[] {' '};
+  private static final char[] EMPTY_CHARS = new char[] {};
   protected Map<String, CachedData> returnValues;
   private String currentReturnKey;
   private int offset;
@@ -57,7 +59,7 @@ public abstract class TextGetCommand extends Command
     return this.mergeCommands;
   }
 
-  public final void setMergeCommands(Map<Object, Command> mergeCommands) {
+  public final void setMergeCommands(final Map<Object, Command> mergeCommands) {
     this.mergeCommands = mergeCommands;
   }
 
@@ -65,11 +67,12 @@ public abstract class TextGetCommand extends Command
     return this.assocCommands;
   }
 
-  public final void setAssocCommands(List<Command> assocCommands) {
+  public final void setAssocCommands(final List<Command> assocCommands) {
     this.assocCommands = assocCommands;
   }
 
-  public TextGetCommand(String key, byte[] keyBytes, CommandType cmdType, CountDownLatch latch) {
+  public TextGetCommand(final String key, final byte[] keyBytes, final CommandType cmdType,
+      final CountDownLatch latch) {
     super(key, keyBytes, cmdType, latch);
     this.returnValues = new HashMap<String, CachedData>(32);
   }
@@ -77,7 +80,7 @@ public abstract class TextGetCommand extends Command
   private ParseStatus parseStatus = ParseStatus.NULL;
 
   public static enum ParseStatus {
-    NULL, VALUE, KEY, FLAG, DATA_LEN, DATA_LEN_DONE, CAS, CAS_DONE, DATA, END
+    NULL, VALUE, KEY, FLAG, DATA_LEN, DATA_LEN_DONE, CAS, CAS_DONE, DATA
   }
 
   protected boolean wasFirst = true;
@@ -86,30 +89,30 @@ public abstract class TextGetCommand extends Command
     return this.parseStatus;
   }
 
-  public void setParseStatus(ParseStatus parseStatus) {
+  public void setParseStatus(final ParseStatus parseStatus) {
     this.parseStatus = parseStatus;
   }
 
   @Override
-  public final boolean decode(MemcachedTCPSession session, ByteBuffer buffer) {
+  public final boolean decode(final MemcachedTCPSession session, final ByteBuffer buffer) {
     while (true) {
       if (buffer == null || !buffer.hasRemaining()) {
         return false;
       }
       switch (this.parseStatus) {
-
         case NULL:
-          if (buffer.remaining() < 2)
+          if (buffer.remaining() < 2) {
             return false;
+          }
           int pos = buffer.position();
           byte first = buffer.get(pos);
           byte second = buffer.get(pos + 1);
           if (first == 'E' && second == 'N') {
-            this.parseStatus = ParseStatus.END;
             // dispatch result
             dispatch();
             this.currentReturnKey = null;
-            continue;
+            // END\r\n
+            return ByteUtils.stepBuffer(buffer, 5);
           } else if (first == 'V') {
             this.parseStatus = ParseStatus.VALUE;
             this.wasFirst = false;
@@ -117,9 +120,6 @@ public abstract class TextGetCommand extends Command
           } else {
             return decodeError(session, buffer);
           }
-        case END:
-          // END\r\n
-          return ByteUtils.stepBuffer(buffer, 5);
         case VALUE:
           // VALUE[SPACE]
           if (ByteUtils.stepBuffer(buffer, 6)) {
@@ -129,7 +129,7 @@ public abstract class TextGetCommand extends Command
             return false;
           }
         case KEY:
-          String item = getItem(buffer, ' ');
+          String item = getItem(buffer, ' ', EMPTY_CHARS);
           if (item == null) {
             return false;
           } else {
@@ -139,7 +139,7 @@ public abstract class TextGetCommand extends Command
             continue;
           }
         case FLAG:
-          item = getItem(buffer, ' ');
+          item = getItem(buffer, ' ', EMPTY_CHARS);
           if (item == null) {
             return false;
           } else {
@@ -149,7 +149,7 @@ public abstract class TextGetCommand extends Command
             continue;
           }
         case DATA_LEN:
-          item = getItem(buffer, '\r', ' ');
+          item = getItem(buffer, '\r', A_SPACE);
           if (item == null) {
             return false;
           } else {
@@ -179,7 +179,7 @@ public abstract class TextGetCommand extends Command
           }
         case CAS:
           // has cas value
-          item = getItem(buffer, '\r');
+          item = getItem(buffer, '\r', EMPTY_CHARS);
           if (item == null) {
             return false;
           } else {
@@ -241,7 +241,7 @@ public abstract class TextGetCommand extends Command
     }
   }
 
-  private String getItem(ByteBuffer buffer, char token, char... others) {
+  private String getItem(final ByteBuffer buffer, final char token, final char[] others) {
     int pos = buffer.position() + this.offset;
     final int limit = buffer.limit();
     for (; pos < limit; pos++) {
@@ -260,7 +260,10 @@ public abstract class TextGetCommand extends Command
     return null;
   }
 
-  private boolean isIn(byte b, char[] others) {
+  private boolean isIn(final byte b, final char[] others) {
+    if (others == EMPTY_CHARS) {
+      return false;
+    }
     for (int i = 0; i < others.length; i++) {
       if (b == others[i]) {
         return true;
@@ -269,7 +272,7 @@ public abstract class TextGetCommand extends Command
     return false;
   }
 
-  private String getString(byte[] keyBytes) {
+  private String getString(final byte[] keyBytes) {
     try {
       return new String(keyBytes, "utf-8");
     } catch (UnsupportedEncodingException e) {
@@ -279,14 +282,14 @@ public abstract class TextGetCommand extends Command
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see net.rubyeye.xmemcached.command.text.MapReturnValueAware#getReturnValues()
    */
   public final Map<String, CachedData> getReturnValues() {
     return this.returnValues;
   }
 
-  public final void setReturnValues(Map<String, CachedData> returnValues) {
+  public final void setReturnValues(final Map<String, CachedData> returnValues) {
     this.returnValues = returnValues;
   }
 

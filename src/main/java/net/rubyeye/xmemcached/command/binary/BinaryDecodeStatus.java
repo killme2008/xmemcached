@@ -18,10 +18,10 @@ package net.rubyeye.xmemcached.command.binary;
 
 /**
  * Binary protocol decode status.
- * 
+ *
  * @author dennis
- * 
+ *
  */
 public enum BinaryDecodeStatus {
-  NONE, READ_HEADER, READ_EXTRAS, READ_KEY, READ_VALUE, DONE, IGNORE
+  NONE, READ_EXTRAS, READ_KEY, READ_VALUE, DONE, IGNORE;
 }
