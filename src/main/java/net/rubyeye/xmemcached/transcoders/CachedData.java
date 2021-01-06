@@ -13,7 +13,8 @@ public final class CachedData {
   /**
    * Maximum data size allowed by memcached.
    */
-  public final static int MAX_SIZE = 1024 * 1024;
+  public final static int MAX_SIZE =
+      Integer.valueOf(System.getProperty("xmemcached.cached.data.size.max", "1048576"));
 
   protected int flag;
   protected long cas;
@@ -34,12 +35,12 @@ public final class CachedData {
     return this.size;
   }
 
-  public final void fillData(ByteBuffer buffer, int offset, int length) {
+  public final void fillData(final ByteBuffer buffer, final int offset, final int length) {
     buffer.get(this.data, offset, length);
     this.size += length;
   }
 
-  public final void fillData(ByteBuffer buffer, int length) {
+  public final void fillData(final ByteBuffer buffer, final int length) {
     buffer.get(this.data, this.size, length);
     this.size += length;
   }
@@ -48,11 +49,11 @@ public final class CachedData {
     return this.capacity;
   }
 
-  public final void setSize(int size) {
+  public final void setSize(final int size) {
     this.size = size;
   }
 
-  public final void setCapacity(int dataLen) {
+  public final void setCapacity(final int dataLen) {
     this.capacity = dataLen;
   }
 
@@ -60,11 +61,11 @@ public final class CachedData {
     return MAX_SIZE;
   }
 
-  public final void setFlag(int flags) {
+  public final void setFlag(final int flags) {
     this.flag = flags;
   }
 
-  public final void setData(byte[] data) {
+  public final void setData(final byte[] data) {
     if (data.length > this.capacity) {
       throw new IllegalArgumentException("Cannot cache data larger than 1MB (you tried to cache a "
           + data.length + " byte object)");
@@ -72,7 +73,7 @@ public final class CachedData {
     this.data = data;
   }
 
-  public final void setCas(long cas) {
+  public final void setCas(final long cas) {
     this.cas = cas;
   }
 
@@ -86,12 +87,12 @@ public final class CachedData {
 
   /**
    * Get a CachedData instance for the given flags and byte array.
-   * 
+   *
    * @param f the flags
    * @param d the data
    * @param capacity the maximum allowable size.
    */
-  public CachedData(int f, byte[] d, int capacity, long casId) {
+  public CachedData(final int f, final byte[] d, final int capacity, final long casId) {
     super();
     this.capacity = capacity;
     this.size = d != null ? d.length : 0;
@@ -106,11 +107,11 @@ public final class CachedData {
 
   /**
    * Get a CachedData instance for the given flags and byte array.
-   * 
+   *
    * @param f the flags
    * @param d the data
    */
-  public CachedData(int f, byte[] d) {
+  public CachedData(final int f, final byte[] d) {
     this(f, d, MAX_SIZE, -1);
   }
 
