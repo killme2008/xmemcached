@@ -55,7 +55,7 @@ import net.rubyeye.xmemcached.utils.Protocol;
  */
 public class Optimizer implements OptimizerMBean, MemcachedOptimizer {
 
-  public static final int DEFAULT_MERGE_FACTOR = 50;
+  public static final int DEFAULT_MERGE_FACTOR = 32;
   private int mergeFactor = DEFAULT_MERGE_FACTOR; // default merge factor;
   private boolean optimiezeGet = true;
   private final boolean optimiezeSet = true;
