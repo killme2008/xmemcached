@@ -46,7 +46,7 @@ public class AWSElasticCacheClient extends XMemcachedClient implements ConfigUpd
 
   private List<InetSocketAddress> configAddrs = new ArrayList<InetSocketAddress>();
 
-  public synchronized void onUpdate(final ClusterConfigration config) {
+  public synchronized void onUpdate(final ClusterConfiguration config) {
 
     if (this.firstTimeUpdate) {
       this.firstTimeUpdate = false;
@@ -234,14 +234,14 @@ public class AWSElasticCacheClient extends XMemcachedClient implements ConfigUpd
     this.configPoller.start();
   }
 
-  private volatile ClusterConfigration currentClusterConfiguration;
+  private volatile ClusterConfiguration currentClusterConfiguration;
 
   /**
    * Get cluster config from cache node by network command.
    *
    * @return
    */
-  public ClusterConfigration getConfig()
+  public ClusterConfiguration getConfig()
       throws MemcachedException, InterruptedException, TimeoutException {
     return this.getConfig("cluster");
   }
@@ -252,7 +252,7 @@ public class AWSElasticCacheClient extends XMemcachedClient implements ConfigUpd
    * @since 2.3.0
    * @return clusetr config.
    */
-  public ClusterConfigration getConfig(final String key)
+  public ClusterConfiguration getConfig(final String key)
       throws MemcachedException, InterruptedException, TimeoutException {
     Command cmd = this.commandFactory.createAWSElasticCacheConfigCommand("get", key);
     final Session session = sendCommand(cmd);
@@ -284,7 +284,7 @@ public class AWSElasticCacheClient extends XMemcachedClient implements ConfigUpd
    * @since 2.3.0
    * @return current cluster config.
    */
-  public ClusterConfigration getCurrentConfig() {
+  public ClusterConfiguration getCurrentConfig() {
     return this.currentClusterConfiguration;
   }
 }

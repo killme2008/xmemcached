@@ -13,5 +13,5 @@ public interface ConfigUpdateListener {
    * 
    * @param config the new config
    */
-  public void onUpdate(ClusterConfigration config);
+  public void onUpdate(ClusterConfiguration config);
 }

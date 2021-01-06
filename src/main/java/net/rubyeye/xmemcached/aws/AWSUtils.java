@@ -20,7 +20,7 @@ public class AWSUtils {
    * @param line
    * @return
    */
-  public static ClusterConfigration parseConfiguration(String line) {
+  public static ClusterConfiguration parseConfiguration(String line) {
     String[] lines = line.trim().split("(?:\\r?\\n)");
     if (lines.length < 2) {
       throw new IllegalArgumentException("Incorrect config response:" + line);
@@ -52,7 +52,7 @@ public class AWSUtils {
       nodeList.add(new CacheNode(hostName, ipAddress, port));
     }
 
-    return new ClusterConfigration(version, nodeList);
+    return new ClusterConfiguration(version, nodeList);
 
   }
 

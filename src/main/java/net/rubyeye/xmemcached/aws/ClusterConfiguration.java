@@ -9,7 +9,7 @@ import java.util.List;
  * @author dennis
  * 
  */
-public class ClusterConfigration implements Serializable {
+public class ClusterConfiguration implements Serializable {
 
   private static final long serialVersionUID = 6809891639636689050L;
 
@@ -32,13 +32,13 @@ public class ClusterConfigration implements Serializable {
   private int version;
   private List<CacheNode> nodeList;
 
-  public ClusterConfigration(int version, List<CacheNode> nodeList) {
+  public ClusterConfiguration(int version, List<CacheNode> nodeList) {
     super();
     this.version = version;
     this.nodeList = nodeList;
   }
 
-  public ClusterConfigration() {
+  public ClusterConfiguration() {
     super();
   }
 

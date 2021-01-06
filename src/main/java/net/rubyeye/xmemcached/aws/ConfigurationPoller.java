@@ -23,7 +23,7 @@ public class ConfigurationPoller implements Runnable {
    * 
    * @return
    */
-  public ClusterConfigration getClusterConfiguration() {
+  public ClusterConfiguration getClusterConfiguration() {
     return clusterConfigration;
   }
 
@@ -53,7 +53,7 @@ public class ConfigurationPoller implements Runnable {
 
   private ScheduledExecutorService scheduledExecutorService;
 
-  private volatile ClusterConfigration clusterConfigration = null;
+  private volatile ClusterConfiguration clusterConfigration = null;
 
   public ConfigurationPoller(AWSElasticCacheClient client, long pollIntervalMills) {
     super();
@@ -83,9 +83,9 @@ public class ConfigurationPoller implements Runnable {
 
   public void run() {
     try {
-      ClusterConfigration newConfig = this.client.getConfig();
+      ClusterConfiguration newConfig = this.client.getConfig();
       if (newConfig != null) {
-        ClusterConfigration currentConfig = this.clusterConfigration;
+        ClusterConfiguration currentConfig = this.clusterConfigration;
         if (currentConfig == null) {
           this.clusterConfigration = newConfig;
         } else {

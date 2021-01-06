@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Properties;
 import net.rubyeye.xmemcached.aws.AWSElasticCacheClient;
 import net.rubyeye.xmemcached.aws.AWSElasticCacheClientBuilder;
-import net.rubyeye.xmemcached.aws.ClusterConfigration;
+import net.rubyeye.xmemcached.aws.ClusterConfiguration;
 import net.rubyeye.xmemcached.utils.AddrUtil;
 import org.junit.Test;
 import com.google.code.yanf4j.core.Session;
@@ -99,7 +99,7 @@ public class AWSElasticCacheClientIT extends TestCase {
 
     try {
       AWSElasticCacheClient client = new AWSElasticCacheClient(new InetSocketAddress(2271));
-      ClusterConfigration config = client.getCurrentConfig();
+      ClusterConfiguration config = client.getCurrentConfig();
       assertEquals(config.getVersion(), version);
       assertEquals(addresses.size(), config.getNodeList().size());
 
@@ -124,7 +124,7 @@ public class AWSElasticCacheClientIT extends TestCase {
       builder.setConnectionPoolSize(2);
       builder.setEnableHealSession(false);
       AWSElasticCacheClient client = builder.build();
-      ClusterConfigration config = client.getCurrentConfig();
+      ClusterConfiguration config = client.getCurrentConfig();
       assertEquals(config.getVersion(), version);
       assertEquals(addresses.size(), config.getNodeList().size());
 
@@ -150,7 +150,7 @@ public class AWSElasticCacheClientIT extends TestCase {
 
     try {
       AWSElasticCacheClient client = new AWSElasticCacheClient(new InetSocketAddress(2271), 3000);
-      ClusterConfigration config = client.getCurrentConfig();
+      ClusterConfiguration config = client.getCurrentConfig();
       assertEquals(config.getVersion(), version);
       assertEquals(1, config.getNodeList().size());
       assertEquals(2272, config.getNodeList().get(0).getPort());
