@@ -4,9 +4,9 @@ import java.net.InetSocketAddress;
 
 /**
  * InetSocketAddress wrapper,encapsulate an order number.
- * 
+ *
  * @author dennis
- * 
+ *
  */
 public class InetSocketAddressWrapper {
   private volatile InetSocketAddress inetSocketAddress;
@@ -29,11 +29,11 @@ public class InetSocketAddressWrapper {
   public InetSocketAddressWrapper(InetSocketAddress inetSocketAddress, int order, int weight,
       InetSocketAddress mainNodeAddress, boolean resolve) {
     super();
+    this.resolve = resolve;
     setInetSocketAddress(inetSocketAddress);
     setMainNodeAddress(mainNodeAddress);
     this.order = order;
     this.weight = weight;
-    this.resolve = resolve;
   }
 
   public String getRemoteAddressStr() {
