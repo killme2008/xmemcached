@@ -68,21 +68,21 @@ public final class XMemcachedMbeanServer {
     if (mbserver != null && connectorServer != null && connectorServer.isActive()) {
       return;
     }
-    // 鍒涘缓MBServer
-    String hostName = null;
-    try {
-      InetAddress addr = InetAddress.getLocalHost();
-
-      hostName = addr.getHostName();
-    } catch (IOException e) {
-      log.error("Get HostName Error", e);
-      hostName = "localhost";
-    }
-    String host = System.getProperty("hostName", hostName);
     try {
       boolean enableJMX =
           Boolean.parseBoolean(System.getProperty(Constants.XMEMCACHED_JMX_ENABLE, "false"));
       if (enableJMX) {
+        // 鍒涘缓MBServer
+        String hostName = null;
+        try {
+          InetAddress addr = InetAddress.getLocalHost();
+
+          hostName = addr.getHostName();
+        } catch (IOException e) {
+          log.error("Get HostName Error", e);
+          hostName = "localhost";
+        }
+        String host = System.getProperty("hostName", hostName);
         mbserver = ManagementFactory.getPlatformMBeanServer();
         int port = Integer.parseInt(System.getProperty(Constants.XMEMCACHED_RMI_PORT, "7077"));
         String rmiName = System.getProperty(Constants.XMEMCACHED_RMI_NAME, "xmemcachedServer");
