@@ -29,6 +29,8 @@ import net.rubyeye.xmemcached.MemcachedSessionComparator;
 import net.rubyeye.xmemcached.MemcachedSessionLocator;
 import net.rubyeye.xmemcached.XMemcachedClientBuilder;
 import net.rubyeye.xmemcached.auth.AuthInfo;
+import net.rubyeye.xmemcached.aws.AWSElasticCacheClient;
+import net.rubyeye.xmemcached.aws.AWSElasticCacheClientBuilder;
 import net.rubyeye.xmemcached.buffer.BufferAllocator;
 import net.rubyeye.xmemcached.buffer.SimpleBufferAllocator;
 import net.rubyeye.xmemcached.command.TextCommandFactory;
@@ -52,6 +54,7 @@ public class XMemcachedClientFactoryBean implements FactoryBean {
   private MemcachedSessionComparator sessionComparator = new IndexMemcachedSessionComparator();
   private BufferAllocator bufferAllocator = new SimpleBufferAllocator();
   private String servers;
+  private String autoDiscoveryServers;
   private List<Integer> weights;
   @SuppressWarnings("unchecked")
   private Transcoder transcoder = new SerializingTranscoder();
@@ -81,6 +84,8 @@ public class XMemcachedClientFactoryBean implements FactoryBean {
   private boolean enableHealSession = true;
 
   private int timeoutExceptionThreshold = MemcachedClient.DEFAULT_MAX_TIMEOUTEXCEPTION_THRESHOLD;
+
+  private long pollConfigIntervalMs = AWSElasticCacheClient.DEFAULT_POLL_CONFIG_INTERVAL_MS;
 
   public int getTimeoutExceptionThreshold() {
     return timeoutExceptionThreshold;
@@ -239,14 +244,28 @@ public class XMemcachedClientFactoryBean implements FactoryBean {
 
   public Object getObject() throws Exception {
     this.checkAttribute();
-    Map<InetSocketAddress, InetSocketAddress> serverMap = this.getServerMap();
-    int[] weightsArray = this.getWeightsArray(serverMap);
-    MemcachedClientBuilder builder = this.newBuilder(serverMap, weightsArray);
+    MemcachedClientBuilder builder = this.newBuilder();
     this.configBuilder(builder);
     this.memcachedClient = builder.build();
     this.memcachedClient.setOpTimeout(opTimeout);
     this.memcachedClient.setTimeoutExceptionThreshold(timeoutExceptionThreshold);
     return this.memcachedClient;
+  }
+
+  private MemcachedClientBuilder newBuilder() {
+    if (this.autoDiscoveryServers == null) {
+      Map<InetSocketAddress, InetSocketAddress> serverMap = this.getServerMap();
+      int[] weightsArray = this.getWeightsArray(serverMap);
+      return this.newBuilder(serverMap, weightsArray);
+    } else {
+      return this.newBuilder(this.autoDiscoveryServers);
+    }
+  }
+
+  private AWSElasticCacheClientBuilder newBuilder(String autoDiscoveryServers) {
+    AWSElasticCacheClientBuilder builder = new AWSElasticCacheClientBuilder(autoDiscoveryServers);
+    builder.setPollConfigIntervalMs(this.pollConfigIntervalMs);
+    return builder;
   }
 
   private MemcachedClientBuilder newBuilder(Map<InetSocketAddress, InetSocketAddress> serverMap,
@@ -347,4 +366,11 @@ public class XMemcachedClientFactoryBean implements FactoryBean {
     this.connectTimeout = connectTimeout;
   }
 
+  public long getPollConfigIntervalMs() {
+    return pollConfigIntervalMs;
+  }
+
+  public void setPollConfigIntervalMs(long pollConfigIntervalMs) {
+    this.pollConfigIntervalMs = pollConfigIntervalMs;
+  }
 }
