@@ -1,4 +1,4 @@
-package net.rubyeye.xmemcached.aws;
+package net.rubyeye.xmemcached.autodiscovery;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -11,7 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * AWS ElastiCache configuration poller
+ * Auto Discovery configuration poller
  * 
  * @author dennis
  * 
@@ -47,7 +47,7 @@ public class ConfigurationPoller implements Runnable {
 
   private static final Logger log = LoggerFactory.getLogger(ConfigurationPoller.class);
 
-  private final AWSElasticCacheClient client;
+  private final AutoDiscoveryCacheClient client;
 
   private final long pollIntervalMills;
 
@@ -55,14 +55,14 @@ public class ConfigurationPoller implements Runnable {
 
   private volatile ClusterConfiguration clusterConfigration = null;
 
-  public ConfigurationPoller(AWSElasticCacheClient client, long pollIntervalMills) {
+  public ConfigurationPoller(AutoDiscoveryCacheClient client, long pollIntervalMills) {
     super();
     this.client = client;
     this.pollIntervalMills = pollIntervalMills;
     this.scheduledExecutorService = Executors.newSingleThreadScheduledExecutor(new ThreadFactory() {
 
       public Thread newThread(Runnable r) {
-        Thread t = new Thread(r, "AWSElasticCacheConfigPoller");
+        Thread t = new Thread(r, "AutoDiscoveryCacheConfigPoller");
         t.setDaemon(true);
         if (t.getPriority() != Thread.NORM_PRIORITY) {
           t.setPriority(Thread.NORM_PRIORITY);

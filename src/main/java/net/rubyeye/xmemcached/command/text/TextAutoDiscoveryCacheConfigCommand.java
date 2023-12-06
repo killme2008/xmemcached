@@ -10,23 +10,28 @@ import net.rubyeye.xmemcached.networking.MemcachedSession;
 import net.rubyeye.xmemcached.utils.ByteUtils;
 
 /**
- * AWS ElasticCache config command, see <a href=
- * "http://docs.aws.amazon.com/AmazonElastiCache/latest/UserGuide/AutoDiscovery.AddingToYourClientLibrary.html"
- * >Adding Auto Discovery To Your Client Library</a>. Only supports Cache Engine version 1.4.14 or
- * higher.
+ * AWS ElasticCache and GCP Auto Discovery config command.
+ *
+ * @see <a href=
+ *      "http://docs.aws.amazon.com/AmazonElastiCache/latest/UserGuide/AutoDiscovery.AddingToYourClientLibrary.html">Adding
+ *      AWS Auto Discovery To Your Client Library</a>
+ * @see <a href=
+ *      "https://cloud.google.com/memorystore/docs/memcached/about-auto-discovery">Adding
+ *      GCP Auto Discovery To Your Client Library</a>
+ * Only supports Cache Engine version 1.4.14 or higher.
  * 
  * @author dennis
  * 
  */
-public class TextAWSElasticCacheConfigCommand extends Command {
+public class TextAutoDiscoveryCacheConfigCommand extends Command {
 
   private String key;
 
   private String subCommand;
 
-  public TextAWSElasticCacheConfigCommand(final CountDownLatch latch, String subCommand,
+  public TextAutoDiscoveryCacheConfigCommand(final CountDownLatch latch, String subCommand,
       String key) {
-    super(subCommand + key, CommandType.AWS_CONFIG, latch);
+    super(subCommand + key, CommandType.AUTO_DISCOVERY_CONFIG, latch);
     this.key = key;
     this.subCommand = subCommand;
     this.result = new StringBuilder();

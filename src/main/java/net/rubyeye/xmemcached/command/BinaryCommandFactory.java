@@ -9,7 +9,7 @@ import java.util.concurrent.CountDownLatch;
 import net.rubyeye.xmemcached.CommandFactory;
 import net.rubyeye.xmemcached.buffer.BufferAllocator;
 import net.rubyeye.xmemcached.buffer.SimpleBufferAllocator;
-import net.rubyeye.xmemcached.command.binary.BinaryAWSElasticCacheConfigCommand;
+import net.rubyeye.xmemcached.command.binary.BinaryAutoDiscoveryCacheConfigCommand;
 import net.rubyeye.xmemcached.command.binary.BinaryAppendPrependCommand;
 import net.rubyeye.xmemcached.command.binary.BinaryAuthListMechanismsCommand;
 import net.rubyeye.xmemcached.command.binary.BinaryAuthStartCommand;
@@ -42,8 +42,8 @@ import com.google.code.yanf4j.buffer.IoBuffer;
 @SuppressWarnings("unchecked")
 public class BinaryCommandFactory implements CommandFactory {
 
-  public Command createAWSElasticCacheConfigCommand(String subCommand, String key) {
-    return new BinaryAWSElasticCacheConfigCommand(new CountDownLatch(1), subCommand, key);
+  public Command createAutoDiscoveryCacheConfigCommand(String subCommand, String key) {
+    return new BinaryAutoDiscoveryCacheConfigCommand(new CountDownLatch(1), subCommand, key);
   }
 
   private BufferAllocator bufferAllocator = new SimpleBufferAllocator();

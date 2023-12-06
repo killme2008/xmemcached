@@ -23,17 +23,17 @@ import net.rubyeye.xmemcached.transcoders.CachedData;
 import net.rubyeye.xmemcached.utils.ByteUtils;
 
 /**
- * AWS ElasticCache config command
+ * Auto Discovery config command
  * 
  * @author dennis
  * 
  */
-public class BinaryAWSElasticCacheConfigCommand extends BaseBinaryCommand {
+public class BinaryAutoDiscoveryCacheConfigCommand extends BaseBinaryCommand {
 
-  public BinaryAWSElasticCacheConfigCommand(final CountDownLatch latch, String subCommand,
+  public BinaryAutoDiscoveryCacheConfigCommand(final CountDownLatch latch, String subCommand,
       String key) {
-    super(key, ByteUtils.getBytes(key), CommandType.AWS_CONFIG, latch, 0, 0, latch, false, null);
-    this.commandType = CommandType.AWS_CONFIG;
+    super(key, ByteUtils.getBytes(key), CommandType.AUTO_DISCOVERY_CONFIG, latch, 0, 0, latch, false, null);
+    this.commandType = CommandType.AUTO_DISCOVERY_CONFIG;
     if (subCommand.equals("get")) {
       this.opCode = OpCode.CONFIG_GET;
     } else if (subCommand.equals("set")) {

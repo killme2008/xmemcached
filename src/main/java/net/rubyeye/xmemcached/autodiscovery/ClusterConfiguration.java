@@ -1,4 +1,4 @@
-package net.rubyeye.xmemcached.aws;
+package net.rubyeye.xmemcached.autodiscovery;
 
 import java.io.Serializable;
 import java.util.List;

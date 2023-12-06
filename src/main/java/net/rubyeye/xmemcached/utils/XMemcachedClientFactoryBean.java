@@ -29,8 +29,8 @@ import net.rubyeye.xmemcached.MemcachedSessionComparator;
 import net.rubyeye.xmemcached.MemcachedSessionLocator;
 import net.rubyeye.xmemcached.XMemcachedClientBuilder;
 import net.rubyeye.xmemcached.auth.AuthInfo;
-import net.rubyeye.xmemcached.aws.AWSElasticCacheClient;
-import net.rubyeye.xmemcached.aws.AWSElasticCacheClientBuilder;
+import net.rubyeye.xmemcached.autodiscovery.AutoDiscoveryCacheClient;
+import net.rubyeye.xmemcached.autodiscovery.AutoDiscoveryCacheClientBuilder;
 import net.rubyeye.xmemcached.buffer.BufferAllocator;
 import net.rubyeye.xmemcached.buffer.SimpleBufferAllocator;
 import net.rubyeye.xmemcached.command.TextCommandFactory;
@@ -85,7 +85,7 @@ public class XMemcachedClientFactoryBean implements FactoryBean {
 
   private int timeoutExceptionThreshold = MemcachedClient.DEFAULT_MAX_TIMEOUTEXCEPTION_THRESHOLD;
 
-  private long pollConfigIntervalMs = AWSElasticCacheClient.DEFAULT_POLL_CONFIG_INTERVAL_MS;
+  private long pollConfigIntervalMs = AutoDiscoveryCacheClient.DEFAULT_POLL_CONFIG_INTERVAL_MS;
 
   public int getTimeoutExceptionThreshold() {
     return timeoutExceptionThreshold;
@@ -262,8 +262,8 @@ public class XMemcachedClientFactoryBean implements FactoryBean {
     }
   }
 
-  private AWSElasticCacheClientBuilder newBuilder(String autoDiscoveryServers) {
-    AWSElasticCacheClientBuilder builder = new AWSElasticCacheClientBuilder(autoDiscoveryServers);
+  private AutoDiscoveryCacheClientBuilder newBuilder(String autoDiscoveryServers) {
+    AutoDiscoveryCacheClientBuilder builder = new AutoDiscoveryCacheClientBuilder(autoDiscoveryServers);
     builder.setPollConfigIntervalMs(this.pollConfigIntervalMs);
     return builder;
   }

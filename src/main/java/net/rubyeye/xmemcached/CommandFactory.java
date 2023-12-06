@@ -269,16 +269,20 @@ public interface CommandFactory {
       CountDownLatch latch, int exp, boolean noreply);
 
   /**
-   * Create a AWS ElasticCache config command, only supports Cache Engine Version 1.4.14 or Higher.
+   * Create a Auto discovery config command, only supports Cache Engine Version 1.4.14 or Higher.
+   * This method works the same for both AWS and GCP Auto Discovery.
    * 
    * @see <a href=
    *      "http://docs.aws.amazon.com/AmazonElastiCache/latest/UserGuide/AutoDiscovery.AddingToYourClientLibrary.html">Adding
-   *      Auto Discovery To Your Client Library</a>
+   *      AWS Auto Discovery To Your Client Library</a>
+   * @see <a href=
+   *      "https://cloud.google.com/memorystore/docs/memcached/use-auto-discovery">Adding
+   *      GCP Auto Discovery To Your Client Library</a>
    * @param subCommand
    * @param key
    * @return
    */
-  public Command createAWSElasticCacheConfigCommand(String subCommand, String key);
+  public Command createAutoDiscoveryCacheConfigCommand(String subCommand, String key);
 
   /**
    * Get this client's protocol version

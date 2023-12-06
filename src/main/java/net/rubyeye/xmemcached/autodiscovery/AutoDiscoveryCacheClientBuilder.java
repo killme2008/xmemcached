@@ -1,4 +1,4 @@
-package net.rubyeye.xmemcached.aws;
+package net.rubyeye.xmemcached.autodiscovery;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -8,12 +8,12 @@ import net.rubyeye.xmemcached.XMemcachedClientBuilder;
 import net.rubyeye.xmemcached.utils.AddrUtil;
 
 /**
- * AWSElasticCacheClient builder.
+ * AutoDiscoveryCacheClient builder.
  * 
  * @author dennis
  * 
  */
-public class AWSElasticCacheClientBuilder extends XMemcachedClientBuilder {
+public class AutoDiscoveryCacheClientBuilder extends XMemcachedClientBuilder {
 
   /**
    * Returns pollConfigIntervalMs.
@@ -53,7 +53,7 @@ public class AWSElasticCacheClientBuilder extends XMemcachedClientBuilder {
 
   private List<InetSocketAddress> configAddrs;
 
-  private long pollConfigIntervalMs = AWSElasticCacheClient.DEFAULT_POLL_CONFIG_INTERVAL_MS;
+  private long pollConfigIntervalMs = AutoDiscoveryCacheClient.DEFAULT_POLL_CONFIG_INTERVAL_MS;
 
   /**
    * Create a builder with an initial ElasticCache server list string in the form of "host:port
@@ -61,7 +61,7 @@ public class AWSElasticCacheClientBuilder extends XMemcachedClientBuilder {
    * 
    * @param serverList server list string in the form of "host:port host2:port"
    */
-  public AWSElasticCacheClientBuilder(String serverList) {
+  public AutoDiscoveryCacheClientBuilder(String serverList) {
     this(AddrUtil.getAddresses(serverList));
   }
 
@@ -70,7 +70,7 @@ public class AWSElasticCacheClientBuilder extends XMemcachedClientBuilder {
    * 
    * @param addr
    */
-  public AWSElasticCacheClientBuilder(InetSocketAddress addr) {
+  public AutoDiscoveryCacheClientBuilder(InetSocketAddress addr) {
     this(asList(addr));
   }
 
@@ -85,18 +85,18 @@ public class AWSElasticCacheClientBuilder extends XMemcachedClientBuilder {
    * 
    * @param configAddrs
    */
-  public AWSElasticCacheClientBuilder(List<InetSocketAddress> configAddrs) {
+  public AutoDiscoveryCacheClientBuilder(List<InetSocketAddress> configAddrs) {
     super(configAddrs);
     this.configAddrs = configAddrs;
   }
 
   /**
-   * Returns a new instanceof AWSElasticCacheClient.
+   * Returns a new instanceof AutoDiscoveryCacheClient.
    */
   @Override
-  public AWSElasticCacheClient build() throws IOException {
+  public AutoDiscoveryCacheClient build() throws IOException {
 
-    AWSElasticCacheClient memcachedClient = new AWSElasticCacheClient(this.sessionLocator,
+    AutoDiscoveryCacheClient memcachedClient = new AutoDiscoveryCacheClient(this.sessionLocator,
         this.sessionComparator, this.bufferAllocator, this.configuration, this.socketOptions,
         this.commandFactory, this.transcoder, this.stateListeners, this.authInfoMap,
         this.connectionPoolSize, this.connectTimeout, this.name, this.failureMode,
