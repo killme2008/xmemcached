@@ -1,19 +1,20 @@
 package net.rubyeye.xmemcached.test.unittest;
 
-import java.net.InetSocketAddress;
-import java.util.List;
-import java.util.Properties;
-import net.rubyeye.xmemcached.autodiscovery.AutoDiscoveryCacheClient;
-import net.rubyeye.xmemcached.autodiscovery.AutoDiscoveryCacheClientBuilder;
-import net.rubyeye.xmemcached.autodiscovery.ClusterConfiguration;
-import net.rubyeye.xmemcached.utils.AddrUtil;
-import org.junit.Test;
 import com.google.code.yanf4j.core.Session;
 import com.google.code.yanf4j.core.impl.HandlerAdapter;
 import com.google.code.yanf4j.core.impl.TextLineCodecFactory;
 import com.google.code.yanf4j.nio.TCPController;
 import com.google.code.yanf4j.util.ResourcesUtils;
 import junit.framework.TestCase;
+import net.rubyeye.xmemcached.autodiscovery.AutoDiscoveryCacheClient;
+import net.rubyeye.xmemcached.autodiscovery.AutoDiscoveryCacheClientBuilder;
+import net.rubyeye.xmemcached.autodiscovery.ClusterConfiguration;
+import net.rubyeye.xmemcached.utils.AddrUtil;
+import org.junit.Test;
+
+import java.net.InetSocketAddress;
+import java.util.List;
+import java.util.Properties;
 
 public class AutoDiscoveryCacheClientIT extends TestCase {
 
@@ -103,8 +104,8 @@ public class AutoDiscoveryCacheClientIT extends TestCase {
       assertEquals(config.getVersion(), version);
       assertEquals(addresses.size(), config.getNodeList().size());
 
-      client.set("aws-cache", 0, "foobar");
-      assertEquals("foobar", client.get("aws-cache"));
+      client.set("auto-discovery-cache", 0, "foobar");
+      assertEquals("foobar", client.get("auto-discovery-cache"));
     } finally {
       configServer.stop();
     }
@@ -128,8 +129,8 @@ public class AutoDiscoveryCacheClientIT extends TestCase {
       assertEquals(config.getVersion(), version);
       assertEquals(addresses.size(), config.getNodeList().size());
 
-      client.set("aws-cache", 0, "foobar");
-      assertEquals("foobar", client.get("aws-cache"));
+      client.set("auto-discovery-cache", 0, "foobar");
+      assertEquals("foobar", client.get("auto-discovery-cache"));
     } finally {
       configServer.stop();
     }
