@@ -1,22 +1,22 @@
 package net.rubyeye.xmemcached.test.unittest;
 
-import java.net.InetSocketAddress;
-import java.util.List;
-import java.util.Properties;
-
-import net.rubyeye.xmemcached.autodiscovery.ClusterConfiguration;
-import net.rubyeye.xmemcached.aws.AWSElasticCacheClient;
-import net.rubyeye.xmemcached.aws.AWSElasticCacheClientBuilder;
-import net.rubyeye.xmemcached.utils.AddrUtil;
-import org.junit.Test;
 import com.google.code.yanf4j.core.Session;
 import com.google.code.yanf4j.core.impl.HandlerAdapter;
 import com.google.code.yanf4j.core.impl.TextLineCodecFactory;
 import com.google.code.yanf4j.nio.TCPController;
 import com.google.code.yanf4j.util.ResourcesUtils;
 import junit.framework.TestCase;
+import net.rubyeye.xmemcached.autodiscovery.AutoDiscoveryCacheClient;
+import net.rubyeye.xmemcached.autodiscovery.AutoDiscoveryCacheClientBuilder;
+import net.rubyeye.xmemcached.autodiscovery.ClusterConfiguration;
+import net.rubyeye.xmemcached.utils.AddrUtil;
+import org.junit.Test;
 
-public class AWSElasticCacheClientIT extends TestCase {
+import java.net.InetSocketAddress;
+import java.util.List;
+import java.util.Properties;
+
+public class AutoDiscoveryCacheClientIT extends TestCase {
 
   private String serverList;
   private List<InetSocketAddress> addresses;
@@ -81,7 +81,7 @@ public class AWSElasticCacheClientIT extends TestCase {
     configServer.bind(new InetSocketAddress(2271));
 
     try {
-      AWSElasticCacheClient client = new AWSElasticCacheClient(new InetSocketAddress(2271));
+      AutoDiscoveryCacheClient client = new AutoDiscoveryCacheClient(new InetSocketAddress(2271));
       fail();
     } catch (IllegalStateException e) {
       assertTrue(e.getMessage().contains("failed"));
@@ -99,13 +99,13 @@ public class AWSElasticCacheClientIT extends TestCase {
     configServer.bind(new InetSocketAddress(2271));
 
     try {
-      AWSElasticCacheClient client = new AWSElasticCacheClient(new InetSocketAddress(2271));
+      AutoDiscoveryCacheClient client = new AutoDiscoveryCacheClient(new InetSocketAddress(2271));
       ClusterConfiguration config = client.getCurrentConfig();
       assertEquals(config.getVersion(), version);
       assertEquals(addresses.size(), config.getNodeList().size());
 
-      client.set("aws-cache", 0, "foobar");
-      assertEquals("foobar", client.get("aws-cache"));
+      client.set("auto-discovery-cache", 0, "foobar");
+      assertEquals("foobar", client.get("auto-discovery-cache"));
     } finally {
       configServer.stop();
     }
@@ -120,17 +120,17 @@ public class AWSElasticCacheClientIT extends TestCase {
     configServer.bind(new InetSocketAddress(2279));
 
     try {
-      AWSElasticCacheClientBuilder builder =
-          new AWSElasticCacheClientBuilder(new InetSocketAddress(2279));
+      AutoDiscoveryCacheClientBuilder builder =
+          new AutoDiscoveryCacheClientBuilder(new InetSocketAddress(2279));
       builder.setConnectionPoolSize(2);
       builder.setEnableHealSession(false);
-      AWSElasticCacheClient client = builder.build();
+      AutoDiscoveryCacheClient client = builder.build();
       ClusterConfiguration config = client.getCurrentConfig();
       assertEquals(config.getVersion(), version);
       assertEquals(addresses.size(), config.getNodeList().size());
 
-      client.set("aws-cache", 0, "foobar");
-      assertEquals("foobar", client.get("aws-cache"));
+      client.set("auto-discovery-cache", 0, "foobar");
+      assertEquals("foobar", client.get("auto-discovery-cache"));
     } finally {
       configServer.stop();
     }
@@ -150,7 +150,7 @@ public class AWSElasticCacheClientIT extends TestCase {
     cs2.bind(new InetSocketAddress(2272));
 
     try {
-      AWSElasticCacheClient client = new AWSElasticCacheClient(new InetSocketAddress(2271), 3000);
+      AutoDiscoveryCacheClient client = new AutoDiscoveryCacheClient(new InetSocketAddress(2271), 3000);
       ClusterConfiguration config = client.getCurrentConfig();
       assertEquals(config.getVersion(), version);
       assertEquals(1, config.getNodeList().size());

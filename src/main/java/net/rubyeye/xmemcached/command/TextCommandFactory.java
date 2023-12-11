@@ -5,7 +5,7 @@ import java.util.Collection;
 import java.util.concurrent.CountDownLatch;
 import net.rubyeye.xmemcached.CommandFactory;
 import net.rubyeye.xmemcached.buffer.BufferAllocator;
-import net.rubyeye.xmemcached.command.text.TextAWSElasticCacheConfigCommand;
+import net.rubyeye.xmemcached.command.text.TextAutoDiscoveryCacheConfigCommand;
 import net.rubyeye.xmemcached.command.text.TextCASCommand;
 import net.rubyeye.xmemcached.command.text.TextDeleteCommand;
 import net.rubyeye.xmemcached.command.text.TextFlushAllCommand;
@@ -31,8 +31,8 @@ import net.rubyeye.xmemcached.utils.Protocol;
  */
 public class TextCommandFactory implements CommandFactory {
 
-  public Command createAWSElasticCacheConfigCommand(String subCommand, String key) {
-    return new TextAWSElasticCacheConfigCommand(new CountDownLatch(1), subCommand, key);
+  public Command createAutoDiscoveryCacheConfigCommand(String subCommand, String key) {
+    return new TextAutoDiscoveryCacheConfigCommand(new CountDownLatch(1), subCommand, key);
   }
 
   public void setBufferAllocator(BufferAllocator bufferAllocator) {

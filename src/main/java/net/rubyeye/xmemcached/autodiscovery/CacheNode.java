@@ -1,13 +1,10 @@
-package net.rubyeye.xmemcached.aws;
+package net.rubyeye.xmemcached.autodiscovery;
 
 import java.io.Serializable;
-import java.net.InetAddress;
 import java.net.InetSocketAddress;
-import java.net.UnknownHostException;
-import net.rubyeye.xmemcached.utils.ByteUtils;
 
 /**
- * AWS ElasticCache Node information.
+ * Auto Discovery Node information.
  * 
  * @author dennis
  * 

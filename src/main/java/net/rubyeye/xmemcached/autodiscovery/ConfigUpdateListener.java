@@ -1,7 +1,7 @@
-package net.rubyeye.xmemcached.aws;
+package net.rubyeye.xmemcached.autodiscovery;
 
 /**
- * AWS ElasticCache config update event listener.
+ * Auto Discovery config update event listener.
  * 
  * @author dennis
  * 

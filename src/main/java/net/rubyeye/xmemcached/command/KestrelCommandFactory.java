@@ -26,7 +26,7 @@ import net.rubyeye.xmemcached.utils.Protocol;
 @SuppressWarnings("unchecked")
 public class KestrelCommandFactory implements CommandFactory {
 
-  public Command createAWSElasticCacheConfigCommand(String subCommand, String key) {
+  public Command createAutoDiscoveryCacheConfigCommand(String subCommand, String key) {
     throw new UnsupportedOperationException("Kestrel doesn't support this operation");
   }
 
