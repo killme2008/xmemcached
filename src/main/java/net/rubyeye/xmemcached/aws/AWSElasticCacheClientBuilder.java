@@ -11,7 +11,8 @@ import net.rubyeye.xmemcached.utils.AddrUtil;
  * AWSElasticCacheClient builder.
  * 
  * @author dennis
- * 
+ * @see  net.rubyeye.xmemcached.autodiscovery.AutoDiscoveryCacheClientBuilder
+ *
  */
 @Deprecated
 public class AWSElasticCacheClientBuilder extends XMemcachedClientBuilder {
