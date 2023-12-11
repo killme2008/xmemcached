@@ -40,6 +40,7 @@ import net.rubyeye.xmemcached.utils.InetSocketAddressWrapper;
  *
  * @since 2.3.0
  * @author dennis
+ * @see  net.rubyeye.xmemcached.autodiscovery.AutoDiscoveryCacheClient
  *
  */
 @Deprecated
