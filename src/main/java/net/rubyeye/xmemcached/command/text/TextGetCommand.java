@@ -108,11 +108,15 @@ public abstract class TextGetCommand extends Command
           byte first = buffer.get(pos);
           byte second = buffer.get(pos + 1);
           if (first == 'E' && second == 'N') {
-            // dispatch result
-            dispatch();
-            this.currentReturnKey = null;
-            // END\r\n
-            return ByteUtils.stepBuffer(buffer, 5);
+            if (ByteUtils.stepBuffer(buffer, 5)) {
+              // dispatch result
+              dispatch();
+              this.currentReturnKey = null;
+              // END\r\n
+              return true;
+            } else {
+              return false;
+            }
           } else if (first == 'V') {
             this.parseStatus = ParseStatus.VALUE;
             this.wasFirst = false;
