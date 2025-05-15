@@ -1298,7 +1298,13 @@ public abstract class AbstractIoBuffer extends IoBuffer {
     return new OutputStream() {
       @Override
       public void write(byte[] b, int off, int len) {
-        AbstractIoBuffer.this.put(b, off, len);
+          if (b == null) {
+              throw new NullPointerException();
+          }
+          if (off < 0 || len < 0 || len > b.length || off > b.length - len) {
+              throw new ArrayIndexOutOfBoundsException();
+          }
+          AbstractIoBuffer.this.put(b, off, len);
       }
 
       @Override
