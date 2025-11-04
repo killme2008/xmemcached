@@ -7,7 +7,6 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
-
 import net.rubyeye.xmemcached.autodiscovery.CacheNode;
 import net.rubyeye.xmemcached.autodiscovery.ClusterConfiguration;
 import org.slf4j.Logger;

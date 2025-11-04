@@ -19,10 +19,12 @@ import net.rubyeye.xmemcached.utils.Protocol;
  * protocol use memcached text protocol,so you can use any memcached clients to talk with it.But
  * it's protocol implementation is not all compatible with memcached standard protocol,So xmemcached
  * supply this command factory for it.
- * 
+ *
  * @author dennis
- * 
+ * @deprecated Kestrel support is deprecated and will be removed in a future version.
+ *
  */
+@Deprecated
 @SuppressWarnings("unchecked")
 public class KestrelCommandFactory implements CommandFactory {
 

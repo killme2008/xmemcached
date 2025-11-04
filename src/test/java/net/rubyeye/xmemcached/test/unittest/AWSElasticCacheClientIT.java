@@ -3,7 +3,6 @@ package net.rubyeye.xmemcached.test.unittest;
 import java.net.InetSocketAddress;
 import java.util.List;
 import java.util.Properties;
-
 import net.rubyeye.xmemcached.autodiscovery.ClusterConfiguration;
 import net.rubyeye.xmemcached.aws.AWSElasticCacheClient;
 import net.rubyeye.xmemcached.aws.AWSElasticCacheClientBuilder;

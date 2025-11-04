@@ -25,10 +25,12 @@ import net.rubyeye.xmemcached.transcoders.TranscoderUtils;
 
 /**
  * Kestrel get command
- * 
+ *
  * @author dennis
- * 
+ * @deprecated Kestrel support is deprecated and will be removed in a future version.
+ *
  */
+@Deprecated
 public class KestrelGetCommand extends TextGetCommand {
 
   public KestrelGetCommand(String key, byte[] keyBytes, CommandType cmdType, CountDownLatch latch,

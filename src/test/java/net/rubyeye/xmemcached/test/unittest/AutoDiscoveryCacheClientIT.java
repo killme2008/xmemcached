@@ -11,7 +11,6 @@ import net.rubyeye.xmemcached.autodiscovery.AutoDiscoveryCacheClientBuilder;
 import net.rubyeye.xmemcached.autodiscovery.ClusterConfiguration;
 import net.rubyeye.xmemcached.utils.AddrUtil;
 import org.junit.Test;
-
 import java.net.InetSocketAddress;
 import java.util.List;
 import java.util.Properties;
@@ -150,7 +149,8 @@ public class AutoDiscoveryCacheClientIT extends TestCase {
     cs2.bind(new InetSocketAddress(2272));
 
     try {
-      AutoDiscoveryCacheClient client = new AutoDiscoveryCacheClient(new InetSocketAddress(2271), 3000);
+      AutoDiscoveryCacheClient client =
+          new AutoDiscoveryCacheClient(new InetSocketAddress(2271), 3000);
       ClusterConfiguration config = client.getCurrentConfig();
       assertEquals(config.getVersion(), version);
       assertEquals(1, config.getNodeList().size());

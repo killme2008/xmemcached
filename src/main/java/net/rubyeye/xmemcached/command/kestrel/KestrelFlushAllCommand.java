@@ -24,10 +24,12 @@ import net.rubyeye.xmemcached.utils.ByteUtils;
 
 /**
  * Kestrel flush command
- * 
+ *
  * @author dennis
- * 
+ * @deprecated Kestrel support is deprecated and will be removed in a future version.
+ *
  */
+@Deprecated
 public class KestrelFlushAllCommand extends TextFlushAllCommand {
 
   public KestrelFlushAllCommand(CountDownLatch latch, int delay, boolean noreply) {

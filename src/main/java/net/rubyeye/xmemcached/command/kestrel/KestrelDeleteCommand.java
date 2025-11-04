@@ -6,6 +6,10 @@ import net.rubyeye.xmemcached.command.text.TextDeleteCommand;
 import net.rubyeye.xmemcached.impl.MemcachedTCPSession;
 import net.rubyeye.xmemcached.utils.ByteUtils;
 
+/**
+ * @deprecated Kestrel support is deprecated and will be removed in a future version.
+ */
+@Deprecated
 public class KestrelDeleteCommand extends TextDeleteCommand {
 
   public KestrelDeleteCommand(String key, byte[] keyBytes, int time, CountDownLatch latch,
