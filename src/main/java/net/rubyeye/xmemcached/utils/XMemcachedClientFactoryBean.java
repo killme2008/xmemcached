@@ -263,7 +263,8 @@ public class XMemcachedClientFactoryBean implements FactoryBean {
   }
 
   private AutoDiscoveryCacheClientBuilder newBuilder(String autoDiscoveryServers) {
-    AutoDiscoveryCacheClientBuilder builder = new AutoDiscoveryCacheClientBuilder(autoDiscoveryServers);
+    AutoDiscoveryCacheClientBuilder builder =
+        new AutoDiscoveryCacheClientBuilder(autoDiscoveryServers);
     builder.setPollConfigIntervalMs(this.pollConfigIntervalMs);
     return builder;
   }

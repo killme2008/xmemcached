@@ -24,10 +24,12 @@ import net.rubyeye.xmemcached.transcoders.Transcoder;
 
 /**
  * kestrel set command
- * 
+ *
  * @author dennis
- * 
+ * @deprecated Kestrel support is deprecated and will be removed in a future version.
+ *
  */
+@Deprecated
 public class KestrelSetCommand extends TextStoreCommand {
 
   @SuppressWarnings("unchecked")

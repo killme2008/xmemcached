@@ -2,7 +2,6 @@ package net.rubyeye.xmemcached.aws;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import net.rubyeye.xmemcached.autodiscovery.CacheNode;
 import net.rubyeye.xmemcached.autodiscovery.ClusterConfiguration;
 import net.rubyeye.xmemcached.utils.ByteUtils;

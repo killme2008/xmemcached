@@ -8,7 +8,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeoutException;
-
 import net.rubyeye.xmemcached.autodiscovery.CacheNode;
 import net.rubyeye.xmemcached.autodiscovery.ClusterConfiguration;
 import net.rubyeye.xmemcached.autodiscovery.ConfigUpdateListener;

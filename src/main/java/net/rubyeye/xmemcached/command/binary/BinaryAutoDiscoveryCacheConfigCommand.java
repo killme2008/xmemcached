@@ -32,7 +32,8 @@ public class BinaryAutoDiscoveryCacheConfigCommand extends BaseBinaryCommand {
 
   public BinaryAutoDiscoveryCacheConfigCommand(final CountDownLatch latch, String subCommand,
       String key) {
-    super(key, ByteUtils.getBytes(key), CommandType.AUTO_DISCOVERY_CONFIG, latch, 0, 0, latch, false, null);
+    super(key, ByteUtils.getBytes(key), CommandType.AUTO_DISCOVERY_CONFIG, latch, 0, 0, latch,
+        false, null);
     this.commandType = CommandType.AUTO_DISCOVERY_CONFIG;
     if (subCommand.equals("get")) {
       this.opCode = OpCode.CONFIG_GET;
