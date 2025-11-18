@@ -1,15 +1,9 @@
 <?xml version="1.0"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-	<parent>
-		<groupId>org.sonatype.oss</groupId>
-		<artifactId>oss-parent</artifactId>
-		<version>7</version>
-	</parent>
-
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.googlecode.xmemcached</groupId>
 	<artifactId>xmemcached</artifactId>
-	<version>2.4.10-SNAPSHOT</version>
+	<version>2.4.9-SNAPSHOT</version>
 	<name>xmemcached</name>
 	<description>Extreme performance modern memcached client for java</description>
 	<url>https://github.com/killme2008/xmemcached</url>
@@ -109,6 +103,17 @@
 		</testResources>
 
 		<plugins>
+      <!-- Central Portal Publishing Plugin -->
+      <plugin>
+        <groupId>org.sonatype.central</groupId>
+        <artifactId>central-publishing-maven-plugin</artifactId>
+        <version>0.9.0</version>
+        <extensions>true</extensions>
+        <configuration>
+          <publishingServerId>central</publishingServerId>
+          <autoPublish>true</autoPublish>
+        </configuration>
+      </plugin>
       <!-- formatter and sortpom -->
       <plugin>
 	      <groupId>net.revelc.code.formatter</groupId>
@@ -208,17 +213,6 @@
 			</plugin>
 		</plugins>
 	</build>
-
-  <distributionManagement>
-    <snapshotRepository>
-      <id>oss</id>
-      <url>https://s01.oss.sonatype.org/content/repositories/snapshots/</url>
-    </snapshotRepository>
-    <repository>
-      <id>oss</id>
-      <url>https://central.sonatype.com/api/v1/publisher/upload/</url>
-    </repository>
-  </distributionManagement>
 
 	<dependencies>
 		<dependency>
