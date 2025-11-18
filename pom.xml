@@ -28,7 +28,7 @@
 		<connection>scm:git:git://github.com/${github.account}/xmemcached.git</connection>
 		<developerConnection>scm:git:git@github.com:${github.account}/xmemcached.git</developerConnection>
 		<url>https://github.com/${github.account}/xmemcached</url>
-	</scm>
+       </scm>
 
 	<repositories>
 		<repository>
@@ -154,7 +154,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
-				<version>2.9.1</version>
+				<version>3.3.0</version>
 				<executions>
 					<execution>
 						<id>attach-javadocs</id>
@@ -163,7 +163,8 @@
 							<goal>jar</goal>
 						</goals>
 						<configuration>
-							<additionalparam>${javadoc.opts}</additionalparam>
+							<doclint>none</doclint>
+							<source>8</source>
 						</configuration>
 					</execution>
 				</executions>
@@ -292,12 +293,14 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
+				<version>3.3.0</version>
 				<configuration>
 					<encoding>${project.build.sourceEncoding}</encoding>
 					<charset>utf-8</charset>
 					<locale>en_US</locale>
 					<excludePackageNames>net.rubyeye.xmemcached.test</excludePackageNames>
-					<additionalparam>${javadoc.xdoclint}</additionalparam>
+					<doclint>none</doclint>
+					<source>8</source>
 				</configuration>
 			</plugin>
 			<plugin>
